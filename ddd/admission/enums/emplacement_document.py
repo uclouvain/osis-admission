@@ -139,6 +139,7 @@ DocumentsSystemeFAC = {
 
 
 DocumentsSystemeSIC = {
+    'JUSTIFICATIF_DEROGATION_DELEGUE_VRAE': _('Delegate/VRAE dispensation certificate'),
     'ATTESTATION_ACCORD_SIC': _('Enrolment authorisation'),
     'ATTESTATION_ACCORD_ANNEXE_SIC': _('Annex 1 visa form'),
     'ATTESTATION_REFUS_SIC': _('Refusal certificate of SIC'),

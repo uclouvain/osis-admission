@@ -85,6 +85,7 @@ from admission.ddd.admission.domain.model.titre_acces_selectionnable import (
 from admission.ddd.admission.domain.validator import (
     ShouldAnneesCVRequisesCompletees,
     ShouldExperiencesAcademiquesEtreCompletees,
+    ShouldExperiencesAcademiquesEtreCompleteesApresSoumission,
 )
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.type_demande import TypeDemande
@@ -368,21 +369,46 @@ class CurriculumPostSoumissionValidatorList(TwoStepsMultipleBusinessExceptionLis
     experiences_non_academiques: List[ExperienceNonAcademiqueDTO]
     experiences_academiques: List[ExperienceAcademiqueDTO]
     experiences_parcours_interne: List[ExperienceParcoursInterneDTO]
+    verification_experiences_completees: bool
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        invariants = [
+            ShouldAnneesCVRequisesCompletees(
+                annee_courante=self.annee_soumission,
+                experiences_academiques=self.experiences_academiques,
+                experiences_academiques_incompletes={},  # Une expérience incomplète justifie quand même une période
+                annee_derniere_inscription_ucl=None,
+                annee_diplome_etudes_secondaires=self.annee_diplome_etudes_secondaires,
+                experiences_non_academiques=self.experiences_non_academiques,
+                date_soumission=self.date_soumission,
+                experiences_parcours_interne=self.experiences_parcours_interne,
+            ),
+        ]
+
+        if self.verification_experiences_completees:
+            invariants.append(
+                ShouldExperiencesAcademiquesEtreCompleteesApresSoumission(
+                    experiences_academiques=self.experiences_academiques,
+                )
+            )
+
+        return invariants
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ExperienceAcademiquePostSoumissionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    experience_academique: ExperienceAcademiqueDTO
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
-            ShouldAnneesCVRequisesCompletees(
-                annee_courante=self.annee_soumission,
-                experiences_academiques=self.experiences_academiques,
-                experiences_academiques_incompletes={},
-                annee_derniere_inscription_ucl=None,
-                annee_diplome_etudes_secondaires=self.annee_diplome_etudes_secondaires,
-                experiences_non_academiques=self.experiences_non_academiques,
-                date_soumission=self.date_soumission,
-                experiences_parcours_interne=self.experiences_parcours_interne,
+            ShouldExperiencesAcademiquesEtreCompleteesApresSoumission(
+                experiences_academiques=[self.experience_academique]
             ),
         ]
 
@@ -645,6 +671,9 @@ class ModifierStatutChecklistParcoursAnterieurValidatorList(TwoStepsMultipleBusi
     condition_acces: Optional[ConditionAcces]
     millesime_condition_acces: Optional[int]
 
+    uuids_experiences_valorisees: set[str]
+    checklist: StatutsChecklistDoctorale
+
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
@@ -658,6 +687,11 @@ class ModifierStatutChecklistParcoursAnterieurValidatorList(TwoStepsMultipleBusi
                 statut=self.statut,
                 condition_acces=self.condition_acces,
                 millesime_condition_acces=self.millesime_condition_acces,
+            ),
+            ShouldStatutsChecklistExperiencesEtreValidees(
+                uuids_experiences_valorisees=self.uuids_experiences_valorisees,
+                checklist=self.checklist,
+                statut=self.statut,
             ),
         ]
 

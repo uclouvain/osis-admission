@@ -165,7 +165,18 @@ def get_missing_curriculum_periods(proposition_uuid: str):
         message_bus_instance.invoke(VerifierCurriculumApresSoumissionQuery(uuid_proposition=proposition_uuid))
         return []
     except MultipleBusinessExceptions as exc:
-        return [e.message for e in sorted(exc.exceptions, key=lambda exception: exception.periode[0], reverse=True)]
+        return [
+            e.message
+            for e in sorted(
+                [
+                    period_exception
+                    for period_exception in exc.exceptions
+                    if isinstance(period_exception, AnneesCurriculumNonSpecifieesException)
+                ],
+                key=lambda exception: exception.periode[0],
+                reverse=True,
+            )
+        ]
 
 
 def takewhile_return_attribute_values(predicate, iterable, attribute):

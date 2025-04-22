@@ -42,14 +42,14 @@
       >
         <i class="fa fa-list-check"></i>
       </button>
-      <label class="btn btn-default active">
-        <input id="documents-shortcut" type="radio" name="shortcut" autocomplete="off" checked>
-        <i class="fa fa-folder-open"></i>
-      </label>
-      <label class="btn btn-default">
-        <input id="infos-shortcut" type="radio" name="shortcut" autocomplete="off">
-        <i class="fa fa-circle-info"></i>
-      </label>
+      <button
+        id="toggle-documents-button"
+        title="{% translate 'Hide the documents' %}"
+        class="btn btn-default active"
+        type="button"
+      >
+        <i class="fa-regular fa-file"></i>
+      </button>
     </div>
 
     {% include "admission/continuing_education/checklist_menu.html" %}
@@ -86,7 +86,7 @@
           <div class="info-part">
           </div>
         </div>
-        
+
           {% include "admission/continuing_education/includes/checklist/decision_fac_approval_modal.html" %}
           {% include "admission/continuing_education/includes/checklist/decision_hold_modal.html" %}
           {% include "admission/continuing_education/includes/checklist/decision_deny_modal.html" %}
@@ -103,12 +103,6 @@
 
     {% include 'admission/document/message_content_reset_confirm_modal.html' %}
     {% include 'admission/document/message_object_reset_confirm_modal.html' %}
-
-    <div id="info-viewer-tab" class="viewer-tab">
-      <div class="split-tab-slider"></div>
-      <div class="info-content"></div>
-    </div>
-
 
     <div id="document-viewer-tab" class="viewer-tab">
       <div class="split-tab-slider"></div>
@@ -282,8 +276,6 @@
               })
           });
 
-          let onFirstTabLoad = true;
-
           menuItems.on('shown.bs.tab', function (e) {
               $(this).parents('.list-group-item').find('.sub-items').show();
 
@@ -291,27 +283,6 @@
               window.location.hash = tabPaneId;
 
               refreshDocuments(tabPaneId);
-
-              // refresh info viewer
-              if (onFirstTabLoad) {
-                  onFirstTabLoad = false;
-                  if (configurationCache.getItem('side-tab', 'documents') === 'info') {
-                      // move info from the current tab to the info viewer 
-                      $('#infos-shortcut').click();
-                  } else {
-                      // hide the info viewer
-                      $('#info-viewer-tab').hide();
-                  }
-              } else if (configurationCache.getItem('side-tab', 'documents') === 'info') {
-                  // (e.target = active && e.relatedTarget = previous)
-                  const $info = $('#info-viewer-tab .info-content');
-                  // move old info from info viewer to old tab
-                  const oldTabPanel = $($(e.relatedTarget).parent().attr('href')).find('.info-part');
-                  $info.children().detach().appendTo(oldTabPanel);
-                  // move new info from current tab to info viewer
-                  const currentTabPanel = $(tabPaneId).find('.info-part');
-                  currentTabPanel.children().detach().appendTo($info);
-              }
           });
 
           // Activate a specific tab from link click inside the checklist
@@ -330,12 +301,16 @@
 
           let configurationCache = null;
 
-          const sidebars = $('#document-viewer-tab, #info-viewer-tab');
-
+          const sidebars = $('#document-viewer-tab');
+          const toggleDocumentsButton = $('#toggle-documents-button');
 
           $(document).ready(function () {
-              configurationCache = new BaseCache('admission_checklist_configuration');
+              configurationCache = new BaseCache('admission_checklist_configuration_{{ original_admission.uuid }}');
               sidebars.css('min-width', configurationCache.getItem('split_size', '20%'));
+
+              if(configurationCache.getItem('showDocuments', null) === false) {
+                  hideDocuments()
+              }
 
               // Activate tab from hash on first load
               $(`#checklist-menu *[data-toggle="tab"][href="${defaultTab}"]`).click();
@@ -379,25 +354,29 @@
           });
 
           // Shortcuts
+          function showDocuments() {
+                configurationCache.setItem('showDocuments', true);
+                toggleDocumentsButton.addClass('active');
+                toggleDocumentsButton.prop('title', "{{ _('Hide the documents') }}");
+                sidebars.show();
+                $('.osis-document-editor .editor-container').each(function () {
+                    this.dispatchEvent(new CustomEvent('setScale', { detail: 'auto' }));
+                });
+          }
 
-          const $info = $('#info-viewer-tab .info-content');
-          $('#infos-shortcut').change(function () {
-              // move the current tab's info-part to the side
-              configurationCache.setItem('side-tab', 'info');
-              const $tabInfo = $('#tabs-content .tab-pane.active .info-part');
-              $tabInfo.children().detach().appendTo($info);
-              $('#info-viewer-tab').show();
-              $('#document-viewer-tab').hide();
-          });
-          $('#documents-shortcut').change(function () {
-              // move back the current tab's info-part
-              configurationCache.setItem('side-tab', 'documents');
-              $info.children().detach().appendTo($('#tabs-content .tab-pane.active .info-part'));
-              $('#info-viewer-tab').hide();
-              $('#document-viewer-tab').show();
-              $('.osis-document-editor .editor-container').each(function () {
-                  this.dispatchEvent(new CustomEvent('setScale', { detail: 'auto' }));
-              });
+          function hideDocuments() {
+                configurationCache.setItem('showDocuments', false);
+                toggleDocumentsButton.removeClass('active');
+                toggleDocumentsButton.prop('title', "{{ _('Show the documents') }}");
+                sidebars.hide();
+          }
+
+          toggleDocumentsButton.on('click', function () {
+              if ($(this).hasClass('active')) {
+                  hideDocuments($(this));
+              } else {
+                  showDocuments($(this));
+              }
           });
 
           {# Manage HTMX requests #}
@@ -539,7 +518,7 @@
       position: relative;
     }
 
-    #tabs-content, #info-viewer-tab, #document-viewer-tab {
+    #tabs-content, #document-viewer-tab {
       overflow-y: auto;
       overflow-x: auto;
     }
@@ -773,7 +752,7 @@
     #checklist-menu .sub-item.bg-warning {
       background-color: #fcf8e3;
     }
-    
+
     .decision-modal .select2-selection--multiple .select2-selection__rendered {
       word-wrap: break-word;
       text-overflow: inherit;
@@ -802,7 +781,7 @@
       float: right;
       margin-top: -7px;
     }
-    
+
     /* Allow to scroll the content above the header menu */
     html {
       overflow: auto;

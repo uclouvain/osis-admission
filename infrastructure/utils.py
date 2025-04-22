@@ -598,6 +598,7 @@ CORRESPONDANCE_CHAMPS_SYSTEME = {
     'ATTESTATION_ACCORD_FACULTAIRE': 'fac_approval_certificate',
     'ATTESTATION_ACCORD_CDD': 'cdd_approval_certificate',
     'ATTESTATION_REFUS_FACULTAIRE': 'fac_refusal_certificate',
+    'JUSTIFICATIF_DEROGATION_DELEGUE_VRAE': 'delegate_vrae_dispensation_certificate',
     'ATTESTATION_ACCORD_SIC': 'sic_approval_certificate',
     'ATTESTATION_ACCORD_ANNEXE_SIC': 'sic_annexe_approval_certificate',
     'ATTESTATION_REFUS_SIC': 'sic_refusal_certificate',

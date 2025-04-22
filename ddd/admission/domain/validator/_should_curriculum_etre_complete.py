@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,19 +24,29 @@
 #
 # ##############################################################################
 import datetime
-from typing import List, Optional, Set, Dict
+from typing import Dict, List, Optional, Set
 
 import attr
-from dateutil.rrule import rrule, MONTHLY, rruleset
+from dateutil.rrule import MONTHLY, rrule, rruleset
 
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AnneesCurriculumNonSpecifieesException,
     ExperiencesAcademiquesNonCompleteesException,
 )
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from base.ddd.utils.business_validator import BusinessValidator, MultipleBusinessExceptions
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
-from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
+from admission.ddd.admission.domain.service.i_profil_candidat import (
+    IProfilCandidatTranslator,
+)
+from base.ddd.utils.business_validator import (
+    BusinessValidator,
+    MultipleBusinessExceptions,
+)
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
+    ExperienceAcademiqueDTO,
+    ExperienceNonAcademiqueDTO,
+)
+from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
+    ExperienceParcoursInterneDTO,
+)
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -202,3 +212,31 @@ class ShouldExperiencesAcademiquesEtreCompletees(BusinessValidator):
                     for experience_uuid, experience_name in self.experiences_academiques_incompletes.items()
                 )
             )
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldExperiencesAcademiquesEtreCompleteesApresSoumission(BusinessValidator):
+    experiences_academiques: List[ExperienceAcademiqueDTO]
+
+    def validate(self, *args, **kwargs):
+        exceptions = {
+            ExperiencesAcademiquesNonCompleteesException(reference=experience.uuid, name=str(experience))
+            for experience in self.experiences_academiques
+            if (
+                # Bachelier FWB
+                experience.est_formation_bachelier_fwb
+                and experience.credits_acquis_bloc_1 is None
+                # Master FWB
+                or experience.est_formation_master_fwb
+                and (
+                    experience.avec_complements is None
+                    or experience.avec_complements
+                    and (
+                        experience.credits_acquis_complements is None or experience.credits_inscrits_complements is None
+                    )
+                )
+            )
+        }
+
+        if exceptions:
+            raise MultipleBusinessExceptions(exceptions=exceptions)
