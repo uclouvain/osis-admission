@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -29,35 +29,46 @@ from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import TestCase
 
-from admission.models import DoctorateAdmission
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
+    ENTITY_CDE,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
-    DroitsInscriptionMontant,
     DispenseOuDroitsMajores,
+    DroitsInscriptionMontant,
 )
 from admission.ddd.admission.enums.emplacement_document import (
     DocumentsCurriculum,
-    StatutReclamationEmplacementDocument,
     DocumentsIdentification,
+    StatutReclamationEmplacementDocument,
 )
+from admission.models import DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.curriculum import (
-    EducationalExperienceFactory,
-    ProfessionalExperienceFactory,
-    EducationalExperienceYearFactory,
-    AdmissionProfessionalValuatedExperiencesFactory,
     AdmissionEducationalValuatedExperiencesFactory,
+    AdmissionProfessionalValuatedExperiencesFactory,
+    EducationalExperienceFactory,
+    EducationalExperienceYearFactory,
+    ProfessionalExperienceFactory,
 )
 from admission.tests.factories.doctorate import DoctorateFactory
 from admission.tests.factories.faculty_decision import RefusalReasonFactory
 from admission.tests.factories.person import CompletePersonFactory
-from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
+from admission.tests.factories.roles import (
+    ProgramManagerRoleFactory,
+    SicManagementRoleFactory,
+)
 from admission.tests.views.doctorate.checklist.sic_decision.base import SicPatchMixin
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
-from osis_profile.models.enums.curriculum import TranscriptType, ActivityType, CURRICULUM_ACTIVITY_LABEL
+from osis_profile.models.enums.curriculum import (
+    CURRICULUM_ACTIVITY_LABEL,
+    ActivityType,
+    TranscriptType,
+)
 from reference.tests.factories.language import LanguageFactory
 
 

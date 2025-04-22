@@ -264,7 +264,6 @@ class PDFGeneration(IPDFGeneration):
                 )
                 context['access_titles_names'].append(experience.titre_pdf_decision_fac)
 
-
             # Curriculum non academic experience
             elif access_title.entity_id.type_titre == TypeTitreAccesSelectionnable.EXPERIENCE_NON_ACADEMIQUE:
                 experience = profil_candidat_translator.get_experience_non_academique(

@@ -792,10 +792,14 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             projet_formation_complementaire=admission.additional_training_project,
             lettres_recommandation=admission.recommendation_letters,
             langue_redaction_these=admission.thesis_language.code if admission.thesis_language else '',
-            nom_langue_redaction_these=getattr(
-                admission.thesis_language,
-                'name' if get_language() == settings.LANGUAGE_CODE_FR else 'name_en',
-            ) if admission.thesis_language else '',
+            nom_langue_redaction_these=(
+                getattr(
+                    admission.thesis_language,
+                    'name' if get_language() == settings.LANGUAGE_CODE_FR else 'name_en',
+                )
+                if admission.thesis_language
+                else ''
+            ),
             institut_these=admission.thesis_institute and admission.thesis_institute.uuid,
             nom_institut_these=admission.thesis_institute and admission.thesis_institute.title or '',
             sigle_institut_these=admission.thesis_institute and admission.thesis_institute.acronym or '',

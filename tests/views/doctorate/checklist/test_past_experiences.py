@@ -65,9 +65,7 @@ from admission.models.base import (
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.curriculum import ProfessionalExperienceFactory
-from admission.tests.factories.doctorate import (
-    DoctorateFactory,
-)
+from admission.tests.factories.doctorate import DoctorateFactory
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import (
     ProgramManagerRoleFactory,

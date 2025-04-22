@@ -50,6 +50,9 @@ from admission.ddd.admission.enums.statut import STATUTS_TOUTE_PROPOSITION_SOUMI
 from admission.ddd.admission.formation_continue.commands import (
     RecupererResumeEtEmplacementsDocumentsPropositionQuery,
 )
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    OngletsChecklist,
+)
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
 from admission.forms import disable_unavailable_forms
 from admission.forms.admission.checklist import CommentForm
@@ -72,7 +75,11 @@ from admission.mail_templates import (
     ADMISSION_EMAIL_DECISION_ON_HOLD,
     ADMISSION_EMAIL_DECISION_VALIDATION,
 )
-from admission.utils import get_salutation_prefix, get_portal_admission_url, get_backoffice_admission_url
+from admission.utils import (
+    get_backoffice_admission_url,
+    get_portal_admission_url,
+    get_salutation_prefix,
+)
 from admission.views.common.detail_tabs.checklist import PropositionFromResumeMixin
 from admission.views.common.mixins import LoadDossierViewMixin
 from infrastructure.messages_bus import message_bus_instance

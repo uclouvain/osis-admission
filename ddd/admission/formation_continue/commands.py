@@ -29,7 +29,9 @@ from typing import Dict, List, Optional
 import attr
 
 from admission.ddd.admission import commands
-from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
+from admission.ddd.admission.enums.valorisation_experience import (
+    ExperiencesCVRecuperees,
+)
 from admission.ddd.interface import SortedQueryRequest
 from osis_common.ddd import interface
 

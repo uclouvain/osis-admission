@@ -122,7 +122,8 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
     @cached_property
     def incomplete_curriculum_experiences(self):
         return {
-            str(experience.uuid) for experience in self.proposition_resume.resume.curriculum.experiences_academiques
+            str(experience.uuid)
+            for experience in self.proposition_resume.resume.curriculum.experiences_academiques
             if experience.champs_credits_bloc_1_et_complements_non_remplis
         }
 

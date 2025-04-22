@@ -224,6 +224,7 @@ from admission.templatetags.admission import (
     bg_class_by_checklist_experience,
 )
 from admission.utils import (
+    access_title_country,
     add_close_modal_into_htmx_response,
     format_academic_year,
     get_access_titles_names,
@@ -232,10 +233,17 @@ from admission.utils import (
     get_portal_admission_list_url,
     get_portal_admission_url,
     get_salutation_prefix,
-    get_training_url, access_title_country,
+    get_training_url,
 )
-from admission.views.common.detail_tabs.checklist import change_admission_status, PropositionFromResumeMixin
-from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin, AdmissionViewMixin
+from admission.views.common.detail_tabs.checklist import (
+    PropositionFromResumeMixin,
+    change_admission_status,
+)
+from admission.views.common.mixins import (
+    AdmissionFormMixin,
+    AdmissionViewMixin,
+    LoadDossierViewMixin,
+)
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.enums.mandate_type import MandateTypes
@@ -382,7 +390,8 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
     @cached_property
     def incomplete_curriculum_experiences(self):
         return {
-            str(experience.uuid) for experience in self.proposition_resume.resume.curriculum.experiences_academiques
+            str(experience.uuid)
+            for experience in self.proposition_resume.resume.curriculum.experiences_academiques
             if experience.champs_credits_bloc_1_et_complements_non_remplis
         }
 
@@ -688,6 +697,7 @@ class FacultyDecisionMixin(CheckListDefaultContextMixin):
     @cached_property
     def selected_access_titles_names(self):
         return get_access_titles_names(access_titles=self.selected_access_titles)
+
 
 class FacultyDecisionView(
     AdmissionFormMixin,

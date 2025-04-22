@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,25 +25,29 @@
 # ##############################################################################
 import unicodedata
 from io import BytesIO
-from typing import Union, Optional
+from typing import Optional, Union
 
 from django.utils.translation import override
 from osis_document.utils import save_raw_content_remotely
-from pikepdf import Pdf, OutlineItem, PdfError, PasswordError
+from pikepdf import OutlineItem, PasswordError, Pdf, PdfError
 
+from admission.ddd.admission.doctorat.preparation import (
+    commands as doctorate_education_commands,
+)
+from admission.ddd.admission.dtos.resume import ResumePropositionDTO
+from admission.ddd.admission.formation_continue import (
+    commands as continuing_education_commands,
+)
+from admission.ddd.admission.formation_generale import (
+    commands as general_education_commands,
+)
+from admission.exports.admission_recap.section import get_sections
 from admission.models import (
     ContinuingEducationAdmission,
-    GeneralEducationAdmission,
     DoctorateAdmission,
+    GeneralEducationAdmission,
 )
 from admission.models.base import BaseAdmission
-from admission.ddd.admission.doctorat.preparation import commands as doctorate_education_commands
-from admission.ddd.admission.dtos.resume import ResumePropositionDTO
-from admission.ddd.admission.formation_continue import commands as continuing_education_commands
-from admission.ddd.admission.formation_generale import commands as general_education_commands
-from admission.exports.admission_recap.section import (
-    get_sections,
-)
 from infrastructure.messages_bus import message_bus_instance
 
 
@@ -54,8 +58,9 @@ def admission_pdf_recap(
     with_annotated_documents=False,
 ):
     """Generates the admission pdf and returns a token to access it."""
+    from osis_document.api.utils import get_remote_tokens, get_several_remote_metadata
+
     from admission.exports.utils import get_pdf_from_template
-    from osis_document.api.utils import get_several_remote_metadata, get_remote_tokens
 
     commands = {
         ContinuingEducationAdmission: continuing_education_commands,

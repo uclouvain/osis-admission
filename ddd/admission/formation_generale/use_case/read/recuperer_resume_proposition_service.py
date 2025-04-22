@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,20 +24,32 @@
 #
 ##############################################################################
 
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.domain.service.i_profil_candidat import (
+    IProfilCandidatTranslator,
+)
 from admission.ddd.admission.domain.service.resume_proposition import ResumeProposition
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
-from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
-from admission.ddd.admission.formation_generale.commands import RecupererResumePropositionQuery
+from admission.ddd.admission.enums.valorisation_experience import (
+    ExperiencesCVRecuperees,
+)
+from admission.ddd.admission.formation_generale.commands import (
+    RecupererResumePropositionQuery,
+)
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
-from admission.ddd.admission.formation_generale.domain.service.i_comptabilite import IComptabiliteTranslator
+from admission.ddd.admission.formation_generale.domain.service.i_comptabilite import (
+    IComptabiliteTranslator,
+)
 from admission.ddd.admission.formation_generale.domain.service.i_question_specifique import (
     IQuestionSpecifiqueTranslator,
 )
-from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
-from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
+from admission.ddd.admission.formation_generale.repository.i_proposition import (
+    IPropositionRepository,
+)
+from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import (
+    IAcademicYearRepository,
+)
 
 
 def recuperer_resume_proposition(
@@ -63,9 +75,11 @@ def recuperer_resume_proposition(
         proposition_dto=proposition_dto,
         comptabilite_dto=comptabilite_dto,
         questions_specifiques_dtos=questions_specifiques_dtos,
-        experiences_cv_recuperees=ExperiencesCVRecuperees.TOUTES
-        if proposition_dto.est_non_soumise
-        else ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION,
+        experiences_cv_recuperees=(
+            ExperiencesCVRecuperees.TOUTES
+            if proposition_dto.est_non_soumise
+            else ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION
+        ),
     )
 
     # THEN

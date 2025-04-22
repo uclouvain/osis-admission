@@ -566,7 +566,7 @@ COMMAND_HANDLERS = {
             cmd,
             proposition_repository=_proposition_repository,
             paiement_frais_dossier_service=_paiement_frais_dossier,
-            calendrier_translator=CalendrierInscriptionInMemory()
+            calendrier_translator=CalendrierInscriptionInMemory(),
         )
     ),
     RecupererListePaiementsPropositionQuery: lambda msg_bus, cmd: recuperer_liste_paiements_proposition(

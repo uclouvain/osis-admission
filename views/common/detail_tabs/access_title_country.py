@@ -35,6 +35,7 @@ __all__ = [
 
 __namespace__ = False
 
+
 class AccessTitleCountryView(AdmissionViewMixin, TemplateView):
     urlpatterns = 'access-title-country'
     template_name = 'admission/includes/access_title_country.html'

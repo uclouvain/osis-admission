@@ -33,7 +33,9 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixDoctoratDejaRealise,
     ChoixLangueRedactionThese,
 )
-from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
+from admission.ddd.admission.enums.valorisation_experience import (
+    ExperiencesCVRecuperees,
+)
 from admission.ddd.interface import SortedQueryRequest
 from osis_common.ddd import interface
 
@@ -544,6 +546,7 @@ class RecupererResumeEtEmplacementsDocumentsPropositionQuery(interface.QueryRequ
     uuid_proposition: str
     avec_document_libres: bool = False
     experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.SEULEMENT_VALORISEES
+
 
 @attr.dataclass(frozen=True, slots=True)
 class ModifierStatutChecklistExperienceParcoursAnterieurCommand(interface.CommandRequest):

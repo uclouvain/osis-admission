@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 import json
-from typing import Optional, Union, List, Dict
+from typing import Dict, List, Optional, Union
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -40,12 +40,12 @@ from admission.calendar.admission_digit_ticket_submission import (
     AdmissionDigitTicketSubmissionCalendar,
 )
 from admission.constants import (
+    COMMENT_TAG_FAC,
+    COMMENT_TAG_GLOBAL,
+    COMMENT_TAG_SIC,
     CONTEXT_CONTINUING,
     CONTEXT_DOCTORATE,
     CONTEXT_GENERAL,
-    COMMENT_TAG_SIC,
-    COMMENT_TAG_GLOBAL,
-    COMMENT_TAG_FAC,
 )
 from admission.ddd.admission.doctorat.preparation.commands import (
     GetCotutelleCommand,
@@ -70,7 +70,9 @@ from admission.ddd.admission.domain.model.enums.type_gestionnaire import (
 from admission.ddd.admission.dtos.proposition_fusion_personne import (
     PropositionFusionPersonneDTO,
 )
-from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
+from admission.ddd.admission.dtos.titre_acces_selectionnable import (
+    TitreAccesSelectionnableDTO,
+)
 from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.formation_continue.commands import (
     RecupererPropositionQuery,
