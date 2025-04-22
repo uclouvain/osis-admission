@@ -38,8 +38,6 @@ from rest_framework import status
 from rest_framework.status import HTTP_200_OK
 from rest_framework.test import APITestCase
 
-from admission.models import GeneralEducationAdmission
-from admission.models.online_payment import OnlinePayment, PaymentStatus, PaymentMethod
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
@@ -47,12 +45,17 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     PaiementDejaRealiseException,
     PropositionPourPaiementInvalideException,
+    DateLimitePaiementDepasseeException,
 )
+from admission.models import GeneralEducationAdmission
+from admission.models.online_payment import OnlinePayment, PaymentStatus, PaymentMethod
 from admission.services.mollie import PaiementMollie
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.payment import OnlinePaymentFactory
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import CandidateFactory
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from base.tests.factories.academic_calendar import AcademicCalendarFactory
 from base.tests.factories.education_group_year import Master120TrainingFactory
 from base.tests.factories.user import UserFactory
 
@@ -161,18 +164,24 @@ class OpenApplicationFeesPaymentViewTestCase(APITestCase):
         )
 
     def setUp(self) -> None:
+        today = datetime.date.today()
         self.admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             candidate=CompletePersonFactory(
                 language=settings.LANGUAGE_CODE_FR,
                 private_email='candidate@test.be',
             ),
-            training=Master120TrainingFactory(),
+            training=Master120TrainingFactory(academic_year__year=today.year - 1),
             status=ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name,
         )
         self.admission.checklist['current']['frais_dossier']['statut'] = ChoixStatutChecklist.GEST_BLOCAGE.name
         self.admission.checklist['current']['frais_dossier']['extra'] = {'initial': '1'}
         self.original_checklist = self.admission.checklist
         self.admission.save()
+
+        self.calendar = AcademicCalendarFactory(
+            reference=AcademicCalendarTypes.ADMISSION_POOL_HUE5_FOREIGN_RESIDENCY.name,
+            data_year=self.admission.training.academic_year
+        )
 
         self.user = self.admission.candidate.user
 
@@ -338,7 +347,7 @@ class OpenApplicationFeesPaymentViewTestCase(APITestCase):
     def test_returns_an_exception_if_the_candidate_already_paid(self):
         self.client.force_authenticate(user=self.user)
 
-        existing_payment = OnlinePaymentFactory(
+        OnlinePaymentFactory(
             admission=self.admission,
             status=PaymentStatus.PAID.name,
         )
@@ -350,6 +359,34 @@ class OpenApplicationFeesPaymentViewTestCase(APITestCase):
         response_data = response.json()
 
         triggered_exception = PaiementDejaRealiseException()
+        self.assertEqual(
+            response_data,
+            {
+                'non_field_errors': [
+                    {
+                        'status_code': triggered_exception.status_code,
+                        'detail': triggered_exception.message,
+                    }
+                ]
+            },
+        )
+
+    def test_returns_an_exception_if_limit_date_reached(self):
+        self.calendar.end_date = datetime.date.today() - datetime.timedelta(days=15)
+        self.calendar.save()
+
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.post(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        response_data = response.json()
+
+        triggered_exception = DateLimitePaiementDepasseeException(
+            date_limite=datetime.date.today() - datetime.timedelta(days=1),
+            annee_formation=self.admission.training.academic_year.year,
+        )
         self.assertEqual(
             response_data,
             {

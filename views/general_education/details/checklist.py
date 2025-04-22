@@ -39,6 +39,7 @@ from django.urls import reverse
 from django.utils import timezone, translation
 from django.utils.formats import date_format
 from django.utils.functional import cached_property
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import ngettext, override, pgettext
@@ -46,6 +47,7 @@ from django.views.generic import FormView, TemplateView
 from django.views.generic.base import RedirectView, View
 from django_htmx.http import HttpResponseClientRefresh
 from osis_comment.models import CommentEntry
+from osis_document.utils import get_file_url
 from osis_history.models import HistoryEntry
 from osis_history.utilities import add_history_entry
 from osis_mail_template.exceptions import EmptyMailTemplateContent
@@ -58,6 +60,10 @@ from admission.ddd.admission.commands import (
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     message_candidat_avec_pae_avant_2015,
+)
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    AnneesCurriculumNonSpecifieesException,
+    ExperiencesAcademiquesNonCompleteesException,
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.ddd.admission.domain.model.enums.condition_acces import (
@@ -115,6 +121,7 @@ from admission.ddd.admission.formation_generale.commands import (
     RefuserPropositionParFaculteCommand,
     SpecifierBesoinDeDerogationSicCommand,
     SpecifierConditionAccesPropositionCommand,
+    SpecifierDerogationDelegueVraeSicCommand,
     SpecifierDerogationFinancabiliteCommand,
     SpecifierEquivalenceTitreAccesEtrangerPropositionCommand,
     SpecifierExperienceEnTantQueTitreAccesCommand,
@@ -127,6 +134,8 @@ from admission.ddd.admission.formation_generale.commands import (
     SpecifierMotifsRefusPropositionParSicCommand,
     SpecifierPaiementNecessaireCommand,
     SpecifierPaiementPlusNecessaireCommand,
+    VerifierCurriculumApresSoumissionQuery,
+    VerifierExperienceCurriculumApresSoumissionQuery,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_ENVOYABLE_EN_FAC_POUR_DECISION,
@@ -149,6 +158,10 @@ from admission.ddd.admission.formation_generale.domain.service.checklist import 
 )
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     FormationNonTrouveeException,
+    ConditionAccesEtreSelectionneException,
+    FormationNonTrouveeException,
+    StatutsChecklistExperiencesEtreValidesException,
+    TitreAccesEtreSelectionneException,
 )
 from admission.ddd.admission.formation_generale.dtos.proposition import (
     PropositionGestionnaireDTO,
@@ -178,6 +191,7 @@ from admission.forms.admission.checklist import (
     PastExperiencesAdmissionRequirementForm,
     SicDecisionApprovalDocumentsForm,
     SicDecisionApprovalForm,
+    SicDecisionDelegateVraeDerogationForm,
     SicDecisionDerogationForm,
     SicDecisionFinalApprovalForm,
     SicDecisionFinalRefusalForm,
@@ -241,7 +255,6 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
 from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
-from osis_document.utils import get_file_url
 from osis_profile.models import EducationalExperience
 from osis_profile.utils.curriculum import groupe_curriculum_par_annee_decroissante
 from osis_role.templatetags.osis_role import has_perm
@@ -282,6 +295,7 @@ __all__ = [
     'SicApprovalEnrolmentDecisionView',
     'SicApprovalFinalDecisionView',
     'SicDecisionApprovalPanelView',
+    'SicDecisionDelegateVraeDispensationView',
     'SicRefusalDecisionView',
     'SicRefusalFinalDecisionView',
     'SicDecisionDispensationView',
@@ -314,8 +328,40 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
         return has_perm('admission.change_checklist', user=self.request.user, obj=self.admission)
 
     @cached_property
+    def curriculum_checking_exceptions(self):
+        from infrastructure.messages_bus import message_bus_instance
+
+        try:
+            message_bus_instance.invoke(VerifierCurriculumApresSoumissionQuery(uuid_proposition=self.admission_uuid))
+            return []
+        except MultipleBusinessExceptions as exc:
+            return exc.exceptions
+
+    @cached_property
     def missing_curriculum_periods(self):
-        return get_missing_curriculum_periods(self.admission_uuid)
+        curriculum_exceptions = self.curriculum_checking_exceptions
+
+        return [
+            e.message
+            for e in sorted(
+                [
+                    period_exception
+                    for period_exception in curriculum_exceptions
+                    if isinstance(period_exception, AnneesCurriculumNonSpecifieesException)
+                ],
+                key=lambda exception: exception.periode[0],
+                reverse=True,
+            )
+        ]
+
+    @cached_property
+    def incomplete_curriculum_experiences(self):
+        curriculum_exceptions = self.curriculum_checking_exceptions
+        return {
+            str(e.reference)
+            for e in curriculum_exceptions
+            if isinstance(e, ExperiencesAcademiquesNonCompleteesException)
+        }
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -960,6 +1006,13 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
                 'dispensation_needed': self.admission.dispensation_needed,
             },
         )
+        context['sic_decision_delegate_vrae_dispensation_form'] = SicDecisionDelegateVraeDerogationForm(
+            initial={
+                'dispensation': self.admission.delegate_vrae_dispensation,
+                'comment': self.admission.delegate_vrae_dispensation_comment,
+                'certificate': self.admission.delegate_vrae_dispensation_certificate,
+            },
+        )
         context['requested_documents'] = {
             document.identifiant: {
                 'reason': self.proposition.documents_demandes.get(document.identifiant, {}).get('reason', ''),
@@ -995,7 +1048,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
                         f'{self.base_namespace}:save-comment', uuid=self.admission_uuid, tab='decision_sic__derogation'
                     ),
                     prefix='decision_sic__derogation',
-                    label=_('Comment about dispensation'),
+                    label=_('Non-progression dispensation comment'),
                 ),
             }
         return context
@@ -1636,6 +1689,36 @@ class SicDecisionDispensationView(
         return super().form_valid(form)
 
 
+class SicDecisionDelegateVraeDispensationView(
+    SicDecisionMixin,
+    AdmissionFormMixin,
+    HtmxPermissionRequiredMixin,
+    FormView,
+):
+    name = 'sic-decision-delegate-vrae-dispensation'
+    urlpatterns = {'sic-decision-delegate-vrae-dispensation': 'sic-decision/delegate-vrae-dispensation'}
+    permission_required = 'admission.checklist_change_sic_decision'
+    form_class = SicDecisionDelegateVraeDerogationForm
+    template_name = 'admission/general_education/includes/checklist/sic_decision_delegate_vrae_dispensation_form.html'
+
+    def form_valid(self, form):
+        try:
+            message_bus_instance.invoke(
+                SpecifierDerogationDelegueVraeSicCommand(
+                    uuid_proposition=self.admission_uuid,
+                    derogation=form.cleaned_data['dispensation'],
+                    commentaire=form.cleaned_data['comment'],
+                    justificatif=form.cleaned_data['certificate'],
+                    gestionnaire=self.request.user.person.global_id,
+                )
+            )
+        except BusinessException as exception:
+            self.message_on_failure = exception.message
+            return super().form_invalid(form)
+        self.htmx_refresh = True
+        return super().form_valid(form)
+
+
 class SicDecisionChangeStatusView(HtmxPermissionRequiredMixin, SicDecisionMixin, TemplateView):
     urlpatterns = {'sic-decision-change-status': 'sic-decision-change-checklist-status/<str:status>'}
     template_name = 'admission/general_education/includes/checklist/sic_decision.html'
@@ -1799,10 +1882,6 @@ class PastExperiencesStatusView(
     htmx_template_name = 'admission/general_education/includes/checklist/previous_experiences.html'
     form_class = StatusForm
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.valid_operation = False
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['past_experiences_admission_requirement_form'] = PastExperiencesAdmissionRequirementForm(
@@ -1827,7 +1906,6 @@ class PastExperiencesStatusView(
                     gestionnaire=self.request.user.person.global_id,
                 )
             )
-            self.valid_operation = True
             self.htmx_trigger_form_extra = {
                 'select_access_title_perm': self.request.user.has_perm(
                     'admission.checklist_select_access_title',
@@ -1842,7 +1920,22 @@ class PastExperiencesStatusView(
                     'Changes for the access title are not available when the state of the Previous experience '
                     'is "Sufficient".'
                 )
-        except MultipleBusinessExceptions:
+        except MultipleBusinessExceptions as exceptions:
+            error_messages = set()
+
+            for exception in exceptions.exceptions:
+                if isinstance(exception, (TitreAccesEtreSelectionneException, ConditionAccesEtreSelectionneException)):
+                    error_messages.add(
+                        gettext(
+                            'To move to this state, an admission requirement must have been selected and at least'
+                            ' one access title line must be selected in the past experience views.'
+                        )
+                    )
+                else:
+                    error_messages.add(str(exception.message))
+
+                self.htmx_trigger_form_extra = {'error_messages': list(error_messages)}
+
             return super().form_invalid(form)
 
         return super().form_valid(form)
@@ -2500,9 +2593,9 @@ class FinancabiliteDerogationNotificationView(
 ):
     urlpatterns = {'financability-derogation-notification': 'financability-derogation-notification'}
     permission_required = 'admission.checklist_financability_dispensation'
-    template_name = (
-        htmx_template_name
-    ) = 'admission/general_education/includes/checklist/financabilite_derogation_candidat_notifie_form.html'
+    template_name = htmx_template_name = (
+        'admission/general_education/includes/checklist/financabilite_derogation_candidat_notifie_form.html'
+    )
     htmx_template_name = (
         'admission/general_education/includes/checklist/financabilite_derogation_candidat_notifie_form.html'
     )
@@ -2556,9 +2649,9 @@ class FinancabiliteDerogationRefusView(
 ):
     urlpatterns = {'financability-derogation-refus': 'financability-derogation-refus'}
     permission_required = 'admission.checklist_financability_dispensation_fac'
-    template_name = (
-        htmx_template_name
-    ) = 'admission/general_education/includes/checklist/financabilite_derogation_refus_form.html'
+    template_name = htmx_template_name = (
+        'admission/general_education/includes/checklist/financabilite_derogation_refus_form.html'
+    )
     htmx_template_name = 'admission/general_education/includes/checklist/financabilite_derogation_refus_form.html'
 
     def get_form(self, form_class=None):
@@ -2616,6 +2709,10 @@ class SinglePastExperienceMixin(
     def experience_uuid(self):
         return self.request.GET.get('identifier')
 
+    @cached_property
+    def experience_type(self):
+        return self.request.GET.get('type', '')
+
     @property
     def experience(self):
         return next(
@@ -2631,6 +2728,7 @@ class SinglePastExperienceMixin(
         context = super().get_context_data(**kwargs)
         context['current'] = self.experience
         context['initial'] = self.experience or {}
+        context['experience_type'] = self.experience_type
         authentication_comment_identifier = f'parcours_anterieur__{self.experience_uuid}__authentication'
         context.setdefault('comment_forms', {})
         context['comment_forms'][authentication_comment_identifier] = CommentForm(
@@ -2671,7 +2769,29 @@ class SinglePastExperienceMixin(
         except ExperienceNonTrouveeException as exception:
             self.message_on_failure = exception.message
             return super().form_invalid(form)
+        except MultipleBusinessExceptions as exception:
+            self.message_on_failure = exception.exceptions.pop().message
+            return super().form_invalid(form)
         return super().form_valid(form)
+
+    @cached_property
+    def incomplete_curriculum_experiences(self):
+        # Override it to only check a single experience
+        try:
+            message_bus_instance.invoke(
+                VerifierExperienceCurriculumApresSoumissionQuery(
+                    uuid_proposition=self.admission_uuid,
+                    uuid_experience=self.experience_uuid,
+                    type_experience=self.experience_type,
+                )
+            )
+            return set()
+        except MultipleBusinessExceptions as multiple_exceptions:
+            return {
+                str(e.reference)
+                for e in multiple_exceptions.exceptions
+                if isinstance(e, ExperiencesAcademiquesNonCompleteesException)
+            }
 
 
 class SinglePastExperienceChangeStatusView(SinglePastExperienceMixin):
@@ -2692,6 +2812,7 @@ class SinglePastExperienceChangeStatusView(SinglePastExperienceMixin):
             ModifierStatutChecklistExperienceParcoursAnterieurCommand(
                 uuid_proposition=self.admission_uuid,
                 uuid_experience=self.experience_uuid,
+                type_experience=self.experience_type,
                 gestionnaire=self.request.user.person.global_id,
                 statut=form.cleaned_data['status'],
                 statut_authentification=form.cleaned_data['authentification'],
@@ -2790,6 +2911,7 @@ class ChecklistView(
             },
             f'parcours_anterieur__{OngletsDemande.ETUDES_SECONDAIRES.name}': secondary_studies_attachments,
             'decision_sic': {
+                'JUSTIFICATIF_DEROGATION_DELEGUE_VRAE',
                 'ATTESTATION_ACCORD_SIC',
                 'ATTESTATION_ACCORD_ANNEXE_SIC',
                 'ATTESTATION_REFUS_SIC',
@@ -2874,7 +2996,7 @@ class ChecklistView(
             tab_names.append('financabilite__derogation')
 
             comments_labels = {
-                'decision_sic__derogation': _('Comment about dispensation'),
+                'decision_sic__derogation': _('Non-progression dispensation comment'),
                 'financabilite__derogation': _('Faculty comment about financability dispensation'),
             }
             comments_permissions = {
@@ -2938,9 +3060,9 @@ class ChecklistView(
             )
 
             context['past_experiences_admission_requirement_form'] = self.past_experiences_admission_requirement_form
-            context[
-                'past_experiences_admission_access_title_equivalency_form'
-            ] = self.past_experiences_admission_access_title_equivalency_form
+            context['past_experiences_admission_access_title_equivalency_form'] = (
+                self.past_experiences_admission_access_title_equivalency_form
+            )
 
             # Financabilité
             context['financabilite'] = self._get_financabilite()

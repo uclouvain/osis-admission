@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-20 14:56+0200\n"
+"POT-Creation-Date: 2025-04-14 14:13+0200\n"
 "PO-Revision-Date: 2024-09-19 09:32+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -352,6 +352,9 @@ msgstr "Vue formations académiques"
 msgid "Acceptation condition"
 msgstr "Condition d'acceptation"
 
+msgid "Access condition"
+msgstr "Condition d'accès"
+
 msgid "Access condition:"
 msgstr "Condition d'accès :"
 
@@ -603,6 +606,13 @@ msgstr "Toutes"
 msgid "All CA members must have approved the proposition."
 msgstr ""
 "Tous les membres du comité d'accompagnement doivent approuver la proposition."
+
+msgid ""
+"All experiences must be in the 'Validated' status so that the previous "
+"experience can be changed to the 'Sufficient' status."
+msgstr ""
+"L'ensemble des expériences doivent être à l'état 'Validé' pour que "
+"le parcours antérieur puisse passer à l'état 'Suffisant'."
 
 msgid "All history"
 msgstr "Historique complet"
@@ -1145,6 +1155,9 @@ msgid "By someone who has already taken this course in a previous edition"
 msgstr ""
 "Par quelqu’un ayant déjà suivi cette formation dans une édition précédente"
 
+msgid "CA"
+msgstr "CA"
+
 msgid "CA Member"
 msgstr "Membre du comité d'accompagnement"
 
@@ -1153,6 +1166,9 @@ msgstr "Membres du comité d'accompagnement"
 
 msgid "CANDIDAT_NOTIFIE"
 msgstr "Candidat·e notifié·e"
+
+msgid "CC"
+msgstr "Réor."
 
 msgid "CDD comment about the collaborative program"
 msgstr "Commentaire de la CDD concernant le programme conjoint"
@@ -1537,8 +1553,8 @@ msgstr "Clôturée"
 msgid "Comment"
 msgstr "Commentaire"
 
-msgid "Comment about dispensation"
-msgstr "Commentaire sur la dérogation"
+msgid "Comment about delegate/VRAE dispensation"
+msgstr "Commentaire sur la dérogation délégué·e/VRAE"
 
 msgid "Comment about the authentication"
 msgstr "Commentaire sur l'authentification"
@@ -1957,6 +1973,12 @@ msgstr "Poursuite de cycle"
 msgid "DD/scholarship/EM?"
 msgstr "DD/boursier/EM ?"
 
+msgid "DEROGATION_DELEGUE"
+msgstr "Dérogation délégué·e"
+
+msgid "DEROGATION_VRAE"
+msgstr "Dérogation VRAE"
+
 msgid "DISPENSE_BOURSE"
 msgstr "Dispense bourse"
 
@@ -2091,6 +2113,21 @@ msgstr "Définitive"
 msgid "Definitive admission date to doctorate"
 msgstr "Date de l'admission définitive au doctorat"
 
+msgid "Delegate VRAE dispensation"
+msgstr "Dérogation délégué·e/VRAE"
+
+msgid "Delegate VRAE dispensation certificate"
+msgstr "Justificatif de la dérogation délégué·e/VRAE"
+
+msgid "Delegate VRAE dispensation comment"
+msgstr "Commentaire de la dérogation délégué·e/VRAE"
+
+msgid "Delegate/VRAE dispensation"
+msgstr "Dérogation délégué·e/VRAE"
+
+msgid "Delegate/VRAE dispensation certificate"
+msgstr "Justificatif de la dérogation délégué·e/VRAE"
+
 msgctxt "admission"
 msgid "Delete"
 msgstr "Supprimer"
@@ -2196,6 +2233,12 @@ msgstr "Directeur·trice du Service des inscriptions Saint-Louis Bruxelles"
 
 msgid "Dispensation"
 msgstr "Dérogation"
+
+msgid "Dispensation certificate"
+msgstr "Justificatif de la dérogation"
+
+msgid "Dispensation comment"
+msgstr "Commentaire de la dérogation"
 
 msgid "Dispensation granted"
 msgstr "Dérogation accordée"
@@ -2790,14 +2833,14 @@ msgstr "Pré-admission existante"
 msgid "Exit without saving"
 msgstr "Quitter sans enregistrer"
 
+msgid "Experience"
+msgstr "Expérience"
+
 msgid "Experience knowledge valorisation"
 msgstr "Valorisation des acquis d'expérience"
 
 msgid "Experience not found."
 msgstr "Expérience non trouvée."
-
-msgid "Experiences"
-msgstr "Expériences"
 
 msgid "Expert advice"
 msgstr "Avis expert"
@@ -3342,6 +3385,9 @@ msgstr "Motif de refus"
 msgid "Has Erasmus Mundus scholarship"
 msgstr "A une bourse Erasmus Mundus"
 
+msgid "Has a dispensation been obtained by the candidate?"
+msgstr "Une dérogation a-t-elle été obtenue par le·la candidat·e"
+
 msgid "Has dual degree scholarship"
 msgstr "A une bourse double diplomation"
 
@@ -3391,6 +3437,9 @@ msgstr "Texte d'aide"
 
 msgid "Hide the checklist menu"
 msgstr "Cacher le menu de la checklist"
+
+msgid "Hide the documents"
+msgstr "Cacher les documents"
 
 msgid "Hide the states of the checklist"
 msgstr "Cacher les états de la checklist"
@@ -3959,6 +4008,10 @@ msgid ""
 msgstr ""
 "Initialisation des questions spécifiques prédéfinies pour une année "
 "académique"
+
+msgctxt "admission"
+msgid "Inst."
+msgstr "Etab."
 
 msgctxt "admission"
 msgid "Institute"
@@ -4815,6 +4868,12 @@ msgstr "Activités non-académiques"
 msgid "Non-academic activity"
 msgstr "Activité non-académique"
 
+msgid "Non-progression dispensation comment"
+msgstr "Commentaire dérogation non-progression"
+
+msgid "Non-progression dispensation needed"
+msgstr "Besoin dérogation non-progression"
+
 msgid "Non-resident (as defined by government decree)"
 msgstr "Non-résident (au sens du Décret)"
 
@@ -5068,6 +5127,9 @@ msgid ""
 msgstr ""
 "Notre Université est heureuse de vous accueillir et vous souhaite un "
 "enrichissant et fructueux séjour."
+
+msgid "PAS_DE_DEROGATION"
+msgstr "Pas de dérogation"
 
 msgid "PAS_DE_DROITS_D_INSCRIPTION"
 msgstr "0 € - Pas de droits d'inscription"
@@ -5707,6 +5769,9 @@ msgctxt "X"
 msgid "Rector"
 msgstr "Recteur·trice"
 
+msgid "Red."
+msgstr "Allèg."
+
 msgid "Reduced rights"
 msgstr "Droits réduits"
 
@@ -6180,6 +6245,9 @@ msgstr "Voir le détail"
 
 msgid "Show the checklist menu"
 msgstr "Afficher le menu de la checklist"
+
+msgid "Show the documents"
+msgstr "Afficher les documents"
 
 msgid "Show the states of the checklist"
 msgstr "Afficher les états de la checklist"
@@ -6655,6 +6723,16 @@ msgstr ""
 msgid "The application can only be validated if it was previously approved."
 msgstr ""
 "La demande ne peut être validée que si elle a préalablement été acceptée."
+
+#, python-brace-format
+msgid ""
+"The application fee payment period for {anac} admissions is now closed.The "
+"deadline was {date_limite}. It is no longer possible to regularize your "
+"situation."
+msgstr ""
+"La période de paiement des frais de dossier pour les admissions {anac} est clôturée."
+"La date limite était fixée au {date_limite}. Il n’est désormais plus "
+"possible de régulariser votre situation."
 
 msgid "The application has been validated."
 msgstr "La demande a été validée."
@@ -7323,6 +7401,9 @@ msgstr ""
 "logement auprès du service LOGE : <a href=\"https://www.uclouvain.be/fr/"
 "logement\">www.uclouvain.be/fr/logement</a>."
 
+msgid "This experience can't be validated if mandatory information is missing."
+msgstr "Cette expérience ne peut pas être validée tant que des informations obligatoires en sont manquantes."
+
 msgid "This experience cannot be updated as it has already been valuated."
 msgstr ""
 "Cette expérience ne peut être mise à jour car elle a déjà été valorisée."
@@ -7404,6 +7485,15 @@ msgstr ""
 "Pour approuver une inscription, le statut de la checklist pour la décision "
 "sic doit être \"A traiter\" ou \"Besoin dérogation\" (avec l'accord de la "
 "dérogation par la direction)."
+
+msgid ""
+"To approve an enrollment, the status of the checklist for the sic decision "
+"must be \"To be processed\" or \"Non-progression dispensation needed\" (with "
+"management approval of the dispensation)."
+msgstr ""
+"Pour approuver une inscription, le statut de la checklist pour la décision "
+"sic doit être \"A traiter\" ou \"Besoin dérogation non-progression\" (avec "
+"l'accord de la dérogation par la direction)."
 
 msgid "To be completed"
 msgstr "À compléter"
@@ -7914,9 +8004,6 @@ msgstr "Année de naissance"
 
 msgid "Year of the training"
 msgstr "Année de la formation"
-
-msgid "Years"
-msgstr "Années"
 
 msgid "Yes"
 msgstr "Oui"

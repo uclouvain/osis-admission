@@ -91,6 +91,7 @@ from admission.ddd.admission.formation_generale.domain.model._comptabilite impor
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     BesoinDeDerogation,
+    BesoinDeDerogationDelegueVrae,
     ChoixStatutChecklist,
     ChoixStatutPropositionGenerale,
     DecisionFacultaireEnum,
@@ -219,6 +220,9 @@ class Proposition(interface.RootEntity):
     # Décision facultaire & sic
     certificat_approbation_fac: List[str] = attr.Factory(list)
     certificat_refus_fac: List[str] = attr.Factory(list)
+    derogation_delegue_vrae: Optional[BesoinDeDerogationDelegueVrae] = None
+    derogation_delegue_vrae_commentaire: str = ''
+    justificatif_derogation_delegue_vrae: List[str] = attr.Factory(list)
     certificat_approbation_sic: List[str] = attr.Factory(list)
     certificat_approbation_sic_annexe: List[str] = attr.Factory(list)
     certificat_refus_sic: List[str] = attr.Factory(list)
@@ -718,8 +722,11 @@ class Proposition(interface.RootEntity):
         statut_checklist_cible: str,
         titres_acces_selectionnes: List[TitreAccesSelectionnable],
         auteur_modification: str,
+        uuids_experiences_valorisees: set[str],
     ):
         ModifierStatutChecklistParcoursAnterieurValidatorList(
+            checklist=self.checklist_actuelle,
+            uuids_experiences_valorisees=uuids_experiences_valorisees,
             statut=ChoixStatutChecklist[statut_checklist_cible],
             titres_acces_selectionnes=titres_acces_selectionnes,
             condition_acces=self.condition_acces,
@@ -735,7 +742,18 @@ class Proposition(interface.RootEntity):
         statut_checklist_authentification: Optional[bool],
         uuid_experience: str,
         auteur_modification: str,
+        type_experience: str,
+        profil_candidat_translator: IProfilCandidatTranslator,
     ):
+        if statut_checklist_cible == ChoixStatutChecklist.GEST_REUSSITE.name:
+            # Une expérience académique ne peut passer à l'état "Validé" que si elle est complète
+            ProfilCandidatService.verifier_experience_curriculum_formation_generale_apres_soumission(
+                proposition=self,
+                uuid_experience=uuid_experience,
+                type_experience=type_experience,
+                profil_candidat_translator=profil_candidat_translator,
+            )
+
         try:
             experience = self.checklist_actuelle.recuperer_enfant('parcours_anterieur', uuid_experience)
         except StopIteration:
@@ -943,6 +961,26 @@ class Proposition(interface.RootEntity):
     def specifier_besoin_de_derogation(self, besoin_de_derogation: BesoinDeDerogation, auteur_modification: str):
         self.besoin_de_derogation = besoin_de_derogation
         self.auteur_derniere_modification = auteur_modification
+
+    def specifier_derogation_delegue_vrae(
+        self,
+        derogation: BesoinDeDerogationDelegueVrae,
+        commentaire: str,
+        justificatif: List[str],
+        auteur_modification: str,
+    ):
+        self.derogation_delegue_vrae = derogation
+        if derogation == BesoinDeDerogationDelegueVrae.PAS_DE_DEROGATION:
+            self.derogation_delegue_vrae_commentaire = ''
+            self.justificatif_derogation_delegue_vrae = []
+        else:
+            self.derogation_delegue_vrae_commentaire = commentaire
+            self.justificatif_derogation_delegue_vrae = justificatif
+        self.auteur_derniere_modification = auteur_modification
+        self.checklist_actuelle.decision_sic = StatutChecklist(
+            statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
+            libelle=__('To be processed'),
+        )
 
     def _specifier_informations_de_base_acceptation_par_sic(
         self,
@@ -1158,6 +1196,7 @@ class Proposition(interface.RootEntity):
                 academic_year_repository=academic_year_repository,
                 profil_candidat_translator=profil_candidat_translator,
                 experience_parcours_interne_translator=experience_parcours_interne_translator,
+                verification_experiences_completees=False,
             )
         except MultipleBusinessExceptions:
             raise MultipleBusinessExceptions(exceptions=[CurriculumNonCompletePourAcceptationException()])

@@ -155,6 +155,13 @@ class VerifierCurriculumApresSoumissionQuery(interface.QueryRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
+class VerifierExperienceCurriculumApresSoumissionQuery(interface.QueryRequest):
+    uuid_proposition: str
+    uuid_experience: str
+    type_experience: str
+
+
+@attr.dataclass(frozen=True, slots=True)
 class DeterminerAnneeAcademiqueEtPotQuery(interface.QueryRequest):
     uuid_proposition: str
 
@@ -570,6 +577,7 @@ class NotifierCandidatDerogationFinancabiliteCommand(interface.CommandRequest):
 class ModifierStatutChecklistExperienceParcoursAnterieurCommand(interface.CommandRequest):
     uuid_proposition: str
     uuid_experience: str
+    type_experience: str
     gestionnaire: str
     statut: str
     statut_authentification: Optional[bool]
@@ -588,6 +596,15 @@ class SpecifierBesoinDeDerogationSicCommand(interface.CommandRequest):
     uuid_proposition: str
     besoin_de_derogation: str
     gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierDerogationDelegueVraeSicCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+    derogation: str
+    commentaire: str = ''
+    justificatif: List[str] = attr.Factory(list)
 
 
 @attr.dataclass(frozen=True, slots=True)
