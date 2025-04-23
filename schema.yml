@@ -5702,30 +5702,6 @@ paths:
       - $ref: '#/components/parameters/X-User-GlobalID'
 components:
   schemas:
-    ActionLink:
-      type: object
-      properties:
-        error:
-          type: string
-        method:
-          $ref: '#/components/schemas/ActionLinkMethodEnum'
-        url:
-          type: string
-          format: uri
-      oneOf:
-      - required:
-        - method
-        - url
-      - required:
-        - error
-    ActionLinkMethodEnum:
-      type: string
-      enum:
-      - DELETE
-      - GET
-      - PATCH
-      - POST
-      - PUT
     ActorTypeEnum:
       enum:
       - PROMOTER
@@ -6568,8 +6544,40 @@ components:
           type: string
           readOnly: true
         links:
-          allOf:
-          - $ref: '#/components/schemas/ActionLink'
+          type: object
+          properties:
+            retrieve_person:
+              $ref: '#/components/schemas/ActionLink'
+            update_person:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_coordinates:
+              $ref: '#/components/schemas/ActionLink'
+            update_coordinates:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_secondary_studies:
+              $ref: '#/components/schemas/ActionLink'
+            update_secondary_studies:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_curriculum:
+              $ref: '#/components/schemas/ActionLink'
+            update_curriculum:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_training_choice:
+              $ref: '#/components/schemas/ActionLink'
+            update_training_choice:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_specific_question:
+              $ref: '#/components/schemas/ActionLink'
+            update_specific_question:
+              $ref: '#/components/schemas/ActionLink'
+            destroy_proposition:
+              $ref: '#/components/schemas/ActionLink'
+            submit_proposition:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_documents:
+              $ref: '#/components/schemas/ActionLink'
+            update_documents:
+              $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
         erreurs: {}
@@ -6692,8 +6700,40 @@ components:
           type: string
           readOnly: true
         links:
-          allOf:
-          - $ref: '#/components/schemas/ActionLink'
+          type: object
+          properties:
+            retrieve_person:
+              $ref: '#/components/schemas/ActionLink'
+            update_person:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_coordinates:
+              $ref: '#/components/schemas/ActionLink'
+            update_coordinates:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_secondary_studies:
+              $ref: '#/components/schemas/ActionLink'
+            update_secondary_studies:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_curriculum:
+              $ref: '#/components/schemas/ActionLink'
+            update_curriculum:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_specific_question:
+              $ref: '#/components/schemas/ActionLink'
+            update_specific_question:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_training_choice:
+              $ref: '#/components/schemas/ActionLink'
+            update_training_choice:
+              $ref: '#/components/schemas/ActionLink'
+            submit_proposition:
+              $ref: '#/components/schemas/ActionLink'
+            destroy_proposition:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_documents:
+              $ref: '#/components/schemas/ActionLink'
+            update_documents:
+              $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
         pdf_recapitulatif:
@@ -6816,8 +6856,12 @@ components:
       type: object
       properties:
         links:
-          allOf:
-          - $ref: '#/components/schemas/ActionLink'
+          type: object
+          properties:
+            list_propositions:
+              $ref: '#/components/schemas/ActionLink'
+            list_supervised:
+              $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
     DefinirCotutelleCommand:
@@ -7109,8 +7153,14 @@ components:
         nom_doctorant:
           type: string
         links:
-          allOf:
-          - $ref: '#/components/schemas/ActionLink'
+          type: object
+          properties:
+            retrieve_project:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_cotutelle:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_supervision:
+              $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
       required:
@@ -7522,8 +7572,68 @@ components:
           type: string
           readOnly: true
         links:
-          allOf:
-          - $ref: '#/components/schemas/ActionLink'
+          type: object
+          properties:
+            retrieve_person:
+              $ref: '#/components/schemas/ActionLink'
+            update_person:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_coordinates:
+              $ref: '#/components/schemas/ActionLink'
+            update_coordinates:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_secondary_studies:
+              $ref: '#/components/schemas/ActionLink'
+            update_secondary_studies:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_languages:
+              $ref: '#/components/schemas/ActionLink'
+            update_languages:
+              $ref: '#/components/schemas/ActionLink'
+            destroy_proposition:
+              $ref: '#/components/schemas/ActionLink'
+            submit_proposition:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_project:
+              $ref: '#/components/schemas/ActionLink'
+            update_project:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_training_choice:
+              $ref: '#/components/schemas/ActionLink'
+            update_training_choice:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_cotutelle:
+              $ref: '#/components/schemas/ActionLink'
+            update_cotutelle:
+              $ref: '#/components/schemas/ActionLink'
+            add_approval:
+              $ref: '#/components/schemas/ActionLink'
+            add_member:
+              $ref: '#/components/schemas/ActionLink'
+            edit_external_member:
+              $ref: '#/components/schemas/ActionLink'
+            remove_member:
+              $ref: '#/components/schemas/ActionLink'
+            set_reference_promoter:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_supervision:
+              $ref: '#/components/schemas/ActionLink'
+            request_signatures:
+              $ref: '#/components/schemas/ActionLink'
+            approve_by_pdf:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_curriculum:
+              $ref: '#/components/schemas/ActionLink'
+            update_curriculum:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_accounting:
+              $ref: '#/components/schemas/ActionLink'
+            update_accounting:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_documents:
+              $ref: '#/components/schemas/ActionLink'
+            update_documents:
+              $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
         erreurs: {}
@@ -7600,8 +7710,54 @@ components:
           type: string
           readOnly: true
         links:
-          allOf:
-          - $ref: '#/components/schemas/ActionLink'
+          type: object
+          properties:
+            retrieve_training_choice:
+              $ref: '#/components/schemas/ActionLink'
+            update_training_choice:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_person:
+              $ref: '#/components/schemas/ActionLink'
+            update_person:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_coordinates:
+              $ref: '#/components/schemas/ActionLink'
+            update_coordinates:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_secondary_studies:
+              $ref: '#/components/schemas/ActionLink'
+            update_secondary_studies:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_languages:
+              $ref: '#/components/schemas/ActionLink'
+            update_languages:
+              $ref: '#/components/schemas/ActionLink'
+            destroy_proposition:
+              $ref: '#/components/schemas/ActionLink'
+            submit_proposition:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_project:
+              $ref: '#/components/schemas/ActionLink'
+            update_project:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_cotutelle:
+              $ref: '#/components/schemas/ActionLink'
+            update_cotutelle:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_supervision:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_curriculum:
+              $ref: '#/components/schemas/ActionLink'
+            update_curriculum:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_accounting:
+              $ref: '#/components/schemas/ActionLink'
+            update_accounting:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_documents:
+              $ref: '#/components/schemas/ActionLink'
+            update_documents:
+              $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
         pdf_recapitulatif:
@@ -8438,8 +8594,50 @@ components:
           type: string
           readOnly: true
         links:
-          allOf:
-          - $ref: '#/components/schemas/ActionLink'
+          type: object
+          properties:
+            retrieve_person:
+              $ref: '#/components/schemas/ActionLink'
+            update_person:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_coordinates:
+              $ref: '#/components/schemas/ActionLink'
+            update_coordinates:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_secondary_studies:
+              $ref: '#/components/schemas/ActionLink'
+            update_secondary_studies:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_curriculum:
+              $ref: '#/components/schemas/ActionLink'
+            update_curriculum:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_training_choice:
+              $ref: '#/components/schemas/ActionLink'
+            update_training_choice:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_specific_question:
+              $ref: '#/components/schemas/ActionLink'
+            update_specific_question:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_accounting:
+              $ref: '#/components/schemas/ActionLink'
+            update_accounting:
+              $ref: '#/components/schemas/ActionLink'
+            destroy_proposition:
+              $ref: '#/components/schemas/ActionLink'
+            submit_proposition:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_documents:
+              $ref: '#/components/schemas/ActionLink'
+            update_documents:
+              $ref: '#/components/schemas/ActionLink'
+            view_payment:
+              $ref: '#/components/schemas/ActionLink'
+            pay_after_submission:
+              $ref: '#/components/schemas/ActionLink'
+            pay_after_request:
+              $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
         erreurs: {}
@@ -8537,8 +8735,48 @@ components:
           type: string
           readOnly: true
         links:
-          allOf:
-          - $ref: '#/components/schemas/ActionLink'
+          type: object
+          properties:
+            retrieve_person:
+              $ref: '#/components/schemas/ActionLink'
+            update_person:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_coordinates:
+              $ref: '#/components/schemas/ActionLink'
+            update_coordinates:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_secondary_studies:
+              $ref: '#/components/schemas/ActionLink'
+            update_secondary_studies:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_curriculum:
+              $ref: '#/components/schemas/ActionLink'
+            update_curriculum:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_specific_question:
+              $ref: '#/components/schemas/ActionLink'
+            update_specific_question:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_training_choice:
+              $ref: '#/components/schemas/ActionLink'
+            update_training_choice:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_accounting:
+              $ref: '#/components/schemas/ActionLink'
+            update_accounting:
+              $ref: '#/components/schemas/ActionLink'
+            submit_proposition:
+              $ref: '#/components/schemas/ActionLink'
+            destroy_proposition:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_documents:
+              $ref: '#/components/schemas/ActionLink'
+            update_documents:
+              $ref: '#/components/schemas/ActionLink'
+            pay_after_submission:
+              $ref: '#/components/schemas/ActionLink'
+            pay_after_request:
+              $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
         pdf_recapitulatif:
@@ -9044,6 +9282,16 @@ components:
       - prenom
       - uuid
       - ville
+    MethodEnum:
+      enum:
+      - BANCONTACT
+      - CREDIT_CARD
+      - BANK_TRANSFER
+      type: string
+      description: |-
+        * `BANCONTACT` - bancontact
+        * `CREDIT_CARD` - creditcard
+        * `BANK_TRANSFER` - banktransfer
     ModifierChoixFormationContinueCommand:
       type: object
       description: |-
@@ -9372,18 +9620,8 @@ components:
       properties:
         method:
           oneOf:
-          - $ref: '#/components/schemas/PaymentMethodMethodEnum'
+          - $ref: '#/components/schemas/MethodEnum'
           - $ref: '#/components/schemas/BlankEnum'
-    PaymentMethodMethodEnum:
-      enum:
-      - BANCONTACT
-      - CREDIT_CARD
-      - BANK_TRANSFER
-      type: string
-      description: |-
-        * `BANCONTACT` - bancontact
-        * `CREDIT_CARD` - creditcard
-        * `BANK_TRANSFER` - banktransfer
     Period:
       type: object
       description: |-
@@ -9728,8 +9966,14 @@ components:
       type: object
       properties:
         links:
-          allOf:
-          - $ref: '#/components/schemas/ActionLink'
+          type: object
+          properties:
+            create_person:
+              $ref: '#/components/schemas/ActionLink'
+            create_coordinates:
+              $ref: '#/components/schemas/ActionLink'
+            create_training_choice:
+              $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
     PropositionError:
@@ -9778,8 +10022,10 @@ components:
       type: object
       properties:
         links:
-          allOf:
-          - $ref: '#/components/schemas/ActionLink'
+          type: object
+          properties:
+            create_training_choice:
+              $ref: '#/components/schemas/ActionLink'
           readOnly: true
           default: {}
         donnees_transferees_vers_compte_interne:
@@ -10058,6 +10304,28 @@ components:
       required:
       - code
       - message
+    ActionLink:
+      type: object
+      properties:
+        error:
+          type: string
+        method:
+          type: string
+          enum:
+          - DELETE
+          - GET
+          - PATCH
+          - POST
+          - PUT
+        url:
+          type: string
+          format: uri
+      oneOf:
+      - required:
+        - method
+        - url
+      - required:
+        - error
     AcceptedLanguageEnum:
       type: string
       enum:
