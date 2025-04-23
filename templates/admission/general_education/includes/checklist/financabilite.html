@@ -130,7 +130,9 @@
       </dl>
     {% endif %}
     {% if original_admission.financability_dispensation_status == 'REFUS_DE_DEROGATION_FACULTAIRE' %}
-      {% include "admission/general_education/includes/checklist/financabilite_derogation_vrae_form.html" %}
+      {% if with_financability_vrae %}
+        {% include "admission/general_education/includes/checklist/financabilite_derogation_vrae_form.html" %}
+      {% endif %}
 
       <div class="panel panel-default">
         <div class="panel-heading">

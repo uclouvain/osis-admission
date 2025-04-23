@@ -2381,6 +2381,7 @@ class FinancabiliteContextMixin(CheckListDefaultContextMixin):
         )
         context['financability_dispensation_refusal_form'] = self.financability_dispensation_refusal_form
         context['financability_dispensation_notification_form'] = self.financability_dispensation_notification_form
+        context['with_financability_vrae'] = True
 
         if self.request.htmx:
             comments = {
