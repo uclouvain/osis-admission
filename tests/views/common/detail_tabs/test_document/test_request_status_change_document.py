@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -30,18 +30,22 @@ import freezegun
 from django.shortcuts import resolve_url
 from django.test import override_settings
 
-from admission.models import AdmissionFormItemInstantiation
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
 from admission.ddd.admission.enums.emplacement_document import (
-    TypeEmplacementDocument,
     IdentifiantBaseEmplacementDocument,
     StatutEmplacementDocument,
     StatutReclamationEmplacementDocument,
+    TypeEmplacementDocument,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
-from admission.tests.views.common.detail_tabs.test_document import BaseDocumentViewTestCase
+from admission.models import AdmissionFormItemInstantiation
+from admission.tests.views.common.detail_tabs.test_document import (
+    BaseDocumentViewTestCase,
+)
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
@@ -138,7 +142,7 @@ class RequestStatusChangeDocumentTestCase(BaseDocumentViewTestCase):
             'status': StatutEmplacementDocument.A_RECLAMER.name,
             'automatically_required': False,
             'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
-            'related_checklist_tab': '',
+            'related_checklist_tab': 'donnees_personnelles',
         }
         self.general_admission.refresh_from_db()
         self.assertEqual(self.general_admission.requested_documents.get(document_identifier), desired_result)
@@ -254,7 +258,7 @@ class RequestStatusChangeDocumentTestCase(BaseDocumentViewTestCase):
             'status': StatutEmplacementDocument.A_RECLAMER.name,
             'automatically_required': False,
             'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
-            'related_checklist_tab': '',
+            'related_checklist_tab': 'donnees_personnelles',
         }
         self.general_admission.refresh_from_db()
         self.assertEqual(self.general_admission.requested_documents.get(document_identifier), desired_result)
@@ -543,7 +547,7 @@ class RequestStatusChangeDocumentTestCase(BaseDocumentViewTestCase):
             'status': StatutEmplacementDocument.A_RECLAMER.name,
             'automatically_required': False,
             'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
-            'related_checklist_tab': '',
+            'related_checklist_tab': 'fiche_etudiant',
         }
         self.continuing_admission.refresh_from_db()
         self.assertEqual(
@@ -642,7 +646,7 @@ class RequestStatusChangeDocumentTestCase(BaseDocumentViewTestCase):
             'status': StatutEmplacementDocument.A_RECLAMER.name,
             'automatically_required': False,
             'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT.name,
-            'related_checklist_tab': '',
+            'related_checklist_tab': 'fiche_etudiant',
         }
         self.continuing_admission.refresh_from_db()
         self.assertEqual(
@@ -761,7 +765,7 @@ class RequestStatusChangeDocumentTestCase(BaseDocumentViewTestCase):
             'status': StatutEmplacementDocument.A_RECLAMER.name,
             'automatically_required': False,
             'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
-            'related_checklist_tab': '',
+            'related_checklist_tab': 'donnees_personnelles',
         }
         self.doctorate_admission.refresh_from_db()
         self.assertEqual(self.doctorate_admission.requested_documents.get(document_identifier), desired_result)
@@ -881,7 +885,7 @@ class RequestStatusChangeDocumentTestCase(BaseDocumentViewTestCase):
             'status': StatutEmplacementDocument.A_RECLAMER.name,
             'automatically_required': False,
             'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
-            'related_checklist_tab': '',
+            'related_checklist_tab': 'donnees_personnelles',
         }
         self.doctorate_admission.refresh_from_db()
         self.assertEqual(self.doctorate_admission.requested_documents.get(document_identifier), desired_result)

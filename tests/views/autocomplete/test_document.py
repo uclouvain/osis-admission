@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -31,6 +31,10 @@ from django.contrib.auth.models import User
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 
+from admission.ddd.admission.enums.emplacement_document import (
+    IdentifiantBaseEmplacementDocument,
+    TypeEmplacementDocument,
+)
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 
 
@@ -41,22 +45,41 @@ class DocumentTypesForSwappingAutocompleteTestCase(TestCase):
                 identifiant='id-11',
                 requis_automatiquement=True,
                 nom_onglet='tab-1',
+                onglet='tab-1',
                 document_uuids=self.document_uuids,
                 libelle='doc-11',
+                type=TypeEmplacementDocument.NON_LIBRE.name,
+                est_emplacement_document_libre=False,
             ),
             mock.Mock(
                 identifiant='id-12',
                 requis_automatiquement=False,
                 nom_onglet='tab-1',
+                onglet='tab-1',
                 document_uuids=self.document_uuids,
                 libelle='doc-12',
+                type=TypeEmplacementDocument.NON_LIBRE.name,
+                est_emplacement_document_libre=False,
+            ),
+            mock.Mock(
+                identifiant='id-13',
+                requis_automatiquement=False,
+                nom_onglet='tab-1',
+                onglet='tab-1',
+                document_uuids=self.document_uuids,
+                libelle='doc-13',
+                type=TypeEmplacementDocument.NON_LIBRE.name,
+                est_emplacement_document_libre=False,
             ),
             mock.Mock(
                 identifiant='id-21',
                 requis_automatiquement=False,
                 nom_onglet='tab-2',
+                onglet=IdentifiantBaseEmplacementDocument.LIBRE_CANDIDAT.name,
                 document_uuids=[],
                 libelle='doc-21',
+                type=TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name,
+                est_emplacement_document_libre=True,
             ),
         ]
         self.patch_message_bus = mock.patch(
@@ -125,11 +148,14 @@ class DocumentTypesForSwappingAutocompleteTestCase(TestCase):
                         ],
                     },
                     {
-                        'text': 'tab-2',
+                        'text': 'tab-2 <i class="fa-solid fa-dice"></i>',
                         'children': [
                             {
                                 'id': 'id-21',
-                                'text': '<i class="fa-solid fa-link-slash"></i> doc-21',
+                                'text': (
+                                    '<i class="fa-solid fa-link-slash"></i> '
+                                    '<i class="fa-solid fa-dice free-document"></i> doc-21'
+                                ),
                                 'disabled': False,
                             },
                         ],
