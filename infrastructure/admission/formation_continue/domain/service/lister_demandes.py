@@ -216,7 +216,7 @@ class ListerDemandesService(IListerDemandesService):
             field_order = {
                 'numero_demande': ['formatted_reference'],
                 'nom_candidat': ['candidate__last_name', 'candidate__first_name'],
-                'courriel_candidat': ['candidate__email'],
+                'courriel_candidat': ['candidate__private_email'],
                 'formation': ['training__acronym'],
                 'edition': ['ordered_edition'],
                 'faculte': ['training_management_faculty'],

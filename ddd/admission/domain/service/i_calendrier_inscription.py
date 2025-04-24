@@ -306,7 +306,10 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
             and (
                 proposition.est_modification_inscription_externe is None
                 or proposition.est_modification_inscription_externe
-                and not proposition.formulaire_modification_inscription
+                and not (
+                    proposition.formulaire_modification_inscription
+                    and proposition.attestation_inscription_reguliere_pour_modification_inscription
+                )
             )
         ):
             raise ModificationInscriptionExterneNonConfirmeeException()

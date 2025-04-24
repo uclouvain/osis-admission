@@ -207,6 +207,7 @@ DocumentsQuestionsSpecifiques = {
     'ATTESTATION_INSCRIPTION_REGULIERE': _('Certificate of regular enrolment'),
     'FORMULAIRE_REORIENTATION': _('Your completed and signed reorientation form'),
     'FORMULAIRE_MODIFICATION_INSCRIPTION': _('Change of enrolment form'),
+    'ATTESTATION_INSCRIPTION_REGULIERE_POUR_MODIFICATION_INSCRIPTION': _('Certificate of regular enrolment'),
     'ADDITIONAL_DOCUMENTS': _(
         'You can add any document you feel is relevant to your application '
         '(supporting documents, proof of language level, etc.).'

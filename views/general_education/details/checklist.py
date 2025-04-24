@@ -3006,6 +3006,7 @@ class ChecklistView(
             'frais_dossier': assimilation_documents,
             'choix_formation': {
                 'FORMULAIRE_REORIENTATION',
+                'ATTESTATION_INSCRIPTION_REGULIERE_POUR_MODIFICATION_INSCRIPTION',
                 'ATTESTATION_INSCRIPTION_REGULIERE',
                 'FORMULAIRE_MODIFICATION_INSCRIPTION',
             },

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 
-from unittest.mock import patch, PropertyMock
+from unittest.mock import PropertyMock, patch
 
 import freezegun
 from django.shortcuts import resolve_url
@@ -174,6 +174,7 @@ class PoolQuestionApiTestCase(APITestCase):
             'is_belgian_bachelor': None,
             'is_external_modification': None,
             'registration_change_form': [],
+            'regular_registration_proof_for_registration_change': [],
         }
         self.assertDictEqual(expected, response.json())
 
@@ -184,8 +185,8 @@ class PoolQuestionApiTestCase(APITestCase):
     def test_pool_question_api_update_with_residency(self, confirm_multiple_upload, confirm, get_remote_metadata):
         confirm.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
         get_remote_metadata.return_value = {"name": "test.pdf", "size": 1}
-        confirm_multiple_upload.side_effect = (
-            lambda _, value, __: ['4bdffb42-552d-415d-9e4c-725f10dce228'] if value else []
+        confirm_multiple_upload.side_effect = lambda _, value, __: (
+            ['4bdffb42-552d-415d-9e4c-725f10dce228'] if value else []
         )
         # Pool questions are inconsistent and should be removed
         admission = GeneralEducationAdmissionFactory(
@@ -194,6 +195,7 @@ class PoolQuestionApiTestCase(APITestCase):
             is_belgian_bachelor=True,
             is_external_reorientation=True,
             registration_change_form=['uuid'],
+            regular_registration_proof_for_registration_change=['uuid-2'],
         )
         self.client.force_authenticate(admission.candidate.user)
         url = resolve_url('admission_api_v1:pool-questions', uuid=admission.uuid)
@@ -219,6 +221,7 @@ class PoolQuestionApiTestCase(APITestCase):
             'is_external_modification': None,
             'is_external_reorientation': None,
             'registration_change_form': [],
+            'regular_registration_proof_for_registration_change': [],
             'regular_registration_proof': [],
             'reorientation_form': [],
         }
@@ -227,3 +230,4 @@ class PoolQuestionApiTestCase(APITestCase):
         self.assertIsNone(admission.is_external_reorientation)
         self.assertIsNone(admission.is_belgian_bachelor)
         self.assertEqual(admission.registration_change_form, [])
+        self.assertEqual(admission.regular_registration_proof_for_registration_change, [])
