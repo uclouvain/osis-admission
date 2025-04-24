@@ -1496,6 +1496,9 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             est_non_resident_au_sens_decret=None,
             est_reorientation_inscription_externe=None,
             formulaire_modification_inscription=['uuid-formulaire-modification-inscription'],
+            attestation_inscription_reguliere_pour_modification_inscription=[
+                'uuid-attestation-inscription-reguliere-pour-modification-inscription'
+            ],
             documents_demandes={},
             documents_libres_sic_uclouvain=[],
             documents_libres_fac_uclouvain=[],
@@ -3291,7 +3294,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
 
             attachments = section.attachments
 
-            self.assertEqual(len(attachments), 2)
+            self.assertEqual(len(attachments), 3)
 
             self.assertEqual(
                 attachments[0].identifier,
@@ -3304,10 +3307,24 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             )
             self.assertTrue(attachments[0].required)
             self.assertFalse(attachments[0].readonly)
-            self.assertEqual(attachments[1].identifier, 'ADDITIONAL_DOCUMENTS')
-            self.assertEqual(attachments[1].label, DocumentsQuestionsSpecifiques['ADDITIONAL_DOCUMENTS'])
-            self.assertEqual(attachments[1].uuids, self.admission.additional_documents)
+            self.assertEqual(
+                attachments[1].identifier,
+                'ATTESTATION_INSCRIPTION_REGULIERE_POUR_MODIFICATION_INSCRIPTION',
+            )
+            self.assertEqual(
+                attachments[1].label,
+                DocumentsQuestionsSpecifiques['ATTESTATION_INSCRIPTION_REGULIERE_POUR_MODIFICATION_INSCRIPTION'],
+            )
+            self.assertEqual(
+                attachments[1].uuids,
+                self.general_bachelor_context.proposition.attestation_inscription_reguliere_pour_modification_inscription,
+            )
+            self.assertTrue(attachments[1].required)
             self.assertFalse(attachments[1].readonly)
+            self.assertEqual(attachments[2].identifier, 'ADDITIONAL_DOCUMENTS')
+            self.assertEqual(attachments[2].label, DocumentsQuestionsSpecifiques['ADDITIONAL_DOCUMENTS'])
+            self.assertEqual(attachments[2].uuids, self.admission.additional_documents)
+            self.assertFalse(attachments[2].readonly)
 
             # The pool is not open...
             with freezegun.freeze_time('2023-10-1'):
@@ -3334,7 +3351,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                     )
                     attachments = section.attachments
 
-                    self.assertEqual(len(attachments), 2)
+                    self.assertEqual(len(attachments), 3)
 
                     self.assertEqual(attachments[0].identifier, 'FORMULAIRE_MODIFICATION_INSCRIPTION')
                     self.assertEqual(
@@ -3347,7 +3364,22 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                     )
                     self.assertTrue(attachments[0].required)
                     self.assertFalse(attachments[0].readonly)
-                    self.assertEqual(attachments[1].identifier, 'ADDITIONAL_DOCUMENTS')
+                    self.assertEqual(
+                        attachments[1].identifier, 'ATTESTATION_INSCRIPTION_REGULIERE_POUR_MODIFICATION_INSCRIPTION'
+                    )
+                    self.assertEqual(
+                        attachments[1].label,
+                        DocumentsQuestionsSpecifiques[
+                            'ATTESTATION_INSCRIPTION_REGULIERE_POUR_MODIFICATION_INSCRIPTION'
+                        ],
+                    )
+                    self.assertEqual(
+                        attachments[1].uuids,
+                        self.general_bachelor_context.proposition.attestation_inscription_reguliere_pour_modification_inscription,
+                    )
+                    self.assertTrue(attachments[1].required)
+                    self.assertFalse(attachments[1].readonly)
+                    self.assertEqual(attachments[2].identifier, 'ADDITIONAL_DOCUMENTS')
 
         with mock.patch.multiple(
             self.general_bachelor_context.proposition,

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -33,14 +33,17 @@ from rest_framework.settings import api_settings
 from admission.api.schema import ChoicesEnumSchema
 from admission.api.serializers.pool_questions import PoolQuestionsSerializer
 from admission.calendar.admission_calendar import SIGLES_WITH_QUOTA
-from admission.models import GeneralEducationAdmission
 from admission.ddd.admission.domain.validator.exceptions import (
     ModificationInscriptionExterneNonConfirmeeException,
     ReorientationInscriptionExterneNonConfirmeeException,
     ResidenceAuSensDuDecretNonRenseigneeException,
 )
 from admission.ddd.admission.formation_generale.commands import VerifierPropositionQuery
-from admission.utils import gather_business_exceptions, get_cached_general_education_admission_perm_obj
+from admission.models import GeneralEducationAdmission
+from admission.utils import (
+    gather_business_exceptions,
+    get_cached_general_education_admission_perm_obj,
+)
 from base.models.academic_calendar import AcademicCalendar
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
@@ -101,7 +104,7 @@ class PoolQuestionsView(APIPermissionRequiredMixin, RetrieveAPIView):
         calendars = {
             calendar['reference']: {
                 'end_date': calendar.get('end_date'),
-                'academic_year': calendar.get('data_year__year')
+                'academic_year': calendar.get('data_year__year'),
             }
             for calendar in (
                 AcademicCalendar.objects.filter(
@@ -144,6 +147,7 @@ class PoolQuestionsView(APIPermissionRequiredMixin, RetrieveAPIView):
                 'is_belgian_bachelor',
                 'is_external_modification',
                 'registration_change_form',
+                'regular_registration_proof_for_registration_change',
             ]
 
         class DynamicPoolQuestionsSerializer(PoolQuestionsSerializer):
@@ -164,6 +168,7 @@ class PoolQuestionsView(APIPermissionRequiredMixin, RetrieveAPIView):
             'is_external_modification': None,
             'is_external_reorientation': None,
             'registration_change_form': [],
+            'regular_registration_proof_for_registration_change': [],
             'regular_registration_proof': [],
             'reorientation_form': [],
             # Add user input

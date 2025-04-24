@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,13 +23,21 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.domain.service.i_poste_diplomatique import IPosteDiplomatiqueTranslator
-from admission.ddd.admission.formation_generale.commands import CompleterQuestionsSpecifiquesParGestionnaireCommand
+from admission.ddd.admission.domain.service.i_poste_diplomatique import (
+    IPosteDiplomatiqueTranslator,
+)
+from admission.ddd.admission.formation_generale.commands import (
+    CompleterQuestionsSpecifiquesParGestionnaireCommand,
+)
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
-from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    PropositionIdentity,
+)
+from admission.ddd.admission.formation_generale.repository.i_proposition import (
+    IPropositionRepository,
+)
 
 
 def completer_questions_specifiques_par_gestionnaire(
@@ -56,6 +64,9 @@ def completer_questions_specifiques_par_gestionnaire(
         formulaire_reorientation=cmd.formulaire_reorientation,
         est_modification_inscription_externe=cmd.est_modification_inscription_externe,
         formulaire_modification_inscription=cmd.formulaire_modification_inscription,
+        attestation_inscription_reguliere_pour_modification_inscription=(
+            cmd.attestation_inscription_reguliere_pour_modification_inscription
+        ),
     )
 
     # THEN

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,19 +26,27 @@
 from django.test import TestCase
 
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.domain.validator.exceptions import PosteDiplomatiqueNonTrouveException
+from admission.ddd.admission.domain.validator.exceptions import (
+    PosteDiplomatiqueNonTrouveException,
+)
 from admission.ddd.admission.formation_generale.commands import (
     CompleterQuestionsSpecifiquesParGestionnaireCommand,
 )
-from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
-from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    Proposition,
+)
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
+    PropositionNonTrouveeException,
+)
 from admission.infrastructure.admission.domain.service.in_memory.poste_diplomatique import (
     PosteDiplomatiqueInMemoryFactory,
 )
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from admission.infrastructure.message_bus_in_memory import (
+    message_bus_in_memory_instance,
+)
 
 
 class TestCompleterQuestionsSpecifiquesParGestionnaireService(TestCase):
@@ -64,6 +72,9 @@ class TestCompleterQuestionsSpecifiquesParGestionnaireService(TestCase):
                 est_bachelier_belge=True,
                 est_modification_inscription_externe=True,
                 formulaire_modification_inscription=['6453f700-9c1a-4f3e-99b4-20ba6e638299'],
+                attestation_inscription_reguliere_pour_modification_inscription=[
+                    '9453f700-9c1a-4f3e-99b4-20ba6e638299'
+                ],
                 est_reorientation_inscription_externe=True,
                 attestation_inscription_reguliere=['7453f700-9c1a-4f3e-99b4-20ba6e638299'],
                 formulaire_reorientation=['8453f700-9c1a-4f3e-99b4-20ba6e638299'],
@@ -87,6 +98,10 @@ class TestCompleterQuestionsSpecifiquesParGestionnaireService(TestCase):
         self.assertEqual(proposition.est_bachelier_belge, True)
         self.assertEqual(proposition.est_modification_inscription_externe, True)
         self.assertEqual(proposition.formulaire_modification_inscription, ['6453f700-9c1a-4f3e-99b4-20ba6e638299'])
+        self.assertEqual(
+            proposition.attestation_inscription_reguliere_pour_modification_inscription,
+            ['9453f700-9c1a-4f3e-99b4-20ba6e638299'],
+        )
         self.assertEqual(proposition.est_reorientation_inscription_externe, True)
         self.assertEqual(proposition.attestation_inscription_reguliere, ['7453f700-9c1a-4f3e-99b4-20ba6e638299'])
         self.assertEqual(proposition.formulaire_reorientation, ['8453f700-9c1a-4f3e-99b4-20ba6e638299'])
