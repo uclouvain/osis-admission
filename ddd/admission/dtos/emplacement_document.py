@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,17 +24,18 @@
 #
 ##############################################################################
 import datetime
-from typing import Optional, List, Dict
+from typing import Dict, List, Optional
 
 import attr
 from django.utils.safestring import mark_safe
 
 from admission.ddd.admission.enums.emplacement_document import (
-    TypeEmplacementDocument,
-    DocumentsSystemeFAC,
+    EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES,
     EMPLACEMENTS_DOCUMENTS_RECLAMABLES,
-    DocumentsSystemeSIC,
     STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
+    DocumentsSystemeFAC,
+    DocumentsSystemeSIC,
+    TypeEmplacementDocument,
 )
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
 from osis_common.ddd import interface
@@ -83,6 +84,10 @@ class EmplacementDocumentDTO(interface.Entity):
     @property
     def est_a_reclamer(self):
         return self.statut in STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER and bool(self.statut_reclamation)
+
+    @property
+    def est_emplacement_document_libre(self):
+        return self.type in EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES
 
     @property
     def libelle_avec_icone(self):
