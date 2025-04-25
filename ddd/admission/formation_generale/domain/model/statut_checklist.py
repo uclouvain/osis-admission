@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,18 +24,21 @@
 #
 # ##############################################################################
 from enum import Enum
-from typing import List, Optional, Dict
+from typing import Dict, List, Optional
 
 import attr
-from django.utils.translation import gettext_lazy as _, pgettext_lazy
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext_lazy
 
-from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
+from admission.ddd.admission.domain.model.enums.authentification import (
+    EtatAuthentificationParcours,
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutChecklist,
     BesoinDeDerogation,
+    ChoixStatutChecklist,
     DecisionFacultaireEnum,
-    OngletsChecklist,
     DerogationFinancement,
+    OngletsChecklist,
 )
 from osis_common.ddd import interface
 
@@ -357,7 +360,7 @@ onglet_financabilite = ConfigurationOngletChecklist(
         ),
         ConfigurationStatutChecklist(
             identifiant='BESOIN_DEROGATION',
-            libelle=_('Dispensation needed'),
+            libelle=_('Non-progression dispensation needed'),
             statut=ChoixStatutChecklist.GEST_EN_COURS,
             extra={'en_cours': 'derogation'},
         ),
@@ -498,7 +501,7 @@ onglet_decision_sic = ConfigurationOngletChecklist(
         ),
         ConfigurationStatutChecklist(
             identifiant='BESOIN_DEROGATION',
-            libelle=_('Dispensation needed'),
+            libelle=_('Non-progression dispensation needed'),
             statut=ChoixStatutChecklist.GEST_EN_COURS,
             extra={'en_cours': 'derogation'},
         ),

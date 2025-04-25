@@ -57,7 +57,7 @@
   <div class="row">
     {% if checklist_display %}
       <div class="col-md-6">
-        {% field_data _("Institute type") experience.type_institut|enum_display:'EstablishmentTypeEnum' %}
+        {% field_data _("Institute type") experience.type_institut|enum_with_acronym_display:'EstablishmentTypeEnum' %}
       </div>
     {% endif %}
     <div class="col-md-6">

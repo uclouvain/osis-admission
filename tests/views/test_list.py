@@ -784,7 +784,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         second_admission = GeneralEducationAdmissionFactory(
             training__management_entity=self.first_entity,
-            candidate__country_of_citizenship=CountryFactory(european_union=False),
+            candidate__country_of_citizenship=CountryFactory(european_union=False, name='Foobar Country'),
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
 

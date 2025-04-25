@@ -55,6 +55,7 @@ from ._should_informations_checklist_etre_completees import (
     ShouldSpecifierInformationsAcceptationFacultaire,
     ShouldSpecifierInformationsAcceptationFacultaireInscription,
     ShouldSpecifierMotifRefusFacultaire,
+    ShouldStatutsChecklistExperiencesEtreValidees,
     ShouldTitreAccesEtreSelectionne,
 )
 from ._should_informations_complementaires_etre_completes import ShouldVisaEtreComplete

@@ -54,6 +54,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     ParcoursAnterieurNonSuffisantException,
     SituationPropositionNonCddException,
     SituationPropositionNonSICException,
+    StatutsChecklistExperiencesEtreValidesException,
     TitreAccesEtreSelectionneException,
     TitreAccesEtreSelectionnePourEnvoyerASICException,
 )
@@ -191,6 +192,32 @@ class ShouldConditionAccesEtreSelectionne(BusinessValidator):
             self.condition_acces and self.millesime_condition_acces
         ):
             raise ConditionAccesEtreSelectionneException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldStatutsChecklistExperiencesEtreValidees(BusinessValidator):
+    uuids_experiences_valorisees: set[str]
+    checklist: StatutsChecklistDoctorale
+    statut: ChoixStatutChecklist
+
+    def validate(self, *args, **kwargs):
+        if self.statut == ChoixStatutChecklist.GEST_REUSSITE:
+            # Le passage à l'état valide nécessite que toutes les expériences valorisées soient passées à l'état valide
+            uuids_experiences_valorisees = self.uuids_experiences_valorisees.copy()
+
+            for experience in self.checklist.parcours_anterieur.enfants:
+                identifiant_experience = experience.extra.get('identifiant')
+
+                if identifiant_experience in uuids_experiences_valorisees:
+                    uuids_experiences_valorisees.discard(identifiant_experience)
+
+                    # Si une expérience valorisée n'est pas à l'état valide, lever l'exception
+                    if experience.statut != ChoixStatutChecklist.GEST_REUSSITE:
+                        raise StatutsChecklistExperiencesEtreValidesException
+
+            # Si une expérience valorisée n'a pas de checklist associée, lever l'exception
+            if uuids_experiences_valorisees:
+                raise StatutsChecklistExperiencesEtreValidesException
 
 
 @attr.dataclass(frozen=True, slots=True)

@@ -110,7 +110,12 @@ def run():  # pragma: no cover
         )
     ).exclude(
         inscription_au_role_requise=False
-    )
+    ).annotate(
+        ordre_priorite=Case(
+            When(continuingeducationadmission__isnull=False, then=1),
+            When(generaleducationadmission__isnull=False, then=2)
+        )
+    ).order_by('ordre_priorite')
     logger.info(f"[TASK - INJECTION EPC] {admissions.count()} dossiers a traiter")
     from admission.services.injection_epc.injection_dossier import InjectionEPCAdmission
 
