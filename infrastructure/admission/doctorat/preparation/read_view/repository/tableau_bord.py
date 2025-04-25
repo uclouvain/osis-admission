@@ -25,16 +25,26 @@
 # ##############################################################################
 from abc import ABCMeta
 
+from django.db.models import Exists, F, OuterRef
+from django.db.models.functions import Now
+from django.db.models.lookups import GreaterThanOrEqual
 from django.db.models.query_utils import Q
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    STATUTS_PROPOSITION_DOCTORALE_SOUMISE,
     ChoixStatutPropositionDoctorale,
     ChoixTypeAdmission,
 )
-from admission.ddd.admission.doctorat.preparation.read_view.domain.enums.tableau_bord import IndicateurTableauBordEnum
+from admission.ddd.admission.doctorat.preparation.read_view.domain.enums.tableau_bord import (
+    IndicateurTableauBordEnum,
+)
 from admission.ddd.admission.doctorat.preparation.read_view.repository.i_tableau_bord import (
     ITableauBordRepositoryAdmissionMixin,
 )
+from admission.models import DoctorateAdmission
+from admission.models.functions import AddMonths
+from epc.models.enums.etat_inscription import EtatInscriptionFormation
+from epc.models.inscription_programme_annuel import InscriptionProgrammeAnnuel
 
 
 class TableauBordRepositoryAdmissionMixin(ITableauBordRepositoryAdmissionMixin, metaclass=ABCMeta):
@@ -47,8 +57,34 @@ class TableauBordRepositoryAdmissionMixin(ITableauBordRepositoryAdmissionMixin, 
             status=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
         ),
-        # IndicateurTableauBordEnum.PRE_ADMISSION_PAS_EN_ORDRE_INSCRIPTION.name: Q(),
-        # IndicateurTableauBordEnum.PRE_ADMISSION_ECHEANCE_3_MOIS.name: Q(),
+        IndicateurTableauBordEnum.PRE_ADMISSION_PAS_EN_ORDRE_INSCRIPTION.name: Q(
+            type=ChoixTypeAdmission.PRE_ADMISSION.name,
+            status=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
+        )
+        & Q(
+            ~Exists(
+                InscriptionProgrammeAnnuel.objects.filter(
+                    admission_uuid=OuterRef('uuid'),
+                    etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+                )
+            ),
+        ),
+        IndicateurTableauBordEnum.PRE_ADMISSION_ECHEANCE_3_MOIS.name: Q(
+            type=ChoixTypeAdmission.PRE_ADMISSION.name,
+            approved_by_cdd_at__isnull=False,
+        )
+        & Q(
+            GreaterThanOrEqual(
+                Now(),
+                AddMonths(F('approved_by_cdd_at'), months=9),
+            ),
+            ~Exists(
+                DoctorateAdmission.objects.filter(
+                    related_pre_admission_id=OuterRef('pk'),
+                    status__in=STATUTS_PROPOSITION_DOCTORALE_SOUMISE,
+                )
+            ),
+        ),
         IndicateurTableauBordEnum.ADMISSION_DOSSIER_SOUMIS.name: Q(
             status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
             type=ChoixTypeAdmission.ADMISSION.name,
@@ -57,5 +93,16 @@ class TableauBordRepositoryAdmissionMixin(ITableauBordRepositoryAdmissionMixin, 
             status=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
             type=ChoixTypeAdmission.ADMISSION.name,
         ),
-        # IndicateurTableauBordEnum.ADMISSION_PAS_EN_ORDRE_INSCRIPTION.name: Q(),
+        IndicateurTableauBordEnum.ADMISSION_PAS_EN_ORDRE_INSCRIPTION.name: Q(
+            type=ChoixTypeAdmission.ADMISSION.name,
+            status=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
+        )
+        & Q(
+            ~Exists(
+                InscriptionProgrammeAnnuel.objects.filter(
+                    admission_uuid=OuterRef('uuid'),
+                    etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+                )
+            ),
+        ),
     }
