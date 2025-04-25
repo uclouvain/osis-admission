@@ -80,6 +80,10 @@ from admission.models import (
 )
 from admission.models.base import BaseAdmission
 from base.models.person import Person
+from osis_profile.models import (
+    OSIS_PROFILE_MODELS,
+)
+from osis_profile.services.injection_epc import InjectionEPCCurriculum
 
 
 class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
@@ -207,6 +211,8 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
                     if isinstance(uuid_document, uuid.UUID)
                 ]
                 model_object.save(update_fields=fields)
+                if isinstance(model_object, OSIS_PROFILE_MODELS):
+                    InjectionEPCCurriculum().injecter_selon_modele(model_object, auteur)
 
     @classmethod
     def entity_to_dict(cls, entity: EmplacementDocument) -> dict:
