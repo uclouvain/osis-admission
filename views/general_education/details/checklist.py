@@ -58,12 +58,12 @@ from admission.ddd.admission.commands import (
     ListerToutesDemandesQuery,
     RechercherParcoursAnterieurQuery,
 )
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
-    message_candidat_avec_pae_avant_2015,
-)
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AnneesCurriculumNonSpecifieesException,
     ExperiencesAcademiquesNonCompleteesException,
+)
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
+    message_candidat_avec_pae_avant_2015,
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.ddd.admission.domain.model.enums.condition_acces import (
@@ -158,7 +158,6 @@ from admission.ddd.admission.formation_generale.domain.service.checklist import 
     Checklist,
 )
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
-    FormationNonTrouveeException,
     ConditionAccesEtreSelectionneException,
     FormationNonTrouveeException,
     StatutsChecklistExperiencesEtreValidesException,
@@ -2953,6 +2952,7 @@ class ChecklistView(
             'frais_dossier': assimilation_documents,
             'choix_formation': {
                 'FORMULAIRE_REORIENTATION',
+                'ATTESTATION_INSCRIPTION_REGULIERE_POUR_MODIFICATION_INSCRIPTION',
                 'ATTESTATION_INSCRIPTION_REGULIERE',
                 'FORMULAIRE_MODIFICATION_INSCRIPTION',
             },

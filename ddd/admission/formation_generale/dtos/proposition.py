@@ -85,6 +85,7 @@ class PropositionDTO(interface.DTO):
 
     est_modification_inscription_externe: Optional[bool]
     formulaire_modification_inscription: List[str]
+    attestation_inscription_reguliere_pour_modification_inscription: List[str]
 
     est_non_resident_au_sens_decret: Optional[bool]
 

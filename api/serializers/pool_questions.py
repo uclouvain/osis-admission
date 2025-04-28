@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,11 +25,13 @@
 # ##############################################################################
 from rest_framework import serializers
 
-from admission.models import GeneralEducationAdmission
-from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
+from admission.ddd.admission.domain.service.i_calendrier_inscription import (
+    ICalendrierInscription,
+)
 from admission.ddd.admission.domain.validator.exceptions import (
     ResidenceAuSensDuDecretNonDisponiblePourInscriptionException,
 )
+from admission.models import GeneralEducationAdmission
 
 
 class PoolQuestionsSerializer(serializers.ModelSerializer):
@@ -63,6 +65,7 @@ class PoolQuestionsSerializer(serializers.ModelSerializer):
             'reorientation_form',
             'is_external_modification',
             'registration_change_form',
+            'regular_registration_proof_for_registration_change',
             'is_non_resident',
             'reorientation_pool_end_date',
             'reorientation_pool_academic_year',

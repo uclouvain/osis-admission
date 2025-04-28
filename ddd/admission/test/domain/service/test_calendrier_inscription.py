@@ -135,13 +135,38 @@ class CalendrierInscriptionTestCase(TestCase):
             )
 
     @freezegun.freeze_time('2022-10-15')
-    def test_verification_calendrier_inscription_modification_renseignee_sans_piece_jointe(self):
-        # Nous sommes dans la période modification, mais le candidat n'a pas renseigné la pièce jointe associée
+    def test_verification_calendrier_inscription_modification_renseignee_sans_formulaire(self):
+        # Nous sommes dans la période modification, mais le candidat n'a pas renseigné le formulaire associé
         proposition = PropositionFactory(
             formation_id__sigle='ECGE3DP',
             formation_id__annee=2022,
             est_modification_inscription_externe=True,
             formulaire_modification_inscription=[],
+            attestation_inscription_reguliere_pour_modification_inscription=['u1'],
+        )
+        profil = ProfilCandidatFactory(matricule=proposition.matricule_candidat)
+        self.profil_candidat_translator.profil_candidats.append(profil.identification)
+        self.profil_candidat_translator.get_coordonnees = lambda m: profil.coordonnees
+        with self.assertRaises(ModificationInscriptionExterneNonConfirmeeException):
+            CalendrierInscriptionInMemory.verifier(
+                formation_id=proposition.formation_id,
+                proposition=proposition,
+                matricule_candidat=proposition.matricule_candidat,
+                titres_acces=Titres(AdmissionConditionsDTOFactory()),
+                type_formation=TrainingType.BACHELOR,
+                profil_candidat_translator=self.profil_candidat_translator,
+                formation_translator=self.formation_translator,
+            )
+
+    @freezegun.freeze_time('2022-10-15')
+    def test_verification_calendrier_inscription_modification_renseignee_attestation_inscription(self):
+        # Nous sommes dans la période modification, mais le candidat n'a pas renseigné l'attestation associée
+        proposition = PropositionFactory(
+            formation_id__sigle='ECGE3DP',
+            formation_id__annee=2022,
+            est_modification_inscription_externe=True,
+            formulaire_modification_inscription=['u1'],
+            attestation_inscription_reguliere_pour_modification_inscription=[],
         )
         profil = ProfilCandidatFactory(matricule=proposition.matricule_candidat)
         self.profil_candidat_translator.profil_candidats.append(profil.identification)

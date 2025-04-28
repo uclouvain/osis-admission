@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,16 +27,14 @@ from dal.forward import Const
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
-from admission.models import DiplomaticPost
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixInscriptionATitre,
     ChoixTypeAdresseFacturation,
 )
-from admission.forms import (
-    get_diplomatic_post_initial_choices,
-)
+from admission.forms import get_diplomatic_post_initial_choices
 from admission.forms.admission.coordonnees import BaseAdmissionAddressForm
 from admission.forms.specific_question import ConfigurableFormMixin
+from admission.models import DiplomaticPost
 from base.forms.utils import FIELD_REQUIRED_MESSAGE, autocomplete
 from base.forms.utils.fields import RadioBooleanField
 from base.forms.utils.file_field import MaxOneFileUploadField
@@ -128,6 +126,12 @@ class GeneralSpecificQuestionsForm(CommonSpecificQuestionsForm):
         required=False,
     )
 
+    attestation_inscription_reguliere_pour_modification_inscription = MaxOneFileUploadField(
+        label=_('Certificate of regular enrolment'),
+        max_files=1,
+        required=False,
+    )
+
     class Media:
         js = ('js/dependsOn.min.js',)
 
@@ -169,6 +173,7 @@ class GeneralSpecificQuestionsForm(CommonSpecificQuestionsForm):
                 'est_bachelier_belge',
                 'est_modification_inscription_externe',
                 'formulaire_modification_inscription',
+                'attestation_inscription_reguliere_pour_modification_inscription',
                 'est_reorientation_inscription_externe',
                 'attestation_inscription_reguliere',
                 'formulaire_reorientation',
@@ -187,6 +192,7 @@ class GeneralSpecificQuestionsForm(CommonSpecificQuestionsForm):
             # not belgian bachelor, clean modification and reorientation fields
             data['est_modification_inscription_externe'] = data.get('est_bachelier_belge')
             data['formulaire_modification_inscription'] = []
+            data['attestation_inscription_reguliere_pour_modification_inscription'] = []
             data['est_reorientation_inscription_externe'] = data.get('est_bachelier_belge')
             data['attestation_inscription_reguliere'] = []
             data['formulaire_reorientation'] = []
@@ -208,6 +214,7 @@ class GeneralSpecificQuestionsForm(CommonSpecificQuestionsForm):
                 self.add_error('est_modification_inscription_externe', FIELD_REQUIRED_MESSAGE)
             elif not data['est_modification_inscription_externe']:
                 data['formulaire_modification_inscription'] = []
+                data['attestation_inscription_reguliere_pour_modification_inscription'] = []
 
             if data.get('est_reorientation_inscription_externe') is None:
                 self.add_error('est_reorientation_inscription_externe', FIELD_REQUIRED_MESSAGE)
