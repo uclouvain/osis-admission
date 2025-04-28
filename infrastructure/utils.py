@@ -351,7 +351,8 @@ def get_document_from_identifier(
             elif domain_identifier in CORRESPONDANCE_CHAMPS_ETUDES_SECONDAIRES_ALTERNATIVES:
                 obj = getattr(admission.candidate, 'highschooldiplomaalternative', None)
                 field = CORRESPONDANCE_CHAMPS_ETUDES_SECONDAIRES_ALTERNATIVES[domain_identifier]
-            obj.injecte_par_cv = admission.secondaire_injectee_par_cv  # from annotation
+            if obj:
+                obj.injecte_par_cv = admission.secondaire_injectee_par_cv  # from annotation
 
         elif base_identifier == OngletsDemande.LANGUES.name:
             # LANGUES.[CODE_LANGUE].[DOMAIN_IDENTIFIER]
