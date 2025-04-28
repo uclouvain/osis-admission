@@ -47,4 +47,7 @@
     {% if financabilite.situation %}<strong>Situation</strong>: {{ financabilite.situation }}{% endif %}
   </p>
   <pre>{{ financabilite_logs }}</pre>
+
+  <h2>Vérification du projet</h2>
+  <pre>{{ verify_project|pprint }}</pre>
 {% endblock %}

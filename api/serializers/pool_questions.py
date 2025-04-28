@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,13 +23,17 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from admission.models import GeneralEducationAdmission
-from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
+from admission.ddd.admission.domain.service.i_calendrier_inscription import (
+    ICalendrierInscription,
+)
 from admission.ddd.admission.domain.validator.exceptions import (
     ResidenceAuSensDuDecretNonDisponiblePourInscriptionException,
 )
+from admission.models import GeneralEducationAdmission
 
 
 class PoolQuestionsSerializer(serializers.ModelSerializer):
@@ -39,6 +43,7 @@ class PoolQuestionsSerializer(serializers.ModelSerializer):
     modification_pool_academic_year = serializers.IntegerField(read_only=True, allow_null=True)
     forbid_enrolment_limited_course_for_non_resident = serializers.SerializerMethodField()
 
+    @extend_schema_field(OpenApiTypes.STR)
     def get_forbid_enrolment_limited_course_for_non_resident(self, _):
         return ResidenceAuSensDuDecretNonDisponiblePourInscriptionException.message
 
