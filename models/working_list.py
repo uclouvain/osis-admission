@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,14 +27,24 @@ from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext_lazy
 from ordered_model.models import OrderedModel
 
-from admission.models.form_item import TranslatedJSONField
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
 from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+)
+from admission.forms import ALL_EMPTY_CHOICE
+from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+    AnneeInscriptionFormationTranslator,
+)
+from admission.models.form_item import TranslatedJSONField
+from base.models.enums.education_group_types import TrainingType
 
 
 class CommonWorkingList(OrderedModel):
@@ -63,13 +73,21 @@ class CommonWorkingList(OrderedModel):
         return self.name.get(settings.LANGUAGE_CODE)
 
 
+UNCHANGED_KEY = 'INCHANGE'
+UNCHANGED_VALUE = _('INCHANGE')
+
+
 class WorkingList(CommonWorkingList):
     quarantine = models.BooleanField(null=True)
 
     admission_type = models.CharField(
         blank=True,
         verbose_name=_('Admission type'),
-        choices=TypeDemande.choices(),
+        choices=(
+            ALL_EMPTY_CHOICE[0],
+            (UNCHANGED_KEY, UNCHANGED_VALUE),
+            *TypeDemande.choices(),
+        ),
         default='',
         max_length=16,
     )
@@ -80,6 +98,16 @@ class WorkingList(CommonWorkingList):
         base_field=models.CharField(
             choices=CHOIX_STATUT_TOUTE_PROPOSITION,
             max_length=30,
+        ),
+        blank=True,
+    )
+
+    admission_education_types = ArrayField(
+        default=list,
+        verbose_name=_('Admission education types'),
+        base_field=models.CharField(
+            choices=AnneeInscriptionFormationTranslator.EDUCATION_TYPES_CHOICES,
+            max_length=64,
         ),
         blank=True,
     )
