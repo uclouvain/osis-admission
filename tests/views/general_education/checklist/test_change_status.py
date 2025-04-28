@@ -132,6 +132,28 @@ class ChangeStatusViewTestCase(APITestCase):
             },
         )
 
+        # Replace existing extra
+        response = self.client.post(
+            url,
+            data='field4=def',
+            content_type='application/x-www-form-urlencoded',
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the admission has been updated
+        self.general_admission.refresh_from_db()
+        self.assertEqual(
+            self.general_admission.checklist['current']['assimilation']['statut'],
+            ChoixStatutChecklist.GEST_REUSSITE.name,
+        )
+        self.assertEqual(
+            self.general_admission.checklist['current']['assimilation']['extra'],
+            {
+                'field4': 'def',
+            },
+        )
+
         # No current checklist
         self.general_admission.checklist.pop('current', None)
         self.general_admission.save()
