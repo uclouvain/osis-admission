@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -1903,6 +1903,74 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         response = self._do_request(
             **default_cmd_params,
+            filtres_etats_checklist_7=['AVIS_EXPERT'],
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(len(response.context['object_list']), 0)
+
+        current_checklist['statut'] = ChoixStatutChecklist.GEST_EN_COURS.name
+        second_admission.save(update_fields=['checklist'])
+
+        response = self._do_request(
+            **default_cmd_params,
+            filtres_etats_checklist_7=['AVIS_EXPERT'],
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(len(response.context['object_list']), 1)
+        self.assertEqual(second_admission.uuid, response.context['object_list'][0].uuid)
+
+        response = self._do_request(
+            **default_cmd_params,
+            filtres_etats_checklist_7=['A_COMPLETER'],
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(len(response.context['object_list']), 0)
+
+        current_checklist['statut'] = ChoixStatutChecklist.GEST_BLOCAGE.name
+        current_checklist['extra'] = {'to_be_completed': '1'}
+        second_admission.save(update_fields=['checklist'])
+
+        response = self._do_request(
+            **default_cmd_params,
+            filtres_etats_checklist_7=['A_COMPLETER'],
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(len(response.context['object_list']), 1)
+        self.assertEqual(second_admission.uuid, response.context['object_list'][0].uuid)
+
+        response = self._do_request(
+            **default_cmd_params,
+            filtres_etats_checklist_7=['A_COMPLETER_APRES_INSCRIPTION'],
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(len(response.context['object_list']), 0)
+
+        current_checklist['statut'] = ChoixStatutChecklist.GEST_BLOCAGE_ULTERIEUR.name
+        current_checklist['extra'] = {}
+        second_admission.save(update_fields=['checklist'])
+
+        response = self._do_request(
+            **default_cmd_params,
+            filtres_etats_checklist_7=['A_COMPLETER_APRES_INSCRIPTION'],
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(len(response.context['object_list']), 1)
+        self.assertEqual(second_admission.uuid, response.context['object_list'][0].uuid)
+
+        response = self._do_request(
+            **default_cmd_params,
             filtres_etats_checklist_7=['INSUFFISANT'],
         )
 
@@ -1911,6 +1979,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(len(response.context['object_list']), 0)
 
         current_checklist['statut'] = ChoixStatutChecklist.GEST_BLOCAGE.name
+        current_checklist['extra'] = {'insufficient': '1'}
         second_admission.save(update_fields=['checklist'])
 
         response = self._do_request(
@@ -1933,6 +2002,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(len(response.context['object_list']), 0)
 
         current_checklist['statut'] = ChoixStatutChecklist.GEST_REUSSITE.name
+        current_checklist['extra'] = {}
         second_admission.save(update_fields=['checklist'])
 
         response = self._do_request(
