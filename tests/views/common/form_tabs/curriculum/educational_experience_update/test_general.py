@@ -1283,6 +1283,7 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
             data={
                 **default_data,
                 'base_form-program': '',
+                'base_form-fwb_equivalent_program': '',
             },
         )
 
@@ -1299,7 +1300,30 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
 
         self.assertEqual(first_form.cleaned_data['is_102_change_of_course'], None)
 
-        # No chosen institute -> no fwb data
+        # No chosen institute and foreign country -> no fwb data
+        response = self.client.post(
+            self.form_url,
+            data={
+                **default_data,
+                'base_form-institute': '',
+                'base_form-country': 'FR',
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        base_form = response.context['base_form']
+        self.assertEqual(base_form.cleaned_data['block_1_acquired_credit_number'], None)
+        self.assertEqual(base_form.cleaned_data['with_complement'], None)
+        self.assertEqual(base_form.cleaned_data['complement_registered_credit_number'], None)
+        self.assertEqual(base_form.cleaned_data['complement_acquired_credit_number'], None)
+
+        year_formset = response.context['year_formset']
+        first_form = year_formset.forms[0]
+
+        self.assertEqual(first_form.cleaned_data['is_102_change_of_course'], None)
+
+        # No chosen institute and be country -> no fwb data except the block 1 credits
         response = self.client.post(
             self.form_url,
             data={
@@ -1311,7 +1335,7 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         base_form = response.context['base_form']
-        self.assertEqual(base_form.cleaned_data['block_1_acquired_credit_number'], None)
+        self.assertEqual(base_form.cleaned_data['block_1_acquired_credit_number'], 50)
         self.assertEqual(base_form.cleaned_data['with_complement'], None)
         self.assertEqual(base_form.cleaned_data['complement_registered_credit_number'], None)
         self.assertEqual(base_form.cleaned_data['complement_acquired_credit_number'], None)
@@ -1414,7 +1438,7 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
             data={
                 **default_data,
                 'base_form-with_complement': '',
-            }
+            },
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
