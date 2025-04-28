@@ -301,9 +301,10 @@ class DoctorateTrainingChoiceFormViewTestCase(TestCase):
     @freezegun.freeze_time('2021-12-01')
     def test_form_submit_with_valid_data(self):
         self.client.force_login(self.sic_manager_user)
+        self.doctorate_admission.type = ChoixTypeAdmission.PRE_ADMISSION.name
+        self.doctorate_admission.save(update_fields=['type'])
 
         default_data = {
-            'admission_type': ChoixTypeAdmission.ADMISSION.name,
             'justification': 'My justification',
             'proximity_commission_cde': ChoixCommissionProximiteCDEouCLSM.MANAGEMENT.name,
             'proximity_commission_cdss': ChoixCommissionProximiteCDSS.BCGIM.name,
@@ -317,7 +318,6 @@ class DoctorateTrainingChoiceFormViewTestCase(TestCase):
             self.doctorate_url,
             {
                 **default_data,
-                'admission_type': ChoixTypeAdmission.PRE_ADMISSION.name,
             },
         )
 
@@ -325,7 +325,6 @@ class DoctorateTrainingChoiceFormViewTestCase(TestCase):
 
         self.doctorate_admission.refresh_from_db()
 
-        self.assertEqual(self.doctorate_admission.type, ChoixTypeAdmission.PRE_ADMISSION.name)
         self.assertEqual(self.doctorate_admission.comment, 'My justification')
         self.assertEqual(
             self.doctorate_admission.specific_question_answers,
@@ -338,11 +337,12 @@ class DoctorateTrainingChoiceFormViewTestCase(TestCase):
         self.assertEqual(self.doctorate_admission.last_update_author, self.sic_manager_user.person)
 
         # Admission
+        self.doctorate_admission.type = ChoixTypeAdmission.ADMISSION.name
+        self.doctorate_admission.save(update_fields=['type'])
         response = self.client.post(
             self.doctorate_url,
             {
                 **default_data,
-                'admission_type': ChoixTypeAdmission.ADMISSION.name,
             },
         )
 
@@ -350,7 +350,6 @@ class DoctorateTrainingChoiceFormViewTestCase(TestCase):
 
         self.doctorate_admission.refresh_from_db()
 
-        self.assertEqual(self.doctorate_admission.type, ChoixTypeAdmission.ADMISSION.name)
         self.assertEqual(self.doctorate_admission.comment, '')
 
         # CDE proximity commission
@@ -403,7 +402,6 @@ class DoctorateTrainingChoiceFormViewTestCase(TestCase):
         self.client.force_login(self.sic_manager_user)
 
         default_data = {
-            'admission_type': ChoixTypeAdmission.ADMISSION.name,
             'justification': 'My justification',
             'proximity_commission_cde': ChoixCommissionProximiteCDEouCLSM.MANAGEMENT.name,
             'proximity_commission_cdss': ChoixCommissionProximiteCDSS.BCGIM.name,
@@ -415,19 +413,14 @@ class DoctorateTrainingChoiceFormViewTestCase(TestCase):
         # Without any data
         response = self.client.post(self.doctorate_url, {})
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        form = response.context['form']
-
-        self.assertFalse(form.is_valid())
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('admission_type', []))
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
 
         # Without the justification about the pre-admission
+        self.doctorate_admission.type = ChoixTypeAdmission.PRE_ADMISSION.name
+        self.doctorate_admission.save(update_fields=['type'])
         response = self.client.post(
             self.doctorate_url,
-            {
-                'admission_type': ChoixTypeAdmission.PRE_ADMISSION.name,
-            },
+            {},
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
