@@ -1305,6 +1305,19 @@ class FinancabilityDispensationRefusalForm(FacDecisionRefusalForm):
         )
 
 
+class FinancabiliteDispensationVraeForm(forms.ModelForm):
+    class Meta:
+        model = GeneralEducationAdmission
+        fields = [
+            'financabilite_dispensation_vrae',
+        ]
+
+    def __init__(self, can_change_vrae_dispensation, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not can_change_vrae_dispensation:
+            self.fields['financabilite_dispensation_vrae'].disabled = True
+
+
 class FinancabiliteApprovalForm(forms.ModelForm):
     class Meta:
         model = GeneralEducationAdmission

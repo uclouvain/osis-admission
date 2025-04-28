@@ -168,3 +168,11 @@ class HistoriqueInMemory(IHistorique):
         gestionnaire: str,
     ):
         pass
+
+    @classmethod
+    def historiser_derogation_vrae_financabilite(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+    ):
+        pass

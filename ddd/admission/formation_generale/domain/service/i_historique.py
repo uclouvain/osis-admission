@@ -213,3 +213,12 @@ class IHistorique(interface.DomainService):
         gestionnaire: str,
     ):
         raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def historiser_derogation_vrae_financabilite(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+    ):
+        raise NotImplementedError
