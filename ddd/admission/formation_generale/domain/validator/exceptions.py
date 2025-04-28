@@ -286,7 +286,8 @@ class EtatChecklistDecisionSicNonValidePourApprouverUneInscription(BusinessExcep
     def __init__(self, **kwargs):
         message = _(
             'To approve an enrollment, the status of the checklist for the sic decision must be '
-            '"To be processed" or "Dispensation needed" (with management approval of the dispensation).'
+            '"To be processed" or "Non-progression dispensation needed" (with management approval '
+            'of the dispensation).'
         )
         super().__init__(message, **kwargs)
 
@@ -334,8 +335,19 @@ class BoursesEtudesNonRenseignees(BusinessException):
         super().__init__(message, **kwargs)
 
 
-class DateLimitePaiementDepasseeException(BusinessException):
+class StatutsChecklistExperiencesEtreValidesException(BusinessException):
     status_code = "FORMATION-GENERALE-37"
+
+    def __init__(self, **kwargs):
+        message = _(
+            "All experiences must be in the 'Validated' status so that the previous experience "
+            "can be changed to the 'Sufficient' status."
+        )
+        super().__init__(message, **kwargs)
+
+
+class DateLimitePaiementDepasseeException(BusinessException):
+    status_code = "FORMATION-GENERALE-38"
 
     def __init__(self, date_limite: datetime.date, annee_formation: int, **kwargs):
         message = _(

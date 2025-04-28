@@ -39,10 +39,9 @@ from ._should_coordonnees_candidat_etre_completees import (
 from ._should_curriculum_etre_complete import (
     ShouldAnneesCVRequisesCompletees,
     ShouldExperiencesAcademiquesEtreCompletees,
+    ShouldExperiencesAcademiquesEtreCompleteesApresSoumission,
 )
-from ._should_documents_etre_completes import (
-    ShouldCompleterTousLesDocumentsReclames,
-)
+from ._should_documents_etre_completes import ShouldCompleterTousLesDocumentsReclames
 from ._should_identification_candidat_etre_completee import (
     ShouldCandidatAuthentiquerIdentite,
     ShouldCandidatAuthentiquerPasseport,
@@ -73,6 +72,7 @@ __all__ = [
     "ShouldAutreFormatCarteBancaireRemboursementEtreCompletee",
     "ShouldIBANCarteBancaireRemboursementEtreCompletee",
     "ShouldExperiencesAcademiquesEtreCompletees",
+    "ShouldExperiencesAcademiquesEtreCompleteesApresSoumission",
     "ShouldTypeCompteBancaireRemboursementEtreComplete",
     "ShouldCoordonneesCandidatEtreCompletees",
 ]

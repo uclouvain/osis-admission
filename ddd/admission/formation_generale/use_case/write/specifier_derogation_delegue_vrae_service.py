@@ -23,40 +23,49 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.domain.service.i_profil_candidat import (
-    IProfilCandidatTranslator,
-)
 from admission.ddd.admission.formation_generale.commands import (
-    ModifierStatutChecklistExperienceParcoursAnterieurCommand,
+    SpecifierDerogationDelegueVraeSicCommand,
 )
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    BesoinDeDerogation,
+    BesoinDeDerogationDelegueVrae,
+)
 from admission.ddd.admission.formation_generale.domain.model.proposition import (
     PropositionIdentity,
+)
+from admission.ddd.admission.formation_generale.domain.service.i_historique import (
+    IHistorique,
 )
 from admission.ddd.admission.formation_generale.repository.i_proposition import (
     IPropositionRepository,
 )
 
 
-def modifier_statut_checklist_experience_parcours_anterieur(
-    cmd: 'ModifierStatutChecklistExperienceParcoursAnterieurCommand',
+def specifier_derogation_delegue_vrae(
+    cmd: 'SpecifierDerogationDelegueVraeSicCommand',
     proposition_repository: 'IPropositionRepository',
-    profil_candidat_translator: 'IProfilCandidatTranslator',
+    historique: 'IHistorique',
 ) -> 'PropositionIdentity':
+    # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition = proposition_repository.get(entity_id=proposition_id)
 
-    proposition.specifier_statut_checklist_experience_parcours_anterieur(
-        statut_checklist_cible=cmd.statut,
-        statut_checklist_authentification=cmd.statut_authentification,
-        uuid_experience=cmd.uuid_experience,
-        auteur_modification=cmd.gestionnaire,
-        type_experience=cmd.type_experience,
-        profil_candidat_translator=profil_candidat_translator,
-    )
+    # WHEN
 
+    # THEN
+    proposition.specifier_derogation_delegue_vrae(
+        BesoinDeDerogationDelegueVrae[cmd.derogation],
+        commentaire=cmd.commentaire,
+        justificatif=cmd.justificatif,
+        auteur_modification=cmd.gestionnaire,
+    )
     proposition_repository.save(proposition)
 
+    historique.historiser_derogation_delegue_vrae(
+        proposition=proposition,
+        gestionnaire=cmd.gestionnaire,
+    )
     return proposition_id

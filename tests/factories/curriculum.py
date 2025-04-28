@@ -34,7 +34,9 @@ from admission.models.base import (
     AdmissionEducationalValuatedExperiences,
     AdmissionProfessionalValuatedExperiences,
 )
+from base.models.enums.community import CommunityEnum
 from base.tests.factories.academic_year import AcademicYearFactory
+from base.tests.factories.organization import OrganizationFactory
 from osis_profile.models import (
     EducationalExperience,
     EducationalExperienceYear,
@@ -47,6 +49,8 @@ from osis_profile.models.enums.curriculum import (
     Result,
     TranscriptType,
 )
+from reference.models.enums.cycle import Cycle
+from reference.tests.factories.diploma_title import DiplomaTitleFactory
 from reference.tests.factories.language import LanguageFactory
 
 
@@ -85,6 +89,36 @@ class EducationalExperienceFactory(factory.django.DjangoModelFactory):
     obtained_grade = Grade.GREAT_DISTINCTION.name
     education_name = 'Computer science'
     institute_name = 'Institute'
+
+    class Params:
+        with_fwb_bachelor_fields = factory.Trait(
+            education_name='',
+            institute_name='',
+            obtained_diploma=False,
+            program=factory.SubFactory(
+                DiplomaTitleFactory,
+                title='Computer science',
+                cycle=Cycle.FIRST_CYCLE.name,
+            ),
+            institute=factory.SubFactory(
+                OrganizationFactory,
+                community=CommunityEnum.FRENCH_SPEAKING.name,
+            ),
+        )
+        with_fwb_master_fields = factory.Trait(
+            education_name='',
+            institute_name='',
+            obtained_diploma=False,
+            program=factory.SubFactory(
+                DiplomaTitleFactory,
+                title='Computer science',
+                cycle=Cycle.SECOND_CYCLE.name,
+            ),
+            institute=factory.SubFactory(
+                OrganizationFactory,
+                community=CommunityEnum.FRENCH_SPEAKING.name,
+            ),
+        )
 
 
 class ProfessionalExperienceFactory(factory.django.DjangoModelFactory):

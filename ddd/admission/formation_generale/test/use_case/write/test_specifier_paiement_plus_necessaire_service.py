@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -33,20 +33,32 @@ from admission.ddd.admission.formation_generale.commands import (
     SpecifierPaiementPlusNecessaireCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
+    ChoixStatutPropositionGenerale,
 )
-from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     PropositionPourPaiementInvalideException,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
+from admission.ddd.admission.formation_generale.test.factory.proposition import (
+    PropositionFactory,
+)
+from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+    ProfilCandidatInMemoryTranslator,
+)
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
-from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
-from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from admission.infrastructure.message_bus_in_memory import (
+    message_bus_in_memory_instance,
+)
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
+    AcademicYear,
+    AcademicYearIdentity,
+)
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import (
+    AcademicYearInMemoryRepository,
+)
 
 
 @freezegun.freeze_time('2020-11-01')
@@ -70,20 +82,27 @@ class TestSpecifierPaiementPlusNecessaire(TestCase):
         self.addCleanup(self.proposition_repository.reset)
         self.candidat_translator = ProfilCandidatInMemoryTranslator()
         self.candidat = self.candidat_translator.profil_candidats[1]
-        self.proposition = self.proposition_repository.get(
-            PropositionIdentity(
-                uuid='uuid-MASTER-SCI-CONFIRMED',
-            ),
+
+        self.proposition = PropositionFactory(
+            entity_id__uuid='uuid-MASTER-SCI-CONFIRMED-PAYMENT',
+            matricule_candidat='0000000001',
+            formation_id=FormationIdentityFactory(sigle="MASTER-SCI", annee=2021),
+            curriculum=['file1.pdf'],
+            est_confirmee=True,
+            est_approuvee_par_sic=True,
+            statut=ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION,
         )
 
+        self.proposition_repository.save(self.proposition)
+
         self.commande_candidat_non_concerne_selon_systeme = SpecifierPaiementPlusNecessaireCommand(
-            uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
+            uuid_proposition='uuid-MASTER-SCI-CONFIRMED-PAYMENT',
             gestionnaire='987654321',
             statut_checklist_frais_dossier=ChoixStatutChecklist.INITIAL_NON_CONCERNE.name,
         )
 
         self.commande_candidat_non_concerne_selon_gestionnaire = SpecifierPaiementPlusNecessaireCommand(
-            uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
+            uuid_proposition='uuid-MASTER-SCI-CONFIRMED-PAYMENT',
             gestionnaire='987654321',
             statut_checklist_frais_dossier=ChoixStatutChecklist.GEST_REUSSITE.name,
         )
