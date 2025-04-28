@@ -23,7 +23,6 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
 
 from admission.ddd.admission.domain.builder.emplacement_document_identity_builder import (
     EmplacementDocumentIdentityBuilder,
@@ -34,12 +33,12 @@ from admission.ddd.admission.domain.service.i_emplacements_documents_proposition
 from admission.ddd.admission.domain.service.i_historique import IHistorique
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.resume_proposition import ResumeProposition
-from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.domain.validator.validator_by_business_action import (
     DocumentsDemandesCompletesValidatorList,
 )
 from admission.ddd.admission.enums import TypeItemFormulaire
 from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument
+from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.formation_generale.commands import CompleterEmplacementsDocumentsParCandidatCommand
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.service.i_comptabilite import IComptabiliteTranslator
@@ -49,7 +48,6 @@ from admission.ddd.admission.formation_generale.domain.service.i_question_specif
 )
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
-from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
 
@@ -118,7 +116,7 @@ def completer_emplacements_documents_par_candidat(
     proposition_repository.save(proposition)
     emplacement_document_repository.save_multiple(entities=documents_reclames, auteur=proposition.matricule_candidat)
 
-    message = notification.confirmer_reception_documents_envoyes_par_candidat(
+    notification.confirmer_reception_documents_envoyes_par_candidat(
         proposition=proposition_dto,
         liste_documents_reclames=documents_reclames,
         liste_documents_dto=documents_reclames_dtos,

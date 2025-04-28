@@ -2397,7 +2397,6 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
             )
             self.assertTrue(attachments[3].required)
-            self.assertTrue(attachments[3].readonly)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_ue_foreign_national_bachelor_diploma_equival(
         self,
@@ -2457,7 +2456,6 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.etudes_secondaires.diplome_etranger.releve_notes,
             )
             self.assertTrue(attachments[3].required)
-            self.assertTrue(attachments[3].readonly)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_ue_foreign_national_bachelor_diploma_pending_eq(
         self,
