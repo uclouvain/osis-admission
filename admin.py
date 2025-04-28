@@ -53,6 +53,7 @@ from admission.auth.roles.program_manager import ProgramManager
 from admission.auth.roles.promoter import Promoter
 from admission.auth.roles.sceb import Sceb
 from admission.auth.roles.sic_management import SicManagement
+from admission.auth.scope import Scope
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
@@ -74,6 +75,9 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
     ORGANISATION_ONGLETS_CHECKLIST as ORGANISATION_ONGLETS_CHECKLIST_GENERALE,
 )
 from admission.forms.checklist_state_filter import ChecklistStateFilterField
+from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+    AnneeInscriptionFormationTranslator,
+)
 from admission.models import (
     Accounting,
     AdmissionTask,
@@ -111,7 +115,6 @@ from base.models.entity_version import EntityVersion
 from base.models.enums.education_group_categories import Categories
 from base.models.person import Person
 from base.models.person_merge_proposal import PersonMergeStatus
-from admission.auth.scope import Scope
 from education_group.contrib.admin import EducationGroupRoleModelAdmin
 from epc.models.inscription_programme_cycle import InscriptionProgrammeCycle
 from osis_profile.models import EducationalExperience, ProfessionalExperience
@@ -1023,6 +1026,12 @@ class WorkingListForm(forms.ModelForm):
         label=_('Admission statuses'),
         required=False,
         choices=CHOIX_STATUT_TOUTE_PROPOSITION,
+    )
+
+    admission_education_types = forms.TypedMultipleChoiceField(
+        label=_('Admission education types'),
+        required=False,
+        choices=AnneeInscriptionFormationTranslator.EDUCATION_TYPES_CHOICES,
     )
 
     class Meta:
