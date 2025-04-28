@@ -4133,6 +4133,10 @@ msgstr "S'agit-il d'une institution de la Fédération Wallonie-Bruxelles ?"
 msgid "Is non-resident (as defined in decree)"
 msgstr "Est non-résident (au sens du décret)"
 
+msgid "Is the exam the access title for this admission?"
+msgstr ""
+"L'examen est-il le titre d'accès de cette proposition ?"
+
 msgid ""
 "Is your admission request linked with a FNRS, FRIA, FRESH or CSC application?"
 msgstr ""

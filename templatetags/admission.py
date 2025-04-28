@@ -80,13 +80,12 @@ from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
+from admission.ddd.admission.dtos.titre_acces_selectionnable import (
+    TitreAccesSelectionnableDTO,
+)
+from admission.ddd.admission.enums import Onglets, TypeItemFormulaire
 from admission.ddd.admission.enums.emplacement_document import (
     StatutReclamationEmplacementDocument,
-)
-from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
-from admission.ddd.admission.enums import (
-    TypeItemFormulaire,
-    Onglets,
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixMoyensDecouverteFormation,
@@ -145,6 +144,7 @@ from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeSt
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
 from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
+from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
@@ -1301,6 +1301,7 @@ def checklist_experience_action_links_context(
         ExperienceNonAcademiqueDTO,
         EtudesSecondairesAdmissionDTO,
         ExperienceParcoursInterneDTO,
+        ExamenDTO,
     ],
     current_year,
     prefix,
@@ -1322,7 +1323,7 @@ def checklist_experience_action_links_context(
         return result_context
 
     elif (
-        experience.__class__ == EtudesSecondairesAdmissionDTO
+        experience.__class__ in [EtudesSecondairesAdmissionDTO, ExamenDTO]
         or experience.valorisee_par_admissions
         and proposition_uuid in experience.valorisee_par_admissions
         and experience.derniere_annee == current_year
