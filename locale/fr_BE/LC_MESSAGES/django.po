@@ -5695,6 +5695,15 @@ msgstr "Refusée"
 msgid "REFUS_AGREGATION"
 msgstr "Refus agrégation"
 
+msgid "REFUS_ARTICLE_95_ACCES_MS_ENSEIGNEMENT"
+msgstr "Refus 95 - accès MS enseignement"
+
+msgid "REFUS_ARTICLE_95_ACCES_S4"
+msgstr "Refus 95 - accès S4"
+
+msgid "REFUS_ARTICLE_95_ACCES_S5"
+msgstr "Refus 95 - accès S5"
+
 msgid "REFUS_ARTICLE_95_GENERIQUE_IRRECEVABILITE"
 msgstr "Refus 95 générique - irrecevabilité"
 
@@ -6646,7 +6655,8 @@ msgid ""
 msgstr ""
 "Le passage à l'état 'Dérogation accordée' est réservé aux demandes de type "
 "inscription dont la situation de dérogation à la finançabilité est 'accord "
-"de dérogation facultaire' ou pour lesquelles une dérogation du VRAE a été obtenue."
+"de dérogation facultaire' ou pour lesquelles une dérogation du VRAE a été "
+"obtenue."
 
 msgid "The 'Dispensation needed' status is reserved to enrolment application."
 msgstr ""
