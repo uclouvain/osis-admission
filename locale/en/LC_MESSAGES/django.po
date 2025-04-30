@@ -1847,6 +1847,12 @@ msgctxt "dashboard-indicator pre-admission"
 msgid "Deadline 3 months"
 msgstr ""
 
+msgid "Deadline exceeded"
+msgstr ""
+
+msgid "Deadline for complements"
+msgstr ""
+
 msgid "Deadline for documents to be requested immediately"
 msgstr ""
 

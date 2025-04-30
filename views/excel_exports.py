@@ -67,24 +67,40 @@ from admission.ddd.admission.doctorat.preparation.dtos.liste import DemandeReche
 from admission.ddd.admission.doctorat.preparation.read_view.repository.i_tableau_bord import (
     ITableauBordRepositoryAdmissionMixin,
 )
-from admission.ddd.admission.dtos.liste import DemandeRechercheDTO as TouteDemandeRechercheDTO
+from admission.ddd.admission.dtos.liste import (
+    DemandeRechercheDTO as TouteDemandeRechercheDTO,
+)
 from admission.ddd.admission.enums import TypeItemFormulaire
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.enums.liste import TardiveModificationReorientationFiltre
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION_DICT
 from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.ddd.admission.formation_continue.commands import ListerDemandesQuery as ListerDemandesContinuesQuery
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue, ChoixEdition
-from admission.ddd.admission.formation_continue.domain.model.enums import OngletsChecklist as OngletsChecklistContinue
+from admission.ddd.admission.formation_continue.commands import (
+    ListerDemandesQuery as ListerDemandesContinuesQuery,
+)
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixEdition,
+    ChoixStatutPropositionContinue,
+)
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    OngletsChecklist as OngletsChecklistContinue,
+)
 from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT_CONTINUE,
 )
-from admission.ddd.admission.formation_continue.dtos.liste import DemandeRechercheDTO as DemandeContinueRechercheDTO
-from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist as OngletsChecklistGenerale
+from admission.ddd.admission.formation_continue.dtos.liste import (
+    DemandeRechercheDTO as DemandeContinueRechercheDTO,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    OngletsChecklist as OngletsChecklistGenerale,
+)
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT_GENERALE,
 )
-from admission.forms.admission.filter import AllAdmissionsFilterForm, ContinuingAdmissionsFilterForm
+from admission.forms.admission.filter import (
+    AllAdmissionsFilterForm,
+    ContinuingAdmissionsFilterForm,
+)
 from admission.forms.doctorate.cdd.filter import DoctorateListFilterForm
 from admission.models import AdmissionFormItem, SupervisionActor
 from admission.templatetags.admission import admission_status
@@ -171,9 +187,7 @@ class BaseAdmissionExcelExportView(
 
     def get_row_data_specific_questions_answers(
         self,
-        proposition_dto: Union[
-            TouteDemandeRechercheDTO,
-        ],
+        proposition_dto: Union[TouteDemandeRechercheDTO,],
     ):
         """
         Get the answers of the specific questions of the proposition based on a list of configurations.
@@ -370,6 +384,10 @@ class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
             mapping_filter_key_value['tardif_modif_reorientation'] = TardiveModificationReorientationFiltre.get_value(
                 late_modification_reorientation
             )
+
+        deadline_for_complements = formatted_filters.get('delai_depasse_complements')
+        if deadline_for_complements:
+            mapping_filter_key_value['delai_depasse_complements'] = _('Deadline exceeded')
 
         trainings_types = formatted_filters.get('types_formation')
         if trainings_types:
@@ -703,9 +721,9 @@ class DoctorateAdmissionListExcelExportView(BaseAdmissionExcelExportView):
 
         dashboard_indicator = formatted_filters.get('indicateur_tableau_bord')
         if dashboard_indicator:
-            mapping_filter_key_value[
-                'indicateur_tableau_bord'
-            ] = ITableauBordRepositoryAdmissionMixin.libelles_indicateurs_admission.get(dashboard_indicator)
+            mapping_filter_key_value['indicateur_tableau_bord'] = (
+                ITableauBordRepositoryAdmissionMixin.libelles_indicateurs_admission.get(dashboard_indicator)
+            )
 
         # Format boolean values
         # > "Yes" / "No" / ""

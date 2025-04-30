@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,33 +25,49 @@
 # ##############################################################################
 import datetime
 from collections import defaultdict
-from typing import List, Optional, Dict, Set
+from typing import Dict, List, Optional, Set
 
 from django.conf import settings
 from django.db.models import (
     BooleanField,
     Case,
+    DateTimeField,
+    Exists,
     ExpressionWrapper,
     F,
     IntegerField,
+    OuterRef,
     Prefetch,
     Q,
     Value,
     When,
-    Exists,
-    OuterRef,
 )
-from django.db.models.functions import Coalesce, NullIf
+from django.db.models.expressions import RawSQL
+from django.db.models.functions import Coalesce, Now, NullIf
+from django.db.models.lookups import GreaterThanOrEqual
 from django.utils.translation import get_language
 
-from admission.ddd.admission.domain.service.i_filtrer_toutes_demandes import IListerToutesDemandes
-from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
+from admission.ddd.admission.domain.service.i_filtrer_toutes_demandes import (
+    IListerToutesDemandes,
+)
+from admission.ddd.admission.dtos.liste import (
+    DemandeRechercheDTO,
+    VisualiseurAdmissionDTO,
+)
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
+from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument
 from admission.ddd.admission.enums.liste import TardiveModificationReorientationFiltre
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    PoursuiteDeCycle,
+    ChoixStatutPropositionGenerale,
     OngletsChecklist,
+    PoursuiteDeCycle,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
@@ -60,7 +76,7 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
 from admission.infrastructure.utils import get_entities_with_descendants_ids
 from admission.models import AdmissionViewer
 from admission.models.base import BaseAdmission
-from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus
+from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
 from admission.views import PaginatedList
 from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
@@ -95,6 +111,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
         mode_filtres_etats_checklist: Optional[str] = '',
         filtres_etats_checklist: Optional[Dict[str, List[str]]] = '',
         tardif_modif_reorientation: Optional[str] = '',
+        delai_depasse_complements: Optional[bool] = None,
     ) -> PaginatedList[DemandeRechercheDTO]:
         language_is_french = get_language() == settings.LANGUAGE_CODE_FR
 
@@ -231,6 +248,36 @@ class ListerToutesDemandes(IListerToutesDemandes):
 
             qs = qs.filter(**{f'{related_field}': True})
 
+        if delai_depasse_complements:
+            today_date = datetime.date.today()
+            qs = qs.filter(
+                status__in=[
+                    ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC.name,
+                    ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name,
+                    ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_FAC.name,
+                    ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_SIC.name,
+                    ChoixStatutPropositionContinue.A_COMPLETER_POUR_FAC.name,
+                ],
+            ).filter(
+                # Search if one requested document has a past deadline
+                RawSQL(
+                    """
+                        EXISTS (
+                            SELECT 1
+                            FROM jsonb_each(requested_documents) AS entry
+                            WHERE (entry.value)->>'status' = %s
+                            AND (entry.value)->>'deadline_at' IS NOT NULL
+                            AND ((entry.value)->>'deadline_at')::date < %s
+                        )
+                        """,
+                    params=[
+                        StatutEmplacementDocument.RECLAME.name,
+                        today_date,
+                    ],
+                    output_field=BooleanField(),
+                ),
+            )
+
         if mode_filtres_etats_checklist and filtres_etats_checklist:
 
             json_path_to_checks = defaultdict(set)
@@ -241,7 +288,10 @@ class ListerToutesDemandes(IListerToutesDemandes):
             # (AND query if both parent and sub items are selected)
             selected_parent_identifiers_by_tab: Dict[str, Set[str]] = defaultdict(set)
 
-            for (tab_name, prefix_identifier,) in [
+            for (
+                tab_name,
+                prefix_identifier,
+            ) in [
                 (
                     OngletsChecklist.experiences_parcours_anterieur.name,
                     'AUTHENTIFICATION',
@@ -267,9 +317,9 @@ class ListerToutesDemandes(IListerToutesDemandes):
                 if not status_values:
                     continue
 
-                current_tab: Optional[
-                    Dict[str, Dict[str, ConfigurationStatutChecklist]]
-                ] = ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT.get(tab_name)
+                current_tab: Optional[Dict[str, Dict[str, ConfigurationStatutChecklist]]] = (
+                    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT.get(tab_name)
+                )
 
                 if not current_tab:
                     continue
@@ -444,24 +494,28 @@ class ListerToutesDemandes(IListerToutesDemandes):
             est_inscription_tardive=admission.late_enrollment,  # From annotation
             est_reorientation_inscription_externe=admission.is_external_reorientation,  # From annotation
             est_modification_inscription_externe=admission.is_external_modification,  # From annotation
-            nationalite_candidat=getattr(
-                admission.candidate.country_of_citizenship,
-                'name' if language_is_french else 'name_en',
-            )
-            if admission.candidate.country_of_citizenship
-            else '',
+            nationalite_candidat=(
+                getattr(
+                    admission.candidate.country_of_citizenship,
+                    'name' if language_is_french else 'name_en',
+                )
+                if admission.candidate.country_of_citizenship
+                else ''
+            ),
             nationalite_ue_candidat=admission.candidate.country_of_citizenship
             and admission.candidate.country_of_citizenship.european_union,
             vip=admission.is_vip,
             etat_demande=admission.status,  # From annotation
             type_demande=admission.type_demande,
             derniere_modification_le=admission.modified_at,
-            derniere_modification_par='{first_name} {last_name}'.format(
-                first_name=admission.last_update_author.first_name,
-                last_name=admission.last_update_author.last_name,
-            )
-            if admission.last_update_author_id
-            else '',
+            derniere_modification_par=(
+                '{first_name} {last_name}'.format(
+                    first_name=admission.last_update_author.first_name,
+                    last_name=admission.last_update_author.last_name,
+                )
+                if admission.last_update_author_id
+                else ''
+            ),
             derniere_modification_par_candidat=admission.candidate_id == admission.last_update_author_id,
             dernieres_vues_par=[
                 VisualiseurAdmissionDTO(

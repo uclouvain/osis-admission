@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -44,6 +44,11 @@ from admission.ddd.admission.dtos.liste import (
     VisualiseurAdmissionDTO,
 )
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
+from admission.ddd.admission.enums.emplacement_document import (
+    StatutEmplacementDocument,
+    StatutReclamationEmplacementDocument,
+    TypeEmplacementDocument,
+)
 from admission.ddd.admission.enums.liste import TardiveModificationReorientationFiltre
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     BesoinDeDerogation,
@@ -236,6 +241,18 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         cls.default_params = {
             'annee_academique': 2022,
             'taille_page': 10,
+        }
+
+        cls.default_document_params = {
+            'automatically_required': False,
+            'last_action_at': '2023-01-01T00:00:00',
+            'last_actor': '0123456',
+            'deadline_at': '2022-12-31',
+            'reason': 'My reason',
+            'requested_at': '2023-01-01T00:00:00',
+            'status': StatutEmplacementDocument.RECLAME.name,
+            'type': TypeEmplacementDocument.NON_LIBRE.name,
+            'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
         }
 
         # Targeted url
@@ -609,6 +626,57 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         response = self._do_request(
             tardif_modif_reorientation=TardiveModificationReorientationFiltre.INSCRIPTION_TARDIVE.name,
         )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['object_list']), 0)
+
+    def test_list_with_filter_by_past_deadline_for_complements(self):
+        self.client.force_login(user=self.sic_management_user)
+
+        document_id = 'IDENTIFICATION.PASSEPORT'
+        document_params = {document_id: self.default_document_params.copy()}
+
+        second_admission = GeneralEducationAdmissionFactory(
+            training__management_entity=self.first_entity,
+            training=self.admissions[0].training,
+            status=ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name,
+            requested_documents=document_params,
+        )
+
+        # To be completed status and past document deadline
+        response = self._do_request(delai_depasse_complements='true')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['object_list']), 1)
+        self.assertEqual(response.context['object_list'][0].uuid, second_admission.uuid)
+
+        # Other admission status
+        second_admission.status = ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC.name
+        second_admission.save()
+
+        response = self._do_request(delai_depasse_complements='true')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['object_list']), 0)
+
+        # Other document status
+        second_admission.status = ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name
+        second_admission.requested_documents[document_id][
+            'status'
+        ] = StatutEmplacementDocument.COMPLETE_APRES_RECLAMATION.name
+        second_admission.save()
+
+        response = self._do_request(delai_depasse_complements='true')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['object_list']), 0)
+
+        # Right status but the deadline is not past
+        second_admission.requested_documents[document_id]['status'] = StatutEmplacementDocument.RECLAME.name
+        second_admission.requested_documents[document_id]['deadline_at'] = '2023-01-01'
+        second_admission.save()
+
+        response = self._do_request(delai_depasse_complements='true')
+
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context['object_list']), 0)
 

@@ -35,7 +35,8 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
-from django.utils.translation import gettext as _, pgettext, pgettext_lazy
+from django.utils.translation import gettext as _
+from django.utils.translation import pgettext, pgettext_lazy
 from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 from osis_async.models import AsyncTask
@@ -52,9 +53,16 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeAdmission,
     ChoixTypeFinancement,
 )
-from admission.ddd.admission.doctorat.preparation.dtos.liste import DemandeRechercheDTO as DemandeDoctoraleRechercheDTO
-from admission.ddd.admission.doctorat.preparation.read_view.domain.enums.tableau_bord import IndicateurTableauBordEnum
-from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
+from admission.ddd.admission.doctorat.preparation.dtos.liste import (
+    DemandeRechercheDTO as DemandeDoctoraleRechercheDTO,
+)
+from admission.ddd.admission.doctorat.preparation.read_view.domain.enums.tableau_bord import (
+    IndicateurTableauBordEnum,
+)
+from admission.ddd.admission.dtos.liste import (
+    DemandeRechercheDTO,
+    VisualiseurAdmissionDTO,
+)
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.enums.liste import TardiveModificationReorientationFiltre
 from admission.ddd.admission.enums.type_demande import TypeDemande
@@ -510,6 +518,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
         international_scholarship = InternationalScholarshipFactory(short_name='ID1')
         double_degree_scholarship = DoubleDegreeScholarshipFactory(short_name="DD1")
         erasmus_mundus_scholarship = ErasmusMundusScholarshipFactory(short_name="EM1")
+        filters_nb = 21
         filters = {
             'annee_academique': 2022,
             'numero': 1,
@@ -532,6 +541,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
             },
             'quarantaine': 'True',
             'tardif_modif_reorientation': TardiveModificationReorientationFiltre.INSCRIPTION_TARDIVE.name,
+            'delai_depasse_complements': 'True',
         }
 
         view = AdmissionListExcelExportView()
@@ -545,8 +555,8 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
         )
 
         names, values = list(worksheet.iter_cols(values_only=True))
-        self.assertEqual(len(names), 20)
-        self.assertEqual(len(values), 20)
+        self.assertEqual(len(names), filters_nb)
+        self.assertEqual(len(values), filters_nb)
 
         # Check the names of the parameters
         self.assertEqual(names[0], _('Creation date'))
@@ -569,6 +579,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(names[17], _('Checklist filters'))
         self.assertEqual(names[18], _('Quarantine'))
         self.assertEqual(names[19], _('Late/Modif./Reor.'))
+        self.assertEqual(names[20], _('Deadline for complements'))
 
         # Check the values of the parameters
         self.assertEqual(values[0], '1 Janvier 2023')
@@ -599,6 +610,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
         )
         self.assertEqual(values[18], 'Oui')
         self.assertEqual(values[19], 'Inscription tardive')
+        self.assertEqual(values[20], _('Deadline exceeded'))
 
         filters['quarantaine'] = False
 
@@ -611,8 +623,8 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
         )
 
         names, values = list(worksheet.iter_cols(values_only=True))
-        self.assertEqual(len(names), 20)
-        self.assertEqual(len(values), 20)
+        self.assertEqual(len(names), filters_nb)
+        self.assertEqual(len(values), filters_nb)
 
         self.assertEqual(values[18], 'Non')
 
@@ -627,10 +639,26 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
         )
 
         names, values = list(worksheet.iter_cols(values_only=True))
-        self.assertEqual(len(names), 20)
-        self.assertEqual(len(values), 20)
+        self.assertEqual(len(names), filters_nb)
+        self.assertEqual(len(values), filters_nb)
 
         self.assertEqual(values[18], 'Tous')
+
+        filters['delai_depasse_complements'] = ''
+
+        worksheet: Worksheet = workbook.create_sheet()
+
+        view.customize_parameters_worksheet(
+            worksheet=worksheet,
+            person=self.sic_management_user.person,
+            filters=str(filters),
+        )
+
+        names, values = list(worksheet.iter_cols(values_only=True))
+        self.assertEqual(len(names), filters_nb)
+        self.assertEqual(len(values), filters_nb)
+
+        self.assertEqual(values[20], '')
 
 
 @freezegun.freeze_time('2023-01-03')
