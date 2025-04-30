@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+import datetime
 import uuid
 from email.message import EmailMessage
 from typing import Dict, List, Optional
@@ -31,7 +31,7 @@ from uuid import UUID
 
 import attr
 from django.conf import settings
-from django.db.models import Func, Model, Q, Exists, OuterRef
+from django.db.models import Exists, Func, Model, OuterRef, Q
 from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 
@@ -174,7 +174,7 @@ class AdmissionDocument:
     status: str
     reason: str
     requested_at: str
-    deadline_at: str
+    deadline_at: Optional[datetime.date]
     last_action_at: str
     last_actor: str
     automatically_required: Optional[bool]
@@ -374,14 +374,18 @@ def get_document_from_identifier(
                     return
                 experience_uuid = document_identifier_parts[1]
                 field = CORRESPONDANCE_CHAMPS_CURRICULUM_EXPERIENCE_ACADEMIQUE[domain_identifier]
-                obj = admission.candidate.educationalexperience_set.filter(uuid=experience_uuid).annotate(
-                    injecte_par_cv=Exists(
-                        CurriculumEPCInjection.objects.filter(
-                            experience_uuid=OuterRef('uuid'),
-                            status__in=CurriculumEPCInjectionStatus.blocking_statuses_for_experience(),
-                        )
-                    ),
-                ).first()
+                obj = (
+                    admission.candidate.educationalexperience_set.filter(uuid=experience_uuid)
+                    .annotate(
+                        injecte_par_cv=Exists(
+                            CurriculumEPCInjection.objects.filter(
+                                experience_uuid=OuterRef('uuid'),
+                                status__in=CurriculumEPCInjectionStatus.blocking_statuses_for_experience(),
+                            )
+                        ),
+                    )
+                    .first()
+                )
 
             elif domain_identifier in CORRESPONDANCE_CHAMPS_CURRICULUM_ANNEE_EXPERIENCE_ACADEMIQUE:
                 # CURRICULUM.[EXPERIENCE_UUID].[EXPERIENCE_YEAR].[DOMAIN_IDENTIFIER]
@@ -390,17 +394,21 @@ def get_document_from_identifier(
                 experience_uuid = document_identifier_parts[1]
                 experience_year = document_identifier_parts[2]
                 field = CORRESPONDANCE_CHAMPS_CURRICULUM_ANNEE_EXPERIENCE_ACADEMIQUE[domain_identifier]
-                obj = EducationalExperienceYear.objects.filter(
-                    educational_experience__uuid=experience_uuid,
-                    academic_year__year=experience_year,
-                ).annotate(
-                    injecte_par_cv=Exists(
-                        CurriculumEPCInjection.objects.filter(
-                            experience_uuid=OuterRef('educational_experience__uuid'),
-                            status__in=CurriculumEPCInjectionStatus.blocking_statuses_for_experience(),
-                        )
-                    ),
-                ).first()
+                obj = (
+                    EducationalExperienceYear.objects.filter(
+                        educational_experience__uuid=experience_uuid,
+                        academic_year__year=experience_year,
+                    )
+                    .annotate(
+                        injecte_par_cv=Exists(
+                            CurriculumEPCInjection.objects.filter(
+                                experience_uuid=OuterRef('educational_experience__uuid'),
+                                status__in=CurriculumEPCInjectionStatus.blocking_statuses_for_experience(),
+                            )
+                        ),
+                    )
+                    .first()
+                )
 
             elif domain_identifier in CORRESPONDANCE_CHAMPS_CURRICULUM_EXPERIENCE_NON_ACADEMIQUE:
                 # CURRICULUM.[EXPERIENCE_UUID].[DOMAIN_IDENTIFIER]
@@ -408,14 +416,18 @@ def get_document_from_identifier(
                     return
                 experience_uuid = document_identifier_parts[1]
                 field = CORRESPONDANCE_CHAMPS_CURRICULUM_EXPERIENCE_NON_ACADEMIQUE[domain_identifier]
-                obj = admission.candidate.professionalexperience_set.filter(uuid=experience_uuid).annotate(
-                    injecte_par_cv=Exists(
-                        CurriculumEPCInjection.objects.filter(
-                            experience_uuid=OuterRef('uuid'),
-                            status__in=CurriculumEPCInjectionStatus.blocking_statuses_for_experience(),
-                        )
-                    ),
-                ).first()
+                obj = (
+                    admission.candidate.professionalexperience_set.filter(uuid=experience_uuid)
+                    .annotate(
+                        injecte_par_cv=Exists(
+                            CurriculumEPCInjection.objects.filter(
+                                experience_uuid=OuterRef('uuid'),
+                                status__in=CurriculumEPCInjectionStatus.blocking_statuses_for_experience(),
+                            )
+                        ),
+                    )
+                    .first()
+                )
 
         elif base_identifier == OngletsDemande.INFORMATIONS_ADDITIONNELLES.name:
             # INFORMATIONS_ADDITIONNELLES.[DOMAIN_IDENTIFIER]
@@ -479,7 +491,11 @@ def get_document_from_identifier(
             status=document_status,
             reason=requested_document.get('reason') or '',
             requested_at=requested_document.get('requested_at') or '',
-            deadline_at=requested_document.get('deadline_at') or '',
+            deadline_at=(
+                admission.requested_documents_deadline
+                if document_status == StatutEmplacementDocument.RECLAME.name
+                else None
+            ),
             last_action_at=requested_document.get('last_action_at') or '',
             last_actor=document_author,
             automatically_required=requested_document.get('automatically_required') or False,

@@ -81,9 +81,7 @@ from admission.models import (
 )
 from admission.models.base import BaseAdmission
 from base.models.person import Person
-from osis_profile.models import (
-    OSIS_PROFILE_MODELS,
-)
+from osis_profile.models import OSIS_PROFILE_MODELS
 from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection
 from osis_profile.models.epc_injection import (
     EPCInjectionStatus as CurriculumEPCInjectionStatus,
@@ -237,7 +235,6 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
             'last_action_at': entity.derniere_action_le or '',
             'status': entity.statut.name,
             'requested_at': entity.reclame_le or '',
-            'deadline_at': entity.a_echeance_le or '',
             'automatically_required': entity.requis_automatiquement,
             'request_status': entity.statut_reclamation.name if entity.statut_reclamation else '',
             'related_checklist_tab': entity.onglet_checklist_associe.name if entity.onglet_checklist_associe else '',
@@ -329,7 +326,7 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
             libelle_fr=emplacement_document.label_fr,
             libelle_en=emplacement_document.label_en,
             reclame_le=parse_datetime(emplacement_document.requested_at) if emplacement_document.requested_at else None,
-            a_echeance_le=parse_date(emplacement_document.deadline_at) if emplacement_document.deadline_at else None,
+            a_echeance_le=emplacement_document.deadline_at,
             derniere_action_le=(
                 parse_datetime(emplacement_document.last_action_at) if emplacement_document.last_action_at else None
             ),

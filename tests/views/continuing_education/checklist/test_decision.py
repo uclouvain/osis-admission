@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 from email import message_from_string
 
 import freezegun
@@ -556,14 +557,13 @@ class ChecklistViewTestCase(TestCase):
                 'last_action_at': '2023-01-02T00:00:00',
                 'status': StatutEmplacementDocument.RECLAME.name,
                 'requested_at': '2023-01-02T00:00:00',
-                'deadline_at': '2023-01-19',
                 'automatically_required': False,
                 'related_checklist_tab': '',
                 'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
             }
         }
-
-        self.continuing_admission.save(update_fields=['status', 'requested_documents'])
+        self.continuing_admission.requested_documents_deadline = datetime.date(2023, 1, 19)
+        self.continuing_admission.save(update_fields=['status', 'requested_documents', 'requested_documents_deadline'])
 
         url = resolve_url(
             'admission:continuing-education:decision-close',
@@ -589,6 +589,7 @@ class ChecklistViewTestCase(TestCase):
             {'blocage': 'closed'},
         )
         self.assertEqual(self.continuing_admission.status, ChoixStatutPropositionContinue.CLOTUREE.name)
+        self.assertIsNone(self.continuing_admission.requested_documents_deadline)
         self.assertEqual(self.continuing_admission.last_update_author, self.iufc_manager_user.person)
 
         # Check that no document is requested anymore
@@ -601,7 +602,6 @@ class ChecklistViewTestCase(TestCase):
                 'last_action_at': '2024-01-01T00:00:00',
                 'status': StatutEmplacementDocument.RECLAMATION_ANNULEE.name,
                 'requested_at': '',
-                'deadline_at': '',
                 'automatically_required': False,
                 'related_checklist_tab': '',
                 'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,

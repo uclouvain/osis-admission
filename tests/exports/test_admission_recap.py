@@ -43,7 +43,7 @@ from admission.calendar.admission_calendar import (
     AdmissionPoolExternalEnrollmentChangeCalendar,
     AdmissionPoolExternalReorientationCalendar,
 )
-from admission.constants import JPEG_MIME_TYPE, PNG_MIME_TYPE, ORDERED_CAMPUSES_UUIDS
+from admission.constants import JPEG_MIME_TYPE, ORDERED_CAMPUSES_UUIDS, PNG_MIME_TYPE
 from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixEtatSignature,
@@ -142,7 +142,9 @@ from admission.exports.admission_recap.section import (
     get_supervision_section,
     get_training_choice_section,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import UnfrozenDTO
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+    UnfrozenDTO,
+)
 from admission.models import AdmissionTask
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import (
@@ -1399,6 +1401,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             autre_moyen_decouverte_formation='',
             adresses_emails_gestionnaires_formation=[],
             documents_demandes={},
+            echeance_demande_documents=None,
             marque_d_interet=False,
             aide_a_la_formation=False,
             inscription_au_role_obligatoire=True,
@@ -1497,6 +1500,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             est_reorientation_inscription_externe=None,
             formulaire_modification_inscription=['uuid-formulaire-modification-inscription'],
             documents_demandes={},
+            echeance_demande_documents=None,
             documents_libres_sic_uclouvain=[],
             documents_libres_fac_uclouvain=[],
             certificat_refus_fac=[],
@@ -1602,6 +1606,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             type_financement='',
             langue_contact_candidat=settings.LANGUAGE_CODE_FR,
             documents_demandes={},
+            echeance_demande_documents=None,
             documents_libres_sic_uclouvain=[],
             documents_libres_fac_uclouvain=[],
             financabilite_regle_calcule="",

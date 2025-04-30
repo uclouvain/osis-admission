@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+import datetime
 import uuid
 from unittest.mock import patch
 
@@ -110,7 +110,9 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        self.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory()
+        self.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
+            requested_documents_deadline=datetime.date(2020, 1, 15)
+        )
         self.general_admission.secondaire_injectee_par_cv = False
 
     def test_get_document_from_invalid_identifier(self):
@@ -137,7 +139,6 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
             'last_action_at': '2020-01-01T00:00:00',
             'status': StatutEmplacementDocument.RECLAME.name,
             'requested_at': '2020-01-01T00:00:00',
-            'deadline_at': '2020-01-15',
             'automatically_required': False,
             'related_checklist_tab': OngletsChecklist.parcours_anterieur.name,
         }
@@ -166,7 +167,7 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
         self.assertEqual(document.status, StatutEmplacementDocument.RECLAME.name)
         self.assertEqual(document.reason, 'My reason')
         self.assertEqual(document.requested_at, '2020-01-01T00:00:00')
-        self.assertEqual(document.deadline_at, '2020-01-15')
+        self.assertEqual(document.deadline_at, datetime.date(2020, 1, 15))
         self.assertEqual(document.last_action_at, '2020-01-01T00:00:00')
         self.assertEqual(document.last_actor, '0123456789')
         self.assertEqual(document.automatically_required, False)
@@ -202,7 +203,6 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
             'last_action_at': '2020-01-01T00:00:00',
             'status': StatutEmplacementDocument.RECLAME.name,
             'requested_at': '2020-01-01T00:00:00',
-            'deadline_at': '2020-01-15',
             'automatically_required': False,
         }
 
@@ -226,7 +226,7 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
         self.assertEqual(document.status, StatutEmplacementDocument.RECLAME.name)
         self.assertEqual(document.reason, 'My reason')
         self.assertEqual(document.requested_at, '2020-01-01T00:00:00')
-        self.assertEqual(document.deadline_at, '2020-01-15')
+        self.assertEqual(document.deadline_at, datetime.date(2020, 1, 15))
         self.assertEqual(document.last_action_at, '2020-01-01T00:00:00')
         self.assertEqual(document.last_actor, '0123456789')
         self.assertEqual(document.automatically_required, False)
@@ -249,7 +249,7 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
         self.assertEqual(document.status, StatutEmplacementDocument.NON_ANALYSE.name)
         self.assertEqual(document.reason, '')
         self.assertEqual(document.requested_at, '')
-        self.assertEqual(document.deadline_at, '')
+        self.assertEqual(document.deadline_at, None)
         self.assertEqual(document.last_action_at, '')
         self.assertEqual(document.last_actor, '')
         self.assertEqual(document.automatically_required, False)
@@ -289,7 +289,7 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
         self.assertEqual(document.status, StatutEmplacementDocument.VALIDE.name)
         self.assertEqual(document.reason, '')
         self.assertEqual(document.requested_at, '')
-        self.assertEqual(document.deadline_at, '')
+        self.assertEqual(document.deadline_at, None)
         self.assertEqual(document.last_action_at, '')
         self.assertEqual(document.last_actor, '0123456')
         self.assertEqual(document.automatically_required, False)
@@ -313,7 +313,7 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
         self.assertEqual(document.status, StatutEmplacementDocument.VALIDE.name)
         self.assertEqual(document.reason, '')
         self.assertEqual(document.requested_at, '')
-        self.assertEqual(document.deadline_at, '')
+        self.assertEqual(document.deadline_at, None)
         self.assertEqual(document.last_action_at, '')
         self.assertEqual(document.last_actor, '0123456')
         self.assertEqual(document.automatically_required, False)
@@ -347,7 +347,7 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
         self.assertEqual(document.status, StatutEmplacementDocument.VALIDE.name)
         self.assertEqual(document.reason, '')
         self.assertEqual(document.requested_at, '')
-        self.assertEqual(document.deadline_at, '')
+        self.assertEqual(document.deadline_at, None)
         self.assertEqual(document.last_action_at, '')
         self.assertEqual(document.last_actor, '')
         self.assertEqual(document.automatically_required, False)
@@ -403,7 +403,7 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
         self.assertEqual(document.status, StatutEmplacementDocument.NON_ANALYSE.name)
         self.assertEqual(document.reason, '')
         self.assertEqual(document.requested_at, '')
-        self.assertEqual(document.deadline_at, '')
+        self.assertEqual(document.deadline_at, None)
         self.assertEqual(document.last_action_at, '')
         self.assertEqual(document.last_actor, '')
         self.assertEqual(document.automatically_required, False)
