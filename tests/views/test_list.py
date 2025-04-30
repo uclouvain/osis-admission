@@ -612,6 +612,42 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context['object_list']), 0)
 
+    def test_list_with_filter_by_past_deadline_for_complements(self):
+        self.client.force_login(user=self.sic_management_user)
+
+        second_admission = GeneralEducationAdmissionFactory(
+            training__management_entity=self.first_entity,
+            training=self.admissions[0].training,
+            status=ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name,
+            requested_documents_deadline=datetime.date(2022, 12, 31),
+        )
+
+        # To be completed status and past document deadline
+        response = self._do_request(delai_depasse_complements='true')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['object_list']), 1)
+        self.assertEqual(response.context['object_list'][0].uuid, second_admission.uuid)
+
+        # Other admission status
+        second_admission.status = ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC.name
+        second_admission.save()
+
+        response = self._do_request(delai_depasse_complements='true')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['object_list']), 0)
+
+        # Right status but the deadline is not past
+        second_admission.status = ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name
+        second_admission.requested_documents_deadline = datetime.date(2023, 1, 1)
+        second_admission.save()
+
+        response = self._do_request(delai_depasse_complements='true')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['object_list']), 0)
+
     def test_list_with_filter_by_training(self):
         self.client.force_login(user=self.sic_management_user)
 

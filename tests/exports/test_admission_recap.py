@@ -1421,6 +1421,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             autre_moyen_decouverte_formation='',
             adresses_emails_gestionnaires_formation=[],
             documents_demandes={},
+            echeance_demande_documents=None,
             marque_d_interet=False,
             aide_a_la_formation=False,
             inscription_au_role_obligatoire=True,
@@ -1523,6 +1524,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 'uuid-attestation-inscription-reguliere-pour-modification-inscription'
             ],
             documents_demandes={},
+            echeance_demande_documents=None,
             documents_libres_sic_uclouvain=[],
             documents_libres_fac_uclouvain=[],
             certificat_refus_fac=[],
@@ -1629,6 +1631,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             type_financement='',
             langue_contact_candidat=settings.LANGUAGE_CODE_FR,
             documents_demandes={},
+            echeance_demande_documents=None,
             documents_libres_sic_uclouvain=[],
             documents_libres_fac_uclouvain=[],
             financabilite_regle_calcule="",

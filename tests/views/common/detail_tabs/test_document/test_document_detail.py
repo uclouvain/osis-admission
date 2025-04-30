@@ -174,7 +174,6 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
                 'last_action_at': '2022-01-03T00:00:00',
                 'status': StatutEmplacementDocument.RECLAME.name,
                 'requested_at': '2022-01-03T00:00:00',
-                'deadline_at': '2022-01-15',
                 'automatically_required': False,
                 'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
                 'related_checklist_tab': 'donnees_personnelles',
@@ -183,6 +182,9 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
 
         # Check that the proposition status has been changed
         self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name)
+
+        # Check that the deadline has been saved
+        self.assertEqual(self.general_admission.requested_documents_deadline, datetime.date(2022, 1, 15))
 
         # Check last modification data
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
@@ -239,7 +241,6 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
                 'last_action_at': '2022-01-05T00:00:00',
                 'status': StatutEmplacementDocument.RECLAMATION_ANNULEE.name,
                 'requested_at': '',
-                'deadline_at': '',
                 'automatically_required': False,
                 'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
                 'related_checklist_tab': 'donnees_personnelles',
@@ -248,6 +249,9 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
 
         # Check that the proposition status has been changed
         self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.CONFIRMEE.name)
+
+        # Check that the deadline has been saved
+        self.assertIsNone(self.general_admission.requested_documents_deadline)
 
         # Check last modification data
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
@@ -418,7 +422,6 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
                 'last_action_at': '2022-01-03T00:00:00',
                 'status': StatutEmplacementDocument.RECLAME.name,
                 'requested_at': '2022-01-03T00:00:00',
-                'deadline_at': '2022-01-15',
                 'automatically_required': False,
                 'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
                 'related_checklist_tab': 'donnees_personnelles',
@@ -427,6 +430,9 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
 
         # Check that the proposition status has been changed
         self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC.name)
+
+        # Check that the deadline has been saved
+        self.assertEqual(self.general_admission.requested_documents_deadline, datetime.date(2022, 1, 15))
 
         # Check last modification data
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
@@ -483,7 +489,6 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
                 'last_action_at': '2022-01-05T00:00:00',
                 'status': StatutEmplacementDocument.RECLAMATION_ANNULEE.name,
                 'requested_at': '',
-                'deadline_at': '',
                 'automatically_required': False,
                 'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
                 'related_checklist_tab': 'donnees_personnelles',
@@ -492,6 +497,9 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
 
         # Check that the proposition status has been changed
         self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name)
+
+        # Check that the deadline has been saved
+        self.assertIsNone(self.general_admission.requested_documents_deadline)
 
         # Check last modification data
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
@@ -676,7 +684,6 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
                 'last_action_at': '2022-01-03T00:00:00',
                 'status': StatutEmplacementDocument.RECLAME.name,
                 'requested_at': '2022-01-03T00:00:00',
-                'deadline_at': '2022-01-15',
                 'automatically_required': False,
                 'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
                 'related_checklist_tab': 'donnees_personnelles',
@@ -685,6 +692,9 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
 
         # Check that the proposition status has been changed
         self.assertEqual(self.doctorate_admission.status, ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_SIC.name)
+
+        # Check that the deadline has been saved
+        self.assertEqual(self.doctorate_admission.requested_documents_deadline, datetime.date(2022, 1, 15))
 
         # Check last modification data
         self.assertEqual(self.doctorate_admission.modified_at, datetime.datetime.now())
@@ -741,7 +751,6 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
                 'last_action_at': '2022-01-05T00:00:00',
                 'status': StatutEmplacementDocument.RECLAMATION_ANNULEE.name,
                 'requested_at': '',
-                'deadline_at': '',
                 'automatically_required': False,
                 'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
                 'related_checklist_tab': 'donnees_personnelles',
@@ -750,6 +759,9 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
 
         # Check that the proposition status has been changed
         self.assertEqual(self.doctorate_admission.status, ChoixStatutPropositionDoctorale.CONFIRMEE.name)
+
+        # Check that the deadline has been saved
+        self.assertIsNone(self.doctorate_admission.requested_documents_deadline)
 
         # Check last modification data
         self.assertEqual(self.doctorate_admission.modified_at, datetime.datetime.now())
@@ -925,7 +937,6 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
                 'last_action_at': '2022-01-03T00:00:00',
                 'status': StatutEmplacementDocument.RECLAME.name,
                 'requested_at': '2022-01-03T00:00:00',
-                'deadline_at': '2022-01-15',
                 'automatically_required': False,
                 'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
                 'related_checklist_tab': 'donnees_personnelles',
@@ -934,6 +945,9 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
 
         # Check that the proposition status has been changed
         self.assertEqual(self.doctorate_admission.status, ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_FAC.name)
+
+        # Check that the deadline has been saved
+        self.assertEqual(self.doctorate_admission.requested_documents_deadline, datetime.date(2022, 1, 15))
 
         # Check last modification data
         self.assertEqual(self.doctorate_admission.modified_at, datetime.datetime.now())
@@ -990,7 +1004,6 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
                 'last_action_at': '2022-01-05T00:00:00',
                 'status': StatutEmplacementDocument.RECLAMATION_ANNULEE.name,
                 'requested_at': '',
-                'deadline_at': '',
                 'automatically_required': False,
                 'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
                 'related_checklist_tab': 'donnees_personnelles',
@@ -999,6 +1012,9 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
 
         # Check that the proposition status has been changed
         self.assertEqual(self.doctorate_admission.status, ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name)
+
+        # Check that the deadline has been saved
+        self.assertIsNone(self.doctorate_admission.requested_documents_deadline)
 
         # Check last modification data
         self.assertEqual(self.doctorate_admission.modified_at, datetime.datetime.now())

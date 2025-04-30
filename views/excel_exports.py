@@ -404,6 +404,10 @@ class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
                 late_modification_reorientation
             )
 
+        deadline_for_complements = formatted_filters.get('delai_depasse_complements')
+        if deadline_for_complements:
+            mapping_filter_key_value['delai_depasse_complements'] = _('Deadline exceeded')
+
         trainings_types = formatted_filters.get('types_formation')
         if trainings_types:
             mapping_filter_key_value['types_formation'] = [TrainingType.get_value(t) for t in trainings_types]
