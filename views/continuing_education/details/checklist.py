@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,12 +24,12 @@
 #
 # ##############################################################################
 
-from typing import Dict, Set, List
+from typing import Dict, List, Set
 
 from django.shortcuts import resolve_url
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import TemplateView, FormView
+from django.views.generic import FormView, TemplateView
 from osis_comment.models import CommentEntry
 
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
@@ -38,15 +38,13 @@ from admission.ddd.admission.dtos.resume import (
 )
 from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.formation_continue.commands import (
-    RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery,
     RecupererQuestionsSpecifiquesQuery,
+    RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery,
 )
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
-from admission.forms.admission.checklist import (
-    CommentForm,
-)
+from admission.forms.admission.checklist import CommentForm
 from admission.forms.admission.continuing_education.checklist import StudentReportForm
-from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
+from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from osis_role.templatetags.osis_role import has_perm
 
@@ -178,8 +176,9 @@ class ChecklistView(
                         admission_document
                         for admission_document in admission_documents
                         if admission_document.identifiant.split('.')[-1] in tab_documents
+                        or admission_document.onglet_checklist_associe == tab_name
                     ],
-                    key=lambda doc: doc.libelle,
+                    key=lambda doc: (not doc.est_emplacement_document_libre, doc.libelle),
                 )
                 for tab_name, tab_documents in documents_by_tab.items()
             }

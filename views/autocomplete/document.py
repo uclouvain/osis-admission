@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,23 +23,31 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List, Dict
+from typing import Dict, List
 
 from dal_select2.views import Select2ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 
-from admission.constants import CONTEXT_GENERAL, CONTEXT_CONTINUING, CONTEXT_DOCTORATE
-from admission.models.base import BaseAdmission
-from admission.ddd.admission.doctorat.preparation import commands as doctorate_education_commands
+from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
+from admission.ddd.admission.doctorat.preparation import (
+    commands as doctorate_education_commands,
+)
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.emplacement_document import (
-    EMPLACEMENTS_DOCUMENTS_INTERNES,
     DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION,
+    EMPLACEMENTS_DOCUMENTS_INTERNES,
+    IdentifiantBaseEmplacementDocument,
+    OngletsDemande,
 )
-from admission.ddd.admission.formation_continue import commands as continuing_education_commands
-from admission.ddd.admission.formation_generale import commands as general_education_commands
+from admission.ddd.admission.formation_continue import (
+    commands as continuing_education_commands,
+)
+from admission.ddd.admission.formation_generale import (
+    commands as general_education_commands,
+)
+from admission.models.base import BaseAdmission
 from infrastructure.messages_bus import message_bus_instance
 
 __namespace__ = False
@@ -56,6 +64,9 @@ class DocumentTypesForSwappingAutocomplete(LoginRequiredMixin, Select2ListView):
         CONTEXT_GENERAL: general_education_commands.RecupererDocumentsPropositionQuery,
         CONTEXT_CONTINUING: continuing_education_commands.RecupererDocumentsPropositionQuery,
         CONTEXT_DOCTORATE: doctorate_education_commands.RecupererDocumentsPropositionQuery,
+    }
+    category_icons = {
+        IdentifiantBaseEmplacementDocument.LIBRE_CANDIDAT.name: ' <i class="fa-solid fa-dice"></i>',
     }
 
     def get(self, request, *args, **kwargs):
@@ -75,28 +86,41 @@ class DocumentTypesForSwappingAutocomplete(LoginRequiredMixin, Select2ListView):
         )
 
         documents_by_category: Dict[str, List[EmplacementDocumentDTO]] = {}
+        category_names: Dict[str, str] = {}
         search_term = self.q.lower()
 
         for document in documents:
             if search_term and search_term not in document.libelle.lower():
                 continue
 
+            if document.onglet not in category_names:
+                category_names[document.onglet] = '{category_name}{category_icon}'.format(
+                    category_name=document.nom_onglet,
+                    category_icon=self.category_icons.get(document.onglet, ''),
+                )
+
             if (
                 document.type not in EMPLACEMENTS_DOCUMENTS_INTERNES
                 and document.identifiant not in DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION
             ):
-                documents_by_category.setdefault(document.nom_onglet, []).append(document)
+                documents_by_category.setdefault(document.onglet, []).append(document)
 
         results = [
             {
-                'text': category,
+                'text': category_names.get(category, ''),
                 'children': [
                     {
                         'id': document.identifiant,
                         'text': (
-                            f'<i class="fa-solid fa-'
-                            f'{"paperclip" if document.document_uuids else "link-slash"}'
-                            f'"></i> {document.libelle}'
+                            '<i class="fa-solid fa-{has_document_icon}"></i>{free_document_icon} {name}'.format(
+                                has_document_icon='paperclip' if document.document_uuids else 'link-slash',
+                                free_document_icon=(
+                                    ' <i class="fa-solid fa-dice free-document"></i>'
+                                    if document.est_emplacement_document_libre
+                                    else ''
+                                ),
+                                name=document.libelle,
+                            )
                         ),
                         'disabled': document.identifiant == document_identifier or document.lecture_seule,
                     }

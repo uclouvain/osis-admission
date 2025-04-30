@@ -406,7 +406,12 @@
       <div id="document-content" hx-indicator="#document-spinner">
         {% for tab, documents in documents.items %}
           <div role="tabpanel" class="documents-tab" id="{{ tab }}-documents">
-            <label for="{{ tab }}-documents-select">{% translate 'Document' %}</label>
+            <label for="{{ tab }}-documents-select">
+              {% translate 'Document' %}
+              {% if documents|has_free_documents %}
+                <span class="fa-solid fa-dice"></span>
+              {% endif %}
+            </label>
             <form
                 method="GET"
                 {# By default, the document identifier is submitted through an url param, but since we submit #}
@@ -430,6 +435,7 @@
                       value="{{ document.identifiant }}"
                       data-document-status="{{ document.statut }}"
                       data-mandatory-document="{% if document.requis_automatiquement %}1{% else %}0{% endif %}"
+                      data-free-document="{% if document.est_emplacement_document_libre %}1{% else %}0{% endif %}"
                   >{{ document.libelle }}</option>
                 {% endfor %}
               </select>
@@ -518,6 +524,9 @@
           function formatDocumentOption(option, optionClasses) {
               const formattedOption = $(`<span class="${optionClasses}"></span>`);
               formattedOption.text(option.text);
+              if (option.element && option.element.dataset.freeDocument === '1') {
+                  formattedOption.prepend('<span class="fa-solid fa-dice document-icon free-document"></span>');
+              }
               if (option.element && option.element.dataset.documentStatus === 'COMPLETE_APRES_RECLAMATION') {
                   formattedOption.prepend('<span class="fa-solid fa-envelope document-icon"></span>');
               }
@@ -525,7 +534,7 @@
           }
 
           function formatResultDocumentOption(option) {
-              return formatDocumentOption(option, 'flex-content-no-wrap');
+              return formatDocumentOption(option, 'flex-content-no-wrap-no-justify');
           }
           function formatSelectedDocumentOption(option) {
               return formatDocumentOption(option, 'selected-document-option');
@@ -1295,6 +1304,10 @@
 
     .disabled-comment textarea {
       background-color: #eee;
+    }
+
+    .select2-results__option:not([role="group"]):has(.free-document), .select2-selection:has(.free-document) {
+      background-color: #ffc90e;
     }
   </style>
 {% endblock style %}
