@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -109,7 +109,12 @@
       <div id="document-content" hx-indicator="#document-spinner">
         {% for tab, documents in documents.items %}
           <div role="tabpanel" class="documents-tab" id="{{ tab }}-documents">
-            <label for="{{ tab }}-documents-select">{% translate 'Document' %}</label>
+            <label for="{{ tab }}-documents-select">
+              {% translate 'Document' %}
+              {% if documents|has_free_documents %}
+                <span class="fa-solid fa-dice"></span>
+              {% endif %}
+            </label>
             <form
               method="GET"
               {# By default, the document identifier is submitted through an url param, but trigger a request from #}
@@ -133,6 +138,7 @@
                   <option
                       value="{{ document.identifiant }}"
                       data-document-status="{{ document.statut }}"
+                      data-free-document="{% if document.est_emplacement_document_libre %}1{% else %}0{% endif %}"
                   >
                     {{ document.libelle }}
                   </option>
@@ -188,6 +194,9 @@
           function formatDocumentOption(option, optionClasses) {
               const formattedOption = $(`<span class="${optionClasses}"></span>`);
               formattedOption.text(option.text);
+              if (option.element && option.element.dataset.freeDocument === '1') {
+                  formattedOption.prepend('<span class="fa-solid fa-dice document-icon free-document"></span>');
+              }
               if (option.element && option.element.dataset.documentStatus === 'COMPLETE_APRES_RECLAMATION') {
                   formattedOption.prepend('<span class="fa-solid fa-envelope document-icon"></span>');
               }
@@ -195,7 +204,7 @@
           }
 
           function formatResultDocumentOption(option) {
-              return formatDocumentOption(option, 'flex-content-no-wrap');
+              return formatDocumentOption(option, 'flex-content-no-wrap-no-justify');
           }
           function formatSelectedDocumentOption(option) {
               return formatDocumentOption(option, 'selected-document-option');
@@ -790,6 +799,10 @@
 
     #tabs-content #fiche_etudiant {
       overflow-x: hidden;
+    }
+
+    .select2-results__option:not([role="group"]):has(.free-document), .select2-selection:has(.free-document) {
+      background-color: #ffc90e;
     }
 
   </style>

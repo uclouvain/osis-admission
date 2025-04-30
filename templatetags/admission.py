@@ -80,13 +80,12 @@ from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
+from admission.ddd.admission.dtos.titre_acces_selectionnable import (
+    TitreAccesSelectionnableDTO,
+)
+from admission.ddd.admission.enums import Onglets, TypeItemFormulaire
 from admission.ddd.admission.enums.emplacement_document import (
     StatutReclamationEmplacementDocument,
-)
-from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
-from admission.ddd.admission.enums import (
-    TypeItemFormulaire,
-    Onglets,
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixMoyensDecouverteFormation,
@@ -1514,6 +1513,11 @@ def get_document_details_url(context, document: EmplacementDocumentDTO):
         return f'{base_url}?{urlencode(query_params)}'
 
     return base_url
+
+
+@register.filter
+def has_free_documents(documents: List[EmplacementDocumentDTO]):
+    return any(document.est_emplacement_document_libre for document in documents)
 
 
 @register.filter

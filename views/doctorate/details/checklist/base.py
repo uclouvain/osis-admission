@@ -36,9 +36,7 @@ from django.views.generic import FormView, TemplateView
 from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
 
-from admission.ddd.admission.commands import (
-    RechercherParcoursAnterieurQuery,
-)
+from admission.ddd.admission.commands import RechercherParcoursAnterieurQuery
 from admission.ddd.admission.doctorat.preparation.commands import (
     GetGroupeDeSupervisionCommand,
 )
@@ -274,6 +272,7 @@ class ChecklistView(
                     admission_document
                     for admission_document in admission_documents
                     if admission_document.identifiant.split('.')[-1] in tab_documents
+                    or admission_document.onglet_checklist_associe == tab_name
                 ]
                 for tab_name, tab_documents in documents_by_tab.items()
             }
@@ -464,9 +463,9 @@ class ChecklistView(
                         )
                     )
 
-            # Sort the documents by label
+            # Sort the documents by document type (free documents first) and label
             for documents in context['documents'].values():
-                documents.sort(key=lambda doc: doc.libelle)
+                documents.sort(key=lambda doc: (not doc.est_emplacement_document_libre, doc.libelle))
 
             # Some tabs also contain the documents of each experience
             context['documents']['parcours_anterieur'].extend(prefixed_past_experiences_documents)

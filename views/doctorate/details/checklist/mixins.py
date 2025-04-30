@@ -136,7 +136,10 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
     @cached_property
     def proposition_resume(self) -> ResumeEtEmplacementsDocumentsPropositionDTO:
         return message_bus_instance.invoke(
-            RecupererResumeEtEmplacementsDocumentsPropositionQuery(uuid_proposition=self.admission_uuid),
+            RecupererResumeEtEmplacementsDocumentsPropositionQuery(
+                uuid_proposition=self.admission_uuid,
+                avec_document_libres=True,
+            ),
         )
 
     def get_context_data(self, **kwargs):

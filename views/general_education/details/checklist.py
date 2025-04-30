@@ -58,12 +58,12 @@ from admission.ddd.admission.commands import (
     ListerToutesDemandesQuery,
     RechercherParcoursAnterieurQuery,
 )
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
-    message_candidat_avec_pae_avant_2015,
-)
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AnneesCurriculumNonSpecifieesException,
     ExperiencesAcademiquesNonCompleteesException,
+)
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
+    message_candidat_avec_pae_avant_2015,
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.ddd.admission.domain.model.enums.condition_acces import (
@@ -157,7 +157,6 @@ from admission.ddd.admission.formation_generale.domain.service.checklist import 
     Checklist,
 )
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
-    FormationNonTrouveeException,
     ConditionAccesEtreSelectionneException,
     FormationNonTrouveeException,
     StatutsChecklistExperiencesEtreValidesException,
@@ -2963,7 +2962,10 @@ class ChecklistView(
         if not self.request.htmx:
             # Retrieve data related to the proposition
             command_result: ResumeEtEmplacementsDocumentsPropositionDTO = message_bus_instance.invoke(
-                RecupererResumeEtEmplacementsDocumentsPropositionQuery(uuid_proposition=self.admission_uuid),
+                RecupererResumeEtEmplacementsDocumentsPropositionQuery(
+                    uuid_proposition=self.admission_uuid,
+                    avec_document_libres=True,
+                ),
             )
 
             context['resume_proposition'] = command_result.resume
@@ -3032,6 +3034,7 @@ class ChecklistView(
                     admission_document
                     for admission_document in admission_documents
                     if admission_document.identifiant.split('.')[-1] in tab_documents
+                    or admission_document.onglet_checklist_associe == tab_name
                 ]
                 for tab_name, tab_documents in documents_by_tab.items()
             }
@@ -3209,9 +3212,9 @@ class ChecklistView(
                         )
                     )
 
-            # Sort the documents by label
+            # Sort the documents by document type (free documents first) and label
             for documents in context['documents'].values():
-                documents.sort(key=lambda doc: doc.libelle)
+                documents.sort(key=lambda doc: (not doc.est_emplacement_document_libre, doc.libelle))
 
             # Some tabs also contain the documents of each experience
             context['documents']['parcours_anterieur'].extend(prefixed_past_experiences_documents)
