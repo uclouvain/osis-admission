@@ -1,5 +1,5 @@
 {% extends base_template %}
-{% load i18n static dictionnary admission %}
+{% load i18n static strings dictionnary admission %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -51,16 +51,10 @@
             {{ checklist_title }}
           </div>
           <div class="panel-body">
-            <div class="comment-thread-viewer"
-                 data-url="{{ other_comments_url }}"
-                 data-tags="{{ checklist_tag }},SIC"
-                 data-header-title="{% translate 'SIC comment for the faculty' %}"
-            ></div>
-            <div class="comment-thread-viewer"
-                 data-url="{{ other_comments_url }}"
-                 data-tags="{{ checklist_tag }},FAC"
-                 data-header-title="{% translate 'Faculty comment for the SIC' %}"
-            ></div>
+            {% concat checklist_tag '__FAC' as fac_checklist_tag %}
+            {% concat checklist_tag '__SIC' as sic_checklist_tag %}
+            {% include 'admission/includes/comment_entry.html' with title=_('SIC comment for the faculty') comment=comments|get_item_or_none:sic_checklist_tag panel_class="panel-default" %}
+            {% include 'admission/includes/comment_entry.html' with title=_('Faculty comment for the SIC') comment=comments|get_item_or_none:fac_checklist_tag panel_class="panel-default" %}
           </div>
         </div>
       {% elif checklist_tag == 'financabilite' %}
@@ -69,16 +63,8 @@
             {{ checklist_title }}
           </div>
           <div class="panel-body">
-            <div class="comment-thread-viewer"
-                 data-url="{{ other_comments_url }}"
-                 data-tags="{{ checklist_tag }}"
-                 data-header-title="{% translate 'Global' %}"
-            ></div>
-            <div class="comment-thread-viewer"
-                 data-url="{{ other_comments_url }}"
-                 data-tags="{{ checklist_tag }},derogation"
-                 data-header-title="{% translate 'Financability dispensation' %}"
-            ></div>
+            {% include 'admission/includes/comment_entry.html' with title=_('Global') comment=comments.financabilite panel_class="panel-default" %}
+            {% include 'admission/includes/comment_entry.html' with title=_('Financability dispensation') comment=comments.financabilite__derogation panel_class="panel-default" %}
           </div>
         </div>
       {% elif checklist_tag == 'parcours_anterieur' %}
@@ -88,22 +74,16 @@
             {{ checklist_title }}
           </div>
           <div class="panel-body">
-            <div class="comment-thread-viewer"
-                 data-url="{{ other_comments_url }}"
-                 data-tags="{{ checklist_tag }}"
-                 data-header-title="{% translate 'Global' %}"
-            ></div>
+            {% include 'admission/includes/comment_entry.html' with title=_('Global') comment=comments.parcours_anterieur panel_class="panel-default" %}
+            {% translate 'Global comment' as global_comment_label %}
+            {% translate 'Comment about the authentication' as authentication_comment_label %}
             {% for experience_uuid, experience_name in experiences_names_by_uuid.items %}
-              <div class="comment-thread-viewer"
-                   data-url="{{ other_comments_url }}"
-                   data-tags="{{ checklist_tag }},{{ experience_uuid }}"
-                   data-header-title="{{ experience_name }} > {% translate 'Global comment' %}"
-              ></div>
-              <div class="comment-thread-viewer"
-                   data-url="{{ other_comments_url }}"
-                   data-tags="{{ checklist_tag }},{{ experience_uuid }},authentication"
-                   data-header-title="{{ experience_name }} > {% translate 'Comment about the authentication' %}"
-              ></div>
+              {% concat 'parcours_anterieur__' experience_uuid as global_comment_id %}
+              {% concat 'parcours_anterieur__' experience_uuid '__authentication' as authentication_comment_id %}
+              {% concat experience_name ' > ' global_comment_label as global_comment_title %}
+              {% concat experience_name ' > ' authentication_comment_label as authentication_comment_title %}
+              {% include 'admission/includes/comment_entry.html' with title=global_comment_title comment=comments|get_item_or_none:global_comment_id panel_class="panel-default" %}
+              {% include 'admission/includes/comment_entry.html' with title=authentication_comment_title comment=comments|get_item_or_none:authentication_comment_id panel_class="panel-default" %}
             {% endfor %}
           </div>
         </div>
@@ -113,49 +93,21 @@
             {{ checklist_title }}
           </div>
           <div class="panel-body">
-            <div class="comment-thread-viewer"
-                 data-url="{{ other_comments_url }}"
-                 data-tags="{{ checklist_tag }}"
-                 data-header-title="{% translate 'Global' %}"
-            ></div>
-            <div class="comment-thread-viewer"
-                 data-url="{{ other_comments_url }}"
-                 data-tags="{{ checklist_tag }},derogation"
-                 data-header-title="{% translate 'Dispensation' %}"
-            ></div>
+            {% include 'admission/includes/comment_entry.html' with title=_('Global') comment=comments.decision_sic panel_class="panel-default" %}
+            {% include 'admission/includes/comment_entry.html' with title=_('Dispensation') comment=comments.decision_sic__derogation panel_class="panel-default" %}
           </div>
         </div>
       {% else %}
-        <div class="comment-thread-viewer"
-             data-url="{{ other_comments_url }}"
-             data-tags="{{ checklist_tag }}"
-             data-header-title="{{ checklist_title }}"
-             data-panel-class="panel panel-info"
-        ></div>
+        {% include 'admission/includes/comment_entry.html' with title=checklist_title comment=comments|get_item_or_none:checklist_tag %}
       {% endif %}
     {% endfor %}
   {% elif view.is_continuing %}
     {% for checklist_tag, checklist_title in checklist_tags %}
       {% if checklist_tag == 'decision' %}
-        <div class="comment-thread-viewer"
-             data-url="{{ other_comments_url }}"
-             data-tags="decision,IUFC_for_FAC"
-             data-header-title="{{ checklist_title }} - {% translate 'IUFC comment for the Faculty' %}"
-             data-panel-class="panel panel-info"
-        ></div>
-        <div class="comment-thread-viewer"
-             data-url="{{ other_comments_url }}"
-             data-tags="decision,FAC_for_IUFC"
-             data-header-title="{{ checklist_title }} - {% translate 'Faculty comment for IUFC' %}"
-             data-panel-class="panel panel-info"
-        ></div>
+        {% include 'admission/includes/comment_entry.html' with title=_('Decision > IUFC comment for the Faculty') comment=comments.decision__IUFC_for_FAC %}
+        {% include 'admission/includes/comment_entry.html' with title=_('Decision > Faculty comment for IUFC') comment=comments.decision__FAC_for_IUFC %}
       {% else %}
-        <div class="comment-thread-viewer"
-             data-url="{{ other_comments_url }}"
-             data-tags="{{ checklist_tag }}"
-             data-header-title="{{ checklist_title }}"
-             data-panel-class="panel panel-info"
-        ></div>
+        {% include 'admission/includes/comment_entry.html' with title=checklist_title comment=comments|get_item_or_none:checklist_tag %}
       {% endif %}
     {% endfor %}
   {% endif %}

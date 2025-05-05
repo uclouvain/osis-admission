@@ -55,6 +55,7 @@ from admission.ddd.admission.doctorat.validation.domain.model.enums import Choix
 from admission.mail_templates import ADMISSION_EMAIL_CDD_REFUSAL_DOCTORATE
 from admission.models import DoctorateAdmission
 from admission.models.checklist import AdditionalApprovalCondition
+from admission.tests import OsisDocumentMockTestMixin
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.curriculum import (
     AdmissionEducationalValuatedExperiencesFactory,
@@ -74,7 +75,7 @@ from base.tests.factories.learning_unit_year import LearningUnitYearFactory
 from osis_profile.models import EducationalExperience, ProfessionalExperience
 
 
-class CddDecisionViewTestCase(TestCase):
+class CddDecisionViewTestCase(OsisDocumentMockTestMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
@@ -92,6 +93,8 @@ class CddDecisionViewTestCase(TestCase):
         cls.default_headers = {'HTTP_HX-Request': 'true'}
 
     def setUp(self) -> None:
+        super().setUp()
+
         self.admission: DoctorateAdmission = DoctorateAdmissionFactory(
             training=self.training,
             candidate=CompletePersonFactory(language=settings.LANGUAGE_CODE_FR),
@@ -184,7 +187,7 @@ class CddDecisionViewTestCase(TestCase):
 
 
 @override_settings(BACKEND_LINK_PREFIX='https//example.com')
-class CddDecisionSendToCddViewTestCase(TestCase):
+class CddDecisionSendToCddViewTestCase(OsisDocumentMockTestMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
@@ -203,6 +206,8 @@ class CddDecisionSendToCddViewTestCase(TestCase):
         cls.default_headers = {'HTTP_HX-Request': 'true'}
 
     def setUp(self) -> None:
+        super().setUp()
+
         self.admission: DoctorateAdmission = DoctorateAdmissionFactory(
             training=self.training,
             candidate=CompletePersonFactory(language=settings.LANGUAGE_CODE_FR),

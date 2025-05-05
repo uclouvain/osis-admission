@@ -1073,6 +1073,9 @@ msgstr "Biologie"
 msgid "Bachelor"
 msgstr "Bachelier"
 
+msgid "Bachelor's course entrance exam"
+msgstr "Examen d'admission aux études de premier cycle de l'enseignement supérieur"
+
 msgid "Back to checklist"
 msgstr "Retour à la checklist"
 
@@ -1187,6 +1190,9 @@ msgstr "CEP"
 
 msgid "CERTIFICAT_60_CREDITS"
 msgstr "1065 € - Certificat 60 crédits"
+
+msgid "CESS"
+msgstr "CESS"
 
 msgctxt "equivalence_type"
 msgid "CESS equivalence"
@@ -2068,6 +2074,12 @@ msgstr "Cher %(name)s,"
 
 msgid "Decision"
 msgstr "Décision"
+
+msgid "Decision > Faculty comment for IUFC"
+msgstr "Décision - Commentaire de la Faculté pour l'IUFC"
+
+msgid "Decision > IUFC comment for the Faculty"
+msgstr "Décision - Commentaire de l'IUFC pour la Faculté"
 
 msgid "Decision confirming the granting of subsidiary protection"
 msgstr "Décision confirmant l'octroi de la protection subsidiaire"
@@ -4852,6 +4864,9 @@ msgstr "Ne plus désigner le document comme étant à réclamer"
 
 msgid "No one invited"
 msgstr "Aucun invité"
+
+msgid "No payment"
+msgstr "Aucun paiement"
 
 msgid "No pool was found to match."
 msgstr "Aucun pot ne correspond."
@@ -8515,6 +8530,10 @@ msgstr "éléments par page"
 msgctxt "feminine"
 msgid "modified"
 msgstr "modifiée"
+
+#, python-format
+msgid "on %(date)s at %(hour)s"
+msgstr "le %(date)s at %(hour)s"
 
 msgctxt "payment"
 msgid "open"

@@ -357,7 +357,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
             klass = PromoteurDTO if actor.type == ActorType.PROMOTER.name else MembreCADTO
             members.append(
                 klass(
-                    uuid=actor.uuid,
+                    uuid=str(actor.uuid),
                     matricule=actor.person and actor.person.global_id,
                     nom=actor.last_name,
                     prenom=actor.first_name,
