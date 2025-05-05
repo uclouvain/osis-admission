@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,7 +26,9 @@
 from abc import abstractmethod
 from email.message import EmailMessage
 
-from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    Proposition,
+)
 from osis_common.ddd import interface
 
 
@@ -77,7 +79,6 @@ class IHistorique(interface.DomainService):
         cls,
         proposition: Proposition,
         gestionnaire: str,
-        message: EmailMessage,
     ):
         raise NotImplementedError
 

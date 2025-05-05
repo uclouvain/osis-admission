@@ -531,3 +531,7 @@ a.no-link {
   display: flex !important;
   align-items: center;
 }
+
+.vertical-aligne-middle {
+  vertical-align: middle;
+}

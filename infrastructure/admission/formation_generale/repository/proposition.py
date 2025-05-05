@@ -314,6 +314,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'financability_dispensation_status': (
                     entity.financabilite_derogation_statut.name if entity.financabilite_derogation_statut else ''
                 ),
+                'financabilite_dispensation_vrae': entity.financabilite_derogation_vrae,
                 'financability_dispensation_first_notification_on': (
                     entity.financabilite_derogation_premiere_notification_le
                 ),
@@ -582,6 +583,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 if admission.financability_dispensation_status
                 else ''
             ),
+            financabilite_derogation_vrae=admission.financabilite_dispensation_vrae,
             financabilite_derogation_premiere_notification_le=(
                 admission.financability_dispensation_first_notification_on
             ),
@@ -820,6 +822,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             ),
             financabilite_etabli_le=admission.financability_established_on,
             financabilite_derogation_statut=admission.financability_dispensation_status,
+            financabilite_derogation_vrae=admission.financabilite_dispensation_vrae,
             financabilite_derogation_premiere_notification_le=(
                 admission.financability_dispensation_first_notification_on
             ),

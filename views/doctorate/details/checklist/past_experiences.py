@@ -294,6 +294,7 @@ class PastExperiencesAccessTitleView(
             ):
                 internal_experiences = get_internal_experiences(
                     matricule_candidat=command_result.proposition.matricule_candidat,
+                    with_credits=False,
                 )
 
             context['selected_access_titles_names'] = get_access_titles_names(
