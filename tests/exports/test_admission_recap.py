@@ -1320,6 +1320,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
         continuing_proposition_dto = _PropositionFormationContinueDTO(
             uuid='uuid-proposition',
             profil_soumis_candidat=None,
+            etat_injection_epc='',
             formation=_FormationDTO(
                 sigle='FC1',
                 annee=2023,

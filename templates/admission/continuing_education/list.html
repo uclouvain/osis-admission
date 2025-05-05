@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -49,12 +49,13 @@
   <div class="row">
     {% bootstrap_field filter_form.entites form_group_class="form-group col-md-2" %}
     {% bootstrap_field filter_form.types_formation form_group_class="form-group col-md-2" %}
-    {% bootstrap_field filter_form.sigles_formations form_group_class="form-group col-md-4" %}
+    {% bootstrap_field filter_form.sigles_formations form_group_class="form-group col-md-3" %}
     {% bootstrap_field filter_form.inscription_requise form_group_class="form-group col-md-2" %}
-    {% bootstrap_field filter_form.paye form_group_class="form-group col-md-2" %}
+    {% bootstrap_field filter_form.paye form_group_class="form-group col-md-1" %}
+    {% bootstrap_field filter_form.injection_epc_en_erreur form_group_class="form-group col-md-2" %}
   </div>
   <div class="row">
-    {% bootstrap_field filter_form.marque_d_interet form_group_class="form-group col-md-12" %}
+    {% bootstrap_field filter_form.marque_d_interet form_group_class="form-group col-md-2" %}
   </div>
 
   <hr>
@@ -105,7 +106,7 @@
 
           {# Working lists #}
           const stateInput = $('#id_etats');
-          const typeInput = $('#id_type');
+          const epcInjectionInErrorInput = $('#id_injection_epc_en_erreur');
           const filterModeInputs = $('input[name="mode_filtres_etats_checklist"]');
           const checklistFiltersInputs = $('#checklist-filters-container .multi-widget input[type="checkbox"]');
           const toggleChecklistFiltersButton = $('#toggle-checklist-filters');
@@ -126,7 +127,7 @@
 
           toggleChecklistFiltersButton.val(checklistFiltersInputs.filter(':checked').length > 0 ? 'off' : 'on').trigger('click');
 
-          $('#id_etats, #id_type, input[name="mode_filtres_etats_checklist"], #checklist-filters-container .multi-widget input[type="checkbox"]').on('change', function () {
+          $('#id_etats, #id_injection_epc_en_erreur, input[name="mode_filtres_etats_checklist"], #checklist-filters-container .multi-widget input[type="checkbox"]').on('change', function () {
               {# Reset the selected working list if the values of the dependent inputs change except if this change was triggered from the working list #}
               if (selectWorkListInProgress) return;
               $('#id_liste_travail').val('').trigger('change');
@@ -138,7 +139,7 @@
               selectWorkListInProgress = true;
 
               stateInput.val(data.admission_statuses).trigger('change');
-              typeInput.val([data.admission_type]).trigger('change');
+              epcInjectionInErrorInput.val([data.epc_injection_in_error]).trigger('change');
               if (!data.checklist_filters_mode) {
                   filterModeInputs.filter(':checked').prop('checked', false).trigger('change');
                   filterModeInputs.parents('label').removeClass('active');

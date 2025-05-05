@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -332,6 +332,7 @@ class ListerDemandesQuery(SortedQueryRequest):
     types_formation: Optional[List[str]] = None
     sigles_formations: Optional[List[str]] = None
     inscription_requise: Optional[bool] = None
+    injection_epc_en_erreur: Optional[bool] = None
     paye: Optional[bool] = None
     mode_filtres_etats_checklist: Optional[str] = ''
     filtres_etats_checklist: Optional[Dict[str, List[str]]] = None
