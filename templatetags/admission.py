@@ -80,13 +80,12 @@ from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
+from admission.ddd.admission.dtos.titre_acces_selectionnable import (
+    TitreAccesSelectionnableDTO,
+)
+from admission.ddd.admission.enums import Onglets, TypeItemFormulaire
 from admission.ddd.admission.enums.emplacement_document import (
     StatutReclamationEmplacementDocument,
-)
-from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
-from admission.ddd.admission.enums import (
-    TypeItemFormulaire,
-    Onglets,
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixMoyensDecouverteFormation,
@@ -131,6 +130,7 @@ from admission.models import (
     GeneralEducationAdmission,
 )
 from admission.models.base import BaseAdmission
+from admission.models.epc_injection import EPCInjectionStatus
 from admission.utils import (
     format_address,
     format_school_title,
@@ -1597,4 +1597,24 @@ def htmx_comment_form(form, disabled=None):
     return {
         'form': form,
         'disabled': disabled,
+    }
+
+
+@register.inclusion_tag('admission/dummy.html')
+def epc_injection_status_display(value):
+    epc_injection_template = {
+        EPCInjectionStatus.OK.name: 'admission/continuing_education/includes/epc_injection_status_ok.html',
+        EPCInjectionStatus.OSIS_ERROR.name: 'admission/continuing_education/includes/epc_injection_status_error.html',
+        EPCInjectionStatus.ERROR.name: 'admission/continuing_education/includes/epc_injection_status_error.html',
+        EPCInjectionStatus.PENDING.name: 'admission/continuing_education/includes/epc_injection_status_pending.html',
+        EPCInjectionStatus.NO_SENT.name: 'admission/continuing_education/includes/epc_injection_status_pending.html',
+    }.get(value)
+
+    if not epc_injection_template:
+        return {'template': 'admission/empty_template.html'}
+
+    return {
+        'template': epc_injection_template,
+        'epc_injection_status_value': value,
+        'epc_injection_status_label': EPCInjectionStatus.get_value(value),
     }

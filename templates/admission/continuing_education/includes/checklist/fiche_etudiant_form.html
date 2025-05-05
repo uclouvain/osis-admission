@@ -7,7 +7,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -31,9 +31,15 @@
   hx-swap="outerHTML"
   hx-trigger="change from:(#fiche_etudiant-form input, #fiche_etudiant-form select, #fiche_etudiant-form textarea) delay:2s"
 >
-  <dl>
-    <dt>Inscription au rôle</dt>
-    <dd><em>En attente de developpement</em></dd>
+  <dl class="inline-field-data">
+    <dt>{% translate 'UCLouvain registration:' %}</dt>
+    <dd>
+      {% if admission.etat_injection_epc %}
+        {% epc_injection_status_display admission.etat_injection_epc %}
+      {% else %}
+        {% translate 'No EPC injection found' %}
+      {% endif %}
+    </dd>
   </dl>
   {% bootstrap_field student_report_form.edition %}
   <div class="row">

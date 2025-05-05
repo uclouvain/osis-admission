@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,49 +24,75 @@
 #
 # ##############################################################################
 import itertools
-from typing import Optional, List, Dict, Union
+from typing import Dict, List, Optional, Union
 
 from django.conf import settings
-from django.utils import translation, timezone
+from django.utils import timezone, translation
 from django.utils.translation import override
 from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
 
 from admission.constants import ORDERED_CAMPUSES_UUIDS
-from admission.ddd.admission.domain.model.enums.condition_acces import TypeTitreAccesSelectionnable
-from admission.ddd.admission.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
-from admission.ddd.admission.dtos.resume import ResumeEtEmplacementsDocumentsPropositionDTO
-from admission.ddd.admission.enums.emplacement_document import (
-    OngletsDemande,
+from admission.ddd.admission.domain.model.enums.condition_acces import (
+    TypeTitreAccesSelectionnable,
 )
+from admission.ddd.admission.domain.model.titre_acces_selectionnable import (
+    TitreAccesSelectionnable,
+)
+from admission.ddd.admission.domain.service.i_profil_candidat import (
+    IProfilCandidatTranslator,
+)
+from admission.ddd.admission.domain.service.i_unites_enseignement_translator import (
+    IUnitesEnseignementTranslator,
+)
+from admission.ddd.admission.dtos.resume import (
+    ResumeEtEmplacementsDocumentsPropositionDTO,
+)
+from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_generale.commands import (
     RecupererResumeEtEmplacementsDocumentsPropositionQuery,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import TypeDeRefus
-from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
-from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation import IPDFGeneration
-from admission.ddd.admission.formation_generale.domain.validator.exceptions import PdfSicInconnu
-from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
-from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    Proposition,
+    PropositionIdentity,
+)
+from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation import (
+    IPDFGeneration,
+)
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
+    PdfSicInconnu,
+)
+from admission.ddd.admission.formation_generale.dtos.proposition import (
+    PropositionGestionnaireDTO,
+)
+from admission.ddd.admission.formation_generale.repository.i_proposition import (
+    IPropositionRepository,
+)
 from admission.exports.utils import admission_generate_pdf
 from admission.infrastructure.admission.domain.service.unites_enseignement_translator import (
     UnitesEnseignementTranslator,
 )
-from admission.infrastructure.utils import (
-    CHAMPS_DOCUMENTS_EXPERIENCES_CURRICULUM,
-)
+from admission.infrastructure.utils import CHAMPS_DOCUMENTS_EXPERIENCES_CURRICULUM
 from admission.utils import WeasyprintStylesheets
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
 from base.utils.utils import format_academic_year
 from ddd.logic.formation_catalogue.commands import GetCreditsDeLaFormationQuery
-from ddd.logic.shared_kernel.campus.domain.model.uclouvain_campus import UclouvainCampusIdentity
-from ddd.logic.shared_kernel.campus.repository.i_uclouvain_campus import IUclouvainCampusRepository
+from ddd.logic.shared_kernel.campus.domain.model.uclouvain_campus import (
+    UclouvainCampusIdentity,
+)
+from ddd.logic.shared_kernel.campus.repository.i_uclouvain_campus import (
+    IUclouvainCampusRepository,
+)
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
-from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceNonAcademiqueDTO, ExperienceAcademiqueDTO
+from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
+    IExperienceParcoursInterneTranslator,
+)
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
+    ExperienceAcademiqueDTO,
+    ExperienceNonAcademiqueDTO,
+)
 
 ENTITY_SIC = 'SIC'
 ENTITY_SICB = 'SICB'
@@ -202,6 +228,7 @@ class PDFGeneration(IPDFGeneration):
                 if internal_experiences_dtos is None:
                     internal_experiences_dtos = experience_parcours_interne_translator.recuperer(
                         matricule=proposition.matricule_candidat,
+                        avec_credits=False,
                     )
 
                 selected_internal_experience = next(

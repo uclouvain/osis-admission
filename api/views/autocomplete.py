@@ -68,6 +68,7 @@ from base.models.enums.education_group_categories import Categories
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import SECTOR
 from base.models.person import Person
+from base.models.specific_iufc_informations import SpecificIUFCInformations
 from base.models.student import Student
 from base.utils.cte import CTESubquery
 from infrastructure.messages_bus import message_bus_instance
@@ -244,6 +245,31 @@ class AutocompleteContinuingEducationView(ListAPIView):
                 terme_de_recherche=request.GET.get('acronym_or_name'),
             )
         )
+
+        # TODO to delete when old IUFC app is closed
+        # Filter the list to retrieve only the trainings that are available
+        if education_list:
+            trainings_filters = Q()
+            for education in education_list:
+                trainings_filters |= Q(
+                    training__academic_year__year=education.annee,
+                    training__acronym=education.sigle,
+                )
+
+            opened_iufc_trainings = (
+                SpecificIUFCInformations.objects.filter(show_to_candidate=True)
+                .filter(trainings_filters)
+                .values_list('training__acronym', 'training__academic_year__year')
+            )
+
+            opened_iufc_trainings_as_set = set(opened_iufc_trainings)
+
+            education_list = [
+                education
+                for education in education_list
+                if (education.sigle, education.annee) in opened_iufc_trainings_as_set
+            ]
+
         serializer = serializers.FormationContinueDTOSerializer(instance=education_list, many=True)
         return Response(serializer.data)
 

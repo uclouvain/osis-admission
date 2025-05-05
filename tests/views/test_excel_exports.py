@@ -35,7 +35,8 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
-from django.utils.translation import gettext as _, pgettext, pgettext_lazy
+from django.utils.translation import gettext as _
+from django.utils.translation import pgettext, pgettext_lazy
 from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 from osis_async.models import AsyncTask
@@ -52,9 +53,16 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeAdmission,
     ChoixTypeFinancement,
 )
-from admission.ddd.admission.doctorat.preparation.dtos.liste import DemandeRechercheDTO as DemandeDoctoraleRechercheDTO
-from admission.ddd.admission.doctorat.preparation.read_view.domain.enums.tableau_bord import IndicateurTableauBordEnum
-from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
+from admission.ddd.admission.doctorat.preparation.dtos.liste import (
+    DemandeRechercheDTO as DemandeDoctoraleRechercheDTO,
+)
+from admission.ddd.admission.doctorat.preparation.read_view.domain.enums.tableau_bord import (
+    IndicateurTableauBordEnum,
+)
+from admission.ddd.admission.dtos.liste import (
+    DemandeRechercheDTO,
+    VisualiseurAdmissionDTO,
+)
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.enums.liste import TardiveModificationReorientationFiltre
 from admission.ddd.admission.enums.type_demande import TypeDemande
@@ -902,6 +910,7 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
                 ],
                 'sigles_formations': [self.admission.training.acronym],
                 'inscription_requise': True,
+                'injection_epc_en_erreur': True,
                 'paye': False,
                 'marque_d_interet': True,
                 'mode_filtres_etats_checklist': ModeFiltrageChecklist.INCLUSION.name,
@@ -923,8 +932,8 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
         )
 
         names, values = list(worksheet.iter_cols(values_only=True))
-        self.assertEqual(len(names), 16)
-        self.assertEqual(len(values), 16)
+        self.assertEqual(len(names), 17)
+        self.assertEqual(len(values), 17)
 
         # Check the names of the parameters
         self.assertEqual(names[0], _('Creation date'))
@@ -939,10 +948,11 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
         self.assertEqual(names[9], _('Course type'))
         self.assertEqual(names[10], pgettext('admission', 'Course'))
         self.assertEqual(names[11], _('Registration required'))
-        self.assertEqual(names[12], _('Paid'))
-        self.assertEqual(names[13], _('Interested mark'))
-        self.assertEqual(names[14], _('Include or exclude the checklist filters'))
-        self.assertEqual(names[15], _('Checklist filters'))
+        self.assertEqual(names[12], _('Injection in error'))
+        self.assertEqual(names[13], _('Paid'))
+        self.assertEqual(names[14], _('Interested mark'))
+        self.assertEqual(names[15], _('Include or exclude the checklist filters'))
+        self.assertEqual(names[16], _('Checklist filters'))
 
         # Check the values of the parameters
         self.assertEqual(values[0], '3 Janvier 2023')
@@ -961,11 +971,12 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
         )
         self.assertEqual(values[10], f"['{self.admission.training.acronym}']")
         self.assertEqual(values[11], 'oui')
-        self.assertEqual(values[12], 'non')
-        self.assertEqual(values[13], 'oui')
-        self.assertEqual(values[14], ModeFiltrageChecklist.INCLUSION.value)
+        self.assertEqual(values[12], 'oui')
+        self.assertEqual(values[13], 'non')
+        self.assertEqual(values[14], 'oui')
+        self.assertEqual(values[15], ModeFiltrageChecklist.INCLUSION.value)
         self.assertEqual(
-            values[15],
+            values[16],
             str(
                 {
                     OngletsChecklistContinue.decision.value: [

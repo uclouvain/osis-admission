@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -33,9 +33,9 @@ from django.utils.translation import get_language
 
 from admission.auth.roles.candidate import Candidate
 from admission.auth.roles.program_manager import ProgramManager
-from admission.models import ContinuingEducationAdmissionProxy
-from admission.models.continuing_education import ContinuingEducationAdmission
-from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
+from admission.ddd.admission.domain.builder.formation_identity import (
+    FormationIdentityBuilder,
+)
 from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.dtos import AdressePersonnelleDTO
 from admission.ddd.admission.dtos.campus import CampusDTO
@@ -46,23 +46,34 @@ from admission.ddd.admission.formation_continue.domain.builder.proposition_ident
 )
 from admission.ddd.admission.formation_continue.domain.model._adresse import Adresse
 from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutPropositionContinue,
-    ChoixInscriptionATitre,
-    ChoixTypeAdresseFacturation,
-    ChoixMoyensDecouverteFormation,
     ChoixEdition,
+    ChoixInscriptionATitre,
     ChoixMotifAttente,
     ChoixMotifRefus,
+    ChoixMoyensDecouverteFormation,
+    ChoixStatutPropositionContinue,
+    ChoixTypeAdresseFacturation,
 )
-from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition, PropositionIdentity
+from admission.ddd.admission.formation_continue.domain.model.proposition import (
+    Proposition,
+    PropositionIdentity,
+)
 from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
     StatutChecklist,
     StatutsChecklistContinue,
 )
-from admission.ddd.admission.formation_continue.domain.validator.exceptions import PropositionNonTrouveeException
+from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
+    PropositionNonTrouveeException,
+)
 from admission.ddd.admission.formation_continue.dtos import PropositionDTO
-from admission.ddd.admission.formation_continue.repository.i_proposition import IPropositionRepository
-from admission.infrastructure.admission.repository.proposition import GlobalPropositionRepository
+from admission.ddd.admission.formation_continue.repository.i_proposition import (
+    IPropositionRepository,
+)
+from admission.infrastructure.admission.repository.proposition import (
+    GlobalPropositionRepository,
+)
+from admission.models import ContinuingEducationAdmissionProxy
+from admission.models.continuing_education import ContinuingEducationAdmission
 from base.models.academic_year import AcademicYear
 from base.models.campus import Campus as CampusDb
 from base.models.education_group_year import EducationGroupYear
@@ -162,11 +173,13 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'billing_address_postal_box': entity.adresse_facturation.boite_postale,
                 'billing_address_postal_code': entity.adresse_facturation.code_postal,
                 'billing_address_city': entity.adresse_facturation.ville,
-                'billing_address_country': Country.objects.filter(
-                    iso_code=entity.adresse_facturation.pays,
-                ).first()
-                if entity.adresse_facturation
-                else None,
+                'billing_address_country': (
+                    Country.objects.filter(
+                        iso_code=entity.adresse_facturation.pays,
+                    ).first()
+                    if entity.adresse_facturation
+                    else None
+                ),
             }
             if entity.adresse_facturation
             else {
@@ -280,27 +293,29 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             equivalence_diplome=admission.diploma_equivalence,
             copie_titre_sejour=admission.residence_permit,
             elements_confirmation=admission.confirmation_elements,
-            inscription_a_titre=ChoixInscriptionATitre[admission.registration_as]
-            if admission.registration_as
-            else None,
+            inscription_a_titre=(
+                ChoixInscriptionATitre[admission.registration_as] if admission.registration_as else None
+            ),
             nom_siege_social=admission.head_office_name,
             numero_unique_entreprise=admission.unique_business_number,
             numero_tva_entreprise=admission.vat_number,
             adresse_mail_professionnelle=admission.professional_email,
-            type_adresse_facturation=ChoixTypeAdresseFacturation[admission.billing_address_type]
-            if admission.billing_address_type
-            else None,
-            adresse_facturation=Adresse(
-                rue=admission.billing_address_street,
-                numero_rue=admission.billing_address_street_number,
-                code_postal=admission.billing_address_postal_code,
-                ville=admission.billing_address_city,
-                pays=admission.billing_address_country.iso_code if admission.billing_address_country else '',
-                destinataire=admission.billing_address_recipient,
-                boite_postale=admission.billing_address_postal_box,
-            )
-            if admission.billing_address_type == ChoixTypeAdresseFacturation.AUTRE.name
-            else None,
+            type_adresse_facturation=(
+                ChoixTypeAdresseFacturation[admission.billing_address_type] if admission.billing_address_type else None
+            ),
+            adresse_facturation=(
+                Adresse(
+                    rue=admission.billing_address_street,
+                    numero_rue=admission.billing_address_street_number,
+                    code_postal=admission.billing_address_postal_code,
+                    ville=admission.billing_address_city,
+                    pays=admission.billing_address_country.iso_code if admission.billing_address_country else '',
+                    destinataire=admission.billing_address_recipient,
+                    boite_postale=admission.billing_address_postal_box,
+                )
+                if admission.billing_address_type == ChoixTypeAdresseFacturation.AUTRE.name
+                else None
+            ),
             documents_additionnels=admission.additional_documents,
             documents_demandes=admission.requested_documents,
             motivations=admission.motivations,
@@ -324,9 +339,9 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             diplome_produit=admission.certificate_provided,
             intitule_du_tff=admission.tff_label,
             decision_dernier_mail_envoye_le=admission.last_email_sent_at,
-            decision_dernier_mail_envoye_par=admission.last_email_sent_by.global_id
-            if admission.last_email_sent_by
-            else '',
+            decision_dernier_mail_envoye_par=(
+                admission.last_email_sent_by.global_id if admission.last_email_sent_by else ''
+            ),
             motif_de_mise_en_attente=ChoixMotifAttente[admission.on_hold_reason] if admission.on_hold_reason else '',
             motif_de_mise_en_attente_autre=admission.on_hold_reason_other,
             condition_d_approbation_par_la_faculte=admission.approval_condition_by_faculty,
@@ -379,42 +394,50 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 intitule=getattr(admission.training, training_title_field),
                 intitule_fr=admission.training.title,
                 intitule_en=admission.training.title_english,
-                campus=CampusDTO(
-                    uuid=campus.uuid,
-                    nom=campus.name,
-                    code_postal=campus.postal_code,
-                    ville=campus.city,
-                    pays_iso_code=campus.country.iso_code if campus.country else '',
-                    nom_pays=getattr(campus.country, country_name_field) if campus.country else '',
-                    rue=campus.street,
-                    numero_rue=campus.street_number,
-                    boite_postale=campus.postal_box,
-                    localisation=campus.location,
-                    email_inscription_sic=campus.sic_enrollment_email,
-                )
-                if campus is not None
-                else None,
+                campus=(
+                    CampusDTO(
+                        uuid=campus.uuid,
+                        nom=campus.name,
+                        code_postal=campus.postal_code,
+                        ville=campus.city,
+                        pays_iso_code=campus.country.iso_code if campus.country else '',
+                        nom_pays=getattr(campus.country, country_name_field) if campus.country else '',
+                        rue=campus.street,
+                        numero_rue=campus.street_number,
+                        boite_postale=campus.postal_box,
+                        localisation=campus.location,
+                        email_inscription_sic=campus.sic_enrollment_email,
+                    )
+                    if campus is not None
+                    else None
+                ),
                 type=admission.training.education_group_type.name,
                 code_domaine=admission.training.main_domain.code if admission.training.main_domain else '',
-                campus_inscription=CampusDTO(
-                    uuid=admission.training.enrollment_campus.uuid,
-                    nom=admission.training.enrollment_campus.name,
-                    code_postal=admission.training.enrollment_campus.postal_code,
-                    ville=admission.training.enrollment_campus.city,
-                    pays_iso_code=admission.training.enrollment_campus.country.iso_code
-                    if admission.training.enrollment_campus.country
-                    else '',
-                    nom_pays=getattr(admission.training.enrollment_campus.country, country_name_field)
-                    if admission.training.enrollment_campus.country
-                    else '',
-                    rue=admission.training.enrollment_campus.street,
-                    numero_rue=admission.training.enrollment_campus.street_number,
-                    boite_postale=admission.training.enrollment_campus.postal_box,
-                    localisation=admission.training.enrollment_campus.location,
-                    email_inscription_sic=admission.training.enrollment_campus.sic_enrollment_email,
-                )
-                if admission.training.enrollment_campus is not None
-                else None,
+                campus_inscription=(
+                    CampusDTO(
+                        uuid=admission.training.enrollment_campus.uuid,
+                        nom=admission.training.enrollment_campus.name,
+                        code_postal=admission.training.enrollment_campus.postal_code,
+                        ville=admission.training.enrollment_campus.city,
+                        pays_iso_code=(
+                            admission.training.enrollment_campus.country.iso_code
+                            if admission.training.enrollment_campus.country
+                            else ''
+                        ),
+                        nom_pays=(
+                            getattr(admission.training.enrollment_campus.country, country_name_field)
+                            if admission.training.enrollment_campus.country
+                            else ''
+                        ),
+                        rue=admission.training.enrollment_campus.street,
+                        numero_rue=admission.training.enrollment_campus.street_number,
+                        boite_postale=admission.training.enrollment_campus.postal_box,
+                        localisation=admission.training.enrollment_campus.location,
+                        email_inscription_sic=admission.training.enrollment_campus.sic_enrollment_email,
+                    )
+                    if admission.training.enrollment_campus is not None
+                    else None
+                ),
                 sigle_entite_gestion=admission.training_management_faculty
                 or admission.sigle_entite_gestion,  # from annotation
                 credits=admission.training.credits,
@@ -431,12 +454,16 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             matricule_candidat=admission.candidate.global_id,
             prenom_candidat=admission.candidate.first_name,
             nom_candidat=admission.candidate.last_name,
-            pays_nationalite_candidat=admission.candidate.country_of_citizenship.iso_code
-            if admission.candidate.country_of_citizenship
-            else '',
-            nom_pays_nationalite_candidat=getattr(admission.candidate.country_of_citizenship, country_name_field)
-            if admission.candidate.country_of_citizenship
-            else '',
+            pays_nationalite_candidat=(
+                admission.candidate.country_of_citizenship.iso_code
+                if admission.candidate.country_of_citizenship
+                else ''
+            ),
+            nom_pays_nationalite_candidat=(
+                getattr(admission.candidate.country_of_citizenship, country_name_field)
+                if admission.candidate.country_of_citizenship
+                else ''
+            ),
             pays_nationalite_ue_candidat=admission.candidate.country_of_citizenship
             and admission.candidate.country_of_citizenship.european_union,
             noma_candidat=admission.student_registration_id or '',  # from annotation
@@ -451,35 +478,45 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             numero_tva_entreprise=admission.vat_number,
             adresse_mail_professionnelle=admission.professional_email,
             type_adresse_facturation=admission.billing_address_type,
-            adresse_facturation=AdressePersonnelleDTO(
-                rue=admission.billing_address_street,
-                numero_rue=admission.billing_address_street_number,
-                code_postal=admission.billing_address_postal_code,
-                ville=admission.billing_address_city,
-                pays=admission.billing_address_country.iso_code if admission.billing_address_country else '',
-                nom_pays=getattr(admission.billing_address_country, country_name_field)
-                if admission.billing_address_country
-                else '',
-                destinataire=admission.billing_address_recipient,
-                boite_postale=admission.billing_address_postal_box,
-            )
-            if admission.billing_address_type == ChoixTypeAdresseFacturation.AUTRE.name
-            else None,
+            adresse_facturation=(
+                AdressePersonnelleDTO(
+                    rue=admission.billing_address_street,
+                    numero_rue=admission.billing_address_street_number,
+                    code_postal=admission.billing_address_postal_code,
+                    ville=admission.billing_address_city,
+                    pays=admission.billing_address_country.iso_code if admission.billing_address_country else '',
+                    nom_pays=(
+                        getattr(admission.billing_address_country, country_name_field)
+                        if admission.billing_address_country
+                        else ''
+                    ),
+                    destinataire=admission.billing_address_recipient,
+                    boite_postale=admission.billing_address_postal_box,
+                )
+                if admission.billing_address_type == ChoixTypeAdresseFacturation.AUTRE.name
+                else None
+            ),
             elements_confirmation=admission.confirmation_elements,
             pdf_recapitulatif=admission.pdf_recap,
             documents_additionnels=admission.additional_documents,
             motivations=admission.motivations,
             moyens_decouverte_formation=admission.ways_to_find_out_about_the_course,
             autre_moyen_decouverte_formation=admission.other_way_to_find_out_about_the_course,
-            aide_a_la_formation=admission.training.specificiufcinformations.training_assistance
-            if getattr(admission.training, 'specificiufcinformations', None)
-            else None,
-            inscription_au_role_obligatoire=admission.training.specificiufcinformations.registration_required
-            if getattr(admission.training, 'specificiufcinformations', None)
-            else None,
-            etat_formation=admission.training.specificiufcinformations.state
-            if getattr(admission.training, 'specificiufcinformations', None)
-            else '',
+            aide_a_la_formation=(
+                admission.training.specificiufcinformations.training_assistance
+                if getattr(admission.training, 'specificiufcinformations', None)
+                else None
+            ),
+            inscription_au_role_obligatoire=(
+                admission.training.specificiufcinformations.registration_required
+                if getattr(admission.training, 'specificiufcinformations', None)
+                else None
+            ),
+            etat_formation=(
+                admission.training.specificiufcinformations.state
+                if getattr(admission.training, 'specificiufcinformations', None)
+                else ''
+            ),
             documents_demandes=admission.requested_documents,
             documents_libres_fac_uclouvain=admission.uclouvain_fac_documents,
             documents_libres_sic_uclouvain=admission.uclouvain_sic_documents,
@@ -497,13 +534,14 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             diplome_produit=admission.certificate_provided,
             intitule_du_tff=admission.tff_label,
             decision_dernier_mail_envoye_le=admission.last_email_sent_at,
-            decision_dernier_mail_envoye_par=admission.last_email_sent_by.global_id
-            if admission.last_email_sent_by
-            else '',
+            decision_dernier_mail_envoye_par=(
+                admission.last_email_sent_by.global_id if admission.last_email_sent_by else ''
+            ),
             motif_de_mise_en_attente=admission.on_hold_reason,
             motif_de_mise_en_attente_autre=admission.on_hold_reason_other,
             condition_d_approbation_par_la_faculte=admission.approval_condition_by_faculty,
             motif_de_refus=admission.refusal_reason,
             motif_de_refus_autre=admission.refusal_reason_other,
             motif_d_annulation=admission.cancel_reason,
+            etat_injection_epc=admission.last_epc_injection_status,
         )

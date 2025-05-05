@@ -269,6 +269,7 @@ class ProfilCandidat(interface.DomainService):
 
         experiences_parcours_interne = experience_parcours_interne_translator.recuperer(
             matricule=proposition.matricule_candidat,
+            avec_credits=False,
         )
 
         curriculum = (
@@ -349,6 +350,7 @@ class ProfilCandidat(interface.DomainService):
 
         experiences_parcours_interne = experience_parcours_interne_translator.recuperer(
             matricule=proposition.matricule_candidat,
+            avec_credits=False,
         )
 
         curriculum = (

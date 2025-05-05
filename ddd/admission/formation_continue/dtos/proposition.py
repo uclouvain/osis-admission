@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -114,6 +114,8 @@ class PropositionDTO(interface.DTO):
     motif_de_refus: Optional[str]
     motif_de_refus_autre: Optional[str]
     motif_d_annulation: Optional[str]
+
+    etat_injection_epc: str
 
     @property
     def est_non_soumise(self):

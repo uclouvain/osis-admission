@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 import datetime
-from typing import Optional, List
+from typing import Optional
 
 import attr
 
@@ -47,7 +47,7 @@ class DemandeRechercheDTO(interface.DTO):
     sigle_faculte: str
     paye: Optional[bool]
     etat_demande: str
-    etat_epc: str
+    etat_injection_epc: str
     date_confirmation: Optional[datetime.datetime]
     derniere_modification_le: datetime.datetime
     derniere_modification_par: str
