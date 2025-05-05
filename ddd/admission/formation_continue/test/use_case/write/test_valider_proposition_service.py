@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -30,20 +30,30 @@ from django.test import SimpleTestCase
 
 from admission.ddd.admission.domain.validator.exceptions import EnQuarantaineException
 from admission.ddd.admission.dtos.merge_proposal import MergeProposalDTO
-from admission.ddd.admission.formation_continue.commands import AnnulerPropositionCommand, ValiderPropositionCommand
-from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutPropositionContinue,
-    ChoixStatutChecklist,
+from admission.ddd.admission.formation_continue.commands import (
+    AnnulerPropositionCommand,
+    ValiderPropositionCommand,
 )
-from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition, PropositionIdentity
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutChecklist,
+    ChoixStatutPropositionContinue,
+)
+from admission.ddd.admission.formation_continue.domain.model.proposition import (
+    Proposition,
+    PropositionIdentity,
+)
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
     ApprouverPropositionTransitionStatutException,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+    ProfilCandidatInMemoryTranslator,
+)
 from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from admission.infrastructure.message_bus_in_memory import (
+    message_bus_in_memory_instance,
+)
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.person_merge_proposal import PersonMergeStatus
 
@@ -56,8 +66,6 @@ class ValiderPropositionTestCase(SimpleTestCase):
         self.cmd = ValiderPropositionCommand(
             uuid_proposition='uuid-USCC22',
             gestionnaire="gestionnaire",
-            objet_message="objet",
-            corps_message="corps",
         )
 
         # Mock publish

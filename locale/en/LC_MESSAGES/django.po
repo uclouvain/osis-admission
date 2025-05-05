@@ -1040,7 +1040,7 @@ msgstr ""
 msgid ""
 "By finalising my application, I undertake to pay the registration fees upon "
 "receipt of the invoice (provided my application is accepted). In case of "
-"cancellation, the modalities depend on the Faculties."
+"cancellation, the modalities depend on the faculties."
 msgstr ""
 
 msgctxt "ways_hear_about_training"
@@ -6531,12 +6531,6 @@ msgstr ""
 "%(end_year)s. As soon as we receive the enrolment authorisation signed by "
 "you, we will let you know how to pay."
 
-#, python-format
-msgid ""
-"The validation mail has been sent to the candidate the %(date)s by "
-"%(sender)s."
-msgstr ""
-
 msgid "There can be no more CA members in the supervision group."
 msgstr ""
 "There can be no more supervisory panel members in the supervision group."
@@ -6956,9 +6950,6 @@ msgid "VIP"
 msgstr ""
 
 msgid "VIP candidate"
-msgstr ""
-
-msgid "Validate"
 msgstr ""
 
 msgid "Validated"

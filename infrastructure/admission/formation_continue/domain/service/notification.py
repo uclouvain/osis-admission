@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -39,21 +39,33 @@ from osis_notification.contrib.notification import EmailNotification
 
 from admission.auth.roles.program_manager import ProgramManager
 from admission.ddd import MAIL_INSCRIPTION_DEFAUT
-from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
+from admission.ddd.admission.domain.model.emplacement_document import (
+    EmplacementDocument,
+)
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument
-from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition
-from admission.ddd.admission.formation_continue.domain.service.i_notification import INotification
+from admission.ddd.admission.formation_continue.domain.model.proposition import (
+    Proposition,
+)
+from admission.ddd.admission.formation_continue.domain.service.i_notification import (
+    INotification,
+)
 from admission.ddd.admission.formation_continue.dtos import PropositionDTO
 from admission.infrastructure.utils import get_requested_documents_html_lists
 from admission.mail_templates import (
     ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_CONTINUING,
     ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_CONTINUING,
 )
-from admission.mail_templates.submission import ADMISSION_EMAIL_CONFIRM_SUBMISSION_CONTINUING
+from admission.mail_templates.submission import (
+    ADMISSION_EMAIL_CONFIRM_SUBMISSION_CONTINUING,
+)
 from admission.models import AdmissionTask, ContinuingEducationAdmission
 from admission.models.base import BaseAdmission
-from admission.utils import get_salutation_prefix, get_portal_admission_url, get_backoffice_admission_url
+from admission.utils import (
+    get_backoffice_admission_url,
+    get_portal_admission_url,
+    get_salutation_prefix,
+)
 from base.models.person import Person
 from base.utils.utils import format_academic_year
 
@@ -105,7 +117,9 @@ class Notification(INotification):
 
     @classmethod
     def confirmer_soumission(cls, proposition: Proposition) -> None:
-        from admission.exports.admission_recap.admission_recap import admission_pdf_recap
+        from admission.exports.admission_recap.admission_recap import (
+            admission_pdf_recap,
+        )
 
         admission = (
             BaseAdmission.objects.with_training_management_and_reference()
@@ -220,20 +234,6 @@ class Notification(INotification):
         )
 
     @classmethod
-    def approuver_proposition(
-        cls,
-        proposition: Proposition,
-        objet_message: str,
-        corps_message: str,
-    ) -> EmailMessage:
-        candidate = Person.objects.get(global_id=proposition.matricule_candidat)
-        return cls._create_email_message_for_person(
-            person=candidate,
-            objet_message=objet_message,
-            corps_message=corps_message,
-        )
-
-    @classmethod
     def envoyer_message_libre_au_candidat(
         cls,
         proposition: Proposition,
@@ -266,9 +266,11 @@ class Notification(INotification):
             'candidate_first_name': proposition.prenom_candidat,
             'candidate_last_name': proposition.nom_candidat,
             'salutation': get_salutation_prefix(person=admission.candidate),
-            'training_title': admission.training.title
-            if admission.candidate.language == settings.LANGUAGE_CODE_FR
-            else admission.training.title_english,
+            'training_title': (
+                admission.training.title
+                if admission.candidate.language == settings.LANGUAGE_CODE_FR
+                else admission.training.title_english
+            ),
             'training_acronym': proposition.formation.sigle,
             'training_campus': proposition.formation.campus,
             'requested_submitted_documents': html_list_by_status[StatutEmplacementDocument.COMPLETE_APRES_RECLAMATION],
@@ -281,9 +283,11 @@ class Notification(INotification):
         }
 
         email_message = generate_email(
-            ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_CONTINUING
-            if html_list_by_status[StatutEmplacementDocument.A_RECLAMER]
-            else ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_CONTINUING,
+            (
+                ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_CONTINUING
+                if html_list_by_status[StatutEmplacementDocument.A_RECLAMER]
+                else ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_CONTINUING
+            ),
             admission.candidate.language,
             tokens,
             recipients=[admission.candidate.private_email],

@@ -305,8 +305,6 @@ class AnnulerPropositionCommand(interface.CommandRequest):
 class ValiderPropositionCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str
-    objet_message: str
-    corps_message: str
 
 
 @attr.dataclass(frozen=True, slots=True)

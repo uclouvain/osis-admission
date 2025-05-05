@@ -207,7 +207,7 @@
               const closedContinuingFields = $('.closed-continuing-fields');
 
               {# Reset the training field when the campus or the year changes #}
-              $('#id_campus, #id_academic_year').on('change', function(event){
+              $('#id_campus').on('change', function(event){
                   $('#id_continuing_education_training').val('').trigger('change');
               });
 
