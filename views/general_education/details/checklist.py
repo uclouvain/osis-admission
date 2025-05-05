@@ -58,12 +58,12 @@ from admission.ddd.admission.commands import (
     ListerToutesDemandesQuery,
     RechercherParcoursAnterieurQuery,
 )
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
-    message_candidat_avec_pae_avant_2015,
-)
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AnneesCurriculumNonSpecifieesException,
     ExperiencesAcademiquesNonCompleteesException,
+)
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
+    message_candidat_avec_pae_avant_2015,
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.ddd.admission.domain.model.enums.condition_acces import (
@@ -158,7 +158,6 @@ from admission.ddd.admission.formation_generale.domain.service.checklist import 
     Checklist,
 )
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
-    FormationNonTrouveeException,
     ConditionAccesEtreSelectionneException,
     FormationNonTrouveeException,
     StatutsChecklistExperiencesEtreValidesException,
@@ -1822,8 +1821,16 @@ class SicDecisionPdfPreviewView(LoadDossierViewMixin, RedirectView):
         return super().get(request, *args, **kwargs)
 
 
-def get_internal_experiences(matricule_candidat: str) -> List[ExperienceParcoursInterneDTO]:
-    return message_bus_instance.invoke(RecupererExperiencesParcoursInterneQuery(matricule=matricule_candidat))
+def get_internal_experiences(
+    matricule_candidat: str,
+    with_credits: bool = True,
+) -> List[ExperienceParcoursInterneDTO]:
+    return message_bus_instance.invoke(
+        RecupererExperiencesParcoursInterneQuery(
+            matricule=matricule_candidat,
+            avec_credits=with_credits,
+        )
+    )
 
 
 class ApplicationFeesView(
@@ -2052,6 +2059,7 @@ class PastExperiencesAccessTitleView(
             ):
                 internal_experiences = get_internal_experiences(
                     matricule_candidat=command_result.proposition.matricule_candidat,
+                    with_credits=False,
                 )
 
             context['selected_access_titles_names'] = get_access_titles_names(
