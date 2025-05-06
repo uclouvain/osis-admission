@@ -109,6 +109,7 @@ class GeneralEducationAdmissionFactory(factory.django.DjangoModelFactory):
     international_scholarship = factory.SubFactory(InternationalScholarshipFactory)
     last_update_author = factory.SubFactory(PersonFactory)
     determined_academic_year = factory.SubFactory(AcademicYearFactory, current=True)
+    determined_pool = None
     checklist = factory.Dict({'default': True})  # This default value is overridden in a post generation method
 
     @factory.post_generation

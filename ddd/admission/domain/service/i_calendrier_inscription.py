@@ -239,9 +239,10 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
         raise NotImplementedError()
 
     @classmethod
-    def recuperer_periode_inscription_specifique_hue_plus_5_resident_a_l_etranger(
+    def recuperer_periode_du_pot(
         cls,
         annee_formation: int,
+        pot: AcademicCalendarTypes,
     ) -> Periode:
         raise NotImplementedError()
 
