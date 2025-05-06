@@ -1424,6 +1424,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             motif_de_refus="",
             motif_de_refus_autre="",
             motif_d_annulation="",
+            photo_identite_candidat=[],
         )
         bachelor_proposition_dto = _PropositionFormationGeneraleDTO(
             uuid='uuid-proposition',
