@@ -234,7 +234,7 @@ class ListerDemandesService(IListerDemandesService):
         qs = qs.order_by(*field_order, 'id')
 
         # Paginate the queryset
-        if page and taille_page:
+        if page is not None and taille_page is not None:
             result = PaginatedList(complete_list=qs.all().values_list('uuid', flat=True))
             bottom = (page - 1) * taille_page
             top = page * taille_page
@@ -282,7 +282,7 @@ class ListerDemandesService(IListerDemandesService):
             nom_candidat=admission.candidate.last_name,
             prenom_candidat=admission.candidate.first_name,
             noma_candidat=noma_candidat,
-            courriel_candidat=admission.candidate.email,
+            courriel_candidat=admission.candidate.private_email,
             sigle_formation=admission.training.acronym,
             code_formation=admission.training.partial_acronym,
             intitule_formation=getattr(admission.training, translated_fields_names['training_title']),
@@ -299,13 +299,4 @@ class ListerDemandesService(IListerDemandesService):
             date_confirmation=admission.submitted_at,
             derniere_modification_le=admission.modified_at,
             derniere_modification_par=admission.last_update_author_name,  # From annotation
-            droits_reduits=admission.reduced_rights,
-            paye_par_cheque_formation=admission.pay_by_training_cheque,
-            cep=admission.cep,
-            etalement_des_paiements=admission.payement_spread,
-            etalement_de_la_formation=admission.training_spread,
-            valorisation_des_acquis_d_experience=admission.experience_knowledge_valorisation,
-            a_presente_l_epreuve_d_evaluation=admission.assessment_test_presented,
-            a_reussi_l_epreuve_d_evaluation=admission.assessment_test_succeeded,
-            diplome_produit=admission.certificate_provided,
         )

@@ -23,42 +23,13 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
-from typing import Optional
-
-import attr
-
-from osis_common.ddd import interface
 
 
-@attr.dataclass(frozen=True, slots=True)
-class DemandeRechercheDTO(interface.DTO):
-    uuid: str
-    numero_demande: str
-    nom_candidat: str
-    prenom_candidat: str
-    noma_candidat: Optional[str]
-    courriel_candidat: str
-    sigle_formation: str
-    code_formation: str
-    intitule_formation: str
-    inscription_au_role_obligatoire: Optional[bool]
-    edition: str
-    sigle_faculte: str
-    paye: Optional[bool]
-    etat_demande: str
-    etat_injection_epc: str
-    date_confirmation: Optional[datetime.datetime]
-    derniere_modification_le: datetime.datetime
-    derniere_modification_par: str
-
-    @property
-    def formation(self) -> str:
-        return f'{self.sigle_formation} - {self.intitule_formation}'
-
-    @property
-    def candidat(self) -> str:
-        nom_complet_candidat = f'{self.nom_candidat}, {self.prenom_candidat}'
-        if self.noma_candidat:
-            nom_complet_candidat += f' ({self.noma_candidat})'
-        return nom_complet_candidat
+def format_address(street='', street_number='', postal_code='', city='', country='', separator=', '):
+    """Return the concatenation of the specified street, street number, postal code, city and country."""
+    address_parts = [
+        f'{street} {street_number}',
+        f'{postal_code} {city}',
+        country,
+    ]
+    return separator.join(filter(lambda part: part and len(part) > 1, address_parts))

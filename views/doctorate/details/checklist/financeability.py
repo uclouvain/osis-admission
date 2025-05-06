@@ -64,7 +64,6 @@ from admission.mail_templates import (
 )
 from admission.utils import (
     add_close_modal_into_htmx_response,
-    format_academic_year,
     get_training_url,
 )
 from admission.views.common.detail_tabs.checklist import change_admission_status
@@ -74,6 +73,7 @@ from admission.views.doctorate.details.checklist.mixins import (
 )
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.utils.htmx import HtmxPermissionRequiredMixin
+from base.utils.utils import format_academic_year
 from infrastructure.messages_bus import message_bus_instance
 
 __all__ = [

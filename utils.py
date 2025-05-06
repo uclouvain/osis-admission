@@ -23,7 +23,6 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import itertools
 import os
 import uuid
 from collections import defaultdict
@@ -39,10 +38,11 @@ from django.db import models
 from django.db.models import F, QuerySet
 from django.shortcuts import resolve_url
 from django.utils import timezone
-from django.utils.translation import get_language, gettext, override, pgettext
+from django.utils.translation import get_language, override, pgettext
 from django_htmx.http import trigger_client_event
 from rest_framework.generics import get_object_or_404
 
+from admission.admission_utils.format_address import format_address
 from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.program_manager import (
     ProgramManager as AdmissionProgramManager,
@@ -55,13 +55,7 @@ from admission.ddd.admission.doctorat.preparation.commands import (
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AnneesCurriculumNonSpecifieesException,
 )
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
-    CurriculumAdmissionDTO,
-)
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
-from admission.ddd.admission.domain.model.enums.condition_acces import (
-    TypeTitreAccesSelectionnable,
-)
 from admission.ddd.admission.dtos.etudes_secondaires import (
     EtudesSecondairesAdmissionDTO,
 )
@@ -89,19 +83,10 @@ from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.person import Person
-from base.utils.utils import format_academic_year
 from ddd.logic.formation_catalogue.commands import GetSigleFormationParenteQuery
-from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
-    AlternativeSecondairesDTO,
-    DiplomeBelgeEtudesSecondairesDTO,
-    DiplomeEtrangerEtudesSecondairesDTO,
-)
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
-)
-from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
-    ExperienceParcoursInterneDTO,
 )
 from osis_common.ddd.interface import BusinessException, QueryRequest
 from program_management.ddd.domain.exception import ProgramTreeNotFoundException
@@ -598,16 +583,6 @@ def get_experience_urls(
             )
 
     return res_context
-
-
-def format_address(street='', street_number='', postal_code='', city='', country=''):
-    """Return the concatenation of the specified street, street number, postal code, city and country."""
-    address_parts = [
-        f'{street} {street_number}',
-        f'{postal_code} {city}',
-        country,
-    ]
-    return ', '.join(filter(lambda part: part and len(part) > 1, address_parts))
 
 
 def format_school_title(school):
