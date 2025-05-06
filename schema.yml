@@ -7867,7 +7867,7 @@ components:
           maxLength: 255
         education_name:
           type: string
-          title: Nom de la formation
+          title: Intitulé de la formation
           maxLength: 255
         study_system:
           title: Système d'études
@@ -9168,7 +9168,7 @@ components:
           nullable: true
         education_name:
           type: string
-          title: Nom de la formation
+          title: Intitulé de la formation
           maxLength: 255
         educationalexperienceyear_set:
           type: array
