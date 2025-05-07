@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 # ##############################################################################
 from functools import partial
 
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import mixins, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
@@ -32,12 +33,15 @@ from rest_framework.response import Response
 from admission.api import serializers
 from admission.api.permissions import IsSelfPersonTabOrTabPermission
 from admission.api.views.mixins import (
-    PersonRelatedMixin,
-    GeneralEducationPersonRelatedMixin,
     ContinuingEducationPersonRelatedMixin,
+    GeneralEducationPersonRelatedMixin,
+    PersonRelatedMixin,
 )
 from osis_role.contrib.views import APIPermissionRequiredMixin
-from reference.services.postal_code_validator import PostalCodeValidatorService, PersonAddressException
+from reference.services.postal_code_validator import (
+    PersonAddressException,
+    PostalCodeValidatorService,
+)
 
 
 class BaseCoordonneesViewSet(
@@ -93,13 +97,32 @@ class BaseCoordonneesViewSet(
         return response
 
 
-class CoordonneesViewSet(PersonRelatedMixin, BaseCoordonneesViewSet):  # pylint: disable=too-many-ancestors
+@extend_schema_view(
+    get=extend_schema(operation_id='retrieveCoordonnees', tags=['person']),
+    put=extend_schema(operation_id='updateCoordonnees', tags=['person']),
+)
+class CommonCoordonneesViewSet(PersonRelatedMixin, BaseCoordonneesViewSet):  # pylint: disable=too-many-ancestors
     name = "coordonnees"
     permission_classes = [
         partial(IsSelfPersonTabOrTabPermission, permission_suffix='coordinates', can_edit=True),
     ]
 
 
+@extend_schema_view(
+    get=extend_schema(operation_id='retrieveCoordonneesAdmission', tags=['person']),
+    put=extend_schema(operation_id='updateCoordonneesAdmission', tags=['person']),
+)
+class CoordonneesViewSet(PersonRelatedMixin, BaseCoordonneesViewSet):  # pylint: disable=too-many-ancestors
+    name = "doctorate_coordonnees"
+    permission_classes = [
+        partial(IsSelfPersonTabOrTabPermission, permission_suffix='coordinates', can_edit=True),
+    ]
+
+
+@extend_schema_view(
+    get=extend_schema(operation_id='retrieveCoordonneesGeneralEducationAdmission', tags=['person']),
+    put=extend_schema(operation_id='updateCoordonneesGeneralEducationAdmission', tags=['person']),
+)
 class GeneralCoordonneesView(
     GeneralEducationPersonRelatedMixin,
     BaseCoordonneesViewSet,
@@ -111,6 +134,10 @@ class GeneralCoordonneesView(
     }
 
 
+@extend_schema_view(
+    get=extend_schema(operation_id='retrieveCoordonneesContinuingEducationAdmission', tags=['person']),
+    put=extend_schema(operation_id='updateCoordonneesContinuingEducationAdmission', tags=['person']),
+)
 class ContinuingCoordonneesView(
     ContinuingEducationPersonRelatedMixin,
     BaseCoordonneesViewSet,

@@ -86,7 +86,7 @@ class CoordonneesTestCase(APITestCase):
             training__management_entity=doctoral_commission,
         )
         AdmissionAcademicCalendarFactory.produce_all_required()
-        cls.admission_url = resolve_url('coordonnees', uuid=cls.admission.uuid)
+        cls.admission_url = resolve_url('doctorate_coordonnees', uuid=cls.admission.uuid)
         # Users
         cls.candidate_user = cls.address.person.user
         cls.candidate_user_without_admission = cls.other_address.person.user
@@ -217,7 +217,7 @@ class CoordonneesTestCase(APITestCase):
         other_admission = DoctorateAdmissionFactory(
             candidate=self.candidate_user.person,
         )
-        other_admission_url = resolve_url('coordonnees', uuid=other_admission.uuid)
+        other_admission_url = resolve_url('doctorate_coordonnees', uuid=other_admission.uuid)
 
         for current_status in ChoixStatutPropositionDoctorale:
             other_admission.status = current_status.name
@@ -241,7 +241,10 @@ class CoordonneesTestCase(APITestCase):
             candidate=self.address.person,
             status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
         )
-        response = self.client.put(resolve_url('coordonnees', uuid=submitted_admission.uuid), self.updated_data)
+        response = self.client.put(
+            resolve_url('doctorate_coordonnees', uuid=submitted_admission.uuid),
+            self.updated_data,
+        )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         submitted_admission.delete()
 

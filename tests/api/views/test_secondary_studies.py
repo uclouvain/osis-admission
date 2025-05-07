@@ -121,7 +121,7 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         continuing_admission = ContinuingEducationAdmissionFactory(
             candidate=doctorate_admission.candidate,
         )
-        cls.doctorate_admission_url = resolve_url("secondary-studies", uuid=doctorate_admission.uuid)
+        cls.doctorate_admission_url = resolve_url("doctorate-secondary-studies", uuid=doctorate_admission.uuid)
         cls.general_admission_url = resolve_url("general_secondary_studies", uuid=cls.general_master_admission.uuid)
         cls.general_bachelor_admission_url = resolve_url(
             "general_secondary_studies",
@@ -423,7 +423,7 @@ class ForeignHighSchoolDiplomaTestCase(APITestCase):
         cls.admission = DoctorateAdmissionFactory()
         cls.user = cls.admission.candidate.user
         cls.url = reverse("secondary-studies")
-        cls.admission_url = resolve_url("secondary-studies", uuid=cls.admission.uuid)
+        cls.admission_url = resolve_url("doctorate-secondary-studies", uuid=cls.admission.uuid)
         cls.academic_year = AcademicYearFactory(current=True)
         cls.language = LanguageFactory(code="FR")
         cls.country = CountryFactory(iso_code="FR")
@@ -517,7 +517,7 @@ class HighSchoolDiplomaAlternativeTestCase(APITestCase):
         cls.admission = DoctorateAdmissionFactory()
         cls.user = cls.admission.candidate.user
         cls.url = reverse("secondary-studies")
-        cls.admission_url = resolve_url("secondary-studies", uuid=cls.admission.uuid)
+        cls.admission_url = resolve_url("doctorate-secondary-studies", uuid=cls.admission.uuid)
         cls.general_admission_url = resolve_url("general_secondary_studies", uuid=cls.admission.uuid)
         cls.file_uuid = '4bdffb42-552d-415d-9e4c-725f10dce228'
         cls.high_school_diploma_alternative_data = {

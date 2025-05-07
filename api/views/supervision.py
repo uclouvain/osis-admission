@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,23 +23,23 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
 from admission.api import serializers
-from admission.api.schema import ResponseSpecificSchema
-from admission.models.enums.actor_type import ActorType
 from admission.ddd.admission.doctorat.preparation.commands import (
     DesignerPromoteurReferenceCommand,
     GetGroupeDeSupervisionCommand,
     IdentifierMembreCACommand,
     IdentifierPromoteurCommand,
     ModifierMembreSupervisionExterneCommand,
+    SoumettreCACommand,
     SupprimerMembreCACommand,
     SupprimerPromoteurCommand,
-    SoumettreCACommand,
 )
+from admission.models.enums.actor_type import ActorType
 from admission.utils import get_cached_admission_perm_obj
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
@@ -51,27 +51,6 @@ __all__ = [
 ]
 
 
-class SupervisionSchema(ResponseSpecificSchema):
-    serializer_mapping = {
-        'GET': serializers.SupervisionDTOSerializer,
-        'PUT': (serializers.IdentifierSupervisionActorSerializer, serializers.PropositionIdentityDTOSerializer),
-        'POST': (serializers.SupervisionActorReferenceSerializer, serializers.PropositionIdentityDTOSerializer),
-        'PATCH': (serializers.ModifierMembreSupervisionExterneSerializer, serializers.PropositionIdentityDTOSerializer),
-    }
-
-    method_mapping = {
-        'get': 'retrieve',
-        'put': 'add',
-        'post': 'remove',
-        'patch': 'edit_external',
-    }
-
-    def get_operation_id_base(self, path, method, action):
-        if method == 'GET':
-            return '_supervision'
-        return '_member'
-
-
 class SupervisionAPIView(
     APIPermissionRequiredMixin,
     mixins.RetrieveModelMixin,
@@ -80,7 +59,6 @@ class SupervisionAPIView(
     GenericAPIView,
 ):
     name = "supervision"
-    schema = SupervisionSchema()
     pagination_class = None
     filter_backends = []
     permission_mapping = {
@@ -93,12 +71,21 @@ class SupervisionAPIView(
     def get_permission_object(self):
         return get_cached_admission_perm_obj(self.kwargs['uuid'])
 
+    @extend_schema(
+        responses=serializers.SupervisionDTOSerializer,
+        operation_id='retrieve_supervision',
+    )
     def get(self, request, *args, **kwargs):
         """Get the supervision group of a proposition"""
         supervision = message_bus_instance.invoke(GetGroupeDeSupervisionCommand(uuid_proposition=kwargs.get('uuid')))
         serializer = serializers.SupervisionDTOSerializer(instance=supervision)
         return Response(serializer.data)
 
+    @extend_schema(
+        request=serializers.IdentifierSupervisionActorSerializer,
+        responses=serializers.PropositionIdentityDTOSerializer,
+        operation_id='add_member',
+    )
     def put(self, request, *args, **kwargs):
         """Add a supervision group member for a proposition"""
         data = {
@@ -107,7 +94,7 @@ class SupervisionAPIView(
             **request.data,
         }
         serializers.IdentifierSupervisionActorSerializer(data=data).is_valid(raise_exception=True)
-        if data.pop('type') == ActorType.CA_MEMBER.name:
+        if data.pop('actor_type') == ActorType.CA_MEMBER.name:
             serializer_cls = serializers.IdentifierMembreCACommandSerializer
             cmd = IdentifierMembreCACommand
         else:
@@ -120,6 +107,11 @@ class SupervisionAPIView(
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @extend_schema(
+        request=serializers.SupervisionActorReferenceSerializer,
+        responses=serializers.PropositionIdentityDTOSerializer,
+        operation_id='remove_member',
+    )
     def post(self, request, *args, **kwargs):
         """Remove a supervision group member for a proposition"""
         serializers.SupervisionActorReferenceSerializer(data=request.data).is_valid(raise_exception=True)
@@ -127,7 +119,7 @@ class SupervisionAPIView(
             'uuid_proposition': str(self.kwargs['uuid']),
             'matricule_auteur': self.get_permission_object().candidate.global_id,
         }
-        if request.data['type'] == ActorType.CA_MEMBER.name:
+        if request.data['actor_type'] == ActorType.CA_MEMBER.name:
             serializer_cls = serializers.SupprimerMembreCACommandSerializer
             data['uuid_membre_ca'] = request.data['uuid_membre']
             cmd = SupprimerMembreCACommand
@@ -142,6 +134,11 @@ class SupervisionAPIView(
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @extend_schema(
+        request=serializers.ModifierMembreSupervisionExterneSerializer,
+        responses=serializers.PropositionIdentityDTOSerializer,
+        operation_id='edit_external_member',
+    )
     def patch(self, request, *args, **kwargs):
         """Edit an external supervision group member for a proposition"""
         serializers.ModifierMembreSupervisionExterneSerializer(data=request.data).is_valid(raise_exception=True)
@@ -156,18 +153,8 @@ class SupervisionAPIView(
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class SupervisionSetReferencePromoterSchema(ResponseSpecificSchema):
-    serializer_mapping = {
-        'PUT': (serializers.DesignerPromoteurReferenceCommandSerializer, serializers.PropositionIdentityDTOSerializer),
-    }
-
-    def get_operation_id(self, path, method):
-        return 'set_reference_promoter'
-
-
 class SupervisionSetReferencePromoterAPIView(APIPermissionRequiredMixin, GenericAPIView):
     name = "set-reference-promoter"
-    schema = SupervisionSetReferencePromoterSchema()
     pagination_class = None
     filter_backends = []
     permission_mapping = {
@@ -177,6 +164,11 @@ class SupervisionSetReferencePromoterAPIView(APIPermissionRequiredMixin, Generic
     def get_permission_object(self):
         return get_cached_admission_perm_obj(self.kwargs['uuid'])
 
+    @extend_schema(
+        request=serializers.DesignerPromoteurReferenceCommandSerializer,
+        responses=serializers.PropositionIdentityDTOSerializer,
+        operation_id='set_reference_promoter',
+    )
     def put(self, request, *args, **kwargs):
         """Set a supervision group member as reference promoter"""
         serializers.DesignerPromoteurReferenceCommandSerializer(data=request.data).is_valid(raise_exception=True)
@@ -191,18 +183,8 @@ class SupervisionSetReferencePromoterAPIView(APIPermissionRequiredMixin, Generic
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class SupervisionSubmitCaSchema(ResponseSpecificSchema):
-    serializer_mapping = {
-        'POST': (None, serializers.PropositionIdentityDTOSerializer),
-    }
-
-    def get_operation_id(self, path, method):
-        return 'submit_ca'
-
-
 class SupervisionSubmitCaAPIView(APIPermissionRequiredMixin, GenericAPIView):
     name = "submit-ca"
-    schema = SupervisionSubmitCaSchema()
     pagination_class = None
     filter_backends = []
     permission_mapping = {
@@ -212,6 +194,11 @@ class SupervisionSubmitCaAPIView(APIPermissionRequiredMixin, GenericAPIView):
     def get_permission_object(self):
         return get_cached_admission_perm_obj(self.kwargs['uuid'])
 
+    @extend_schema(
+        request=None,
+        responses=serializers.PropositionIdentityDTOSerializer,
+        operation_id='submit_ca',
+    )
     def post(self, request, *args, **kwargs):
         """Submit the new CA"""
         result = message_bus_instance.invoke(
