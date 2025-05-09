@@ -544,8 +544,9 @@ msgid "All CA members must have approved the proposition."
 msgstr "All supervisory panel members must have approved the proposition."
 
 msgid ""
-"All experiences must be in the 'Validated' status so that the previous "
-"experience can be changed to the 'Sufficient' status."
+"All experiences must be in the 'Validated' status or in the 'To complete "
+"after enrolment' status so that the previous experience can be changed to "
+"the 'Sufficient' status."
 msgstr ""
 
 msgid "All history"
