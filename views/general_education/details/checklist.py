@@ -218,11 +218,8 @@ from admission.mail_templates.checklist import (
 )
 from admission.models import EPCInjection
 from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
-from admission.models.online_payment import PaymentMethod, PaymentStatus
-from admission.templatetags.admission import (
-    authentication_css_class,
-    bg_class_by_checklist_experience,
-)
+from admission.models.online_payment import PaymentStatus, PaymentMethod
+from admission.templatetags.admission import authentication_css_class, bg_class_by_checklist_experience
 from admission.utils import (
     access_title_country,
     add_close_modal_into_htmx_response,
@@ -3296,8 +3293,6 @@ class ChecklistView(
 
             # Add the documents related to cv experiences
             for admission_document in admission_documents:
-                if admission_document.lecture_seule:
-                    read_only_documents.append(admission_document.identifiant)
                 document_tab_identifier = admission_document.onglet.split('.')
 
                 if document_tab_identifier[0] == OngletsDemande.CURRICULUM.name and len(document_tab_identifier) > 1:

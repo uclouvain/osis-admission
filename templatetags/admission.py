@@ -36,7 +36,6 @@ import attr
 from django import template
 from django.conf import settings
 from django.core.validators import EMPTY_VALUES
-from django.db.models import Q
 from django.shortcuts import resolve_url
 from django.template.defaultfilters import unordered_list
 from django.urls import NoReverseMatch, reverse
@@ -44,15 +43,11 @@ from django.utils.safestring import SafeString, mark_safe
 from django.utils.translation import get_language, gettext
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext
-from osis_comment.models import CommentEntry
 from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_history.models import HistoryEntry
 from rules.templatetags import rules
 
 from admission.auth.constants import READ_ACTIONS_BY_TAB, UPDATE_ACTIONS_BY_TAB
-from admission.auth.roles.central_manager import CentralManager
-from admission.auth.roles.program_manager import ProgramManager
-from admission.auth.roles.sic_management import SicManagement
 from admission.constants import (
     CONTEXT_CONTINUING,
     CONTEXT_DOCTORATE,
@@ -141,19 +136,14 @@ from admission.utils import (
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.enums.civil_state import CivilState
 from base.models.person import Person
-from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
 from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
-    ExperienceAcademiqueDTO,
-    ExperienceNonAcademiqueDTO,
     MessageCurriculumDTO,
 )
-from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
-    ExperienceParcoursInterneDTO,
-)
-from osis_role.contrib.permissions import _get_roles_assigned_to_user
+from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
 from osis_role.templatetags.osis_role import has_perm
 from reference.models.country import Country
 from reference.models.language import Language
@@ -1472,9 +1462,6 @@ def get_document_details_url(context, document: EmplacementDocumentDTO):
     )
 
     query_params = {}
-
-    if document.lecture_seule:
-        query_params['read-only'] = '1'
 
     if document.requis_automatiquement:
         query_params['mandatory'] = '1'

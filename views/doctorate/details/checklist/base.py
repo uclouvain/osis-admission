@@ -442,8 +442,6 @@ class ChecklistView(
 
             # Add the documents related to cv experiences
             for admission_document in admission_documents:
-                if admission_document.lecture_seule:
-                    read_only_documents.append(admission_document.identifiant)
                 document_tab_identifier = admission_document.onglet.split('.')
 
                 if document_tab_identifier[0] == OngletsDemande.CURRICULUM.name and len(document_tab_identifier) > 1:

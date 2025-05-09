@@ -30,6 +30,7 @@ from typing import List, Optional, Set, Union
 
 from django.conf import settings
 from django.db import transaction
+from django.db.models import Exists, OuterRef, F
 from django.utils.dateparse import parse_date, parse_datetime
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
@@ -80,6 +81,15 @@ from admission.models import (
 )
 from admission.models.base import BaseAdmission
 from base.models.person import Person
+from osis_profile.models import (
+    OSIS_PROFILE_MODELS,
+)
+from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection
+from osis_profile.models.epc_injection import (
+    EPCInjectionStatus as CurriculumEPCInjectionStatus,
+)
+from osis_profile.models.epc_injection import ExperienceType
+from osis_profile.services.injection_epc import InjectionEPCCurriculum
 
 
 class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
@@ -121,7 +131,7 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
         admission = cls.get_admission(entities[0].entity_id.proposition_id)
 
         admission.modified_at = datetime.datetime.now()
-        admission.last_update_author = Person.objects.get(global_id=auteur)
+        admission.last_update_author = Person.objects.annotate(noma=F('student__registration_id')).get(global_id=auteur)
 
         updated_fields_by_object = {
             admission: ['requested_documents', 'modified_at', 'last_update_author'],
@@ -207,6 +217,11 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
                     if isinstance(uuid_document, uuid.UUID)
                 ]
                 model_object.save(update_fields=fields)
+                if isinstance(model_object, OSIS_PROFILE_MODELS):
+                    vient_d_epc = bool(getattr(model_object, 'external_id', ''))
+                    deja_injectee = model_object.injecte_par_cv
+                    if vient_d_epc or deja_injectee:
+                        InjectionEPCCurriculum().injecter_selon_modele(model_object, admission.last_update_author)
 
     @classmethod
     def entity_to_dict(cls, entity: EmplacementDocument) -> dict:
@@ -423,6 +438,14 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
         entity_id: PropositionIdentity,
     ) -> Union[GeneralEducationAdmission, DoctorateAdmission, ContinuingEducationAdmission]:
         try:
-            return cls.admission_model_class.objects.get(uuid=entity_id.uuid)
+            return cls.admission_model_class.objects.annotate(
+                secondaire_injectee_par_cv=Exists(
+                    CurriculumEPCInjection.objects.filter(
+                        type_experience=ExperienceType.HIGH_SCHOOL.name,
+                        person_id=OuterRef('candidate_id'),
+                        status__in=CurriculumEPCInjectionStatus.blocking_statuses_for_experience(),
+                    )
+                ),
+            ).get(uuid=entity_id.uuid)
         except cls.admission_model_class.DoesNotExist:
             raise PropositionNonTrouveeException
