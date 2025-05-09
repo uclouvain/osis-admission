@@ -36,7 +36,6 @@ import attr
 from django import template
 from django.conf import settings
 from django.core.validators import EMPTY_VALUES
-from django.db.models import Q
 from django.shortcuts import resolve_url
 from django.template.defaultfilters import unordered_list
 from django.urls import NoReverseMatch, reverse
@@ -44,15 +43,11 @@ from django.utils.safestring import SafeString, mark_safe
 from django.utils.translation import get_language, gettext
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext
-from osis_comment.models import CommentEntry
 from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_history.models import HistoryEntry
 from rules.templatetags import rules
 
 from admission.auth.constants import READ_ACTIONS_BY_TAB, UPDATE_ACTIONS_BY_TAB
-from admission.auth.roles.central_manager import CentralManager
-from admission.auth.roles.program_manager import ProgramManager
-from admission.auth.roles.sic_management import SicManagement
 from admission.constants import (
     CONTEXT_CONTINUING,
     CONTEXT_DOCTORATE,
@@ -80,11 +75,10 @@ from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
-from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
-from admission.ddd.admission.enums import (
-    TypeItemFormulaire,
-    Onglets,
+from admission.ddd.admission.dtos.titre_acces_selectionnable import (
+    TitreAccesSelectionnableDTO,
 )
+from admission.ddd.admission.enums import Onglets, TypeItemFormulaire
 from admission.ddd.admission.enums.emplacement_document import (
     StatutReclamationEmplacementDocument,
 )
@@ -131,6 +125,7 @@ from admission.models import (
     GeneralEducationAdmission,
 )
 from admission.models.base import BaseAdmission
+from admission.models.epc_injection import EPCInjectionStatus
 from admission.utils import (
     format_address,
     format_school_title,
@@ -141,7 +136,6 @@ from admission.utils import (
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.enums.civil_state import CivilState
 from base.models.person import Person
-from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
 from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
@@ -150,7 +144,6 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     MessageCurriculumDTO,
 )
 from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
-from osis_role.contrib.permissions import _get_roles_assigned_to_user
 from osis_role.templatetags.osis_role import has_perm
 from reference.models.country import Country
 from reference.models.language import Language
@@ -327,8 +320,6 @@ class Tab:
     name: str
     label: str = ''
     icon: str = ''
-    badge: str = ''
-    icon_after: str = ''
 
     def __hash__(self):
         # Only hash the name, as lazy strings have different memory addresses
@@ -445,36 +436,6 @@ def get_valid_tab_tree(context, permission_obj, tab_tree):
         # Get the accessible sub tabs depending on the user permissions
         valid_sub_tabs = [tab for tab in sub_tabs if can_read_tab(context, tab.name, permission_obj)]
 
-        # Add dynamic badge for comments
-        if parent_tab == Tab('comments'):
-            from admission.views.common.detail_tabs.comments import (
-                COMMENT_TAG_FAC,
-                COMMENT_TAG_GLOBAL,
-                COMMENT_TAG_SIC,
-            )
-
-            roles = _get_roles_assigned_to_user(context['request'].user)
-            qs = CommentEntry.objects.filter(object_uuid=context['view'].kwargs['uuid'])
-            if {SicManagement, CentralManager} & set(roles):
-                parent_tab.badge = qs.filter(tags__contains=[COMMENT_TAG_SIC, COMMENT_TAG_GLOBAL]).count()
-            elif {ProgramManager} & set(roles):
-                parent_tab.badge = qs.filter(tags__contains=[COMMENT_TAG_FAC, COMMENT_TAG_GLOBAL]).count()
-
-        # Add icon when folder in quarantine
-        if parent_tab == Tab('person') and getattr(permission_obj, 'candidate_id', None):
-            person_merge_proposal = PersonMergeProposal.objects.filter(
-                original_person_id=permission_obj.candidate_id,
-            ).first()
-            if person_merge_proposal and (
-                person_merge_proposal.status in PersonMergeStatus.quarantine_statuses()
-                or not person_merge_proposal.validation.get('valid', True)
-            ):
-                # Cas display warning when quarantaine
-                # (cf. admission/infrastructure/admission/domain/service/lister_toutes_demandes.py)
-                parent_tab.icon_after = 'fas fa-warning text-warning'
-            else:
-                parent_tab.icon_after = ''
-
         # Only add the parent tab if at least one sub tab is allowed
         if len(valid_sub_tabs) > 0:
             valid_tab_tree[parent_tab] = valid_sub_tabs
@@ -513,6 +474,7 @@ def admission_tabs(context):
     admission = context['view'].get_permission_object()
     current_tab_tree = get_valid_tab_tree(context, admission, TAB_TREES[get_current_context(admission)]).copy()
     tab_context['tab_tree'] = current_tab_tree
+    tab_context['tab_label_suffixes'] = context.get('tab_label_suffixes', {})
     return tab_context
 
 
@@ -625,10 +587,10 @@ def field_data(
 
 
 @register.simple_tag
-def get_image_file_url(file_uuids):
-    """Returns the url of the file whose uuid is the first of the specified ones, if it is an image."""
-    if file_uuids:
-        token = get_remote_token(file_uuids[0], for_modified_upload=True)
+def get_image_file_url(file_uuid):
+    """Returns the url of the file, if it is an image."""
+    if file_uuid:
+        token = get_remote_token(file_uuid, for_modified_upload=True)
         if token:
             metadata = get_remote_metadata(token)
             if metadata and metadata.get('mimetype') in IMAGE_MIME_TYPES:
@@ -1591,4 +1553,24 @@ def htmx_comment_form(form, disabled=None):
     return {
         'form': form,
         'disabled': disabled,
+    }
+
+
+@register.inclusion_tag('admission/dummy.html')
+def epc_injection_status_display(value):
+    epc_injection_template = {
+        EPCInjectionStatus.OK.name: 'admission/continuing_education/includes/epc_injection_status_ok.html',
+        EPCInjectionStatus.OSIS_ERROR.name: 'admission/continuing_education/includes/epc_injection_status_error.html',
+        EPCInjectionStatus.ERROR.name: 'admission/continuing_education/includes/epc_injection_status_error.html',
+        EPCInjectionStatus.PENDING.name: 'admission/continuing_education/includes/epc_injection_status_pending.html',
+        EPCInjectionStatus.NO_SENT.name: 'admission/continuing_education/includes/epc_injection_status_pending.html',
+    }.get(value)
+
+    if not epc_injection_template:
+        return {'template': 'admission/empty_template.html'}
+
+    return {
+        'template': epc_injection_template,
+        'epc_injection_status_value': value,
+        'epc_injection_status_label': EPCInjectionStatus.get_value(value),
     }

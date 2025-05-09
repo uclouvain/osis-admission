@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,35 +23,17 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework.generics import RetrieveAPIView
 from rest_framework.response import Response
 
 from admission.api import serializers
-from admission.api.schema import ResponseSpecificSchema
 from admission.utils import (
-    get_cached_continuing_education_admission_perm_obj,
     get_cached_admission_perm_obj,
+    get_cached_continuing_education_admission_perm_obj,
     get_cached_general_education_admission_perm_obj,
 )
 from osis_role.contrib.views import APIPermissionRequiredMixin
-
-
-class BasePDFRecapSchema(ResponseSpecificSchema):
-    serializer_mapping = {
-        'GET': serializers.PDFRecapSerializer,
-    }
-
-
-class ContinuingPDFRecapSchema(BasePDFRecapSchema):
-    operation_id_base = '_continuing_education_proposition_pdf_recap'
-
-
-class DoctoratePDFRecapSchema(BasePDFRecapSchema):
-    operation_id_base = '_doctorate_education_proposition_pdf_recap'
-
-
-class GeneralPDFRecapSchema(BasePDFRecapSchema):
-    operation_id_base = '_general_education_proposition_pdf_recap'
 
 
 class BasePDFRecapView(APIPermissionRequiredMixin, RetrieveAPIView):
@@ -60,7 +42,9 @@ class BasePDFRecapView(APIPermissionRequiredMixin, RetrieveAPIView):
 
     def get(self, request, *args, **kwargs):
         """Generate the proposition recap and return a file read token"""
-        from admission.exports.admission_recap.admission_recap import admission_pdf_recap
+        from admission.exports.admission_recap.admission_recap import (
+            admission_pdf_recap,
+        )
 
         admission = self.get_permission_object()
 
@@ -69,9 +53,14 @@ class BasePDFRecapView(APIPermissionRequiredMixin, RetrieveAPIView):
         return Response(serializer.data)
 
 
+@extend_schema_view(
+    get=extend_schema(
+        responses=serializers.PDFRecapSerializer,
+        operation_id='retrieve_continuing_education_proposition_pdf_recap',
+    ),
+)
 class ContinuingPDFRecapView(BasePDFRecapView):
     name = "continuing_pdf_recap"
-    schema = ContinuingPDFRecapSchema()
     permission_mapping = {
         'GET': 'admission.download_continuingeducationadmission_pdf_recap',
     }
@@ -80,9 +69,14 @@ class ContinuingPDFRecapView(BasePDFRecapView):
         return get_cached_continuing_education_admission_perm_obj(self.kwargs['uuid'])
 
 
+@extend_schema_view(
+    get=extend_schema(
+        responses=serializers.PDFRecapSerializer,
+        operation_id='retrieve_doctorate_education_proposition_pdf_recap',
+    ),
+)
 class DoctoratePDFRecapView(BasePDFRecapView):
     name = "doctorate_pdf_recap"
-    schema = DoctoratePDFRecapSchema()
     permission_mapping = {
         'GET': 'admission.download_doctorateadmission_pdf_recap',
     }
@@ -91,9 +85,14 @@ class DoctoratePDFRecapView(BasePDFRecapView):
         return get_cached_admission_perm_obj(self.kwargs['uuid'])
 
 
+@extend_schema_view(
+    get=extend_schema(
+        responses=serializers.PDFRecapSerializer,
+        operation_id='retrieve_general_education_proposition_pdf_recap',
+    ),
+)
 class GeneralPDFRecapView(BasePDFRecapView):
     name = "general_pdf_recap"
-    schema = GeneralPDFRecapSchema()
     permission_mapping = {
         'GET': 'admission.download_generaleducationadmission_pdf_recap',
     }

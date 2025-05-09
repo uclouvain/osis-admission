@@ -297,6 +297,7 @@ COMMAND_HANDLERS = {
         i_profil_candidat_translator=ProfilCandidatTranslator(),
         i_comptabilite_translator=ComptabiliteTranslator(),
         academic_year_repository=AcademicYearRepository(),
+        question_specifique_translator=QuestionSpecifiqueTranslator(),
     ),
     RecupererPropositionGestionnaireQuery: lambda msg_bus, cmd: recuperer_proposition_gestionnaire(
         cmd,
@@ -430,6 +431,7 @@ COMMAND_HANDLERS = {
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
             question_specifique_translator=QuestionSpecifiqueTranslator(),
+            unites_enseignement_translator=UnitesEnseignementTranslator(),
         )
     ),
     SpecifierPaiementNecessaireCommand: lambda msg_bus, cmd: specifier_paiement_necessaire(
@@ -512,7 +514,6 @@ COMMAND_HANDLERS = {
         unites_enseignement_translator=UnitesEnseignementTranslator(),
         titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
         profil_candidat_translator=ProfilCandidatTranslator(),
-        academic_year_repository=AcademicYearRepository(),
         experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
     ),
     ApprouverInscriptionTardiveParFaculteCommand: lambda msg_bus, cmd: approuver_inscription_tardive_par_faculte(

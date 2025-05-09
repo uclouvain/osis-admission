@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,48 +24,80 @@
 #
 # ##############################################################################
 import itertools
-from typing import Optional, List, Dict, Union
+from typing import Dict, List, Optional, Union
 
 from django.conf import settings
-from django.utils import translation, timezone
+from django.utils import timezone, translation
 from django.utils.translation import override
 
 from admission.constants import ORDERED_CAMPUSES_UUIDS
 from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererResumeEtEmplacementsDocumentsPropositionQuery,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixTypeAdmission
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import TypeDeRefus
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition, PropositionIdentity
-from admission.ddd.admission.doctorat.preparation.domain.service.i_pdf_generation import IPDFGeneration
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PdfSicInconnu
-from admission.ddd.admission.doctorat.preparation.dtos import GroupeDeSupervisionDTO
-from admission.ddd.admission.doctorat.preparation.dtos.proposition import PropositionGestionnaireDTO
-from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
-from admission.ddd.admission.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
-from admission.ddd.admission.dtos.resume import ResumeEtEmplacementsDocumentsPropositionDTO
-from admission.ddd.admission.enums.emplacement_document import (
-    OngletsDemande,
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixTypeAdmission,
 )
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
+    TypeDeRefus,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    Proposition,
+    PropositionIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.domain.service.i_pdf_generation import (
+    IPDFGeneration,
+)
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    PdfSicInconnu,
+)
+from admission.ddd.admission.doctorat.preparation.dtos import GroupeDeSupervisionDTO
+from admission.ddd.admission.doctorat.preparation.dtos.proposition import (
+    PropositionGestionnaireDTO,
+)
+from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
+    IPropositionRepository,
+)
+from admission.ddd.admission.domain.model.titre_acces_selectionnable import (
+    TitreAccesSelectionnable,
+)
+from admission.ddd.admission.domain.service.i_profil_candidat import (
+    IProfilCandidatTranslator,
+)
+from admission.ddd.admission.domain.service.i_unites_enseignement_translator import (
+    IUnitesEnseignementTranslator,
+)
+from admission.ddd.admission.dtos.resume import (
+    ResumeEtEmplacementsDocumentsPropositionDTO,
+)
+from admission.ddd.admission.enums.emplacement_document import OngletsDemande
 from admission.exports.utils import admission_generate_pdf
 from admission.infrastructure.admission.domain.service.unites_enseignement_translator import (
     UnitesEnseignementTranslator,
 )
-from admission.infrastructure.utils import (
-    CHAMPS_DOCUMENTS_EXPERIENCES_CURRICULUM,
-)
+from admission.infrastructure.utils import CHAMPS_DOCUMENTS_EXPERIENCES_CURRICULUM
 from admission.utils import WeasyprintStylesheets
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
 from ddd.logic.formation_catalogue.commands import GetCreditsDeLaFormationQuery
-from ddd.logic.shared_kernel.campus.domain.model.uclouvain_campus import UclouvainCampusIdentity
-from ddd.logic.shared_kernel.campus.repository.i_uclouvain_campus import IUclouvainCampusRepository
+from ddd.logic.shared_kernel.campus.domain.model.uclouvain_campus import (
+    UclouvainCampusIdentity,
+)
+from ddd.logic.shared_kernel.campus.repository.i_uclouvain_campus import (
+    IUclouvainCampusRepository,
+)
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
-from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceNonAcademiqueDTO, ExperienceAcademiqueDTO
-from reference.services.mandates import MandatesService, MandateFunctionEnum, MandatesException
+from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
+    IExperienceParcoursInterneTranslator,
+)
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
+    ExperienceAcademiqueDTO,
+    ExperienceNonAcademiqueDTO,
+)
+from reference.services.mandates import (
+    MandateFunctionEnum,
+    MandatesException,
+    MandatesService,
+)
 
 ENTITY_SIC = 'SIC'
 ENTITY_SICB = 'SICB'
@@ -247,16 +279,14 @@ class PDFGeneration(IPDFGeneration):
     ) -> Optional[str]:
         from infrastructure.messages_bus import message_bus_instance
 
-        proposition_dto = proposition_repository.get_dto_for_gestionnaire(
-            proposition.entity_id, UnitesEnseignementTranslator
-        )
-
         documents_resume: ResumeEtEmplacementsDocumentsPropositionDTO = message_bus_instance.invoke(
             RecupererResumeEtEmplacementsDocumentsPropositionQuery(
-                uuid_proposition=proposition_dto.uuid,
+                uuid_proposition=str(proposition.entity_id.uuid),
                 avec_document_libres=True,
             )
         )
+
+        proposition_dto = documents_resume.resume.proposition
 
         experiences_curriculum_par_uuid: Dict[str, Union[ExperienceNonAcademiqueDTO, ExperienceAcademiqueDTO]] = {
             str(experience.uuid): experience

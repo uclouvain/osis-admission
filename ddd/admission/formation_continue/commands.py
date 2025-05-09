@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -29,6 +29,9 @@ from typing import Dict, List, Optional
 import attr
 
 from admission.ddd.admission import commands
+from admission.ddd.admission.enums.valorisation_experience import (
+    ExperiencesCVRecuperees,
+)
 from admission.ddd.interface import SortedQueryRequest
 from osis_common.ddd import interface
 
@@ -182,8 +185,10 @@ class RecupererDocumentsReclamesPropositionQuery(interface.QueryRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery(interface.QueryRequest):
+class RecupererResumeEtEmplacementsDocumentsPropositionQuery(interface.QueryRequest):
     uuid_proposition: str
+    avec_document_libres: bool = False
+    experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -305,8 +310,6 @@ class AnnulerPropositionCommand(interface.CommandRequest):
 class ValiderPropositionCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str
-    objet_message: str
-    corps_message: str
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -332,6 +335,7 @@ class ListerDemandesQuery(SortedQueryRequest):
     types_formation: Optional[List[str]] = None
     sigles_formations: Optional[List[str]] = None
     inscription_requise: Optional[bool] = None
+    injection_epc_en_erreur: Optional[bool] = None
     paye: Optional[bool] = None
     mode_filtres_etats_checklist: Optional[str] = ''
     filtres_etats_checklist: Optional[Dict[str, List[str]]] = None

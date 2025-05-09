@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -91,7 +91,6 @@
           {% include "admission/continuing_education/includes/checklist/decision_hold_modal.html" %}
           {% include "admission/continuing_education/includes/checklist/decision_deny_modal.html" %}
           {% include "admission/continuing_education/includes/checklist/decision_cancel_modal.html" %}
-          {% include "admission/continuing_education/includes/checklist/decision_validation_modal.html" %}
           {% include 'admission/continuing_education/includes/checklist/decision_send_to_fac_modal.html' %}
           {% include 'admission/continuing_education/includes/checklist/decision_to_be_processed_modal.html' %}
           {% include 'admission/continuing_education/includes/checklist/decision_taken_in_charge_modal.html' %}
@@ -106,7 +105,7 @@
 
     <div id="document-viewer-tab" class="viewer-tab">
       <div class="split-tab-slider"></div>
-      <div id="document-content" hx-indicator="#document-spinner">
+      <div id="document-content" hx-indicator="#document-details">
         {% for tab, documents in documents.items %}
           <div role="tabpanel" class="documents-tab" id="{{ tab }}-documents">
             <label for="{{ tab }}-documents-select">{% translate 'Document' %}</label>
@@ -619,21 +618,18 @@
       position: absolute;
       left: 50%;
       top: 50%;
-      font-size: 2em;
+      width: 2em;
+      height: 2em;
       margin-top: -1em;
-      content: "\f110";
-      font-family: "Font Awesome 6 Free";
-      font-weight: 900;
-      -webkit-animation-name: fa-spin;
-      animation-name: fa-spin;
-      -webkit-animation-direction: normal;
-      animation-direction: normal;
-      -webkit-animation-duration: 1s;
-      animation-duration: 1s;
-      -webkit-animation-iteration-count: infinite;
-      animation-iteration-count: infinite;
-      -webkit-animation-timing-function: steps(8);
-      animation-timing-function: steps(8);
+      content: '';
+      border-radius: 50%;
+      -moz-animation: spin-loader 2s linear infinite;
+      -webkit-animation: spin-loader 2s linear infinite;
+      animation: spin-loader 2s linear infinite;
+      border-color: #286090;
+      border-style: solid;
+      border-top-color: transparent;
+      z-index: 100;
     }
 
     #tabs-content a.saving::before {

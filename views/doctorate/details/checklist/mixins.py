@@ -121,11 +121,10 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
 
     @cached_property
     def incomplete_curriculum_experiences(self):
-        curriculum_exceptions = self.curriculum_checking_exceptions
         return {
-            str(e.reference)
-            for e in curriculum_exceptions
-            if isinstance(e, ExperiencesAcademiquesNonCompleteesException)
+            str(experience.uuid)
+            for experience in self.proposition_resume.resume.curriculum.experiences_academiques
+            if experience.champs_credits_bloc_1_et_complements_non_remplis
         }
 
     @cached_property
@@ -136,8 +135,15 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
     @cached_property
     def proposition_resume(self) -> ResumeEtEmplacementsDocumentsPropositionDTO:
         return message_bus_instance.invoke(
-            RecupererResumeEtEmplacementsDocumentsPropositionQuery(uuid_proposition=self.admission_uuid),
+            RecupererResumeEtEmplacementsDocumentsPropositionQuery(
+                uuid_proposition=self.admission_uuid,
+                avec_document_libres=True,
+            ),
         )
+
+    @cached_property
+    def admission_refusal_reasons(self):
+        return [reason.uuid for reason in self.admission.refusal_reasons.all()] + self.admission.other_refusal_reasons
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -224,8 +230,16 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
         return context
 
 
-def get_internal_experiences(matricule_candidat: str) -> List[ExperienceParcoursInterneDTO]:
-    return message_bus_instance.invoke(RecupererExperiencesParcoursInterneQuery(matricule=matricule_candidat))
+def get_internal_experiences(
+    matricule_candidat: str,
+    with_credits: bool = True,
+) -> List[ExperienceParcoursInterneDTO]:
+    return message_bus_instance.invoke(
+        RecupererExperiencesParcoursInterneQuery(
+            matricule=matricule_candidat,
+            avec_credits=with_credits,
+        )
+    )
 
 
 def get_email(template_identifier, language, proposition_dto: PropositionGestionnaireDTO, extra_tokens: dict = None):

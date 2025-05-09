@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,15 +26,20 @@
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
+from django.db.models import BooleanField, NullBooleanField
 from django.utils.translation import gettext_lazy as _
 from ordered_model.models import OrderedModel
 
-from admission.models.form_item import TranslatedJSONField
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
 from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+)
+from admission.models.form_item import TranslatedJSONField
 
 
 class CommonWorkingList(OrderedModel):
@@ -99,6 +104,8 @@ class ContinuingWorkingList(CommonWorkingList):
         ),
         blank=True,
     )
+
+    epc_injection_in_error = BooleanField(default=None, blank=True, null=True, verbose_name=_('EPC injection in error'))
 
     class Meta(OrderedModel.Meta):
         verbose_name = _('Continuing working list')

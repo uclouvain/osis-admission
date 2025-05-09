@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 import itertools
-from typing import Dict, Set, List
+from typing import Dict, List, Set
 
 import attr
 from django.conf import settings
@@ -43,38 +43,44 @@ from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueD
 from admission.ddd.admission.dtos.resume import (
     ResumeEtEmplacementsDocumentsPropositionDTO,
 )
-from admission.ddd.admission.enums import Onglets
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    OngletsChecklist,
+)
 from admission.ddd.admission.enums.statut import STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER_OU_ANNULEE
 from admission.ddd.admission.formation_continue.commands import (
-    RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery,
-    RecupererQuestionsSpecifiquesQuery,
+    RecupererResumeEtEmplacementsDocumentsPropositionQuery,
 )
-from admission.ddd.admission.formation_continue.domain.model.enums import OngletsChecklist
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    OngletsChecklist,
+)
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
 from admission.forms import disable_unavailable_forms
-from admission.forms.admission.checklist import (
-    CommentForm,
-)
+from admission.forms.admission.checklist import CommentForm
 from admission.forms.admission.continuing_education.checklist import (
-    StudentReportForm,
-    DecisionFacApprovalForm,
-    DecisionCancelForm,
-    DecisionValidationForm,
-    DecisionDenyForm,
-    DecisionHoldForm,
     CloseForm,
+    DecisionCancelForm,
+    DecisionDenyForm,
+    DecisionFacApprovalForm,
+    DecisionHoldForm,
+    DecisionValidationForm,
     SendToFacForm,
+    StudentReportForm,
 )
 from admission.mail_templates import (
+    ADMISSION_EMAIL_DECISION_CANCEL,
+    ADMISSION_EMAIL_DECISION_DENY,
     ADMISSION_EMAIL_DECISION_FAC_APPROVAL_WITH_CONDITION,
     ADMISSION_EMAIL_DECISION_FAC_APPROVAL_WITHOUT_CONDITION,
-    ADMISSION_EMAIL_DECISION_DENY,
+    ADMISSION_EMAIL_DECISION_IUFC_COMMENT_FOR_FAC,
     ADMISSION_EMAIL_DECISION_ON_HOLD,
     ADMISSION_EMAIL_DECISION_VALIDATION,
-    ADMISSION_EMAIL_DECISION_CANCEL,
-    ADMISSION_EMAIL_DECISION_IUFC_COMMENT_FOR_FAC,
 )
-from admission.utils import get_salutation_prefix, get_portal_admission_url, get_backoffice_admission_url
+from admission.utils import (
+    get_backoffice_admission_url,
+    get_portal_admission_url,
+    get_salutation_prefix,
+)
+from admission.views.common.detail_tabs.checklist import PropositionFromResumeMixin
 from admission.views.common.mixins import LoadDossierViewMixin
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.templatetags.osis_role import has_perm
@@ -146,9 +152,11 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
             subject = ''
 
         return DecisionFacApprovalForm(
-            data=self.request.POST
-            if self.request.method == 'POST' and 'decision-fac-approval-subject' in self.request.POST
-            else None,
+            data=(
+                self.request.POST
+                if self.request.method == 'POST' and 'decision-fac-approval-subject' in self.request.POST
+                else None
+            ),
             prefix='decision-fac-approval',
             initial={
                 'subject': subject,
@@ -199,9 +207,11 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
 
         return DecisionDenyForm(
             candidate_language=self.admission.candidate.language,
-            data=self.request.POST
-            if self.request.method == 'POST' and 'decision-deny-subject' in self.request.POST
-            else None,
+            data=(
+                self.request.POST
+                if self.request.method == 'POST' and 'decision-deny-subject' in self.request.POST
+                else None
+            ),
             prefix='decision-deny',
             initial={
                 'subject': subject,
@@ -228,9 +238,11 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
 
         return DecisionHoldForm(
             candidate_language=self.admission.candidate.language,
-            data=self.request.POST
-            if self.request.method == 'POST' and 'decision-hold-subject' in self.request.POST
-            else None,
+            data=(
+                self.request.POST
+                if self.request.method == 'POST' and 'decision-hold-subject' in self.request.POST
+                else None
+            ),
             prefix='decision-hold',
             initial={
                 'subject': subject,
@@ -255,37 +267,12 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
             body = ''
 
         return DecisionCancelForm(
-            data=self.request.POST
-            if self.request.method == 'POST' and 'decision-cancel-subject' in self.request.POST
-            else None,
+            data=(
+                self.request.POST
+                if self.request.method == 'POST' and 'decision-cancel-subject' in self.request.POST
+                else None
+            ),
             prefix='decision-cancel',
-            initial={
-                'subject': subject,
-                'body': body,
-            },
-        )
-
-    @cached_property
-    def decision_validation_form(self):
-        tokens = self.mail_tokens
-
-        try:
-            mail_template: MailTemplate = MailTemplate.objects.get_mail_template(
-                ADMISSION_EMAIL_DECISION_VALIDATION,
-                self.admission.candidate.language,
-            )
-
-            subject = mail_template.render_subject(tokens=tokens)
-            body = mail_template.body_as_html(tokens=tokens)
-        except EmptyMailTemplateContent:
-            subject = ''
-            body = ''
-
-        return DecisionValidationForm(
-            data=self.request.POST
-            if self.request.method == 'POST' and 'decision-validation-subject' in self.request.POST
-            else None,
-            prefix='decision-validation',
             initial={
                 'subject': subject,
                 'body': body,
@@ -343,7 +330,6 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
         context['decision_hold_form'] = self.decision_hold_form
         context['decision_deny_form'] = self.decision_deny_form
         context['decision_cancel_form'] = self.decision_cancel_form
-        context['decision_validation_form'] = self.decision_validation_form
         context['decision_close_form'] = self.decision_close_form
         context['decision_send_to_fac_form'] = self.decision_send_to_fac_form
 
@@ -378,7 +364,6 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
                 context['decision_hold_form']: self.can_update_checklist_tab,
                 context['decision_deny_form']: self.can_update_checklist_tab,
                 context['decision_cancel_form']: self.can_update_checklist_tab,
-                context['decision_validation_form']: self.can_update_iufc_checklist_tab,
                 context['decision_close_form']: self.can_update_checklist_tab,
                 context['decision_send_to_fac_form']: self.can_update_iufc_checklist_tab,
                 **{
@@ -404,6 +389,7 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
 
 
 class ChecklistView(
+    PropositionFromResumeMixin,
     CheckListDefaultContextMixin,
     TemplateView,
 ):
@@ -433,6 +419,12 @@ class ChecklistView(
         }
         return documents_by_tab
 
+    @cached_property
+    def proposition_resume(self) -> ResumeEtEmplacementsDocumentsPropositionDTO:
+        return message_bus_instance.invoke(
+            RecupererResumeEtEmplacementsDocumentsPropositionQuery(uuid_proposition=self.admission_uuid)
+        )
+
     def get_template_names(self):
         if self.request.htmx:
             return ["admission/continuing_education/checklist_menu.html"]
@@ -444,22 +436,11 @@ class ChecklistView(
         context = super().get_context_data(**kwargs)
         if not self.request.htmx:
             # Retrieve data related to the proposition
-            command_result: ResumeEtEmplacementsDocumentsPropositionDTO = message_bus_instance.invoke(
-                RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery(uuid_proposition=self.admission_uuid),
-            )
+            command_result = self.proposition_resume
 
             context['resume_proposition'] = command_result.resume
 
-            specific_questions: List[QuestionSpecifiqueDTO] = message_bus_instance.invoke(
-                RecupererQuestionsSpecifiquesQuery(
-                    uuid_proposition=self.admission_uuid,
-                    onglets=[
-                        Onglets.INFORMATIONS_ADDITIONNELLES.name,
-                        Onglets.ETUDES_SECONDAIRES.name,
-                        Onglets.CURRICULUM.name,
-                    ],
-                )
-            )
+            specific_questions = command_result.resume.questions_specifiques_dtos
 
             context['specific_questions_by_tab'] = get_dynamic_questions_by_tab(specific_questions)
 

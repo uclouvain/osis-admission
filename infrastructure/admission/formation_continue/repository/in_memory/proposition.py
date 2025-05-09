@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -30,14 +30,21 @@ import factory
 
 from admission.ddd.admission.dtos import AdressePersonnelleDTO
 from admission.ddd.admission.enums.emplacement_document import (
-    TypeEmplacementDocument,
     StatutEmplacementDocument,
     StatutReclamationEmplacementDocument,
+    TypeEmplacementDocument,
 )
-from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition, PropositionIdentity
-from admission.ddd.admission.formation_continue.domain.validator.exceptions import PropositionNonTrouveeException
+from admission.ddd.admission.formation_continue.domain.model.proposition import (
+    Proposition,
+    PropositionIdentity,
+)
+from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
+    PropositionNonTrouveeException,
+)
 from admission.ddd.admission.formation_continue.dtos import PropositionDTO
-from admission.ddd.admission.formation_continue.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.formation_continue.repository.i_proposition import (
+    IPropositionRepository,
+)
 from admission.ddd.admission.formation_continue.test.factory.proposition import (
     PropositionFactory,
     _PropositionIdentityFactory,
@@ -47,7 +54,9 @@ from admission.ddd.admission.test.factory.formation import FormationIdentityFact
 from admission.infrastructure.admission.formation_continue.domain.service.in_memory.formation import (
     FormationContinueInMemoryTranslator,
 )
-from admission.infrastructure.admission.repository.in_memory.proposition import GlobalPropositionInMemoryRepository
+from admission.infrastructure.admission.repository.in_memory.proposition import (
+    GlobalPropositionInMemoryRepository,
+)
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 
 
@@ -221,6 +230,7 @@ class PropositionInMemoryRepository(
             nom_pays_nationalite_candidat=candidat.nationalite,
             noma_candidat=candidat.noma_candidat,
             adresse_email_candidat=candidat.adresse_email_candidat,
+            photo_identite_candidat=[],
             statut=proposition.statut.name,
             creee_le=proposition.creee_le,
             modifiee_le=proposition.modifiee_le,
@@ -258,9 +268,9 @@ class PropositionInMemoryRepository(
             moyens_decouverte_formation=[way.name for way in proposition.moyens_decouverte_formation],
             autre_moyen_decouverte_formation=proposition.autre_moyen_decouverte_formation,
             aide_a_la_formation=infos_specifiques_iufc.aide_a_la_formation if infos_specifiques_iufc else None,
-            inscription_au_role_obligatoire=infos_specifiques_iufc.inscription_au_role_obligatoire
-            if infos_specifiques_iufc
-            else None,
+            inscription_au_role_obligatoire=(
+                infos_specifiques_iufc.inscription_au_role_obligatoire if infos_specifiques_iufc else None
+            ),
             etat_formation=infos_specifiques_iufc.etat.name if infos_specifiques_iufc else '',
             documents_demandes=proposition.documents_demandes,
             documents_libres_sic_uclouvain=cls.documents_libres_sic_uclouvain.get(proposition.entity_id.uuid, []),
@@ -290,4 +300,5 @@ class PropositionInMemoryRepository(
             motif_d_annulation=proposition.motif_d_annulation,
             profil_soumis_candidat=proposition.profil_soumis_candidat,
             adresses_emails_gestionnaires_formation=[],
+            etat_injection_epc='',
         )

@@ -340,8 +340,8 @@ class StatutsChecklistExperiencesEtreValidesException(BusinessException):
 
     def __init__(self, **kwargs):
         message = _(
-            "All experiences must be in the 'Validated' status so that the previous experience "
-            "can be changed to the 'Sufficient' status."
+            "All experiences must be in the 'Validated' status or in the 'To complete after enrolment' status so that "
+            "the previous experience can be changed to the 'Sufficient' status."
         )
         super().__init__(message, **kwargs)
 
@@ -355,6 +355,6 @@ class DateLimitePaiementDepasseeException(BusinessException):
             "The deadline was {date_limite}. It is no longer possible to regularize your situation."
         ).format(
             date_limite=date_limite.strftime("%d/%m/%Y"),
-            anac=display_as_academic_year(annee_formation)
+            anac=display_as_academic_year(annee_formation),
         )
         super().__init__(message, **kwargs)

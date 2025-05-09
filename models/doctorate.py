@@ -25,11 +25,9 @@
 # ##############################################################################
 import datetime
 from contextlib import suppress
-from typing import Optional
 
 from django.contrib.postgres.fields import ArrayField
 from django.core.cache import cache
-from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import OuterRef, Prefetch
 from django.utils.datetime_safe import date
@@ -39,6 +37,7 @@ from osis_signature.contrib.fields import SignatureProcessField
 from rest_framework.settings import api_settings
 
 from admission.admission_utils.copy_documents import copy_documents
+from admission.constants import CONTEXT_DOCTORATE
 from admission.ddd import DUREE_MAXIMALE_PROGRAMME, DUREE_MINIMALE_PROGRAMME
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
@@ -79,15 +78,17 @@ from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd.interface import BusinessException
 
 from .base import BaseAdmission, BaseAdmissionQuerySet, admission_directory_path
+from .checklist import RefusalReason
+from .mixins import DocumentCopyModelMixin
 
 __all__ = [
     "DoctorateAdmission",
 ]
 
-from .checklist import RefusalReason
 
+class DoctorateAdmission(DocumentCopyModelMixin, BaseAdmission):
+    ID_ATTRIBUTE = 'uuid'  # Used by the DocumentCopyModelMixin
 
-class DoctorateAdmission(BaseAdmission):
     type = models.CharField(
         verbose_name=_("Type"),
         max_length=255,
@@ -651,18 +652,8 @@ class DoctorateAdmission(BaseAdmission):
             )
         )
 
-    def __init__(self, *args, **kwargs):
-        self._duplicate_documents_when_saving: Optional[bool] = None
-
-        super().__init__(*args, **kwargs)
-
-    @property
-    def duplicate_documents_when_saving(self):
-        return self._duplicate_documents_when_saving
-
-    @duplicate_documents_when_saving.setter
-    def duplicate_documents_when_saving(self, value):
-        self._duplicate_documents_when_saving = value
+    def get_admission_context(self):
+        return CONTEXT_DOCTORATE
 
     # The following properties are here to alias the training_id field to doctorate_id
     @property
@@ -733,9 +724,6 @@ class DoctorateAdmission(BaseAdmission):
         ]
 
     def save(self, *args, **kwargs) -> None:
-        if self._state.adding and self.duplicate_documents_when_saving:
-            copy_documents(objs=[self])
-
         super().save(*args, **kwargs)
         cache.delete('admission_permission_{}'.format(self.uuid))
 
@@ -859,7 +847,6 @@ class PropositionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
             .annotate_submitted_profile_countries_names()
             .annotate_last_status_update()
             .prefetch_related(
-                'prerequisite_courses__academic_year',
                 Prefetch(
                     'refusal_reasons',
                     queryset=RefusalReason.objects.select_related('category').order_by('category__order', 'order'),

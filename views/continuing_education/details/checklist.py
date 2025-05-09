@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,30 +24,28 @@
 #
 # ##############################################################################
 
-from typing import Dict, Set, List
+from typing import Dict, List, Set
 
 from django.shortcuts import resolve_url
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import TemplateView, FormView
+from django.views.generic import FormView, TemplateView
 from osis_comment.models import CommentEntry
 
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import (
     ResumeEtEmplacementsDocumentsPropositionDTO,
 )
-from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.formation_continue.commands import (
-    RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery,
-    RecupererQuestionsSpecifiquesQuery,
+    RecupererResumeEtEmplacementsDocumentsPropositionQuery,
 )
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
-from admission.forms.admission.checklist import (
-    CommentForm,
-)
+from admission.forms.admission.checklist import CommentForm
 from admission.forms.admission.continuing_education.checklist import StudentReportForm
-from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
+from admission.views.common.detail_tabs.checklist import PropositionFromResumeMixin
+from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from base.utils.htmx import HtmxPermissionRequiredMixin
+from infrastructure.messages_bus import message_bus_instance
 from osis_role.templatetags.osis_role import has_perm
 
 __namespace__ = False
@@ -87,12 +85,19 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
 
 
 class ChecklistView(
+    PropositionFromResumeMixin,
     CheckListDefaultContextMixin,
     TemplateView,
 ):
     urlpatterns = 'checklist'
     template_name = "admission/continuing_education/checklist.html"
     permission_required = 'admission.view_checklist'
+
+    @cached_property
+    def proposition_resume(self) -> ResumeEtEmplacementsDocumentsPropositionDTO:
+        return message_bus_instance.invoke(
+            RecupererResumeEtEmplacementsDocumentsPropositionQuery(uuid_proposition=self.admission_uuid)
+        )
 
     @classmethod
     def checklist_documents_by_tab(cls, specific_questions: List[QuestionSpecifiqueDTO]) -> Dict[str, Set[str]]:
@@ -131,22 +136,11 @@ class ChecklistView(
         context = super().get_context_data(**kwargs)
         if not self.request.htmx:
             # Retrieve data related to the proposition
-            command_result: ResumeEtEmplacementsDocumentsPropositionDTO = message_bus_instance.invoke(
-                RecupererResumeEtEmplacementsDocumentsNonLibresPropositionQuery(uuid_proposition=self.admission_uuid),
-            )
+            command_result = self.proposition_resume
 
             context['resume_proposition'] = command_result.resume
 
-            specific_questions: List[QuestionSpecifiqueDTO] = message_bus_instance.invoke(
-                RecupererQuestionsSpecifiquesQuery(
-                    uuid_proposition=self.admission_uuid,
-                    onglets=[
-                        Onglets.INFORMATIONS_ADDITIONNELLES.name,
-                        Onglets.ETUDES_SECONDAIRES.name,
-                        Onglets.CURRICULUM.name,
-                    ],
-                )
-            )
+            specific_questions = command_result.resume.questions_specifiques_dtos
 
             context['specific_questions_by_tab'] = get_dynamic_questions_by_tab(specific_questions)
 

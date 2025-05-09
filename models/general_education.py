@@ -33,6 +33,7 @@ from django.utils.translation import gettext_lazy as _
 from osis_document.contrib import FileField
 from rest_framework.settings import api_settings
 
+from admission.constants import CONTEXT_GENERAL
 from admission.ddd import DUREE_MAXIMALE_PROGRAMME, DUREE_MINIMALE_PROGRAMME
 from admission.ddd.admission.domain.model.enums.equivalence import (
     EtatEquivalenceTitreAcces,
@@ -517,6 +518,9 @@ class GeneralEducationAdmission(BaseAdmission):
         verbose_name = _("General education admission")
         ordering = ('-created_at',)
         permissions = []
+
+    def get_admission_context(self):
+        return CONTEXT_GENERAL
 
     def update_detailed_status(self, author: 'Person' = None):
         """Gather exceptions from verification and update determined pool and academic year"""

@@ -547,7 +547,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
         )
         Candidate.objects.get_or_create(person=candidate)
 
-        cls._sauvegarder_comptabilite(admission, entity)
+        cls._sauvegarder_comptabilite(admission=admission, entity=entity, dupliquer_documents=dupliquer_documents)
 
         admission.prerequisite_courses.set([training.uuid for training in entity.complements_formation])
         admission.refusal_reasons.set([motif.uuid for motif in entity.motifs_refus])
@@ -563,12 +563,13 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
         return value
 
     @classmethod
-    def _sauvegarder_comptabilite(cls, admission: DoctorateAdmission, entity: Proposition):
+    def _sauvegarder_comptabilite(cls, admission: DoctorateAdmission, entity: Proposition, dupliquer_documents=False):
         unemployment_benefit_pension_proof = entity.comptabilite.preuve_allocations_chomage_pension_indemnite
         parent_annex_25_26 = entity.comptabilite.annexe_25_26_refugies_apatrides_decision_protection_parent
         Accounting.objects.update_or_create(
             admission=admission,
             defaults={
+                'duplicate_documents_when_saving': dupliquer_documents,  # Indicate if the documents must be duplicated
                 'institute_absence_debts_certificate': entity.comptabilite.attestation_absence_dette_etablissement,
                 'assimilation_situation': (
                     entity.comptabilite.type_situation_assimilation.name
@@ -791,6 +792,14 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             projet_formation_complementaire=admission.additional_training_project,
             lettres_recommandation=admission.recommendation_letters,
             langue_redaction_these=admission.thesis_language.code if admission.thesis_language else '',
+            nom_langue_redaction_these=(
+                getattr(
+                    admission.thesis_language,
+                    'name' if get_language() == settings.LANGUAGE_CODE_FR else 'name_en',
+                )
+                if admission.thesis_language
+                else ''
+            ),
             institut_these=admission.thesis_institute and admission.thesis_institute.uuid,
             nom_institut_these=admission.thesis_institute and admission.thesis_institute.title or '',
             sigle_institut_these=admission.thesis_institute and admission.thesis_institute.acronym or '',

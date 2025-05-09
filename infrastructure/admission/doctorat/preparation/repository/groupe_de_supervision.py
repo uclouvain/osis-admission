@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,23 +26,37 @@
 from collections import defaultdict
 from typing import List, Optional, Union
 
+from django.apps import apps
 from django.db.models import F, Prefetch
 from django.db.models.functions import Coalesce
-from django.utils.translation import get_language, gettext_lazy as _
+from django.utils.translation import get_language
+from django.utils.translation import gettext_lazy as _
 from osis_signature.enums import SignatureState
 from osis_signature.models import Actor, Process, StateHistory
 
 from admission.auth.roles.ca_member import CommitteeMember
 from admission.auth.roles.promoter import Promoter
-from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
-from admission.ddd.admission.doctorat.preparation.domain.model._cotutelle import Cotutelle
-from admission.ddd.admission.doctorat.preparation.domain.model._membre_CA import MembreCAIdentity
-from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
-from admission.ddd.admission.doctorat.preparation.domain.model._signature_membre_CA import SignatureMembreCA
+from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import (
+    PropositionIdentityBuilder,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model._cotutelle import (
+    Cotutelle,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model._membre_CA import (
+    MembreCAIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import (
+    PromoteurIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model._signature_membre_CA import (
+    SignatureMembreCA,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model._signature_promoteur import (
     SignaturePromoteur,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import DoctoratIdentity
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import (
+    DoctoratIdentity,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixEtatSignature,
     ChoixStatutPropositionDoctorale,
@@ -53,9 +67,15 @@ from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervi
     GroupeDeSupervisionIdentity,
     SignataireIdentity,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.doctorat.preparation.dtos import CotutelleDTO, MembreCADTO, PromoteurDTO
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    Proposition,
+    PropositionIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.dtos import (
+    CotutelleDTO,
+    MembreCADTO,
+    PromoteurDTO,
+)
 from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
     IGroupeDeSupervisionRepository,
 )
@@ -337,7 +357,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
             klass = PromoteurDTO if actor.type == ActorType.PROMOTER.name else MembreCADTO
             members.append(
                 klass(
-                    uuid=actor.uuid,
+                    uuid=str(actor.uuid),
                     matricule=actor.person and actor.person.global_id,
                     nom=actor.last_name,
                     prenom=actor.first_name,
@@ -393,29 +413,31 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
             proposition.supervision_group = Process.objects.create()
             proposition.save(update_fields=['supervision_group'])
 
-        if not uuid_proposition_originale:
+        if not uuid_proposition_originale or not apps.is_installed('parcours_doctoral'):
             return
 
-        # Copy members of the supervision group of the original proposition
-        for admission_actor in SupervisionActor.objects.filter(
-            process__doctorateadmission__uuid=uuid_proposition_originale,
+        from parcours_doctoral.models import ParcoursDoctoralSupervisionActor
+
+        # Copy members of the supervision group of the doctorate of the original proposition
+        for doctorate_actor in ParcoursDoctoralSupervisionActor.objects.filter(
+            process__parcoursdoctoral__admission__uuid=uuid_proposition_originale,
         ):
             SupervisionActor.objects.create(
                 process=proposition.supervision_group,
-                type=admission_actor.type,
-                is_doctor=admission_actor.is_doctor,
-                is_reference_promoter=admission_actor.is_reference_promoter,
+                type=doctorate_actor.type,
+                is_doctor=doctorate_actor.is_doctor,
+                is_reference_promoter=doctorate_actor.is_reference_promoter,
                 **(
-                    {'person_id': admission_actor.person_id}
-                    if admission_actor.person_id
+                    {'person_id': doctorate_actor.person_id}
+                    if doctorate_actor.person_id
                     else {
-                        'first_name': admission_actor.first_name,
-                        'last_name': admission_actor.last_name,
-                        'email': admission_actor.email,
-                        'institute': admission_actor.institute,
-                        'city': admission_actor.city,
-                        'country_id': admission_actor.country_id,
-                        'language': admission_actor.language,
+                        'first_name': doctorate_actor.first_name,
+                        'last_name': doctorate_actor.last_name,
+                        'email': doctorate_actor.email,
+                        'institute': doctorate_actor.institute,
+                        'city': doctorate_actor.city,
+                        'country_id': doctorate_actor.country_id,
+                        'language': doctorate_actor.language,
                     }
                 ),
             )

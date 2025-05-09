@@ -26,6 +26,8 @@
 from functools import partial
 
 from django.utils.functional import cached_property
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from admission.api.serializers.fields import AnswerToSpecificQuestionField
@@ -112,15 +114,11 @@ class HighSchoolDiplomaSerializer(serializers.Serializer):
     is_valuated = serializers.SerializerMethodField(read_only=True)
     can_update_diploma = serializers.SerializerMethodField(read_only=True)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['is_vae_potential'].field_schema = {'type': 'boolean'}
-        self.fields['is_valuated'].field_schema = {'type': 'boolean'}
-        self.fields['can_update_diploma'].field_schema = {'type': 'boolean'}
-
+    @extend_schema_field(OpenApiTypes.BOOL)
     def get_is_vae_potential(self, person):
         return ProfilCandidatTranslator.est_potentiel_vae(person.global_id)
 
+    @extend_schema_field(OpenApiTypes.BOOL)
     def get_is_valuated(self, person):
         return self.valuation.est_valorise
 
@@ -170,6 +168,7 @@ class HighSchoolDiplomaSerializer(serializers.Serializer):
         if instance.high_school_diploma_alternative:
             instance.high_school_diploma_alternative.delete()
 
+    @extend_schema_field(OpenApiTypes.BOOL)
     def get_can_update_diploma(self, person):
         return self.valuation.diplome_est_modifiable(
             diplome=(

@@ -110,6 +110,7 @@ from .repository.proposition import PropositionRepository
 
 COMMAND_HANDLERS = {
     InitierPropositionCommand: lambda msg_bus, cmd: initier_proposition(
+        msg_bus,
         cmd,
         proposition_repository=PropositionRepository(),
         doctorat_translator=DoctoratTranslator(),
@@ -262,8 +263,6 @@ COMMAND_HANDLERS = {
     GetGroupeDeSupervisionCommand: lambda msg_bus, cmd: recuperer_groupe_de_supervision(
         cmd,
         groupe_supervision_repository=GroupeDeSupervisionRepository(),
-        promoteur_translator=PromoteurTranslator(),
-        membre_ca_translator=MembreCATranslator(),
     ),
     GetCotutelleCommand: lambda msg_bus, cmd: recuperer_cotutelle(
         cmd,
@@ -324,8 +323,6 @@ COMMAND_HANDLERS = {
         i_profil_candidat_translator=ProfilCandidatTranslator(),
         i_comptabilite_translator=ComptabiliteTranslator(),
         groupe_supervision_repository=GroupeDeSupervisionRepository(),
-        promoteur_translator=PromoteurTranslator(),
-        membre_ca_translator=MembreCATranslator(),
         academic_year_repository=AcademicYearRepository(),
         question_specifique_translator=QuestionSpecifiqueTranslator(),
     ),
@@ -343,8 +340,6 @@ COMMAND_HANDLERS = {
         academic_year_repository=AcademicYearRepository(),
         personne_connue_translator=PersonneConnueUclTranslator(),
         groupe_supervision_repository=GroupeDeSupervisionRepository(),
-        promoteur_translator=PromoteurTranslator(),
-        membre_ca_translator=MembreCATranslator(),
     ),
     RecupererDocumentsReclamesPropositionQuery: lambda msg_bus, cmd: recuperer_documents_reclames_proposition(
         cmd,
@@ -356,8 +351,6 @@ COMMAND_HANDLERS = {
         academic_year_repository=AcademicYearRepository(),
         personne_connue_translator=PersonneConnueUclTranslator(),
         groupe_supervision_repository=GroupeDeSupervisionRepository(),
-        promoteur_translator=PromoteurTranslator(),
-        membre_ca_translator=MembreCATranslator(),
     ),
     AnnulerReclamationDocumentsAuCandidatCommand: (
         lambda msg_bus, cmd: annuler_reclamation_documents_au_candidat(
@@ -372,8 +365,6 @@ COMMAND_HANDLERS = {
             emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
             comptabilite_translator=ComptabiliteTranslator(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
-            promoteur_translator=PromoteurTranslator(),
-            membre_ca_translator=MembreCATranslator(),
         )
     ),
     CompleterEmplacementsDocumentsParCandidatCommand: lambda msg_bus, cmd: (
@@ -390,8 +381,6 @@ COMMAND_HANDLERS = {
             notification=Notification(),
             comptabilite_translator=ComptabiliteTranslator(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
-            promoteur_translator=PromoteurTranslator(),
-            membre_ca_translator=MembreCATranslator(),
         )
     ),
     RecalculerEmplacementsDocumentsNonLibresPropositionCommand: (
@@ -404,8 +393,6 @@ COMMAND_HANDLERS = {
             emplacement_document_repository=EmplacementDocumentRepository(),
             comptabilite_translator=ComptabiliteTranslator(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
-            promoteur_translator=PromoteurTranslator(),
-            membre_ca_translator=MembreCATranslator(),
         )
     ),
     InitialiserEmplacementDocumentLibreNonReclamableCommand: lambda msg_bus, cmd: (
@@ -490,8 +477,7 @@ COMMAND_HANDLERS = {
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
-            promoteur_translator=PromoteurTranslator(),
-            membre_ca_translator=MembreCATranslator(),
+            unites_enseignement_translator=UnitesEnseignementTranslator(),
         )
     ),
     EnvoyerPropositionACddLorsDeLaDecisionCddCommand: (
@@ -526,8 +512,6 @@ COMMAND_HANDLERS = {
         academic_year_repository=AcademicYearRepository(),
         experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
         groupe_supervision_repository=GroupeDeSupervisionRepository(),
-        promoteur_translator=PromoteurTranslator(),
-        membre_ca_translator=MembreCATranslator(),
         notification=Notification(),
     ),
     EnvoyerPropositionAuSicLorsDeLaDecisionCddCommand: (
@@ -593,8 +577,6 @@ COMMAND_HANDLERS = {
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
-            promoteur_translator=PromoteurTranslator(),
-            membre_ca_translator=MembreCATranslator(),
         )
     ),
     ModifierAuthentificationExperienceParcoursAnterieurCommand: (
@@ -623,8 +605,6 @@ COMMAND_HANDLERS = {
             experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
             digit_repository=DigitRepository(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
-            promoteur_translator=PromoteurTranslator(),
-            membre_ca_translator=MembreCATranslator(),
         )
     ),
     ApprouverInscriptionParSicCommand: (
@@ -641,8 +621,6 @@ COMMAND_HANDLERS = {
             personne_connue_translator=PersonneConnueUclTranslator(),
             experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
-            promoteur_translator=PromoteurTranslator(),
-            membre_ca_translator=MembreCATranslator(),
         )
     ),
     EnvoyerEmailApprobationInscriptionAuCandidatCommand: (

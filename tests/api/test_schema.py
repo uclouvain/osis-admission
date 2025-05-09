@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,7 +25,6 @@
 # ##############################################################################
 import filecmp
 import sys
-import unittest
 from unittest import SkipTest
 
 from django.core.files.temp import NamedTemporaryFile
@@ -47,7 +46,6 @@ class ApiSchemaTestCase(TestCase):
             raise SkipTest("Not testing admission directly, do not test schema")
         super().setUpClass()
 
-    @unittest.skip
     def test_api_schema_matches_generation(self):
         with NamedTemporaryFile(mode='w+') as temp:
             call_command(
@@ -73,7 +71,7 @@ class ApiSchemaTestCase(TestCase):
                 ],
             )
             call_command(
-                'generateschema',
+                'spectacular',
                 urlconf='admission.api.url_v1',
                 generator_class='admission.api.schema.AdmissionSchemaGenerator',
                 file=temp.name,

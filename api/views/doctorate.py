@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,23 +23,18 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from drf_spectacular.utils import extend_schema
 from rest_framework import mixins
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
 from admission.api import serializers
-from admission.api.schema import ResponseSpecificSchema
-from admission.ddd.admission.doctorat.preparation.commands import RecupererAdmissionDoctoratQuery
-
+from admission.ddd.admission.doctorat.preparation.commands import (
+    RecupererAdmissionDoctoratQuery,
+)
 from admission.utils import get_cached_admission_perm_obj
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
-
-
-class DoctorateSchema(ResponseSpecificSchema):
-    serializer_mapping = {
-        'GET': serializers.DoctorateDTOSerializer,
-    }
 
 
 class DoctorateAPIView(
@@ -50,7 +45,6 @@ class DoctorateAPIView(
     name = "doctorate"
     pagination_class = None
     filter_backends = []
-    schema = DoctorateSchema()
     permission_mapping = {
         'GET': 'admission.view_doctorateadmission',
     }
@@ -58,6 +52,10 @@ class DoctorateAPIView(
     def get_permission_object(self):
         return get_cached_admission_perm_obj(self.kwargs['uuid'])
 
+    @extend_schema(
+        responses=serializers.DoctorateDTOSerializer,
+        operation_id='retrieveDoctorateDTO',
+    )
     def get(self, request, *args, **kwargs):
         """Get the doctorate"""
         doctorate = message_bus_instance.invoke(

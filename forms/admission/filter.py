@@ -398,6 +398,12 @@ class ContinuingAdmissionsFilterForm(AdmissionFilterWithEntitiesAndTrainingTypes
         empty_label=pgettext_lazy("feminine", "All"),
     )
 
+    injection_epc_en_erreur = NullBooleanSelectField(
+        label=_('Injection in error'),
+        required=False,
+        empty_label=' - ',
+    )
+
     paye = NullBooleanSelectField(
         label=_('Paid'),
         required=False,
