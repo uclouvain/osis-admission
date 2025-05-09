@@ -1041,7 +1041,7 @@ msgstr ""
 msgid ""
 "By finalising my application, I undertake to pay the registration fees upon "
 "receipt of the invoice (provided my application is accepted). In case of "
-"cancellation, the modalities depend on the Faculties."
+"cancellation, the modalities depend on the faculties."
 msgstr ""
 
 msgctxt "ways_hear_about_training"
@@ -2062,6 +2062,9 @@ msgstr ""
 msgid "Dispensation needed"
 msgstr ""
 
+msgid "Dispensation obtained by the VRAE"
+msgstr ""
+
 msgid "Dispensation or increased fees"
 msgstr ""
 
@@ -2294,7 +2297,10 @@ msgstr ""
 msgid "ENROLMENT AUTHORISATION<br>for the %(academic_year)s academic year"
 msgstr ""
 
-msgid "EPC status"
+msgid "EPC injection"
+msgstr ""
+
+msgid "EPC injection in error"
 msgstr ""
 
 msgid "EU,NEU"
@@ -2736,6 +2742,9 @@ msgstr ""
 
 msgctxt "tab"
 msgid "Finalization"
+msgstr ""
+
+msgid "Financability VRAE dispensation"
 msgstr ""
 
 msgid "Financability computed rule"
@@ -3575,6 +3584,9 @@ msgid ""
 "Initialization of the predefined specific questions for an academic year"
 msgstr ""
 
+msgid "Injection in error"
+msgstr ""
+
 msgctxt "admission"
 msgid "Inst."
 msgstr ""
@@ -4279,6 +4291,9 @@ msgstr ""
 
 msgid ""
 "No 'ValidationError' exception must be triggered with the the provided data."
+msgstr ""
+
+msgid "No EPC injection found"
 msgstr ""
 
 msgid "No English studies"
@@ -5986,7 +6001,8 @@ msgstr ""
 
 msgid ""
 "The 'Dispensation granted' status is reserved to enrolment application with "
-"financability dispensation status set to 'Faculty dispensation granted'."
+"financability dispensation status set to 'Faculty dispensation granted' or "
+"with a VRAE dispensation."
 msgstr ""
 
 msgid "The 'Dispensation needed' status is reserved to enrolment application."
@@ -6516,12 +6532,6 @@ msgstr ""
 "%(end_year)s. As soon as we receive the enrolment authorisation signed by "
 "you, we will let you know how to pay."
 
-#, python-format
-msgid ""
-"The validation mail has been sent to the candidate the %(date)s by "
-"%(sender)s."
-msgstr ""
-
 msgid "There can be no more CA members in the supervision group."
 msgstr ""
 "There can be no more supervisory panel members in the supervision group."
@@ -6852,6 +6862,9 @@ msgstr ""
 msgid "UCLouvain logo"
 msgstr ""
 
+msgid "UCLouvain registration:"
+msgstr ""
+
 msgid ""
 "UCLouvain to forward to the secondary school at which I obtained my Belgian "
 "secondary school, information relating to the successful completion of the "
@@ -6940,9 +6953,6 @@ msgstr ""
 msgid "VIP candidate"
 msgstr ""
 
-msgid "Validate"
-msgstr ""
-
 msgid "Validated"
 msgstr ""
 
@@ -6989,9 +6999,6 @@ msgstr "Work contract"
 
 msgctxt "equivalence_status"
 msgid "Waiting"
-msgstr ""
-
-msgid "Waiting for development"
 msgstr ""
 
 msgid "Waiting for signature"

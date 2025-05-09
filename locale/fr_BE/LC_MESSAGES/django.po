@@ -1144,12 +1144,12 @@ msgstr "Motivation succincte"
 msgid ""
 "By finalising my application, I undertake to pay the registration fees upon "
 "receipt of the invoice (provided my application is accepted). In case of "
-"cancellation, the modalities depend on the Faculties."
+"cancellation, the modalities depend on the faculties."
 msgstr ""
 "En finalisant ma demande d’admission, je m’engage à payer les droits "
 "d’inscription dès réception de la facture (pour autant que ma demande "
 "d’admission soit acceptée). En cas d’annulation, les modalités dépendent des "
-"Facultés."
+"facultés."
 
 msgctxt "ways_hear_about_training"
 msgid "By someone who has already taken this course in a previous edition"
@@ -2247,6 +2247,9 @@ msgstr "Dérogation accordée"
 msgid "Dispensation needed"
 msgstr "Besoin dérogation"
 
+msgid "Dispensation obtained by the VRAE"
+msgstr "Dérogation obtenue par le VRAE"
+
 msgid "Dispensation or increased fees"
 msgstr "Dispense ou droits majorés"
 
@@ -2497,8 +2500,11 @@ msgstr "EN"
 msgid "ENROLMENT AUTHORISATION<br>for the %(academic_year)s academic year"
 msgstr "AUTORISATION D’INSCRIPTION<br>à l’année académique %(academic_year)s"
 
-msgid "EPC status"
-msgstr "Statut EPC"
+msgid "EPC injection"
+msgstr "Injection EPC"
+
+msgid "EPC injection in error"
+msgstr "Injection EPC en erreur"
 
 msgid "EU,NEU"
 msgstr "UE,HUE"
@@ -2999,6 +3005,9 @@ msgstr "Filtrer par documents"
 msgctxt "tab"
 msgid "Finalization"
 msgstr "Finalisation"
+
+msgid "Financability VRAE dispensation"
+msgstr "Dérogation VRAE à la financabilité"
 
 msgid "Financability computed rule"
 msgstr "Règle calculé de financabilité"
@@ -4010,6 +4019,9 @@ msgstr ""
 "Initialisation des questions spécifiques prédéfinies pour une année "
 "académique"
 
+msgid "Injection in error"
+msgstr "Injection en erreur"
+
 msgctxt "admission"
 msgid "Inst."
 msgstr "Etab."
@@ -4786,6 +4798,9 @@ msgid ""
 msgstr ""
 "Aucune erreur de validation ne doit être déclenchée avec les données "
 "spécifiées."
+
+msgid "No EPC injection found"
+msgstr "Aucune injection EPC trouvée"
 
 msgid "No English studies"
 msgstr "Aucune étude en anglais"
@@ -6611,11 +6626,12 @@ msgstr ""
 
 msgid ""
 "The 'Dispensation granted' status is reserved to enrolment application with "
-"financability dispensation status set to 'Faculty dispensation granted'."
+"financability dispensation status set to 'Faculty dispensation granted' or "
+"with a VRAE dispensation."
 msgstr ""
 "Le passage à l'état 'Dérogation accordée' est réservé aux demandes de type "
 "inscription dont la situation de dérogation à la finançabilité est 'accord "
-"de dérogation facultaire'."
+"de dérogation facultaire' ou pour lesquelles une dérogation du VRAE a été obtenue."
 
 msgid "The 'Dispensation needed' status is reserved to enrolment application."
 msgstr ""
@@ -7246,13 +7262,6 @@ msgstr ""
 "01/02/%(end_year)s. Dès réception de ce document signé par vos soins, les "
 "modalités de payement vous seront communiquées."
 
-#, python-format
-msgid ""
-"The validation mail has been sent to the candidate the %(date)s by "
-"%(sender)s."
-msgstr ""
-"Le mail de validation a été envoyé au candidat le %(date)s par %(sender)s."
-
 msgid "There can be no more CA members in the supervision group."
 msgstr ""
 "Il ne peut y avoir davantage de membres du comité d'accompagnement dans le "
@@ -7648,6 +7657,9 @@ msgstr "Par le site de la formation continue UCLouvain"
 msgid "UCLouvain logo"
 msgstr "Logo de l'UCLouvain"
 
+msgid "UCLouvain registration:"
+msgstr "Inscription au rôle :"
+
 msgid ""
 "UCLouvain to forward to the secondary school at which I obtained my Belgian "
 "secondary school, information relating to the successful completion of the "
@@ -7742,9 +7754,6 @@ msgstr "VIP"
 msgid "VIP candidate"
 msgstr "Candidat VIP"
 
-msgid "Validate"
-msgstr "Valider"
-
 msgid "Validated"
 msgstr "Validé"
 
@@ -7792,9 +7801,6 @@ msgstr "Contrat de travail"
 msgctxt "equivalence_status"
 msgid "Waiting"
 msgstr "En attente"
-
-msgid "Waiting for development"
-msgstr "En attente de développement"
 
 msgid "Waiting for signature"
 msgstr "En attente de signature"

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 from django.conf import settings
 from django.forms import Form
 from django.http import HttpResponseForbidden
-from django.views.generic import TemplateView, FormView
+from django.views.generic import FormView, TemplateView
 from osis_history.utilities import add_history_entry
 from osis_mail_template.utils import transform_html_to_text
 from osis_notification.contrib.handlers import EmailNotificationHandler
@@ -34,33 +34,35 @@ from osis_notification.contrib.notification import EmailNotification
 
 from admission.auth.roles.program_manager import ProgramManager
 from admission.ddd.admission.formation_continue.commands import (
-    MettreEnAttenteCommand,
-    RefuserPropositionCommand,
     AnnulerPropositionCommand,
-    ValiderPropositionCommand,
+    AnnulerReclamationDocumentsAuCandidatCommand,
     ApprouverParFacCommand,
     CloturerPropositionCommand,
-    AnnulerReclamationDocumentsAuCandidatCommand,
     MettreAValiderCommand,
+    MettreEnAttenteCommand,
+    RefuserPropositionCommand,
+    ValiderPropositionCommand,
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutPropositionContinue,
-    ChoixStatutChecklist,
     STATUTS_PROPOSITION_CONTINUE_SOUMISE_POUR_CANDIDAT,
+    ChoixStatutChecklist,
+    ChoixStatutPropositionContinue,
 )
 from admission.forms.admission.continuing_education.checklist import (
-    DecisionFacApprovalForm,
-    DecisionCancelForm,
-    DecisionValidationForm,
-    DecisionDenyForm,
-    DecisionHoldForm,
     CloseForm,
+    DecisionCancelForm,
+    DecisionDenyForm,
+    DecisionFacApprovalForm,
+    DecisionHoldForm,
+    DecisionValidationForm,
     SendToFacForm,
 )
 from admission.infrastructure.utils import get_message_to_historize
 from admission.views.common.detail_tabs.checklist import change_admission_status
 from admission.views.common.mixins import AdmissionFormMixin
-from admission.views.continuing_education.details.checklist.base import CheckListDefaultContextMixin
+from admission.views.continuing_education.details.checklist.base import (
+    CheckListDefaultContextMixin,
+)
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
@@ -230,18 +232,15 @@ class CancelFormView(CheckListDefaultContextMixin, AdmissionFormMixin, HtmxPermi
 class ValidationFormView(CheckListDefaultContextMixin, AdmissionFormMixin, HtmxPermissionRequiredMixin, FormView):
     name = 'decision-validation'
     urlpatterns = 'decision-validation'
-    template_name = 'admission/continuing_education/includes/checklist/decision_validation_form.html'
-    htmx_template_name = 'admission/continuing_education/includes/checklist/decision_validation_form.html'
+    template_name = 'admission/empty_template.html'
+    htmx_template_name = 'admission/empty_template.html'
     permission_required = 'admission.change_checklist_iufc'
-    form_class = DecisionValidationForm
+    form_class = Form
 
     def dispatch(self, request, *args, **kwargs):
         if self.admission.is_in_quarantine:
             return HttpResponseForbidden()
         return super().dispatch(request, *args, **kwargs)
-
-    def get_form(self, form_class=None):
-        return self.decision_validation_form
 
     def form_valid(self, form):
         try:
@@ -249,8 +248,6 @@ class ValidationFormView(CheckListDefaultContextMixin, AdmissionFormMixin, HtmxP
                 ValiderPropositionCommand(
                     uuid_proposition=self.admission_uuid,
                     gestionnaire=self.request.user.person.global_id,
-                    objet_message=form.cleaned_data['subject'],
-                    corps_message=form.cleaned_data['body'],
                 )
             )
         except BusinessException as exception:

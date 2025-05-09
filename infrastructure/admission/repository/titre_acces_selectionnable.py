@@ -134,6 +134,7 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
         internal_experiences = (
             experience_parcours_interne_translator.recuperer(
                 matricule=admission.candidate.global_id,
+                avec_credits=False,
             )
             if not seulement_selectionnes or seulement_selectionnes and internal_access_titles_uuids
             else []

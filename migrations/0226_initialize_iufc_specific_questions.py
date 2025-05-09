@@ -4,41 +4,20 @@ from django.db import migrations
 
 from admission.ddd.admission.domain.enums import TypeFormation
 from admission.ddd.admission.enums import (
-    TypeItemFormulaire,
     CleConfigurationItemFormulaire,
+    CritereItemFormulaireFormation,
+    Onglets,
+    TypeChampSelectionFormulaire,
     TypeChampTexteFormulaire,
-    TypeChampSelectionFormulaire, CritereItemFormulaireFormation, Onglets,
+    TypeItemFormulaire,
 )
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from admission.management.commands.initialize_specific_questions import (
+    SpecificContinuingQuestionToInit as SpecificQuestionToInit,
+)
 from base.models.enums.education_group_categories import Categories
-from base.models.utils.utils import ChoiceEnum
-
-
-class SpecificQuestionToInit(ChoiceEnum):
-    IUFC_ANNEXES = 'IUFC-Annexes'
-    IUFC_BIM1 = 'IUFC-BIM1'
-    IUFC_BIM2 = 'IUFC-BIM2'
-    IUFC_BIM3 = 'IUFC-BIM3'
-    IUFC_BURNOUT = 'IUFC-Burnout'
-    IUFC_CHEQUES_FORMATION1 = 'IUFC-Chèques formation1'
-    IUFC_CHEQUES_FORMATION2 = 'IUFC-Chèques formation2'
-    IUFC_CONGES_EDUCATION = 'IUFC-Congés éducation'
-    IUFC_CONGES_EDUCATION_DOC = 'IUFC-Congés éducation doc'
-    IUFC_ETALEMENT_PAIEMENT = 'IUFC-Etalement paiement'
-    IUFC_HOTEL = 'IUFC-Hôtel'
-    IUFC_INAMI = 'IUFC-INAMI'
-    IUFC_LANGAGE_PROGR = 'IUFC-Langage progr'
-    IUFC_LOGICIELS_STAT = 'IUFC-Logiciels stat'
-    IUFC_MEDIATION_ST_LOUIS = 'IUFC-Médiation St Louis'
-    IUFC_NIV_ANGLAIS = 'IUFC-Niv anglais'
-    IUFC_PC = 'IUFC-PC'
-    IUFC_PREREQUIS_STAT = 'IUFC-Prérequis stat'
-    IUFC_SECTEUR_ASSOCIATIF_QUESTION = 'IUFC-Secteur associatif question'
-    IUFC_SECTEUR_ASSOCIATIF_DOC = 'IUFC-Secteur associatif doc'
-    IUFC_TITRE_PEDAGOGIQUE_QUESTION = 'IUFC-Titre pédagogique question'
-    IUFC_TITRE_PEDAGOGIQUE_DOC = 'IUFC-Titre pédagogique doc'
 
 
 def initialize_iufc_specific_questions(apps, schema_editor):
@@ -734,6 +713,7 @@ def initialize_iufc_specific_questions(apps, schema_editor):
             )
 
     AdmissionFormItemInstantiation.objects.bulk_create(admission_form_items_instantiations)
+
 
 class Migration(migrations.Migration):
 
