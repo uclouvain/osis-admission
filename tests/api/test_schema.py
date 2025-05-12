@@ -27,9 +27,11 @@ import filecmp
 import sys
 from unittest import SkipTest
 
+from django.conf import settings
 from django.core.files.temp import NamedTemporaryFile
 from django.core.management import ManagementUtility, call_command
 from django.test import TestCase
+from django.utils.translation import override
 
 
 class ApiSchemaTestCase(TestCase):
@@ -46,6 +48,7 @@ class ApiSchemaTestCase(TestCase):
             raise SkipTest("Not testing admission directly, do not test schema")
         super().setUpClass()
 
+    @override(language=settings.LANGUAGE_CODE_FR)
     def test_api_schema_matches_generation(self):
         with NamedTemporaryFile(mode='w+') as temp:
             call_command(
