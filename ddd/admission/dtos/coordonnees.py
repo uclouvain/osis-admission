@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ from typing import Optional
 
 import attr
 
+from admission.admission_utils.format_address import format_address
 from osis_common.ddd import interface
 
 
@@ -41,6 +42,16 @@ class AdressePersonnelleDTO(interface.DTO):
     boite_postale: str
     destinataire: str = ''
 
+    def adresse_formatee(self, separator):
+        return format_address(
+            street=self.rue,
+            street_number=self.numero_rue,
+            postal_code=self.code_postal,
+            city=self.ville,
+            country=self.nom_pays,
+            separator=separator,
+        )
+
 
 @attr.dataclass(frozen=True, slots=True)
 class CoordonneesDTO(interface.DTO):
@@ -49,3 +60,9 @@ class CoordonneesDTO(interface.DTO):
     numero_mobile: str
     adresse_email_privee: str
     numero_contact_urgence: str
+
+    def adresse_domicile_legale_formatee(self, separator=', '):
+        return self.domicile_legal.adresse_formatee(separator) if self.domicile_legal else ''
+
+    def adresse_correspondance_formatee(self, separator=', '):
+        return self.adresse_correspondance.adresse_formatee(separator) if self.adresse_correspondance else ''

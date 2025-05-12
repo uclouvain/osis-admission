@@ -608,12 +608,13 @@ msgstr ""
 "Tous les membres du comité d'accompagnement doivent approuver la proposition."
 
 msgid ""
-"All experiences must be in the 'Validated' status or in the 'To complete after "
-"enrolment' status so that the previous experience can be changed to the "
-"'Sufficient' status."
+"All experiences must be in the 'Validated' status or in the 'To complete "
+"after enrolment' status so that the previous experience can be changed to "
+"the 'Sufficient' status."
 msgstr ""
-"L'ensemble des expériences doivent être à l'état 'Validé' ou à l'état 'A compléter après inscription' pour que le "
-"parcours antérieur puisse passer à l'état 'Suffisant'."
+"L'ensemble des expériences doivent être à l'état 'Validé' ou à l'état 'A "
+"compléter après inscription' pour que le parcours antérieur puisse passer à "
+"l'état 'Suffisant'."
 
 msgid "All history"
 msgstr "Historique complet"
@@ -1075,7 +1076,8 @@ msgid "Bachelor"
 msgstr "Bachelier"
 
 msgid "Bachelor's course entrance exam"
-msgstr "Examen d'admission aux études de premier cycle de l'enseignement supérieur"
+msgstr ""
+"Examen d'admission aux études de premier cycle de l'enseignement supérieur"
 
 msgid "Back to checklist"
 msgstr "Retour à la checklist"
@@ -1095,6 +1097,9 @@ msgstr "Compte bancaire"
 
 msgid "Belgian"
 msgstr "Belge"
+
+msgid "Belgian National Register Number"
+msgstr "Numéro de registre national belge"
 
 msgid "Belgian diploma"
 msgstr "Diplôme belge"
@@ -1667,6 +1672,9 @@ msgstr "Date de l'épreuve de confirmation"
 msgid "Contact"
 msgstr "Contact"
 
+msgid "Contact address"
+msgstr "Adresse de contact"
+
 msgid "Contact details"
 msgstr "Coordonnées"
 
@@ -1925,6 +1933,9 @@ msgid_plural "Course duration: %(years)s years."
 msgstr[0] "Durée des études : 1 an."
 msgstr[1] "Durée des études : %(years)s ans."
 
+msgid "Course manager(s)"
+msgstr "Gestionnaire(s) de formation"
+
 msgid "Course name"
 msgstr "Intitulé de la formation"
 
@@ -1968,8 +1979,14 @@ msgstr "Date de création"
 msgid "Credits earned"
 msgstr "Crédits acquis"
 
+msgid "Current employer"
+msgstr "Employeur actuel"
+
 msgid "Current funding"
 msgstr "Financement actuel"
+
+msgid "Current occupation"
+msgstr "Fonction actuelle"
 
 msgid "Curriculum"
 msgstr "Curriculum"
@@ -2734,6 +2751,9 @@ msgstr ""
 msgid "Emails of the training managers"
 msgstr "Emails des gestionnaires de la formation"
 
+msgid "Emergency contact"
+msgstr "Contact en cas d'urgence"
+
 msgid "Emergency contact (telephone number)"
 msgstr "Contact en cas d'urgence (numéro de téléphone)"
 
@@ -3397,6 +3417,9 @@ msgstr "Mention obtenue"
 #, python-brace-format
 msgid "Graduation of {program_name}"
 msgstr "L'obtention de votre diplôme de {program_name}"
+
+msgid "Graduation year"
+msgstr "Année d'obtention"
 
 msgid "Greetings depending on the gender of the candidate"
 msgstr "Salutations en fonction du genre du candidat"
@@ -4184,6 +4207,9 @@ msgstr "Langue"
 msgid "Language regime"
 msgstr "Régime linguistique"
 
+msgid "Last degree level"
+msgstr "Niveau du dernier diplôme"
+
 msgid "Last email sent by"
 msgstr "Dernière email envoyé par"
 
@@ -4661,6 +4687,9 @@ msgstr "Autres prénoms"
 msgid "Missing"
 msgstr "Manquants"
 
+msgid "Mobile phone (GSM)"
+msgstr "Téléphone mobile (GSM)"
+
 msgid "Mobility months amount"
 msgstr "Nombre de mois de mobilité"
 
@@ -4688,6 +4717,9 @@ msgstr "ID Mollie"
 
 msgid "Most recent year of enrolment"
 msgstr "Dernière année d'inscription"
+
+msgid "Most recent year of enrolment at UCL"
+msgstr "Dernière année d'inscription UCL"
 
 msgid "Motivation"
 msgstr "Motivation"
@@ -4747,9 +4779,6 @@ msgstr "Mon conjoint"
 
 msgid "NO"
 msgstr "Non"
-
-msgid "NOMA"
-msgstr "NOMA"
 
 msgid "NOMA not found"
 msgstr "NOMA non trouvé"
@@ -5091,6 +5120,9 @@ msgctxt "ways_hear_about_training"
 msgid "Other"
 msgstr "Autre"
 
+msgid "Other academic courses"
+msgstr "Autres formations"
+
 msgid "Other additional conditions"
 msgstr "Autres conditions complémentaires"
 
@@ -5251,6 +5283,9 @@ msgstr "Numéro de passeport"
 
 msgid "Past experiences authentication"
 msgstr "Authentification parcours"
+
+msgid "Past non-academic activities (prof. and not prof.)"
+msgstr "Activités non-académiques passées (prof. et non prof.)"
 
 msgid "Pay by training cheque"
 msgstr "Paye par chèque formation"
@@ -5529,6 +5564,9 @@ msgstr "Présidente de la %(cdd_title)s"
 msgctxt "male gender"
 msgid "President of the %(cdd_title)s"
 msgstr "Président de la %(cdd_title)s"
+
+msgid "Previous NOMA"
+msgstr "Précédent NOMA"
 
 msgid "Previous admission"
 msgstr "Demande précédente"
@@ -5890,6 +5928,9 @@ msgstr "Droits d'inscription"
 
 msgid "Registration required"
 msgstr "Inscription au rôle requise"
+
+msgid "Registration type"
+msgstr "Inscription à titre"
 
 msgid "Related experience"
 msgstr "Expérience associée"
@@ -6646,7 +6687,8 @@ msgid ""
 msgstr ""
 "Le passage à l'état 'Dérogation accordée' est réservé aux demandes de type "
 "inscription dont la situation de dérogation à la finançabilité est 'accord "
-"de dérogation facultaire' ou pour lesquelles une dérogation du VRAE a été obtenue."
+"de dérogation facultaire' ou pour lesquelles une dérogation du VRAE a été "
+"obtenue."
 
 msgid "The 'Dispensation needed' status is reserved to enrolment application."
 msgstr ""
@@ -7601,6 +7643,9 @@ msgctxt "admission"
 msgid "Training acronym"
 msgstr "Sigle formation"
 
+msgid "Training assistance"
+msgstr "Aide à la formation"
+
 msgid "Training of the admission"
 msgstr "Formation de la proposition"
 
@@ -8532,6 +8577,9 @@ msgctxt "feminine"
 msgid "modified"
 msgstr "modifiée"
 
+msgid "no"
+msgstr "non"
+
 #, python-format
 msgid "on %(date)s at %(hour)s"
 msgstr "le %(date)s at %(hour)s"
@@ -8585,9 +8633,6 @@ msgstr "utilisation"
 msgid "yes"
 msgstr "oui"
 
-msgid "yes,no"
-msgstr "oui,non"
-
 msgid "yes,no,"
 msgstr "oui,non,"
 
@@ -8617,3 +8662,7 @@ msgstr ""
 #, python-brace-format
 msgid "{items} types out of {total}"
 msgstr "{items} types sur {total}"
+
+#, python-brace-format
+msgid "{obj.dates_formatees} : {obj.fonction} at {obj.employeur}"
+msgstr "{obj.dates_formatees} : {obj.fonction} à {obj.employeur}"

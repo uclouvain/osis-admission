@@ -116,7 +116,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             ContinuingEducationAdmissionFactory(
                 candidate__first_name="John",
                 candidate__last_name="Doe",
-                candidate__email='john.doe@example.be',
+                candidate__private_email='john.doe@example.be',
                 status=ChoixStatutPropositionContinue.CONFIRMEE.name,
                 training__management_entity=cls.first_entity,
                 training__acronym="ZEBU0",
@@ -141,7 +141,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             ContinuingEducationAdmissionFactory(
                 candidate__first_name="Jim",
                 candidate__last_name="Arnold",
-                candidate__email='jim.arnold@example.be',
+                candidate__private_email='jim.arnold@example.be',
                 status=ChoixStatutPropositionContinue.EN_BROUILLON.name,
                 training__management_entity=cls.first_entity,
                 training__acronym="ABCD0",
@@ -367,7 +367,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(object_list[0].nom_candidat, current_admission.candidate.last_name)
         self.assertEqual(object_list[0].prenom_candidat, current_admission.candidate.first_name)
         self.assertEqual(object_list[0].noma_candidat, self.students[0].registration_id)
-        self.assertEqual(object_list[0].courriel_candidat, current_admission.candidate.email)
+        self.assertEqual(object_list[0].courriel_candidat, current_admission.candidate.private_email)
         self.assertEqual(object_list[0].sigle_formation, current_admission.training.acronym)
         self.assertEqual(object_list[0].code_formation, current_admission.training.partial_acronym)
         self.assertEqual(object_list[0].intitule_formation, current_admission.training.title)
@@ -377,18 +377,6 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         )
         self.assertEqual(object_list[0].edition, current_admission.edition)
         self.assertEqual(object_list[0].sigle_faculte, current_admission.training_management_faculty)
-        self.assertEqual(object_list[0].droits_reduits, current_admission.reduced_rights)
-        self.assertEqual(object_list[0].paye_par_cheque_formation, current_admission.pay_by_training_cheque)
-        self.assertEqual(object_list[0].cep, current_admission.cep)
-        self.assertEqual(object_list[0].etalement_des_paiements, current_admission.payement_spread)
-        self.assertEqual(object_list[0].etalement_de_la_formation, current_admission.training_spread)
-        self.assertEqual(
-            object_list[0].valorisation_des_acquis_d_experience,
-            current_admission.experience_knowledge_valorisation,
-        )
-        self.assertEqual(object_list[0].a_presente_l_epreuve_d_evaluation, current_admission.assessment_test_presented)
-        self.assertEqual(object_list[0].a_reussi_l_epreuve_d_evaluation, current_admission.assessment_test_succeeded)
-        self.assertEqual(object_list[0].diplome_produit, current_admission.certificate_provided)
 
         self.assertEqual(object_list[0].etat_demande, current_admission.status)
         self.assertEqual(object_list[0].etat_injection_epc, '')

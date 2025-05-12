@@ -993,6 +993,9 @@ msgstr ""
 msgid "Belgian"
 msgstr ""
 
+msgid "Belgian National Register Number"
+msgstr ""
+
 msgid "Belgian diploma"
 msgstr ""
 
@@ -1535,6 +1538,9 @@ msgstr ""
 msgid "Contact"
 msgstr ""
 
+msgid "Contact address"
+msgstr ""
+
 msgid "Contact details"
 msgstr ""
 
@@ -1746,6 +1752,9 @@ msgid_plural "Course duration: %(years)s years."
 msgstr[0] ""
 msgstr[1] ""
 
+msgid "Course manager(s)"
+msgstr ""
+
 msgid "Course name"
 msgstr ""
 
@@ -1787,7 +1796,13 @@ msgstr ""
 msgid "Credits earned"
 msgstr ""
 
+msgid "Current employer"
+msgstr ""
+
 msgid "Current funding"
+msgstr ""
+
+msgid "Current occupation"
 msgstr ""
 
 msgid "Curriculum"
@@ -2489,6 +2504,9 @@ msgstr ""
 msgid "Emails of the training managers"
 msgstr ""
 
+msgid "Emergency contact"
+msgstr ""
+
 msgid "Emergency contact (telephone number)"
 msgstr ""
 
@@ -3097,6 +3115,9 @@ msgstr ""
 
 #, python-brace-format
 msgid "Graduation of {program_name}"
+msgstr ""
+
+msgid "Graduation year"
 msgstr ""
 
 msgid "Greetings depending on the gender of the candidate"
@@ -3744,6 +3765,9 @@ msgstr ""
 msgid "Language regime"
 msgstr ""
 
+msgid "Last degree level"
+msgstr ""
+
 msgid "Last email sent by"
 msgstr ""
 
@@ -4160,6 +4184,9 @@ msgstr ""
 msgid "Missing"
 msgstr ""
 
+msgid "Mobile phone (GSM)"
+msgstr ""
+
 msgid "Mobility months amount"
 msgstr ""
 
@@ -4186,6 +4213,9 @@ msgid "Mollie ID"
 msgstr ""
 
 msgid "Most recent year of enrolment"
+msgstr ""
+
+msgid "Most recent year of enrolment at UCL"
 msgstr ""
 
 msgid "Motivation"
@@ -4243,9 +4273,6 @@ msgstr ""
 
 msgid "NO"
 msgstr "No"
-
-msgid "NOMA"
-msgstr ""
 
 msgid "NOMA not found"
 msgstr ""
@@ -4570,6 +4597,9 @@ msgctxt "ways_hear_about_training"
 msgid "Other"
 msgstr ""
 
+msgid "Other academic courses"
+msgstr ""
+
 msgid "Other additional conditions"
 msgstr ""
 
@@ -4727,6 +4757,9 @@ msgid "Passport number"
 msgstr ""
 
 msgid "Past experiences authentication"
+msgstr ""
+
+msgid "Past non-academic activities (prof. and not prof.)"
 msgstr ""
 
 msgid "Pay by training cheque"
@@ -4966,6 +4999,9 @@ msgstr ""
 #, python-format
 msgctxt "male gender"
 msgid "President of the %(cdd_title)s"
+msgstr ""
+
+msgid "Previous NOMA"
 msgstr ""
 
 msgid "Previous admission"
@@ -5313,6 +5349,9 @@ msgid "Registration fees"
 msgstr ""
 
 msgid "Registration required"
+msgstr ""
+
+msgid "Registration type"
 msgstr ""
 
 msgid "Related experience"
@@ -6806,6 +6845,9 @@ msgctxt "admission"
 msgid "Training acronym"
 msgstr ""
 
+msgid "Training assistance"
+msgstr ""
+
 msgid "Training of the admission"
 msgstr ""
 
@@ -7616,6 +7658,9 @@ msgctxt "feminine"
 msgid "modified"
 msgstr ""
 
+msgid "no"
+msgstr ""
+
 #, python-format
 msgid "on %(date)s at %(hour)s"
 msgstr ""
@@ -7669,9 +7714,6 @@ msgstr ""
 msgid "yes"
 msgstr ""
 
-msgid "yes,no"
-msgstr ""
-
 msgid "yes,no,"
 msgstr ""
 
@@ -7698,4 +7740,8 @@ msgstr ""
 
 #, python-brace-format
 msgid "{items} types out of {total}"
+msgstr ""
+
+#, python-brace-format
+msgid "{obj.dates_formatees} : {obj.fonction} at {obj.employeur}"
 msgstr ""

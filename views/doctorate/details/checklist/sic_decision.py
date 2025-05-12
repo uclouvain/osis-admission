@@ -96,7 +96,6 @@ from admission.mail_templates.checklist import (
     EMAIL_TEMPLATE_VISA_APPLICATION_DOCUMENT_URL_DOCTORATE_TOKEN,
 )
 from admission.utils import (
-    format_academic_year,
     get_backoffice_admission_url,
     get_portal_admission_url,
     get_salutation_prefix,
@@ -114,6 +113,7 @@ from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
 from base.utils.htmx import HtmxPermissionRequiredMixin
+from base.utils.utils import format_academic_year
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
