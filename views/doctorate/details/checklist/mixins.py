@@ -224,8 +224,16 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
         return context
 
 
-def get_internal_experiences(matricule_candidat: str) -> List[ExperienceParcoursInterneDTO]:
-    return message_bus_instance.invoke(RecupererExperiencesParcoursInterneQuery(matricule=matricule_candidat))
+def get_internal_experiences(
+    matricule_candidat: str,
+    with_credits: bool = True,
+) -> List[ExperienceParcoursInterneDTO]:
+    return message_bus_instance.invoke(
+        RecupererExperiencesParcoursInterneQuery(
+            matricule=matricule_candidat,
+            avec_credits=with_credits,
+        )
+    )
 
 
 def get_email(template_identifier, language, proposition_dto: PropositionGestionnaireDTO, extra_tokens: dict = None):

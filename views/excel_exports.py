@@ -67,26 +67,43 @@ from admission.ddd.admission.doctorat.preparation.dtos.liste import DemandeReche
 from admission.ddd.admission.doctorat.preparation.read_view.repository.i_tableau_bord import (
     ITableauBordRepositoryAdmissionMixin,
 )
-from admission.ddd.admission.dtos.liste import DemandeRechercheDTO as TouteDemandeRechercheDTO
+from admission.ddd.admission.dtos.liste import (
+    DemandeRechercheDTO as TouteDemandeRechercheDTO,
+)
 from admission.ddd.admission.enums import TypeItemFormulaire
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.enums.liste import TardiveModificationReorientationFiltre
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION_DICT
 from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.ddd.admission.formation_continue.commands import ListerDemandesQuery as ListerDemandesContinuesQuery
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue, ChoixEdition
-from admission.ddd.admission.formation_continue.domain.model.enums import OngletsChecklist as OngletsChecklistContinue
+from admission.ddd.admission.formation_continue.commands import (
+    ListerDemandesQuery as ListerDemandesContinuesQuery,
+)
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixEdition,
+    ChoixStatutPropositionContinue,
+)
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    OngletsChecklist as OngletsChecklistContinue,
+)
 from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT_CONTINUE,
 )
-from admission.ddd.admission.formation_continue.dtos.liste import DemandeRechercheDTO as DemandeContinueRechercheDTO
-from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist as OngletsChecklistGenerale
+from admission.ddd.admission.formation_continue.dtos.liste import (
+    DemandeRechercheDTO as DemandeContinueRechercheDTO,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    OngletsChecklist as OngletsChecklistGenerale,
+)
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT_GENERALE,
 )
-from admission.forms.admission.filter import AllAdmissionsFilterForm, ContinuingAdmissionsFilterForm
+from admission.forms.admission.filter import (
+    AllAdmissionsFilterForm,
+    ContinuingAdmissionsFilterForm,
+)
 from admission.forms.doctorate.cdd.filter import DoctorateListFilterForm
 from admission.models import AdmissionFormItem, SupervisionActor
+from admission.models.epc_injection import EPCInjectionStatus
 from admission.templatetags.admission import admission_status
 from admission.utils import add_messages_into_htmx_response
 from base.models.campus import Campus
@@ -171,9 +188,7 @@ class BaseAdmissionExcelExportView(
 
     def get_row_data_specific_questions_answers(
         self,
-        proposition_dto: Union[
-            TouteDemandeRechercheDTO,
-        ],
+        proposition_dto: Union[TouteDemandeRechercheDTO,],
     ):
         """
         Get the answers of the specific questions of the proposition based on a list of configurations.
@@ -487,7 +502,7 @@ class ContinuingAdmissionListExcelExportView(BaseAdmissionExcelExportView):
 
         # Format boolean values
         # > "Yes" / "No" / ""
-        for filter_name in ['inscription_requise', 'paye']:
+        for filter_name in ['inscription_requise', 'paye', 'injection_epc_en_erreur']:
             formatted_filters[filter_name] = yesno(formatted_filters[filter_name], _('yes,no,'))
 
         # > "Yes" / ""
@@ -540,7 +555,7 @@ class ContinuingAdmissionListExcelExportView(BaseAdmissionExcelExportView):
             _('Assessment test succeeded'),
             _('Certificate provided'),
             _('Status'),
-            _('EPC status'),
+            _('EPC injection'),
             _('Confirmation date'),
             _('Last modif.'),
             _('Modification author'),
@@ -567,7 +582,7 @@ class ContinuingAdmissionListExcelExportView(BaseAdmissionExcelExportView):
             yesno(row.a_reussi_l_epreuve_d_evaluation, _('yes,no')),
             yesno(row.diplome_produit, _('yes,no')),
             str(ChoixStatutPropositionContinue.get_value(row.etat_demande)),
-            '',  # TODO Add EPC status
+            str(EPCInjectionStatus.get_value(row.etat_injection_epc)) if row.etat_injection_epc else '',
             row.date_confirmation.strftime(FULL_DATE_FORMAT) if row.date_confirmation else '',
             row.derniere_modification_le.strftime(FULL_DATE_FORMAT),
             row.derniere_modification_par,
@@ -704,9 +719,9 @@ class DoctorateAdmissionListExcelExportView(BaseAdmissionExcelExportView):
 
         dashboard_indicator = formatted_filters.get('indicateur_tableau_bord')
         if dashboard_indicator:
-            mapping_filter_key_value[
-                'indicateur_tableau_bord'
-            ] = ITableauBordRepositoryAdmissionMixin.libelles_indicateurs_admission.get(dashboard_indicator)
+            mapping_filter_key_value['indicateur_tableau_bord'] = (
+                ITableauBordRepositoryAdmissionMixin.libelles_indicateurs_admission.get(dashboard_indicator)
+            )
 
         # Format boolean values
         # > "Yes" / "No" / ""

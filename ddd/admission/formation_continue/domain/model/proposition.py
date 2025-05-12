@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 # ##############################################################################
 
 import datetime
-from typing import Optional, Dict, List
+from typing import Dict, List, Optional
 
 import attr
 from django.utils.timezone import now
@@ -34,39 +34,47 @@ from django.utils.translation import gettext_noop as __
 from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.domain.model.question_specifique import QuestionSpecifique
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.domain.service.i_question_specifique import ISuperQuestionSpecifiqueTranslator
-from admission.ddd.admission.domain.service.profil_candidat import ProfilCandidat as ProfilCandidatService
+from admission.ddd.admission.domain.service.i_profil_candidat import (
+    IProfilCandidatTranslator,
+)
+from admission.ddd.admission.domain.service.i_question_specifique import (
+    ISuperQuestionSpecifiqueTranslator,
+)
+from admission.ddd.admission.domain.service.profil_candidat import (
+    ProfilCandidat as ProfilCandidatService,
+)
 from admission.ddd.admission.formation_continue.domain.model._adresse import Adresse
 from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutPropositionContinue,
-    ChoixInscriptionATitre,
-    ChoixTypeAdresseFacturation,
-    ChoixMoyensDecouverteFormation,
     ChoixEdition,
+    ChoixInscriptionATitre,
     ChoixMotifAttente,
     ChoixMotifRefus,
+    ChoixMoyensDecouverteFormation,
     ChoixStatutChecklist,
+    ChoixStatutPropositionContinue,
+    ChoixTypeAdresseFacturation,
 )
 from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
-    StatutsChecklistContinue,
     StatutChecklist,
+    StatutsChecklistContinue,
 )
 from admission.ddd.admission.formation_continue.domain.validator.validator_by_business_action import (
-    InformationsComplementairesValidatorList,
     ChoixFormationValidatorList,
+    InformationsComplementairesValidatorList,
 )
 from admission.ddd.admission.formation_continue.domain.validator.validator_by_business_actions import (
-    MettreEnAttenteValidatorList,
-    ApprouverParFacValidatorList,
-    RefuserPropositionValidatorList,
     AnnulerPropositionValidatorList,
+    ApprouverParFacValidatorList,
     ApprouverPropositionValidatorList,
     CloturerPropositionValidatorList,
     MettreAValiderValidatorList,
+    MettreEnAttenteValidatorList,
+    RefuserPropositionValidatorList,
 )
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
-from ddd.logic.formation_catalogue.formation_continue.dtos.informations_specifiques import InformationsSpecifiquesDTO
+from ddd.logic.formation_catalogue.formation_continue.dtos.informations_specifiques import (
+    InformationsSpecifiquesDTO,
+)
 from osis_common.ddd import interface
 
 
@@ -395,8 +403,6 @@ class Proposition(interface.RootEntity):
             statut=ChoixStatutChecklist.GEST_REUSSITE,
             libelle=__('Validated'),
         )
-        self.decision_dernier_mail_envoye_le = now()
-        self.decision_dernier_mail_envoye_par = gestionnaire
         self.auteur_derniere_modification = gestionnaire
 
     def mettre_a_valider(

@@ -566,6 +566,13 @@ class SpecifierDerogationFinancabiliteCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
+class SpecifierDerogationVraeFinancabiliteCommand(interface.CommandRequest):
+    uuid_proposition: str
+    derogation_vrae: bool
+    gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
 class NotifierCandidatDerogationFinancabiliteCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str

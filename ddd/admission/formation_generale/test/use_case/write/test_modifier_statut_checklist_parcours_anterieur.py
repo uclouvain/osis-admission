@@ -210,6 +210,17 @@ class TestModifierStatutChecklistParcoursAnterieurService(SimpleTestCase):
         )
         self.assertIsNotNone(proposition_id)
 
+        checklist_experience.statut = ChoixStatutChecklist.GEST_BLOCAGE_ULTERIEUR
+
+        proposition_id = self.message_bus.invoke(
+            ModifierStatutChecklistParcoursAnterieurCommand(
+                uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
+                statut=ChoixStatutChecklist.GEST_REUSSITE.name,
+                gestionnaire='0123456789',
+            )
+        )
+        self.assertIsNotNone(proposition_id)
+
         # Expérience valorisée mais sans checklist -> lever une exception
         self.profil_candidat_translator.valorisations['INCONNUE-VALORISEE'] = ['uuid-MASTER-SCI-CONFIRMED']
 

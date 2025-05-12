@@ -143,7 +143,7 @@ class IElementsConfirmation(interface.DomainService):
     )
     DROITS_INSCRIPTION_IUFC = _(
         'By finalising my application, I undertake to pay the registration fees upon receipt of the invoice '
-        '(provided my application is accepted). In case of cancellation, the modalities depend on the Faculties.'
+        '(provided my application is accepted). In case of cancellation, the modalities depend on the faculties.'
     )
     TITRE_ELEMENT_CONFIRMATION = {
         'hors_delai': '',

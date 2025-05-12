@@ -7,7 +7,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -76,7 +76,7 @@
       {% checklist_state_button tab='decision' label=_("To validate IUFC") icon='list-check' state='GEST_EN_COURS' en_cours="to_validate" class='info' htmx_post='decision-to-validate' disabled=is_not_iufc %}
       {% if not original_admission.is_in_quarantine %}
         {% if is_iufc %}
-          {% checklist_state_button tab='decision' label=validated_label icon='check' state='GEST_REUSSITE' class='success' open_modal='#decision-validation-modal' %}
+          {% checklist_state_button tab='decision' label=validated_label icon='check' state='GEST_REUSSITE' class='success' htmx_post='decision-validation' %}
         {% else %}
           {% checklist_state_button tab='decision' label=validated_label icon='check' state='GEST_REUSSITE' class='success' disabled=True %}
         {% endif %}
@@ -115,7 +115,7 @@
       {% checklist_state_button tab='decision' label=_("Canceled") icon='circle-stop' state='GEST_BLOCAGE' blocage="canceled" class='danger' open_modal='#decision-cancel-modal' %}
       {% checklist_state_button tab='decision' label=_("To validate IUFC") icon='list-check' state='GEST_EN_COURS' en_cours="to_validate" class='info' disabled=True %}
       {% if not original_admission.is_in_quarantine %}
-        {% checklist_state_button tab='decision' label=validated_label icon='check' state='GEST_REUSSITE' class='success' open_modal='#decision-validation-modal' disabled=is_not_iufc %}
+        {% checklist_state_button tab='decision' label=validated_label icon='check' state='GEST_REUSSITE' class='success' htmx_post='decision-validation' disabled=is_not_iufc %}
       {% endif %}
 
     {% elif current.statut == 'GEST_REUSSITE' %}
@@ -131,7 +131,7 @@
       {% endif %}
       {% checklist_state_button tab='decision' label=_("To validate IUFC") icon='list-check' state='GEST_EN_COURS' en_cours="to_validate" class='info' tooltip=validation_disabled_str|force_escape disabled=True %}
       {% if not original_admission.is_in_quarantine %}
-        {% checklist_state_button tab='decision' label=validated_label icon='check' state='GEST_REUSSITE' class='success' open_modal='#decision-validation-modal' %}
+        {% checklist_state_button tab='decision' label=validated_label icon='check' state='GEST_REUSSITE' class='success' htmx_post='decision-validation' %}
       {% endif %}
 
     {% else %}  {# Initial / on hold #}
@@ -174,8 +174,6 @@
     <div class="alert alert-info">{% blocktranslate with date=original_admission.last_email_sent_at|date:'d/m/Y H:i' sender=original_admission.last_email_sent_by %}The deny mail has been sent to the candidate the {{ date }} by {{ sender }}.{% endblocktranslate %}</div>
   {% elif current.statut == 'GEST_BLOCAGE' and current.extra.blocage == 'canceled' %}
     <div class="alert alert-info">{% blocktranslate with date=original_admission.last_email_sent_at|date:'d/m/Y H:i' sender=original_admission.last_email_sent_by %}The cancel mail has been sent to the candidate the {{ date }} by {{ sender }}.{% endblocktranslate %}</div>
-  {% elif current.statut == 'GEST_REUSSITE' %}
-    <div class="alert alert-info">{% blocktranslate with date=original_admission.last_email_sent_at|date:'d/m/Y H:i' sender=original_admission.last_email_sent_by %}The validation mail has been sent to the candidate the {{ date }} by {{ sender }}.{% endblocktranslate %}</div>
   {% endif %}
 
   {% if is_iufc %}
@@ -205,6 +203,3 @@
   </div>
 </div>
 {% endwith %}
-
-
-

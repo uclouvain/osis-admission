@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,11 +31,17 @@ from django.conf import settings
 from django.utils import formats
 from osis_history.utilities import add_history_entry
 
-from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition
-from admission.ddd.admission.formation_continue.domain.service.i_historique import IHistorique
+from admission.ddd.admission.formation_continue.domain.model.proposition import (
+    Proposition,
+)
+from admission.ddd.admission.formation_continue.domain.service.i_historique import (
+    IHistorique,
+)
 from admission.infrastructure.utils import get_message_to_historize
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
-from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
+from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import (
+    PersonneConnueUclTranslator,
+)
 
 TAGS_CHANGEMENT_STATUT = ["proposition", "decision", "status-changed"]
 TAGS_APPROBATION_PROPOSITION = TAGS_CHANGEMENT_STATUT + ["proposition-accepted"]
@@ -181,26 +187,14 @@ class Historique(IHistorique):
         cls,
         proposition: Proposition,
         gestionnaire: str,
-        message: EmailMessage,
     ):
         gestionnaire_dto = PersonneConnueUclTranslator().get(gestionnaire)
         now = formats.date_format(datetime.datetime.now(), "DATETIME_FORMAT")
 
-        if message:
-            recipient = message['To']
-            fr_message = f'Un mail informant de la validation du dossier a été envoyé à "{recipient}" le {now}.'
-            en_message = (
-                f'An e-mail notifying that the dossier has been validated was sent to "{recipient}" on ' f'{now}.'
-            )
-            cls.historiser_mail_decision(proposition=proposition, gestionnaire_dto=gestionnaire_dto, message=message)
-        else:
-            fr_message = f"Le dossier a été validé le {now}."
-            en_message = f"The dossier has been validated on {now}."
-
         add_history_entry(
             proposition.entity_id.uuid,
-            fr_message,
-            en_message,
+            f"Le dossier a été validé le {now}.",
+            f"The dossier has been validated on {now}.",
             "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
             tags=TAGS_APPROBATION_PROPOSITION,
         )

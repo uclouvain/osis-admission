@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,15 +23,27 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.formation_continue.commands import ValiderPropositionCommand
+from admission.ddd.admission.formation_continue.commands import (
+    ValiderPropositionCommand,
+)
 from admission.ddd.admission.formation_continue.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
-from admission.ddd.admission.formation_continue.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.formation_continue.domain.service.i_historique import IHistorique
-from admission.ddd.admission.formation_continue.domain.service.i_notification import INotification
-from admission.ddd.admission.formation_continue.events import PropositionFormationContinueValideeEvent
-from admission.ddd.admission.formation_continue.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.formation_continue.domain.model.proposition import (
+    PropositionIdentity,
+)
+from admission.ddd.admission.formation_continue.domain.service.i_historique import (
+    IHistorique,
+)
+from admission.ddd.admission.formation_continue.domain.service.i_notification import (
+    INotification,
+)
+from admission.ddd.admission.formation_continue.events import (
+    PropositionFormationContinueValideeEvent,
+)
+from admission.ddd.admission.formation_continue.repository.i_proposition import (
+    IPropositionRepository,
+)
 
 
 def valider_proposition(
@@ -39,7 +51,6 @@ def valider_proposition(
     cmd: 'ValiderPropositionCommand',
     proposition_repository: 'IPropositionRepository',
     historique: 'IHistorique',
-    notification: 'INotification',
     profil_candidat_translator: 'IProfilCandidatTranslator',
 ) -> 'PropositionIdentity':
     # GIVEN
@@ -53,15 +64,9 @@ def valider_proposition(
 
     # THEN
     proposition_repository.save(proposition)
-    message = notification.approuver_proposition(
-        proposition=proposition,
-        objet_message=cmd.objet_message,
-        corps_message=cmd.corps_message,
-    )
     historique.historiser_approuver_proposition(
         proposition=proposition,
         gestionnaire=cmd.gestionnaire,
-        message=message,
     )
 
     msg_bus.publish(
