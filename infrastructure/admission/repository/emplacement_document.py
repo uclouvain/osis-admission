@@ -30,7 +30,7 @@ from typing import List, Optional, Set, Union
 
 from django.conf import settings
 from django.db import transaction
-from django.db.models import Exists, OuterRef, F
+from django.db.models import Exists, OuterRef
 from django.utils.dateparse import parse_date, parse_datetime
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
@@ -131,7 +131,7 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
         admission = cls.get_admission(entities[0].entity_id.proposition_id)
 
         admission.modified_at = datetime.datetime.now()
-        admission.last_update_author = Person.objects.annotate(noma=F('student__registration_id')).get(global_id=auteur)
+        admission.last_update_author = Person.objects.get(global_id=auteur)
 
         updated_fields_by_object = {
             admission: ['requested_documents', 'modified_at', 'last_update_author'],
@@ -221,7 +221,11 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
                     vient_d_epc = bool(getattr(model_object, 'external_id', ''))
                     deja_injectee = model_object.injecte_par_cv
                     if vient_d_epc or deja_injectee:
-                        InjectionEPCCurriculum().injecter_selon_modele(model_object, admission.last_update_author)
+                        InjectionEPCCurriculum().injecter_selon_modele(
+                            model_object,
+                            admission.candidate,
+                            admission.last_update_author,
+                        )
 
     @classmethod
     def entity_to_dict(cls, entity: EmplacementDocument) -> dict:
