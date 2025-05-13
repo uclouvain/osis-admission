@@ -59,6 +59,7 @@ class CommitteeMember(RoleModel):
             'admission.view_admission_person': is_part_of_committee & is_being_enrolled,
             'admission.view_admission_coordinates': is_part_of_committee & is_being_enrolled,
             'admission.view_admission_secondary_studies': is_part_of_committee & is_being_enrolled,
+            'admission.view_admission_exam': is_part_of_committee & is_being_enrolled,
             'admission.view_admission_languages': is_part_of_committee & is_being_enrolled,
             'admission.view_admission_curriculum': is_part_of_committee & is_being_enrolled,
             'admission.view_admission_accounting': is_part_of_committee & is_being_enrolled,

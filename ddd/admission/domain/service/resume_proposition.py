@@ -103,11 +103,7 @@ class ResumeProposition(interface.DomainService):
 
         resume_candidat_dto = profil_candidat_translator.recuperer_toutes_informations_candidat(
             matricule=proposition_dto.matricule_candidat,
-            formation=(
-                proposition_dto.doctorat.type
-                if isinstance(proposition_dto, PropositionDoctoraleDTO)
-                else proposition_dto.formation.type
-            ),
+            formation=proposition_dto.formation,
             annee_courante=annee_courante,
             uuid_proposition=proposition_dto.uuid,
             experiences_cv_recuperees=experiences_cv_recuperees,
@@ -123,6 +119,7 @@ class ResumeProposition(interface.DomainService):
             connaissances_langues=resume_candidat_dto.connaissances_langues,
             groupe_supervision=groupe_supervision_dto,
             questions_specifiques_dtos=questions_specifiques_dtos,
+            examens=resume_candidat_dto.examens,
         )
 
     @classmethod
