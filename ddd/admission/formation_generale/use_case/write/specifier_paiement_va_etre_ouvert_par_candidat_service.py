@@ -43,6 +43,7 @@ def specifier_paiement_va_etre_ouvert_par_candidat(
 ) -> PaiementDTO:
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
+    print(proposition_id)
     proposition = proposition_repository.get(entity_id=proposition_id)
     periode_du_pot = (
         calendrier_translator.recuperer_periode_du_pot(
@@ -50,7 +51,7 @@ def specifier_paiement_va_etre_ouvert_par_candidat(
             pot=proposition.pot_calcule
         )
     )
-
+    print(periode_du_pot)
     # WHEN
     paiement_frais_dossier_service.verifier_paiement_frais_dossier_necessaire(
         proposition=proposition,
