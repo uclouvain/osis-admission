@@ -297,20 +297,12 @@ class ExperienceUrlsTestCase(TestCase):
         )
         self.assertEqual(experience_urls['delete_url'], '')
         self.assertEqual(
-            experience_urls['edit_url'],
+            experience_urls['curex_url'],
             '/osis_profile/0123456789/parcours_externe/edit/experience_non_academique/{experience_uuid}'.format(
                 experience_uuid=non_academic_experience.uuid,
             ),
         )
-        self.assertEqual(experience_urls['edit_new_link_tab'], True)
-        self.assertEqual(
-            experience_urls['duplicate_url'],
-            '/admissions/continuing-education/{admission_uuid}/update/curriculum/non_educational/'
-            '{experience_uuid}/duplicate'.format(
-                admission_uuid=self.continuing_education.uuid,
-                experience_uuid=non_academic_experience.uuid,
-            ),
-        )
+        self.assertEqual(experience_urls['duplicate_url'], '')
 
     def test_get_urls_of_an_epc_non_academic_experience_if_the_user_can_change_the_cv_of_a_non_student_candidate(self):
         non_academic_experience = ExperienceNonAcademiqueDTOFactory(
@@ -333,14 +325,7 @@ class ExperienceUrlsTestCase(TestCase):
         self.assertEqual(experience_urls['delete_url'], '')
         self.assertEqual(experience_urls['edit_url'], '')
         self.assertEqual(experience_urls['edit_new_link_tab'], False)
-        self.assertEqual(
-            experience_urls['duplicate_url'],
-            '/admissions/continuing-education/{admission_uuid}/update/curriculum/non_educational/'
-            '{experience_uuid}/duplicate'.format(
-                admission_uuid=self.continuing_education.uuid,
-                experience_uuid=non_academic_experience.uuid,
-            ),
-        )
+        self.assertEqual(experience_urls['duplicate_url'], '')
 
     def test_get_urls_of_an_epc_non_academic_experience_if_the_user_cannot_change_the_profile(self):
         non_academic_experience = ExperienceNonAcademiqueDTOFactory(
@@ -364,14 +349,7 @@ class ExperienceUrlsTestCase(TestCase):
         self.assertEqual(experience_urls['delete_url'], '')
         self.assertEqual(experience_urls['edit_url'], '')
         self.assertEqual(experience_urls['edit_new_link_tab'], False)
-        self.assertEqual(
-            experience_urls['duplicate_url'],
-            '/admissions/continuing-education/{admission_uuid}/update/curriculum/non_educational/'
-            '{experience_uuid}/duplicate'.format(
-                admission_uuid=self.continuing_education.uuid,
-                experience_uuid=non_academic_experience.uuid,
-            ),
-        )
+        self.assertEqual(experience_urls['duplicate_url'], '')
 
     def test_get_urls_of_the_secondary_studies_if_the_user_cannot_change_the_cv(self):
         secondary_studies = EtudesSecondairesDTOFactory()
