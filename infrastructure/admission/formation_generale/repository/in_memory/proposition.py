@@ -174,7 +174,6 @@ class PropositionInMemoryRepository(
                         'last_action_at': '2023-01-02T00:00:00',
                         'status': StatutEmplacementDocument.RECLAME.name,
                         'requested_at': '2023-01-02T00:00:00',
-                        'deadline_at': '2023-01-19',
                         'automatically_required': False,
                         'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
                     },
@@ -185,7 +184,6 @@ class PropositionInMemoryRepository(
                         'last_action_at': '2023-01-03T00:00:00',
                         'status': StatutEmplacementDocument.RECLAME.name,
                         'requested_at': '2023-01-03T00:00:00',
-                        'deadline_at': '2023-01-19',
                         'automatically_required': False,
                         'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT.name,
                     },
@@ -231,7 +229,7 @@ class PropositionInMemoryRepository(
                 formation_id=FormationIdentityFactory(sigle="MASTER-SCI", annee=2021),
                 curriculum=['file1.pdf'],
                 est_confirmee=True,
-                pot_calcule=random.choice(list(ADMISSION_POOL_ACADEMIC_CALENDAR_TYPES))
+                pot_calcule=random.choice(list(ADMISSION_POOL_ACADEMIC_CALENDAR_TYPES)),
             ),
             PropositionFactory(
                 entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-CERTIFICATE-CONFIRMED'),
@@ -336,6 +334,7 @@ class PropositionInMemoryRepository(
             formulaire_reorientation=proposition.formulaire_reorientation,
             pdf_recapitulatif=['recap.pdf'],
             documents_demandes=proposition.documents_demandes,
+            echeance_demande_documents=proposition.echeance_demande_documents,
             documents_libres_sic_uclouvain=cls.documents_libres_sic_uclouvain.get(proposition.entity_id.uuid, []),
             documents_libres_fac_uclouvain=cls.documents_libres_fac_uclouvain.get(proposition.entity_id.uuid, []),
             certificat_refus_fac=proposition.certificat_refus_fac,

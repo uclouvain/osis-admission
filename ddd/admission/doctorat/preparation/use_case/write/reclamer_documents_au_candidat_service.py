@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,15 +23,25 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.doctorat.preparation.commands import ReclamerDocumentsAuCandidatCommand
+from admission.ddd.admission.doctorat.preparation.commands import (
+    ReclamerDocumentsAuCandidatCommand,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    PropositionIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import (
+    INotification,
+)
+from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
+    IPropositionRepository,
+)
 from admission.ddd.admission.domain.builder.emplacement_document_identity_builder import (
     EmplacementDocumentIdentityBuilder,
 )
 from admission.ddd.admission.domain.service.i_historique import IHistorique
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import INotification
-from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
-from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
+from admission.ddd.admission.repository.i_emplacement_document import (
+    IEmplacementDocumentRepository,
+)
 
 
 def reclamer_documents_au_candidat(
@@ -56,7 +66,11 @@ def reclamer_documents_au_candidat(
         a_echeance_le=cmd.a_echeance_le,
     )
 
-    proposition.reclamer_documents(auteur_modification=cmd.auteur, type_gestionnaire=cmd.type_gestionnaire)
+    proposition.reclamer_documents(
+        auteur_modification=cmd.auteur,
+        type_gestionnaire=cmd.type_gestionnaire,
+        a_echeance_le=cmd.a_echeance_le,
+    )
 
     proposition_repository.save(proposition)
     emplacement_document_repository.save_multiple(entities=documents_reclames, auteur=cmd.auteur)

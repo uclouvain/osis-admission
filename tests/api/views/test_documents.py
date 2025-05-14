@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,51 +27,59 @@
 import datetime
 import uuid
 from unittest import mock
-from unittest.mock import patch, call
+from unittest.mock import call, patch
 
 import freezegun
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import override_settings
 from django.utils.translation import gettext
-
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
-from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
-from admission.tests.factories.doctorate import DoctorateFactory
 from osis_document.enums import PostProcessingType
 from osis_notification.models import EmailNotification
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.constants import SUPPORTED_MIME_TYPES, PNG_MIME_TYPE
-from admission.models import AdmissionTask
+from admission.constants import PNG_MIME_TYPE, SUPPORTED_MIME_TYPES
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
 from admission.ddd.admission.domain.validator.exceptions import (
     DocumentsCompletesDifferentsDesReclamesException,
     DocumentsReclamesImmediatementNonCompletesException,
 )
 from admission.ddd.admission.enums import (
     CleConfigurationItemFormulaire,
-    Onglets,
     CritereItemFormulaireFormation,
+    Onglets,
     TypeItemFormulaire,
 )
 from admission.ddd.admission.enums.emplacement_document import (
-    TypeEmplacementDocument,
-    OngletsDemande,
     IdentifiantBaseEmplacementDocument,
+    OngletsDemande,
     StatutEmplacementDocument,
     StatutReclamationEmplacementDocument,
+    TypeEmplacementDocument,
+)
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
+)
+from admission.models import AdmissionTask
+from admission.tests.factories import DoctorateAdmissionFactory
+from admission.tests.factories.continuing_education import (
+    ContinuingEducationAdmissionFactory,
 )
 from admission.tests.factories.curriculum import (
     AdmissionEducationalValuatedExperiencesFactory,
     AdmissionProfessionalValuatedExperiencesFactory,
 )
-from admission.tests.factories.form_item import DocumentAdmissionFormItemFactory, AdmissionFormItemInstantiationFactory
+from admission.tests.factories.doctorate import DoctorateFactory
+from admission.tests.factories.form_item import (
+    AdmissionFormItemInstantiationFactory,
+    DocumentAdmissionFormItemFactory,
+)
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.person import CompletePersonFactory
 from base.forms.utils.file_field import PDF_MIME_TYPE
@@ -90,7 +98,6 @@ class BaseAdmissionRequestedDocumentListApiTestCase(APITestCase):
             'automatically_required': False,
             'last_action_at': '2023-01-01T00:00:00',
             'last_actor': '0123456',
-            'deadline_at': '2023-01-16',
             'reason': 'Ma raison',
             'requested_at': '2023-01-01T00:00:00',
             'status': StatutEmplacementDocument.RECLAME.name,
@@ -121,21 +128,25 @@ class BaseAdmissionRequestedDocumentListApiTestCase(APITestCase):
         output = {
             PostProcessingType.MERGE.name: {
                 'input': [],
-                'output': []
-                if PostProcessingType.MERGE.name not in post_processing_types
-                else {
-                    'upload_objects': [str(cls.PDF_MERGE_UUID)],
-                    'post_processing_objects': [str(uuid.uuid4())],
-                },
+                'output': (
+                    []
+                    if PostProcessingType.MERGE.name not in post_processing_types
+                    else {
+                        'upload_objects': [str(cls.PDF_MERGE_UUID)],
+                        'post_processing_objects': [str(uuid.uuid4())],
+                    }
+                ),
             },
             PostProcessingType.CONVERT.name: {
                 'input': [],
-                'output': []
-                if PostProcessingType.CONVERT.name not in post_processing_types
-                else {
-                    'upload_objects': [str(cls.PDF_CONVERT_UUID)],
-                    'post_processing_objects': [str(uuid.uuid4())],
-                },
+                'output': (
+                    []
+                    if PostProcessingType.CONVERT.name not in post_processing_types
+                    else {
+                        'upload_objects': [str(cls.PDF_CONVERT_UUID)],
+                        'post_processing_objects': [str(uuid.uuid4())],
+                    }
+                ),
             },
         }
         return output
@@ -212,6 +223,7 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedDoc
                 enrollment_campus__sic_enrollment_email='abc@example.com',
             ),
             status=ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name,
+            requested_documents_deadline=datetime.date(2023, 1, 16),
         )
 
         self.free_document = AdmissionFormItemInstantiationFactory(
@@ -653,9 +665,10 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedDoc
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()['uuid'], str(self.admission.uuid))
 
-        # Check admission status and last modification data
+        # Check admission status and request deadline and last modification data
         self.admission.refresh_from_db()
         self.assertEqual(self.admission.status, ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC.name)
+        self.assertIsNone(self.admission.requested_documents_deadline)
         self.assertEqual(self.admission.modified_at, datetime.datetime.now())
         self.assertEqual(self.admission.last_update_author, self.admission.candidate)
 
@@ -780,9 +793,10 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedDoc
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()['uuid'], str(self.admission.uuid))
 
-        # Check admission status and last modification data
+        # Check admission status and request deadline and last modification data
         self.admission.refresh_from_db()
         self.assertEqual(self.admission.status, ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC.name)
+        self.assertIsNone(self.admission.requested_documents_deadline)
         self.assertEqual(self.admission.modified_at, datetime.datetime.now())
         self.assertEqual(self.admission.last_update_author, self.admission.candidate)
 
@@ -877,6 +891,7 @@ class ContinuingAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequested
             ),
             training__enrollment_campus__sic_enrollment_email='abc@example.com',
             status=ChoixStatutPropositionContinue.A_COMPLETER_POUR_FAC.name,
+            requested_documents_deadline=datetime.date(2023, 1, 16),
         )
 
         self.free_document = AdmissionFormItemInstantiationFactory(
@@ -1248,9 +1263,10 @@ class ContinuingAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequested
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()['uuid'], str(self.admission.uuid))
 
-        # Check admission status and last modification data
+        # Check admission status and request deadline and last modification data
         self.admission.refresh_from_db()
         self.assertEqual(self.admission.status, ChoixStatutPropositionGenerale.COMPLETEE_POUR_FAC.name)
+        self.assertIsNone(self.admission.requested_documents_deadline)
         self.assertEqual(self.admission.modified_at, datetime.datetime.now())
         self.assertEqual(self.admission.last_update_author, self.admission.candidate)
 
@@ -1375,9 +1391,10 @@ class ContinuingAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequested
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()['uuid'], str(self.admission.uuid))
 
-        # Check admission status and last modification data
+        # Check admission status and request deadline and last modification data
         self.admission.refresh_from_db()
         self.assertEqual(self.admission.status, ChoixStatutPropositionGenerale.COMPLETEE_POUR_FAC.name)
+        self.assertIsNone(self.admission.requested_documents_deadline)
         self.assertEqual(self.admission.modified_at, datetime.datetime.now())
         self.assertEqual(self.admission.last_update_author, self.admission.candidate)
 
@@ -1471,6 +1488,7 @@ class DoctorateAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedD
                 enrollment_campus__sic_enrollment_email='abc@example.com',
             ),
             status=ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_SIC.name,
+            requested_documents_deadline=datetime.date(2023, 1, 16),
         )
 
         self.free_document = AdmissionFormItemInstantiationFactory(
@@ -1912,9 +1930,10 @@ class DoctorateAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedD
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()['uuid'], str(self.admission.uuid))
 
-        # Check admission status and last modification data
+        # Check admission status and request deadline and last modification data
         self.admission.refresh_from_db()
         self.assertEqual(self.admission.status, ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC.name)
+        self.assertIsNone(self.admission.requested_documents_deadline)
         self.assertEqual(self.admission.modified_at, datetime.datetime.now())
         self.assertEqual(self.admission.last_update_author, self.admission.candidate)
 
@@ -2039,9 +2058,10 @@ class DoctorateAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedD
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()['uuid'], str(self.admission.uuid))
 
-        # Check admission status and last modification data
+        # Check admission status and request deadline and last modification data
         self.admission.refresh_from_db()
         self.assertEqual(self.admission.status, ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC.name)
+        self.assertIsNone(self.admission.requested_documents_deadline)
         self.assertEqual(self.admission.modified_at, datetime.datetime.now())
         self.assertEqual(self.admission.last_update_author, self.admission.candidate)
 

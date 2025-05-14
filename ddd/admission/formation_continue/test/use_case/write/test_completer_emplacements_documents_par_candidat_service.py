@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -30,10 +30,13 @@ from typing import Dict
 import freezegun
 from django.test import SimpleTestCase
 
-from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument, EmplacementDocumentIdentity
+from admission.ddd.admission.domain.model.emplacement_document import (
+    EmplacementDocument,
+    EmplacementDocumentIdentity,
+)
 from admission.ddd.admission.domain.validator.exceptions import (
-    DocumentsReclamesImmediatementNonCompletesException,
     DocumentsCompletesDifferentsDesReclamesException,
+    DocumentsReclamesImmediatementNonCompletesException,
 )
 from admission.ddd.admission.enums.emplacement_document import (
     StatutEmplacementDocument,
@@ -41,22 +44,35 @@ from admission.ddd.admission.enums.emplacement_document import (
     TypeEmplacementDocument,
 )
 from admission.ddd.admission.formation_continue.commands import (
-    ReclamerDocumentsAuCandidatCommand,
     CompleterEmplacementsDocumentsParCandidatCommand,
+    ReclamerDocumentsAuCandidatCommand,
 )
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
-from admission.ddd.admission.formation_continue.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.formation_continue.domain.validator.exceptions import PropositionNonTrouveeException
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+)
+from admission.ddd.admission.formation_continue.domain.model.proposition import (
+    PropositionIdentity,
+)
+from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
+    PropositionNonTrouveeException,
+)
 from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
 from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
     emplacement_document_in_memory_repository,
 )
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from admission.infrastructure.message_bus_in_memory import (
+    message_bus_in_memory_instance,
+)
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
-from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
-from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
+    AcademicYear,
+    AcademicYearIdentity,
+)
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import (
+    AcademicYearInMemoryRepository,
+)
 
 
 class CompleterEmplacementsDocumentsParCandidatTestCase(SimpleTestCase):
@@ -181,9 +197,10 @@ class CompleterEmplacementsDocumentsParCandidatTestCase(SimpleTestCase):
             self.assertEqual(emplacements_documents[identifiant].reclame_le, None)
             self.assertEqual(emplacements_documents[identifiant].statut, StatutEmplacementDocument.A_RECLAMER)
 
-        # Le statut de la proposition a changé
+        # Le statut de la proposition a changé et la date d'échéance de réclamation est réinitialisée
         self.assertEqual(proposition_id, proposition.entity_id)
         self.assertEqual(proposition.statut, ChoixStatutPropositionContinue.COMPLETEE_POUR_FAC)
+        self.assertIsNone(proposition.echeance_demande_documents)
 
     @freezegun.freeze_time("2023-01-03", as_kwarg="freeze_time")
     def test_should_completer_emplacements_documents_demandes_immediatement(self, freeze_time):
@@ -251,9 +268,10 @@ class CompleterEmplacementsDocumentsParCandidatTestCase(SimpleTestCase):
 
         self.assertEqual(emplacements_documents[self.id_document_libre].uuids_documents, [])
 
-        # Le statut de la proposition a changé
+        # Le statut de la proposition a changé et la date d'échéance de réclamation est réinitialisée
         self.assertEqual(proposition_id, proposition.entity_id)
         self.assertEqual(proposition.statut, ChoixStatutPropositionContinue.COMPLETEE_POUR_FAC)
+        self.assertIsNone(proposition.echeance_demande_documents)
 
     @freezegun.freeze_time("2023-01-03")
     def test_should_pas_completer_si_proposition_non_trouvee(self):

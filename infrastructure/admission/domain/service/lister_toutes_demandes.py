@@ -44,6 +44,9 @@ from django.db.models import (
 from django.db.models.functions import Coalesce, NullIf
 from django.utils.translation import get_language
 
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
 from admission.ddd.admission.domain.service.i_filtrer_toutes_demandes import (
     IListerToutesDemandes,
 )
@@ -54,7 +57,11 @@ from admission.ddd.admission.dtos.liste import (
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.enums.liste import TardiveModificationReorientationFiltre
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
     OngletsChecklist,
     PoursuiteDeCycle,
 )
@@ -99,6 +106,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
         mode_filtres_etats_checklist: Optional[str] = '',
         filtres_etats_checklist: Optional[Dict[str, List[str]]] = '',
         tardif_modif_reorientation: Optional[str] = '',
+        delai_depasse_complements: Optional[bool] = None,
     ) -> PaginatedList[DemandeRechercheDTO]:
         language_is_french = get_language() == settings.LANGUAGE_CODE_FR
 
@@ -264,6 +272,19 @@ class ListerToutesDemandes(IListerToutesDemandes):
             }[tardif_modif_reorientation]
 
             qs = qs.filter(**{f'{related_field}': True})
+
+        if delai_depasse_complements:
+            today_date = datetime.date.today()
+            qs = qs.filter(
+                status__in=[
+                    ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC.name,
+                    ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name,
+                    ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_FAC.name,
+                    ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_SIC.name,
+                    ChoixStatutPropositionContinue.A_COMPLETER_POUR_FAC.name,
+                ],
+                requested_documents_deadline__lt=today_date,
+            )
 
         if mode_filtres_etats_checklist and filtres_etats_checklist:
 
