@@ -35,6 +35,7 @@ from admission.auth.roles.program_manager import (
     ProgramManager as ProgramManagerAdmission,
 )
 from admission.auth.roles.sic_management import SicManagement
+from admission.constants import COMMENT_TAG_FAC, COMMENT_TAG_GLOBAL, COMMENT_TAG_SIC
 from admission.ddd.admission.commands import (
     RechercherParcoursAnterieurQuery,
     RecupererEtudesSecondairesQuery,
@@ -63,21 +64,15 @@ from osis_role.contrib.permissions import _get_roles_assigned_to_user
 __all__ = [
     "AdmissionCommentsView",
     "AdmissionCommentApiView",
-    "COMMENT_TAG_SIC",
-    "COMMENT_TAG_FAC",
-    "COMMENT_TAG_GLOBAL",
     "COMMENT_TAG_IUFC_FOR_FAC",
     "COMMENT_TAG_FAC_FOR_IUFC",
 ]
 __namespace__ = False
 
-COMMENT_TAG_SIC = 'SIC'
-COMMENT_TAG_FAC = 'FAC'
 COMMENT_TAG_IUFC_FOR_FAC = 'IUFC_for_FAC'
 COMMENT_TAG_FAC_FOR_IUFC = 'FAC_for_IUFC'
 COMMENT_TAG_SIC_FOR_CDD = 'SIC_FOR_CDD'
 COMMENT_TAG_CDD_FOR_SIC = 'CDD_FOR_SIC'
-COMMENT_TAG_GLOBAL = 'GLOBAL'
 
 
 class AdmissionCommentsView(LoadDossierViewMixin, TemplateView):
@@ -124,22 +119,28 @@ class AdmissionCommentsView(LoadDossierViewMixin, TemplateView):
             experiences_names_by_uuid = {}
 
             for experience in curriculum.experiences_academiques:
-                experiences_names_by_uuid[experience.uuid] = experience.titre_formate
+                experiences_names_by_uuid[str(experience.uuid)] = experience.titre_formate
 
             for experience in curriculum.experiences_non_academiques:
-                experiences_names_by_uuid[experience.uuid] = experience.titre_formate
+                experiences_names_by_uuid[str(experience.uuid)] = experience.titre_formate
 
             if self.is_general:
                 secondary_studies = message_bus_instance.invoke(
                     RecupererEtudesSecondairesQuery(matricule_candidat=self.proposition.matricule_candidat)
                 )
                 if secondary_studies:
-                    experiences_names_by_uuid[secondary_studies.uuid] = secondary_studies.titre_formate
+                    experiences_names_by_uuid[str(secondary_studies.uuid)] = secondary_studies.titre_formate
 
             context['experiences_names_by_uuid'] = experiences_names_by_uuid
 
         elif self.is_continuing:
             context['checklist_tags'] = ContinueOngletsChecklist.choices()
+
+        # Load the non-editable comments
+        context['comments'] = {
+            '__'.join(comment.tags): comment
+            for comment in CommentEntry.objects.filter(object_uuid=self.admission_uuid).select_related('author')
+        }
 
         return context
 

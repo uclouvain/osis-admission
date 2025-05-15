@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import datetime
+import random
 import uuid
 from decimal import Decimal
 from email import message_from_string
@@ -38,6 +39,7 @@ from rest_framework import status
 from rest_framework.status import HTTP_200_OK
 from rest_framework.test import APITestCase
 
+from admission.constants import ADMISSION_POOL_ACADEMIC_CALENDAR_TYPES
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
@@ -54,7 +56,6 @@ from admission.tests.factories.general_education import GeneralEducationAdmissio
 from admission.tests.factories.payment import OnlinePaymentFactory
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import CandidateFactory
-from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.tests.factories.academic_calendar import AcademicCalendarFactory
 from base.tests.factories.education_group_year import Master120TrainingFactory
 from base.tests.factories.user import UserFactory
@@ -172,6 +173,7 @@ class OpenApplicationFeesPaymentViewTestCase(APITestCase):
             ),
             training=Master120TrainingFactory(academic_year__year=today.year - 1),
             status=ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name,
+            determined_pool=random.choice(list(ADMISSION_POOL_ACADEMIC_CALENDAR_TYPES)).name
         )
         self.admission.checklist['current']['frais_dossier']['statut'] = ChoixStatutChecklist.GEST_BLOCAGE.name
         self.admission.checklist['current']['frais_dossier']['extra'] = {'initial': '1'}
@@ -179,7 +181,7 @@ class OpenApplicationFeesPaymentViewTestCase(APITestCase):
         self.admission.save()
 
         self.calendar = AcademicCalendarFactory(
-            reference=AcademicCalendarTypes.ADMISSION_POOL_HUE5_FOREIGN_RESIDENCY.name,
+            reference=self.admission.determined_pool,
             data_year=self.admission.training.academic_year
         )
 

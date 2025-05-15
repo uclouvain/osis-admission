@@ -49,7 +49,7 @@ class LanguagesKnowledgeTestCase(APITestCase):
     def setUpTestData(cls):
         cls.user = CandidateFactory().person.user
         cls.admission = DoctorateAdmissionFactory()
-        cls.url = resolve_url("languages-knowledge")
+        cls.url = resolve_url("common-languages-knowledge")
         cls.admission_url = resolve_url("languages-knowledge", uuid=cls.admission.uuid)
         cls.french_knowledge_data = {
             "certificate": [],

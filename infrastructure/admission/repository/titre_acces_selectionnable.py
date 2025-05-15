@@ -26,7 +26,9 @@
 import uuid
 from typing import List, Optional
 
+from django.conf import settings
 from django.db.models import F, Max, Q, QuerySet
+from django.utils.translation import get_language, gettext
 
 from admission.ddd.admission.domain.model.enums.condition_acces import (
     TypeTitreAccesSelectionnable,
@@ -49,11 +51,12 @@ from admission.models.base import (
     AdmissionProfessionalValuatedExperiences,
     BaseAdmission,
 )
+from base.utils.utils import format_academic_year
 from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
     IExperienceParcoursInterneTranslator,
 )
 from osis_profile import BE_ISO_CODE, MOIS_DEBUT_ANNEE_ACADEMIQUE
-from osis_profile.models.enums.curriculum import Result
+from osis_profile.models.enums.curriculum import ActivityType, Result
 
 
 class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
@@ -65,30 +68,15 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
         seulement_selectionnes: Optional[bool] = None,
     ) -> List[TitreAccesSelectionnable]:
         # Retrieve the secondary studies
-        admission: BaseAdmission = (
-            BaseAdmission.objects.select_related(
-                'candidate__belgianhighschooldiploma__academic_graduation_year',
-                'candidate__foreignhighschooldiploma__academic_graduation_year',
-                'candidate__foreignhighschooldiploma__country',
-                'candidate__highschooldiplomaalternative',
-                'candidate__graduated_from_high_school_year',
-                'training__academic_year',
-            )
-            .prefetch_related('internal_access_titles')
-            .only(
-                'training__academic_year__year',
-                'are_secondary_studies_access_title',
-                'candidate__global_id',
-                'candidate__belgianhighschooldiploma__uuid',
-                'candidate__foreignhighschooldiploma__uuid',
-                'candidate__belgianhighschooldiploma__academic_graduation_year__year',
-                'candidate__foreignhighschooldiploma__academic_graduation_year__year',
-                'candidate__foreignhighschooldiploma__country__iso_code',
-                'candidate__highschooldiplomaalternative__uuid',
-                'candidate__graduated_from_high_school_year__year',
-            )
-            .get(uuid=proposition_identity.uuid)
-        )
+        admission: BaseAdmission = BaseAdmission.objects.select_related(
+            'candidate__belgianhighschooldiploma__academic_graduation_year',
+            'candidate__belgianhighschooldiploma__institute',
+            'candidate__foreignhighschooldiploma__academic_graduation_year',
+            'candidate__foreignhighschooldiploma__country',
+            'candidate__highschooldiplomaalternative',
+            'candidate__graduated_from_high_school_year',
+            'training__academic_year',
+        ).get(uuid=proposition_identity.uuid)
 
         additional_filters = {'is_access_title': True} if seulement_selectionnes else {}
 
@@ -110,7 +98,12 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
                 )
             )
             .distinct()
-            .select_related('educationalexperience__country')
+            .select_related(
+                'educationalexperience__country',
+                'educationalexperience__institute',
+                'educationalexperience__program',
+                'educationalexperience__fwb_equivalent_program',
+            )
         )
 
         # Retrieve the non academic experiences from the curriculum
@@ -118,9 +111,7 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
             AdmissionProfessionalValuatedExperiences.objects.filter(
                 baseadmission=admission,
                 **additional_filters,
-            )
-            .select_related('professionalexperience')
-            .only('professionalexperience__end_date')
+            ).select_related('professionalexperience')
         )
 
         # Retrieve the internal experiences
@@ -146,19 +137,39 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
         high_school_diploma_experience_year = None
         high_school_diploma = None
         high_school_diploma_country = ''
+        has_default_language = get_language() == settings.LANGUAGE_CODE
+        formatted_high_school_diploma_name = ''
+        formatted_high_school_diploma_name_variables = {}
 
         if getattr(admission.candidate, 'belgianhighschooldiploma', None):
             high_school_diploma = admission.candidate.belgianhighschooldiploma
             high_school_diploma_country = BE_ISO_CODE
+            formatted_high_school_diploma_name = '{title} ({year}) - {institute}'
+            formatted_high_school_diploma_name_variables['title'] = gettext('CESS')
+            formatted_high_school_diploma_name_variables['institute'] = (
+                high_school_diploma.institute.name
+                if high_school_diploma.institute_id
+                else high_school_diploma.other_institute_name
+            )
+
         elif getattr(admission.candidate, 'foreignhighschooldiploma', None):
             high_school_diploma = admission.candidate.foreignhighschooldiploma
-            if getattr(admission.candidate.foreignhighschooldiploma, 'country', None):
-                high_school_diploma_country = admission.candidate.foreignhighschooldiploma.country.iso_code
+            formatted_high_school_diploma_name = '{title} ({year}) - {country}'
+            formatted_high_school_diploma_name_variables['title'] = (
+                high_school_diploma.get_foreign_diploma_type_display()
+            )
+            if getattr(high_school_diploma, 'country', None):
+                high_school_diploma_country = high_school_diploma.country.iso_code
+                formatted_high_school_diploma_name_variables['country'] = (
+                    high_school_diploma.country.name if has_default_language else high_school_diploma.country.name_en
+                )
         elif (
             getattr(admission.candidate, 'highschooldiplomaalternative', None)
             and admission.candidate.highschooldiplomaalternative.first_cycle_admission_exam
         ):
             high_school_diploma = admission.candidate.highschooldiplomaalternative
+            formatted_high_school_diploma_name = '{title}'
+            formatted_high_school_diploma_name_variables['title'] = gettext("Bachelor's course entrance exam")
 
         if high_school_diploma:
             high_school_diploma_experience_uuid = high_school_diploma.uuid
@@ -169,10 +180,15 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
         elif getattr(admission.candidate, 'graduated_from_high_school_year', None):
             high_school_diploma_experience_uuid = OngletsDemande.ETUDES_SECONDAIRES.name
             high_school_diploma_experience_year = admission.candidate.graduated_from_high_school_year.year
+            formatted_high_school_diploma_name = '{title} ({year})'
+            formatted_high_school_diploma_name_variables['title'] = gettext('Secondary school')
 
         if high_school_diploma_experience_uuid and (
             not seulement_selectionnes or admission.are_secondary_studies_access_title
         ):
+            formatted_high_school_diploma_name_variables['year'] = format_academic_year(
+                high_school_diploma_experience_year,
+            )
             access_titles.append(
                 TitreAccesSelectionnable(
                     entity_id=TitreAccesSelectionnableIdentity(
@@ -183,10 +199,26 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
                     selectionne=bool(admission.are_secondary_studies_access_title),
                     annee=high_school_diploma_experience_year,
                     pays_iso_code=high_school_diploma_country,
+                    nom=formatted_high_school_diploma_name.format(**formatted_high_school_diploma_name_variables),
                 ),
             )
 
         for experience in educational_valuated_experiences:
+            educational_experience = experience.educationalexperience
+            institute_name = (
+                educational_experience.institute.name
+                if educational_experience.institute_id
+                else educational_experience.institute_name
+            )
+            training_name = (
+                educational_experience.program.title
+                if educational_experience.program_id
+                else educational_experience.education_name
+            )
+
+            if educational_experience.fwb_equivalent_program_id:
+                training_name += f' ({educational_experience.fwb_equivalent_program.title})'
+
             access_titles.append(
                 TitreAccesSelectionnable(
                     entity_id=TitreAccesSelectionnableIdentity(
@@ -196,10 +228,11 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
                     ),
                     selectionne=bool(experience.is_access_title),
                     annee=experience.last_year,
-                    pays_iso_code=(
-                        experience.educationalexperience.country.iso_code
-                        if experience.educationalexperience.country
-                        else ''
+                    pays_iso_code=(educational_experience.country.iso_code if educational_experience.country else ''),
+                    nom='{title} ({year}) - {institute}'.format(
+                        title=training_name,
+                        year=format_academic_year(experience.last_year),
+                        institute=institute_name,
                     ),
                 )
             )
@@ -222,6 +255,14 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
                     selectionne=bool(experience.is_access_title),
                     annee=last_year,
                     pays_iso_code='',
+                    nom='{title} ({year})'.format(
+                        title=(
+                            experience.professionalexperience.activity
+                            if experience.professionalexperience.type == ActivityType.OTHER.name
+                            else str(ActivityType.get_value(experience.professionalexperience.type))
+                        ),
+                        year=format_academic_year(last_year),
+                    ),
                 )
             )
 
@@ -232,7 +273,8 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
 
         for experience in internal_experiences:
             is_selected = experience.uuid in internal_access_titles_uuids
-            last_year = experience.derniere_annee.annee
+            last_experience = experience.derniere_annee
+            last_year = last_experience.annee
 
             # Add the experience
             if (
@@ -259,6 +301,10 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
                     selectionne=is_selected,
                     annee=last_year,
                     pays_iso_code=BE_ISO_CODE,
+                    nom='{title} ({year}) - UCL'.format(
+                        title=last_experience.intitule_formation,
+                        year=format_academic_year(last_year),
+                    ),
                 )
             )
 

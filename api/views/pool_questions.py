@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,35 +25,33 @@
 # ##############################################################################
 import datetime
 
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.generics import RetrieveAPIView
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
-from admission.api.schema import ChoicesEnumSchema
 from admission.api.serializers.pool_questions import PoolQuestionsSerializer
 from admission.calendar.admission_calendar import SIGLES_WITH_QUOTA
-from admission.models import GeneralEducationAdmission
 from admission.ddd.admission.domain.validator.exceptions import (
     ModificationInscriptionExterneNonConfirmeeException,
     ReorientationInscriptionExterneNonConfirmeeException,
     ResidenceAuSensDuDecretNonRenseigneeException,
 )
 from admission.ddd.admission.formation_generale.commands import VerifierPropositionQuery
-from admission.utils import gather_business_exceptions, get_cached_general_education_admission_perm_obj
+from admission.models import GeneralEducationAdmission
+from admission.utils import (
+    gather_business_exceptions,
+    get_cached_general_education_admission_perm_obj,
+)
 from base.models.academic_calendar import AcademicCalendar
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
-class PoolQuestionsSchema(ChoicesEnumSchema):
-    operation_id_base = '_pool_questions'
-
-
 class PoolQuestionsView(APIPermissionRequiredMixin, RetrieveAPIView):
     name = "pool-questions"
-    schema = PoolQuestionsSchema()
     pagination_class = None
     filter_backends = []
     permission_mapping = {
@@ -65,6 +63,7 @@ class PoolQuestionsView(APIPermissionRequiredMixin, RetrieveAPIView):
     def get_permission_object(self):
         return get_cached_general_education_admission_perm_obj(self.kwargs['uuid'])
 
+    @extend_schema(operation_id='retrieve_pool_questions')
     def get(self, request, *args, **kwargs):
         """Get relevant pool questions"""
         admission = self.get_permission_object()
@@ -101,7 +100,7 @@ class PoolQuestionsView(APIPermissionRequiredMixin, RetrieveAPIView):
         calendars = {
             calendar['reference']: {
                 'end_date': calendar.get('end_date'),
-                'academic_year': calendar.get('data_year__year')
+                'academic_year': calendar.get('data_year__year'),
             }
             for calendar in (
                 AcademicCalendar.objects.filter(
@@ -154,6 +153,7 @@ class PoolQuestionsView(APIPermissionRequiredMixin, RetrieveAPIView):
         serializer = DynamicPoolQuestionsSerializer(instance=admission)
         return Response(serializer.data)
 
+    @extend_schema(operation_id='update_pool_questions')
     def put(self, request, *args, **kwargs):
         """Update pool questions"""
         admission = GeneralEducationAdmission.objects.get(uuid=kwargs.get('uuid'))

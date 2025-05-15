@@ -49,6 +49,9 @@ from admission.auth.roles.program_manager import (
 )
 from admission.auth.roles.sic_management import SicManagement
 from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
+from admission.ddd.admission.doctorat.preparation.commands import (
+    VerifierCurriculumApresSoumissionQuery as VerifierCurriculumApresSoumissionDoctoraleQuery,
+)
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AnneesCurriculumNonSpecifieesException,
 )
@@ -66,7 +69,7 @@ from admission.ddd.admission.dtos.titre_acces_selectionnable import (
     TitreAccesSelectionnableDTO,
 )
 from admission.ddd.admission.formation_generale.commands import (
-    VerifierCurriculumApresSoumissionQuery,
+    VerifierCurriculumApresSoumissionQuery as VerifierCurriculumApresSoumissionGeneraleQuery,
 )
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
@@ -110,8 +113,10 @@ from reference.models.scholarship import Scholarship
 def get_cached_admission_perm_obj(admission_uuid):
     qs = DoctorateAdmission.objects.select_related(
         'supervision_group',
-        'candidate',
+        'candidate__personmergeproposal',
         'training__academic_year',
+        'training__education_group_type',
+        'determined_academic_year',
     )
     return cache.get_or_set(
         'admission_permission_{}'.format(admission_uuid),
@@ -120,7 +125,12 @@ def get_cached_admission_perm_obj(admission_uuid):
 
 
 def get_cached_general_education_admission_perm_obj(admission_uuid):
-    qs = GeneralEducationAdmission.objects.select_related('candidate', 'training__academic_year')
+    qs = GeneralEducationAdmission.objects.select_related(
+        'candidate__personmergeproposal',
+        'training__academic_year',
+        'training__education_group_type',
+        'determined_academic_year',
+    )
     return cache.get_or_set(
         'admission_permission_{}'.format(admission_uuid),
         lambda: get_object_or_404(qs, uuid=admission_uuid),
@@ -128,7 +138,11 @@ def get_cached_general_education_admission_perm_obj(admission_uuid):
 
 
 def get_cached_continuing_education_admission_perm_obj(admission_uuid):
-    qs = ContinuingEducationAdmission.objects.select_related('candidate', 'training__academic_year')
+    qs = ContinuingEducationAdmission.objects.select_related(
+        'candidate__personmergeproposal',
+        'training__academic_year',
+        'training__specificiufcinformations',
+    )
     return cache.get_or_set(
         'admission_permission_{}'.format(admission_uuid),
         lambda: get_object_or_404(qs, uuid=admission_uuid),
@@ -162,7 +176,28 @@ def get_missing_curriculum_periods(proposition_uuid: str):
     from infrastructure.messages_bus import message_bus_instance
 
     try:
-        message_bus_instance.invoke(VerifierCurriculumApresSoumissionQuery(uuid_proposition=proposition_uuid))
+        message_bus_instance.invoke(VerifierCurriculumApresSoumissionGeneraleQuery(uuid_proposition=proposition_uuid))
+        return []
+    except MultipleBusinessExceptions as exc:
+        return [
+            e.message
+            for e in sorted(
+                [
+                    period_exception
+                    for period_exception in exc.exceptions
+                    if isinstance(period_exception, AnneesCurriculumNonSpecifieesException)
+                ],
+                key=lambda exception: exception.periode[0],
+                reverse=True,
+            )
+        ]
+
+
+def get_missing_curriculum_periods_for_doctorate(proposition_uuid: str):
+    from infrastructure.messages_bus import message_bus_instance
+
+    try:
+        message_bus_instance.invoke(VerifierCurriculumApresSoumissionDoctoraleQuery(uuid_proposition=proposition_uuid))
         return []
     except MultipleBusinessExceptions as exc:
         return [
@@ -385,15 +420,10 @@ def get_access_conditions_url(training_type, training_acronym, partial_training_
 
 def get_access_titles_names(
     access_titles: Dict[str, TitreAccesSelectionnableDTO],
-    curriculum_dto: CurriculumAdmissionDTO,
-    etudes_secondaires_dto: EtudesSecondairesAdmissionDTO,
-    internal_experiences: List[ExperienceParcoursInterneDTO],
 ) -> List[str]:
     """
     Returns the list of access titles formatted names in reverse chronological order.
     """
-    access_titles_names = []
-
     # Sort the access titles by year and only keep the selected ones
     access_titles_list = sorted(
         (access_title for access_title in access_titles.values() if access_title.selectionne),
@@ -401,72 +431,7 @@ def get_access_titles_names(
         reverse=True,
     )
 
-    curriculum_experiences_by_uuid = {
-        experience.uuid: experience
-        for experience in itertools.chain(
-            curriculum_dto.experiences_academiques,
-            curriculum_dto.experiences_non_academiques,
-            [etudes_secondaires_dto.experience],
-            internal_experiences,
-        )
-        if experience
-    }
-
-    for access_title in access_titles_list:
-        experience_name = ''
-        experience = curriculum_experiences_by_uuid.get(access_title.uuid_experience)
-
-        if access_title.type_titre == TypeTitreAccesSelectionnable.EXPERIENCE_PARCOURS_INTERNE.name:
-            # Internal experience
-            if isinstance(experience, ExperienceParcoursInterneDTO):
-                experience_derniere_annee = experience.derniere_annee
-                experience_name = '{title} ({year}) - UCL'.format(
-                    title=experience_derniere_annee.intitule_formation,
-                    year=format_academic_year(experience_derniere_annee.annee),
-                )
-
-        elif access_title.type_titre == TypeTitreAccesSelectionnable.ETUDES_SECONDAIRES.name:
-            # Secondary studies
-            if isinstance(experience, DiplomeBelgeEtudesSecondairesDTO):
-                experience_name = '{title} ({year}) - {institute}'.format(
-                    title=str(etudes_secondaires_dto.diplome_belge),
-                    year=format_academic_year(access_title.annee),
-                    institute=etudes_secondaires_dto.diplome_belge.nom_institut,
-                )
-            elif isinstance(experience, DiplomeEtrangerEtudesSecondairesDTO):
-                experience_name = '{title} ({year}) - {country}'.format(
-                    title=str(etudes_secondaires_dto.diplome_etranger),
-                    year=format_academic_year(access_title.annee),
-                    country=etudes_secondaires_dto.diplome_etranger.pays_nom,
-                )
-            elif isinstance(experience, AlternativeSecondairesDTO):
-                experience_name = str(etudes_secondaires_dto.alternative_secondaires)
-            elif etudes_secondaires_dto.annee_diplome_etudes_secondaires:
-                experience_name = '{title} ({year})'.format(
-                    title=gettext('Secondary school'),
-                    year=format_academic_year(access_title.annee),
-                )
-        else:
-            # Curriculum experiences
-            if isinstance(experience, ExperienceAcademiqueDTO):
-                experience_name = '{title} ({year}) - {institute}'.format(
-                    title=(
-                        f'{experience.nom_formation} ({experience.nom_formation_equivalente_communaute_fr})'
-                        if experience.nom_formation_equivalente_communaute_fr
-                        else experience.nom_formation
-                    ),
-                    year=format_academic_year(access_title.annee),
-                    institute=experience.nom_institut,
-                )
-            elif isinstance(experience, ExperienceNonAcademiqueDTO):
-                experience_name = '{title} ({year})'.format(
-                    title=str(experience),
-                    year=format_academic_year(access_title.annee),
-                )
-
-        access_titles_names.append(experience_name)
-
-    return access_titles_names
+    return [access_title.nom for access_title in access_titles_list]
 
 
 def get_experience_urls(

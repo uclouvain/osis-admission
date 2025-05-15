@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,33 +25,38 @@
 # ##############################################################################
 import datetime
 from collections import defaultdict
-from typing import List, Optional, Dict, Set
+from typing import Dict, List, Optional, Set
 
 from django.conf import settings
 from django.db.models import (
     BooleanField,
     Case,
+    Exists,
     ExpressionWrapper,
     F,
     IntegerField,
+    OuterRef,
     Prefetch,
     Q,
     Value,
     When,
-    Exists,
-    OuterRef,
 )
 from django.db.models.functions import Coalesce, NullIf
 from django.utils.translation import get_language
 
-from admission.ddd.admission.domain.service.i_filtrer_toutes_demandes import IListerToutesDemandes
-from admission.ddd.admission.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
+from admission.ddd.admission.domain.service.i_filtrer_toutes_demandes import (
+    IListerToutesDemandes,
+)
+from admission.ddd.admission.dtos.liste import (
+    DemandeRechercheDTO,
+    VisualiseurAdmissionDTO,
+)
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.enums.liste import TardiveModificationReorientationFiltre
 from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    PoursuiteDeCycle,
     OngletsChecklist,
+    PoursuiteDeCycle,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
@@ -60,7 +65,6 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
 from admission.infrastructure.utils import get_entities_with_descendants_ids
 from admission.models import AdmissionViewer
 from admission.models.base import BaseAdmission
-from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus
 from admission.views import PaginatedList
 from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
@@ -101,6 +105,11 @@ class ListerToutesDemandes(IListerToutesDemandes):
         prefetch_viewers_queryset = (
             AdmissionViewer.objects.filter(viewed_at__gte=datetime.datetime.now() - datetime.timedelta(hours=1))
             .select_related('person')
+            .only(
+                'person__last_name',
+                'person__first_name',
+                'viewed_at',
+            )
             .order_by('-viewed_at')
         )
 
@@ -151,7 +160,6 @@ class ListerToutesDemandes(IListerToutesDemandes):
                 'last_update_author',
                 'determined_academic_year',
                 'training__academic_year',
-                'training__enrollment_campus',
                 'training__education_group_type',
             )
             .prefetch_related(
@@ -162,6 +170,32 @@ class ListerToutesDemandes(IListerToutesDemandes):
                 ),
                 'candidate__student_set',
                 'candidate__personmergeproposal',
+            )
+            .only(
+                'uuid',
+                'candidate__last_name',
+                'candidate__first_name',
+                'candidate__country_of_citizenship_id',
+                'candidate__country_of_citizenship__european_union',
+                'candidate__country_of_citizenship__name',
+                'candidate__country_of_citizenship__name_en',
+                'candidate__private_email',
+                'training__acronym',
+                'training__partial_acronym',
+                'training__title',
+                'training__title_english',
+                'training__education_group_type__name',
+                'training__academic_year__year',
+                'type_demande',
+                'modified_at',
+                'last_update_author__first_name',
+                'last_update_author__last_name',
+                'last_update_author_id',
+                'candidate_id',
+                'submitted_at',
+                'determined_academic_year__year',
+                'determined_academic_year_id',
+                'specific_question_answers',
             )
         )
 
@@ -241,7 +275,10 @@ class ListerToutesDemandes(IListerToutesDemandes):
             # (AND query if both parent and sub items are selected)
             selected_parent_identifiers_by_tab: Dict[str, Set[str]] = defaultdict(set)
 
-            for (tab_name, prefix_identifier,) in [
+            for (
+                tab_name,
+                prefix_identifier,
+            ) in [
                 (
                     OngletsChecklist.experiences_parcours_anterieur.name,
                     'AUTHENTIFICATION',
@@ -267,9 +304,9 @@ class ListerToutesDemandes(IListerToutesDemandes):
                 if not status_values:
                     continue
 
-                current_tab: Optional[
-                    Dict[str, Dict[str, ConfigurationStatutChecklist]]
-                ] = ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT.get(tab_name)
+                current_tab: Optional[Dict[str, Dict[str, ConfigurationStatutChecklist]]] = (
+                    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT.get(tab_name)
+                )
 
                 if not current_tab:
                     continue
@@ -444,24 +481,31 @@ class ListerToutesDemandes(IListerToutesDemandes):
             est_inscription_tardive=admission.late_enrollment,  # From annotation
             est_reorientation_inscription_externe=admission.is_external_reorientation,  # From annotation
             est_modification_inscription_externe=admission.is_external_modification,  # From annotation
-            nationalite_candidat=getattr(
-                admission.candidate.country_of_citizenship,
-                'name' if language_is_french else 'name_en',
-            )
-            if admission.candidate.country_of_citizenship
-            else '',
-            nationalite_ue_candidat=admission.candidate.country_of_citizenship
-            and admission.candidate.country_of_citizenship.european_union,
-            vip=admission.is_vip,
+            nationalite_candidat=(
+                getattr(
+                    admission.candidate.country_of_citizenship,
+                    'name' if language_is_french else 'name_en',
+                )
+                if admission.candidate.country_of_citizenship_id
+                else ''
+            ),
+            nationalite_ue_candidat=(
+                admission.candidate.country_of_citizenship.european_union
+                if admission.candidate.country_of_citizenship_id
+                else None
+            ),
+            vip=admission.is_vip,  # From annotation
             etat_demande=admission.status,  # From annotation
             type_demande=admission.type_demande,
             derniere_modification_le=admission.modified_at,
-            derniere_modification_par='{first_name} {last_name}'.format(
-                first_name=admission.last_update_author.first_name,
-                last_name=admission.last_update_author.last_name,
-            )
-            if admission.last_update_author_id
-            else '',
+            derniere_modification_par=(
+                '{first_name} {last_name}'.format(
+                    first_name=admission.last_update_author.first_name,
+                    last_name=admission.last_update_author.last_name,
+                )
+                if admission.last_update_author_id
+                else ''
+            ),
             derniere_modification_par_candidat=admission.candidate_id == admission.last_update_author_id,
             dernieres_vues_par=[
                 VisualiseurAdmissionDTO(
@@ -472,9 +516,9 @@ class ListerToutesDemandes(IListerToutesDemandes):
                 for viewer in admission.other_admission_viewers
             ],
             date_confirmation=admission.submitted_at,
-            est_premiere_annee=admission.est_premiere_annee,
-            poursuite_de_cycle=admission.cycle_pursuit,
-            annee_calculee=admission.determined_academic_year.year if admission.determined_academic_year else None,
+            est_premiere_annee=admission.est_premiere_annee,  # From annotation
+            poursuite_de_cycle=admission.cycle_pursuit,  # From annotation
+            annee_calculee=admission.determined_academic_year.year if admission.determined_academic_year_id else None,
             adresse_email_candidat=admission.candidate.private_email,
             reponses_questions_specifiques=admission.specific_question_answers,
         )

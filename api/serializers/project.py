@@ -23,7 +23,8 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from admission.api.serializers.fields import (
@@ -86,23 +87,11 @@ __all__ = [
     "FormationGeneraleDTOSerializer",
     "GeneralEducationPropositionDTOSerializer",
     "ContinuingEducationPropositionDTOSerializer",
-    "PROPOSITION_ERROR_SCHEMA",
     "GeneralEducationPropositionIdentityWithStatusSerializer",
     "DoctoratePreAdmissionSearchDTOSerializer",
 ]
 
 from reference.api.serializers.language import RelatedLanguageField
-
-PROPOSITION_ERROR_SCHEMA = {
-    "type": "array",
-    "items": {
-        "type": "object",
-        "properties": {
-            "status_code": {"type": "string"},
-            "detail": {"type": "string"},
-        },
-    },
-}
 
 STATUT_A_COMPLETER = "A_COMPLETER"
 STATUT_TRAITEMENT_UCLOUVAIN_EN_COURS = "TRAITEMENT_UCLOUVAIN_EN_COURS"
@@ -113,6 +102,7 @@ class PropositionStatusMixin(serializers.Serializer):
 
     STATUS_TO_PORTAL_STATUS = {}
 
+    @extend_schema_field(OpenApiTypes.STR)
     def get_statut(self, obj):
         return self.STATUS_TO_PORTAL_STATUS.get(obj.statut, obj.statut)
 
@@ -168,7 +158,7 @@ class DoctorateAdmissionReadSerializer(serializers.ModelSerializer):
 
 
 class PropositionIdentityDTOSerializer(serializers.Serializer):
-    uuid = serializers.ReadOnlyField()
+    uuid = serializers.UUIDField(read_only=True)
 
 
 class GeneralEducationPropositionIdentityWithStatusSerializer(serializers.ModelSerializer):
@@ -591,10 +581,6 @@ class GeneralEducationPropositionDTOSerializer(
     documents_demandes = None
     droits_inscription_montant_autre = None
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.fields['erreurs'].field_schema = PROPOSITION_ERROR_SCHEMA
-
     class Meta:
         source = FormationGeneralePropositionDTO
 
@@ -665,10 +651,6 @@ class ContinuingEducationPropositionDTOSerializer(
     erreurs = serializers.JSONField()
     elements_confirmation = None
     documents_demandes = None
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.fields['erreurs'].field_schema = PROPOSITION_ERROR_SCHEMA
 
     class Meta:
         source = FormationContinuePropositionDTO
@@ -751,8 +733,8 @@ class CompleterPropositionCommandSerializer(DTOSerializer):
 
 
 class SectorDTOSerializer(serializers.Serializer):
-    sigle = serializers.ReadOnlyField()
-    intitule = serializers.ReadOnlyField()
+    sigle = serializers.CharField(read_only=True)
+    intitule = serializers.CharField(read_only=True)
 
 
 class CampusDTOSerializer(IncludedFieldsMixin, DTOSerializer):

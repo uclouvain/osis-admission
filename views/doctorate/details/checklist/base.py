@@ -36,9 +36,7 @@ from django.views.generic import FormView, TemplateView
 from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
 
-from admission.ddd.admission.commands import (
-    RechercherParcoursAnterieurQuery,
-)
+from admission.ddd.admission.commands import RechercherParcoursAnterieurQuery
 from admission.ddd.admission.doctorat.preparation.commands import (
     GetGroupeDeSupervisionCommand,
 )
@@ -79,7 +77,7 @@ from admission.templatetags.admission import (
     authentication_css_class,
     bg_class_by_checklist_experience,
 )
-from admission.utils import get_access_titles_names
+from admission.views.common.detail_tabs.checklist import PropositionFromResumeMixin
 from admission.views.common.detail_tabs.comments import (
     COMMENT_TAG_CDD_FOR_SIC,
     COMMENT_TAG_SIC_FOR_CDD,
@@ -122,6 +120,7 @@ TABS_WITH_SIC_AND_FAC_COMMENTS: Set[str] = {
 
 
 class ChecklistView(
+    PropositionFromResumeMixin,
     PastExperiencesMixin,
     CddDecisionMixin,
     FinancabiliteContextMixin,
@@ -136,6 +135,15 @@ class ChecklistView(
     @cached_property
     def internal_experiences(self) -> List[ExperienceParcoursInterneDTO]:
         return get_internal_experiences(matricule_candidat=self.proposition.matricule_candidat)
+
+    @cached_property
+    def selected_access_titles(self):
+        # Override it to avoid unuseful request
+        return {
+            access_title_uuid: access_title
+            for access_title_uuid, access_title in self.selectable_access_titles.items()
+            if access_title.selectionne
+        }
 
     @classmethod
     def checklist_documents_by_tab(cls, specific_questions: List[QuestionSpecifiqueDTO]) -> Dict[str, Set[str]]:
@@ -211,8 +219,6 @@ class ChecklistView(
         ).first()
 
     def get_context_data(self, **kwargs):
-        from infrastructure.messages_bus import message_bus_instance
-
         context = super().get_context_data(**kwargs)
 
         if not self.request.htmx:
@@ -230,7 +236,10 @@ class ChecklistView(
 
             comments = {
                 ('__'.join(c.tags)): c
-                for c in CommentEntry.objects.filter(object_uuid=self.admission_uuid, tags__overlap=tab_names)
+                for c in CommentEntry.objects.filter(
+                    object_uuid=self.admission_uuid,
+                    tags__overlap=tab_names,
+                ).select_related('author')
             }
 
             for tab in TABS_WITH_SIC_AND_FAC_COMMENTS:
@@ -278,6 +287,8 @@ class ChecklistView(
                 for tab_name, tab_documents in documents_by_tab.items()
             }
 
+            context['requested_documents_dtos'] = self.sic_decision_approval_form_requestable_documents
+
             # Experiences
             if self.proposition_fusion:
                 merge_curex = (
@@ -294,12 +305,6 @@ class ChecklistView(
             # Access titles
             context['access_title_url'] = self.access_title_url
             context['access_titles'] = self.selectable_access_titles
-            context['selected_access_titles_names'] = get_access_titles_names(
-                access_titles=self.selectable_access_titles,
-                curriculum_dto=command_result.resume.curriculum,
-                etudes_secondaires_dto=command_result.resume.etudes_secondaires,
-                internal_experiences=self.internal_experiences,
-            )
 
             context['past_experiences_admission_requirement_form'] = self.past_experiences_admission_requirement_form
             context['past_experiences_admission_access_title_equivalency_form'] = (
@@ -310,10 +315,8 @@ class ChecklistView(
             context['financabilite'] = self._get_financabilite()
 
             # Projet de recherche
-            context['cotutelle'] = self.cotutelle
-            context['groupe_supervision'] = message_bus_instance.invoke(
-                GetGroupeDeSupervisionCommand(uuid_proposition=self.admission_uuid)
-            )
+            context['cotutelle'] = self.proposition_resume.resume.groupe_supervision.cotutelle
+            context['groupe_supervision'] = self.proposition_resume.resume.groupe_supervision
             # There is a bug with translated strings with percent signs
             # https://docs.djangoproject.com/en/3.2/topics/i18n/translation/#troubleshooting-gettext-incorrectly-detects-python-format-in-strings-with-percent-signs
             # xgettext:no-python-format
@@ -439,8 +442,6 @@ class ChecklistView(
 
             # Add the documents related to cv experiences
             for admission_document in admission_documents:
-                if admission_document.lecture_seule:
-                    read_only_documents.append(admission_document.identifiant)
                 document_tab_identifier = admission_document.onglet.split('.')
 
                 if document_tab_identifier[0] == OngletsDemande.CURRICULUM.name and len(document_tab_identifier) > 1:
@@ -506,7 +507,6 @@ class ChecklistView(
                 {
                     context['assimilation_form']: can_change_checklist,
                     context['cdd_decision_refusal_form']: can_change_cdd_decision,
-                    context['cdd_decision_approval_form']: can_change_cdd_decision,
                     context['financabilite_approval_form']: can_change_checklist,
                     context['past_experiences_admission_requirement_form']: can_change_past_experiences,
                     context['past_experiences_admission_access_title_equivalency_form']: can_change_access_title,

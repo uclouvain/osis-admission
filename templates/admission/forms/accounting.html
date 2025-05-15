@@ -50,7 +50,7 @@
   {% if with_assimilation %}
     {% panel _('Belgian student status') %}
       {% with field=form.type_situation_assimilation %}
-        <div class="form-group required_field {% if field.errors %}has-error{% elif form.is_bound %}has-success{% endif %}">
+        <div class="form-group required_field {% if field.errors %}has-error{% endif %}">
           {% bootstrap_label field.label label_for=form.type_situation_assimilation.0.id_for_label label_class='control-label' %}
           {% for radio in form.type_situation_assimilation %}
             <div class="radio">
@@ -88,7 +88,7 @@
       <div id="assimilation2-container">
         <hr>
         {% with field=form.sous_type_situation_assimilation_2 %}
-          <div class="form-group required_field {% if field.errors %}has-error{% elif form.is_bound %}has-success{% endif %}">
+          <div class="form-group required_field {% if field.errors %}has-error{% endif %}">
             {% bootstrap_label field.label label_for=form.sous_type_situation_assimilation_2.0.id_for_label label_class='control-label' %}
             {% for radio in form.sous_type_situation_assimilation_2 %}
               <div class="radio">
@@ -146,7 +146,7 @@
         <hr>
         <div id="assimilation5-relationship-container">
           {% with field=form.relation_parente %}
-            <div class="form-group required_field {% if field.errors %}has-error{% elif form.is_bound %}has-success{% endif %}">
+            <div class="form-group required_field {% if field.errors %}has-error{% endif %}">
               {% bootstrap_label field.label label_for=form.relation_parente.0.id_for_label label_class='control-label' %}
               {% for radio in form.relation_parente %}
                 <div class="radio">

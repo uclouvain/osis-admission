@@ -7,7 +7,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2024 Université catholique de Louvain
+  * Copyright (C) 2015-2025 Université catholique de Louvain
   (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
@@ -36,7 +36,6 @@
       <span class="fa fa-{{ icon }}"></span>
     {% endif %}
     {{ tab_label }}
-    {% if badge is not None %}<span class="badge badge-secondary">{{ badge }}</span>{% endif %}
-    {% if icon_after is not None %}<span class="fa fa-{{ icon_after }}"></span>{% endif %}
+    {% if tab_label_suffix %}{{ tab_label_suffix }}{% endif %}
   </a>
 </li>

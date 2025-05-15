@@ -37,14 +37,12 @@ from django.db.models.functions import Concat
 from django.utils.decorators import method_decorator
 from django.utils.translation import get_language
 from django.views.decorators.cache import cache_page
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework.filters import BaseFilterBackend
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 
 from admission.api import serializers
-from admission.api.schema import (
-    AuthorizationAwareSchema,
-)
 from admission.api.serializers import PersonSerializer
 from admission.ddd.admission.doctorat.preparation.commands import (
     RechercherDoctoratQuery,
@@ -84,11 +82,11 @@ __all__ = [
 ]
 
 
+@extend_schema_view(get=extend_schema(operation_id='listSectorDTOs'))
 class AutocompleteSectorView(ListAPIView):
     """Autocomplete sectors"""
 
     name = "autocomplete-sector"
-    schema = AuthorizationAwareSchema()
     pagination_class = None
     filter_backends = []
     serializer_class = serializers.SectorDTOSerializer
@@ -170,11 +168,11 @@ class DoctorateEducationSearchingBackend(BaseFilterBackend, EducationSearchingBa
         ]
 
 
+@extend_schema_view(get=extend_schema(operation_id='listDoctoratDTOs'))
 class AutocompleteDoctoratView(ListAPIView):
     """Autocomplete doctorates given a sector"""
 
     name = "autocomplete-doctorate"
-    schema = AuthorizationAwareSchema()
     pagination_class = None
     filter_backends = [DoctorateEducationSearchingBackend]
     serializer_class = serializers.DoctoratDTOSerializer
@@ -208,11 +206,11 @@ class ContinuingEducationSearchingBackend(BaseFilterBackend, EducationSearchingB
         ]
 
 
+@extend_schema_view(get=extend_schema(operation_id='listFormationGeneraleDTOs'))
 class AutocompleteGeneralEducationView(ListAPIView):
     """Autocomplete to find a general education"""
 
     name = "autocomplete-general-education"
-    schema = AuthorizationAwareSchema()
     serializer_class = serializers.FormationGeneraleDTOSerializer
     filter_backends = [GeneralEducationSearchingBackend]
     pagination_class = None
@@ -229,11 +227,11 @@ class AutocompleteGeneralEducationView(ListAPIView):
         return Response(serializer.data)
 
 
+@extend_schema_view(get=extend_schema(operation_id='listFormationContinueDTOs'))
 class AutocompleteContinuingEducationView(ListAPIView):
     """Autocomplete to find a continuing education"""
 
     name = "autocomplete-continuing-education"
-    schema = AuthorizationAwareSchema()
     serializer_class = serializers.FormationContinueDTOSerializer
     filter_backends = [ContinuingEducationSearchingBackend]
     pagination_class = None
@@ -321,11 +319,13 @@ class CampusSearchBackend(BaseFilterBackend):
         ]
 
 
+@extend_schema_view(
+    get=extend_schema(operation_id='listTutors'),
+)
 class AutocompleteTutorView(ListAPIView):
     """Autocomplete tutors"""
 
     name = "autocomplete-tutor"
-    schema = AuthorizationAwareSchema()
     filter_backends = [PersonSearchingBackend]
     serializer_class = serializers.TutorSerializer
     queryset = (
@@ -340,11 +340,13 @@ class AutocompleteTutorView(ListAPIView):
     )
 
 
+@extend_schema_view(
+    get=extend_schema(operation_id='listPeople'),
+)
 class AutocompletePersonView(ListAPIView):
     """Autocomplete person"""
 
     name = "autocomplete-person"
-    schema = AuthorizationAwareSchema()
     filter_backends = [PersonSearchingBackend]
     serializer_class = PersonSerializer
     queryset = (
@@ -412,11 +414,13 @@ class DiplomaticPostSearchBackend(BaseFilterBackend):
         ]
 
 
+@extend_schema_view(
+    get=extend_schema(operation_id='listDiplomaticPosts'),
+)
 class AutocompleteDiplomaticPostView(ListAPIView):
     """Autocomplete diplomatic posts"""
 
     name = 'autocomplete-diplomatic-post'
-    schema = AuthorizationAwareSchema()
     filter_backends = [DiplomaticPostSearchBackend]
     serializer_class = serializers.DiplomaticPostSerializer
     queryset = DiplomaticPost.objects.annotate_countries().all()

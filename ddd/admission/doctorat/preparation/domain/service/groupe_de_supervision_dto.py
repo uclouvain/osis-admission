@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,9 +23,9 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
-from admission.ddd.admission.doctorat.preparation.domain.service.i_membre_CA import IMembreCATranslator
-from admission.ddd.admission.doctorat.preparation.domain.service.i_promoteur import IPromoteurTranslator
+from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import (
+    PropositionIdentityBuilder,
+)
 from admission.ddd.admission.doctorat.preparation.dtos import (
     DetailSignatureMembreCADTO,
     DetailSignaturePromoteurDTO,
@@ -43,14 +43,13 @@ class GroupeDeSupervisionDto(interface.DomainService):
         cls,
         uuid_proposition: str,
         repository: 'IGroupeDeSupervisionRepository',
-        promoteur_translator: 'IPromoteurTranslator',
-        membre_ca_translator: 'IMembreCATranslator',
     ) -> 'GroupeDeSupervisionDTO':
         groupe = repository.get_by_proposition_id(PropositionIdentityBuilder.build_from_uuid(uuid_proposition))
+        membres_groupe = repository.get_members_by_member_id(groupe_id=groupe.entity_id)
         return GroupeDeSupervisionDTO(
             signatures_promoteurs=[
                 DetailSignaturePromoteurDTO(
-                    promoteur=promoteur_translator.get_dto(signature.promoteur_id),
+                    promoteur=membres_groupe.get(str(signature.promoteur_id.uuid)),
                     statut=signature.etat.name,
                     date=signature.date,
                     commentaire_externe=signature.commentaire_externe,
@@ -62,7 +61,7 @@ class GroupeDeSupervisionDto(interface.DomainService):
             ],
             signatures_membres_CA=[
                 DetailSignatureMembreCADTO(
-                    membre_CA=membre_ca_translator.get_dto(signature.membre_CA_id),
+                    membre_CA=membres_groupe.get(str(signature.membre_CA_id.uuid)),
                     statut=signature.etat.name,
                     date=signature.date,
                     commentaire_externe=signature.commentaire_externe,

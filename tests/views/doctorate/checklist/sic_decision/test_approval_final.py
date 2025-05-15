@@ -378,7 +378,7 @@ class SicApprovalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
 
         event = self.mock_publish.call_args[0][0]
         self.assertIsInstance(event, InscriptionDoctoraleApprouveeParSicEvent)
-        self.assertEqual(event.entity_id.uuid, self.admission.uuid)
+        self.assertEqual(event.entity_id.uuid, str(self.admission.uuid))
         self.assertEqual(event.matricule, self.admission.candidate.global_id)
         self.assertEqual(event.auteur, self.sic_manager_user.person.global_id)
         self.assertEqual(event.objet_message, 'subject')
