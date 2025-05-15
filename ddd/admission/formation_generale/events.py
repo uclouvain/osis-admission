@@ -28,12 +28,12 @@ from typing import Optional
 import attr
 
 from admission.ddd.admission.formation_continue.domain.model.proposition import PropositionIdentity
-from osis_common.ddd.interface import Event
+from osis_common.ddd.interface import Event, EntityIdentity
 
 
 @attr.dataclass(frozen=True, slots=True, kw_only=True)
 class FraisDossierPayeEvent(Event):
-    entity_id: 'PropositionIdentity'
+    entity_id: PropositionIdentity
     numero_dossier: str
     montant: Decimal
     matricule: str
@@ -41,7 +41,7 @@ class FraisDossierPayeEvent(Event):
 
 @attr.dataclass(frozen=True, slots=True, kw_only=True)
 class PropositionSoumiseEvent(Event):
-    entity_id: 'PropositionIdentity'
+    entity_id: PropositionIdentity
     matricule: str
     nom: str
     prenom: str
@@ -54,7 +54,7 @@ class PropositionSoumiseEvent(Event):
 
 @attr.dataclass(frozen=True, slots=True, kw_only=True)
 class InscriptionApprouveeParSicEvent(Event):
-    entity_id: 'PropositionIdentity'
+    entity_id: PropositionIdentity
     matricule: str
     objet_message: str
     corps_message: str
@@ -63,7 +63,7 @@ class InscriptionApprouveeParSicEvent(Event):
 
 @attr.dataclass(frozen=True, slots=True, kw_only=True)
 class AdmissionApprouveeParSicEvent(Event):
-    entity_id: 'PropositionIdentity'
+    entity_id: PropositionIdentity
     matricule: str
     nom: str
     prenom: str
@@ -76,23 +76,23 @@ class AdmissionApprouveeParSicEvent(Event):
 
 @attr.dataclass(frozen=True, slots=True, kw_only=True)
 class FormationDuDossierAdmissionModifieeEvent(Event):
-    entity_id: 'PropositionIdentity'
+    entity_id: PropositionIdentity
     matricule: str
 
 
 @attr.dataclass(frozen=True, slots=True, kw_only=True)
 class DonneesIdentificationCandidatModifiee(Event):
-    entity_id: 'EntityIdentity' = None
+    entity_id: EntityIdentity = None
     matricule: str
 
 
 @attr.dataclass(frozen=True, slots=True, kw_only=True)
 class CoordonneesCandidatModifiees(Event):
-    entity_id: 'EntityIdentity' = None
+    entity_id: EntityIdentity = None
     matricule: str
 
 
 @attr.dataclass(frozen=True, slots=True, kw_only=True)
 class DonneesPersonellesCandidatValidee(Event):
-    entity_id: 'EntityIdentity' = None
+    entity_id: EntityIdentity = None
     matricule: str
