@@ -32,7 +32,7 @@ from osis_common.ddd.interface import Event
 
 @attr.dataclass(frozen=True, slots=True, kw_only=True)
 class PropositionDoctoraleSoumiseEvent(Event):
-    entity_id: 'PropositionIdentity'
+    entity_id: PropositionIdentity
     matricule: str
     nom: str
     prenom: str
@@ -45,7 +45,7 @@ class PropositionDoctoraleSoumiseEvent(Event):
 
 @attr.dataclass(frozen=True, slots=True, kw_only=True)
 class InscriptionDoctoraleApprouveeParSicEvent(Event):
-    entity_id: 'PropositionIdentity'
+    entity_id: PropositionIdentity
     type_admission: str
     matricule: str
     objet_message: str
@@ -55,7 +55,7 @@ class InscriptionDoctoraleApprouveeParSicEvent(Event):
 
 @attr.dataclass(frozen=True, slots=True, kw_only=True)
 class AdmissionDoctoraleApprouveeParSicEvent(Event):
-    entity_id: 'PropositionIdentity'
+    entity_id: PropositionIdentity
     type_admission: str
     matricule: str
     nom: str
@@ -69,5 +69,5 @@ class AdmissionDoctoraleApprouveeParSicEvent(Event):
 
 @attr.dataclass(frozen=True, slots=True, kw_only=True)
 class FormationDuDossierAdmissionDoctoraleModifieeEvent(Event):
-    entity_id: 'PropositionIdentity'
+    entity_id: PropositionIdentity
     matricule: str
