@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -28,46 +28,40 @@ import uuid
 from typing import List
 
 from django.utils.text import slugify
+from drf_spectacular.helpers import forced_singular_serializer
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from osis_document.enums import PostProcessingType
 from rest_framework import generics
 from rest_framework.response import Response
 
 from admission.api import serializers
-from admission.api.schema import ResponseSpecificSchema
+from admission.ddd.admission.doctorat.preparation import (
+    commands as doctorate_education_commands,
+)
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.emplacement_document import (
     DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION,
     StatutReclamationEmplacementDocument,
 )
-from admission.ddd.admission.formation_generale import commands as general_education_commands
-from admission.ddd.admission.formation_continue import commands as continuing_education_commands
-from admission.ddd.admission.doctorat.preparation import commands as doctorate_education_commands
+from admission.ddd.admission.formation_continue import (
+    commands as continuing_education_commands,
+)
+from admission.ddd.admission.formation_generale import (
+    commands as general_education_commands,
+)
 from admission.exceptions import DocumentPostProcessingException
 from admission.utils import (
-    get_cached_general_education_admission_perm_obj,
-    get_cached_continuing_education_admission_perm_obj,
     get_cached_admission_perm_obj,
+    get_cached_continuing_education_admission_perm_obj,
+    get_cached_general_education_admission_perm_obj,
 )
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
-class RequestedDocumentsListSchema(ResponseSpecificSchema):
-    serializer_mapping = {
-        'GET': serializers.DocumentSpecificQuestionsListSerializer,
-        'POST': (
-            serializers.CompleterEmplacementsDocumentsParCandidatCommandSerializer,
-            serializers.PropositionIdentityDTOSerializer,
-        ),
-    }
-    # Force schema to return an object (so that we have the two lists and the date)
-    list_force_object = True
-
-
 class RequestedDocumentListView(APIPermissionRequiredMixin, generics.ListCreateAPIView):
     name = "documents"
-    schema = RequestedDocumentsListSchema()
     serializer_class = serializers.DocumentSpecificQuestionsListSerializer
     pagination_class = None
     filter_backends = []
@@ -106,7 +100,10 @@ class RequestedDocumentListView(APIPermissionRequiredMixin, generics.ListCreateA
         return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
-        from osis_document.api.utils import get_several_remote_metadata, launch_post_processing
+        from osis_document.api.utils import (
+            get_several_remote_metadata,
+            launch_post_processing,
+        )
 
         input_serializer = serializers.CompleterEmplacementsDocumentsParCandidatCommandSerializer(data=request.data)
         input_serializer.is_valid(raise_exception=True)
@@ -168,9 +165,11 @@ class RequestedDocumentListView(APIPermissionRequiredMixin, generics.ListCreateA
             final_documents[identifier] = [
                 uuid.UUID(
                     result[
-                        PostProcessingType.MERGE.name
-                        if result[PostProcessingType.MERGE.name].get('output')
-                        else PostProcessingType.CONVERT.name
+                        (
+                            PostProcessingType.MERGE.name
+                            if result[PostProcessingType.MERGE.name].get('output')
+                            else PostProcessingType.CONVERT.name
+                        )
                     ]['output']['upload_objects'][0]
                 )
             ]
@@ -187,13 +186,23 @@ class RequestedDocumentListView(APIPermissionRequiredMixin, generics.ListCreateA
         return Response(output_serializer.data)
 
 
+@extend_schema_view(
+    get=extend_schema(
+        responses=forced_singular_serializer(serializers.DocumentSpecificQuestionsListSerializer),
+        operation_id="list_general_documents",
+    ),
+    post=extend_schema(
+        request=serializers.CompleterEmplacementsDocumentsParCandidatCommandSerializer,
+        responses=serializers.PropositionIdentityDTOSerializer,
+        operation_id="create_general_documents",
+    ),
+)
 class GeneralRequestedDocumentListView(RequestedDocumentListView):
     name = "general_documents"
     permission_mapping = {
         'GET': 'admission.view_generaleducationadmission_documents',
         'POST': 'admission.change_generaleducationadmission_documents',
     }
-    schema = RequestedDocumentsListSchema(operation_id_base='_general_documents')
 
     get_documents_command = general_education_commands.RecupererDocumentsReclamesPropositionQuery
     complete_documents_commands = general_education_commands.CompleterEmplacementsDocumentsParCandidatCommand
@@ -202,13 +211,23 @@ class GeneralRequestedDocumentListView(RequestedDocumentListView):
         return get_cached_general_education_admission_perm_obj(self.kwargs['uuid'])
 
 
+@extend_schema_view(
+    get=extend_schema(
+        responses=forced_singular_serializer(serializers.DocumentSpecificQuestionsListSerializer),
+        operation_id="list_continuing_documents",
+    ),
+    post=extend_schema(
+        request=serializers.CompleterEmplacementsDocumentsParCandidatCommandSerializer,
+        responses=serializers.PropositionIdentityDTOSerializer,
+        operation_id="create_continuing_documents",
+    ),
+)
 class ContinuingRequestedDocumentListView(RequestedDocumentListView):
     name = "continuing_documents"
     permission_mapping = {
         'GET': 'admission.view_continuingeducationadmission_documents',
         'POST': 'admission.change_continuingeducationadmission_documents',
     }
-    schema = RequestedDocumentsListSchema(operation_id_base='_continuing_documents')
 
     get_documents_command = continuing_education_commands.RecupererDocumentsReclamesPropositionQuery
     complete_documents_commands = continuing_education_commands.CompleterEmplacementsDocumentsParCandidatCommand
@@ -217,13 +236,23 @@ class ContinuingRequestedDocumentListView(RequestedDocumentListView):
         return get_cached_continuing_education_admission_perm_obj(self.kwargs['uuid'])
 
 
+@extend_schema_view(
+    get=extend_schema(
+        responses=forced_singular_serializer(serializers.DocumentSpecificQuestionsListSerializer),
+        operation_id="list_doctorate_documents",
+    ),
+    post=extend_schema(
+        request=serializers.CompleterEmplacementsDocumentsParCandidatCommandSerializer,
+        responses=serializers.PropositionIdentityDTOSerializer,
+        operation_id="create_doctorate_documents",
+    ),
+)
 class DoctorateRequestedDocumentListView(RequestedDocumentListView):
     name = "doctorate_documents"
     permission_mapping = {
         'GET': 'admission.view_admission_documents',
         'POST': 'admission.change_admission_documents',
     }
-    schema = RequestedDocumentsListSchema(operation_id_base='_doctorate_documents')
 
     get_documents_command = doctorate_education_commands.RecupererDocumentsReclamesPropositionQuery
     complete_documents_commands = doctorate_education_commands.CompleterEmplacementsDocumentsParCandidatCommand

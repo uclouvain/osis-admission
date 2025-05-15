@@ -36,6 +36,9 @@ from osis_document.contrib import FileField
 from osis_signature.contrib.fields import SignatureProcessField
 from rest_framework.settings import api_settings
 
+from admission.admission_utils.copy_documents import copy_documents
+from admission.constants import CONTEXT_DOCTORATE
+from admission.ddd import DUREE_MAXIMALE_PROGRAMME, DUREE_MINIMALE_PROGRAMME
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
@@ -649,6 +652,9 @@ class DoctorateAdmission(DocumentCopyModelMixin, BaseAdmission):
             )
         )
 
+    def get_admission_context(self):
+        return CONTEXT_DOCTORATE
+
     # The following properties are here to alias the training_id field to doctorate_id
     @property
     def doctorate(self):
@@ -841,7 +847,6 @@ class PropositionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
             .annotate_submitted_profile_countries_names()
             .annotate_last_status_update()
             .prefetch_related(
-                'prerequisite_courses__academic_year',
                 Prefetch(
                     'refusal_reasons',
                     queryset=RefusalReason.objects.select_related('category').order_by('category__order', 'order'),

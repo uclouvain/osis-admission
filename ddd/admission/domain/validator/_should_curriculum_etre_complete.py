@@ -222,20 +222,7 @@ class ShouldExperiencesAcademiquesEtreCompleteesApresSoumission(BusinessValidato
         exceptions = {
             ExperiencesAcademiquesNonCompleteesException(reference=experience.uuid, name=str(experience))
             for experience in self.experiences_academiques
-            if (
-                # Bachelier FWB
-                experience.est_formation_bachelier_fwb
-                and experience.credits_acquis_bloc_1 is None
-                # Master FWB
-                or experience.est_formation_master_fwb
-                and (
-                    experience.avec_complements is None
-                    or experience.avec_complements
-                    and (
-                        experience.credits_acquis_complements is None or experience.credits_inscrits_complements is None
-                    )
-                )
-            )
+            if experience.champs_credits_bloc_1_et_complements_non_remplis
         }
 
         if exceptions:

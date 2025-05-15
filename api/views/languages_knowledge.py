@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -28,34 +28,17 @@ from functools import partial
 from django.core.exceptions import ValidationError
 from django.db.models import Case, When
 from django.utils.translation import gettext as _
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import mixins, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
 from admission.api import serializers
 from admission.api.permissions import IsSelfPersonTabOrTabPermission
-from admission.api.views.mixins import PersonRelatedMixin, PersonRelatedSchema
+from admission.api.views.mixins import PersonRelatedMixin
 from admission.ddd import LANGUES_OBLIGATOIRES_DOCTORAT
 from osis_profile.models.education import LanguageKnowledge
 from osis_role.contrib.views import APIPermissionRequiredMixin
-
-
-class LanguagesKnowledgeSchema(PersonRelatedSchema):
-    def get_responses(self, path, method):
-        if method == "POST":
-            return super().get_responses(path, "GET")
-        return super().get_responses(path, method)
-
-    def get_request_body(self, path, method):
-        if method == "POST":
-            self.request_media_types = self.map_parsers(path, method)
-            item_schema = self._get_reference(self.get_serializer(path, method))
-            body_schema = {
-                'type': 'array',
-                'items': item_schema,
-            }
-            return {'content': {ct: {'schema': body_schema} for ct in self.request_media_types}}
-        return super().get_request_body(path, method)
 
 
 class LanguagesKnowledgeViewSet(
@@ -70,7 +53,6 @@ class LanguagesKnowledgeViewSet(
     filter_backends = []
     serializer_class = serializers.LanguageKnowledgeSerializer
     permission_classes = [partial(IsSelfPersonTabOrTabPermission, permission_suffix='languages')]
-    schema = LanguagesKnowledgeSchema()
 
     def get_queryset(self):
         return self.candidate.languages_knowledge.alias(
@@ -81,6 +63,7 @@ class LanguagesKnowledgeViewSet(
             ),
         ).order_by('-relevancy', 'language__code')
 
+    @extend_schema(operation_id='listLanguageKnowledgesAdmission', tags=['person'])
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
 
@@ -94,6 +77,12 @@ class LanguagesKnowledgeViewSet(
         if duplicate_languages:
             raise ValidationError(_("You cannot enter a language more than once, please correct the form."))
 
+    @extend_schema(
+        operation_id='createLanguageKnowledgeAdmission',
+        request=serializers.LanguageKnowledgeSerializer(many=True),
+        responses=serializers.LanguageKnowledgeSerializer(many=True),
+        tags=['person'],
+    )
     def post(self, request, *args, **kwargs):
         person = self.request.user.person
         input_serializer = self.get_serializer(request, many=True, data=request.data)
@@ -113,3 +102,11 @@ class LanguagesKnowledgeViewSet(
         if self.get_permission_object():
             self.get_permission_object().update_detailed_status(person)
         return Response(output_serializer.data, status=status.HTTP_201_CREATED)
+
+
+@extend_schema_view(
+    get=extend_schema(operation_id='listLanguageKnowledges', tags=['person']),
+    post=extend_schema(operation_id='createLanguageKnowledge', tags=['person']),
+)
+class CommonLanguagesKnowledgeViewSet(LanguagesKnowledgeViewSet):
+    name = "common-languages-knowledge"

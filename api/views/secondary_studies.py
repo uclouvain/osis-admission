@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,15 +25,16 @@
 # ##############################################################################
 from functools import partial
 
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import mixins
 from rest_framework.generics import GenericAPIView
 
 from admission.api import serializers
 from admission.api.permissions import IsSelfPersonTabOrTabPermission
 from admission.api.views.mixins import (
-    PersonRelatedMixin,
-    GeneralEducationPersonRelatedMixin,
     ContinuingEducationPersonRelatedMixin,
+    GeneralEducationPersonRelatedMixin,
+    PersonRelatedMixin,
 )
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
@@ -61,11 +62,28 @@ class BaseSecondaryStudiesViewSet(
         return response
 
 
-class SecondaryStudiesViewSet(PersonRelatedMixin, BaseSecondaryStudiesViewSet):
+@extend_schema_view(
+    get=extend_schema(operation_id="retrieveHighSchoolDiploma", tags=['person']),
+    put=extend_schema(operation_id="updateHighSchoolDiploma", tags=['person']),
+)
+class CommonSecondaryStudiesViewSet(PersonRelatedMixin, BaseSecondaryStudiesViewSet):
     name = "secondary-studies"
     permission_classes = [partial(IsSelfPersonTabOrTabPermission, permission_suffix='secondary_studies')]
 
 
+@extend_schema_view(
+    get=extend_schema(operation_id="retrieveHighSchoolDiplomaAdmission", tags=['person']),
+    put=extend_schema(operation_id="updateHighSchoolDiplomaAdmission", tags=['person']),
+)
+class SecondaryStudiesViewSet(PersonRelatedMixin, BaseSecondaryStudiesViewSet):
+    name = "doctorate-secondary-studies"
+    permission_classes = [partial(IsSelfPersonTabOrTabPermission, permission_suffix='secondary_studies')]
+
+
+@extend_schema_view(
+    get=extend_schema(operation_id="retrieveHighSchoolDiplomaGeneralEducationAdmission", tags=['person']),
+    put=extend_schema(operation_id="updateHighSchoolDiplomaGeneralEducationAdmission", tags=['person']),
+)
 class GeneralSecondaryStudiesView(GeneralEducationPersonRelatedMixin, BaseSecondaryStudiesViewSet):
     name = "general_secondary_studies"
     permission_mapping = {
@@ -80,6 +98,10 @@ class GeneralSecondaryStudiesView(GeneralEducationPersonRelatedMixin, BaseSecond
         return serializer_context
 
 
+@extend_schema_view(
+    get=extend_schema(operation_id="retrieveHighSchoolDiplomaContinuingEducationAdmission", tags=['person']),
+    put=extend_schema(operation_id="updateHighSchoolDiplomaContinuingEducationAdmission", tags=['person']),
+)
 class ContinuingSecondaryStudiesView(ContinuingEducationPersonRelatedMixin, BaseSecondaryStudiesViewSet):
     name = "continuing_secondary_studies"
     permission_mapping = {

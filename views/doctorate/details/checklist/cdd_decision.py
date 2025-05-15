@@ -56,7 +56,7 @@ from admission.mail_templates import (
     ADMISSION_EMAIL_CDD_APPROVAL_DOCTORATE_WITHOUT_BELGIAN_DIPLOMA,
     ADMISSION_EMAIL_CDD_REFUSAL_DOCTORATE,
 )
-from admission.utils import get_salutation_prefix
+from admission.utils import get_access_titles_names, get_salutation_prefix
 from admission.views.common.detail_tabs.checklist import change_admission_status
 from admission.views.common.mixins import AdmissionFormMixin
 from admission.views.doctorate.details.checklist.mixins import (
@@ -108,10 +108,13 @@ class CddDecisionMixin(CheckListDefaultContextMixin):
         context['history_entries']['cdd_decision'] = cdd_decision_history
 
         context['cdd_decision_refusal_form'] = self.cdd_decision_refusal_form
-        context['cdd_decision_approval_form'] = self.cdd_decision_approval_form
         context['cdd_decision_approval_final_form'] = self.cdd_decision_approval_final_form
 
         return context
+
+    @cached_property
+    def selected_access_titles_names(self):
+        return get_access_titles_names(access_titles=self.selected_access_titles)
 
     @cached_property
     def cdd_decision_refusal_form(self):
@@ -334,6 +337,12 @@ class CddApprovalDecisionView(
     template_name = 'admission/doctorate/includes/checklist/cdd_decision_approval_form.html'
     htmx_template_name = 'admission/doctorate/includes/checklist/cdd_decision_approval_form.html'
     permission_required = 'admission.checklist_change_faculty_decision'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        context['cdd_decision_approval_form'] = self.cdd_decision_approval_form
+        context['selected_access_titles_names'] = self.selected_access_titles_names
+        return context
 
     def get_form(self, form_class=None):
         return self.cdd_decision_approval_form

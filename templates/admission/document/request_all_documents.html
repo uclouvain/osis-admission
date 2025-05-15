@@ -26,7 +26,7 @@
   {% bootstrap_form_errors form %}
   {% csrf_token %}
   {% bootstrap_field form.deadline %}
-  <div id="requested-documents-selects" class="form-group {% if field.errors %}has-error{% elif form.is_bound %}has-success{% endif %} required_field">
+  <div id="requested-documents-selects" class="form-group {% if field.errors %}has-error{% endif %} required_field">
     <table class="table table-condensed">
       <thead>
         <tr>

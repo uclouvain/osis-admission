@@ -67,7 +67,7 @@
     {% panel _("PhD research project") %}
         {% field_data _("Project title") admission.titre_projet %}
         {% field_data _("Project resume") admission.resume_projet|linebreaks %}
-        {% field_data _("Thesis language") admission.langue_redaction_these|osis_language_name %}
+        {% field_data _("Thesis language") admission.nom_langue_redaction_these %}
         {% if admission.institut_these %}
           {% display admission.nom_institut_these ' ' '(' admission.sigle_institut_these ')' as institut_these %}
         {% endif %}

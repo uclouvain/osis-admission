@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,13 +23,12 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import mixins, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
 from admission.api import serializers
-from admission.api.schema import ResponseSpecificSchema
 from admission.ddd.admission.doctorat.preparation import commands as doctorate_commands
 from admission.ddd.admission.formation_generale import commands as general_commands
 from admission.utils import (
@@ -38,28 +37,6 @@ from admission.utils import (
 )
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
-
-
-class GeneralAccountingSchema(ResponseSpecificSchema):
-    operation_id_base = '_general_accounting'
-    serializer_mapping = {
-        'GET': serializers.GeneralEducationAccountingDTOSerializer,
-        'PUT': (
-            serializers.CompleterComptabilitePropositionGeneraleCommandSerializer,
-            serializers.PropositionIdentityDTOSerializer,
-        ),
-    }
-
-
-class DoctorateAccountingSchema(ResponseSpecificSchema):
-    operation_id_base = '_accounting'
-    serializer_mapping = {
-        'GET': serializers.DoctorateEducationAccountingDTOSerializer,
-        'PUT': (
-            serializers.CompleterComptabilitePropositionDoctoraleCommandSerializer,
-            serializers.PropositionIdentityDTOSerializer,
-        ),
-    }
 
 
 class BaseAccountingView(
@@ -97,9 +74,19 @@ class BaseAccountingView(
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+@extend_schema_view(
+    get=extend_schema(
+        responses=serializers.DoctorateEducationAccountingDTOSerializer,
+        operation_id='retrieve_accounting',
+    ),
+    put=extend_schema(
+        request=serializers.CompleterComptabilitePropositionDoctoraleCommandSerializer,
+        responses=serializers.PropositionIdentityDTOSerializer,
+        operation_id='update_accounting',
+    ),
+)
 class DoctorateAccountingView(BaseAccountingView):
     name = 'doctorate_accounting'
-    schema = DoctorateAccountingSchema()
     permission_mapping = {
         'GET': 'admission.view_admission_accounting',
         'PUT': 'admission.change_admission_accounting',
@@ -113,9 +100,19 @@ class DoctorateAccountingView(BaseAccountingView):
         return get_cached_admission_perm_obj(self.kwargs['uuid'])
 
 
+@extend_schema_view(
+    get=extend_schema(
+        responses=serializers.GeneralEducationAccountingDTOSerializer,
+        operation_id='retrieve_general_accounting',
+    ),
+    put=extend_schema(
+        request=serializers.CompleterComptabilitePropositionGeneraleCommandSerializer,
+        responses=serializers.PropositionIdentityDTOSerializer,
+        operation_id='update_general_accounting',
+    ),
+)
 class GeneralAccountingView(BaseAccountingView):
     name = 'general_accounting'
-    schema = GeneralAccountingSchema()
     permission_mapping = {
         'GET': 'admission.view_generaleducationadmission_accounting',
         'PUT': 'admission.change_generaleducationadmission_accounting',

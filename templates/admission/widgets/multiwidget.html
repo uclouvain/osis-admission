@@ -33,7 +33,7 @@
           {% endifchanged %}
         {% endif %}
         <div class="form-group
-        {% if field.errors %} has-error{% elif is_bound %} has-success{% endif %}
+        {% if field.errors %} has-error{% endif %}
         {% if field.is_required %} required_field{% endif %}"
         >
           {% if field.label %}

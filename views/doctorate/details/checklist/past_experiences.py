@@ -30,7 +30,7 @@ from django.shortcuts import resolve_url
 from django.utils.functional import cached_property
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import FormView
+from django.views.generic import FormView, TemplateView
 from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
 
@@ -49,6 +49,7 @@ from admission.ddd.admission.doctorat.preparation.commands import (
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     ChoixStatutChecklist,
+    OngletsChecklist,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     ConditionAccesEtreSelectionneException,
@@ -74,8 +75,12 @@ from admission.forms.admission.checklist import (
     StatusForm,
     can_edit_experience_authentication,
 )
-from admission.utils import get_access_titles_names
-from admission.views.common.mixins import AdmissionFormMixin
+from admission.utils import (
+    get_access_titles_names,
+    get_missing_curriculum_periods,
+    get_missing_curriculum_periods_for_doctorate,
+)
+from admission.views.common.mixins import AdmissionFormMixin, AdmissionViewMixin
 from admission.views.doctorate.details.checklist.mixins import (
     CheckListDefaultContextMixin,
     get_internal_experiences,
@@ -86,6 +91,7 @@ from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
 
 __all__ = [
+    'MissingCurriculumPeriodsView',
     'PastExperiencesStatusView',
     'PastExperiencesAdmissionRequirementView',
     'PastExperiencesAccessTitleEquivalencyView',
@@ -268,41 +274,11 @@ class PastExperiencesAccessTitleView(
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
         context['checked'] = self.checked
         context['url'] = self.request.get_full_path()
         context['experience_uuid'] = self.request.GET.get('experience_uuid')
         context['can_choose_access_title'] = True  # True as the user can access to the current view
-
-        # Get the list of the selected access titles
-        access_titles: Dict[str, TitreAccesSelectionnableDTO] = message_bus_instance.invoke(
-            RecupererTitresAccesSelectionnablesPropositionQuery(
-                uuid_proposition=self.admission_uuid,
-                seulement_selectionnes=True,
-            )
-        )
-
-        if access_titles:
-            command_result: ResumePropositionDTO = message_bus_instance.invoke(
-                RecupererResumePropositionQuery(uuid_proposition=self.admission_uuid),
-            )
-
-            internal_experiences = []
-
-            if any(
-                title.type_titre == TypeTitreAccesSelectionnable.EXPERIENCE_PARCOURS_INTERNE.name
-                for title in access_titles.values()
-            ):
-                internal_experiences = get_internal_experiences(
-                    matricule_candidat=command_result.proposition.matricule_candidat,
-                    with_credits=False,
-                )
-
-            context['selected_access_titles_names'] = get_access_titles_names(
-                access_titles=access_titles,
-                curriculum_dto=command_result.curriculum,
-                etudes_secondaires_dto=command_result.etudes_secondaires,
-                internal_experiences=internal_experiences,
-            )
 
         return context
 
@@ -415,7 +391,9 @@ class SinglePastExperienceMixin(
             comment=CommentEntry.objects.filter(
                 object_uuid=self.admission_uuid,
                 tags=['parcours_anterieur', self.experience_uuid, 'authentication'],
-            ).first(),
+            )
+            .select_related('author')
+            .first(),
             form_url=resolve_url(
                 f'{self.base_namespace}:save-comment',
                 uuid=self.admission_uuid,
@@ -529,3 +507,23 @@ class SinglePastExperienceChangeAuthenticationView(SinglePastExperienceMixin):
                 etat_authentification=form.cleaned_data['state'],
             )
         )
+
+
+class MissingCurriculumPeriodsView(AdmissionViewMixin, TemplateView):
+    urlpatterns = 'missing-curriculum-periods'
+    template_name = 'admission/general_education/includes/checklist/missing_curriculum_periods_message_htmx.html'
+    permission_required = 'admission.view_checklist'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['missing_curriculum_periods'] = get_missing_curriculum_periods_for_doctorate(
+            proposition_uuid=self.admission_uuid,
+        )
+
+        context['tabs'] = [
+            OngletsChecklist.parcours_anterieur.name,
+            OngletsChecklist.financabilite.name,
+        ]
+
+        return context

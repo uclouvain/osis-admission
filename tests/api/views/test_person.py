@@ -69,7 +69,7 @@ class PersonTestCase(APITestCase):
             candidate__first_name="John",
             training__management_entity=self.doctoral_commission,
         )
-        self.admission_url = resolve_url('person', uuid=admission.uuid)
+        self.admission_url = resolve_url('doctorate_person', uuid=admission.uuid)
         self.candidate_user = admission.candidate.user
 
     def test_user_not_logged_assert_not_authorized(self):
@@ -116,7 +116,7 @@ class PersonTestCase(APITestCase):
         other_admission = DoctorateAdmissionFactory(
             candidate=self.candidate_user.person,
         )
-        other_admission_url = resolve_url('person', uuid=other_admission.uuid)
+        other_admission_url = resolve_url('doctorate_person', uuid=other_admission.uuid)
 
         for current_status in ChoixStatutPropositionDoctorale:
             other_admission.status = current_status.name
@@ -141,7 +141,7 @@ class PersonTestCase(APITestCase):
             candidate=self.candidate_user.person,
             status=ChoixStatutPropositionDoctorale.EN_BROUILLON.name,
         )
-        other_admission_url = resolve_url('person', uuid=other_admission.uuid)
+        other_admission_url = resolve_url('doctorate_person', uuid=other_admission.uuid)
 
         # Other admission - in draft
         response = self.client.get(self.admission_url)

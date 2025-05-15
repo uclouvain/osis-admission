@@ -115,13 +115,14 @@ class CalendrierInscriptionInMemory(ICalendrierInscription):
         return None
 
     @classmethod
-    def recuperer_periode_inscription_specifique_hue_plus_5_resident_a_l_etranger(
+    def recuperer_periode_du_pot(
         cls,
         annee_formation: int,
+        pot: AcademicCalendarTypes,
     ) -> Periode:
         aujourdhui = datetime.date.today()
         return Periode(
             date_debut=aujourdhui - timedelta(days=14),
             date_fin=aujourdhui,
-            type=AcademicCalendarTypes.ADMISSION_POOL_HUE5_BELGIUM_RESIDENCY.name,
+            type=pot.name,
         )

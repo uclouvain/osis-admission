@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,6 +24,9 @@
 #
 # ##############################################################################
 from django.db.models import Prefetch
+from drf_spectacular.helpers import forced_singular_serializer
+from drf_spectacular.utils import extend_schema, extend_schema_view
+from gestion_des_comptes.models import HistoriqueMatriculeCompte
 from osis_signature.models import Actor
 from rest_framework import mixins, status
 from rest_framework.generics import GenericAPIView, ListAPIView, ListCreateAPIView
@@ -31,18 +34,26 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from admission.api import serializers
-from admission.api.permissions import IsListingOrHasNotAlreadyCreatedPermission, IsSupervisionMember
-from admission.api.schema import ResponseSpecificSchema
+from admission.api.permissions import (
+    IsListingOrHasNotAlreadyCreatedPermission,
+    IsSupervisionMember,
+)
 from admission.ddd.admission.doctorat.preparation.commands import (
     CompleterPropositionCommand,
+)
+from admission.ddd.admission.doctorat.preparation.commands import (
     ListerPropositionsCandidatQuery as ListerPropositionsDoctoralesCandidatQuery,
+)
+from admission.ddd.admission.doctorat.preparation.commands import (
     ListerPropositionsSuperviseesQuery,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixTypeAdmission,
     ChoixStatutPropositionDoctorale,
+    ChoixTypeAdmission,
 )
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import JustificationRequiseException
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    JustificationRequiseException,
+)
 from admission.ddd.admission.formation_continue.commands import (
     ListerPropositionsCandidatQuery as ListerPropositionsFormationContinueCandidatQuery,
 )
@@ -51,11 +62,11 @@ from admission.ddd.admission.formation_generale.commands import (
 )
 from admission.models import DoctorateAdmission
 from admission.utils import get_cached_admission_perm_obj
-from backoffice.settings.rest_framework.common_views import DisplayExceptionsByFieldNameAPIMixin
+from backoffice.settings.rest_framework.common_views import (
+    DisplayExceptionsByFieldNameAPIMixin,
+)
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
-from gestion_des_comptes.models import HistoriqueMatriculeCompte
-
 
 __all__ = [
     "PropositionCreatePermissionsView",
@@ -66,44 +77,39 @@ __all__ = [
 ]
 
 
-class PropositionCreatePermissionsSchema(ResponseSpecificSchema):
-    serializer_mapping = {
-        'GET': serializers.PropositionCreatePermissionsSerializer,
-    }
-
-    def get_operation_id_base(self, path, method, action):
-        return '_proposition_create_permissions'
-
-
 class PropositionCreatePermissionsView(APIPermissionRequiredMixin, APIView):
     name = "proposition_create_permissions"
-    schema = PropositionCreatePermissionsSchema()
     pagination_class = None
     filter_backends = []
     action = 'detail'
 
+    @extend_schema(
+        responses=serializers.PropositionCreatePermissionsSerializer,
+        operation_id='detail_proposition_create_permissions',
+    )
     def get(self, request, *args, **kwargs):
         serializer = serializers.PropositionCreatePermissionsSerializer({}, context={'request': request})
         return Response(serializer.data)
 
 
-class PropositionListSchema(ResponseSpecificSchema):
-    serializer_mapping = {
-        'GET': serializers.PropositionSearchSerializer,
-    }
-    # Force schema to return an object (so that we have the results and the links)
-    list_force_object = True
-
-    def get_operation_id_base(self, path, method, action):
-        return '_proposition' if method == 'POST' else '_propositions'
-
-
+@extend_schema_view(
+    get=extend_schema(
+        responses=forced_singular_serializer(serializers.PropositionSearchSerializer),
+        operation_id="list_propositions",
+        tags=['propositions'],
+    ),
+    post=extend_schema(
+        request=None,
+        responses=None,
+        operation_id="create_proposition",
+    ),
+)
 class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNameAPIMixin, ListCreateAPIView):
     name = "propositions"
-    schema = PropositionListSchema()
     pagination_class = None
     filter_backends = []
     permission_classes = [IsListingOrHasNotAlreadyCreatedPermission]
+    serializer_class = serializers.PropositionSearchSerializer
 
     field_name_by_exception = {
         JustificationRequiseException: ['justification'],
@@ -128,7 +134,7 @@ class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNa
                 "continuing_education_propositions": continuing_education_list,
                 'donnees_transferees_vers_compte_interne': self.get_donnees_transferees_vers_compte_interne(
                     matricule=candidate_global_id
-                )
+                ),
             },
             context=self.get_serializer_context(),
         )
@@ -138,8 +144,7 @@ class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNa
     def get_donnees_transferees_vers_compte_interne(self, matricule: str) -> bool:
         if matricule.startswith('8'):
             return HistoriqueMatriculeCompte.objects.filter(
-                matricule_externe=matricule,
-                matricule_interne_actif=True
+                matricule_externe=matricule, matricule_interne_actif=True
             ).exists()
         return False
 
@@ -149,19 +154,19 @@ class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNa
         raise NotImplementedError
 
 
-class SupervisedPropositionListSchema(ResponseSpecificSchema):
-    operation_id_base = '_supervised_propositions'
-    serializer_mapping = {
-        'GET': serializers.DoctoratePropositionSearchDTOSerializer,
-    }
-
-
+@extend_schema_view(
+    get=extend_schema(
+        responses=serializers.DoctoratePropositionSearchDTOSerializer,
+        operation_id='list_supervised_propositions',
+        tags=['propositions'],
+    )
+)
 class SupervisedPropositionListView(APIPermissionRequiredMixin, ListAPIView):
     name = "supervised_propositions"
-    schema = SupervisedPropositionListSchema(tags=['propositions'])
     pagination_class = None
     filter_backends = []
     permission_classes = [IsSupervisionMember]
+    serializer_class = serializers.DoctoratePropositionSearchDTOSerializer
 
     def list(self, request, **kwargs):
         """List the propositions of the supervision group member"""
@@ -190,25 +195,6 @@ class SupervisedPropositionListView(APIPermissionRequiredMixin, ListAPIView):
         return Response(serializer.data)
 
 
-class ProjectSchema(ResponseSpecificSchema):
-    operation_id_base = '_project'
-    serializer_mapping = {
-        'PUT': (serializers.CompleterPropositionCommandSerializer, serializers.PropositionIdentityDTOSerializer),
-    }
-
-    def map_choicefield(self, field):
-        schema = super().map_choicefield(field)
-        if field.field_name == "commission_proximite":
-            self.enums["ChoixCommissionProximite"] = schema
-            return {'$ref': "#/components/schemas/ChoixCommissionProximite"}
-        return schema
-
-    def map_field(self, field):
-        if field.field_name == 'erreurs':
-            return serializers.PROPOSITION_ERROR_SCHEMA
-        return super().map_field(field)
-
-
 class ProjectViewSet(
     APIPermissionRequiredMixin,
     mixins.RetrieveModelMixin,
@@ -216,7 +202,6 @@ class ProjectViewSet(
     GenericAPIView,
 ):
     name = "project"
-    schema = ProjectSchema()
     pagination_class = None
     filter_backends = []
     permission_mapping = {
@@ -227,6 +212,10 @@ class ProjectViewSet(
     def get_permission_object(self):
         return get_cached_admission_perm_obj(self.kwargs['uuid'])
 
+    @extend_schema(
+        responses=None,
+        operation_id='retrieve_project',
+    )
     def get(self, request, *args, **kwargs):
         """
         This method is only used to check the permission.
@@ -234,6 +223,11 @@ class ProjectViewSet(
         """
         return Response(data={})
 
+    @extend_schema(
+        request=serializers.CompleterPropositionCommandSerializer,
+        responses=serializers.PropositionIdentityDTOSerializer,
+        operation_id='update_project',
+    )
     def put(self, request, *args, **kwargs):
         """Edit the project"""
         serializer = serializers.CompleterPropositionCommandSerializer(data=request.data)
@@ -249,19 +243,19 @@ class ProjectViewSet(
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class DoctoratePreAdmissionListSchema(ResponseSpecificSchema):
-    operation_id_base = '_doctorate_pre_admission'
-    serializer_mapping = {
-        'GET': serializers.DoctoratePreAdmissionSearchDTOSerializer,
-    }
-
-
+@extend_schema_view(
+    get=extend_schema(
+        responses=serializers.DoctoratePreAdmissionSearchDTOSerializer,
+        operation_id='list_doctorate_pre_admissions',
+        tags=['propositions'],
+    ),
+)
 class DoctoratePreAdmissionList(APIPermissionRequiredMixin, DisplayExceptionsByFieldNameAPIMixin, ListAPIView):
     name = "doctorate_pre_admission_list"
-    schema = DoctoratePreAdmissionListSchema()
     pagination_class = None
     filter_backends = []
     permission_classes = [IsListingOrHasNotAlreadyCreatedPermission]
+    serializer_class = serializers.DoctoratePreAdmissionSearchDTOSerializer
 
     def list(self, request, **kwargs):
         """List the propositions of the logged in user"""

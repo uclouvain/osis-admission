@@ -1205,13 +1205,6 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
             academic_year=cls.academic_years[0],
             education_group_type__name=TrainingType.BACHELOR.name,
         )
-        cls.first_diploma = DiplomaTitleFactory(title="Informatique")
-        cls.second_diploma = DiplomaTitleFactory(title="Commerce")
-        cls.first_institute = OrganizationFactory(
-            name='UCL',
-            community=CommunityEnum.FRENCH_SPEAKING.name,
-            establishment_type=EstablishmentTypeEnum.UNIVERSITY.name,
-        )
 
         cls.sic_manager_user = SicManagementRoleFactory(entity=cls.commission).person.user
         cls.fac_manager_user = ProgramManagerRoleFactory(education_group=cls.training.education_group).person.user
@@ -1329,13 +1322,6 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertDjangoMessage(response, gettext('Your data have been saved.'))
 
-        selected_access_titles_names = response.context.get('selected_access_titles_names')
-
-        self.assertIsNotNone(selected_access_titles_names)
-        self.assertEqual(len(selected_access_titles_names), 1)
-
-        self.assertEqual(selected_access_titles_names[0], 'Computer science (2022-2023) - Institute')
-
         valuated_experience.refresh_from_db()
         self.assertEqual(valuated_experience.is_access_title, True)
 
@@ -1351,61 +1337,6 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
 
         valuated_experience.refresh_from_db()
         self.assertEqual(valuated_experience.is_access_title, False)
-
-        selected_access_titles_names = response.context.get('selected_access_titles_names')
-
-        self.assertIsNone(selected_access_titles_names)
-
-        # Select a known and valuated experience (with predefined institute and program)
-        valuated_experience.educationalexperience.institute = self.first_institute
-        valuated_experience.educationalexperience.program = self.first_diploma
-        valuated_experience.educationalexperience.education_name = ''
-        valuated_experience.educationalexperience.institute_name = ''
-        valuated_experience.educationalexperience.save()
-
-        response = self.client.post(
-            valid_url,
-            **self.default_headers,
-            data={
-                'access-title': 'on',
-            },
-        )
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertDjangoMessage(response, gettext('Your data have been saved.'))
-
-        selected_access_titles_names = response.context.get('selected_access_titles_names')
-
-        self.assertIsNotNone(selected_access_titles_names)
-        self.assertEqual(len(selected_access_titles_names), 1)
-
-        self.assertEqual(selected_access_titles_names[0], 'Informatique (2022-2023) - UCL')
-
-        valuated_experience.refresh_from_db()
-        self.assertEqual(valuated_experience.is_access_title, True)
-
-        # Select a known and valuated experience (with fwb equivalent program)
-        BelgianHighSchoolDiploma.objects.filter(person=self.candidate).delete()
-        ForeignHighSchoolDiploma.objects.filter(person=self.candidate).delete()
-        HighSchoolDiplomaAlternative.objects.filter(person=self.candidate).delete()
-
-        valuated_experience.educationalexperience.fwb_equivalent_program = self.second_diploma
-        valuated_experience.educationalexperience.save()
-
-        response = self.client.post(
-            valid_url,
-            **self.default_headers,
-            data={
-                'access-title': 'on',
-            },
-        )
-
-        selected_access_titles_names = response.context.get('selected_access_titles_names')
-
-        self.assertIsNotNone(selected_access_titles_names)
-        self.assertEqual(len(selected_access_titles_names), 1)
-
-        self.assertEqual(selected_access_titles_names[0], 'Informatique (Commerce) (2022-2023) - UCL')
 
     def test_specify_a_cv_non_educational_experience_as_access_title(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -1464,13 +1395,6 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
         valuated_experience.refresh_from_db()
         self.assertEqual(valuated_experience.is_access_title, True)
 
-        selected_access_titles_names = response.context.get('selected_access_titles_names')
-
-        self.assertIsNotNone(selected_access_titles_names)
-        self.assertEqual(len(selected_access_titles_names), 1)
-
-        self.assertEqual(selected_access_titles_names[0], 'Travail (2023-2024)')
-
         # Unselect a known and valuated experience
         response = self.client.post(
             f'{self.url}?experience_uuid={valuated_experience.professionalexperience_id}'
@@ -1484,10 +1408,6 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
 
         valuated_experience.refresh_from_db()
         self.assertEqual(valuated_experience.is_access_title, False)
-
-        selected_access_titles_names = response.context.get('selected_access_titles_names')
-
-        self.assertIsNone(selected_access_titles_names)
 
     @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
     def test_specify_the_higher_education_experience_as_access_title(self, confirm_multiple_upload):
@@ -1513,13 +1433,6 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
         self.general_admission.refresh_from_db()
         self.assertTrue(self.general_admission.are_secondary_studies_access_title)
 
-        selected_access_titles_names = response.context.get('selected_access_titles_names')
-
-        self.assertIsNotNone(selected_access_titles_names)
-        self.assertEqual(len(selected_access_titles_names), 1)
-
-        self.assertEqual(selected_access_titles_names[0], 'CESS (2021-2022) - HS UCL')
-
         # Unselect a known experience (be diploma)
         response = self.client.post(
             f'{self.url}?experience_uuid={self.candidate.belgianhighschooldiploma.uuid}'
@@ -1533,10 +1446,6 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
 
         self.general_admission.refresh_from_db()
         self.assertFalse(self.general_admission.are_secondary_studies_access_title)
-
-        selected_access_titles_names = response.context.get('selected_access_titles_names')
-
-        self.assertIsNone(selected_access_titles_names)
 
         # Select a known experience (foreign diploma)
         self.candidate.belgianhighschooldiploma.delete()
@@ -1561,16 +1470,6 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
 
         self.general_admission.refresh_from_db()
         self.assertTrue(self.general_admission.are_secondary_studies_access_title)
-
-        selected_access_titles_names = response.context.get('selected_access_titles_names')
-
-        self.assertIsNotNone(selected_access_titles_names)
-        self.assertEqual(len(selected_access_titles_names), 1)
-
-        self.assertEqual(
-            selected_access_titles_names[0],
-            "Baccalauréat national (ou diplôme d'état, ...) (2022-2023) - France",
-        )
 
         # Select a known experience (alternative diploma)
         # self.candidate.foreignhighschooldiploma.delete()
@@ -1654,13 +1553,6 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
                 'access-title': 'on',
             },
         )
-
-        selected_access_titles_names = response.context.get('selected_access_titles_names')
-
-        self.assertIsNotNone(selected_access_titles_names)
-        self.assertEqual(len(selected_access_titles_names), 1)
-
-        self.assertEqual(selected_access_titles_names[0], f'{pce_a_pae_a.programme.offer.title} (2021-2022) - UCL')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertDjangoMessage(response, gettext('Your data have been saved.'))

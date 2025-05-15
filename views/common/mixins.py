@@ -24,22 +24,29 @@
 #
 # ##############################################################################
 import json
-from typing import Optional, Union
+from typing import Dict, List, Optional, Union
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.cache import cache
 from django.shortcuts import resolve_url
+from django.template.loader import render_to_string
 from django.utils.functional import cached_property
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from django.views.generic.base import ContextMixin
 
-from admission.auth.roles.central_manager import CentralManager
-from admission.auth.roles.sic_management import SicManagement
 from admission.calendar.admission_digit_ticket_submission import (
     AdmissionDigitTicketSubmissionCalendar,
 )
-from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
+from admission.constants import (
+    COMMENT_TAG_FAC,
+    COMMENT_TAG_GLOBAL,
+    COMMENT_TAG_SIC,
+    CONTEXT_CONTINUING,
+    CONTEXT_DOCTORATE,
+    CONTEXT_GENERAL,
+)
 from admission.ddd.admission.doctorat.preparation.commands import (
     GetCotutelleCommand,
     RecupererAdmissionDoctoratQuery,
@@ -62,6 +69,9 @@ from admission.ddd.admission.domain.model.enums.type_gestionnaire import (
 )
 from admission.ddd.admission.dtos.proposition_fusion_personne import (
     PropositionFusionPersonneDTO,
+)
+from admission.ddd.admission.dtos.titre_acces_selectionnable import (
+    TitreAccesSelectionnableDTO,
 )
 from admission.ddd.admission.enums import Onglets
 from admission.ddd.admission.formation_continue.commands import (
@@ -170,6 +180,26 @@ class AdmissionViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextMix
         if self.is_fac:
             return TypeGestionnaire.FAC.name
 
+    @cached_property
+    def selectable_access_titles(self) -> Dict[str, TitreAccesSelectionnableDTO]:
+        return message_bus_instance.invoke(
+            RecupererTitresAccesSelectionnablesPropositionQuery(
+                uuid_proposition=self.admission_uuid,
+            )
+        )
+
+    @cached_property
+    def selected_access_titles(self):
+        return message_bus_instance.invoke(
+            RecupererTitresAccesSelectionnablesPropositionQuery(
+                uuid_proposition=self.admission_uuid,
+                seulement_selectionnes=True,
+            )
+        )
+
+    def get_access_title_country(self):
+        return access_title_country(self.selected_access_titles.values())
+
 
 class LoadDossierViewMixin(AdmissionViewMixin):
     specific_questions_tab: Optional[Onglets] = None
@@ -222,23 +252,6 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         url = self.request.GET.get('next', '')
         hash_url = self.request.GET.get('next_hash_url', '')
         return f'{url}#{hash_url}' if hash_url else url
-
-    @cached_property
-    def selectable_access_titles(self):
-        return message_bus_instance.invoke(
-            RecupererTitresAccesSelectionnablesPropositionQuery(
-                uuid_proposition=self.admission_uuid,
-            )
-        )
-
-    @cached_property
-    def selected_access_titles(self):
-        return message_bus_instance.invoke(
-            RecupererTitresAccesSelectionnablesPropositionQuery(
-                uuid_proposition=self.admission_uuid,
-                seulement_selectionnes=True,
-            )
-        )
 
     @property
     def injection_inscription(self):
@@ -300,8 +313,8 @@ class LoadDossierViewMixin(AdmissionViewMixin):
     def demande_est_en_quarantaine(self) -> bool:
         person_merge_proposal = getattr(self.admission.candidate, 'personmergeproposal', None)
         if person_merge_proposal and (
-                person_merge_proposal.status in PersonMergeStatus.quarantine_statuses()
-                or not person_merge_proposal.validation.get('valid', True)
+            person_merge_proposal.status in PersonMergeStatus.quarantine_statuses()
+            or not person_merge_proposal.validation.get('valid', True)
         ):
             # Cas display warning when quarantaine
             # (cf. admission/infrastructure/admission/domain/service/lister_toutes_demandes.py)
@@ -324,6 +337,8 @@ class LoadDossierViewMixin(AdmissionViewMixin):
                 if current_admission[key]:
                     context[f'{key}_admission_url'] = resolve_url('admission:base', uuid=current_admission[key])
 
+        context['tab_label_suffixes'] = self.get_tab_label_suffixes()
+
         if self.specific_questions_tab:
             context['specific_questions'] = self.specific_questions
 
@@ -332,7 +347,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
             context['admission'] = self.proposition
         elif self.is_general:
             context['admission'] = self.proposition
-            context['access_title_country'] = access_title_country(self.selected_access_titles.values())
+            context['access_title_country'] = None  # Will be computed later
         elif self.is_continuing:
             context['admission'] = self.proposition
             context['is_continuing'] = True
@@ -347,20 +362,48 @@ class LoadDossierViewMixin(AdmissionViewMixin):
 
     def get_outil_de_comparaison_et_fusion_url(self) -> str:
         return resolve_url(
-            'admission:services:gestion-des-comptes:outil-comparaison-et-fusion',
-            uuid=self.admission_uuid
+            'admission:services:gestion-des-comptes:outil-comparaison-et-fusion', uuid=self.admission_uuid
         )
 
     def dispatch(self, request, *args, **kwargs):
-        if (
-            request.method == 'GET'
-            and self.admission_uuid
-            and getattr(request.user, 'person', None)
-            and (SicManagement.belong_to(request.user.person) or CentralManager.belong_to(request.user.person))
-        ):
+        if request.method == 'GET' and self.admission_uuid and getattr(request.user, 'person', None) and self.is_sic:
             AdmissionViewer.add_viewer(person=request.user.person, admission=self.admission)
 
         return super().dispatch(request, *args, **kwargs)
+
+    def get_tab_label_suffixes(self):
+        """
+        Get elements that will be added after the parent tab labels.
+        :return: A dictionary whose the keys are the ids of the parent tabs and the values the content to display.
+        """
+        tab_label_suffixes = {}
+
+        # Add the number of comments related to the admission
+        comments_url = ''
+        if self.is_sic:
+            comments_url = (
+                f"{resolve_url(f'admission:{self.current_context}:sic-comments', uuid=self.admission_uuid)}"
+                f"?tags={COMMENT_TAG_SIC},{COMMENT_TAG_GLOBAL}"
+            )
+        elif self.is_fac:
+            comments_url = (
+                f"{resolve_url(f'admission:{self.current_context}:fac-comments', uuid=self.admission_uuid)}"
+                f"?tags={COMMENT_TAG_FAC},{COMMENT_TAG_GLOBAL}"
+            )
+
+        if comments_url:
+            tab_label_suffixes['comments'] = mark_safe(
+                render_to_string(
+                    template_name='admission/includes/badges/comment.html',
+                    context={'comments_url': comments_url},
+                )
+            )
+
+        # Add icon when folder in quarantine
+        if self.demande_est_en_quarantaine:
+            tab_label_suffixes['person'] = mark_safe('<span class="fa fa-fas fa-warning text-warning"></span>')
+
+        return tab_label_suffixes
 
 
 class AdmissionFormMixin(AdmissionViewMixin):

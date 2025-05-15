@@ -32,6 +32,7 @@ from django.utils.translation import gettext_lazy as _
 from osis_document.contrib import FileField
 from rest_framework.settings import api_settings
 
+from admission.constants import CONTEXT_CONTINUING
 from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixEdition,
@@ -318,6 +319,9 @@ class ContinuingEducationAdmission(BaseAdmission):
         verbose_name = _("Continuing education admission")
         ordering = ('-created_at',)
         permissions = []
+
+    def get_admission_context(self):
+        return CONTEXT_CONTINUING
 
     def update_detailed_status(self, author: 'Person' = None):
         from admission.ddd.admission.formation_continue.commands import (

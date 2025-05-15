@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,7 +26,6 @@
 
 from rest_framework import serializers
 
-from admission.models.enums.actor_type import ActorType
 from admission.ddd.admission.doctorat.preparation.commands import (
     DesignerPromoteurReferenceCommand,
     IdentifierMembreCACommand,
@@ -40,8 +39,10 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
     GroupeDeSupervisionDTO,
     PropositionDTO,
 )
+from admission.models.enums.actor_type import ActorType
 from base.models.person import Person
 from base.utils.serializers import DTOSerializer
+
 from . import DoctoratDTOSerializer
 from .mixins import IncludedFieldsMixin
 
@@ -103,7 +104,7 @@ class ExternalSupervisionDTOSerializer(serializers.Serializer):
 
 
 class SupervisionActorReferenceSerializer(serializers.Serializer):
-    type = serializers.ChoiceField(
+    actor_type = serializers.ChoiceField(
         choices=ActorType.choices(),
     )
     uuid_membre = serializers.CharField()
@@ -137,7 +138,7 @@ class IdentifierMembreCACommandSerializer(DTOSerializer):
 
 class IdentifierSupervisionActorSerializer(IdentifierMembreCACommandSerializer):
     uuid_proposition = None
-    type = serializers.ChoiceField(
+    actor_type = serializers.ChoiceField(
         choices=ActorType.choices(),
     )
 
@@ -184,6 +185,6 @@ class PersonSerializer(serializers.ModelSerializer):
 
 
 class TutorSerializer(PersonSerializer):
-    first_name = serializers.ReadOnlyField(source='person.first_name')
-    last_name = serializers.ReadOnlyField(source='person.last_name')
-    global_id = serializers.ReadOnlyField(source='person.global_id')
+    first_name = serializers.ReadOnlyField()
+    last_name = serializers.ReadOnlyField()
+    global_id = serializers.ReadOnlyField()

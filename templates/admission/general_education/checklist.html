@@ -227,17 +227,11 @@
                   <th>{% translate 'Payment method' %}</th>
                 </tr>
               </thead>
-              <tbody>
-                {% for payment in payments %}
-                  <tr>
-                    <td>{{ payment.montant }}</td>
-                    <td>{{ payment.identifiant_paiement }}</td>
-                    <td>{{ payment_status_translations|get_item:payment.statut }}</td>
-                    <td>{{ payment.date_creation|date:'d/m/Y H:i' }}</td>
-                    <td>{{ payment.date_mise_a_jour|date:'d/m/Y H:i' }}</td>
-                    <td>{{ payment_method_translations|get_item:payment.methode }}</td>
-                  </tr>
-                {% endfor %}
+              <tbody
+                hx-get="{% url 'admission:general-education:payments-list' view.kwargs.uuid %}"
+                hx-trigger="intersect once"
+              >
+                <tr><td colspan="6">&nbsp;</td></tr>
               </tbody>
             </table>
 
@@ -463,7 +457,7 @@
 
     <div id="document-viewer-tab" class="viewer-tab">
       <div class="split-tab-slider"></div>
-      <div id="document-content" hx-indicator="#document-spinner">
+      <div id="document-content" hx-indicator="#document-details">
         {% for tab, documents in documents.items %}
           <div role="tabpanel" class="documents-tab" id="{{ tab }}-documents">
             <label for="{{ tab }}-documents-select">{% translate 'Document' %}</label>
@@ -520,7 +514,8 @@
   {{ assimilation_form.media.js }}
   {{ fac_decision_refusal_form.media.js }}
   {{ sic_decision_refusal_form.media.js }}
-  {{ sic_decision_approval_form.media.js }}
+  <script type="text/javascript" src="{% static 'admission/select2_tag.js' %}"></script>
+  <script src="{% static 'js/dependsOn.min.js' %}"></script>
   <script type="text/javascript" src="{% static 'osis_document/osis-document-editor.umd.min.js' %}"></script>
   <script src="{% static 'admission/ckeditor.js' %}"></script>
   {{ read_only_documents|json_script:"read-only-documents" }}
@@ -1057,9 +1052,7 @@
 {% block style %}
   {{ block.super }}
   {{ fac_decision_refusal_form.media.css }}
-  {{ fac_decision_approval_form.media.css }}
   {{ sic_decision_refusal_form.media.css }}
-  {{ sic_decision_approval_form.media.css }}
   <link href="{% static 'osis_document/osis-document-editor.css' %}" rel="stylesheet" />
   <link href="{% static 'admission/AdmissionSelectFilter.css' %}" rel="stylesheet" >
   <link href="{% static 'admission/autogrow_textarea.css' %}" rel="stylesheet" />
@@ -1176,21 +1169,18 @@
       position: absolute;
       left: 50%;
       top: 50%;
-      font-size: 2em;
+      width: 2em;
+      height: 2em;
       margin-top: -1em;
-      content: "\f110";
-      font-family: "Font Awesome 6 Free";
-      font-weight: 900;
-      -webkit-animation-name: fa-spin;
-      animation-name: fa-spin;
-      -webkit-animation-direction: normal;
-      animation-direction: normal;
-      -webkit-animation-duration: 1s;
-      animation-duration: 1s;
-      -webkit-animation-iteration-count: infinite;
-      animation-iteration-count: infinite;
-      -webkit-animation-timing-function: steps(8);
-      animation-timing-function: steps(8);
+      content: '';
+      border-radius: 50%;
+      -moz-animation: spin-loader 2s linear infinite;
+      -webkit-animation: spin-loader 2s linear infinite;
+      animation: spin-loader 2s linear infinite;
+      border-color: #286090;
+      border-style: solid;
+      border-top-color: transparent;
+      z-index: 100;
     }
 
     #tabs-content a.saving::before {
