@@ -210,6 +210,7 @@ class PropositionFactory(factory.Factory):
     matricule_candidat = FuzzyText(length=10, chars=string.digits)
     formation_id = factory.SubFactory(FormationIdentityFactory)
     comptabilite = factory.SubFactory(_ComptabiliteFactory)
+    pot_calcule = None
 
     creee_le = factory.Faker('past_datetime')
     modifiee_le = factory.Faker('past_datetime')
