@@ -65,7 +65,7 @@ from admission.mail_templates import (
 from admission.models import DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.doctorate import DoctorateFactory
-from admission.tests.factories.faculty_decision import RefusalReasonFactory
+from admission.tests.factories.faculty_decision import DoctorateRefusalReasonFactory
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import (
     ProgramManagerRoleFactory,
@@ -160,7 +160,7 @@ class SicApprovalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.admission.checklist['current']['financabilite']['statut'] = ChoixStatutChecklist.GEST_REUSSITE.name
         self.admission.checklist['current']['financabilite']['extra'] = {'reussite': 'financable'}
         self.admission.save(update_fields=['checklist'])
-        self.admission.refusal_reasons.add(RefusalReasonFactory())
+        self.admission.refusal_reasons.add(DoctorateRefusalReasonFactory())
         self.url = resolve_url(
             'admission:doctorate:sic-decision-approval-final',
             uuid=self.admission.uuid,
