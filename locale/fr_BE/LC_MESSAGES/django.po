@@ -5737,6 +5737,9 @@ msgstr "Refus de dérogation facultaire"
 msgid "REFUS_DIRECTION"
 msgstr "Refus dérogation direction"
 
+msgid "REFUS_DOCTORAT"
+msgstr "Refus doctorat"
+
 msgid "REFUS_DOSSIER_TARDIF"
 msgstr "Refus dossier tardif"
 

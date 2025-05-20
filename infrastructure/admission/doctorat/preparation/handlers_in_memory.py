@@ -649,6 +649,13 @@ COMMAND_HANDLERS = {
             historique=_historique,
         )
     ),
+    SpecifierMotifsRefusPropositionParSicCommand: (
+        lambda msg_bus, cmd: specifier_motifs_refus_proposition_par_sic(
+            cmd,
+            proposition_repository=_proposition_repository,
+            historique=_historique,
+        )
+    ),
     ApprouverAdmissionParSicCommand: (
         lambda msg_bus, cmd: approuver_admission_par_sic(
             message_bus=msg_bus,

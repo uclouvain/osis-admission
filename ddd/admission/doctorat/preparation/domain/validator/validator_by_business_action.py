@@ -759,6 +759,21 @@ class SpecifierInformationsApprobationInscriptionValidatorList(TwoStepsMultipleB
 
 
 @attr.dataclass(frozen=True, slots=True)
+class RefuserParSicAValiderValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutPropositionDoctorale
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldSicPeutDonnerDecision(
+                statut=self.statut,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
 class RedonnerLaMainAuCandidatValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     statut: ChoixStatutPropositionDoctorale
 

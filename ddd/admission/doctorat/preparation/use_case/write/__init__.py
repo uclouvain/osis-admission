@@ -117,6 +117,9 @@ from .specifier_informations_acceptation_proposition_par_sic_service import (
 from .specifier_motifs_refus_proposition_par_cdd_service import (
     specifier_motifs_refus_proposition_par_cdd,
 )
+from .specifier_motifs_refus_proposition_par_sic_service import (
+    specifier_motifs_refus_proposition_par_sic,
+)
 from .supprimer_membre_CA_service import supprimer_membre_CA
 from .supprimer_promoteur_service import supprimer_promoteur
 from .supprimer_proposition_service import supprimer_proposition

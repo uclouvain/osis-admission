@@ -5162,6 +5162,9 @@ msgstr "Faculty dispensation refusal"
 msgid "REFUS_DIRECTION"
 msgstr ""
 
+msgid "REFUS_DOCTORAT"
+msgstr "Doctorate refusal"
+
 msgid "REFUS_DOSSIER_TARDIF"
 msgstr ""
 

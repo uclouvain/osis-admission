@@ -91,6 +91,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
     PropositionProjetDoctoralValidatorList,
     RedonnerLaMainAuCandidatValidatorList,
     RefuserParCDDValidatorList,
+    RefuserParSicAValiderValidatorList,
     SICPeutSoumettreAuCDDLorsDeLaDecisionCDDValidatorList,
     SoumettreCAValidatorList,
     SpecifierInformationsApprobationInscriptionValidatorList,
@@ -992,6 +993,24 @@ class Proposition(interface.RootEntity):
             nom_personne_contact_programme_annuel=nom_personne_contact_programme_annuel,
             email_personne_contact_programme_annuel=email_personne_contact_programme_annuel,
         )
+
+    def specifier_motifs_refus_par_sic(
+        self,
+        auteur_modification: str,
+        uuids_motifs: List[str],
+        autres_motifs: List[str],
+    ):
+        RefuserParSicAValiderValidatorList(statut=self.statut).validate()
+
+        self.statut = ChoixStatutPropositionDoctorale.ATTENTE_VALIDATION_DIRECTION
+        self.checklist_actuelle.decision_sic = StatutChecklist(
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+            libelle=__('Refusal'),
+            extra={'en_cours': "refusal"},
+        )
+        self.auteur_derniere_modification = auteur_modification
+        self.motifs_refus = [MotifRefusIdentity(uuid=uuid_motif) for uuid_motif in uuids_motifs]
+        self.autres_motifs_refus = autres_motifs
 
     def approuver_par_sic(
         self,

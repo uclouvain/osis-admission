@@ -1220,8 +1220,10 @@ class SicDecisionRefusalForm(FacDecisionRefusalForm):
         self.fields['reasons'].required = False
 
 
-class DoctorateSicDecisionRefusalForm(FacDecisionRefusalForm):
-    model_reason = DoctorateRefusalReason
+class DoctorateSicDecisionRefusalForm(DoctorateFacDecisionRefusalForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['reasons'].required = False
 
 
 class SicDecisionDerogationForm(forms.Form):

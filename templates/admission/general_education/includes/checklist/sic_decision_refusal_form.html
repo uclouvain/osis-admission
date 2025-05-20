@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,9 @@
 
     {% bootstrap_form_errors sic_decision_refusal_form %}
 
+    {% if sic_decision_refusal_form.refusal_type %}
       {% bootstrap_field sic_decision_refusal_form.refusal_type %}
+    {% endif %}
 
     <div
         id="sic-decision-refusal-reason-container"
@@ -44,10 +46,13 @@
       {% bootstrap_field sic_decision_refusal_form.reasons %}
     </div>
 
-    <dl>
-      <dt>{% trans "Faculty comment for the SIC" %}</dt>
-      <dd>{{ comments.decision_facultaire__FAC.comment.value|linebreaksbr|default:"-" }}</dd>
-    </dl>
+    <div id="fac-decision-fac-for-sic-comment" hx-preserve="true">
+      {% if comment_forms.decision_facultaire__FAC %}
+        {% bootstrap_field comment_forms.decision_facultaire__FAC.comment %}
+      {% elif comment_forms.decision_cdd__CDD_FOR_SIC %}
+        {% bootstrap_field comment_forms.decision_cdd__CDD_FOR_SIC.comment %}
+      {% endif %}
+    </div>
   </div>
 
   <div class="modal-footer">
@@ -60,7 +65,7 @@
     </button>
     <button
         class="btn btn-primary"
-        name="save"
+        name="save-{{ sic_decision_refusal_form.prefix }}"
     >
       {% translate 'Save' context 'admission' %}
     </button>
