@@ -115,7 +115,7 @@
       {% checklist_state_button tab='decision_cdd' label=_("Approval") icon='check' state='GEST_REUSSITE' class='success' disabled=cannot_change_cdd_decision tooltip=to_complete_tooltip open_modal=cdd_in_progress_approval_modal %}
     </div>
 
-    {% if current.statut == 'GEST_BLOCAGE' and current.extra.decision == 'EN_DECISION' or current.statut == 'GEST_REUSSITE' %}
+    {% if current.statut == 'GEST_REUSSITE' %}
       {% if history_entries.cdd_decision %}
         <p class="alert alert-info">
         {% blocktranslate with sent_at=history_entries.cdd_decision.created|date:'DATETIME_FORMAT' sender=history_entries.cdd_decision.author trimmed %}
@@ -124,7 +124,45 @@
       {% endif %}
     {% endif %}
 
-    {% if current.statut == 'GEST_REUSSITE' %}
+    {% if current.statut == 'GEST_BLOCAGE' and current.extra.decision == 'EN_DECISION'|enum_display:'DecisionCDDEnum' %}
+      <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active panel panel-default" id="cdd-decision-refusal-details">
+          <div class="panel-heading flex-content align-items-baseline">
+            {% translate 'Reason for refusal' %}
+            {% if can_change_cdd_decision %}
+              <button
+                class="btn btn-default"
+                data-toggle="modal"
+                data-target="#cdd-decision-refusal-modal"
+              >
+                <i class="fa fa-edit"></i>
+              </button>
+            {% endif %}
+          </div>
+          <div class="panel-body">
+            <dl>
+              <dt>{% translate 'Reasons' %}</dt>
+              <dd>
+                <ul class="refusal-reasons-list">
+                  {% for reason in admission.motifs_refus %}
+                    {% ifchanged reason.categorie %}
+                      {% if not forloop.first %}
+                        </ul></li>
+                      {% endif %}
+                      <li>{{ reason.categorie }}<ul>
+                    {% endifchanged %}
+                  <li>{{ reason.motif }}</li>
+                  {% if forloop.last %}
+                    </ul></li>
+                  {% endif %}
+                  {% endfor %}
+                </ul>
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    {% elif current.statut == 'GEST_REUSSITE' %}
       <div class="tab-content">
         <div role="tabpanel" class="tab-pane active panel panel-default" id="cdd-decision-approval-details">
           <div class="panel-heading flex-content align-items-baseline">

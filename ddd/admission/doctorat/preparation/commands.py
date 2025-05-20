@@ -574,8 +574,14 @@ class EnvoyerPropositionAuSicLorsDeLaDecisionCddCommand(interface.CommandRequest
 class RefuserPropositionParCddCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str
-    objet_message: str
-    corps_message: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierMotifsRefusPropositionParCDDCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+    uuids_motifs: List[str] = attr.Factory(list)
+    autres_motifs: List[str] = attr.Factory(list)
 
 
 @attr.dataclass(frozen=True, slots=True)

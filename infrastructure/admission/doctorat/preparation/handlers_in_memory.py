@@ -544,12 +544,17 @@ COMMAND_HANDLERS = {
             historique=_historique,
         )
     ),
+    SpecifierMotifsRefusPropositionParCDDCommand: lambda msg_bus, cmd: specifier_motifs_refus_proposition_par_cdd(
+        cmd,
+        proposition_repository=_proposition_repository,
+    ),
     RefuserPropositionParCddCommand: lambda msg_bus, cmd: refuser_proposition_par_cdd(
         cmd,
         proposition_repository=_proposition_repository,
         historique=_historique,
         personne_connue_ucl_translator=_personne_connue_ucl_translator,
-        notification=_notification,
+        unites_enseignement_translator=_unites_enseignement_translator,
+        pdf_generation=_pdf_generation,
     ),
     SpecifierInformationsAcceptationPropositionParCddCommand: (
         lambda msg_bus, cmd: specifier_informations_acceptation_proposition_par_cdd(

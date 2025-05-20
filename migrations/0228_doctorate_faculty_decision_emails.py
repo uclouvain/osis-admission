@@ -5,9 +5,8 @@ from django.db.migrations import RunPython
 from osis_mail_template import MailTemplateMigration
 
 from admission.mail_templates import (
-    ADMISSION_EMAIL_CDD_REFUSAL_DOCTORATE,
-    ADMISSION_EMAIL_CDD_APPROVAL_DOCTORATE_WITHOUT_BELGIAN_DIPLOMA,
     ADMISSION_EMAIL_CDD_APPROVAL_DOCTORATE_WITH_BELGIAN_DIPLOMA,
+    ADMISSION_EMAIL_CDD_APPROVAL_DOCTORATE_WITHOUT_BELGIAN_DIPLOMA,
 )
 
 
@@ -30,39 +29,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        MailTemplateMigration(
-            identifier=ADMISSION_EMAIL_CDD_REFUSAL_DOCTORATE,
-            subjects={
-                'en': "UCLouvain - admission application {admission_reference} follow-up",
-                'fr-be': "UCLouvain - suivi de votre demande d'admission - {admission_reference}",
-            },
-            contents={
-                'en': '''<p>{greetings} {candidate_first_name} {candidate_last_name},</p>
-
-                <p>Thank you for your admission application to the {training_acronym} / {training_title} programme
-                  for the {academic_year} academic year.</p>
-
-                <p>After evaluating your application, we regret to inform you that your application for admission 
-                  has not been accepted.</p>
-                  
-                <p><strong>(motif : texte à insérer par gestionnaire)</strong></p>
-                  
-                <p>{sender_name} - {doctoral_commission}</p>
-                ''',
-                'fr-be': '''<p>{greetings} {candidate_first_name} {candidate_last_name},</p>
-
-                <p>Votre demande d'admission à l'année académique {academic_year} au programme {training_acronym} / {training_title}
-                  nous est bien parvenue et nous vous en remercions.</p>
-
-                <p>Après analyse de votre dossier, nous sommes au regret de vous informer que votre demande d'admission n'a
-                  pu faire l'objet d'une réponse favorable.</p>
-                  
-                <p><strong>(motif : texte à insérer par gestionnaire)</strong></p>
-                  
-                <p>{sender_name} - {doctoral_commission}</p>
-                ''',
-            },
-        ),
         MailTemplateMigration(
             identifier=ADMISSION_EMAIL_CDD_APPROVAL_DOCTORATE_WITH_BELGIAN_DIPLOMA,
             subjects={

@@ -52,16 +52,21 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
     DecisionCDDEnum,
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
-from admission.mail_templates import ADMISSION_EMAIL_CDD_REFUSAL_DOCTORATE
 from admission.models import DoctorateAdmission
 from admission.models.checklist import AdditionalApprovalCondition
 from admission.tests import OsisDocumentMockTestMixin
 from admission.tests.factories import DoctorateAdmissionFactory
+from admission.tests.factories.comment import CommentEntryFactory
 from admission.tests.factories.curriculum import (
     AdmissionEducationalValuatedExperiencesFactory,
     AdmissionProfessionalValuatedExperiencesFactory,
 )
 from admission.tests.factories.doctorate import DoctorateFactory
+from admission.tests.factories.faculty_decision import (
+    DoctorateRefusalReasonFactory,
+    RefusalReasonFactory,
+)
+from admission.tests.factories.history import HistoryEntryFactory
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import (
     ProgramManagerRoleFactory,
@@ -416,6 +421,11 @@ class CddDecisionSendToSicViewTestCase(TestCase):
         self.change_remote_metadata_patcher.return_value = 'a-token'
         self.addCleanup(patcher.stop)
 
+        # Mock weasyprint
+        patcher = mock.patch('admission.exports.utils.get_pdf_from_template', return_value=b'some content')
+        self.get_pdf_from_template_patcher = patcher.start()
+        self.addCleanup(patcher.stop)
+
     def test_send_to_sic_is_forbidden_with_fac_user_if_the_admission_is_not_in_specific_statuses(self):
         self.client.force_login(user=self.fac_manager_user)
 
@@ -516,6 +526,113 @@ class CddDecisionSendToSicViewTestCase(TestCase):
             ['proposition', 'cdd-decision', 'send-to-sic', 'status-changed'],
         )
 
+    @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
+    def test_send_to_sic_with_fac_user_in_specific_statuses_to_refuse(self, frozen_time):
+        self.client.force_login(user=self.fac_manager_user)
+
+        self.admission.status = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name
+        self.admission.refusal_reasons.all().delete()
+        self.admission.other_refusal_reasons = []
+        self.admission.cdd_refusal_certificate = []
+        self.admission.save()
+
+        # Simulate a transfer from the SIC to the CDD
+        history_entry = HistoryEntryFactory(
+            object_uuid=self.admission.uuid,
+            tags=['proposition', 'cdd-decision', 'send-to-cdd', 'status-changed'],
+        )
+
+        # Simulate a comment from the FAC
+        comment_entry = CommentEntryFactory(
+            object_uuid=self.admission.uuid,
+            tags=['decision_cdd', 'CDD_FOR_SIC'],
+            content='The comment from the CDD to the SIC',
+        )
+
+        # Invalid request -> We need to specify a reason
+        response = self.client.post(self.url + '?refusal=1', **self.default_headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            gettext('When refusing a proposition, the reason must be specified.'),
+            [m.message for m in response.context['messages']],
+        )
+
+        self.admission.other_refusal_reasons = ['test']
+        self.admission.save()
+
+        frozen_time.move_to('2022-01-03')
+
+        # Valid request
+        response = self.client.post(self.url + '?refusal=1', **self.default_headers)
+
+        # Check the response
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the admission has been updated
+        self.admission.refresh_from_db()
+
+        self.assertEqual(self.admission.status, ChoixStatutPropositionDoctorale.RETOUR_DE_FAC.name)
+        self.assertEqual(
+            self.admission.checklist['current']['decision_cdd']['statut'],
+            ChoixStatutChecklist.GEST_BLOCAGE.name,
+        )
+        self.assertEqual(
+            self.admission.checklist['current']['decision_cdd']['extra'],
+            {
+                'decision': DecisionCDDEnum.EN_DECISION.value,
+            },
+        )
+        self.assertEqual(self.admission.last_update_author, self.fac_manager_user.person)
+        self.assertEqual(self.admission.modified_at, datetime.datetime.now())
+
+        # A certificate has been generated
+        self.assertEqual(self.admission.cdd_refusal_certificate, [self.file_uuid])
+
+        # Check the template context
+        self.get_pdf_from_template_patcher.assert_called_once()
+        pdf_context = self.get_pdf_from_template_patcher.call_args_list[0][0][2]
+
+        self.assertIn('proposition', pdf_context)
+        self.assertEqual(pdf_context['proposition'].uuid, self.admission.uuid)
+
+        self.assertIn('fac_decision_comment', pdf_context)
+        self.assertEqual(pdf_context['fac_decision_comment'], comment_entry)
+
+        self.assertIn('sic_to_fac_history_entry', pdf_context)
+        self.assertEqual(pdf_context['sic_to_fac_history_entry'], history_entry)
+
+        self.assertIn('manager', pdf_context)
+        self.assertEqual(pdf_context['manager'].matricule, self.fac_manager_user.person.global_id)
+
+        # Check that an entry in the history has been created
+        history_entries: List[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.admission.uuid).order_by(
+            '-id'
+        )
+
+        self.assertEqual(len(history_entries), 2)
+
+        history_entry = history_entries[0]
+
+        self.assertEqual(
+            history_entry.author,
+            f'{self.fac_manager_user.person.first_name} {self.fac_manager_user.person.last_name}',
+        )
+
+        self.assertEqual(
+            history_entry.message_fr,
+            'Le dossier a été refusé par la CDD.',
+        )
+
+        self.assertEqual(
+            history_entry.message_en,
+            'The dossier has been refused by the CDD.',
+        )
+
+        self.assertCountEqual(
+            history_entry.tags,
+            ['proposition', 'cdd-decision', 'refusal', 'status-changed'],
+        )
+
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl')
 class CddRefusalDecisionViewTestCase(TestCase):
@@ -599,6 +716,11 @@ class CddRefusalDecisionViewTestCase(TestCase):
         patched.return_value = {"foo": {"name": "test.pdf", "size": 1}}
         self.addCleanup(self.get_several_remote_metadata_patcher.stop)
 
+        # Mock weasyprint
+        patcher = mock.patch('admission.exports.utils.get_pdf_from_template', return_value=b'some content')
+        self.get_pdf_from_template_patcher = patcher.start()
+        self.addCleanup(patcher.stop)
+
     def test_submit_refusal_decision_is_forbidden_with_sic_user(self):
         self.client.force_login(user=self.sic_manager_user)
 
@@ -632,40 +754,6 @@ class CddRefusalDecisionViewTestCase(TestCase):
 
         form = response.context['cdd_decision_refusal_form']
 
-        mail = MailTemplate.objects.get(
-            identifier=ADMISSION_EMAIL_CDD_REFUSAL_DOCTORATE,
-            language=settings.LANGUAGE_CODE_FR,
-        )
-
-        self.assertEqual(
-            form.initial.get('subject'),
-            mail.render_subject(
-                tokens={
-                    'admission_reference': f'-CDE21-{str(self.admission)}',
-                },
-            ),
-        )
-
-        teaching_campus = self.admission.training.educationgroupversion_set.first().root_group.main_teaching_campus
-        self.assertEqual(
-            form.initial.get('body'),
-            mail.body_as_html(
-                tokens={
-                    'greetings': 'Cher',
-                    'doctoral_commission': 'Commission doctorale 1',
-                    'sender_name': f'{self.fac_manager_user.person.first_name} '
-                    f'{self.fac_manager_user.person.last_name}',
-                    'admission_reference': f'-CDE21-{str(self.admission)}',
-                    'candidate_first_name': self.admission.candidate.first_name,
-                    'candidate_last_name': self.admission.candidate.last_name,
-                    'training_acronym': self.admission.training.acronym,
-                    'training_title': self.admission.training.title,
-                    'training_campus': teaching_campus.name,
-                    'academic_year': self.admission.training.academic_year.year,
-                }
-            ),
-        )
-
     def test_refusal_decision_form_submitting_with_invalid_data(self):
         self.client.force_login(user=self.fac_manager_user)
 
@@ -681,19 +769,19 @@ class CddRefusalDecisionViewTestCase(TestCase):
         form = response.context['cdd_decision_refusal_form']
 
         self.assertFalse(form.is_valid())
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('subject', []))
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('body', []))
+        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('reasons', []))
 
     @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
     def test_refusal_decision_form_submitting_with_valid_data(self, frozen_time):
         self.client.force_login(user=self.fac_manager_user)
 
+        refusal_reason = DoctorateRefusalReasonFactory()
+
         # Choose an existing reason
         response = self.client.post(
             self.url,
             data={
-                'cdd-decision-refusal-subject': 'Subject',
-                'cdd-decision-refusal-body': 'Body',
+                'cdd-decision-refusal-reasons': [refusal_reason.uuid],
             },
             **self.default_headers,
         )
@@ -707,7 +795,11 @@ class CddRefusalDecisionViewTestCase(TestCase):
         # Check that the admission has been updated
         self.admission.refresh_from_db()
 
-        self.assertEqual(self.admission.status, ChoixStatutPropositionDoctorale.INSCRIPTION_REFUSEE.name)
+        refusal_reasons = self.admission.refusal_reasons.all()
+        self.assertEqual(len(refusal_reasons), 1)
+        self.assertEqual(refusal_reasons[0], refusal_reason)
+        self.assertEqual(self.admission.other_refusal_reasons, [])
+        self.assertEqual(self.admission.status, ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name)
         self.assertEqual(
             self.admission.checklist['current']['decision_cdd']['statut'],
             ChoixStatutChecklist.GEST_BLOCAGE.name,
@@ -719,47 +811,126 @@ class CddRefusalDecisionViewTestCase(TestCase):
         self.assertEqual(self.admission.last_update_author, self.fac_manager_user.person)
         self.assertEqual(self.admission.modified_at, datetime.datetime.now())
 
-        # Check that a notication has been planned
-        notifications = EmailNotification.objects.filter(person=self.admission.candidate)
+        # Choose another reason
+        response = self.client.post(
+            self.url,
+            data={
+                'cdd-decision-refusal-reasons': ['My other reason'],
+            },
+            **self.default_headers,
+        )
 
-        email_object = message_from_string(notifications[0].payload)
-        self.assertEqual(email_object['To'], self.admission.candidate.private_email)
-        self.assertEqual(email_object['Subject'], 'Subject')
-        self.assertIn('Body', notifications[0].payload)
+        # Check the response
+        self.assertEqual(response.status_code, 200)
 
-        # Check that entries in the history have been created
+        form = response.context['cdd_decision_refusal_form']
+        self.assertTrue(form.is_valid())
+
+        # Check that the admission has been updated
+        self.admission.refresh_from_db()
+
+        self.assertFalse(self.admission.refusal_reasons.exists())
+        self.assertEqual(self.admission.other_refusal_reasons, ['My other reason'])
+        self.assertEqual(self.admission.last_update_author, self.fac_manager_user.person)
+        self.assertEqual(self.admission.modified_at, datetime.datetime.now())
+
+    @freezegun.freeze_time('2022-01-01')
+    def test_refusal_decision_form_submitting_with_transfer_to_sic(self):
+        self.client.force_login(user=self.fac_manager_user)
+
+        refusal_reason = DoctorateRefusalReasonFactory()
+
+        # Simulate a transfer from the SIC to the CDD
+        history_entry = HistoryEntryFactory(
+            object_uuid=self.admission.uuid,
+            tags=['proposition', 'cdd-decision', 'send-to-cdd', 'status-changed'],
+        )
+
+        # Simulate a comment from the FAC
+        comment_entry = CommentEntryFactory(
+            object_uuid=self.admission.uuid,
+            tags=['decision_cdd', 'CDD_FOR_SIC'],
+            content='The comment from the CDD to the SIC',
+        )
+
+        # Chosen reason and transfer to SIC
+        response = self.client.post(
+            self.url,
+            data={
+                'cdd-decision-refusal-reasons': [refusal_reason.uuid],
+                'save-transfer': '1',
+            },
+            **self.default_headers,
+        )
+
+        # Check the response
+        self.assertEqual(response.status_code, 200)
+
+        form = response.context['cdd_decision_refusal_form']
+        self.assertTrue(form.is_valid())
+
+        # Check that the admission has been updated
+        self.admission.refresh_from_db()
+
+        refusal_reasons = self.admission.refusal_reasons.all()
+        self.assertEqual(len(refusal_reasons), 1)
+        self.assertEqual(refusal_reasons[0], refusal_reason)
+        self.assertEqual(self.admission.other_refusal_reasons, [])
+        self.assertEqual(self.admission.status, ChoixStatutPropositionDoctorale.RETOUR_DE_FAC.name)
+        self.assertEqual(
+            self.admission.checklist['current']['decision_cdd']['statut'],
+            ChoixStatutChecklist.GEST_BLOCAGE.name,
+        )
+        self.assertEqual(
+            self.admission.checklist['current']['decision_cdd']['extra'],
+            {'decision': DecisionCDDEnum.EN_DECISION.value},
+        )
+        self.assertEqual(self.admission.last_update_author, self.fac_manager_user.person)
+        self.assertEqual(self.admission.modified_at, datetime.datetime.now())
+
+        # A certificate has been generated
+        self.assertEqual(self.admission.cdd_refusal_certificate, [self.file_uuid])
+
+        # Check the template context
+        self.get_pdf_from_template_patcher.assert_called_once()
+        pdf_context = self.get_pdf_from_template_patcher.call_args_list[0][0][2]
+
+        self.assertIn('proposition', pdf_context)
+        self.assertEqual(pdf_context['proposition'].uuid, self.admission.uuid)
+
+        self.assertIn('fac_decision_comment', pdf_context)
+        self.assertEqual(pdf_context['fac_decision_comment'], comment_entry)
+
+        self.assertIn('sic_to_fac_history_entry', pdf_context)
+        self.assertEqual(pdf_context['sic_to_fac_history_entry'], history_entry)
+
+        self.assertIn('manager', pdf_context)
+        self.assertEqual(pdf_context['manager'].matricule, self.fac_manager_user.person.global_id)
+
+        # Check that an entry in the history has been created
         history_entries = HistoryEntry.objects.filter(object_uuid=self.admission.uuid).order_by('-id')
 
         self.assertEqual(len(history_entries), 2)
+        history_entry = history_entries[0]
 
         self.assertEqual(
-            history_entries[0].author,
+            history_entry.author,
             f'{self.fac_manager_user.person.first_name} {self.fac_manager_user.person.last_name}',
         )
 
         self.assertEqual(
-            history_entries[0].message_fr,
+            history_entry.message_fr,
             'Le dossier a été refusé par la CDD.',
         )
 
         self.assertEqual(
-            history_entries[0].message_en,
+            history_entry.message_en,
             'The dossier has been refused by the CDD.',
         )
 
         self.assertCountEqual(
-            history_entries[0].tags,
+            history_entry.tags,
             ['proposition', 'cdd-decision', 'refusal', 'status-changed'],
-        )
-
-        self.assertCountEqual(
-            history_entries[1].tags,
-            ['proposition', 'cdd-decision', 'refusal', 'message'],
-        )
-
-        self.assertEqual(
-            history_entries[1].author,
-            f'{self.fac_manager_user.person.first_name} {self.fac_manager_user.person.last_name}',
         )
 
 

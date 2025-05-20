@@ -608,12 +608,13 @@ msgstr ""
 "Tous les membres du comité d'accompagnement doivent approuver la proposition."
 
 msgid ""
-"All experiences must be in the 'Validated' status or in the 'To complete after "
-"enrolment' status so that the previous experience can be changed to the "
-"'Sufficient' status."
+"All experiences must be in the 'Validated' status or in the 'To complete "
+"after enrolment' status so that the previous experience can be changed to "
+"the 'Sufficient' status."
 msgstr ""
-"L'ensemble des expériences doivent être à l'état 'Validé' ou à l'état 'A compléter après inscription' pour que le "
-"parcours antérieur puisse passer à l'état 'Suffisant'."
+"L'ensemble des expériences doivent être à l'état 'Validé' ou à l'état 'A "
+"compléter après inscription' pour que le parcours antérieur puisse passer à "
+"l'état 'Suffisant'."
 
 msgid "All history"
 msgstr "Historique complet"
@@ -1075,7 +1076,8 @@ msgid "Bachelor"
 msgstr "Bachelier"
 
 msgid "Bachelor's course entrance exam"
-msgstr "Examen d'admission aux études de premier cycle de l'enseignement supérieur"
+msgstr ""
+"Examen d'admission aux études de premier cycle de l'enseignement supérieur"
 
 msgid "Back to checklist"
 msgstr "Retour à la checklist"
@@ -2351,6 +2353,18 @@ msgstr "Formation doctorale"
 msgid "Doctorate enrolment applications"
 msgstr "Demandes d'inscription en doctorat"
 
+msgid "Doctorate refusal reason"
+msgstr "Motif de refus pour doctorat"
+
+msgid "Doctorate refusal reason categories"
+msgstr "Catégories des motifs de refus pour doctorat"
+
+msgid "Doctorate refusal reason category"
+msgstr "Catégorie d'un motif de refus pour doctorat"
+
+msgid "Doctorate refusal reasons"
+msgstr "Motifs de refus pour doctorat"
+
 msgid "Doctorate thesis field"
 msgstr "Domaine de la thèse de doctorat"
 
@@ -2686,11 +2700,6 @@ msgid ""
 msgstr ""
 "E-mail envoyé au candidat lorsque la CDD approuve une proposition en "
 "formation doctorale d'un candidat ayant un diplôme belge."
-
-msgid "Email sent to the candidate when the CDD refuses a doctorate admission."
-msgstr ""
-"E-mail envoyé au candidat lorsque la CDD refuse une proposition en formation "
-"doctorale."
 
 msgid ""
 "Email sent to the candidate when the faculty approve the application with "
@@ -5836,6 +5845,9 @@ msgstr "Attestation de refus SIC"
 msgid "Refusal certificate of faculty"
 msgstr "Attestation de refus facultaire"
 
+msgid "Refusal certificate of the CDD"
+msgstr "Attestation de refus de la CDD"
+
 msgid "Refusal document link"
 msgstr "Lien du document de refus"
 
@@ -6646,7 +6658,8 @@ msgid ""
 msgstr ""
 "Le passage à l'état 'Dérogation accordée' est réservé aux demandes de type "
 "inscription dont la situation de dérogation à la finançabilité est 'accord "
-"de dérogation facultaire' ou pour lesquelles une dérogation du VRAE a été obtenue."
+"de dérogation facultaire' ou pour lesquelles une dérogation du VRAE a été "
+"obtenue."
 
 msgid "The 'Dispensation needed' status is reserved to enrolment application."
 msgstr ""

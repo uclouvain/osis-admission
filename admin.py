@@ -38,7 +38,7 @@ from django.shortcuts import resolve_url
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
-from django.utils.translation import ngettext, pgettext, pgettext_lazy
+from django.utils.translation import ngettext, pgettext
 from django_admin_listfilter_dropdown.filters import RelatedDropdownFilter
 from django_json_widget.widgets import JSONEditorWidget
 from hijack.contrib.admin import HijackUserAdminMixin
@@ -88,6 +88,8 @@ from admission.models.base import BaseAdmission
 from admission.models.categorized_free_document import CategorizedFreeDocument
 from admission.models.checklist import (
     AdditionalApprovalCondition,
+    DoctorateRefusalReason,
+    DoctorateRefusalReasonCategory,
     FreeAdditionalApprovalCondition,
     RefusalReason,
     RefusalReasonCategory,
@@ -108,7 +110,6 @@ from admission.services.injection_epc.injection_dossier import InjectionEPCAdmis
 from admission.views.mollie_webhook import MollieWebHook
 from base.models.academic_year import AcademicYear
 from base.models.education_group_type import EducationGroupType
-from base.models.entity_version import EntityVersion
 from base.models.enums.education_group_categories import Categories
 from base.models.person import Person
 from base.models.person_merge_proposal import PersonMergeStatus
@@ -793,6 +794,23 @@ class RefusalReasonCategoryAdmin(DisplayTranslatedNameMixin, OrderedModelAdmin):
 
 @admin.register(RefusalReason)
 class RefusalReasonAdmin(DisplayTranslatedNameMixin, OrderedModelAdmin):
+    autocomplete_fields = ['category']
+    list_display = ['safe_name', 'category', 'move_up_down_links', 'order']
+    list_filter = ['category']
+
+    @admin.display(description=_('Name'))
+    def safe_name(self, obj):
+        return mark_safe(obj.name)
+
+
+@admin.register(DoctorateRefusalReasonCategory)
+class DoctorateRefusalReasonCategoryAdmin(DisplayTranslatedNameMixin, OrderedModelAdmin):
+    list_display = ['name', 'move_up_down_links', 'order']
+    search_fields = ['name']
+
+
+@admin.register(DoctorateRefusalReason)
+class DoctorateRefusalReasonAdmin(DisplayTranslatedNameMixin, OrderedModelAdmin):
     autocomplete_fields = ['category']
     list_display = ['safe_name', 'category', 'move_up_down_links', 'order']
     list_filter = ['category']

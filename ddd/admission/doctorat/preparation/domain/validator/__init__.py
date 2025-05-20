@@ -72,6 +72,7 @@ from ._should_informations_checklist_etre_completees import (
     ShouldSelectionnerTitreAccesPourEnvoyerASIC,
     ShouldSicPeutDonnerDecision,
     ShouldSICPeutSoumettreACddLorsDeLaDecisionCdd,
+    ShouldSpecifierMotifRefusCDD,
     ShouldStatutsChecklistExperiencesEtreValidees,
     ShouldTitreAccesEtreSelectionne,
 )
@@ -146,6 +147,7 @@ __all__ = [
     "ShouldSICPeutSoumettreACddLorsDeLaDecisionCdd",
     "ShouldGestionnairePeutSoumettreAuSicLorsDeLaDecisionCdd",
     "ShouldCddPeutDonnerDecision",
+    "ShouldSpecifierMotifRefusCDD",
     "ShouldPropositionEtreInscriptionTardiveAvecConditionAcces",
     "ShouldSelectionnerTitreAccesPourEnvoyerASIC",
     "ShouldSicPeutDonnerDecision",

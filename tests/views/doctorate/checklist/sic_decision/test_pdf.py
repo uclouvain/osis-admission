@@ -54,7 +54,7 @@ from admission.tests.factories.curriculum import (
     ProfessionalExperienceFactory,
 )
 from admission.tests.factories.doctorate import DoctorateFactory
-from admission.tests.factories.faculty_decision import RefusalReasonFactory
+from admission.tests.factories.faculty_decision import DoctorateRefusalReasonFactory
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import (
     ProgramManagerRoleFactory,
@@ -101,7 +101,7 @@ class SicDecisionPdfPreviewViewTestCase(SicPatchMixin, TestCase):
             must_report_to_sic=False,
             communication_to_the_candidate='',
         )
-        cls.admission.refusal_reasons.add(RefusalReasonFactory())
+        cls.admission.refusal_reasons.add(DoctorateRefusalReasonFactory())
         document_params = {
             'automatically_required': False,
             'last_action_at': '2023-01-01T00:00:00',

@@ -114,6 +114,7 @@ class IEmplacementsDocumentsPropositionTranslator(interface.DomainService):
         elif resume_dto.est_proposition_doctorale:
             documents_systeme = (
                 ('DOSSIER_ANALYSE', resume_dto.proposition.pdf_recapitulatif),
+                ('ATTESTATION_REFUS_CDD', resume_dto.proposition.certificat_refus_cdd),
                 ('ATTESTATION_ACCORD_CDD', resume_dto.proposition.certificat_approbation_cdd),
                 ('ATTESTATION_ACCORD_SIC', resume_dto.proposition.certificat_approbation_sic),
                 ('ATTESTATION_ACCORD_ANNEXE_SIC', resume_dto.proposition.certificat_approbation_sic_annexe),

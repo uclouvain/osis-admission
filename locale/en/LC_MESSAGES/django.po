@@ -2163,6 +2163,18 @@ msgstr ""
 msgid "Doctorate enrolment applications"
 msgstr ""
 
+msgid "Doctorate refusal reason"
+msgstr ""
+
+msgid "Doctorate refusal reason categories"
+msgstr ""
+
+msgid "Doctorate refusal reason category"
+msgstr ""
+
+msgid "Doctorate refusal reasons"
+msgstr ""
+
 msgid "Doctorate thesis field"
 msgstr ""
 
@@ -2453,9 +2465,6 @@ msgstr ""
 msgid ""
 "Email sent to the candidate when the CDD approves a doctorate admission of a "
 "candidate with a Belgian diploma."
-msgstr ""
-
-msgid "Email sent to the candidate when the CDD refuses a doctorate admission."
 msgstr ""
 
 msgid ""
@@ -5258,6 +5267,9 @@ msgid "Refusal certificate of SIC"
 msgstr ""
 
 msgid "Refusal certificate of faculty"
+msgstr ""
+
+msgid "Refusal certificate of the CDD"
 msgstr ""
 
 msgid "Refusal document link"
