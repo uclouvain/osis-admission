@@ -468,6 +468,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             and admission.candidate.country_of_citizenship.european_union,
             noma_candidat=admission.student_registration_id or '',  # from annotation
             adresse_email_candidat=admission.candidate.private_email,
+            photo_identite_candidat=admission.candidate.id_photo,
             reponses_questions_specifiques=admission.specific_question_answers,
             curriculum=admission.curriculum,
             equivalence_diplome=admission.diploma_equivalence,

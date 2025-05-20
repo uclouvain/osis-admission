@@ -36,6 +36,18 @@ def path(pattern, view, name=None):
 
 
 # Create the routers and register our viewsets with it.
+common_view_set_router = SimpleRouter(trailing_slash=False)
+common_view_set_router.register(
+    'curriculum/educational',
+    views.CommonEducationalExperienceViewSet,
+    basename="cv_educational_experiences",
+)
+common_view_set_router.register(
+    'curriculum/professional',
+    views.CommonProfessionalExperienceViewSet,
+    basename="cv_professional_experiences",
+)
+
 doctorate_view_set_router = SimpleRouter(trailing_slash=False)
 doctorate_view_set_router.register(
     'curriculum/educational',
@@ -73,13 +85,6 @@ continuing_education_view_set_router.register(
 )
 app_name = "admission_api_v1"
 
-person_tabs = [
-    path('person', views.PersonViewSet),
-    path('coordonnees', views.CoordonneesViewSet),
-    path('secondary_studies', views.SecondaryStudiesViewSet),
-    path('languages_knowledge', views.LanguagesKnowledgeViewSet),
-    _path('', include(doctorate_view_set_router.urls)),
-]
 
 urlpatterns = [
     # > Every education
@@ -91,13 +96,21 @@ urlpatterns = [
     # > Doctorate education
     path('supervised_propositions', views.SupervisedPropositionListView),
     # Creation tabs
-    _path('', include(person_tabs)),
+    path('person', views.CommonPersonViewSet),
+    path('coordonnees', views.CommonCoordonneesViewSet),
+    path('secondary_studies', views.CommonSecondaryStudiesViewSet),
+    path('languages_knowledge', views.CommonLanguagesKnowledgeViewSet),
+    _path('', include(common_view_set_router.urls)),
     path('curriculum', views.PersonCurriculumView),
     # Admission-related
     path('propositions/doctorate', views.DoctorateTrainingChoiceAPIView),
     path('propositions/doctorate/pre-admission-list', views.DoctoratePreAdmissionList),
     path('propositions/doctorate/<uuid:uuid>', views.DoctoratePropositionView),
-    _path('propositions/doctorate/<uuid:uuid>/', include(person_tabs)),
+    _path('propositions/doctorate/<uuid:uuid>/', include(doctorate_view_set_router.urls)),
+    path('propositions/doctorate/<uuid:uuid>/person', views.PersonViewSet),
+    path('propositions/doctorate/<uuid:uuid>/coordonnees', views.CoordonneesViewSet),
+    path('propositions/doctorate/<uuid:uuid>/secondary_studies', views.SecondaryStudiesViewSet),
+    path('propositions/doctorate/<uuid:uuid>/languages_knowledge', views.LanguagesKnowledgeViewSet),
     path('propositions/doctorate/<uuid:uuid>/project', views.ProjectViewSet),
     path('propositions/doctorate/<uuid:uuid>/verify_project', admission.api.views.submission.VerifyDoctoralProjectView),
     path('propositions/doctorate/<uuid:uuid>/curriculum', views.DoctorateCurriculumView),
@@ -120,7 +133,9 @@ urlpatterns = [
     ),
     path('propositions/doctorate/<uuid:uuid>/supervision/request-signatures', views.RequestSignaturesAPIView),
     path('propositions/doctorate/<uuid:uuid>/supervision/approve', views.ApprovePropositionAPIView),
-    path('propositions/doctorate/<uuid:uuid>/supervision/external/<token>', views.ExternalApprovalPropositionAPIView),
+    path(
+        'propositions/doctorate/<uuid:uuid>/supervision/external/<str:token>', views.ExternalApprovalPropositionAPIView
+    ),
     path('propositions/doctorate/<uuid:uuid>/supervision/approve-by-pdf', views.ApproveByPdfPropositionAPIView),
     # Doctorate
     path('propositions/doctorate/<uuid:uuid>/doctorate', views.DoctorateAPIView),

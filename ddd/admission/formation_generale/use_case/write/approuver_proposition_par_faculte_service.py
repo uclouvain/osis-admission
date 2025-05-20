@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,20 +26,42 @@
 import datetime
 
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.domain.repository.i_titre_acces_selectionnable import ITitreAccesSelectionnableRepository
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
+from admission.ddd.admission.domain.repository.i_titre_acces_selectionnable import (
+    ITitreAccesSelectionnableRepository,
+)
+from admission.ddd.admission.domain.service.i_profil_candidat import (
+    IProfilCandidatTranslator,
+)
+from admission.ddd.admission.domain.service.i_unites_enseignement_translator import (
+    IUnitesEnseignementTranslator,
+)
 from admission.ddd.admission.formation_generale.commands import (
     ApprouverPropositionParFaculteCommand,
 )
-from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
-from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation import IPDFGeneration
-from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
-from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
-from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
-from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
-from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    PropositionIdentity,
+)
+from admission.ddd.admission.formation_generale.domain.service.i_historique import (
+    IHistorique,
+)
+from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation import (
+    IPDFGeneration,
+)
+from admission.ddd.admission.formation_generale.repository.i_proposition import (
+    IPropositionRepository,
+)
+from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import (
+    GetCurrentAcademicYear,
+)
+from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import (
+    IAcademicYearRepository,
+)
+from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import (
+    IPersonneConnueUclTranslator,
+)
+from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
+    IExperienceParcoursInterneTranslator,
+)
 
 
 def approuver_proposition_par_faculte(
@@ -51,18 +73,9 @@ def approuver_proposition_par_faculte(
     unites_enseignement_translator: 'IUnitesEnseignementTranslator',
     titre_acces_selectionnable_repository: 'ITitreAccesSelectionnableRepository',
     profil_candidat_translator: 'IProfilCandidatTranslator',
-    academic_year_repository: 'IAcademicYearRepository',
     experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
 ) -> PropositionIdentity:
     # GIVEN
-    annee_courante = (
-        GetCurrentAcademicYear()
-        .get_starting_academic_year(
-            datetime.date.today(),
-            academic_year_repository,
-        )
-        .year
-    )
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
     titres_selectionnes = titre_acces_selectionnable_repository.search_by_proposition(
@@ -86,7 +99,6 @@ def approuver_proposition_par_faculte(
         unites_enseignement_translator=unites_enseignement_translator,
         profil_candidat_translator=profil_candidat_translator,
         titres_selectionnes=titres_selectionnes,
-        annee_courante=annee_courante,
         experience_parcours_interne_translator=experience_parcours_interne_translator,
     )
 

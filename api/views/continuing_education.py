@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,20 +25,24 @@
 # ##############################################################################
 
 from django.http import Http404
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework.generics import RetrieveAPIView
 
 from admission.api import serializers
-from admission.api.schema import BetterChoicesSchema
-from ddd.logic.formation_catalogue.formation_continue.commands import RecupererInformationsSpecifiquesQuery
+from ddd.logic.formation_catalogue.formation_continue.commands import (
+    RecupererInformationsSpecifiquesQuery,
+)
 from ddd.logic.formation_catalogue.formation_continue.domain.validator.exceptions import (
     InformationsSpecifiquesNonTrouveesException,
 )
 from infrastructure.messages_bus import message_bus_instance
 
 
+@extend_schema_view(
+    get=extend_schema(operation_id='retrieveInformationsSpecifiquesFormationContinueDTO'),
+)
 class RetrieveContinuingEducationSpecificInformationView(RetrieveAPIView):
     name = 'retrieve-continuing-education-specific-information'
-    schema = BetterChoicesSchema()
     filter_backends = []
     serializer_class = serializers.InformationsSpecifiquesFormationContinueDTOSerializer
 

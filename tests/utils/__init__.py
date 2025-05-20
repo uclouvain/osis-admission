@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,8 +27,12 @@ import uuid
 
 from django.test import TestCase
 
-from admission.ddd.admission.domain.model.enums.condition_acces import TypeTitreAccesSelectionnable
-from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
+from admission.ddd.admission.domain.model.enums.condition_acces import (
+    TypeTitreAccesSelectionnable,
+)
+from admission.ddd.admission.dtos.titre_acces_selectionnable import (
+    TitreAccesSelectionnableDTO,
+)
 from admission.utils import access_title_country
 
 
@@ -47,6 +51,7 @@ class UtilsTestCase(TestCase):
                 uuid_experience=uuid_experience,
                 annee=None,
                 pays_iso_code='',
+                nom='',
             )
         ]
 
@@ -60,6 +65,7 @@ class UtilsTestCase(TestCase):
                 uuid_experience=uuid_experience,
                 annee=2020,
                 pays_iso_code='BE',
+                nom='',
             ),
             TitreAccesSelectionnableDTO(
                 type_titre=TypeTitreAccesSelectionnable.EXPERIENCE_ACADEMIQUE.name,
@@ -67,6 +73,7 @@ class UtilsTestCase(TestCase):
                 uuid_experience=uuid_experience,
                 annee=2021,
                 pays_iso_code='FR',
+                nom='',
             ),
             TitreAccesSelectionnableDTO(
                 type_titre=TypeTitreAccesSelectionnable.EXPERIENCE_NON_ACADEMIQUE.name,
@@ -74,6 +81,7 @@ class UtilsTestCase(TestCase):
                 uuid_experience=uuid_experience,
                 annee=2022,
                 pays_iso_code='',
+                nom='',
             ),
             TitreAccesSelectionnableDTO(
                 type_titre=TypeTitreAccesSelectionnable.ETUDES_SECONDAIRES.name,
@@ -81,6 +89,7 @@ class UtilsTestCase(TestCase):
                 uuid_experience=uuid_experience,
                 annee=2015,
                 pays_iso_code='UK',
+                nom='',
             ),
         ]
 
@@ -94,6 +103,7 @@ class UtilsTestCase(TestCase):
                 uuid_experience=uuid_experience,
                 annee=2020,
                 pays_iso_code='BE',
+                nom='',
             ),
             TitreAccesSelectionnableDTO(
                 type_titre=TypeTitreAccesSelectionnable.EXPERIENCE_ACADEMIQUE.name,
@@ -101,6 +111,7 @@ class UtilsTestCase(TestCase):
                 uuid_experience=uuid_experience,
                 annee=2020,
                 pays_iso_code='FR',
+                nom='',
             ),
             TitreAccesSelectionnableDTO(
                 type_titre=TypeTitreAccesSelectionnable.EXPERIENCE_NON_ACADEMIQUE.name,
@@ -108,6 +119,7 @@ class UtilsTestCase(TestCase):
                 uuid_experience=uuid_experience,
                 annee=2022,
                 pays_iso_code='',
+                nom='',
             ),
         ]
 

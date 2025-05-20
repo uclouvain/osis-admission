@@ -77,13 +77,14 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         cls.sic_manager_user = SicManagementRoleFactory(entity=cls.first_doctoral_commission).person.user
         cls.fac_manager_user = ProgramManagerRoleFactory(education_group=cls.training.education_group).person.user
         cls.default_headers = {'HTTP_HX-Request': 'true'}
+        cls.european_union_country = CountryFactory(european_union=True)
 
         AdditionalApprovalCondition.objects.all().delete()
         cls.admission: DoctorateAdmission = DoctorateAdmissionFactory(
             training=cls.training,
             candidate=CompletePersonFactory(
                 language=settings.LANGUAGE_CODE_FR,
-                country_of_citizenship__european_union=True,
+                country_of_citizenship=cls.european_union_country,
             ),
             submitted=True,
             status=ChoixStatutPropositionDoctorale.COMPLETEE_POUR_SIC.name,
@@ -100,6 +101,12 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
             'admission:doctorate:sic-decision-enrolment-approval',
             uuid=cls.admission.uuid,
         )
+
+    def setUp(self) -> None:
+        super().setUp()
+
+        self.admission.candidate.country_of_citizenship = self.european_union_country
+        self.admission.candidate.save(update_fields=['country_of_citizenship'])
 
     def test_submit_approval_decision_is_forbidden_with_fac_user(self):
         self.client.force_login(user=self.fac_manager_user)

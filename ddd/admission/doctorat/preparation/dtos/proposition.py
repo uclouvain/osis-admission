@@ -82,6 +82,7 @@ class PropositionDTO(interface.DTO):
     projet_formation_complementaire: List[str]
     lettres_recommandation: List[str]
     langue_redaction_these: Optional[str]
+    nom_langue_redaction_these: Optional[str]
     institut_these: Optional[UUID]
     nom_institut_these: str
     sigle_institut_these: str

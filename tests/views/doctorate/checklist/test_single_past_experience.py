@@ -59,6 +59,7 @@ from admission.tests.factories.roles import (
     ProgramManagerRoleFactory,
     SicManagementRoleFactory,
 )
+from admission.tests.views.doctorate.checklist.sic_decision.base import SicPatchMixin
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.enums.community import CommunityEnum
 from base.tests.factories.academic_year import AcademicYearFactory
@@ -72,7 +73,7 @@ from reference.tests.factories.diploma_title import DiplomaTitleFactory
 
 
 @freezegun.freeze_time('2023-01-01')
-class SinglePastExperienceChangeStatusViewTestCase(TestCase):
+class SinglePastExperienceChangeStatusViewTestCase(SicPatchMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
@@ -94,6 +95,8 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
         cls.url_name = 'admission:doctorate:single-past-experience-change-status'
 
     def setUp(self) -> None:
+        super().setUp()
+
         self.admission: DoctorateAdmission = DoctorateAdmissionFactory(
             training=self.training,
             candidate=self.candidate,
@@ -352,7 +355,7 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
 
 
 @freezegun.freeze_time('2023-01-01')
-class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
+class SinglePastExperienceChangeAuthenticationViewTestCase(SicPatchMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
@@ -375,6 +378,8 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
         cls.url_name = 'admission:doctorate:single-past-experience-change-authentication'
 
     def setUp(self) -> None:
+        super().setUp()
+
         self.admission: DoctorateAdmission = DoctorateAdmissionFactory(
             training=self.training,
             candidate=self.candidate,

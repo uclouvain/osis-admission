@@ -62,6 +62,7 @@ class PropositionDTO(interface.DTO):
     date_changement_statut: Optional[datetime.datetime]
     candidat_a_plusieurs_demandes: bool
     langue_contact_candidat: str
+    photo_identite_candidat: List[str]
 
     reponses_questions_specifiques: Dict[str, Union[str, List[str]]]
 

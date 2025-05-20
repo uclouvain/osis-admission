@@ -30,6 +30,7 @@ from uuid import UUID
 
 import freezegun
 from django.test import TestCase
+from django.utils.translation import gettext
 
 from admission.ddd.admission.domain.model.enums.condition_acces import (
     TypeTitreAccesSelectionnable,
@@ -63,9 +64,12 @@ from admission.tests.factories.secondary_studies import (
     ForeignHighSchoolDiplomaFactory,
     HighSchoolDiplomaAlternativeFactory,
 )
+from base.models.enums.community import CommunityEnum
 from base.models.enums.education_group_types import TrainingType
+from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.enums.got_diploma import GotDiploma
 from base.tests.factories.academic_year import AcademicYearFactory
+from base.tests.factories.organization import OrganizationFactory
 from base.tests.factories.student import StudentFactory
 from epc.models.enums.decision_resultat_cycle import DecisionResultatCycle
 from epc.models.enums.etat_inscription import EtatInscriptionFormation
@@ -82,6 +86,8 @@ from epc.tests.factories.inscription_programme_cycle import (
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile import BE_ISO_CODE
 from osis_profile.models.enums.curriculum import Result
+from osis_profile.models.enums.education import ForeignDiplomaTypes
+from reference.tests.factories.diploma_title import DiplomaTitleFactory
 
 
 @freezegun.freeze_time('2023-01-01')
@@ -94,6 +100,13 @@ class GetAccessTitlesViewTestCase(TestCase):
         cls.training = GeneralEducationTrainingFactory(
             academic_year=cls.academic_years[0],
             education_group_type__name=TrainingType.BACHELOR.name,
+        )
+        cls.first_diploma = DiplomaTitleFactory(title="Informatique")
+        cls.second_diploma = DiplomaTitleFactory(title="Commerce")
+        cls.first_institute = OrganizationFactory(
+            name='UCL',
+            community=CommunityEnum.FRENCH_SPEAKING.name,
+            establishment_type=EstablishmentTypeEnum.UNIVERSITY.name,
         )
 
     def test_get_access_titles_with_no_experience(self):
@@ -162,6 +175,49 @@ class GetAccessTitlesViewTestCase(TestCase):
         )
         self.assertEqual(access_titles[educational_experience_uuid].annee, self.academic_years[1].year)
         self.assertEqual(access_titles[educational_experience_uuid].selectionne, False)
+
+        # Experience with custom institute and program
+        self.assertEqual(
+            access_titles[educational_experience_uuid].nom,
+            'Computer science (2022-2023) - Institute',
+        )
+
+        # Experience with predefined institute and program
+        educational_experience.institute = self.first_institute
+        educational_experience.program = self.first_diploma
+        educational_experience.education_name = ''
+        educational_experience.institute_name = ''
+        educational_experience.save()
+
+        access_titles = message_bus_instance.invoke(
+            RecupererTitresAccesSelectionnablesPropositionQuery(
+                uuid_proposition=general_admission.uuid,
+            )
+        )
+
+        self.assertEqual(len(access_titles), 1)
+        self.assertIn(educational_experience_uuid, access_titles)
+        self.assertEqual(
+            access_titles[educational_experience_uuid].nom,
+            'Informatique (2022-2023) - UCL',
+        )
+
+        # Experience with fwb equivalent program
+        educational_experience.fwb_equivalent_program = self.second_diploma
+        educational_experience.save()
+
+        access_titles = message_bus_instance.invoke(
+            RecupererTitresAccesSelectionnablesPropositionQuery(
+                uuid_proposition=general_admission.uuid,
+            )
+        )
+
+        self.assertEqual(len(access_titles), 1)
+        self.assertIn(educational_experience_uuid, access_titles)
+        self.assertEqual(
+            access_titles[educational_experience_uuid].nom,
+            'Informatique (Commerce) (2022-2023) - UCL',
+        )
 
         # Only retrieve selected access titles if specified
         access_titles = message_bus_instance.invoke(
@@ -232,7 +288,7 @@ class GetAccessTitlesViewTestCase(TestCase):
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
 
-        # Add an educational experience
+        # Add a non-educational experience
         non_educational_experience = ProfessionalExperienceFactory(
             person=general_admission.candidate,
             end_date=datetime.date(2022, 1, 1),
@@ -274,6 +330,7 @@ class GetAccessTitlesViewTestCase(TestCase):
         )
         self.assertEqual(access_titles[non_educational_experience_uuid].annee, 2021)
         self.assertEqual(access_titles[non_educational_experience_uuid].selectionne, True)
+        self.assertEqual(access_titles[non_educational_experience_uuid].nom, 'Travail (2021-2022)')
 
         # Change related year
         non_educational_experience.end_date = datetime.date(2022, 9, 15)
@@ -326,6 +383,7 @@ class GetAccessTitlesViewTestCase(TestCase):
         )
         self.assertEqual(access_titles[belgian_high_school_diploma.uuid].annee, 2022)
         self.assertEqual(access_titles[belgian_high_school_diploma.uuid].selectionne, False)
+        self.assertEqual(access_titles[belgian_high_school_diploma.uuid].nom, 'CESS (2022-2023) - HS UCL')
 
         # Only retrieve selected access titles if specified
         access_titles = message_bus_instance.invoke(
@@ -358,6 +416,7 @@ class GetAccessTitlesViewTestCase(TestCase):
         foreign_high_school_diploma = ForeignHighSchoolDiplomaFactory(
             person=general_admission.candidate,
             academic_graduation_year=self.academic_years[0],
+            foreign_diploma_type=ForeignDiplomaTypes.NATIONAL_BACHELOR.name,
         )
 
         access_titles = message_bus_instance.invoke(
@@ -378,6 +437,12 @@ class GetAccessTitlesViewTestCase(TestCase):
         )
         self.assertEqual(access_titles[foreign_high_school_diploma.uuid].annee, 2021)
         self.assertEqual(access_titles[foreign_high_school_diploma.uuid].selectionne, True)
+        self.assertEqual(
+            access_titles[foreign_high_school_diploma.uuid].nom,
+            "Baccalauréat national (ou diplôme d'état, ...) (2021-2022) - {country_name}".format(
+                country_name=foreign_high_school_diploma.country.name,
+            ),
+        )
 
         # High school diploma alternative
         foreign_high_school_diploma.delete()
@@ -416,6 +481,10 @@ class GetAccessTitlesViewTestCase(TestCase):
         )
         self.assertEqual(access_titles[high_school_diploma_alternative.uuid].annee, None)
         self.assertEqual(access_titles[high_school_diploma_alternative.uuid].selectionne, True)
+        self.assertEqual(
+            access_titles[high_school_diploma_alternative.uuid].nom,
+            gettext("Bachelor's course entrance exam"),
+        )
 
         high_school_diploma_alternative.delete()
 
@@ -610,6 +679,10 @@ class GetAccessTitlesViewTestCase(TestCase):
         self.assertEqual(access_titles[pce_b_uuid].selectionne, False)
         self.assertEqual(access_titles[pce_b_uuid].annee, self.academic_years[1].year)
         self.assertEqual(access_titles[pce_b_uuid].pays_iso_code, BE_ISO_CODE)
+        self.assertEqual(
+            access_titles[pce_b_uuid].nom,
+            f'{pce_b_pae_a.programme.offer.title} (2022-2023) - UCL',
+        )
 
         self.assertEqual(access_titles[pce_a_uuid].uuid_experience, pce_a_uuid)
         self.assertEqual(
@@ -619,6 +692,10 @@ class GetAccessTitlesViewTestCase(TestCase):
         self.assertEqual(access_titles[pce_a_uuid].selectionne, False)
         self.assertEqual(access_titles[pce_a_uuid].annee, self.academic_years[1].year)
         self.assertEqual(access_titles[pce_a_uuid].pays_iso_code, BE_ISO_CODE)
+        self.assertEqual(
+            access_titles[pce_a_uuid].nom,
+            f'{pce_a_pae_b.programme.offer.title} (2022-2023) - UCL',
+        )
 
         # Select an internal experience as access title
         general_admission.internal_access_titles.add(pce_a)
