@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -36,32 +36,31 @@ from rest_framework.parsers import FormParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from admission.constants import COMMENT_TAG_FAC, COMMENT_TAG_SIC
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
 )
-from admission.ddd.admission.formation_generale.events import DonneesPersonellesCandidatValidee
-from admission.forms.admission.checklist import (
-    CommentForm,
+from admission.ddd.admission.formation_generale.events import (
+    DonneesPersonellesCandidatValidee,
 )
+from admission.forms.admission.checklist import CommentForm
 from admission.views.common.detail_tabs.comments import (
-    COMMENT_TAG_SIC,
-    COMMENT_TAG_FAC,
-    COMMENT_TAG_IUFC_FOR_FAC,
-    COMMENT_TAG_FAC_FOR_IUFC,
     COMMENT_TAG_CDD_FOR_SIC,
+    COMMENT_TAG_FAC_FOR_IUFC,
+    COMMENT_TAG_IUFC_FOR_FAC,
     COMMENT_TAG_SIC_FOR_CDD,
 )
-from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
+from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 
 __all__ = [
     'ChangeStatusView',
     'SaveCommentView',
+    'PropositionFromResumeMixin',
 ]
 
 __namespace__ = False
 
 from infrastructure.messages_bus import message_bus_instance
-
 from osis_common.ddd.interface import BusinessException
 
 COMMENT_FINANCABILITE_DISPENSATION = 'financabilite__derogation'
@@ -109,11 +108,7 @@ def change_admission_status(tab, admission_status, extra, admission, author, rep
     admission.save(update_fields=update_fields)
 
     if tab in ['donnees_personnelles'] and admission_status == ChoixStatutChecklist.GEST_REUSSITE.name:
-        message_bus_instance.publish(
-            DonneesPersonellesCandidatValidee(
-                matricule=admission.candidate.global_id
-            )
-        )
+        message_bus_instance.publish(DonneesPersonellesCandidatValidee(matricule=admission.candidate.global_id))
     return serializer.data
 
 
@@ -203,3 +198,12 @@ class SaveCommentView(AdmissionFormMixin, FormView):
             },
         )
         return super().form_valid(CommentForm(comment=comment, **self.get_form_kwargs()))
+
+
+class PropositionFromResumeMixin:
+    """Load the proposition from the resume (needs a 'proposition_resume' attribute)"""
+
+    @cached_property
+    def proposition(self):
+        # Override it to avoid unuseful request
+        return self.proposition_resume.resume.proposition

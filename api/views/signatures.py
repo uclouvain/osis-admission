@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,13 +23,12 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from admission.api import serializers
-from admission.api.schema import ResponseSpecificSchema
 from admission.ddd.admission.doctorat.preparation.commands import (
     DemanderSignaturesCommand,
     RenvoyerInvitationSignatureExterneCommand,
@@ -39,17 +38,8 @@ from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
-class RequestSignaturesSchema(ResponseSpecificSchema):
-    operation_id_base = "_signatures"
-    serializer_mapping = {
-        "PUT": (serializers.RenvoyerInvitationSignatureExterneSerializer, serializers.PropositionIdentityDTOSerializer),
-        "POST": serializers.PropositionIdentityDTOSerializer,
-    }
-
-
 class RequestSignaturesAPIView(APIPermissionRequiredMixin, APIView):
     name = "request-signatures"
-    schema = RequestSignaturesSchema()
     pagination_class = None
     filter_backends = []
     permission_mapping = {
@@ -60,6 +50,11 @@ class RequestSignaturesAPIView(APIPermissionRequiredMixin, APIView):
     def get_permission_object(self):
         return get_cached_admission_perm_obj(self.kwargs['uuid'])
 
+    @extend_schema(
+        request=serializers.RenvoyerInvitationSignatureExterneSerializer,
+        responses=serializers.PropositionIdentityDTOSerializer,
+        operation_id='update_signatures',
+    )
     def put(self, request, *args, **kwargs):
         """Resend an invitation for and external member."""
         serializer = serializers.RenvoyerInvitationSignatureExterneSerializer(data=request.data)
@@ -70,6 +65,11 @@ class RequestSignaturesAPIView(APIPermissionRequiredMixin, APIView):
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @extend_schema(
+        request=None,
+        responses=serializers.PropositionIdentityDTOSerializer,
+        operation_id='create_signatures',
+    )
     def post(self, request, *args, **kwargs):
         """Ask for all promoters and members to sign the proposition."""
         result = message_bus_instance.invoke(

@@ -31,7 +31,7 @@ from uuid import UUID
 
 import attr
 from django.conf import settings
-from django.db.models import Func, Model, Q
+from django.db.models import Exists, F, Func, Model, OuterRef, Q
 from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 
@@ -377,10 +377,14 @@ def get_document_from_identifier(
                 experience_uuid = document_identifier_parts[1]
                 experience_year = document_identifier_parts[2]
                 field = CORRESPONDANCE_CHAMPS_CURRICULUM_ANNEE_EXPERIENCE_ACADEMIQUE[domain_identifier]
-                obj = EducationalExperienceYear.objects.filter(
-                    educational_experience__uuid=experience_uuid,
-                    academic_year__year=experience_year,
-                ).first()
+                obj = (
+                    EducationalExperienceYear.objects.filter(
+                        educational_experience__uuid=experience_uuid,
+                        academic_year__year=experience_year,
+                    )
+                    .annotate(educational_experience_uuid=F('educational_experience__uuid'))
+                    .first()
+                )
 
             elif domain_identifier in CORRESPONDANCE_CHAMPS_CURRICULUM_EXPERIENCE_NON_ACADEMIQUE:
                 # CURRICULUM.[EXPERIENCE_UUID].[DOMAIN_IDENTIFIER]

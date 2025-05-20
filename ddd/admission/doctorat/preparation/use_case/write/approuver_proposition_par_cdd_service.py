@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -28,25 +28,55 @@ import datetime
 from admission.ddd.admission.doctorat.preparation.commands import (
     ApprouverPropositionParCddCommand,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.doctorat.preparation.domain.service.groupe_de_supervision_dto import GroupeDeSupervisionDto
-from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
-from admission.ddd.admission.doctorat.preparation.domain.service.i_membre_CA import IMembreCATranslator
-from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import INotification
-from admission.ddd.admission.doctorat.preparation.domain.service.i_pdf_generation import IPDFGeneration
-from admission.ddd.admission.doctorat.preparation.domain.service.i_promoteur import IPromoteurTranslator
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    PropositionIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.domain.service.groupe_de_supervision_dto import (
+    GroupeDeSupervisionDto,
+)
+from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import (
+    IHistorique,
+)
+from admission.ddd.admission.doctorat.preparation.domain.service.i_membre_CA import (
+    IMembreCATranslator,
+)
+from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import (
+    INotification,
+)
+from admission.ddd.admission.doctorat.preparation.domain.service.i_pdf_generation import (
+    IPDFGeneration,
+)
+from admission.ddd.admission.doctorat.preparation.domain.service.i_promoteur import (
+    IPromoteurTranslator,
+)
 from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
     IGroupeDeSupervisionRepository,
 )
-from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
+    IPropositionRepository,
+)
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.domain.repository.i_titre_acces_selectionnable import ITitreAccesSelectionnableRepository
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
-from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
-from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
-from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
-from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
+from admission.ddd.admission.domain.repository.i_titre_acces_selectionnable import (
+    ITitreAccesSelectionnableRepository,
+)
+from admission.ddd.admission.domain.service.i_profil_candidat import (
+    IProfilCandidatTranslator,
+)
+from admission.ddd.admission.domain.service.i_unites_enseignement_translator import (
+    IUnitesEnseignementTranslator,
+)
+from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import (
+    GetCurrentAcademicYear,
+)
+from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import (
+    IAcademicYearRepository,
+)
+from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import (
+    IPersonneConnueUclTranslator,
+)
+from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
+    IExperienceParcoursInterneTranslator,
+)
 
 
 def approuver_proposition_par_cdd(
@@ -61,8 +91,6 @@ def approuver_proposition_par_cdd(
     academic_year_repository: 'IAcademicYearRepository',
     experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
-    promoteur_translator: 'IPromoteurTranslator',
-    membre_ca_translator: 'IMembreCATranslator',
     notification: 'INotification',
 ) -> PropositionIdentity:
     # GIVEN
@@ -79,8 +107,6 @@ def approuver_proposition_par_cdd(
     groupe_supervision_dto = GroupeDeSupervisionDto().get(
         uuid_proposition=cmd.uuid_proposition,
         repository=groupe_supervision_repository,
-        promoteur_translator=promoteur_translator,
-        membre_ca_translator=membre_ca_translator,
     )
 
     titres_selectionnes = titre_acces_selectionnable_repository.search_by_proposition(

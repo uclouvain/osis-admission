@@ -271,6 +271,10 @@ class ShouldStatutsChecklistExperiencesEtreValidees(BusinessValidator):
 
     def validate(self, *args, **kwargs):
         if self.statut == ChoixStatutChecklist.GEST_REUSSITE:
+            valid_experience_statuses = {
+                ChoixStatutChecklist.GEST_REUSSITE,
+                ChoixStatutChecklist.GEST_BLOCAGE_ULTERIEUR,
+            }
             # Le passage à l'état valide nécessite que toutes les expériences valorisées soient passées à l'état valide
             uuids_experiences_valorisees = self.uuids_experiences_valorisees.copy()
             uuids_experiences_valorisees.add(OngletsDemande.ETUDES_SECONDAIRES.name)
@@ -282,7 +286,7 @@ class ShouldStatutsChecklistExperiencesEtreValidees(BusinessValidator):
                     uuids_experiences_valorisees.discard(identifiant_experience)
 
                     # Si une expérience valorisée n'est pas à l'état valide, lever l'exception
-                    if experience.statut != ChoixStatutChecklist.GEST_REUSSITE:
+                    if experience.statut not in valid_experience_statuses:
                         raise StatutsChecklistExperiencesEtreValidesException
 
             # Si une expérience valorisée n'a pas de checklist associée, lever l'exception

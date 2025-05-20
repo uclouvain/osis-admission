@@ -75,18 +75,19 @@ class CalendrierInscription(ICalendrierInscription):
             return PeriodeDTO(date_debut=academic_calendar[0].start_date, date_fin=academic_calendar[0].end_date)
 
     @classmethod
-    def recuperer_periode_inscription_specifique_hue_plus_5_resident_a_l_etranger(
+    def recuperer_periode_du_pot(
         cls,
         annee_formation: int,
+        pot: AcademicCalendarTypes,
     ) -> Periode:
         academic_calendar = AcademicCalendar.objects.get(
-            reference=AcademicCalendarTypes.ADMISSION_POOL_HUE5_FOREIGN_RESIDENCY.name,
+            reference=pot.name,
             data_year__year=annee_formation,
         )
         return Periode(
             date_debut=academic_calendar.start_date,
             date_fin=academic_calendar.end_date,
-            type=AcademicCalendarTypes.ADMISSION_POOL_HUE5_FOREIGN_RESIDENCY.name,
+            type=pot.name,
         )
 
     @classmethod
