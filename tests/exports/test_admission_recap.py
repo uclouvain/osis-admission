@@ -1616,6 +1616,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             certificat_approbation_sic_annexe=[],
             certificat_approbation_cdd=[],
             certificat_refus_cdd=[],
+            certificat_refus_sic=[],
             doit_fournir_visa_etudes=False,
             visa_etudes_d=['uuid-visa-etudes-d'],
             certificat_autorisation_signe=['uuid-certificat-autorisation-signe'],

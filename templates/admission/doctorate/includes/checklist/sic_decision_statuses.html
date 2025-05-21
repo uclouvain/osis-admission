@@ -67,6 +67,11 @@
     {% url view.base_namespace|add:':sic-decision-change-status' uuid=view.kwargs.uuid status='GEST_BLOCAGE-closed' as change_status_url %}
     {% checklist_state_button tab='decision_sic' label=_("Closed") icon='circle-stop' state='GEST_BLOCAGE' blocage="closed" class='danger' htmx_post=change_status_url %}
   {% endif %}
+  {% if current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'refusal' %}
+    {% checklist_state_button tab='decision_sic' label=_("REFUSEE") icon='circle-stop' state='GEST_BLOCAGE' blocage="refusal" class='danger' open_modal='#sic-decision-refusal-final-modal' %}
+  {% else %}
+    {% checklist_state_button tab='decision_sic' label=_("REFUSEE") icon='circle-stop' state='GEST_BLOCAGE' blocage="refusal" class='danger' disabled=True %}
+  {% endif %}
   {% if original_admission.checklist.current.financabilite.statut != 'INITIAL_NON_CONCERNE' and original_admission.checklist.current.financabilite.statut != 'GEST_REUSSITE' %}
     {% translate 'The status of the checklist for the financability must be "Not concerned" or "Financable" or "Dispensation granted".' as approval_disabled_tooltip %}
     {% checklist_state_button tab='decision_sic' label=_("Approved") icon='check' state='GEST_REUSSITE' class='success' tooltip=approval_disabled_tooltip|force_escape disabled=True %}

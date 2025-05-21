@@ -50,8 +50,18 @@ templates.register(
     tokens=CHECKLIST_TOKENS
     + [
         Token(
-            name='candidate',
-            description=_("Candidate of the admission"),
+            name='training_acronym',
+            description=_('Acronym of the training'),
+            example='SPRI2MS/DI',
+        ),
+        Token(
+            name='greetings',
+            description=_("Greetings depending on the gender of the candidate"),
+            example="Cher",
+        ),
+        Token(
+            name='sender_name',
+            description=_('Name of the manager sending the email'),
             example="John Doe",
         ),
         Token(
@@ -60,9 +70,9 @@ templates.register(
             example="2023-2024",
         ),
         Token(
-            name='admission_training',
-            description=_("Training of the admission"),
-            example="AGRO3DP / Doctorat en sciences agronomiques et ingénierie biologique",
+            name='doctoral_commission',
+            description=_('Name of the doctoral commission'),
+            example="Commission CD1",
         ),
         Token(
             name='document_link',

@@ -33,6 +33,3 @@ from osis_common.ddd import interface
 class MotifRefusDTO(interface.DTO):
     motif: str
     categorie: str
-
-    def __str__(self):
-        return self.motif
