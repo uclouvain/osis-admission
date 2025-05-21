@@ -82,6 +82,7 @@ from .recalculer_emplacements_documents_non_libres_proposition_service import (
 )
 from .reclamer_documents_au_candidat_service import reclamer_documents_au_candidat
 from .refuser_proposition_par_faculte_service import refuser_proposition_par_cdd
+from .refuser_proposition_par_sic_service import refuser_proposition_par_sic
 from .refuser_proposition_service import refuser_proposition
 from .renvoyer_invitation_signature_externe_service import (
     renvoyer_invitation_signature_externe,

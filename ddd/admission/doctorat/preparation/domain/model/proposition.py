@@ -92,6 +92,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
     RedonnerLaMainAuCandidatValidatorList,
     RefuserParCDDValidatorList,
     RefuserParSicAValiderValidatorList,
+    RefuserParSicValidatorList,
     SICPeutSoumettreAuCDDLorsDeLaDecisionCDDValidatorList,
     SoumettreCAValidatorList,
     SpecifierInformationsApprobationInscriptionValidatorList,
@@ -233,6 +234,7 @@ class Proposition(interface.RootEntity):
     certificat_approbation_cdd: List[str] = attr.Factory(list)
     certificat_approbation_sic: List[str] = attr.Factory(list)
     certificat_approbation_sic_annexe: List[str] = attr.Factory(list)
+    certificat_refus_sic: List[str] = attr.Factory(list)
 
     motifs_refus: List[MotifRefusIdentity] = attr.Factory(list)
     autres_motifs_refus: List[str] = attr.Factory(list)
@@ -1183,3 +1185,16 @@ class Proposition(interface.RootEntity):
             statut=self.statut,
         ).validate()
         self.statut = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC
+
+    def refuser_par_sic(self, auteur_modification: str):
+        RefuserParSicValidatorList(
+            statut=self.statut,
+        ).validate()
+
+        self.checklist_actuelle.decision_sic = StatutChecklist(
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+            libelle=__('Refusal'),
+            extra={'blocage': 'refusal'},
+        )
+        self.statut = ChoixStatutPropositionDoctorale.INSCRIPTION_REFUSEE
+        self.auteur_derniere_modification = auteur_modification

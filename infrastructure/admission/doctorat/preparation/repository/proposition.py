@@ -255,6 +255,7 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
         certificat_approbation_cdd=admission.cdd_approval_certificate,
         certificat_approbation_sic=admission.sic_approval_certificate,
         certificat_approbation_sic_annexe=admission.sic_annexe_approval_certificate,
+        certificat_refus_sic=admission.sic_refusal_certificate,
         avec_complements_formation=admission.with_prerequisite_courses,
         complements_formation=[
             ComplementFormationIdentity(uuid=admission_training.uuid)
@@ -507,6 +508,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'cdd_approval_certificate': entity.certificat_approbation_cdd,
                 'sic_approval_certificate': entity.certificat_approbation_sic,
                 'sic_annexe_approval_certificate': entity.certificat_approbation_sic_annexe,
+                'sic_refusal_certificate': entity.certificat_refus_sic,
                 'other_refusal_reasons': entity.autres_motifs_refus,
                 'with_prerequisite_courses': entity.avec_complements_formation,
                 'prerequisite_courses_fac_comment': entity.commentaire_complements_formation,
@@ -859,6 +861,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             certificat_approbation_cdd=admission.cdd_approval_certificate,
             certificat_approbation_sic=admission.sic_approval_certificate,
             certificat_approbation_sic_annexe=admission.sic_annexe_approval_certificate,
+            certificat_refus_sic=admission.sic_refusal_certificate,
             doit_fournir_visa_etudes=admission.must_provide_student_visa_d,
             visa_etudes_d=admission.student_visa_d,
             certificat_autorisation_signe=admission.signed_enrollment_authorization,
