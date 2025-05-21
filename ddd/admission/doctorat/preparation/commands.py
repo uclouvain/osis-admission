@@ -577,6 +577,14 @@ class RefuserPropositionParCddCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
+class RefuserPropositionParSicCommand(interface.CommandRequest):
+    uuid_proposition: str
+    auteur: str
+    objet_message: str = ''
+    corps_message: str = ''
+
+
+@attr.dataclass(frozen=True, slots=True)
 class SpecifierMotifsRefusPropositionParCDDCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str

@@ -635,6 +635,17 @@ COMMAND_HANDLERS = {
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
         )
     ),
+    RefuserPropositionParSicCommand: (
+        lambda msg_bus, cmd: refuser_proposition_par_sic(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
+            historique=Historique(),
+            notification=Notification(),
+            pdf_generation=PDFGeneration(),
+            campus_repository=UclouvainCampusRepository(),
+        )
+    ),
     EnvoyerEmailApprobationInscriptionAuCandidatCommand: (
         lambda msg_bus, cmd: envoyer_email_approbation_inscription_au_candidat(
             cmd=cmd,

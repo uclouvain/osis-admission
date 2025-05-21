@@ -180,6 +180,7 @@ class ChecklistView(
             OngletsChecklist.decision_sic.name: {
                 'ATTESTATION_ACCORD_SIC',
                 'ATTESTATION_ACCORD_ANNEXE_SIC',
+                'ATTESTATION_REFUS_SIC',
                 'ATTESTATION_ACCORD_CDD',
                 'ATTESTATION_REFUS_CDD',
             },

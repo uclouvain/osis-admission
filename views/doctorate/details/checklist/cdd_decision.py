@@ -150,7 +150,7 @@ class CddDecisionMixin(CheckListDefaultContextMixin):
                 proposition_dto=self.proposition,
                 extra_tokens={
                     'greetings': get_salutation_prefix(self.admission.candidate),
-                    'doctoral_commission': self.management_entity_title,
+                    'doctoral_commission': self.proposition.doctorat.intitule_entite_gestion,
                     'sender_name': f'{self.request.user.person.first_name} {self.request.user.person.last_name}',
                 },
             )

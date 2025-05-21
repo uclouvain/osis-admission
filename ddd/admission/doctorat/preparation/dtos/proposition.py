@@ -131,6 +131,7 @@ class PropositionDTO(interface.DTO):
     certificat_approbation_cdd: List[str]
     certificat_approbation_sic: List[str]
     certificat_approbation_sic_annexe: List[str]
+    certificat_refus_sic: List[str]
 
     doit_fournir_visa_etudes: Optional[bool]
     visa_etudes_d: List[str]

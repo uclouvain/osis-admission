@@ -447,6 +447,12 @@ class DoctorateAdmission(DocumentCopyModelMixin, BaseAdmission):
         verbose_name=_('Approval certificate of the CDD'),
         mimetypes=[PDF_MIME_TYPE],
     )
+    sic_refusal_certificate = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('Refusal certificate from SIC'),
+        mimetypes=[PDF_MIME_TYPE],
+    )
     sic_approval_certificate = FileField(
         blank=True,
         upload_to=admission_directory_path,
