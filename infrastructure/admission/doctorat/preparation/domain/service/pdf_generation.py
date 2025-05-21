@@ -455,9 +455,6 @@ class PDFGeneration(IPDFGeneration):
         gestionnaire: str,
         temporaire: bool = False,
     ) -> Optional[str]:
-        if proposition.type_de_refus == TypeDeRefus.REFUS_LIBRE:
-            return None
-
         with translation.override(settings.LANGUAGE_CODE_FR):
             proposition_dto = proposition_repository.get_dto_for_gestionnaire(
                 proposition.entity_id, UnitesEnseignementTranslator

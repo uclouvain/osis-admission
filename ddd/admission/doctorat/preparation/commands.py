@@ -735,6 +735,14 @@ class SpecifierInformationsAcceptationInscriptionParSicCommand(interface.Command
 
 
 @attr.dataclass(frozen=True, slots=True)
+class SpecifierMotifsRefusPropositionParSicCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+    uuids_motifs: List[str] = attr.Factory(list)
+    autres_motifs: List[str] = attr.Factory(list)
+
+
+@attr.dataclass(frozen=True, slots=True)
 class ApprouverAdmissionParSicCommand(interface.CommandRequest):
     uuid_proposition: str
     objet_message: str
