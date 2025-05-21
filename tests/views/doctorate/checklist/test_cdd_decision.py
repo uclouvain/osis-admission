@@ -38,7 +38,6 @@ from django.shortcuts import resolve_url
 from django.test import TestCase, override_settings
 from django.utils.translation import gettext
 from osis_history.models import HistoryEntry
-from osis_mail_template.models import MailTemplate
 from osis_notification.models import EmailNotification
 
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
@@ -62,10 +61,7 @@ from admission.tests.factories.curriculum import (
     AdmissionProfessionalValuatedExperiencesFactory,
 )
 from admission.tests.factories.doctorate import DoctorateFactory
-from admission.tests.factories.faculty_decision import (
-    DoctorateRefusalReasonFactory,
-    RefusalReasonFactory,
-)
+from admission.tests.factories.faculty_decision import DoctorateRefusalReasonFactory
 from admission.tests.factories.history import HistoryEntryFactory
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import (
@@ -189,6 +185,23 @@ class CddDecisionViewTestCase(OsisDocumentMockTestMixin, TestCase):
             ChoixStatutChecklist.INITIAL_CANDIDAT.name,
         )
         self.assertEqual(self.admission.checklist['current']['decision_cdd']['extra'], {})
+
+    def test_change_the_checklist_status_is_not_possible_if_the_current_status_is_closed(self):
+        self.client.force_login(user=self.fac_manager_user)
+
+        self.admission.status = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name
+        self.admission.checklist['current']['decision_cdd']['statut'] = ChoixStatutChecklist.GEST_BLOCAGE.name
+        self.admission.checklist['current']['decision_cdd']['extra'] = {'decision': DecisionCDDEnum.CLOTURE.name}
+        self.admission.save()
+
+        response = self.client.post(self.url, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertIn(
+            gettext('It is not possible to go from the "Closed" status to this status.'),
+            [m.message for m in response.context['messages']],
+        )
 
 
 @override_settings(BACKEND_LINK_PREFIX='https//example.com')
@@ -579,7 +592,7 @@ class CddDecisionSendToSicViewTestCase(TestCase):
         self.assertEqual(
             self.admission.checklist['current']['decision_cdd']['extra'],
             {
-                'decision': DecisionCDDEnum.EN_DECISION.value,
+                'decision': DecisionCDDEnum.EN_DECISION.name,
             },
         )
         self.assertEqual(self.admission.last_update_author, self.fac_manager_user.person)
@@ -834,6 +847,37 @@ class CddRefusalDecisionViewTestCase(TestCase):
         self.assertEqual(self.admission.last_update_author, self.fac_manager_user.person)
         self.assertEqual(self.admission.modified_at, datetime.datetime.now())
 
+    def test_refusal_decision_is_not_possible_if_the_current_status_is_closed(self):
+        self.client.force_login(user=self.fac_manager_user)
+
+        self.admission.status = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name
+        self.admission.checklist['current']['decision_cdd']['statut'] = ChoixStatutChecklist.GEST_BLOCAGE.name
+        self.admission.checklist['current']['decision_cdd']['extra'] = {'decision': DecisionCDDEnum.CLOTURE.name}
+        self.admission.save()
+
+        response = self.client.post(
+            self.url,
+            data={'cdd-decision-refusal-reasons': ['My other reason']},
+            **self.default_headers,
+        )
+
+        # Check the response
+        self.assertEqual(response.status_code, 200)
+
+        form = response.context['cdd_decision_refusal_form']
+        self.assertTrue(form.is_valid())
+
+        self.assertIn(
+            gettext('It is not possible to go from the "Closed" status to this status.'),
+            [m.message for m in response.context['messages']],
+        )
+
+        # Check that the admission has not been updated
+        self.admission.refresh_from_db()
+
+        self.assertFalse(self.admission.refusal_reasons.exists())
+        self.assertEqual(self.admission.other_refusal_reasons, [])
+
     @freezegun.freeze_time('2022-01-01')
     def test_refusal_decision_form_submitting_with_transfer_to_sic(self):
         self.client.force_login(user=self.fac_manager_user)
@@ -883,7 +927,7 @@ class CddRefusalDecisionViewTestCase(TestCase):
         )
         self.assertEqual(
             self.admission.checklist['current']['decision_cdd']['extra'],
-            {'decision': DecisionCDDEnum.EN_DECISION.value},
+            {'decision': DecisionCDDEnum.EN_DECISION.name},
         )
         self.assertEqual(self.admission.last_update_author, self.fac_manager_user.person)
         self.assertEqual(self.admission.modified_at, datetime.datetime.now())
@@ -1273,6 +1317,40 @@ class CddApprovalDecisionViewTestCase(TestCase):
         self.assertEqual(self.admission.annual_program_contact_person_email, 'john.doe@example.be')
         self.assertEqual(self.admission.join_program_fac_comment, 'Comment about the join program')
 
+    def test_approval_decision_is_not_possible_if_the_current_status_is_closed(self):
+        self.client.force_login(user=self.fac_manager_user)
+
+        self.admission.status = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name
+        self.admission.checklist['current']['decision_cdd']['statut'] = ChoixStatutChecklist.GEST_BLOCAGE.name
+        self.admission.checklist['current']['decision_cdd']['extra'] = {'decision': DecisionCDDEnum.CLOTURE.name}
+        self.admission.save()
+
+        response = self.client.post(
+            self.url,
+            data={
+                'cdd-decision-approval-prerequisite_courses': [],
+                'cdd-decision-approval-with_prerequisite_courses': 'True',
+            },
+            **self.default_headers,
+        )
+
+        # Check the response
+        self.assertEqual(response.status_code, 200)
+
+        form = response.context['cdd_decision_approval_form']
+        self.assertTrue(form.is_valid())
+
+        self.assertIn(
+            gettext('It is not possible to go from the "Closed" status to this status.'),
+            [m.message for m in response.context['messages']],
+        )
+
+        # Check that the admission has not been updated
+        self.admission.refresh_from_db()
+
+        self.assertFalse(self.admission.with_prerequisite_courses)
+        self.assertFalse(self.admission.prerequisite_courses.exists())
+
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl')
 @freezegun.freeze_time('2022-01-01')
@@ -1531,6 +1609,35 @@ class CddApprovalFinalDecisionViewTestCase(TestCase):
 
         self.assertEqual(self.admission.status, ChoixStatutPropositionDoctorale.RETOUR_DE_FAC.name)
 
+    def test_cdd_approval_final_decision_is_not_possible_if_the_current_status_is_closed(self):
+        self.client.force_login(user=self.fac_manager_user)
+
+        self.admission.status = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name
+        self.admission.checklist['current']['decision_cdd']['statut'] = ChoixStatutChecklist.GEST_BLOCAGE.name
+        self.admission.checklist['current']['decision_cdd']['extra'] = {'decision': DecisionCDDEnum.CLOTURE.name}
+        self.admission.save()
+
+        self.admission.are_secondary_studies_access_title = True
+        self.admission.save(update_fields=['are_secondary_studies_access_title'])
+
+        response = self.client.post(self.url, data=self.default_data, **self.default_headers)
+
+        # Check the response
+        self.assertEqual(response.status_code, 200)
+
+        form = response.context['cdd_decision_approval_final_form']
+        self.assertTrue(form.is_valid())
+
+        self.assertIn(
+            gettext('It is not possible to go from the "Closed" status to this status.'),
+            [m.message for m in response.context['messages']],
+        )
+
+        # Check that the admission has not been updated
+        self.admission.refresh_from_db()
+
+        self.assertEqual(self.admission.status, ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name)
+
     @freezegun.freeze_time('2022-01-01')
     def test_cdd_approval_final_decision_with_fac_user_with_a_cv_academic_experience_as_access_title(self):
         self.client.force_login(user=self.fac_manager_user)
@@ -1609,3 +1716,120 @@ class CddApprovalFinalDecisionViewTestCase(TestCase):
         self.admission.refresh_from_db()
 
         self.assertEqual(self.admission.status, ChoixStatutPropositionDoctorale.RETOUR_DE_FAC.name)
+
+
+@override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl')
+class CddDecisionClosedViewTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
+
+        cls.first_doctoral_commission = EntityWithVersionFactory(
+            version__acronym=ENTITY_CDE,
+            version__title='Commission doctorale 1',
+        )
+        EntityVersionFactory(entity=cls.first_doctoral_commission)
+
+        cls.training = DoctorateFactory(
+            management_entity=cls.first_doctoral_commission,
+            academic_year=cls.academic_years[0],
+        )
+
+        cls.sic_manager_user = SicManagementRoleFactory(entity=cls.first_doctoral_commission).person.user
+        cls.fac_manager_user = ProgramManagerRoleFactory(education_group=cls.training.education_group).person.user
+        cls.default_headers = {'HTTP_HX-Request': 'true'}
+
+    def setUp(self) -> None:
+        self.admission: DoctorateAdmission = DoctorateAdmissionFactory(
+            training=self.training,
+            submitted=True,
+            status=ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name,
+        )
+        self.default_checklist = copy.deepcopy(self.admission.checklist)
+        self.url = resolve_url(
+            'admission:doctorate:cdd-decision-closed',
+            uuid=self.admission.uuid,
+        )
+
+    def test_close_the_admission_is_forbidden_with_sic_user(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        response = self.client.post(self.url, **self.default_headers)
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_close_the_admission_is_forbidden_with_fac_user_in_invalid_status(self):
+        self.client.force_login(user=self.fac_manager_user)
+
+        self.admission.status = ChoixStatutPropositionDoctorale.CONFIRMEE.name
+        self.admission.save(update_fields=['status'])
+
+        response = self.client.post(self.url, **self.default_headers)
+
+        self.assertEqual(response.status_code, 403)
+
+    @freezegun.freeze_time('2023-01-01')
+    def test_close_the_admission_with_fac_user(self):
+        self.client.force_login(user=self.fac_manager_user)
+
+        response = self.client.post(self.url, **self.default_headers)
+
+        # Check the response
+        self.assertEqual(response.status_code, 200)
+
+        self.assertNotIn(
+            gettext('It is not possible to go from the "Closed" status to this status.'),
+            [m.message for m in response.context['messages']],
+        )
+
+        # Check that the admission has been updated
+        self.admission.refresh_from_db()
+
+        self.assertEqual(self.admission.status, ChoixStatutPropositionDoctorale.CLOTUREE.name)
+
+        cdd_decision_checklist = self.admission.checklist['current']['decision_cdd']
+
+        self.assertEqual(cdd_decision_checklist['statut'], ChoixStatutChecklist.GEST_BLOCAGE.name)
+        self.assertEqual(cdd_decision_checklist['extra'], {'decision': DecisionCDDEnum.CLOTURE.name})
+
+        self.assertEqual(self.admission.last_update_author, self.fac_manager_user.person)
+        self.assertEqual(self.admission.modified_at, datetime.datetime.now())
+
+        # Check that an entry in the history has been created
+        history_entries: List[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.admission.uuid)
+
+        self.assertEqual(len(history_entries), 1)
+        history_entry = history_entries[0]
+
+        self.assertEqual(history_entry.message_fr, 'Le dossier a été clôturé par la CDD.')
+
+        self.assertEqual(history_entry.message_en, 'The dossier has been closed by the CDD.')
+
+        self.assertEqual(
+            history_entry.author,
+            f'{self.fac_manager_user.person.first_name} {self.fac_manager_user.person.last_name}',
+        )
+
+        self.assertCountEqual(history_entry.tags, ['proposition', 'cdd-decision', 'closed', 'status-changed'])
+
+        # Simulate that SIC sent to the CDD the admission
+        self.admission.status = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name
+        self.admission.save(update_fields=['status'])
+
+        response = self.client.post(self.url, **self.default_headers)
+
+        # Check the response
+        self.assertEqual(response.status_code, 200)
+
+        self.assertIn(
+            gettext('It is not possible to go from the "Closed" status to this status.'),
+            [m.message for m in response.context['messages']],
+        )
+
+        # Check that the admission has not been updated
+        self.admission.refresh_from_db()
+
+        self.assertEqual(self.admission.status, ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name)
+
+        # Check that no entry in the history has been created
+        self.assertEqual(HistoryEntry.objects.filter(object_uuid=self.admission.uuid).count(), 1)

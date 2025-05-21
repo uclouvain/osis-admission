@@ -623,6 +623,12 @@ class SpecifierInformationsAcceptationPropositionParCddCommand(interface.Command
 
 
 @attr.dataclass(frozen=True, slots=True)
+class CloturerPropositionParCddCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
 class ModifierStatutChecklistParcoursAnterieurCommand(interface.CommandRequest):
     uuid_proposition: str
     statut: str

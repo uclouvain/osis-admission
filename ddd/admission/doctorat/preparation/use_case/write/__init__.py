@@ -31,6 +31,7 @@ from .approuver_inscription_par_sic_service import approuver_inscription_par_sic
 from .approuver_proposition_par_cdd_service import approuver_proposition_par_cdd
 from .approuver_proposition_par_pdf_service import approuver_proposition_par_pdf
 from .approuver_proposition_service import approuver_proposition
+from .cloturer_proposition_par_cdd_service import cloturer_proposition_par_cdd
 from .completer_comptabilite_proposition_service import (
     completer_comptabilite_proposition,
 )
