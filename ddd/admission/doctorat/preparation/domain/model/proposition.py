@@ -83,6 +83,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
     ApprouverInscriptionParSicValidatorList,
     ApprouverParCDDValidatorList,
     ApprouverParSicAValiderValidatorList,
+    CloturerParCDDValidatorList,
     CompletionPropositionValidatorList,
     DemanderCandidatModificationCaValidatorList,
     GestionnairePeutSoumettreAuSicLorsDeLaDecisionCDDValidatorList,
@@ -1085,6 +1086,7 @@ class Proposition(interface.RootEntity):
     ):
         SpecifierNouvellesInformationsDecisionCDDValidatorList(
             statut=self.statut,
+            checklist_decision_cdd=self.checklist_actuelle.decision_cdd,
         ).validate()
         self.specifier_refus_par_cdd()
         self.motifs_refus = [MotifRefusIdentity(uuid=uuid_motif) for uuid_motif in uuids_motifs]
@@ -1104,6 +1106,7 @@ class Proposition(interface.RootEntity):
         ApprouverParCDDValidatorList(
             statut=self.statut,
             titres_selectionnes=titres_selectionnes,
+            checklist_decision_cdd=self.checklist_actuelle.decision_cdd,
         ).validate()
 
         self.specifier_acceptation_par_cdd()
@@ -1113,6 +1116,7 @@ class Proposition(interface.RootEntity):
 
     def refuser_par_cdd(self, auteur_modification: str):
         RefuserParCDDValidatorList(
+            checklist_decision_cdd=self.checklist_actuelle.decision_cdd,
             statut=self.statut,
             motifs_refus=self.motifs_refus,
             autres_motifs_refus=self.autres_motifs_refus,
@@ -1139,6 +1143,7 @@ class Proposition(interface.RootEntity):
     ):
         SpecifierNouvellesInformationsDecisionCDDValidatorList(
             statut=self.statut,
+            checklist_decision_cdd=self.checklist_actuelle.decision_cdd,
         ).validate()
         self.auteur_derniere_modification = auteur_modification
 
@@ -1197,4 +1202,18 @@ class Proposition(interface.RootEntity):
             extra={'blocage': 'refusal'},
         )
         self.statut = ChoixStatutPropositionDoctorale.INSCRIPTION_REFUSEE
+        self.auteur_derniere_modification = auteur_modification
+
+    def cloturer_par_cdd(self, auteur_modification: str):
+        CloturerParCDDValidatorList(
+            statut=self.statut,
+            checklist_decision_cdd=self.checklist_actuelle.decision_cdd,
+        ).validate()
+
+        self.statut = ChoixStatutPropositionDoctorale.CLOTUREE
+        self.checklist_actuelle.decision_cdd = StatutChecklist(
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+            libelle=__('Closed'),
+            extra={'decision': DecisionCDDEnum.CLOTURE.name},
+        )
         self.auteur_derniere_modification = auteur_modification

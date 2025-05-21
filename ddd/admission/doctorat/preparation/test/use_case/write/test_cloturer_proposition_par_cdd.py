@@ -26,14 +26,12 @@
 from django.test import TestCase
 
 from admission.ddd.admission.doctorat.preparation.commands import (
-    SpecifierMotifsRefusPropositionParCDDCommand,
+    CloturerPropositionParCddCommand,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
-    ChoixStatutChecklist,
-    DecisionCDDEnum,
     OngletsChecklist,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
@@ -49,7 +47,6 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 from admission.ddd.admission.doctorat.preparation.test.factory.person import (
     PersonneConnueUclDTOFactory,
 )
-from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
@@ -62,13 +59,13 @@ from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_
 )
 
 
-class TestSpecifierMotifsRefusParCDD(TestCase):
+class TestCloturerPropositionParCdd(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
         cls.proposition_repository = PropositionInMemoryRepository()
         cls.message_bus = message_bus_in_memory_instance
-        cls.command = SpecifierMotifsRefusPropositionParCDDCommand
+        cls.command = CloturerPropositionParCddCommand
         for matricule in ['00321234', '00987890']:
             PersonneConnueUclInMemoryTranslator.personnes_connues_ucl.add(
                 PersonneConnueUclDTOFactory(matricule=matricule),
@@ -77,90 +74,38 @@ class TestSpecifierMotifsRefusParCDD(TestCase):
     def setUp(self) -> None:
         self.proposition_repository.reset()
         self.proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-SC3DP-confirmee'))
-        self.proposition.statut = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC
+        self.proposition.statut = ChoixStatutPropositionDoctorale.COMPLETEE_POUR_SIC
         self.parametres_commande_par_defaut = {
             'uuid_proposition': 'uuid-SC3DP-confirmee',
-            'uuids_motifs': ['uuid-nouveau-motif-refus'],
-            'autres_motifs': [],
             'gestionnaire': '00321234',
         }
 
-    def test_should_etre_ok_si_motif_connu_specifie_en_statut_traitement_fac(self):
+    def test_should_etre_ok_si_statuts_corrects(self):
         self.proposition.statut = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC
 
-        resultat = self.message_bus.invoke(
-            self.command(
-                uuid_proposition=self.proposition.entity_id.uuid,
-                uuids_motifs=['uuid-nouveau-motif-refus'],
-                autres_motifs=[],
-                gestionnaire='0123456789',
-            )
-        )
+        statuts_decision_cdd = ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT[OngletsChecklist.decision_cdd.name]
+
+        statut_a_traiter = statuts_decision_cdd['A_TRAITER']
+        statut_cloture = statuts_decision_cdd['CLOTURE']
+
+        self.proposition.checklist_actuelle.decision_cdd.statut = statut_a_traiter.statut
+        self.proposition.checklist_actuelle.decision_cdd.extra = statut_a_traiter.extra.copy()
+
+        resultat = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
 
         # Vérifier résultat de la commande
-        self.assertEqual(resultat.uuid, self.proposition.entity_id.uuid)
+        self.assertEqual(resultat.uuid, 'uuid-SC3DP-confirmee')
 
         # Vérifier la proposition
         proposition = self.proposition_repository.get(resultat)
-        self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.TRAITEMENT_FAC)
-        self.assertEqual(proposition.checklist_actuelle.decision_cdd.statut, ChoixStatutChecklist.GEST_BLOCAGE)
-        self.assertEqual(
-            proposition.checklist_actuelle.decision_cdd.extra,
-            {'decision': DecisionCDDEnum.EN_DECISION.name},
-        )
-        self.assertEqual(proposition.motifs_refus, [MotifRefusIdentity(uuid='uuid-nouveau-motif-refus')])
-        self.assertEqual(proposition.autres_motifs_refus, [])
-
-    def test_should_etre_ok_si_motif_libre_specifie_en_statut_completee_pour_fac(self):
-        self.proposition.statut = ChoixStatutPropositionDoctorale.COMPLETEE_POUR_FAC
-
-        resultat = self.message_bus.invoke(
-            self.command(
-                uuid_proposition=self.proposition.entity_id.uuid,
-                uuids_motifs=[],
-                autres_motifs=['Autre motif'],
-                gestionnaire='0123456789',
-            )
-        )
-
-        # Vérifier résultat de la commande
-        self.assertEqual(resultat.uuid, self.proposition.entity_id.uuid)
-
-        # Vérifier la proposition
-        proposition = self.proposition_repository.get(resultat)
-        self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.COMPLETEE_POUR_FAC)
-        self.assertEqual(proposition.checklist_actuelle.decision_cdd.statut, ChoixStatutChecklist.GEST_BLOCAGE)
-        self.assertEqual(
-            proposition.checklist_actuelle.decision_cdd.extra,
-            {'decision': DecisionCDDEnum.EN_DECISION.name},
-        )
-        self.assertEqual(proposition.motifs_refus, [])
-        self.assertEqual(proposition.autres_motifs_refus, ['Autre motif'])
-
-    def test_should_etre_ok_en_statut_a_completer_pour_fac(self):
-        self.proposition.statut = ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_FAC
-
-        resultat = self.message_bus.invoke(
-            self.command(
-                uuid_proposition=self.proposition.entity_id.uuid,
-                uuids_motifs=[],
-                autres_motifs=[],
-                gestionnaire='0123456789',
-            )
-        )
-
-        # Vérifier résultat de la commande
-        self.assertEqual(resultat.uuid, self.proposition.entity_id.uuid)
-
-        # Vérifier la proposition
-        proposition = self.proposition_repository.get(resultat)
-        self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_FAC)
+        self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.CLOTUREE)
+        self.assertEqual(proposition.checklist_actuelle.decision_cdd.statut, statut_cloture.statut)
+        self.assertEqual(proposition.checklist_actuelle.decision_cdd.extra, statut_cloture.extra)
 
     def test_should_lever_exception_si_statut_non_conforme(self):
         statuts_invalides = ChoixStatutPropositionDoctorale.get_names_except(
             ChoixStatutPropositionDoctorale.COMPLETEE_POUR_FAC,
             ChoixStatutPropositionDoctorale.TRAITEMENT_FAC,
-            ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_FAC,
         )
 
         for statut in statuts_invalides:
@@ -168,9 +113,11 @@ class TestSpecifierMotifsRefusParCDD(TestCase):
 
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-            self.assertIsInstance(context.exception.exceptions.pop(), SituationPropositionNonCddException)
+                self.assertIsInstance(context.exception.exceptions.pop(), SituationPropositionNonCddException)
 
     def test_should_lever_exception_si_statut_checklist_invalide(self):
+        self.proposition.statut = ChoixStatutPropositionDoctorale.COMPLETEE_POUR_FAC
+
         statuts_decision_cdd = ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT[OngletsChecklist.decision_cdd.name]
 
         statuts_invalides = {
