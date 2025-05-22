@@ -576,6 +576,11 @@ COMMAND_HANDLERS = {
         groupe_supervision_repository=_groupe_supervision_repository,
         notification=_notification,
     ),
+    CloturerPropositionParCddCommand: lambda msg_bus, cmd: cloturer_proposition_par_cdd(
+        cmd,
+        proposition_repository=_proposition_repository,
+        historique=_historique,
+    ),
     EnvoyerPropositionAuSicLorsDeLaDecisionCddCommand: (
         lambda msg_bus, cmd: envoyer_proposition_au_sic_lors_de_la_decision_cdd(
             cmd,

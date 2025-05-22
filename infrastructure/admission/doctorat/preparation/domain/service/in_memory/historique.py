@@ -170,6 +170,10 @@ class HistoriqueInMemory(IHistorique):
         pass
 
     @classmethod
+    def historiser_cloture_cdd(cls, proposition: Proposition, gestionnaire: str):
+        pass
+
+    @classmethod
     def historiser_specification_informations_acceptation_sic(
         cls,
         proposition: Proposition,

@@ -639,6 +639,14 @@ class MotifRefusCDDNonSpecifieException(BusinessException):
         super().__init__(message, **kwargs)
 
 
+class StatutChecklistDecisionCddDoitEtreDifferentClotureException(BusinessException):
+    status_code = "PROPOSITION-71"
+
+    def __init__(self, **kwargs):
+        message = _('It is not possible to go from the "Closed" status to this status.')
+        super().__init__(message, **kwargs)
+
+
 class MembreNonExterneException(BusinessException):
     status_code = "PROPOSITION-14"
 

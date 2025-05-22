@@ -37,9 +37,14 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     ChoixStatutChecklist,
+    OngletsChecklist,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     SituationPropositionNonCddException,
+    StatutChecklistDecisionCddDoitEtreDifferentClotureException,
     TitreAccesEtreSelectionnePourEnvoyerASICException,
 )
 from admission.ddd.admission.doctorat.preparation.test.factory.groupe_de_supervision import (
@@ -194,3 +199,25 @@ class TestApprouverPropositionParCdd(TestCase):
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
             self.assertIsInstance(context.exception.exceptions.pop(), TitreAccesEtreSelectionnePourEnvoyerASICException)
+
+    def test_should_lever_exception_si_statut_checklist_invalide(self):
+        self.proposition.statut = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC
+
+        statuts_decision_cdd = ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT[OngletsChecklist.decision_cdd.name]
+
+        statuts_invalides = {
+            'CLOTURE',
+        }
+
+        for identifiant_statut in statuts_invalides:
+            statut = statuts_decision_cdd[identifiant_statut]
+            self.proposition.checklist_actuelle.decision_cdd.statut = statut.statut
+            self.proposition.checklist_actuelle.decision_cdd.extra = statut.extra.copy()
+
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
+
+            self.assertIsInstance(
+                context.exception.exceptions.pop(),
+                StatutChecklistDecisionCddDoitEtreDifferentClotureException,
+            )

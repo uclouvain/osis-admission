@@ -570,6 +570,7 @@ class RefuserParCDDValidatorList(TwoStepsMultipleBusinessExceptionListValidator)
     statut: ChoixStatutPropositionDoctorale
     motifs_refus: List[MotifRefusIdentity]
     autres_motifs_refus: List[str]
+    checklist_decision_cdd: StatutChecklist
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -579,9 +580,31 @@ class RefuserParCDDValidatorList(TwoStepsMultipleBusinessExceptionListValidator)
             ShouldCddPeutDonnerDecision(
                 statut=self.statut,
             ),
+            ShouldStatutChecklistEtreDifferentCloture(
+                checklist_decision_cdd=self.checklist_decision_cdd,
+            ),
             ShouldSpecifierMotifRefusCDD(
                 motifs_refus=self.motifs_refus,
                 autres_motifs_refus=self.autres_motifs_refus,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class CloturerParCDDValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutPropositionDoctorale
+    checklist_decision_cdd: StatutChecklist
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldCddPeutDonnerDecision(
+                statut=self.statut,
+            ),
+            ShouldStatutChecklistEtreDifferentCloture(
+                checklist_decision_cdd=self.checklist_decision_cdd,
             ),
         ]
 
@@ -591,6 +614,8 @@ class ApprouverParCDDValidatorList(TwoStepsMultipleBusinessExceptionListValidato
     statut: ChoixStatutPropositionDoctorale
 
     titres_selectionnes: List[TitreAccesSelectionnable]
+
+    checklist_decision_cdd: StatutChecklist
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -602,6 +627,9 @@ class ApprouverParCDDValidatorList(TwoStepsMultipleBusinessExceptionListValidato
             ),
             ShouldSelectionnerTitreAccesPourEnvoyerASIC(
                 titres_selectionnes=self.titres_selectionnes,
+            ),
+            ShouldStatutChecklistEtreDifferentCloture(
+                checklist_decision_cdd=self.checklist_decision_cdd,
             ),
         ]
 
@@ -706,6 +734,7 @@ class ModifierStatutChecklistParcoursAnterieurValidatorList(TwoStepsMultipleBusi
 @attr.dataclass(frozen=True, slots=True)
 class SpecifierNouvellesInformationsDecisionCDDValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     statut: ChoixStatutPropositionDoctorale
+    checklist_decision_cdd: StatutChecklist
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -714,6 +743,9 @@ class SpecifierNouvellesInformationsDecisionCDDValidatorList(TwoStepsMultipleBus
         return [
             ShouldPeutSpecifierInformationsDecisionCdd(
                 statut=self.statut,
+            ),
+            ShouldStatutChecklistEtreDifferentCloture(
+                checklist_decision_cdd=self.checklist_decision_cdd,
             ),
         ]
 
