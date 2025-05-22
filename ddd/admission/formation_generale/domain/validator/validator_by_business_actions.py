@@ -53,6 +53,9 @@ from admission.ddd.admission.domain.validator import (
     ShouldIBANCarteBancaireRemboursementEtreCompletee,
     ShouldTypeCompteBancaireRemboursementEtreComplete,
 )
+from admission.ddd.admission.domain.validator._should_curriculum_etre_complete import (
+    ShouldExperiencesNonAcademiquesAvoirUnCertificat,
+)
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model._comptabilite import (
@@ -159,6 +162,9 @@ class FormationGeneraleCurriculumValidatorList(TwoStepsMultipleBusinessException
             ),
             ShouldExperiencesAcademiquesEtreCompletees(
                 experiences_academiques_incompletes=self.experiences_academiques_incompletes,
+            ),
+            ShouldExperiencesNonAcademiquesAvoirUnCertificat(
+                experiences_non_academiques=self.experiences_non_academiques,
             ),
             ShouldEquivalenceEtreSpecifiee(
                 equivalence=self.equivalence_diplome,

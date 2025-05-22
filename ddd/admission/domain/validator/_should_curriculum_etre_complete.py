@@ -32,6 +32,7 @@ from dateutil.rrule import MONTHLY, rrule, rruleset
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AnneesCurriculumNonSpecifieesException,
     ExperiencesAcademiquesNonCompleteesException,
+    ExperiencesNonAcademiquesCertificatManquantException,
 )
 from admission.ddd.admission.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
@@ -210,6 +211,26 @@ class ShouldExperiencesAcademiquesEtreCompletees(BusinessValidator):
                         name=experience_name,
                     )
                     for experience_uuid, experience_name in self.experiences_academiques_incompletes.items()
+                )
+            )
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldExperiencesNonAcademiquesAvoirUnCertificat(BusinessValidator):
+    experiences_non_academiques: List[ExperienceNonAcademiqueDTO]
+
+    def validate(self, *args, **kwargs):
+        experiences_incompletes = [
+            experience for experience in self.experiences_non_academiques if not experience.certificat
+        ]
+
+        if experiences_incompletes:
+            raise MultipleBusinessExceptions(
+                exceptions=set(
+                    ExperiencesNonAcademiquesCertificatManquantException(
+                        reference=experience.uuid,
+                    )
+                    for experience in experiences_incompletes
                 )
             )
 
