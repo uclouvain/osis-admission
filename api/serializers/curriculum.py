@@ -302,6 +302,9 @@ class CurriculumDetailsSerializer(serializers.Serializer):
     maximal_date = serializers.SerializerMethodField()
     incomplete_periods = serializers.ListField(child=serializers.CharField())
     incomplete_experiences = serializers.DictField(child=serializers.ListField(child=serializers.CharField()))
+    incomplete_professional_experiences = serializers.DictField(
+        child=serializers.ListField(child=serializers.CharField())
+    )
 
     @extend_schema_field(OpenApiTypes.DATE)
     def get_minimal_date(self, _):
