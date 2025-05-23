@@ -6,7 +6,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -144,7 +144,14 @@
   {% include "admission/exports/includes/sic_refusal/"|add:proposition.type_de_refus|add:".html" %}
 
   <p>
-    Conscient de la déception que ce courrier pourrait susciter, je vous prie néanmoins d'agréer, Madame, Monsieur,
+    {% if director.gender == 'F' %}
+      Consciente
+    {% elif director.gender == 'H' %}
+      Conscient
+    {% else %}
+      Conscient·e
+    {% endif %}
+    de la déception que ce courrier pourrait susciter, je vous prie néanmoins d'agréer, Madame, Monsieur,
     l'expression de mes salutations distinguées.
   </p>
 
