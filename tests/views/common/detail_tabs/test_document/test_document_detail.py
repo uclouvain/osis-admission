@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -36,16 +36,20 @@ from django.utils.translation import gettext
 from osis_history.models import HistoryEntry
 from osis_notification.models import EmailNotification
 
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
 from admission.ddd.admission.enums.emplacement_document import (
-    TypeEmplacementDocument,
     StatutEmplacementDocument,
     StatutReclamationEmplacementDocument,
+    TypeEmplacementDocument,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
-from admission.tests.views.common.detail_tabs.test_document import BaseDocumentViewTestCase
+from admission.tests.views.common.detail_tabs.test_document import (
+    BaseDocumentViewTestCase,
+)
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.file_field import PDF_MIME_TYPE
 
@@ -169,7 +173,6 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
                 'last_action_at': '2022-01-03T00:00:00',
                 'status': StatutEmplacementDocument.RECLAME.name,
                 'requested_at': '2022-01-03T00:00:00',
-                'deadline_at': '2022-01-15',
                 'automatically_required': False,
                 'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
                 'related_checklist_tab': '',
@@ -178,6 +181,9 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
 
         # Check that the proposition status has been changed
         self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name)
+
+        # Check that the deadline has been saved
+        self.assertEqual(self.general_admission.requested_documents_deadline, datetime.date(2022, 1, 15))
 
         # Check last modification data
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
@@ -234,7 +240,6 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
                 'last_action_at': '2022-01-05T00:00:00',
                 'status': StatutEmplacementDocument.RECLAMATION_ANNULEE.name,
                 'requested_at': '',
-                'deadline_at': '',
                 'automatically_required': False,
                 'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
                 'related_checklist_tab': '',
@@ -243,6 +248,9 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
 
         # Check that the proposition status has been changed
         self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.CONFIRMEE.name)
+
+        # Check that the deadline has been saved
+        self.assertIsNone(self.general_admission.requested_documents_deadline)
 
         # Check last modification data
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
@@ -413,7 +421,6 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
                 'last_action_at': '2022-01-03T00:00:00',
                 'status': StatutEmplacementDocument.RECLAME.name,
                 'requested_at': '2022-01-03T00:00:00',
-                'deadline_at': '2022-01-15',
                 'automatically_required': False,
                 'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
                 'related_checklist_tab': '',
@@ -422,6 +429,9 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
 
         # Check that the proposition status has been changed
         self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC.name)
+
+        # Check that the deadline has been saved
+        self.assertEqual(self.general_admission.requested_documents_deadline, datetime.date(2022, 1, 15))
 
         # Check last modification data
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
@@ -478,7 +488,6 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
                 'last_action_at': '2022-01-05T00:00:00',
                 'status': StatutEmplacementDocument.RECLAMATION_ANNULEE.name,
                 'requested_at': '',
-                'deadline_at': '',
                 'automatically_required': False,
                 'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
                 'related_checklist_tab': '',
@@ -487,6 +496,9 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
 
         # Check that the proposition status has been changed
         self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name)
+
+        # Check that the deadline has been saved
+        self.assertIsNone(self.general_admission.requested_documents_deadline)
 
         # Check last modification data
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
@@ -671,7 +683,6 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
                 'last_action_at': '2022-01-03T00:00:00',
                 'status': StatutEmplacementDocument.RECLAME.name,
                 'requested_at': '2022-01-03T00:00:00',
-                'deadline_at': '2022-01-15',
                 'automatically_required': False,
                 'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
                 'related_checklist_tab': '',
@@ -680,6 +691,9 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
 
         # Check that the proposition status has been changed
         self.assertEqual(self.doctorate_admission.status, ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_SIC.name)
+
+        # Check that the deadline has been saved
+        self.assertEqual(self.doctorate_admission.requested_documents_deadline, datetime.date(2022, 1, 15))
 
         # Check last modification data
         self.assertEqual(self.doctorate_admission.modified_at, datetime.datetime.now())
@@ -736,7 +750,6 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
                 'last_action_at': '2022-01-05T00:00:00',
                 'status': StatutEmplacementDocument.RECLAMATION_ANNULEE.name,
                 'requested_at': '',
-                'deadline_at': '',
                 'automatically_required': False,
                 'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
                 'related_checklist_tab': '',
@@ -745,6 +758,9 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
 
         # Check that the proposition status has been changed
         self.assertEqual(self.doctorate_admission.status, ChoixStatutPropositionDoctorale.CONFIRMEE.name)
+
+        # Check that the deadline has been saved
+        self.assertIsNone(self.doctorate_admission.requested_documents_deadline)
 
         # Check last modification data
         self.assertEqual(self.doctorate_admission.modified_at, datetime.datetime.now())
@@ -920,7 +936,6 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
                 'last_action_at': '2022-01-03T00:00:00',
                 'status': StatutEmplacementDocument.RECLAME.name,
                 'requested_at': '2022-01-03T00:00:00',
-                'deadline_at': '2022-01-15',
                 'automatically_required': False,
                 'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
                 'related_checklist_tab': '',
@@ -929,6 +944,9 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
 
         # Check that the proposition status has been changed
         self.assertEqual(self.doctorate_admission.status, ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_FAC.name)
+
+        # Check that the deadline has been saved
+        self.assertEqual(self.doctorate_admission.requested_documents_deadline, datetime.date(2022, 1, 15))
 
         # Check last modification data
         self.assertEqual(self.doctorate_admission.modified_at, datetime.datetime.now())
@@ -985,7 +1003,6 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
                 'last_action_at': '2022-01-05T00:00:00',
                 'status': StatutEmplacementDocument.RECLAMATION_ANNULEE.name,
                 'requested_at': '',
-                'deadline_at': '',
                 'automatically_required': False,
                 'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
                 'related_checklist_tab': '',
@@ -994,6 +1011,9 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
 
         # Check that the proposition status has been changed
         self.assertEqual(self.doctorate_admission.status, ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name)
+
+        # Check that the deadline has been saved
+        self.assertIsNone(self.doctorate_admission.requested_documents_deadline)
 
         # Check last modification data
         self.assertEqual(self.doctorate_admission.modified_at, datetime.datetime.now())
