@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,38 +26,48 @@
 from typing import Union
 
 from django.utils import timezone
+from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import mixins, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
 from admission.api import serializers
-from admission.api.schema import ResponseSpecificSchema
 from admission.api.serializers import PropositionErrorsSerializer
 from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererElementsConfirmationQuery as RecupererElementsConfirmationDoctoralQuery,
-    SoumettrePropositionCommand as SoumettrePropositionDoctoratCommand,
-    VerifierProjetQuery,
 )
+from admission.ddd.admission.doctorat.preparation.commands import (
+    SoumettrePropositionCommand as SoumettrePropositionDoctoratCommand,
+)
+from admission.ddd.admission.doctorat.preparation.commands import VerifierProjetQuery
 from admission.ddd.admission.domain.validator.exceptions import (
     ConditionsAccessNonRempliesException,
     PoolNonResidentContingenteNonOuvertException,
 )
 from admission.ddd.admission.formation_continue.commands import (
     RecupererElementsConfirmationQuery as RecupererElementsConfirmationContinueQuery,
+)
+from admission.ddd.admission.formation_continue.commands import (
     SoumettrePropositionCommand as SoumettrePropositionContinueCommand,
 )
 from admission.ddd.admission.formation_generale.commands import (
     RecupererElementsConfirmationQuery as RecupererElementsConfirmationGeneralQuery,
+)
+from admission.ddd.admission.formation_generale.commands import (
     SoumettrePropositionCommand as SoumettrePropositionGeneraleCommand,
 )
-from admission.models import GeneralEducationAdmission, ContinuingEducationAdmission, DoctorateAdmission
+from admission.models import (
+    ContinuingEducationAdmission,
+    DoctorateAdmission,
+    GeneralEducationAdmission,
+)
 from admission.utils import (
     gather_business_exceptions,
+    get_access_conditions_url,
     get_cached_admission_perm_obj,
     get_cached_continuing_education_admission_perm_obj,
     get_cached_general_education_admission_perm_obj,
-    get_access_conditions_url,
 )
 from base.models.academic_calendar import AcademicCalendar
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
@@ -93,47 +103,8 @@ def valuate_experiences(instance: Union[GeneralEducationAdmission, ContinuingEdu
     )
 
 
-class VerifySchema(ResponseSpecificSchema):
-    response_description = "Verification errors"
-
-
-class VerifyProjectSchema(VerifySchema):
-    operation_id_base = '_verify_project'
-    response_description = "Project verification errors"
-
-    def get_responses(self, path, method):
-        return (
-            {
-                status.HTTP_200_OK: {
-                    "description": self.response_description,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "array",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "status_code": {
-                                            "type": "string",
-                                        },
-                                        "detail": {
-                                            "type": "string",
-                                        },
-                                    },
-                                },
-                            }
-                        }
-                    },
-                }
-            }
-            if method == 'GET'
-            else super(VerifySchema, self).get_responses(path, method)
-        )
-
-
 class VerifyDoctoralProjectView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, GenericAPIView):
     name = "verify-project"
-    schema = VerifyProjectSchema()
     permission_mapping = {
         'GET': 'admission.change_admission_supervision',
     }
@@ -143,26 +114,30 @@ class VerifyDoctoralProjectView(APIPermissionRequiredMixin, mixins.RetrieveModel
     def get_permission_object(self):
         return get_cached_admission_perm_obj(self.kwargs['uuid'])
 
+    @extend_schema(
+        responses=OpenApiResponse(
+            response={
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "status_code": {
+                            "type": "string",
+                        },
+                        "detail": {
+                            "type": "string",
+                        },
+                    },
+                },
+            },
+            description="Project verification errors",
+        ),
+        operation_id='retrieve_verify_project',
+    )
     def get(self, request, *args, **kwargs):
         """Check the project to be OK with all validators."""
         data = gather_business_exceptions(VerifierProjetQuery(uuid_proposition=str(kwargs["uuid"])))
         return Response(data.get(api_settings.NON_FIELD_ERRORS_KEY, []), status=status.HTTP_200_OK)
-
-
-class SubmitDoctoralPropositionSchema(VerifySchema):
-    response_description = "Proposition verification errors"
-
-    serializer_mapping = {
-        'GET': serializers.PropositionErrorsSerializer,
-        'POST': (serializers.SubmitPropositionSerializer, serializers.PropositionIdentityDTOSerializer),
-    }
-
-    def get_operation_id(self, path, method):
-        if method == 'GET':
-            return 'verify_proposition'
-        elif method == 'POST':
-            return 'submit_proposition'
-        return super().get_operation_id(path, method)
 
 
 class SubmitPropositionMixin:
@@ -187,7 +162,6 @@ class SubmitDoctoralPropositionView(
     GenericAPIView,
 ):
     name = "submit-doctoral-proposition"
-    schema = SubmitDoctoralPropositionSchema()
     permission_mapping = {
         'GET': 'admission.submit_doctorateadmission',
         'POST': 'admission.submit_doctorateadmission',
@@ -196,6 +170,10 @@ class SubmitDoctoralPropositionView(
     def get_permission_object(self):
         return get_cached_admission_perm_obj(self.kwargs['uuid'])
 
+    @extend_schema(
+        responses=serializers.PropositionErrorsSerializer,
+        operation_id='verify_proposition',
+    )
     def get(self, request, *args, **kwargs):
         """Check the proposition to be OK with all validators."""
         admission = self.get_permission_object()
@@ -208,6 +186,11 @@ class SubmitDoctoralPropositionView(
             data['elements_confirmation'] = message_bus_instance.invoke(cmd)
         return Response(PropositionErrorsSerializer(data).data, status=status.HTTP_200_OK)
 
+    @extend_schema(
+        request=serializers.SubmitPropositionSerializer,
+        responses=serializers.PropositionIdentityDTOSerializer,
+        operation_id='submit_proposition',
+    )
     def post(self, request, *args, **kwargs):
         """Submit the proposition."""
         # Trigger the submit command
@@ -220,20 +203,6 @@ class SubmitDoctoralPropositionView(
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class SubmitGeneralEducationPropositionSchema(VerifySchema):
-    response_description = "Proposition verification errors"
-    serializer_mapping = {
-        'GET': serializers.PropositionErrorsSerializer,
-        'POST': (
-            serializers.SubmitPropositionSerializer,
-            serializers.GeneralEducationPropositionIdentityWithStatusSerializer,
-        ),
-    }
-
-    def get_operation_id(self, path, method):
-        return 'verify_general_education_proposition' if method == 'GET' else 'submit_general_education_proposition'
-
-
 class SubmitGeneralEducationPropositionView(
     SubmitPropositionMixin,
     APIPermissionRequiredMixin,
@@ -241,7 +210,6 @@ class SubmitGeneralEducationPropositionView(
     GenericAPIView,
 ):
     name = "submit-general-proposition"
-    schema = SubmitGeneralEducationPropositionSchema()
     permission_mapping = {
         'GET': 'admission.submit_generaleducationadmission',
         'POST': 'admission.submit_generaleducationadmission',
@@ -250,6 +218,10 @@ class SubmitGeneralEducationPropositionView(
     def get_permission_object(self):
         return get_cached_general_education_admission_perm_obj(self.kwargs['uuid'])
 
+    @extend_schema(
+        responses=serializers.PropositionErrorsSerializer,
+        operation_id='verify_general_education_proposition',
+    )
     def get(self, request, *args, **kwargs):
         """Check the proposition to be OK with all validators."""
         admission = self.get_permission_object()
@@ -279,6 +251,11 @@ class SubmitGeneralEducationPropositionView(
 
         return Response(PropositionErrorsSerializer(data).data, status=status.HTTP_200_OK)
 
+    @extend_schema(
+        request=serializers.SubmitPropositionSerializer,
+        responses=serializers.GeneralEducationPropositionIdentityWithStatusSerializer,
+        operation_id='submit_general_education_proposition',
+    )
     def post(self, request, *args, **kwargs):
         """Submit the proposition."""
         serializer = serializers.SubmitPropositionSerializer(data=request.data)
@@ -291,19 +268,6 @@ class SubmitGeneralEducationPropositionView(
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class SubmitContinuingEducationPropositionSchema(VerifySchema):
-    response_description = "Proposition verification errors"
-    serializer_mapping = {
-        'GET': serializers.PropositionErrorsSerializer,
-        'POST': (serializers.SubmitPropositionSerializer, serializers.PropositionIdentityDTOSerializer),
-    }
-
-    def get_operation_id(self, path, method):
-        return (
-            'verify_continuing_education_proposition' if method == 'GET' else 'submit_continuing_education_proposition'
-        )
-
-
 class SubmitContinuingEducationPropositionView(
     SubmitPropositionMixin,
     APIPermissionRequiredMixin,
@@ -311,7 +275,6 @@ class SubmitContinuingEducationPropositionView(
     GenericAPIView,
 ):
     name = "submit-continuing-proposition"
-    schema = SubmitContinuingEducationPropositionSchema()
     permission_mapping = {
         'GET': 'admission.submit_continuingeducationadmission',
         'POST': 'admission.submit_continuingeducationadmission',
@@ -320,6 +283,10 @@ class SubmitContinuingEducationPropositionView(
     def get_permission_object(self):
         return get_cached_continuing_education_admission_perm_obj(self.kwargs['uuid'])
 
+    @extend_schema(
+        responses=serializers.PropositionErrorsSerializer,
+        operation_id='verify_continuing_education_proposition',
+    )
     def get(self, request, *args, **kwargs):
         """Check the proposition to be OK with all validators."""
         admission = self.get_permission_object()
@@ -332,6 +299,11 @@ class SubmitContinuingEducationPropositionView(
             data['elements_confirmation'] = message_bus_instance.invoke(cmd)
         return Response(PropositionErrorsSerializer(data).data, status=status.HTTP_200_OK)
 
+    @extend_schema(
+        request=serializers.SubmitPropositionSerializer,
+        responses=serializers.PropositionIdentityDTOSerializer,
+        operation_id='submit_continuing_education_proposition',
+    )
     def post(self, request, *args, **kwargs):
         """Submit the proposition."""
         serializer = serializers.SubmitPropositionSerializer(data=request.data)

@@ -24,11 +24,11 @@
 #
 # ##############################################################################
 from django.http import Http404
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.response import Response
 
 from admission.api import serializers
-from admission.api.schema import AuthorizationAwareSchema
 from admission.constants import ORDERED_CAMPUSES_UUIDS
 from admission.models import DiplomaticPost
 from base.models.campus import Campus
@@ -39,11 +39,11 @@ from ddd.logic.shared_kernel.campus.commands import (
 from infrastructure.messages_bus import message_bus_instance
 
 
+@extend_schema_view(get=extend_schema(operation_id='retrieveCampus', tags=['campus']))
 class RetrieveCampusView(RetrieveAPIView):
     """Retrieves a campus"""
 
     name = 'retrieve-campus'
-    schema = AuthorizationAwareSchema()
     filter_backends = []
     serializer_class = serializers.CampusSerializer
 
@@ -56,11 +56,11 @@ class RetrieveCampusView(RetrieveAPIView):
         return Response(serializer.data)
 
 
+@extend_schema_view(get=extend_schema(operation_id='listCampus', tags=['campus']))
 class ListCampusView(ListAPIView):
     """Retrieves the UCLouvain campuses"""
 
     name = 'list-campuses'
-    schema = AuthorizationAwareSchema()
     filter_backends = []
     pagination_class = None
     serializer_class = serializers.CampusSerializer
@@ -76,19 +76,13 @@ class ListCampusView(ListAPIView):
         return Response(serializer.data)
 
 
-class RetrieveDiplomaticPostSchema(AuthorizationAwareSchema):
-    def get_operation(self, path, method):
-        operation = super().get_operation(path, method)
-        # Override the parameter type because every url parameter is considered as a string
-        operation['parameters'][0]['schema']['type'] = 'integer'
-        return operation
-
-
+@extend_schema_view(
+    get=extend_schema(operation_id='retrieveDiplomaticPost', tags=['diplomatic-post']),
+)
 class RetrieveDiplomaticPostView(RetrieveAPIView):
     """Retrieves a diplomatic post"""
 
     name = 'retrieve-diplomatic-post'
-    schema = RetrieveDiplomaticPostSchema()
     filter_backends = []
     serializer_class = serializers.DiplomaticPostSerializer
     queryset = DiplomaticPost.objects.annotate_countries().all()

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -115,34 +115,34 @@ ACTION_LINKS = {
 DOCTORATE_ACTION_LINKS = {
     # Person
     'retrieve_person': {
-        'path_name': 'admission_api_v1:person',
+        'path_name': 'admission_api_v1:doctorate_person',
         'method': 'GET',
         'params': ['uuid'],
     },
     'update_person': {
-        'path_name': 'admission_api_v1:person',
+        'path_name': 'admission_api_v1:doctorate_person',
         'method': 'PUT',
         'params': ['uuid'],
     },
     # Coordinates
     'retrieve_coordinates': {
-        'path_name': 'admission_api_v1:coordonnees',
+        'path_name': 'admission_api_v1:doctorate_coordonnees',
         'method': 'GET',
         'params': ['uuid'],
     },
     'update_coordinates': {
-        'path_name': 'admission_api_v1:coordonnees',
+        'path_name': 'admission_api_v1:doctorate_coordonnees',
         'method': 'PUT',
         'params': ['uuid'],
     },
     # Secondary studies
     'retrieve_secondary_studies': {
-        'path_name': 'admission_api_v1:secondary-studies',
+        'path_name': 'admission_api_v1:doctorate-secondary-studies',
         'method': 'GET',
         'params': ['uuid'],
     },
     'update_secondary_studies': {
-        'path_name': 'admission_api_v1:secondary-studies',
+        'path_name': 'admission_api_v1:doctorate-secondary-studies',
         'method': 'PUT',
         'params': ['uuid'],
     },

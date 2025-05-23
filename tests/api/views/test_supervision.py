@@ -159,7 +159,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         url = resolve_url("admission_api_v1:supervision", uuid=admission.uuid)
         data = {
             'matricule': PersonFactory(first_name="John").global_id,
-            'type': ActorType.CA_MEMBER.name,
+            'actor_type': ActorType.CA_MEMBER.name,
             **self.empty_external_data,
         }
         response = self.client.put(url, data=data)
@@ -176,7 +176,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
 
         data = {
             'matricule': PersonFactory(first_name="John").global_id,
-            'type': ActorType.CA_MEMBER.name,
+            'actor_type': ActorType.CA_MEMBER.name,
             **self.empty_external_data,
         }
         response = self.client.put(self.url, data=data)
@@ -191,7 +191,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
 
         data = {
             'matricule': "",
-            'type': ActorType.CA_MEMBER.name,
+            'actor_type': ActorType.CA_MEMBER.name,
             'prenom': 'Jean',
             'nom': 'Pierre',
             'email': 'jeanpierre@example.org',
@@ -212,7 +212,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
     def test_supervision_ajouter_membre_ca_inexistant(self):
         self.client.force_authenticate(user=self.candidate.user)
 
-        data = {'matricule': "inexistant", 'type': ActorType.CA_MEMBER.name, **self.empty_external_data}
+        data = {'matricule': "inexistant", 'actor_type': ActorType.CA_MEMBER.name, **self.empty_external_data}
         response = self.client.put(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json()['non_field_errors'][0]['status_code'], MembreCANonTrouveException.status_code)
@@ -222,7 +222,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
 
         data = {
             'matricule': TutorFactory(person__first_name="John").person.global_id,
-            'type': ActorType.PROMOTER.name,
+            'actor_type': ActorType.PROMOTER.name,
             **self.empty_external_data,
         }
         response = self.client.put(self.url, data=data)
@@ -238,7 +238,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
 
         data = {
             'matricule': "",
-            'type': ActorType.PROMOTER.name,
+            'actor_type': ActorType.PROMOTER.name,
             'prenom': 'Jean',
             'nom': 'Pierre',
             'email': 'jeanpierre@example.org',
@@ -261,7 +261,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
 
         data = {
             'matricule': "inexistant",
-            'type': ActorType.PROMOTER.name,
+            'actor_type': ActorType.PROMOTER.name,
             **self.empty_external_data,
         }
         response = self.client.put(self.url, data=data)
@@ -272,7 +272,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         self.client.force_authenticate(user=self.no_role_user)
         data = {
             'matricule': TutorFactory(person__first_name="Joe").person.global_id,
-            'type': ActorType.PROMOTER.name,
+            'actor_type': ActorType.PROMOTER.name,
             **self.empty_external_data,
         }
         response = self.client.put(self.url, data=data)
@@ -282,7 +282,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         self.client.force_authenticate(user=self.other_candidate_user)
         data = {
             'matricule': TutorFactory(person__first_name="Joe").person.global_id,
-            'type': ActorType.PROMOTER.name,
+            'actor_type': ActorType.PROMOTER.name,
             **self.empty_external_data,
         }
         response = self.client.put(self.url, data=data)
@@ -296,7 +296,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         self.client.force_authenticate(user=other_promoter.person.user)
         data = {
             'matricule': TutorFactory(person__first_name="Joe").person.global_id,
-            'type': ActorType.PROMOTER.name,
+            'actor_type': ActorType.PROMOTER.name,
             **self.empty_external_data,
         }
         response = self.client.put(self.url, data=data)
@@ -306,7 +306,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         self.client.force_authenticate(user=self.promoter.person.user)
         data = {
             'matricule': TutorFactory(person__first_name="Joe").person.global_id,
-            'type': ActorType.PROMOTER.name,
+            'actor_type': ActorType.PROMOTER.name,
             **self.empty_external_data,
         }
         response = self.client.put(self.url, data=data)
@@ -323,7 +323,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         self.client.force_authenticate(user=other_member.person.user)
         data = {
             'matricule': PersonFactory(first_name="Joe").global_id,
-            'type': ActorType.CA_MEMBER.name,
+            'actor_type': ActorType.CA_MEMBER.name,
             **self.empty_external_data,
         }
         response = self.client.put(self.url, data=data)
@@ -333,7 +333,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         self.client.force_authenticate(user=member.person.user)
         data = {
             'matricule': PersonFactory(first_name="Joe").global_id,
-            'type': ActorType.CA_MEMBER.name,
+            'actor_type': ActorType.CA_MEMBER.name,
             **self.empty_external_data,
         }
         response = self.client.put(self.url, data=data)
@@ -348,7 +348,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         response = self.client.post(
             self.url,
             data={
-                'type': ActorType.PROMOTER.name,
+                'actor_type': ActorType.PROMOTER.name,
                 'uuid_membre': promoter.uuid,
             },
         )
@@ -362,7 +362,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         response = self.client.post(
             self.url,
             data={
-                'type': ActorType.CA_MEMBER.name,
+                'actor_type': ActorType.CA_MEMBER.name,
                 'uuid_membre': member.uuid,
             },
         )
@@ -376,7 +376,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         response = self.client.post(
             self.url,
             data={
-                'type': ActorType.PROMOTER.name,
+                'actor_type': ActorType.PROMOTER.name,
                 'uuid_membre': self.promoter.uuid,
             },
         )
@@ -388,7 +388,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         response = self.client.post(
             self.url,
             data={
-                'type': ActorType.PROMOTER.name,
+                'actor_type': ActorType.PROMOTER.name,
                 'uuid_membre': self.promoter.uuid,
             },
         )
@@ -401,7 +401,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         # The current user is not yet a supervisor of the admission
         self.client.force_authenticate(user=other_promoter.person.user)
         data = {
-            'type': ActorType.PROMOTER.name,
+            'actor_type': ActorType.PROMOTER.name,
             'uuid_membre': self.promoter.uuid,
         }
         response = self.client.post(self.url, data=data)
@@ -423,7 +423,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         self.client.force_authenticate(user=other_member.person.user)
         data = {
             'matricule': member.uuid,
-            'type': ActorType.CA_MEMBER.name,
+            'actor_type': ActorType.CA_MEMBER.name,
         }
         response = self.client.put(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -441,14 +441,14 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
 
         data = {
             'matricule': self.promoter.uuid,
-            'type': ActorType.PROMOTER.name,
+            'actor_type': ActorType.PROMOTER.name,
         }
         response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         data = {
             'matricule': TutorFactory(person__first_name="Joe").person.global_id,
-            'type': ActorType.PROMOTER.name,
+            'actor_type': ActorType.PROMOTER.name,
         }
         response = self.client.put(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -475,7 +475,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         # Add CA member
         data = {
             'matricule': PersonFactory(first_name="Joe").global_id,
-            'type': ActorType.CA_MEMBER.name,
+            'actor_type': ActorType.CA_MEMBER.name,
             **self.empty_external_data,
         }
         response = self.client.put(self.url, data=data)
@@ -483,7 +483,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
 
         # Remove promoter
         data = {
-            'type': ActorType.PROMOTER.name,
+            'actor_type': ActorType.PROMOTER.name,
             'uuid_membre': promoter.uuid,
         }
         response = self.client.post(self.url, data=data)

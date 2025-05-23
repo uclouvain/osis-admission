@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,20 +25,27 @@
 # ##############################################################################
 from functools import partial
 
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import mixins, status
 from rest_framework.generics import GenericAPIView, RetrieveAPIView
 from rest_framework.response import Response
 
 from admission.api import serializers
-from admission.api.permissions import IsSelfPersonTabOrTabPermission, DoesNotHaveSubmittedPropositions
-from admission.api.views.mixins import (
-    PersonRelatedMixin,
-    GeneralEducationPersonRelatedMixin,
-    ContinuingEducationPersonRelatedMixin,
-    PersonRelatedSchema,
+from admission.api.permissions import (
+    DoesNotHaveSubmittedPropositions,
+    IsSelfPersonTabOrTabPermission,
 )
-from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
-from backoffice.settings.rest_framework.common_views import DisplayExceptionsByFieldNameAPIMixin
+from admission.api.views.mixins import (
+    ContinuingEducationPersonRelatedMixin,
+    GeneralEducationPersonRelatedMixin,
+    PersonRelatedMixin,
+)
+from admission.infrastructure.admission.domain.service.profil_candidat import (
+    ProfilCandidatTranslator,
+)
+from backoffice.settings.rest_framework.common_views import (
+    DisplayExceptionsByFieldNameAPIMixin,
+)
 from osis_role.contrib.views import APIPermissionRequiredMixin
 from reference.services.belgian_niss_validator import BelgianNISSException
 
@@ -75,7 +82,11 @@ class BasePersonViewSet(
         return response
 
 
-class PersonViewSet(PersonRelatedMixin, BasePersonViewSet):
+@extend_schema_view(
+    get=extend_schema(operation_id="retrievePersonIdentification", tags=['person']),
+    put=extend_schema(operation_id="updatePersonIdentification", tags=['person']),
+)
+class CommonPersonViewSet(PersonRelatedMixin, BasePersonViewSet):
     name = "person"
     permission_classes = [
         DoesNotHaveSubmittedPropositions,
@@ -83,6 +94,22 @@ class PersonViewSet(PersonRelatedMixin, BasePersonViewSet):
     ]
 
 
+@extend_schema_view(
+    get=extend_schema(operation_id="retrievePersonIdentificationAdmission", tags=['person']),
+    put=extend_schema(operation_id="updatePersonIdentificationAdmission", tags=['person']),
+)
+class PersonViewSet(PersonRelatedMixin, BasePersonViewSet):
+    name = "doctorate_person"
+    permission_classes = [
+        DoesNotHaveSubmittedPropositions,
+        partial(IsSelfPersonTabOrTabPermission, permission_suffix='person', can_edit=True),
+    ]
+
+
+@extend_schema_view(
+    get=extend_schema(operation_id="retrievePersonIdentificationGeneralEducationAdmission", tags=['person']),
+    put=extend_schema(operation_id="updatePersonIdentificationGeneralEducationAdmission", tags=['person']),
+)
 class GeneralPersonView(GeneralEducationPersonRelatedMixin, BasePersonViewSet):
     name = "general_person"
     permission_mapping = {
@@ -91,6 +118,10 @@ class GeneralPersonView(GeneralEducationPersonRelatedMixin, BasePersonViewSet):
     }
 
 
+@extend_schema_view(
+    get=extend_schema(operation_id="retrievePersonIdentificationContinuingEducationAdmission", tags=['person']),
+    put=extend_schema(operation_id="updatePersonIdentificationContinuingEducationAdmission", tags=['person']),
+)
 class ContinuingPersonView(ContinuingEducationPersonRelatedMixin, BasePersonViewSet):
     name = "continuing_person"
     permission_mapping = {
@@ -99,23 +130,15 @@ class ContinuingPersonView(ContinuingEducationPersonRelatedMixin, BasePersonView
     }
 
 
-class IdentificationDTOSchema(PersonRelatedSchema):
-    operation_id_base = '_identification_dto'
-    serializer_mapping = {
-        'GET': (
-            None,
-            serializers.IdentificationDTOSerializer,
-        ),
-    }
-
-
+@extend_schema_view(
+    get=extend_schema(operation_id="retrieve_identification_dto", tags=['person']),
+)
 class IdentificationDTOView(APIPermissionRequiredMixin, RetrieveAPIView):
     name = "person_identification"
     permission_classes = [
         DoesNotHaveSubmittedPropositions,
     ]
     serializer_class = serializers.IdentificationDTOSerializer
-    schema = IdentificationDTOSchema()
     filter_backends = []
     pagination_class = None
 
