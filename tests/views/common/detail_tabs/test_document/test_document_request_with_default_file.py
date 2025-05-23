@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,26 +31,36 @@ from django.shortcuts import resolve_url
 from django.test import override_settings
 from django.utils.translation import gettext
 
-from admission.models import AdmissionFormItemInstantiation
-from admission.ddd.admission.enums import TypeItemFormulaire, CritereItemFormulaireFormation, Onglets
-from admission.ddd.admission.enums.emplacement_document import (
-    TypeEmplacementDocument,
-    IdentifiantBaseEmplacementDocument,
-    StatutEmplacementDocument,
-    StatutReclamationEmplacementDocument,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
-    OngletsChecklist as OngletsChecklistGenerale,
-)
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     OngletsChecklist as OngletsChecklistDoctorale,
 )
-from admission.tests.factories.categorized_free_document import CategorizedFreeDocumentFactory
-from admission.tests.views.common.detail_tabs.test_document import BaseDocumentViewTestCase
+from admission.ddd.admission.enums import (
+    CritereItemFormulaireFormation,
+    Onglets,
+    TypeItemFormulaire,
+)
+from admission.ddd.admission.enums.emplacement_document import (
+    IdentifiantBaseEmplacementDocument,
+    StatutEmplacementDocument,
+    StatutReclamationEmplacementDocument,
+    TypeEmplacementDocument,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    OngletsChecklist as OngletsChecklistGenerale,
+)
+from admission.models import AdmissionFormItemInstantiation
+from admission.tests.factories.categorized_free_document import (
+    CategorizedFreeDocumentFactory,
+)
+from admission.tests.views.common.detail_tabs.test_document import (
+    BaseDocumentViewTestCase,
+)
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 
 
@@ -76,6 +86,7 @@ class DocumentRequestWithDefaultFileTestCase(BaseDocumentViewTestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('file_name', []))
+        self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('checklist_tab', []))
 
         # Submit a valid form
         response = self.client.post(
@@ -169,6 +180,7 @@ class DocumentRequestWithDefaultFileTestCase(BaseDocumentViewTestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('file_name', []))
+        self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('checklist_tab', []))
 
         # With invalid chosen predefined file
         categorized_document = CategorizedFreeDocumentFactory(
@@ -290,11 +302,13 @@ class DocumentRequestWithDefaultFileTestCase(BaseDocumentViewTestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('file_name', []))
+        self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('checklist_tab', []))
 
         # Submit a valid form
         response = self.client.post(
             url,
             data={
+                'free-document-request-with-default-file-form-checklist_tab': 'donnees_personnelles',
                 'free-document-request-with-default-file-form-file_name': 'My file name',
                 'free-document-request-with-default-file-form-file_0': ['file_0-token'],
             },
@@ -343,7 +357,7 @@ class DocumentRequestWithDefaultFileTestCase(BaseDocumentViewTestCase):
                 'status': StatutEmplacementDocument.VALIDE.name,
                 'request_status': '',
                 'automatically_required': False,
-                'related_checklist_tab': '',
+                'related_checklist_tab': 'donnees_personnelles',
             }
         }
         self.assertEqual(form_item_instantiation.admission.requested_documents, desired_result)
@@ -380,6 +394,7 @@ class DocumentRequestWithDefaultFileTestCase(BaseDocumentViewTestCase):
         response = self.client.post(url, data={}, **self.default_headers)
 
         self.assertEqual(response.status_code, 200)
+        self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('checklist_tab', []))
         self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('file_name', []))
 
         # Submit a valid form
@@ -474,6 +489,7 @@ class DocumentRequestWithDefaultFileTestCase(BaseDocumentViewTestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('file_name', []))
+        self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('checklist_tab', []))
 
         # With invalid chosen predefined file
         categorized_document = CategorizedFreeDocumentFactory(
@@ -595,11 +611,13 @@ class DocumentRequestWithDefaultFileTestCase(BaseDocumentViewTestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('file_name', []))
+        self.assertIn(FIELD_REQUIRED_MESSAGE, response.context['form'].errors.get('checklist_tab', []))
 
         # Submit a valid form
         response = self.client.post(
             url,
             data={
+                'free-document-request-with-default-file-form-checklist_tab': 'donnees_personnelles',
                 'free-document-request-with-default-file-form-file_name': 'My file name',
                 'free-document-request-with-default-file-form-file_0': ['file_0-token'],
             },
@@ -648,7 +666,7 @@ class DocumentRequestWithDefaultFileTestCase(BaseDocumentViewTestCase):
                 'status': StatutEmplacementDocument.VALIDE.name,
                 'request_status': '',
                 'automatically_required': False,
-                'related_checklist_tab': '',
+                'related_checklist_tab': 'donnees_personnelles',
             }
         }
         self.assertEqual(form_item_instantiation.admission.requested_documents, desired_result)
