@@ -30,6 +30,7 @@ from django.conf import settings
 from django.db import transaction
 from django.db.models import F, Value, CharField, Case, When
 from django.utils.dateparse import parse_date, parse_datetime
+from itertools import chain
 from typing import List, Optional, Set, Union
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
@@ -260,49 +261,41 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
             curriculum_injections = CurriculumEPCInjection.objects.filter(
                 person_id=candidate_id,
                 status__in=CurriculumEPCInjectionStatus.blocking_statuses_for_experience(),
-            ).only('experience_uuid')
+            ).values_list('experience_uuid', flat=True)
         if demande_injections is None:
-            educational_injections = DemandeEPCInjection.objects.filter(
+            common_filter = Q(
                 type=EPCInjectionType.DEMANDE.name,
                 admission__candidate_id=candidate_id,
                 status__in=EPCInjectionStatus.blocking_statuses_for_experience(),
-            ).annotate(
-                experience_uuid=(
-                    F('admission__admissioneducationalvaluatedexperiences__educationalexperience_id')
-                ),
-            ).only('pk')
-            professional_injections = DemandeEPCInjection.objects.filter(
-                type=EPCInjectionType.DEMANDE.name,
-                admission__candidate_id=candidate_id,
-                status__in=EPCInjectionStatus.blocking_statuses_for_experience(),
-            ).annotate(
-                experience_uuid=(
-                    F('admission__admissionprofessionalvaluatedexperiences__professionalexperience_id')
-                ),
-            ).only('pk')
-            secondaires_injection = DemandeEPCInjection.objects.filter(
-                type=EPCInjectionType.DEMANDE.name,
-                admission__candidate_id=candidate_id,
-                status__in=EPCInjectionStatus.blocking_statuses_for_experience(),
+            )
+            educational_uuids = DemandeEPCInjection.objects.filter(common_filter).annotate(
+                experience_uuid=F('admission__admissioneducationalvaluatedexperiences__educationalexperience_id')
+            ).exclude(experience_uuid__isnull=True).values_list('experience_uuid', flat=True)
+            professional_uuids = DemandeEPCInjection.objects.filter(common_filter).annotate(
+                experience_uuid=F('admission__admissionprofessionalvaluatedexperiences__professionalexperience_id')
+            ).exclude(experience_uuid__isnull=True).values_list('experience_uuid', flat=True)
+            secondaires_uuids = DemandeEPCInjection.objects.filter(
+                common_filter,
                 admission__training__educationgrouptype__name=TrainingType.BACHELOR.name,
             ).annotate(
                 experience_uuid=Case(
                     When(
                         admission__candidate__foreignhighschooldiploma__isnull=False,
-                        then=F('admission__candidate__foreignhighschooldiploma__uuid')
+                        then=F('admission__candidate__foreignhighschooldiploma__uuid'),
                     ),
                     When(
                         admission__candidate__belgianhighschooldiploma__isnull=False,
-                        then=F('admission__candidate__belgianhighschooldiploma__uuid')
+                        then=F('admission__candidate__belgianhighschooldiploma__uuid'),
                     ),
                     When(
                         admission__candidate__highschooldiplomaalternative__isnull=False,
-                        then=F('admission__candidate__highschooldiplomaalternative__uuid')
+                        then=F('admission__candidate__highschooldiplomaalternative__uuid'),
                     ),
-                ),
-            ).filter(experience_uuid__isnull=False).only('pk')
-            demande_injections = educational_injections.union(professional_injections).union(secondaires_injection)
-        uuids_list = list(curriculum_injections) + [inj.experience_uuid for inj in demande_injections]
+                    output_field=models.UUIDField(),
+                )
+            ).exclude(experience_uuid__isnull=True).values_list('experience_uuid', flat=True)
+            demande_injections = list(chain(educational_uuids, professional_uuids, secondaires_uuids))
+        uuids_list = set(curriculum_injections) | set(demande_injections)
         # TODO: pour les experiences academiques, faut recuperer l'uuid du chapeau
         return experience_object.uuid in uuids_list
 
