@@ -533,6 +533,9 @@ msgstr "Conditions d'accès non remplies."
 msgid "Admission context"
 msgstr "Contexte d'admission"
 
+msgid "Admission education types"
+msgstr "Les types de formation de l'admission"
+
 msgid "Admission export"
 msgstr "Export d'admission"
 
@@ -3769,6 +3772,9 @@ msgstr ""
 msgid "IBAN account number"
 msgstr "Numéro de compte IBAN"
 
+msgid "INCHANGE"
+msgstr "Inchangé"
+
 msgid "INITIAL_CANDIDAT"
 msgstr "Initial candidat"
 
@@ -6646,7 +6652,8 @@ msgid ""
 msgstr ""
 "Le passage à l'état 'Dérogation accordée' est réservé aux demandes de type "
 "inscription dont la situation de dérogation à la finançabilité est 'accord "
-"de dérogation facultaire' ou pour lesquelles une dérogation du VRAE a été obtenue."
+"de dérogation facultaire' ou pour lesquelles une dérogation du VRAE a été "
+"obtenue."
 
 msgid "The 'Dispensation needed' status is reserved to enrolment application."
 msgstr ""
