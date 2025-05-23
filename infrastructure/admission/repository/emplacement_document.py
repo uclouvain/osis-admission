@@ -26,12 +26,11 @@
 
 import datetime
 import uuid
-from typing import List, Optional, Set, Union
-
 from django.conf import settings
 from django.db import transaction
 from django.db.models import F, Value, CharField, Case, When
 from django.utils.dateparse import parse_date, parse_datetime
+from typing import List, Optional, Set, Union
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     OngletsChecklist as OngletsChecklistDoctorat,
@@ -215,6 +214,7 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
                         )
 
             demande_injections: Optional[List[DemandeEPCInjection]] = None
+            curriculum_injections: Optional[List[CurriculumEPCInjection]] = None
 
             for model_object, fields in updated_fields_by_object.items():
                 # Ensure the files are not deleted by osis_document.contrib.fields.FileField.pre_save
@@ -228,6 +228,7 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
                 if isinstance(model_object, OSIS_PROFILE_MODELS):
                     vient_d_epc = bool(getattr(model_object, 'external_id', ''))
                     deja_injectee = cls.already_injected_experience(
+                        curriculum_injections,
                         demande_injections,
                         admission.candidate_id,
                         model_object,
@@ -239,30 +240,27 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
                             admission.last_update_author,
                         )
 
-    EXPERIENCE_INJECTION_CHECKING_CONDITION = {
-        BelgianHighSchoolDiploma: lambda exp, inj: inj.type_experience == ExperienceType.HIGH_SCHOOL.name,
-        ForeignHighSchoolDiploma: lambda exp, inj: inj.type_experience == ExperienceType.HIGH_SCHOOL.name,
-        HighSchoolDiplomaAlternative: lambda exp, inj: inj.type_experience == ExperienceType.HIGH_SCHOOL.name,
-        EducationalExperience: lambda exp, inj: inj.experience_uuid == exp.uuid,
-        ProfessionalExperience: lambda exp, inj: inj.experience_uuid == exp.uuid,
-        EducationalExperienceYear: lambda exp, inj: inj.experience_uuid
-        == exp.educational_experience_uuid,  # From annotation
-    }
-
     @classmethod
     def already_injected_experience(
         cls,
-        demande_injections: Optional[List[CurriculumEPCInjection]],
+        curriculum_injections: Optional[List[CurriculumEPCInjection]],
+        demande_injections: Optional[List[DemandeEPCInjection]],
         candidate_id,
         experience_object,
     ):
         """
         Return True if the experience has already been injected.
-        :param demande_injections: The list of the injections of the candidate.
+        :param curriculum_injections: The list of the injections by curex of the candidate edition.
+        :param demande_injections: The list of the injections by admission of the candidate edition.
         :param candidate_id: The id of the candidate (person).
         :param experience_object: The experience to check
         :return: True if the experience has been injected, otherwise False.
         """
+        if curriculum_injections is None:
+            curriculum_injections = CurriculumEPCInjection.objects.filter(
+                person_id=candidate_id,
+                status__in=CurriculumEPCInjectionStatus.blocking_statuses_for_experience(),
+            ).only('experience_uuid')
         if demande_injections is None:
             educational_injections = DemandeEPCInjection.objects.filter(
                 type=EPCInjectionType.DEMANDE.name,
@@ -272,8 +270,7 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
                 experience_uuid=(
                     F('admission__admissioneducationalvaluatedexperiences__educationalexperience_id')
                 ),
-                type_experience=Value(ExperienceType.ACADEMIC.name, output_field=CharField()),
-            )
+            ).only('pk')
             professional_injections = DemandeEPCInjection.objects.filter(
                 type=EPCInjectionType.DEMANDE.name,
                 admission__candidate_id=candidate_id,
@@ -282,8 +279,7 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
                 experience_uuid=(
                     F('admission__admissionprofessionalvaluatedexperiences__professionalexperience_id')
                 ),
-                type_experience=Value(ExperienceType.PROFESSIONAL.name, output_field=CharField()),
-            )
+            ).only('pk')
             secondaires_injection = DemandeEPCInjection.objects.filter(
                 type=EPCInjectionType.DEMANDE.name,
                 admission__candidate_id=candidate_id,
@@ -304,13 +300,11 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
                         then=F('admission__candidate__highschooldiplomaalternative__uuid')
                     ),
                 ),
-                type_experience=Value(ExperienceType.HIGH_SCHOOL.name, output_field=CharField()),
-            ).filter(experience_uuid__isnull=False)
+            ).filter(experience_uuid__isnull=False).only('pk')
             demande_injections = educational_injections.union(professional_injections).union(secondaires_injection)
-
-        checking_condition = cls.EXPERIENCE_INJECTION_CHECKING_CONDITION[type(experience_object)]
-
-        return any(checking_condition(experience_object, inj) for inj in demande_injections)
+        uuids_list = list(curriculum_injections) + [inj.experience_uuid for inj in demande_injections]
+        # TODO: pour les experiences academiques, faut recuperer l'uuid du chapeau
+        return experience_object.uuid in uuids_list
 
     @classmethod
     def entity_to_dict(cls, entity: EmplacementDocument) -> dict:
