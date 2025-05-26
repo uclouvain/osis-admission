@@ -24,11 +24,13 @@
 #
 # ##############################################################################
 import datetime
+import random
 from unittest import mock
 
 import freezegun
 from django.test import SimpleTestCase
 
+from admission.constants import ADMISSION_POOL_ACADEMIC_CALENDAR_TYPES
 from admission.ddd.admission.domain.model.periode import Periode
 from admission.ddd.admission.formation_generale.commands import (
     SpecifierPaiementVaEtreOuvertParCandidatCommand,
@@ -52,7 +54,6 @@ from admission.infrastructure.admission.formation_generale.repository.in_memory.
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from admission.models.online_payment import PaymentStatus
-from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 
@@ -143,13 +144,13 @@ class TestSpecifierPaiementVaEtreOuvertParCandidat(SimpleTestCase):
                 self.message_bus.invoke(self.command)
 
     @mock.patch('admission.infrastructure.admission.domain.service.in_memory.calendrier_inscription.'
-                'CalendrierInscriptionInMemory.recuperer_periode_inscription_specifique_hue_plus_5_resident_a_l_etranger')
+                'CalendrierInscriptionInMemory.recuperer_periode_du_pot')
     def test_should_lever_exception_si_date_limite_depassee(self, mock_calendar):
         date_debut = datetime.date.today() - datetime.timedelta(days=15)
         mock_calendar.return_value = Periode(
             date_debut=date_debut,
             date_fin=date_debut,
-            type=AcademicCalendarTypes.ADMISSION_POOL_HUE5_BELGIUM_RESIDENCY.name,
+            type=random.choice(list(ADMISSION_POOL_ACADEMIC_CALENDAR_TYPES)).name,
         )
         with mock.patch.multiple(
             self.proposition,

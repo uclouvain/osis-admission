@@ -43,7 +43,6 @@ class DocumentTypesForSwappingAutocompleteTestCase(TestCase):
                 nom_onglet='tab-1',
                 document_uuids=self.document_uuids,
                 libelle='doc-11',
-                lecture_seule=False,
             ),
             mock.Mock(
                 identifiant='id-12',
@@ -51,15 +50,6 @@ class DocumentTypesForSwappingAutocompleteTestCase(TestCase):
                 nom_onglet='tab-1',
                 document_uuids=self.document_uuids,
                 libelle='doc-12',
-                lecture_seule=False,
-            ),
-            mock.Mock(
-                identifiant='id-13',
-                requis_automatiquement=False,
-                nom_onglet='tab-1',
-                document_uuids=self.document_uuids,
-                libelle='doc-13',
-                lecture_seule=True,
             ),
             mock.Mock(
                 identifiant='id-21',
@@ -67,7 +57,6 @@ class DocumentTypesForSwappingAutocompleteTestCase(TestCase):
                 nom_onglet='tab-2',
                 document_uuids=[],
                 libelle='doc-21',
-                lecture_seule=False,
             ),
         ]
         self.patch_message_bus = mock.patch(
@@ -132,11 +121,6 @@ class DocumentTypesForSwappingAutocompleteTestCase(TestCase):
                                 'id': 'id-12',
                                 'text': '<i class="fa-solid fa-paperclip"></i> doc-12',
                                 'disabled': False,
-                            },
-                            {
-                                'id': 'id-13',
-                                'text': '<i class="fa-solid fa-paperclip"></i> doc-13',
-                                'disabled': True,  # The document is read-only (from EPC)
                             },
                         ],
                     },

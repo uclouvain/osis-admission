@@ -321,6 +321,7 @@ COMMAND_HANDLERS = {
         i_profil_candidat_translator=_profil_candidat_translator,
         i_comptabilite_translator=_comptabilite_translator,
         academic_year_repository=_academic_year_repository,
+        question_specifique_translator=_question_specific_translator,
     ),
     RecupererPropositionGestionnaireQuery: lambda msg_bus, cmd: recuperer_proposition_gestionnaire(
         cmd,
@@ -454,6 +455,7 @@ COMMAND_HANDLERS = {
             academic_year_repository=_academic_year_repository,
             personne_connue_translator=_personne_connue_ucl_translator,
             question_specifique_translator=_question_specific_translator,
+            unites_enseignement_translator=_unites_enseignement_translator,
         )
     ),
     SpecifierPaiementNecessaireCommand: lambda msg_bus, cmd: specifier_paiement_necessaire(
@@ -536,7 +538,6 @@ COMMAND_HANDLERS = {
         unites_enseignement_translator=_unites_enseignement_translator,
         titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
         profil_candidat_translator=_profil_candidat_translator,
-        academic_year_repository=_academic_year_repository,
         experience_parcours_interne_translator=_experience_parcours_interne_translator,
     ),
     ApprouverInscriptionTardiveParFaculteCommand: lambda msg_bus, cmd: approuver_inscription_tardive_par_faculte(
@@ -565,7 +566,7 @@ COMMAND_HANDLERS = {
             cmd,
             proposition_repository=_proposition_repository,
             paiement_frais_dossier_service=_paiement_frais_dossier,
-            calendrier_translator=CalendrierInscriptionInMemory()
+            calendrier_translator=CalendrierInscriptionInMemory(),
         )
     ),
     RecupererListePaiementsPropositionQuery: lambda msg_bus, cmd: recuperer_liste_paiements_proposition(

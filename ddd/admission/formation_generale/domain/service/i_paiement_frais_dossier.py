@@ -74,7 +74,7 @@ class IPaiementFraisDossier(interface.DomainService):
     def verifier_paiement_frais_dossier_necessaire(
         cls,
         proposition: PropositionGenerale,
-        periode_hue_plus_5_resident_etranger: Periode,
+        periode_du_pot: Periode,
     ) -> None:
         if not proposition.statut == ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE:
             raise PropositionPourPaiementInvalideException
@@ -82,7 +82,7 @@ class IPaiementFraisDossier(interface.DomainService):
         if cls.paiement_realise(proposition_uuid=proposition.entity_id.uuid):
             raise PaiementDejaRealiseException
         aujourdhui = datetime.date.today()
-        date_limite = periode_hue_plus_5_resident_etranger.date_fin + timedelta(days=14)
+        date_limite = periode_du_pot.date_fin + timedelta(days=14)
         if aujourdhui > date_limite:
             raise DateLimitePaiementDepasseeException(
                 date_limite=date_limite,

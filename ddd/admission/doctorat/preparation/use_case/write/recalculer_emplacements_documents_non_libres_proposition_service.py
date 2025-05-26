@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,25 +27,41 @@
 from admission.ddd.admission.doctorat.preparation.commands import (
     RecalculerEmplacementsDocumentsNonLibresPropositionCommand,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.doctorat.preparation.domain.service.i_comptabilite import IComptabiliteTranslator
-from admission.ddd.admission.doctorat.preparation.domain.service.i_membre_CA import IMembreCATranslator
-from admission.ddd.admission.doctorat.preparation.domain.service.i_promoteur import IPromoteurTranslator
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    PropositionIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.domain.service.i_comptabilite import (
+    IComptabiliteTranslator,
+)
+from admission.ddd.admission.doctorat.preparation.domain.service.i_membre_CA import (
+    IMembreCATranslator,
+)
+from admission.ddd.admission.doctorat.preparation.domain.service.i_promoteur import (
+    IPromoteurTranslator,
+)
 from admission.ddd.admission.doctorat.preparation.domain.service.i_question_specifique import (
     IQuestionSpecifiqueTranslator,
 )
 from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
     IGroupeDeSupervisionRepository,
 )
-from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
+    IPropositionRepository,
+)
+from admission.ddd.admission.domain.service.i_profil_candidat import (
+    IProfilCandidatTranslator,
+)
 from admission.ddd.admission.domain.service.reinitialiser_emplacements_documents_non_libres_proposition import (
     ReinitialiserEmplacementsDocumentsNonLibresPropositionService,
 )
 from admission.ddd.admission.domain.service.resume_proposition import ResumeProposition
 from admission.ddd.admission.enums import TypeItemFormulaire
-from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
-from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
+from admission.ddd.admission.repository.i_emplacement_document import (
+    IEmplacementDocumentRepository,
+)
+from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import (
+    IAcademicYearRepository,
+)
 
 
 def recalculer_emplacements_documents_non_libres_proposition(
@@ -57,8 +73,6 @@ def recalculer_emplacements_documents_non_libres_proposition(
     emplacement_document_repository: 'IEmplacementDocumentRepository',
     academic_year_repository: 'IAcademicYearRepository',
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
-    promoteur_translator: 'IPromoteurTranslator',
-    membre_ca_translator: 'IMembreCATranslator',
 ) -> PropositionIdentity:
     # GIVEN
     resume_dto = ResumeProposition.get_resume_demande_doctorat(
@@ -68,8 +82,6 @@ def recalculer_emplacements_documents_non_libres_proposition(
         profil_candidat_translator=profil_candidat_translator,
         academic_year_repository=academic_year_repository,
         groupe_supervision_repository=groupe_supervision_repository,
-        promoteur_translator=promoteur_translator,
-        membre_ca_translator=membre_ca_translator,
         question_specifique_translator=question_specifique_translator,
     )
 

@@ -23,11 +23,13 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import random
 from dataclasses import dataclass
 from typing import List, Optional
 
 import factory
 
+from admission.constants import ADMISSION_POOL_ACADEMIC_CALENDAR_TYPES
 from admission.ddd import CODE_BACHELIER_VETERINAIRE
 from admission.ddd.admission.domain.service.i_unites_enseignement_translator import (
     IUnitesEnseignementTranslator,
@@ -229,6 +231,7 @@ class PropositionInMemoryRepository(
                 formation_id=FormationIdentityFactory(sigle="MASTER-SCI", annee=2021),
                 curriculum=['file1.pdf'],
                 est_confirmee=True,
+                pot_calcule=random.choice(list(ADMISSION_POOL_ACADEMIC_CALENDAR_TYPES))
             ),
             PropositionFactory(
                 entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-CERTIFICATE-CONFIRMED'),

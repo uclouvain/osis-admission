@@ -44,16 +44,16 @@ def specifier_paiement_va_etre_ouvert_par_candidat(
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition = proposition_repository.get(entity_id=proposition_id)
-    periode_hue_plus_5_resident_etranger = (
-        calendrier_translator.recuperer_periode_inscription_specifique_hue_plus_5_resident_a_l_etranger(
-            annee_formation=proposition.formation_id.annee
+    periode_du_pot = (
+        calendrier_translator.recuperer_periode_du_pot(
+            annee_formation=proposition.formation_id.annee,
+            pot=proposition.pot_calcule
         )
     )
-
     # WHEN
     paiement_frais_dossier_service.verifier_paiement_frais_dossier_necessaire(
         proposition=proposition,
-        periode_hue_plus_5_resident_etranger=periode_hue_plus_5_resident_etranger,
+        periode_du_pot=periode_du_pot,
     )
 
     # THEN
