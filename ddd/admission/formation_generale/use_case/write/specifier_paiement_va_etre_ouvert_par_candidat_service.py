@@ -50,7 +50,6 @@ def specifier_paiement_va_etre_ouvert_par_candidat(
             pot=proposition.pot_calcule
         )
     )
-
     # WHEN
     paiement_frais_dossier_service.verifier_paiement_frais_dossier_necessaire(
         proposition=proposition,
