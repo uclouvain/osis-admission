@@ -251,6 +251,7 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
             if admission.financability_dispensation_last_notification_by
             else None
         ),
+        certificat_refus_cdd=admission.cdd_refusal_certificate,
         certificat_approbation_cdd=admission.cdd_approval_certificate,
         certificat_approbation_sic=admission.sic_approval_certificate,
         certificat_approbation_sic_annexe=admission.sic_annexe_approval_certificate,
@@ -502,6 +503,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'financability_dispensation_last_notification_by': (
                     financabilite_derogation_derniere_notification_par_person
                 ),
+                'cdd_refusal_certificate': entity.certificat_refus_cdd,
                 'cdd_approval_certificate': entity.certificat_approbation_cdd,
                 'sic_approval_certificate': entity.certificat_approbation_sic,
                 'sic_annexe_approval_certificate': entity.certificat_approbation_sic_annexe,
@@ -853,6 +855,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 if admission.financability_dispensation_last_notification_by
                 else ''
             ),
+            certificat_refus_cdd=admission.cdd_refusal_certificate,
             certificat_approbation_cdd=admission.cdd_approval_certificate,
             certificat_approbation_sic=admission.sic_approval_certificate,
             certificat_approbation_sic_annexe=admission.sic_annexe_approval_certificate,

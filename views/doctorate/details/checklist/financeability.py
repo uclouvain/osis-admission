@@ -52,14 +52,11 @@ from admission.forms.admission.checklist import (
     CommentForm,
     DoctorateFinancabiliteApprovalForm,
     DoctorateFinancabiliteNotFinanceableForm,
-    FinancabiliteApprovalForm,
+    DoctorateFinancabilityDispensationRefusalForm,
     FinancabiliteDispensationForm,
-    FinancabiliteNotFinanceableForm,
     FinancabiliteNotificationForm,
-    FinancabilityDispensationRefusalForm,
 )
 from admission.mail_templates import (
-    ADMISSION_EMAIL_FINANCABILITY_DISPENSATION_NOTIFICATION,
     ADMISSION_EMAIL_FINANCABILITY_DISPENSATION_NOTIFICATION_DOCTORATE,
 )
 from admission.utils import (
@@ -108,7 +105,7 @@ class FinancabiliteContextMixin(CheckListDefaultContextMixin):
                 'reasons': self.admission_refusal_reasons,
             }
 
-        return FinancabilityDispensationRefusalForm(**form_kwargs)
+        return DoctorateFinancabilityDispensationRefusalForm(**form_kwargs)
 
     @cached_property
     def financability_dispensation_notification_form(self):

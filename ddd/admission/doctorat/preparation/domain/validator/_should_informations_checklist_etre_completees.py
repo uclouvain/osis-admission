@@ -51,6 +51,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     EtatChecklistDecisionSicNonValidePourApprouverUneInscription,
     EtatChecklistFinancabiliteNonValidePourApprouverDemande,
     InscriptionTardiveAvecConditionAccesException,
+    MotifRefusCDDNonSpecifieException,
     ParcoursAnterieurNonSuffisantException,
     SituationPropositionNonCddException,
     SituationPropositionNonSICException,
@@ -61,6 +62,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 from admission.ddd.admission.domain.model.complement_formation import (
     ComplementFormationIdentity,
 )
+from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
 from admission.ddd.admission.domain.model.titre_acces_selectionnable import (
     TitreAccesSelectionnable,
 )
@@ -99,6 +101,16 @@ class ShouldCddPeutDonnerDecision(BusinessValidator):
     def validate(self, *args, **kwargs):
         if self.statut.name not in STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD:
             raise SituationPropositionNonCddException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldSpecifierMotifRefusCDD(BusinessValidator):
+    motifs_refus: List[MotifRefusIdentity]
+    autres_motifs_refus: List[str]
+
+    def validate(self, *args, **kwargs):
+        if not self.motifs_refus and not self.autres_motifs_refus:
+            raise MotifRefusCDDNonSpecifieException
 
 
 @attr.dataclass(frozen=True, slots=True)

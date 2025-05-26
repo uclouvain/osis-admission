@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -35,15 +35,22 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
     ChoixStatutChecklist,
     DecisionCDDEnum,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    PropositionIdentity,
+)
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     SituationPropositionNonCddException,
 )
-from admission.ddd.admission.doctorat.preparation.test.factory.person import PersonneConnueUclDTOFactory
+from admission.ddd.admission.doctorat.preparation.test.factory.person import (
+    PersonneConnueUclDTOFactory,
+)
+from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from admission.infrastructure.message_bus_in_memory import (
+    message_bus_in_memory_instance,
+)
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
     PersonneConnueUclInMemoryTranslator,
@@ -68,12 +75,12 @@ class TestRefuserPropositionParFaculte(TestCase):
         self.parametres_commande_par_defaut = {
             'uuid_proposition': 'uuid-SC3DP-confirmee',
             'gestionnaire': '00321234',
-            'objet_message': 'Objet du message',
-            'corps_message': 'Corps du message',
         }
 
-    def test_should_etre_ok_si_traitement_fac(self):
+    def test_should_etre_ok_si_traitement_fac_et_motif_connu(self):
         self.proposition.statut = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC
+        self.proposition.motifs_refus = [MotifRefusIdentity(uuid='uuid-nouveau-motif-refus')]
+        self.proposition.autres_motifs_refus = []
 
         resultat = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
 
@@ -82,15 +89,17 @@ class TestRefuserPropositionParFaculte(TestCase):
 
         # Vérifier la proposition
         proposition = self.proposition_repository.get(resultat)
-        self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.INSCRIPTION_REFUSEE)
+        self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.RETOUR_DE_FAC)
         self.assertEqual(proposition.checklist_actuelle.decision_cdd.statut, ChoixStatutChecklist.GEST_BLOCAGE)
         self.assertEqual(
             proposition.checklist_actuelle.decision_cdd.extra,
             {'decision': DecisionCDDEnum.EN_DECISION.name},
         )
 
-    def test_should_etre_ok_si_completee_pour_fac(self):
+    def test_should_etre_ok_si_completee_pour_fac_et_motif_libre(self):
         self.proposition.statut = ChoixStatutPropositionDoctorale.COMPLETEE_POUR_FAC
+        self.proposition.motifs_refus = []
+        self.proposition.autres_motifs_refus = ['Autre motif']
 
         resultat = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
 

@@ -347,6 +347,7 @@ class PropositionInMemoryRepository(
             financabilite_derogation_derniere_notification_par=(
                 proposition.financabilite_derogation_derniere_notification_par
             ),
+            certificat_refus_cdd=proposition.certificat_refus_cdd,
             certificat_approbation_cdd=proposition.certificat_approbation_cdd,
             certificat_approbation_sic=proposition.certificat_approbation_sic,
             certificat_approbation_sic_annexe=proposition.certificat_approbation_sic_annexe,

@@ -43,7 +43,7 @@ from admission.calendar.admission_calendar import (
     AdmissionPoolExternalEnrollmentChangeCalendar,
     AdmissionPoolExternalReorientationCalendar,
 )
-from admission.constants import JPEG_MIME_TYPE, PNG_MIME_TYPE, ORDERED_CAMPUSES_UUIDS
+from admission.constants import JPEG_MIME_TYPE, ORDERED_CAMPUSES_UUIDS, PNG_MIME_TYPE
 from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixEtatSignature,
@@ -142,7 +142,9 @@ from admission.exports.admission_recap.section import (
     get_supervision_section,
     get_training_choice_section,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import UnfrozenDTO
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+    UnfrozenDTO,
+)
 from admission.models import AdmissionTask
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import (
@@ -1613,6 +1615,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             certificat_approbation_sic=[],
             certificat_approbation_sic_annexe=[],
             certificat_approbation_cdd=[],
+            certificat_refus_cdd=[],
             doit_fournir_visa_etudes=False,
             visa_etudes_d=['uuid-visa-etudes-d'],
             certificat_autorisation_signe=['uuid-certificat-autorisation-signe'],
