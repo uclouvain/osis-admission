@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import difflib
 import filecmp
 import sys
 from unittest import SkipTest
@@ -76,4 +77,19 @@ class ApiSchemaTestCase(TestCase):
                 generator_class='admission.api.schema.AdmissionSchemaGenerator',
                 file=temp.name,
             )
-            self.assertTrue(filecmp.cmp('admission/schema.yml', temp.name), msg="Schema has not been re-generated")
+            if not filecmp.cmp('admission/schema.yml', temp.name, shallow=False):
+                with open('admission/schema.yml', 'r') as schema_file:
+                    schema_lines = schema_file.readlines()
+                with open(temp.name, 'r') as new_schema_file:
+                    new_schema_lines = new_schema_file.readlines()
+                self.fail(
+                    "Schema has not been re-generated:\n\n"
+                    + ''.join(
+                        difflib.unified_diff(
+                            schema_lines,
+                            new_schema_lines,
+                            fromfile='schema.yml',
+                            tofile='generated_schema.yml',
+                        )
+                    )
+                )

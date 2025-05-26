@@ -34,7 +34,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -90,7 +89,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -142,7 +140,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -192,7 +189,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -215,7 +211,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -269,7 +264,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -319,7 +313,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -342,7 +335,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -385,7 +377,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -419,7 +410,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -457,7 +447,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -479,7 +468,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -512,7 +500,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -542,7 +529,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -576,7 +562,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '201':
           content:
@@ -616,7 +601,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -655,7 +639,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -688,7 +671,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '204':
           description: No response body
@@ -712,7 +694,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '201':
           content:
@@ -752,7 +733,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -791,7 +771,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -824,7 +803,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '204':
           description: No response body
@@ -843,7 +821,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -883,7 +860,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -905,7 +881,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -933,7 +908,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -970,7 +944,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -1003,7 +976,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -1038,7 +1010,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -1069,7 +1040,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -1099,7 +1069,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '201':
           description: No response body
@@ -1129,7 +1098,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '201':
           content:
@@ -1170,7 +1138,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -1204,7 +1171,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '204':
           description: No response body
@@ -1239,7 +1205,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -1275,7 +1240,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -1314,7 +1278,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -1350,7 +1313,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -1389,7 +1351,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -1429,7 +1390,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '201':
           content:
@@ -1469,7 +1429,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -1514,7 +1473,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -1553,7 +1511,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '204':
           description: No response body
@@ -1589,7 +1546,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '201':
           content:
@@ -1629,7 +1585,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -1674,7 +1629,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -1713,7 +1667,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '204':
           description: No response body
@@ -1743,7 +1696,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -1782,7 +1734,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '201':
           content:
@@ -1817,7 +1768,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -1854,7 +1804,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -1895,7 +1844,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -1929,7 +1877,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -1967,7 +1914,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -2007,7 +1953,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -2042,7 +1987,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -2082,7 +2026,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -2119,7 +2062,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           description: No response body
@@ -2154,7 +2096,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -2192,7 +2133,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -2223,7 +2163,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '201':
           content:
@@ -2264,7 +2203,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -2298,7 +2236,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '204':
           description: No response body
@@ -2333,7 +2270,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -2370,7 +2306,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -2410,7 +2345,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -2444,7 +2378,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -2483,7 +2416,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -2518,7 +2450,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -2558,7 +2489,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -2594,7 +2524,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -2633,7 +2562,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -2673,7 +2601,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '201':
           content:
@@ -2713,7 +2640,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -2758,7 +2684,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -2797,7 +2722,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '204':
           description: No response body
@@ -2833,7 +2757,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '201':
           content:
@@ -2873,7 +2796,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -2918,7 +2840,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -2957,7 +2878,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '204':
           description: No response body
@@ -2988,7 +2908,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -3022,7 +2941,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -3061,7 +2979,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '201':
           content:
@@ -3095,7 +3012,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -3138,7 +3054,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -3175,7 +3090,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -3212,7 +3126,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -3253,7 +3166,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -3290,7 +3202,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           description: No response body
@@ -3326,7 +3237,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -3360,7 +3270,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -3398,7 +3307,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -3433,7 +3341,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -3473,7 +3380,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -3508,7 +3414,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -3548,7 +3453,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -3588,7 +3492,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -3627,7 +3530,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -3668,7 +3570,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -3708,7 +3609,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -3749,7 +3649,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -3890,7 +3789,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -3930,7 +3828,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -3971,7 +3868,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -4006,7 +3902,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -4046,7 +3941,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -4084,7 +3978,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -4119,7 +4012,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -4151,7 +4043,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -4187,7 +4078,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '201':
           content:
@@ -4228,7 +4118,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -4262,7 +4151,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '204':
           description: No response body
@@ -4297,7 +4185,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -4334,7 +4221,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -4374,7 +4260,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -4408,7 +4293,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -4447,7 +4331,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -4483,7 +4366,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -4522,7 +4404,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -4562,7 +4443,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '201':
           content:
@@ -4602,7 +4482,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -4647,7 +4526,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -4686,7 +4564,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '204':
           description: No response body
@@ -4722,7 +4599,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '201':
           content:
@@ -4762,7 +4638,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -4807,7 +4682,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -4846,7 +4720,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '204':
           description: No response body
@@ -4876,7 +4749,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -4915,7 +4787,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '201':
           content:
@@ -4949,7 +4820,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -4983,7 +4853,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -5021,7 +4890,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -5056,7 +4924,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -5091,7 +4958,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -5128,7 +4994,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -5169,7 +5034,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -5204,7 +5068,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -5243,7 +5106,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -5277,7 +5139,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -5315,7 +5176,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -5355,7 +5215,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -5390,7 +5249,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -5430,7 +5288,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -5467,7 +5324,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           description: No response body
@@ -5502,7 +5358,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -5540,7 +5395,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -5562,7 +5416,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -5590,7 +5443,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -5618,7 +5470,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -5650,7 +5501,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -5678,7 +5528,6 @@ paths:
       security:
       - tokenAuth: []
       - Token: []
-      - cookieAuth: []
       responses:
         '200':
           content:
@@ -10115,8 +9964,8 @@ components:
       - M
       type: string
       description: |-
-        * `F` - Femme
-        * `M` - Homme
+        * `F` - Féminin
+        * `M` - Masculin
     SpecificEnrolmentPeriods:
       type: object
       properties:
@@ -10337,10 +10186,6 @@ components:
       in: header
       name: Authorization
       description: Token-based authentication with required prefix "ESB"
-    cookieAuth:
-      type: apiKey
-      in: cookie
-      name: sessionid
     tokenAuth:
       type: apiKey
       in: header

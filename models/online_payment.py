@@ -78,7 +78,7 @@ class OnlinePayment(models.Model):
         related_name='online_payments',
     )
 
-    payment_id = models.CharField(max_length=14)
+    payment_id = models.CharField(max_length=50,  unique=True)
     status = models.CharField(choices=PaymentStatus.choices(), max_length=10)
     expiration_date = models.DateTimeField(null=True)
     method = models.CharField(choices=PaymentMethod.choices(), max_length=17, blank=True, default='')

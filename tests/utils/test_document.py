@@ -111,7 +111,6 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
         self.addCleanup(patcher.stop)
 
         self.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory()
-        self.general_admission.secondaire_injectee_par_cv = False
 
     def test_get_document_from_invalid_identifier(self):
         self.assertIsNone(get_document_from_identifier(self.general_admission, 'foobar'))

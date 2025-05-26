@@ -31,7 +31,7 @@ from uuid import UUID
 
 import attr
 from django.conf import settings
-from django.db.models import Func, Model, Q, Exists, OuterRef
+from django.db.models import Exists, F, Func, Model, OuterRef, Q
 from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 
@@ -55,10 +55,6 @@ from base.models.entity_version import (
 )
 from base.models.enums.entity_type import PEDAGOGICAL_ENTITY_TYPES
 from osis_profile.models import EducationalExperienceYear
-from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection
-from osis_profile.models.epc_injection import (
-    EPCInjectionStatus as CurriculumEPCInjectionStatus,
-)
 
 FORMATTED_EMAIL_FOR_HISTORY = """{sender_label} : {sender}
 {recipient_label} : {recipient}
@@ -351,8 +347,6 @@ def get_document_from_identifier(
             elif domain_identifier in CORRESPONDANCE_CHAMPS_ETUDES_SECONDAIRES_ALTERNATIVES:
                 obj = getattr(admission.candidate, 'highschooldiplomaalternative', None)
                 field = CORRESPONDANCE_CHAMPS_ETUDES_SECONDAIRES_ALTERNATIVES[domain_identifier]
-            if obj:
-                obj.injecte_par_cv = admission.secondaire_injectee_par_cv  # from annotation
 
         elif base_identifier == OngletsDemande.LANGUES.name:
             # LANGUES.[CODE_LANGUE].[DOMAIN_IDENTIFIER]
@@ -374,14 +368,7 @@ def get_document_from_identifier(
                     return
                 experience_uuid = document_identifier_parts[1]
                 field = CORRESPONDANCE_CHAMPS_CURRICULUM_EXPERIENCE_ACADEMIQUE[domain_identifier]
-                obj = admission.candidate.educationalexperience_set.filter(uuid=experience_uuid).annotate(
-                    injecte_par_cv=Exists(
-                        CurriculumEPCInjection.objects.filter(
-                            experience_uuid=OuterRef('uuid'),
-                            status__in=CurriculumEPCInjectionStatus.blocking_statuses_for_experience(),
-                        )
-                    ),
-                ).first()
+                obj = admission.candidate.educationalexperience_set.filter(uuid=experience_uuid).first()
 
             elif domain_identifier in CORRESPONDANCE_CHAMPS_CURRICULUM_ANNEE_EXPERIENCE_ACADEMIQUE:
                 # CURRICULUM.[EXPERIENCE_UUID].[EXPERIENCE_YEAR].[DOMAIN_IDENTIFIER]
@@ -390,17 +377,14 @@ def get_document_from_identifier(
                 experience_uuid = document_identifier_parts[1]
                 experience_year = document_identifier_parts[2]
                 field = CORRESPONDANCE_CHAMPS_CURRICULUM_ANNEE_EXPERIENCE_ACADEMIQUE[domain_identifier]
-                obj = EducationalExperienceYear.objects.filter(
-                    educational_experience__uuid=experience_uuid,
-                    academic_year__year=experience_year,
-                ).annotate(
-                    injecte_par_cv=Exists(
-                        CurriculumEPCInjection.objects.filter(
-                            experience_uuid=OuterRef('educational_experience__uuid'),
-                            status__in=CurriculumEPCInjectionStatus.blocking_statuses_for_experience(),
-                        )
-                    ),
-                ).first()
+                obj = (
+                    EducationalExperienceYear.objects.filter(
+                        educational_experience__uuid=experience_uuid,
+                        academic_year__year=experience_year,
+                    )
+                    .annotate(educational_experience_uuid=F('educational_experience__uuid'))
+                    .first()
+                )
 
             elif domain_identifier in CORRESPONDANCE_CHAMPS_CURRICULUM_EXPERIENCE_NON_ACADEMIQUE:
                 # CURRICULUM.[EXPERIENCE_UUID].[DOMAIN_IDENTIFIER]
@@ -408,14 +392,7 @@ def get_document_from_identifier(
                     return
                 experience_uuid = document_identifier_parts[1]
                 field = CORRESPONDANCE_CHAMPS_CURRICULUM_EXPERIENCE_NON_ACADEMIQUE[domain_identifier]
-                obj = admission.candidate.professionalexperience_set.filter(uuid=experience_uuid).annotate(
-                    injecte_par_cv=Exists(
-                        CurriculumEPCInjection.objects.filter(
-                            experience_uuid=OuterRef('uuid'),
-                            status__in=CurriculumEPCInjectionStatus.blocking_statuses_for_experience(),
-                        )
-                    ),
-                ).first()
+                obj = admission.candidate.professionalexperience_set.filter(uuid=experience_uuid).first()
 
         elif base_identifier == OngletsDemande.INFORMATIONS_ADDITIONNELLES.name:
             # INFORMATIONS_ADDITIONNELLES.[DOMAIN_IDENTIFIER]

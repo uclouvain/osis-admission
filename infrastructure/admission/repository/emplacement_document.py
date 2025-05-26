@@ -26,11 +26,12 @@
 
 import datetime
 import uuid
+from itertools import chain
 from typing import List, Optional, Set, Union
 
 from django.conf import settings
 from django.db import transaction
-from django.db.models import Exists, OuterRef
+from django.db.models import F, Value, CharField, Case, When, Q, UUIDField
 from django.utils.dateparse import parse_date, parse_datetime
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
@@ -80,6 +81,9 @@ from admission.models import (
     GeneralEducationAdmission,
 )
 from admission.models.base import BaseAdmission
+from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
+from admission.services.injection_epc.injection_dossier import EPCInjection as DemandeEPCInjection
+from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
 from osis_profile.models import (
     OSIS_PROFILE_MODELS,
@@ -88,7 +92,6 @@ from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjec
 from osis_profile.models.epc_injection import (
     EPCInjectionStatus as CurriculumEPCInjectionStatus,
 )
-from osis_profile.models.epc_injection import ExperienceType
 from osis_profile.services.injection_epc import InjectionEPCCurriculum
 
 
@@ -208,6 +211,8 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
                             },
                         )
 
+            experiences_injectees_uuid_set = cls._retrieve_experiences_uuid_set(admission.candidate_id)
+
             for model_object, fields in updated_fields_by_object.items():
                 # Ensure the files are not deleted by osis_document.contrib.fields.FileField.pre_save
                 model_object._files_to_keep = [
@@ -219,13 +224,56 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
                 model_object.save(update_fields=fields)
                 if isinstance(model_object, OSIS_PROFILE_MODELS):
                     vient_d_epc = bool(getattr(model_object, 'external_id', ''))
-                    deja_injectee = model_object.injecte_par_cv
+                    # TODO: pour les experiences academiques, faut recuperer l'uuid du chapeau
+                    deja_injectee = model_object.uuid in experiences_injectees_uuid_set
                     if vient_d_epc or deja_injectee:
                         InjectionEPCCurriculum().injecter_selon_modele(
                             model_object,
                             admission.candidate,
                             admission.last_update_author,
                         )
+
+    @classmethod
+    def _retrieve_experiences_uuid_set(cls, candidate_id: int) -> Set[uuid.UUID]:
+        curriculum_injections = CurriculumEPCInjection.objects.filter(
+            person_id=candidate_id,
+            status__in=CurriculumEPCInjectionStatus.blocking_statuses_for_experience(),
+        ).values_list('experience_uuid', flat=True)
+
+        common_filter = Q(
+            type=EPCInjectionType.DEMANDE.name,
+            admission__candidate_id=candidate_id,
+            status__in=EPCInjectionStatus.blocking_statuses_for_experience(),
+        )
+        educational_uuids = DemandeEPCInjection.objects.filter(common_filter).annotate(
+            experience_uuid=F('admission__admissioneducationalvaluatedexperiences__educationalexperience_id')
+        ).exclude(experience_uuid__isnull=True).values_list('experience_uuid', flat=True)
+        professional_uuids = DemandeEPCInjection.objects.filter(common_filter).annotate(
+            experience_uuid=F('admission__admissionprofessionalvaluatedexperiences__professionalexperience_id')
+        ).exclude(experience_uuid__isnull=True).values_list('experience_uuid', flat=True)
+        secondaires_uuids = DemandeEPCInjection.objects.filter(
+            common_filter,
+            admission__training__educationgrouptype__name=TrainingType.BACHELOR.name,
+        ).annotate(
+            experience_uuid=Case(
+                When(
+                    admission__candidate__belgianhighschooldiploma__isnull=False,
+                    then=F('admission__candidate__belgianhighschooldiploma__uuid'),
+                ),
+                When(
+                    admission__candidate__highschooldiplomaalternative__isnull=False,
+                    then=F('admission__candidate__highschooldiplomaalternative__uuid'),
+                ),
+                When(
+                    admission__candidate__foreignhighschooldiploma__isnull=False,
+                    then=F('admission__candidate__foreignhighschooldiploma__uuid'),
+                ),
+                output_field=UUIDField(),
+            )
+        ).exclude(experience_uuid__isnull=True).values_list('experience_uuid', flat=True)
+        demande_injections = list(chain(educational_uuids, professional_uuids, secondaires_uuids))
+
+        return set(curriculum_injections) | set(demande_injections)
 
     @classmethod
     def entity_to_dict(cls, entity: EmplacementDocument) -> dict:
@@ -442,14 +490,6 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
         entity_id: PropositionIdentity,
     ) -> Union[GeneralEducationAdmission, DoctorateAdmission, ContinuingEducationAdmission]:
         try:
-            return cls.admission_model_class.objects.annotate(
-                secondaire_injectee_par_cv=Exists(
-                    CurriculumEPCInjection.objects.filter(
-                        type_experience=ExperienceType.HIGH_SCHOOL.name,
-                        person_id=OuterRef('candidate_id'),
-                        status__in=CurriculumEPCInjectionStatus.blocking_statuses_for_experience(),
-                    )
-                ),
-            ).get(uuid=entity_id.uuid)
+            return cls.admission_model_class.objects.get(uuid=entity_id.uuid)
         except cls.admission_model_class.DoesNotExist:
             raise PropositionNonTrouveeException
