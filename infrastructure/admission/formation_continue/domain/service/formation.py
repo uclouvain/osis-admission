@@ -297,7 +297,7 @@ class FormationContinueTranslator(IFormationContinueTranslator):
                 uclouvain_est_institution_reference=True,
                 inscription_web=True,
                 statut=ActiveStatusEnum.ACTIVE.name,
-                type=AnneeInscriptionFormationTranslator.OSIS_ADMISSION_EDUCATION_TYPES_MAPPING.get(
+                types=AnneeInscriptionFormationTranslator.OSIS_ADMISSION_EDUCATION_TYPES_MAPPING.get(
                     TypeFormation.FORMATION_CONTINUE.name
                 ),
             )

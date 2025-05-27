@@ -31,7 +31,7 @@ from typing import List, Optional, Set, Union
 
 from django.conf import settings
 from django.db import transaction
-from django.db.models import F, Value, CharField, Case, When, Q, UUIDField
+from django.db.models import F, Case, When, Q, UUIDField
 from django.utils.dateparse import parse_date, parse_datetime
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
@@ -224,8 +224,8 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
                 model_object.save(update_fields=fields)
                 if isinstance(model_object, OSIS_PROFILE_MODELS):
                     vient_d_epc = bool(getattr(model_object, 'external_id', ''))
-                    # TODO: pour les experiences academiques, faut recuperer l'uuid du chapeau
-                    deja_injectee = model_object.uuid in experiences_injectees_uuid_set
+                    object_uuid = getattr(model_object, 'educational_experience_uuid', model_object.uuid)
+                    deja_injectee = object_uuid in experiences_injectees_uuid_set
                     if vient_d_epc or deja_injectee:
                         InjectionEPCCurriculum().injecter_selon_modele(
                             model_object,
@@ -253,7 +253,7 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
         ).exclude(experience_uuid__isnull=True).values_list('experience_uuid', flat=True)
         secondaires_uuids = DemandeEPCInjection.objects.filter(
             common_filter,
-            admission__training__educationgrouptype__name=TrainingType.BACHELOR.name,
+            admission__training__education_group_type__name=TrainingType.BACHELOR.name,
         ).annotate(
             experience_uuid=Case(
                 When(
