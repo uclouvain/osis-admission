@@ -26,7 +26,7 @@
 from django.test import TestCase
 
 from admission.ddd.admission.doctorat.preparation.commands import (
-    CloturerPropositionParCddCommand,
+    PasserEtatATraiterDecisionCddCommand,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
@@ -42,7 +42,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist 
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     SituationPropositionNonCddException,
-    StatutChecklistDecisionCddDoitEtreDifferentClotureException,
 )
 from admission.ddd.admission.doctorat.preparation.test.factory.person import (
     PersonneConnueUclDTOFactory,
@@ -59,13 +58,13 @@ from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_
 )
 
 
-class TestCloturerPropositionParCdd(TestCase):
+class TestPasserEtatATraiterDecisionCdd(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
         cls.proposition_repository = PropositionInMemoryRepository()
         cls.message_bus = message_bus_in_memory_instance
-        cls.command = CloturerPropositionParCddCommand
+        cls.command = PasserEtatATraiterDecisionCddCommand
         for matricule in ['00321234', '00987890']:
             PersonneConnueUclInMemoryTranslator.personnes_connues_ucl.add(
                 PersonneConnueUclDTOFactory(matricule=matricule),
@@ -88,8 +87,8 @@ class TestCloturerPropositionParCdd(TestCase):
         statut_a_traiter = statuts_decision_cdd['A_TRAITER']
         statut_cloture = statuts_decision_cdd['CLOTURE']
 
-        self.proposition.checklist_actuelle.decision_cdd.statut = statut_a_traiter.statut
-        self.proposition.checklist_actuelle.decision_cdd.extra = statut_a_traiter.extra.copy()
+        self.proposition.checklist_actuelle.decision_cdd.statut = statut_cloture.statut
+        self.proposition.checklist_actuelle.decision_cdd.extra = statut_cloture.extra.copy()
 
         resultat = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
 
@@ -98,9 +97,9 @@ class TestCloturerPropositionParCdd(TestCase):
 
         # Vérifier la proposition
         proposition = self.proposition_repository.get(resultat)
-        self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.CLOTUREE)
-        self.assertEqual(proposition.checklist_actuelle.decision_cdd.statut, statut_cloture.statut)
-        self.assertEqual(proposition.checklist_actuelle.decision_cdd.extra, statut_cloture.extra)
+        self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.TRAITEMENT_FAC)
+        self.assertEqual(proposition.checklist_actuelle.decision_cdd.statut, statut_a_traiter.statut)
+        self.assertEqual(proposition.checklist_actuelle.decision_cdd.extra, statut_a_traiter.extra)
         self.assertEqual(proposition.auteur_derniere_modification, '00321234')
 
     def test_should_lever_exception_si_statut_non_conforme(self):
@@ -115,25 +114,3 @@ class TestCloturerPropositionParCdd(TestCase):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
                 self.assertIsInstance(context.exception.exceptions.pop(), SituationPropositionNonCddException)
-
-    def test_should_lever_exception_si_statut_checklist_invalide(self):
-        self.proposition.statut = ChoixStatutPropositionDoctorale.COMPLETEE_POUR_FAC
-
-        statuts_decision_cdd = ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT[OngletsChecklist.decision_cdd.name]
-
-        statuts_invalides = {
-            'CLOTURE',
-        }
-
-        for identifiant_statut in statuts_invalides:
-            statut = statuts_decision_cdd[identifiant_statut]
-            self.proposition.checklist_actuelle.decision_cdd.statut = statut.statut
-            self.proposition.checklist_actuelle.decision_cdd.extra = statut.extra.copy()
-
-            with self.assertRaises(MultipleBusinessExceptions) as context:
-                self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-
-            self.assertIsInstance(
-                context.exception.exceptions.pop(),
-                StatutChecklistDecisionCddDoitEtreDifferentClotureException,
-            )

@@ -610,6 +610,59 @@ class CloturerParCDDValidatorList(TwoStepsMultipleBusinessExceptionListValidator
 
 
 @attr.dataclass(frozen=True, slots=True)
+class PasserEtatATraiterDecisionCDDValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutPropositionDoctorale
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldCddPeutDonnerDecision(
+                statut=self.statut,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class PasserEtatPrisEnChargeDecisionCDDValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutPropositionDoctorale
+    checklist_decision_cdd: StatutChecklist
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldCddPeutDonnerDecision(
+                statut=self.statut,
+            ),
+            ShouldStatutChecklistEtreDifferentCloture(
+                checklist_decision_cdd=self.checklist_decision_cdd,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class PasserEtatACompleterParSicDecisionCDDValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutPropositionDoctorale
+    checklist_decision_cdd: StatutChecklist
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldCddPeutDonnerDecision(
+                statut=self.statut,
+            ),
+            ShouldStatutChecklistEtreDifferentCloture(
+                checklist_decision_cdd=self.checklist_decision_cdd,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
 class ApprouverParCDDValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     statut: ChoixStatutPropositionDoctorale
 

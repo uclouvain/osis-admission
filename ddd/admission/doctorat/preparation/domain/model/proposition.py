@@ -89,6 +89,9 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
     GestionnairePeutSoumettreAuSicLorsDeLaDecisionCDDValidatorList,
     ModifierStatutChecklistParcoursAnterieurValidatorList,
     ModifierTypeAdmissionValidatorList,
+    PasserEtatACompleterParSicDecisionCDDValidatorList,
+    PasserEtatATraiterDecisionCDDValidatorList,
+    PasserEtatPrisEnChargeDecisionCDDValidatorList,
     PropositionProjetDoctoralValidatorList,
     RedonnerLaMainAuCandidatValidatorList,
     RefuserParCDDValidatorList,
@@ -1215,5 +1218,40 @@ class Proposition(interface.RootEntity):
             statut=ChoixStatutChecklist.GEST_BLOCAGE,
             libelle=__('Closed'),
             extra={'decision': DecisionCDDEnum.CLOTURE.name},
+        )
+        self.auteur_derniere_modification = auteur_modification
+
+    def passer_etat_a_traiter_decision_cdd(self, auteur_modification):
+        PasserEtatATraiterDecisionCDDValidatorList(
+            statut=self.statut,
+        ).validate()
+        self.checklist_actuelle.decision_cdd = StatutChecklist(
+            statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
+            libelle=__('To be processed'),
+        )
+        self.auteur_derniere_modification = auteur_modification
+
+    def passer_etat_pris_en_charge_decision_cdd(self, auteur_modification):
+        PasserEtatPrisEnChargeDecisionCDDValidatorList(
+            statut=self.statut,
+            checklist_decision_cdd=self.checklist_actuelle.decision_cdd,
+        ).validate()
+
+        self.checklist_actuelle.decision_cdd = StatutChecklist(
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+            libelle=__('Taken in charge'),
+        )
+        self.auteur_derniere_modification = auteur_modification
+
+    def passer_etat_a_completer_par_sic_decision_cdd(self, auteur_modification):
+        PasserEtatACompleterParSicDecisionCDDValidatorList(
+            statut=self.statut,
+            checklist_decision_cdd=self.checklist_actuelle.decision_cdd,
+        ).validate()
+
+        self.checklist_actuelle.decision_cdd = StatutChecklist(
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+            libelle=__('To be completed by SIC'),
+            extra={'decision': DecisionCDDEnum.HORS_DECISION.name},
         )
         self.auteur_derniere_modification = auteur_modification

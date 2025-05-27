@@ -27,6 +27,8 @@ from django.test import TestCase
 
 from admission.ddd.admission.doctorat.preparation.commands import (
     CloturerPropositionParCddCommand,
+    PasserEtatACompleterParSicDecisionCddCommand,
+    PasserEtatATraiterDecisionCddCommand,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
@@ -59,13 +61,13 @@ from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_
 )
 
 
-class TestCloturerPropositionParCdd(TestCase):
+class TestPasserEtatACompleterParSicDecisionCdd(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
         cls.proposition_repository = PropositionInMemoryRepository()
         cls.message_bus = message_bus_in_memory_instance
-        cls.command = CloturerPropositionParCddCommand
+        cls.command = PasserEtatACompleterParSicDecisionCddCommand
         for matricule in ['00321234', '00987890']:
             PersonneConnueUclInMemoryTranslator.personnes_connues_ucl.add(
                 PersonneConnueUclDTOFactory(matricule=matricule),
@@ -86,7 +88,7 @@ class TestCloturerPropositionParCdd(TestCase):
         statuts_decision_cdd = ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT[OngletsChecklist.decision_cdd.name]
 
         statut_a_traiter = statuts_decision_cdd['A_TRAITER']
-        statut_cloture = statuts_decision_cdd['CLOTURE']
+        statut_a_completer_par_sic = statuts_decision_cdd['A_COMPLETER_PAR_SIC']
 
         self.proposition.checklist_actuelle.decision_cdd.statut = statut_a_traiter.statut
         self.proposition.checklist_actuelle.decision_cdd.extra = statut_a_traiter.extra.copy()
@@ -98,9 +100,9 @@ class TestCloturerPropositionParCdd(TestCase):
 
         # Vérifier la proposition
         proposition = self.proposition_repository.get(resultat)
-        self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.CLOTUREE)
-        self.assertEqual(proposition.checklist_actuelle.decision_cdd.statut, statut_cloture.statut)
-        self.assertEqual(proposition.checklist_actuelle.decision_cdd.extra, statut_cloture.extra)
+        self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.TRAITEMENT_FAC)
+        self.assertEqual(proposition.checklist_actuelle.decision_cdd.statut, statut_a_completer_par_sic.statut)
+        self.assertEqual(proposition.checklist_actuelle.decision_cdd.extra, statut_a_completer_par_sic.extra)
         self.assertEqual(proposition.auteur_derniere_modification, '00321234')
 
     def test_should_lever_exception_si_statut_non_conforme(self):

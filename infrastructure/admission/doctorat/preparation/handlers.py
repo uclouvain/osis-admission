@@ -524,6 +524,18 @@ COMMAND_HANDLERS = {
         proposition_repository=PropositionRepository(),
         historique=Historique(),
     ),
+    PasserEtatPrisEnChargeDecisionCddCommand: lambda msg_bus, cmd: passer_etat_pris_en_charge_decision_cdd(
+        cmd,
+        proposition_repository=PropositionRepository(),
+    ),
+    PasserEtatATraiterDecisionCddCommand: lambda msg_bus, cmd: passer_etat_a_traiter_decision_cdd(
+        cmd,
+        proposition_repository=PropositionRepository(),
+    ),
+    PasserEtatACompleterParSicDecisionCddCommand: lambda msg_bus, cmd: passer_etat_a_completer_par_sic_decision_cdd(
+        cmd,
+        proposition_repository=PropositionRepository(),
+    ),
     EnvoyerPropositionAuSicLorsDeLaDecisionCddCommand: (
         lambda msg_bus, cmd: envoyer_proposition_au_sic_lors_de_la_decision_cdd(
             cmd,

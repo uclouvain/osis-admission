@@ -78,6 +78,15 @@ from .modifier_type_admission_service import modifier_type_admission
 from .notifier_candidat_derogation_financabilite_service import (
     notifier_candidat_derogation_financabilite,
 )
+from .passer_etat_a_completer_par_sic_decision_cdd_service import (
+    passer_etat_a_completer_par_sic_decision_cdd,
+)
+from .passer_etat_a_traiter_decision_cdd_service import (
+    passer_etat_a_traiter_decision_cdd,
+)
+from .passer_etat_pris_en_charge_decision_cdd_service import (
+    passer_etat_pris_en_charge_decision_cdd,
+)
 from .recalculer_emplacements_documents_non_libres_proposition_service import (
     recalculer_emplacements_documents_non_libres_proposition,
 )

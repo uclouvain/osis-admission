@@ -629,6 +629,24 @@ class CloturerPropositionParCddCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
+class PasserEtatATraiterDecisionCddCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class PasserEtatPrisEnChargeDecisionCddCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class PasserEtatACompleterParSicDecisionCddCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
 class ModifierStatutChecklistParcoursAnterieurCommand(interface.CommandRequest):
     uuid_proposition: str
     statut: str
