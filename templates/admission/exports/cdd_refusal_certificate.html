@@ -26,32 +26,32 @@
 
 {% block extra_head %}
   <style>
-    #title {
-      text-align: center;
-    }
+      #title {
+          text-align: center;
+      }
 
-    #title h1 {
-      font-size: 1.5em;
-    }
+      #title h1 {
+          font-size: 1.5em;
+      }
 
-    #main-container dl {
-      margin-top: 2em;
-    }
+      #main-container dl {
+          margin-top: 2em;
+      }
 
-    footer {
-      padding: 20px 0;
-      height: 130px;
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      align-content: flex-end;
-    }
+      footer {
+          padding: 20px 0;
+          height: 130px;
+          width: 100%;
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-end;
+          align-content: flex-end;
+      }
 
-    #sedes {
-      height: 130px;
-      width: auto;
-    }
+      #sedes {
+          height: 130px;
+          width: auto;
+      }
 
   </style>
 {% endblock %}
@@ -74,18 +74,15 @@
     <p class="text-center">
       <em>
         {% blocktranslate trimmed %}
-          This document is an internal document containing the details of the faculty's decision.
+          This document is an internal document containing the details of the CDD's decision.
           Under no circumstances will it be sent in this form to the candidate. The candidate will receive a letter
-          from SIC containing the various details of the faculty's decision.
+          from SIC containing the various details of the CDD's decision.
         {% endblocktranslate %}
       </em>
     </p>
 
     <div id="title" class="mt-3">
-      <h1>
-        {% translate 'Faculty decision:' %}
-        {% block decision_title %}{% endblock %}
-      </h1>
+      <h1>{% translate 'CDD decision: refusal' %}</h1>
     </div>
 
     <p class="mt-3">
@@ -95,21 +92,26 @@
       {% display proposition.formation.sigle ' - ' proposition.formation.intitule %}
     </p>
 
-    {% block decision_content %}{% endblock %}
+    <dl>
+      <dt>{% translate 'Refusal reasons:' %}</dt>
+      <dd>
+        <ul>
+          {% for reason in proposition.motifs_refus %}
+            <li>{{ reason.motif }}</li>
+          {% endfor %}
+        </ul>
+      </dd>
+    </dl>
 
-    {% if fac_decision_comment.content %}
-      {% field_data _('Faculty comment for the SIC:') fac_decision_comment.content|linebreaks inline=True %}
+    {% if cdd_decision_comment.content %}
+      {% field_data _('CDD comment for the SIC') cdd_decision_comment.content|linebreaks inline=True %}
     {% else %}
-      {% field_data _('Faculty comment for the SIC:') '' inline=True %}
+      {% field_data _('CDD comment for the SIC') '' inline=True %}
     {% endif %}
 
     {% now 'd/m/Y' as today_date %}
 
-    <p class="mt-2">
-      {% blocktranslate trimmed with manager_first_name=manager.prenom manager_last_name=manager.nom date=today_date %}
-        For the jury president, {{ manager_first_name }} {{ manager_last_name }} on {{ date }}.
-      {% endblocktranslate %}
-    </p>
+    <p class="mt-2">{{ manager.prenom }} {{ manager.nom }}</p>
   </div>
 {% endblock %}
 

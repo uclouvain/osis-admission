@@ -536,13 +536,7 @@ class CddDecisionSendToSicViewTestCase(TestCase):
         self.admission.cdd_refusal_certificate = []
         self.admission.save()
 
-        # Simulate a transfer from the SIC to the CDD
-        history_entry = HistoryEntryFactory(
-            object_uuid=self.admission.uuid,
-            tags=['proposition', 'cdd-decision', 'send-to-cdd', 'status-changed'],
-        )
-
-        # Simulate a comment from the FAC
+        # Simulate a comment from the CDD
         comment_entry = CommentEntryFactory(
             object_uuid=self.admission.uuid,
             tags=['decision_cdd', 'CDD_FOR_SIC'],
@@ -595,21 +589,16 @@ class CddDecisionSendToSicViewTestCase(TestCase):
         self.assertIn('proposition', pdf_context)
         self.assertEqual(pdf_context['proposition'].uuid, self.admission.uuid)
 
-        self.assertIn('fac_decision_comment', pdf_context)
-        self.assertEqual(pdf_context['fac_decision_comment'], comment_entry)
-
-        self.assertIn('sic_to_fac_history_entry', pdf_context)
-        self.assertEqual(pdf_context['sic_to_fac_history_entry'], history_entry)
+        self.assertIn('cdd_decision_comment', pdf_context)
+        self.assertEqual(pdf_context['cdd_decision_comment'], comment_entry)
 
         self.assertIn('manager', pdf_context)
         self.assertEqual(pdf_context['manager'].matricule, self.fac_manager_user.person.global_id)
 
         # Check that an entry in the history has been created
-        history_entries: List[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.admission.uuid).order_by(
-            '-id'
-        )
+        history_entries: List[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.admission.uuid)
 
-        self.assertEqual(len(history_entries), 2)
+        self.assertEqual(len(history_entries), 1)
 
         history_entry = history_entries[0]
 
@@ -840,13 +829,7 @@ class CddRefusalDecisionViewTestCase(TestCase):
 
         refusal_reason = DoctorateRefusalReasonFactory()
 
-        # Simulate a transfer from the SIC to the CDD
-        history_entry = HistoryEntryFactory(
-            object_uuid=self.admission.uuid,
-            tags=['proposition', 'cdd-decision', 'send-to-cdd', 'status-changed'],
-        )
-
-        # Simulate a comment from the FAC
+        # Simulate a comment from the CDD
         comment_entry = CommentEntryFactory(
             object_uuid=self.admission.uuid,
             tags=['decision_cdd', 'CDD_FOR_SIC'],
@@ -898,19 +881,16 @@ class CddRefusalDecisionViewTestCase(TestCase):
         self.assertIn('proposition', pdf_context)
         self.assertEqual(pdf_context['proposition'].uuid, self.admission.uuid)
 
-        self.assertIn('fac_decision_comment', pdf_context)
-        self.assertEqual(pdf_context['fac_decision_comment'], comment_entry)
-
-        self.assertIn('sic_to_fac_history_entry', pdf_context)
-        self.assertEqual(pdf_context['sic_to_fac_history_entry'], history_entry)
+        self.assertIn('cdd_decision_comment', pdf_context)
+        self.assertEqual(pdf_context['cdd_decision_comment'], comment_entry)
 
         self.assertIn('manager', pdf_context)
         self.assertEqual(pdf_context['manager'].matricule, self.fac_manager_user.person.global_id)
 
         # Check that an entry in the history has been created
-        history_entries = HistoryEntry.objects.filter(object_uuid=self.admission.uuid).order_by('-id')
+        history_entries = HistoryEntry.objects.filter(object_uuid=self.admission.uuid)
 
-        self.assertEqual(len(history_entries), 2)
+        self.assertEqual(len(history_entries), 1)
         history_entry = history_entries[0]
 
         self.assertEqual(

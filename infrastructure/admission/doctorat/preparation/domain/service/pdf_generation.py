@@ -211,31 +211,20 @@ class PDFGeneration(IPDFGeneration):
             unites_enseignement_translator,
         )
 
-        fac_decision_comment = CommentEntry.objects.filter(
+        cdd_decision_comment = CommentEntry.objects.filter(
             object_uuid=proposition_dto.uuid,
             tags=[OngletsChecklist.decision_cdd.name, 'CDD_FOR_SIC'],
         ).first()
 
-        sic_to_fac_history_entry = (
-            HistoryEntry.objects.filter(
-                object_uuid=proposition_dto.uuid,
-                tags__contains=['proposition', 'cdd-decision', 'send-to-cdd', 'status-changed'],
-            )
-            .order_by('-created')
-            .first()
-        )
-
         # Generate the pdf
         token = admission_generate_pdf(
             admission=None,
-            template='admission/exports/fac_refusal_certificate.html',
+            template='admission/exports/cdd_refusal_certificate.html',
             filename='cdd_refusal_certificate.pdf',
             context={
                 'proposition': proposition_dto,
                 'manager': gestionnaire,
-                'fac_decision_comment': fac_decision_comment,
-                'sic_to_fac_history_entry': sic_to_fac_history_entry,
-                'for_doctorate': True,
+                'cdd_decision_comment': cdd_decision_comment,
             },
             stylesheets=WeasyprintStylesheets.get_stylesheets(),
             author=gestionnaire.matricule,

@@ -1075,6 +1075,9 @@ msgstr ""
 msgid "CDD decision"
 msgstr ""
 
+msgid "CDD decision: refusal"
+msgstr ""
+
 msgid "CDD process"
 msgstr ""
 
@@ -6660,6 +6663,13 @@ msgstr ""
 msgid ""
 "This document does not represent a commitment of financial support from "
 "UCLouvain."
+msgstr ""
+
+msgid ""
+"This document is an internal document containing the details of the CDD's "
+"decision. Under no circumstances will it be sent in this form to the "
+"candidate. The candidate will receive a letter from SIC containing the "
+"various details of the CDD's decision."
 msgstr ""
 
 msgid ""

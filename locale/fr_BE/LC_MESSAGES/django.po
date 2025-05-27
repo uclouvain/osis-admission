@@ -1185,6 +1185,9 @@ msgstr "Commentaire de la CDD pour le SIC"
 msgid "CDD decision"
 msgstr "Décision CDD"
 
+msgid "CDD decision: refusal"
+msgstr "Décision de la CDD : refus"
+
 msgid "CDD process"
 msgstr "Traitement de la CDD"
 
@@ -7417,6 +7420,17 @@ msgid ""
 msgstr ""
 "Ce document ne représente pas un engagement de prise en charge ou d'aide "
 "financière de la part de l'UCLouvain."
+
+msgid ""
+"This document is an internal document containing the details of the CDD's "
+"decision. Under no circumstances will it be sent in this form to the "
+"candidate. The candidate will receive a letter from SIC containing the "
+"various details of the CDD's decision."
+msgstr ""
+"Ce document est un document interne qui reprend les éléments de la décision "
+"de la CDD. Il n’est en aucun cas transmis sous cette forme au candidat ou à "
+"la candidate. Le ou la candidat·e recevra un courrier de SIC qui insérera "
+"les divers éléments de la décision de la CDD."
 
 msgid ""
 "This document is an internal document containing the details of the "
