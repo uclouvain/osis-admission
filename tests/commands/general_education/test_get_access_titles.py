@@ -87,6 +87,7 @@ from infrastructure.messages_bus import message_bus_instance
 from osis_profile import BE_ISO_CODE
 from osis_profile.models.enums.curriculum import Result
 from osis_profile.models.enums.education import ForeignDiplomaTypes
+from osis_profile.tests.factories.exam import ExamFactory
 from reference.tests.factories.diploma_title import DiplomaTitleFactory
 
 
@@ -459,7 +460,7 @@ class GetAccessTitlesViewTestCase(TestCase):
 
         self.assertEqual(len(access_titles), 0)
 
-        high_school_diploma_alternative.first_cycle_admission_exam = ['file.pdf']
+        high_school_diploma_alternative.certificate = ['file.pdf']
         high_school_diploma_alternative.save()
 
         access_titles = message_bus_instance.invoke(
@@ -540,6 +541,60 @@ class GetAccessTitlesViewTestCase(TestCase):
         )
 
         self.assertEqual(len(access_titles), 0)
+
+    def test_get_access_title_with_exam(self):
+        access_titles: Dict[str, TitreAccesSelectionnableDTO]
+
+        general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
+            training=self.training,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+
+        # Exam
+        exam = ExamFactory(
+            person=general_admission.candidate,
+            year=self.academic_years[1],
+            education_group_year_exam__education_group_year=general_admission.training,
+        )
+
+        access_titles = message_bus_instance.invoke(
+            RecupererTitresAccesSelectionnablesPropositionQuery(
+                uuid_proposition=general_admission.uuid,
+            )
+        )
+
+        self.assertEqual(len(access_titles), 1)
+        self.assertIn(str(exam.uuid), access_titles)
+
+        self.assertEqual(access_titles[str(exam.uuid)].uuid_experience, str(exam.uuid))
+        self.assertEqual(
+            access_titles[str(exam.uuid)].type_titre,
+            TypeTitreAccesSelectionnable.EXAMENS.name,
+        )
+        self.assertEqual(access_titles[str(exam.uuid)].annee, 2022)
+        self.assertIs(access_titles[str(exam.uuid)].selectionne, False)
+
+        # Only retrieve selected access titles if specified
+        access_titles = message_bus_instance.invoke(
+            RecupererTitresAccesSelectionnablesPropositionQuery(
+                uuid_proposition=general_admission.uuid,
+                seulement_selectionnes=True,
+            )
+        )
+
+        self.assertEqual(len(access_titles), 0)
+
+        general_admission.is_exam_access_title = True
+        general_admission.save(update_fields=['is_exam_access_title'])
+
+        access_titles = message_bus_instance.invoke(
+            RecupererTitresAccesSelectionnablesPropositionQuery(
+                uuid_proposition=general_admission.uuid,
+                seulement_selectionnes=True,
+            )
+        )
+
+        self.assertEqual(len(access_titles), 1)
 
     def test_get_access_title_with_internal_experience(self):
         access_titles: Dict[str, TitreAccesSelectionnableDTO]

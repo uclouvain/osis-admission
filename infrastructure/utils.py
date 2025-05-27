@@ -345,8 +345,16 @@ def get_document_from_identifier(
                 obj = getattr(admission.candidate, 'foreignhighschooldiploma', None)
                 field = CORRESPONDANCE_CHAMPS_ETUDES_SECONDAIRES_ETRANGERES[domain_identifier]
             elif domain_identifier in CORRESPONDANCE_CHAMPS_ETUDES_SECONDAIRES_ALTERNATIVES:
-                obj = getattr(admission.candidate, 'highschooldiplomaalternative', None)
+                obj = admission.candidate.exams.filter(type=ExamTypes.PREMIER_CYCLE.name).first()
                 field = CORRESPONDANCE_CHAMPS_ETUDES_SECONDAIRES_ALTERNATIVES[domain_identifier]
+
+        elif base_identifier == OngletsDemande.EXAMS.name:
+            # EXAMS.[DOMAIN_IDENTIFIER]
+            obj = admission.candidate.exams.filter(
+                type=ExamTypes.FORMATION.name,
+                education_group_year_exam__education_group_year=admission.training,
+            ).first()
+            field = CORRESPONDANCE_CHAMPS_EXAMENS.get(domain_identifier)
 
         elif base_identifier == OngletsDemande.LANGUES.name:
             # LANGUES.[CODE_LANGUE].[DOMAIN_IDENTIFIER]
@@ -494,7 +502,11 @@ CORRESPONDANCE_CHAMPS_ETUDES_SECONDAIRES_ETRANGERES = {
 }
 
 CORRESPONDANCE_CHAMPS_ETUDES_SECONDAIRES_ALTERNATIVES = {
-    'ALTERNATIVE_SECONDAIRES_EXAMEN_ADMISSION_PREMIER_CYCLE': 'first_cycle_admission_exam',
+    'ALTERNATIVE_SECONDAIRES_EXAMEN_ADMISSION_PREMIER_CYCLE': 'certificate',
+}
+
+CORRESPONDANCE_CHAMPS_EXAMENS = {
+    'ATTESTATION_DE_REUSSITE_CONCOURS_D_ENTREE_OU_D_ADMISSION': 'certificate',
 }
 
 CORRESPONDANCE_CHAMPS_CONNAISSANCES_LANGUES = {
