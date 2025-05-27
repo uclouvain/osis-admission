@@ -103,11 +103,7 @@ class ResumeProposition(interface.DomainService):
 
         resume_candidat_dto = profil_candidat_translator.recuperer_toutes_informations_candidat(
             matricule=proposition_dto.matricule_candidat,
-            formation=(
-                proposition_dto.doctorat.type
-                if isinstance(proposition_dto, PropositionDoctoraleDTO)
-                else proposition_dto.formation.type
-            ),
+            formation=proposition_dto.formation,
             annee_courante=annee_courante,
             uuid_proposition=proposition_dto.uuid,
             experiences_cv_recuperees=experiences_cv_recuperees,
@@ -123,6 +119,7 @@ class ResumeProposition(interface.DomainService):
             connaissances_langues=resume_candidat_dto.connaissances_langues,
             groupe_supervision=groupe_supervision_dto,
             questions_specifiques_dtos=questions_specifiques_dtos,
+            examens=resume_candidat_dto.examens,
         )
 
     @classmethod
@@ -148,13 +145,27 @@ class ResumeProposition(interface.DomainService):
         resume_candidat_dto = profil_candidat_translator.recuperer_toutes_informations_candidat(
             matricule=proposition_dto.matricule_candidat,
             formation=(
-                proposition_dto.doctorat.type
+                proposition_dto.doctorat
                 if isinstance(proposition_dto, PropositionDoctoraleDTO)
-                else proposition_dto.formation.type
+                else proposition_dto.formation
             ),
             annee_courante=annee_courante,
             uuid_proposition=proposition_dto.uuid,
             experiences_cv_recuperees=experiences_cv_recuperees,
+        )
+
+        examen_dto = profil_candidat_translator.get_examen(
+            matricule=proposition_dto.matricule_candidat,
+            formation_sigle=(
+                proposition_dto.doctorat.sigle
+                if isinstance(proposition_dto, PropositionDoctoraleDTO)
+                else proposition_dto.formation.sigle
+            ),
+            formation_annee=(
+                proposition_dto.doctorat.annee
+                if isinstance(proposition_dto, PropositionDoctoraleDTO)
+                else proposition_dto.formation.annee
+            ),
         )
 
         return ResumePropositionGestionnaireDTO(
@@ -167,6 +178,7 @@ class ResumeProposition(interface.DomainService):
             connaissances_langues=resume_candidat_dto.connaissances_langues,
             groupe_supervision=groupe_supervision_dto,
             questions_specifiques_dtos=questions_specifiques_dtos,
+            examens=examen_dto,
         )
 
     @classmethod
