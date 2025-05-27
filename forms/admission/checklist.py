@@ -469,6 +469,7 @@ class CommonApprovalForm(forms.ModelForm):
             attrs={
                 'data-token-separators': '[{}]'.format(SEPARATOR),
                 'data-tags': 'true',
+                'data-result-html': 'true',
                 'data-allow-clear': 'false',
                 **DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
             },
@@ -892,6 +893,7 @@ class CommonSicDecisionApprovalForm(forms.ModelForm):
                 'data-token-separators': '[{}]'.format(SEPARATOR),
                 'data-tags': 'true',
                 'data-allow-clear': 'false',
+                'data-result-html': 'true',
                 **DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
             },
         ),
