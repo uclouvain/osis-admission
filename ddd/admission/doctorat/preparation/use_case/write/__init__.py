@@ -31,6 +31,7 @@ from .approuver_inscription_par_sic_service import approuver_inscription_par_sic
 from .approuver_proposition_par_cdd_service import approuver_proposition_par_cdd
 from .approuver_proposition_par_pdf_service import approuver_proposition_par_pdf
 from .approuver_proposition_service import approuver_proposition
+from .cloturer_proposition_par_cdd_service import cloturer_proposition_par_cdd
 from .completer_comptabilite_proposition_service import (
     completer_comptabilite_proposition,
 )
@@ -76,6 +77,15 @@ from .modifier_statut_checklist_parcours_anterieur_service import (
 from .modifier_type_admission_service import modifier_type_admission
 from .notifier_candidat_derogation_financabilite_service import (
     notifier_candidat_derogation_financabilite,
+)
+from .passer_etat_a_completer_par_sic_decision_cdd_service import (
+    passer_etat_a_completer_par_sic_decision_cdd,
+)
+from .passer_etat_a_traiter_decision_cdd_service import (
+    passer_etat_a_traiter_decision_cdd,
+)
+from .passer_etat_pris_en_charge_decision_cdd_service import (
+    passer_etat_pris_en_charge_decision_cdd,
 )
 from .recalculer_emplacements_documents_non_libres_proposition_service import (
     recalculer_emplacements_documents_non_libres_proposition,

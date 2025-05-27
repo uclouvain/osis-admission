@@ -26,14 +26,12 @@
 from django.test import TestCase
 
 from admission.ddd.admission.doctorat.preparation.commands import (
-    RefuserPropositionParCddCommand,
+    PasserEtatATraiterDecisionCddCommand,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
-    ChoixStatutChecklist,
-    DecisionCDDEnum,
     OngletsChecklist,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
@@ -44,12 +42,10 @@ from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist 
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     SituationPropositionNonCddException,
-    StatutChecklistDecisionCddDoitEtreDifferentClotureException,
 )
 from admission.ddd.admission.doctorat.preparation.test.factory.person import (
     PersonneConnueUclDTOFactory,
 )
-from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
@@ -62,13 +58,13 @@ from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_
 )
 
 
-class TestRefuserPropositionParFaculte(TestCase):
+class TestPasserEtatATraiterDecisionCdd(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
         cls.proposition_repository = PropositionInMemoryRepository()
         cls.message_bus = message_bus_in_memory_instance
-        cls.command = RefuserPropositionParCddCommand
+        cls.command = PasserEtatATraiterDecisionCddCommand
         for matricule in ['00321234', '00987890']:
             PersonneConnueUclInMemoryTranslator.personnes_connues_ucl.add(
                 PersonneConnueUclDTOFactory(matricule=matricule),
@@ -83,10 +79,16 @@ class TestRefuserPropositionParFaculte(TestCase):
             'gestionnaire': '00321234',
         }
 
-    def test_should_etre_ok_si_traitement_fac_et_motif_connu(self):
+    def test_should_etre_ok_si_statuts_corrects(self):
         self.proposition.statut = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC
-        self.proposition.motifs_refus = [MotifRefusIdentity(uuid='uuid-nouveau-motif-refus')]
-        self.proposition.autres_motifs_refus = []
+
+        statuts_decision_cdd = ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT[OngletsChecklist.decision_cdd.name]
+
+        statut_a_traiter = statuts_decision_cdd['A_TRAITER']
+        statut_cloture = statuts_decision_cdd['CLOTURE']
+
+        self.proposition.checklist_actuelle.decision_cdd.statut = statut_cloture.statut
+        self.proposition.checklist_actuelle.decision_cdd.extra = statut_cloture.extra.copy()
 
         resultat = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
 
@@ -95,22 +97,10 @@ class TestRefuserPropositionParFaculte(TestCase):
 
         # Vérifier la proposition
         proposition = self.proposition_repository.get(resultat)
-        self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.RETOUR_DE_FAC)
-        self.assertEqual(proposition.checklist_actuelle.decision_cdd.statut, ChoixStatutChecklist.GEST_BLOCAGE)
-        self.assertEqual(
-            proposition.checklist_actuelle.decision_cdd.extra,
-            {'decision': DecisionCDDEnum.EN_DECISION.name},
-        )
-
-    def test_should_etre_ok_si_completee_pour_fac_et_motif_libre(self):
-        self.proposition.statut = ChoixStatutPropositionDoctorale.COMPLETEE_POUR_FAC
-        self.proposition.motifs_refus = []
-        self.proposition.autres_motifs_refus = ['Autre motif']
-
-        resultat = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-
-        # Vérifier résultat de la commande
-        self.assertEqual(resultat.uuid, 'uuid-SC3DP-confirmee')
+        self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.TRAITEMENT_FAC)
+        self.assertEqual(proposition.checklist_actuelle.decision_cdd.statut, statut_a_traiter.statut)
+        self.assertEqual(proposition.checklist_actuelle.decision_cdd.extra, statut_a_traiter.extra)
+        self.assertEqual(proposition.auteur_derniere_modification, '00321234')
 
     def test_should_lever_exception_si_statut_non_conforme(self):
         statuts_invalides = ChoixStatutPropositionDoctorale.get_names_except(
@@ -124,26 +114,3 @@ class TestRefuserPropositionParFaculte(TestCase):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
                 self.assertIsInstance(context.exception.exceptions.pop(), SituationPropositionNonCddException)
-
-    def test_should_lever_exception_si_statut_checklist_invalide(self):
-        self.proposition.statut = ChoixStatutPropositionDoctorale.COMPLETEE_POUR_FAC
-        self.proposition.autres_motifs_refus = ['Autre motif']
-
-        statuts_decision_cdd = ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT[OngletsChecklist.decision_cdd.name]
-
-        statuts_invalides = {
-            'CLOTURE',
-        }
-
-        for identifiant_statut in statuts_invalides:
-            statut = statuts_decision_cdd[identifiant_statut]
-            self.proposition.checklist_actuelle.decision_cdd.statut = statut.statut
-            self.proposition.checklist_actuelle.decision_cdd.extra = statut.extra.copy()
-
-            with self.assertRaises(MultipleBusinessExceptions) as context:
-                self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-
-            self.assertIsInstance(
-                context.exception.exceptions.pop(),
-                StatutChecklistDecisionCddDoitEtreDifferentClotureException,
-            )

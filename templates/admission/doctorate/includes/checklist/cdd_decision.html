@@ -33,7 +33,6 @@
     {% has_perm 'admission.checklist_faculty_decision_transfer_to_fac' as can_transfer_to_cdd %}
     {% has_perm 'admission.checklist_faculty_decision_transfer_to_sic_without_decision' as can_transfer_to_sic %}
     {% has_perm 'admission.checklist_change_faculty_decision' as can_change_cdd_decision %}
-    {% not_bool can_change_cdd_decision as cannot_change_cdd_decision %}
 
     {% if in_sic_statuses %}
       {% field_data _('Dossier') _('The dossier is currently in SIC') %}
@@ -68,7 +67,6 @@
 
     {% if original_admission.status == 'A_COMPLETER_POUR_FAC' %}
       {% translate "Documents requested by the CDD are still expected from the candidate. The application could be sent to the SIC once they have been received." as cannot_transfer_message %}
-      {% translate "Documents requested by the CDD are still expected from the candidate." as to_complete_tooltip %}
     {% elif not can_transfer_to_sic %}
       {% blocktranslate with statuses=cdd_statuses_for_transfer asvar cannot_transfer_message trimmed %}
         The global status of the application must be one of the following in order to submit the dossier to the SIC: {{ statuses }}.
@@ -93,7 +91,7 @@
     <div class="mt-1" style="margin-bottom: 5px;"><strong>{% translate 'CDD process' %}</strong></div>
     <div class="form-group btn-group status-group" role="group">
       {% if can_change_cdd_decision %}
-        {% if current.statut == 'GEST_REUSSITE' or current.statut == 'GEST_BLOCAGE' and current.extra.decision == 'EN_DECISION' %}
+        {% if current.statut == 'GEST_REUSSITE' or current.statut == 'GEST_BLOCAGE' and current.extra.decision == 'EN_DECISION' or current.statut == 'GEST_BLOCAGE' and current.extra.decision == 'CLOTURE' %}
           {% concat '#cdd-decision-confirm-modal-INITIAL_CANDIDAT' as cdd_initial_confirm_modal %}
           {% concat '#cdd-decision-confirm-modal-GEST_EN_COURS' as cdd_in_progress_confirm_modal %}
           {% concat '#cdd-decision-confirm-modal-GEST_BLOCAGE' as cdd_to_be_completed_confirm_modal %}
@@ -102,17 +100,17 @@
         {% concat '#cdd-decision-refusal-modal' as cdd_to_be_completed_refusal_modal %}
         {% concat '#cdd-decision-approval-modal' as cdd_in_progress_approval_modal %}
 
-        {% url view.base_namespace|add:':cdd-decision-change-status' uuid=view.kwargs.uuid status='INITIAL_CANDIDAT' as change_status_url_initial %}
-        {% url view.base_namespace|add:':cdd-decision-change-status' uuid=view.kwargs.uuid status='GEST_EN_COURS' as change_status_url_in_progress %}
-        {% url view.base_namespace|add:':cdd-decision-change-status' uuid=view.kwargs.uuid status='GEST_BLOCAGE' as base_change_status_url_to_be_completed_sic %}
-        {% concat base_change_status_url_to_be_completed_sic '?decision=HORS_DECISION' as change_status_url_to_be_completed_sic %}
+        {% url view.base_namespace|add:':cdd-decision-to-processed' uuid=view.kwargs.uuid as change_status_url_initial %}
+        {% url view.base_namespace|add:':cdd-decision-taken-in-charge' uuid=view.kwargs.uuid as change_status_url_in_progress %}
+        {% url view.base_namespace|add:':cdd-decision-to-complete-by-sic' uuid=view.kwargs.uuid as change_status_url_to_be_completed_sic %}
       {% endif %}
 
-      {% checklist_state_button tab='decision_cdd' label=_("To be processed") icon='user' state='INITIAL_CANDIDAT' class='info' disabled=cannot_change_cdd_decision tooltip=to_complete_tooltip htmx_post=change_status_url_initial open_modal=cdd_initial_confirm_modal %}
-      {% checklist_state_button tab='decision_cdd' label=_("Taken in charge") icon='pencil' state='GEST_EN_COURS' class='warning' disabled=cannot_change_cdd_decision tooltip=to_complete_tooltip htmx_post=change_status_url_in_progress open_modal=cdd_in_progress_confirm_modal %}
-      {% checklist_state_button tab='decision_cdd' label=_("To be completed by SIC") icon='circle-stop' state='GEST_BLOCAGE' decision='HORS_DECISION' class='danger' htmx_post=change_status_url_to_be_completed_sic disabled=cannot_change_cdd_decision tooltip=to_complete_tooltip open_modal=cdd_to_be_completed_confirm_modal %}
-      {% checklist_state_button tab='decision_cdd' label=_("Refusal") icon='circle-stop' state='GEST_BLOCAGE' decision='EN_DECISION' class='danger' disabled=cannot_change_cdd_decision tooltip=to_complete_tooltip open_modal=cdd_to_be_completed_refusal_modal %}
-      {% checklist_state_button tab='decision_cdd' label=_("Approval") icon='check' state='GEST_REUSSITE' class='success' disabled=cannot_change_cdd_decision tooltip=to_complete_tooltip open_modal=cdd_in_progress_approval_modal %}
+      {% checklist_state_button tab='decision_cdd' label=_("To be processed") icon='user' state='INITIAL_CANDIDAT' class='info' disabled=cdd_decision_to_processed_status_disabled tooltip=cdd_decision_to_processed_status_tooltip htmx_post=change_status_url_initial open_modal=cdd_initial_confirm_modal %}
+      {% checklist_state_button tab='decision_cdd' label=_("Taken in charge") icon='pencil' state='GEST_EN_COURS' class='warning' disabled=cdd_decision_statuses_disabled tooltip=cdd_decision_statuses_tooltip htmx_post=change_status_url_in_progress open_modal=cdd_in_progress_confirm_modal %}
+      {% checklist_state_button tab='decision_cdd' label=_("To be completed by SIC") icon='circle-stop' state='GEST_BLOCAGE' decision='HORS_DECISION' class='danger' htmx_post=change_status_url_to_be_completed_sic disabled=cdd_decision_statuses_disabled tooltip=cdd_decision_statuses_tooltip open_modal=cdd_to_be_completed_confirm_modal %}
+      {% checklist_state_button tab='decision_cdd' label=_("Closed") icon='circle-stop' state='GEST_BLOCAGE' decision='CLOTURE' class='danger' disabled=cdd_decision_statuses_disabled tooltip=cdd_decision_statuses_tooltip open_modal='#cdd-decision-closed-modal' %}
+      {% checklist_state_button tab='decision_cdd' label=_("Refusal") icon='circle-stop' state='GEST_BLOCAGE' decision='EN_DECISION' class='danger' disabled=cdd_decision_statuses_disabled tooltip=cdd_decision_statuses_tooltip open_modal=cdd_to_be_completed_refusal_modal %}
+      {% checklist_state_button tab='decision_cdd' label=_("Approval") icon='check' state='GEST_REUSSITE' class='success' disabled=cdd_decision_statuses_disabled tooltip=cdd_decision_statuses_tooltip open_modal=cdd_in_progress_approval_modal %}
     </div>
 
     {% if current.statut == 'GEST_REUSSITE' %}
@@ -124,7 +122,7 @@
       {% endif %}
     {% endif %}
 
-    {% if current.statut == 'GEST_BLOCAGE' and current.extra.decision == 'EN_DECISION'|enum_display:'DecisionCDDEnum' %}
+    {% if current.statut == 'GEST_BLOCAGE' and current.extra.decision == 'EN_DECISION' %}
       <div class="tab-content">
         <div role="tabpanel" class="tab-pane active panel panel-default" id="cdd-decision-refusal-details">
           <div class="panel-heading flex-content align-items-baseline">

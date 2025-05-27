@@ -73,6 +73,7 @@ from ._should_informations_checklist_etre_completees import (
     ShouldSicPeutDonnerDecision,
     ShouldSICPeutSoumettreACddLorsDeLaDecisionCdd,
     ShouldSpecifierMotifRefusCDD,
+    ShouldStatutChecklistEtreDifferentCloture,
     ShouldStatutsChecklistExperiencesEtreValidees,
     ShouldTitreAccesEtreSelectionne,
 )
@@ -163,4 +164,5 @@ __all__ = [
     "ShouldPeutDemanderCandidatModificationCaFacultaire",
     "ShouldPropositionStatutEtreCorrectPourSoumissionCA",
     "ShouldStatutsChecklistExperiencesEtreValidees",
+    "ShouldStatutChecklistEtreDifferentCloture",
 ]
