@@ -2178,6 +2178,18 @@ msgstr ""
 msgid "Doctorate enrolment applications"
 msgstr ""
 
+msgid "Doctorate refusal reason"
+msgstr ""
+
+msgid "Doctorate refusal reason categories"
+msgstr ""
+
+msgid "Doctorate refusal reason category"
+msgstr ""
+
+msgid "Doctorate refusal reasons"
+msgstr ""
+
 msgid "Doctorate thesis field"
 msgstr ""
 
@@ -2468,9 +2480,6 @@ msgstr ""
 msgid ""
 "Email sent to the candidate when the CDD approves a doctorate admission of a "
 "candidate with a Belgian diploma."
-msgstr ""
-
-msgid "Email sent to the candidate when the CDD refuses a doctorate admission."
 msgstr ""
 
 msgid ""
@@ -3732,6 +3741,9 @@ msgstr ""
 
 msgid ""
 "Is your admission request linked with a FNRS, FRIA, FRESH or CSC application?"
+msgstr ""
+
+msgid "It is not possible to go from the \"Closed\" status to this status."
 msgstr ""
 
 msgid ""
@@ -5189,6 +5201,9 @@ msgstr "Faculty dispensation refusal"
 msgid "REFUS_DIRECTION"
 msgstr ""
 
+msgid "REFUS_DOCTORAT"
+msgstr "Doctorate refusal"
+
 msgid "REFUS_DOSSIER_TARDIF"
 msgstr ""
 
@@ -5294,6 +5309,9 @@ msgid "Refusal certificate of SIC"
 msgstr ""
 
 msgid "Refusal certificate of faculty"
+msgstr ""
+
+msgid "Refusal certificate of the CDD"
 msgstr ""
 
 msgid "Refusal document link"
@@ -6188,6 +6206,11 @@ msgstr ""
 msgid ""
 "The closing of the application has important consequences (canceling the "
 "requested documents, status reset, etc). Do you confirm the closing?"
+msgstr ""
+
+msgid ""
+"The closing of the application has important consequences (transfer of the "
+"application to the SIC, status reset, etc). Do you confirm the closing?"
 msgstr ""
 
 #, python-format

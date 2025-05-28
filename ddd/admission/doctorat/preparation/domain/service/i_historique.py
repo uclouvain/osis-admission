@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,14 +26,21 @@
 from email.message import EmailMessage
 from typing import Optional
 
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import (
     GroupeDeSupervision,
     SignataireIdentity,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition, PropositionIdentity
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    Proposition,
+    PropositionIdentity,
+)
 from admission.ddd.admission.doctorat.preparation.dtos import AvisDTO
-from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
+from admission.ddd.admission.domain.model.enums.authentification import (
+    EtatAuthentificationParcours,
+)
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
 from osis_common.ddd import interface
 
@@ -138,7 +145,7 @@ class IHistorique(interface.DomainService):
         raise NotImplementedError
 
     @classmethod
-    def historiser_refus_cdd(cls, proposition: Proposition, gestionnaire: PersonneConnueUclDTO, message: EmailMessage):
+    def historiser_refus_cdd(cls, proposition: Proposition, gestionnaire: PersonneConnueUclDTO):
         raise NotImplementedError
 
     @classmethod
@@ -148,6 +155,10 @@ class IHistorique(interface.DomainService):
         gestionnaire: PersonneConnueUclDTO,
         message: EmailMessage,
     ):
+        raise NotImplementedError
+
+    @classmethod
+    def historiser_cloture_cdd(cls, proposition: Proposition, gestionnaire: str):
         raise NotImplementedError
 
     @classmethod
@@ -215,6 +226,15 @@ class IHistorique(interface.DomainService):
         gestionnaire: str,
         message: EmailMessage,
         uuid_experience: str,
+    ):
+        raise NotImplementedError
+
+    @classmethod
+    def historiser_specification_motifs_refus_sic(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+        statut_original: ChoixStatutPropositionDoctorale,
     ):
         raise NotImplementedError
 

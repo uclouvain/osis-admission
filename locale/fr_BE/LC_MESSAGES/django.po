@@ -2368,6 +2368,18 @@ msgstr "Formation doctorale"
 msgid "Doctorate enrolment applications"
 msgstr "Demandes d'inscription en doctorat"
 
+msgid "Doctorate refusal reason"
+msgstr "Motif de refus pour doctorat"
+
+msgid "Doctorate refusal reason categories"
+msgstr "Catégories des motifs de refus pour doctorat"
+
+msgid "Doctorate refusal reason category"
+msgstr "Catégorie d'un motif de refus pour doctorat"
+
+msgid "Doctorate refusal reasons"
+msgstr "Motifs de refus pour doctorat"
+
 msgid "Doctorate thesis field"
 msgstr "Domaine de la thèse de doctorat"
 
@@ -2703,11 +2715,6 @@ msgid ""
 msgstr ""
 "E-mail envoyé au candidat lorsque la CDD approuve une proposition en "
 "formation doctorale d'un candidat ayant un diplôme belge."
-
-msgid "Email sent to the candidate when the CDD refuses a doctorate admission."
-msgstr ""
-"E-mail envoyé au candidat lorsque la CDD refuse une proposition en formation "
-"doctorale."
 
 msgid ""
 "Email sent to the candidate when the faculty approve the application with "
@@ -4174,6 +4181,9 @@ msgid ""
 msgstr ""
 "Votre demande d'admission est-elle en lien avec une candidature FNRS, FRIA, "
 "FRESH, CSC"
+
+msgid "It is not possible to go from the \"Closed\" status to this status."
+msgstr "Il n'est pas possible de passer du statut \"Clôturée\" à ce statut."
 
 msgid ""
 "It is not possible to go from the \"To validate IUFC\" status to this status."
@@ -5766,6 +5776,9 @@ msgstr "Refus de dérogation facultaire"
 msgid "REFUS_DIRECTION"
 msgstr "Refus dérogation direction"
 
+msgid "REFUS_DOCTORAT"
+msgstr "Refus doctorat"
+
 msgid "REFUS_DOSSIER_TARDIF"
 msgstr "Refus dossier tardif"
 
@@ -5873,6 +5886,9 @@ msgstr "Attestation de refus SIC"
 
 msgid "Refusal certificate of faculty"
 msgstr "Attestation de refus facultaire"
+
+msgid "Refusal certificate of the CDD"
+msgstr "Attestation de refus de la CDD"
 
 msgid "Refusal document link"
 msgstr "Lien du document de refus"
@@ -6857,6 +6873,14 @@ msgid ""
 msgstr ""
 "La clôture du dossier a des conséquences importantes (annulation des "
 "documents demandés, réinitialisation des états, etc). Confirmez-vous la "
+"clôture ?"
+
+msgid ""
+"The closing of the application has important consequences (transfer of the "
+"application to the SIC, status reset, etc). Do you confirm the closing?"
+msgstr ""
+"La clôture du dossier a des conséquences importantes (rapatriement du "
+"dossier en SIC, réinitialisation des états, etc). Confirmez-vous la "
 "clôture ?"
 
 #, python-format

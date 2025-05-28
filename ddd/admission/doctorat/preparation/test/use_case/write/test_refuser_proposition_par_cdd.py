@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -34,16 +34,28 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     ChoixStatutChecklist,
     DecisionCDDEnum,
+    OngletsChecklist,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    PropositionIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
+)
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     SituationPropositionNonCddException,
+    StatutChecklistDecisionCddDoitEtreDifferentClotureException,
 )
-from admission.ddd.admission.doctorat.preparation.test.factory.person import PersonneConnueUclDTOFactory
+from admission.ddd.admission.doctorat.preparation.test.factory.person import (
+    PersonneConnueUclDTOFactory,
+)
+from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from admission.infrastructure.message_bus_in_memory import (
+    message_bus_in_memory_instance,
+)
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
     PersonneConnueUclInMemoryTranslator,
@@ -63,17 +75,18 @@ class TestRefuserPropositionParFaculte(TestCase):
             )
 
     def setUp(self) -> None:
+        self.proposition_repository.reset()
         self.proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-SC3DP-confirmee'))
         self.proposition.statut = ChoixStatutPropositionDoctorale.COMPLETEE_POUR_SIC
         self.parametres_commande_par_defaut = {
             'uuid_proposition': 'uuid-SC3DP-confirmee',
             'gestionnaire': '00321234',
-            'objet_message': 'Objet du message',
-            'corps_message': 'Corps du message',
         }
 
-    def test_should_etre_ok_si_traitement_fac(self):
+    def test_should_etre_ok_si_traitement_fac_et_motif_connu(self):
         self.proposition.statut = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC
+        self.proposition.motifs_refus = [MotifRefusIdentity(uuid='uuid-nouveau-motif-refus')]
+        self.proposition.autres_motifs_refus = []
 
         resultat = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
 
@@ -82,15 +95,17 @@ class TestRefuserPropositionParFaculte(TestCase):
 
         # Vérifier la proposition
         proposition = self.proposition_repository.get(resultat)
-        self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.INSCRIPTION_REFUSEE)
+        self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.RETOUR_DE_FAC)
         self.assertEqual(proposition.checklist_actuelle.decision_cdd.statut, ChoixStatutChecklist.GEST_BLOCAGE)
         self.assertEqual(
             proposition.checklist_actuelle.decision_cdd.extra,
             {'decision': DecisionCDDEnum.EN_DECISION.name},
         )
 
-    def test_should_etre_ok_si_completee_pour_fac(self):
+    def test_should_etre_ok_si_completee_pour_fac_et_motif_libre(self):
         self.proposition.statut = ChoixStatutPropositionDoctorale.COMPLETEE_POUR_FAC
+        self.proposition.motifs_refus = []
+        self.proposition.autres_motifs_refus = ['Autre motif']
 
         resultat = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
 
@@ -109,3 +124,26 @@ class TestRefuserPropositionParFaculte(TestCase):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
                 self.assertIsInstance(context.exception.exceptions.pop(), SituationPropositionNonCddException)
+
+    def test_should_lever_exception_si_statut_checklist_invalide(self):
+        self.proposition.statut = ChoixStatutPropositionDoctorale.COMPLETEE_POUR_FAC
+        self.proposition.autres_motifs_refus = ['Autre motif']
+
+        statuts_decision_cdd = ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT[OngletsChecklist.decision_cdd.name]
+
+        statuts_invalides = {
+            'CLOTURE',
+        }
+
+        for identifiant_statut in statuts_invalides:
+            statut = statuts_decision_cdd[identifiant_statut]
+            self.proposition.checklist_actuelle.decision_cdd.statut = statut.statut
+            self.proposition.checklist_actuelle.decision_cdd.extra = statut.extra.copy()
+
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
+
+            self.assertIsInstance(
+                context.exception.exceptions.pop(),
+                StatutChecklistDecisionCddDoitEtreDifferentClotureException,
+            )

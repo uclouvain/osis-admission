@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,64 +31,82 @@ from django.db.models import OuterRef, Subquery
 from django.shortcuts import resolve_url
 from django.utils import translation
 from django.utils.functional import lazy
-from django.utils.translation import get_language, gettext_lazy as _, gettext
+from django.utils.translation import get_language, gettext
+from django.utils.translation import gettext_lazy as _
 from osis_async.models import AsyncTask
 from osis_document.api.utils import get_remote_token, get_remote_tokens
 from osis_document.utils import get_file_url
 from osis_mail_template import generate_email
 from osis_mail_template.utils import transform_html_to_text
-from osis_notification.contrib.handlers import EmailNotificationHandler, WebNotificationHandler
-from osis_notification.contrib.notification import WebNotification, EmailNotification
+from osis_notification.contrib.handlers import (
+    EmailNotificationHandler,
+    WebNotificationHandler,
+)
+from osis_notification.contrib.notification import EmailNotification, WebNotification
 from osis_signature.enums import SignatureState
 from osis_signature.models import Actor
 from osis_signature.utils import get_signing_token
 
 from admission.ddd import MAIL_INSCRIPTION_DEFAUT, MAIL_VERIFICATEUR_CURSUS
-from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixEtatSignature
+from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import (
+    PromoteurIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixEtatSignature,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import (
     GroupeDeSupervision,
     SignataireIdentity,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
-from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import INotification
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    Proposition,
+)
+from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import (
+    INotification,
+)
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     SignataireNonTrouveException,
 )
 from admission.ddd.admission.doctorat.preparation.dtos import AvisDTO, PropositionDTO
-from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
+from admission.ddd.admission.domain.model.emplacement_document import (
+    EmplacementDocument,
+)
 from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument
 from admission.ddd.admission.repository.i_digit import IDigitRepository
-from admission.infrastructure.admission.doctorat.preparation.domain.service.doctorat import DoctoratTranslator
-from admission.infrastructure.admission.formation_generale.domain.service.notification import ONE_YEAR_SECONDS
+from admission.infrastructure.admission.doctorat.preparation.domain.service.doctorat import (
+    DoctoratTranslator,
+)
+from admission.infrastructure.admission.formation_generale.domain.service.notification import (
+    ONE_YEAR_SECONDS,
+)
 from admission.infrastructure.utils import get_requested_documents_html_lists
 from admission.mail_templates import (
+    ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CANDIDATE_DOCTORATE,
+    ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS_DOCTORATE,
     ADMISSION_EMAIL_CONFIRM_SUBMISSION_DOCTORATE,
     ADMISSION_EMAIL_MEMBER_REMOVED,
     ADMISSION_EMAIL_SIGNATURE_CANDIDATE,
     ADMISSION_EMAIL_SIGNATURE_REFUSAL,
     ADMISSION_EMAIL_SIGNATURE_REQUESTS_ACTOR,
     ADMISSION_EMAIL_SIGNATURE_REQUESTS_CANDIDATE,
-    ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS_DOCTORATE,
-    ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CANDIDATE_DOCTORATE,
     ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_DOCTORATE,
     ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_DOCTORATE,
-    EMAIL_TEMPLATE_ENROLLMENT_AUTHORIZATION_DOCUMENT_URL_DOCTORATE_TOKEN,
-    EMAIL_TEMPLATE_VISA_APPLICATION_DOCUMENT_URL_DOCTORATE_TOKEN,
-    EMAIL_TEMPLATE_ENROLLMENT_GENERATED_NOMA_DOCTORATE_TOKEN,
     EMAIL_TEMPLATE_CDD_ANNEX_DOCUMENT_URL_DOCTORATE_TOKEN,
+    EMAIL_TEMPLATE_ENROLLMENT_AUTHORIZATION_DOCUMENT_URL_DOCTORATE_TOKEN,
+    EMAIL_TEMPLATE_ENROLLMENT_GENERATED_NOMA_DOCTORATE_TOKEN,
+    EMAIL_TEMPLATE_VISA_APPLICATION_DOCUMENT_URL_DOCTORATE_TOKEN,
 )
-from admission.models import AdmissionTask, SupervisionActor, DoctorateAdmission
+from admission.models import AdmissionTask, DoctorateAdmission, SupervisionActor
 from admission.models.base import BaseAdmission
 from admission.models.doctorate import PropositionProxy
 from admission.models.enums.actor_type import ActorType
 from admission.utils import (
     get_admission_cdd_managers,
-    get_salutation_prefix,
-    get_portal_admission_url,
     get_backoffice_admission_url,
+    get_portal_admission_url,
+    get_salutation_prefix,
 )
 from base.models.person import Person
 from base.utils.utils import format_academic_year
@@ -626,11 +644,6 @@ class Notification(INotification):
         objet_message: str,
         corps_message: str,
     ) -> Optional[EmailMessage]:
-        if not objet_message or not corps_message:
-            return None
-
-        candidate = Person.objects.get(global_id=proposition.matricule_candidat)
-
         document_uuid = (
             DoctorateAdmission.objects.filter(uuid=proposition.entity_id.uuid).values('sic_refusal_certificate')
         )[0]['sic_refusal_certificate'][0]
@@ -638,17 +651,13 @@ class Notification(INotification):
         document_url = get_file_url(token)
         corps_message = corps_message.replace(EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN, document_url)
 
-        email_notification = EmailNotification(
-            recipient=candidate.private_email,
-            subject=objet_message,
-            html_content=corps_message,
-            plain_text_content=transform_html_to_text(corps_message),
+        return cls.envoyer_message_libre_au_candidat(
+            proposition=proposition,
+            objet_message=objet_message,
+            corps_message=corps_message,
+            cc_promoteurs=True,
+            cc_membres_ca=True,
         )
-
-        candidate_email_message = EmailNotificationHandler.build(email_notification)
-        EmailNotificationHandler.create(candidate_email_message, person=candidate)
-
-        return candidate_email_message
 
     @classmethod
     def accepter_proposition_par_sic(

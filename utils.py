@@ -27,7 +27,7 @@ import os
 import uuid
 from collections import defaultdict
 from contextlib import suppress
-from typing import Dict, Iterable, List, Union
+from typing import Dict, Iterable, List, Union, Optional
 
 import weasyprint
 from django.conf import settings
@@ -326,8 +326,8 @@ class WeasyprintStylesheets:
         return getattr(cls, '_stylesheet_bs5')
 
 
-def get_salutation_prefix(person: Person) -> str:
-    with override(language=person.language):
+def get_salutation_prefix(person: Person, language: Optional[str] = '') -> str:
+    with override(language=language or person.language):
         return {
             ChoixGenre.H.name: pgettext('male gender', 'Dear'),
             ChoixGenre.F.name: pgettext('female gender', 'Dear'),

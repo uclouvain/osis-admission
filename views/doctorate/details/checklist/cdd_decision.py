@@ -23,18 +23,23 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
 from django.forms import Form
 from django.utils.functional import cached_property
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
 from osis_history.models import HistoryEntry
 
 from admission.ddd.admission.doctorat.preparation.commands import (
     ApprouverPropositionParCddCommand,
+    CloturerPropositionParCddCommand,
     EnvoyerPropositionACddLorsDeLaDecisionCddCommand,
     EnvoyerPropositionAuSicLorsDeLaDecisionCddCommand,
+    PasserEtatACompleterParSicDecisionCddCommand,
+    PasserEtatATraiterDecisionCddCommand,
+    PasserEtatPrisEnChargeDecisionCddCommand,
     RefuserPropositionParCddCommand,
     SpecifierInformationsAcceptationPropositionParCddCommand,
+    SpecifierMotifsRefusPropositionParCDDCommand,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_CDD_POUR_DECISION,
@@ -46,18 +51,20 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     OngletsChecklist,
 )
+from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
+)
 from admission.ddd.admission.doctorat.preparation.dtos import PromoteurDTO
 from admission.forms.admission.checklist import (
     DoctorateCddDecisionApprovalForm,
+    DoctorateFacDecisionRefusalForm,
     SendEMailForm,
 )
 from admission.mail_templates import (
     ADMISSION_EMAIL_CDD_APPROVAL_DOCTORATE_WITH_BELGIAN_DIPLOMA,
     ADMISSION_EMAIL_CDD_APPROVAL_DOCTORATE_WITHOUT_BELGIAN_DIPLOMA,
-    ADMISSION_EMAIL_CDD_REFUSAL_DOCTORATE,
 )
 from admission.utils import get_access_titles_names, get_salutation_prefix
-from admission.views.common.detail_tabs.checklist import change_admission_status
 from admission.views.common.mixins import AdmissionFormMixin
 from admission.views.doctorate.details.checklist.mixins import (
     CheckListDefaultContextMixin,
@@ -68,12 +75,15 @@ from base.utils.htmx import HtmxPermissionRequiredMixin
 from infrastructure.messages_bus import message_bus_instance
 
 __all__ = [
-    'CddDecisionView',
     'CddDecisionSendToCddView',
     'CddRefusalDecisionView',
     'CddApprovalDecisionView',
     'CddDecisionSendToSicView',
     'CddApprovalFinalDecisionView',
+    'CddDecisionClosedView',
+    'CddDecisionToProcessedView',
+    'CddDecisionTakenInChargeView',
+    'CddDecisionToCompleteBySicView',
 ]
 
 
@@ -93,6 +103,7 @@ class CddDecisionMixin(CheckListDefaultContextMixin):
             STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD
         )
         context['is_sic'] = self.is_sic
+        context['fac_decision_refusal_form'] = self.cdd_decision_refusal_form
 
         context.setdefault('history_entries', {})
 
@@ -110,7 +121,30 @@ class CddDecisionMixin(CheckListDefaultContextMixin):
         context['cdd_decision_refusal_form'] = self.cdd_decision_refusal_form
         context['cdd_decision_approval_final_form'] = self.cdd_decision_approval_final_form
 
+        can_change_decision = self.request.user.has_perm('admission.checklist_change_faculty_decision', self.admission)
+        in_cdd_decision_closed_status = self.in_cdd_decision_closed_status()
+
+        cdd_decision_to_processed_status_tooltip = ''
+        cdd_decision_statuses_tooltip = ''
+
+        if self.admission.status == ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_FAC.name:
+            cdd_decision_to_processed_status_tooltip = cdd_decision_statuses_tooltip = _(
+                'Documents requested by the CDD are still expected from the candidate.'
+            )
+        elif can_change_decision and in_cdd_decision_closed_status:
+            cdd_decision_statuses_tooltip = _('It is not possible to go from the "Closed" status to this status.')
+
+        context['cdd_decision_to_processed_status_tooltip'] = cdd_decision_to_processed_status_tooltip
+        context['cdd_decision_statuses_tooltip'] = cdd_decision_statuses_tooltip
+        context['cdd_decision_to_processed_status_disabled'] = not can_change_decision
+        context['cdd_decision_statuses_disabled'] = not can_change_decision or self.in_cdd_decision_closed_status()
+
         return context
+
+    def in_cdd_decision_closed_status(self):
+        current_cdd_checklist = self.admission.checklist.get('current', {}).get(OngletsChecklist.decision_cdd.name, {})
+        closed_status = ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT[OngletsChecklist.decision_cdd.name]['CLOTURE']
+        return closed_status.matches_dict(current_cdd_checklist)
 
     @cached_property
     def selected_access_titles_names(self):
@@ -123,27 +157,12 @@ class CddDecisionMixin(CheckListDefaultContextMixin):
         }
 
         if self.request.method == 'GET':
-            # Load the email template
-            subject, body = get_email(
-                template_identifier=ADMISSION_EMAIL_CDD_REFUSAL_DOCTORATE,
-                language=self.proposition.langue_contact_candidat,
-                proposition_dto=self.proposition,
-                extra_tokens={
-                    'greetings': get_salutation_prefix(self.admission.candidate),
-                    'doctoral_commission': self.management_entity_title,
-                    'sender_name': f'{self.request.user.person.first_name} {self.request.user.person.last_name}',
-                },
-            )
-
-            form_kwargs['initial'] = {
-                'subject': subject,
-                'body': body,
-            }
+            form_kwargs['initial'] = {'reasons': self.admission_refusal_reasons}
 
         else:
             form_kwargs['data'] = self.request.POST
 
-        return SendEMailForm(**form_kwargs)
+        return DoctorateFacDecisionRefusalForm(**form_kwargs)
 
     @cached_property
     def cdd_decision_approval_final_form(self):
@@ -163,7 +182,7 @@ class CddDecisionMixin(CheckListDefaultContextMixin):
                 proposition_dto=self.proposition,
                 extra_tokens={
                     'greetings': get_salutation_prefix(self.admission.candidate),
-                    'doctoral_commission': self.management_entity_title,
+                    'doctoral_commission': self.proposition.doctorat.intitule_entite_gestion,
                     'sender_name': f'{self.request.user.person.first_name} {self.request.user.person.last_name}',
                 },
             )
@@ -199,38 +218,6 @@ class CddDecisionMixin(CheckListDefaultContextMixin):
             data=self.request.POST if self.request.method == 'POST' else None,
             prefix='cdd-decision-approval',
         )
-
-
-class CddDecisionView(
-    AdmissionFormMixin,
-    CddDecisionMixin,
-    HtmxPermissionRequiredMixin,
-    FormView,
-):
-    name = 'cdd-decision-status'
-    urlpatterns = {'cdd-decision-change-status': 'cdd-decision/status-change/<str:status>'}
-    permission_required = 'admission.checklist_change_faculty_decision'
-    template_name = 'admission/doctorate/includes/checklist/cdd_decision.html'
-    htmx_template_name = 'admission/doctorate/includes/checklist/cdd_decision.html'
-    form_class = Form
-
-    def form_valid(self, form):
-        admission = self.get_permission_object()
-
-        extra = {}
-        if 'decision' in self.request.GET:
-            extra['decision'] = self.request.GET['decision']
-
-        change_admission_status(
-            tab=OngletsChecklist.decision_cdd.name,
-            admission_status=self.kwargs['status'],
-            extra=extra,
-            admission=admission,
-            replace_extra=True,
-            author=self.request.user.person,
-        )
-
-        return super().form_valid(form)
 
 
 class CddDecisionSendToCddView(
@@ -277,7 +264,12 @@ class CddDecisionSendToSicView(
     def form_valid(self, form):
         try:
             message_bus_instance.invoke(
-                EnvoyerPropositionAuSicLorsDeLaDecisionCddCommand(
+                RefuserPropositionParCddCommand(
+                    uuid_proposition=self.admission_uuid,
+                    gestionnaire=self.request.user.person.global_id,
+                )
+                if self.request.GET.get('refusal') and self.is_fac
+                else EnvoyerPropositionAuSicLorsDeLaDecisionCddCommand(
                     uuid_proposition=self.admission_uuid,
                     gestionnaire=self.request.user.person.global_id,
                     envoi_par_cdd=self.is_fac,
@@ -303,7 +295,15 @@ class CddRefusalDecisionView(
     urlpatterns = {'cdd-decision-refusal': 'cdd-decision/cdd-decision-refusal'}
     template_name = 'admission/doctorate/includes/checklist/cdd_decision_refusal_form.html'
     htmx_template_name = 'admission/doctorate/includes/checklist/cdd_decision_refusal_form.html'
-    permission_required = 'admission.checklist_change_faculty_decision'
+
+    def get_permission_required(self):
+        return (
+            (
+                'admission.checklist_faculty_decision_transfer_to_sic_with_decision'
+                if 'save_transfer' in self.request.POST
+                else 'admission.checklist_change_faculty_decision'
+            ),
+        )
 
     def get_form(self, form_class=None):
         return self.cdd_decision_refusal_form
@@ -311,14 +311,21 @@ class CddRefusalDecisionView(
     def form_valid(self, form):
         try:
             message_bus_instance.invoke(
-                RefuserPropositionParCddCommand(
+                SpecifierMotifsRefusPropositionParCDDCommand(
                     uuid_proposition=self.admission_uuid,
+                    uuids_motifs=form.cleaned_data['reasons'],
+                    autres_motifs=form.cleaned_data['other_reasons'],
                     gestionnaire=self.request.user.person.global_id,
-                    objet_message=form.cleaned_data['subject'],
-                    corps_message=form.cleaned_data['body'],
                 )
             )
-            self.htmx_refresh = True
+            if 'save-transfer' in self.request.POST:
+                message_bus_instance.invoke(
+                    RefuserPropositionParCddCommand(
+                        uuid_proposition=self.admission_uuid,
+                        gestionnaire=self.request.user.person.global_id,
+                    )
+                )
+                self.htmx_refresh = True
         except MultipleBusinessExceptions as multiple_exceptions:
             self.message_on_failure = multiple_exceptions.exceptions.pop().message
             return self.form_invalid(form)
@@ -394,6 +401,119 @@ class CddApprovalFinalDecisionView(
                 )
             )
             self.htmx_refresh = True
+        except MultipleBusinessExceptions as multiple_exceptions:
+            self.message_on_failure = multiple_exceptions.exceptions.pop().message
+            return self.form_invalid(form)
+
+        return super().form_valid(form)
+
+
+class CddDecisionClosedView(
+    CddDecisionMixin,
+    AdmissionFormMixin,
+    HtmxPermissionRequiredMixin,
+    FormView,
+):
+    name = 'cdd-decision-closed'
+    urlpatterns = {'cdd-decision-closed': 'cdd-decision/cdd-decision-closed'}
+    template_name = 'admission/doctorate/includes/checklist/cdd_decision.html'
+    htmx_template_name = 'admission/doctorate/includes/checklist/cdd_decision.html'
+    permission_required = 'admission.checklist_change_faculty_decision'
+    form_class = Form
+
+    def form_valid(self, form):
+        try:
+            message_bus_instance.invoke(
+                CloturerPropositionParCddCommand(
+                    uuid_proposition=self.admission_uuid,
+                    gestionnaire=self.request.user.person.global_id,
+                )
+            )
+            self.htmx_refresh = True
+        except MultipleBusinessExceptions as multiple_exceptions:
+            self.message_on_failure = multiple_exceptions.exceptions.pop().message
+            return self.form_invalid(form)
+
+        return super().form_valid(form)
+
+
+class CddDecisionToProcessedView(
+    CddDecisionMixin,
+    AdmissionFormMixin,
+    HtmxPermissionRequiredMixin,
+    FormView,
+):
+    name = 'cdd-decision-to-processed'
+    urlpatterns = {'cdd-decision-to-processed': 'cdd-decision/cdd-decision-to-processed'}
+    template_name = 'admission/doctorate/includes/checklist/cdd_decision.html'
+    htmx_template_name = 'admission/doctorate/includes/checklist/cdd_decision.html'
+    permission_required = 'admission.checklist_change_faculty_decision'
+    form_class = Form
+
+    def form_valid(self, form):
+        try:
+            message_bus_instance.invoke(
+                PasserEtatATraiterDecisionCddCommand(
+                    uuid_proposition=self.admission_uuid,
+                    gestionnaire=self.request.user.person.global_id,
+                )
+            )
+        except MultipleBusinessExceptions as multiple_exceptions:
+            self.message_on_failure = multiple_exceptions.exceptions.pop().message
+            return self.form_invalid(form)
+
+        return super().form_valid(form)
+
+
+class CddDecisionTakenInChargeView(
+    CddDecisionMixin,
+    AdmissionFormMixin,
+    HtmxPermissionRequiredMixin,
+    FormView,
+):
+    name = 'cdd-decision-taken-in-charge'
+    urlpatterns = {'cdd-decision-taken-in-charge': 'cdd-decision/cdd-decision-taken-in-charge'}
+    template_name = 'admission/doctorate/includes/checklist/cdd_decision.html'
+    htmx_template_name = 'admission/doctorate/includes/checklist/cdd_decision.html'
+    permission_required = 'admission.checklist_change_faculty_decision'
+    form_class = Form
+
+    def form_valid(self, form):
+        try:
+            message_bus_instance.invoke(
+                PasserEtatPrisEnChargeDecisionCddCommand(
+                    uuid_proposition=self.admission_uuid,
+                    gestionnaire=self.request.user.person.global_id,
+                )
+            )
+        except MultipleBusinessExceptions as multiple_exceptions:
+            self.message_on_failure = multiple_exceptions.exceptions.pop().message
+            return self.form_invalid(form)
+
+        return super().form_valid(form)
+
+
+class CddDecisionToCompleteBySicView(
+    CddDecisionMixin,
+    AdmissionFormMixin,
+    HtmxPermissionRequiredMixin,
+    FormView,
+):
+    name = 'cdd-decision-to-complete-by-sic'
+    urlpatterns = {'cdd-decision-to-complete-by-sic': 'cdd-decision/cdd-decision-to-complete-by-sic'}
+    template_name = 'admission/doctorate/includes/checklist/cdd_decision.html'
+    htmx_template_name = 'admission/doctorate/includes/checklist/cdd_decision.html'
+    permission_required = 'admission.checklist_change_faculty_decision'
+    form_class = Form
+
+    def form_valid(self, form):
+        try:
+            message_bus_instance.invoke(
+                PasserEtatACompleterParSicDecisionCddCommand(
+                    uuid_proposition=self.admission_uuid,
+                    gestionnaire=self.request.user.person.global_id,
+                )
+            )
         except MultipleBusinessExceptions as multiple_exceptions:
             self.message_on_failure = multiple_exceptions.exceptions.pop().message
             return self.form_invalid(form)

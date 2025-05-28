@@ -24,12 +24,11 @@
 #
 # ##############################################################################
 import datetime
-from unittest import mock
 
 import freezegun
 from django.conf import settings
 from django.shortcuts import resolve_url
-from django.test import TestCase, override_settings
+from django.test import TestCase
 from django.utils import timezone
 
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
@@ -46,14 +45,13 @@ from admission.models import DoctorateAdmission
 from admission.tests import OsisDocumentMockTestMixin
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.doctorate import DoctorateFactory
-from admission.tests.factories.faculty_decision import RefusalReasonFactory
+from admission.tests.factories.faculty_decision import DoctorateRefusalReasonFactory
 from admission.tests.factories.form_item import AdmissionFormItemFactory
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import (
     ProgramManagerRoleFactory,
     SicManagementRoleFactory,
 )
-from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -524,7 +522,7 @@ class FinancabiliteDerogationViewTestCase(OsisDocumentMockTestMixin, TestCase):
     def test_refus_post_with_other_reasons(self):
         self.client.force_login(user=self.sic_manager_user)
 
-        refusal_reason = RefusalReasonFactory()
+        refusal_reason = DoctorateRefusalReasonFactory()
         self.admission.refusal_reasons.set([refusal_reason])
 
         url = resolve_url(

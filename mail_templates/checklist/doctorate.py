@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,8 +26,10 @@
 from django.utils.translation import gettext_lazy as _
 from osis_mail_template import Token, templates
 
-from admission.mail_templates.tokens import DOCTORATE_ADMISSION_TAG, admission_common_tokens
-
+from admission.mail_templates.tokens import (
+    DOCTORATE_ADMISSION_TAG,
+    admission_common_tokens,
+)
 
 CHECKLIST_TOKENS = admission_common_tokens + [
     Token(
@@ -48,8 +50,18 @@ templates.register(
     tokens=CHECKLIST_TOKENS
     + [
         Token(
-            name='candidate',
-            description=_("Candidate of the admission"),
+            name='training_acronym',
+            description=_('Acronym of the training'),
+            example='SPRI2MS/DI',
+        ),
+        Token(
+            name='greetings',
+            description=_("Greetings depending on the gender of the candidate"),
+            example="Cher",
+        ),
+        Token(
+            name='sender_name',
+            description=_('Name of the manager sending the email'),
             example="John Doe",
         ),
         Token(
@@ -58,9 +70,9 @@ templates.register(
             example="2023-2024",
         ),
         Token(
-            name='admission_training',
-            description=_("Training of the admission"),
-            example="AGRO3DP / Doctorat en sciences agronomiques et ingénierie biologique",
+            name='doctoral_commission',
+            description=_('Name of the doctoral commission'),
+            example="Commission CD1",
         ),
         Token(
             name='document_link',
@@ -333,41 +345,6 @@ templates.register(
     ],
 )
 
-
-ADMISSION_EMAIL_CDD_REFUSAL_DOCTORATE = 'osis-admission-cdd-refusal-doctorate'
-templates.register(
-    ADMISSION_EMAIL_CDD_REFUSAL_DOCTORATE,
-    description=_('Email sent to the candidate when the CDD refuses a doctorate admission.'),
-    tag=DOCTORATE_ADMISSION_TAG,
-    tokens=CHECKLIST_TOKENS
-    + [
-        Token(
-            name='training_acronym',
-            description=_('Acronym of the training'),
-            example='SPRI2MS/DI',
-        ),
-        Token(
-            name='academic_year',
-            description=_("Academic year of the admission"),
-            example="2023-2024",
-        ),
-        Token(
-            name='greetings',
-            description=_("Greetings depending on the gender of the candidate"),
-            example="Cher",
-        ),
-        Token(
-            name='sender_name',
-            description=_('Name of the manager sending the email'),
-            example="John Doe",
-        ),
-        Token(
-            name='doctoral_commission',
-            description=_('Name of the doctoral commission'),
-            example="Commission CD1",
-        ),
-    ],
-)
 
 ADMISSION_EMAIL_CDD_APPROVAL_DOCTORATE_WITH_BELGIAN_DIPLOMA = (
     'osis-admission-cdd-approval-doctorate-with-belgian-diploma'

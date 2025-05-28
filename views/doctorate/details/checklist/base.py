@@ -175,13 +175,15 @@ class ChecklistView(
             OngletsChecklist.donnees_personnelles.name: assimilation_documents,
             OngletsChecklist.decision_cdd.name: {
                 'ATTESTATION_ACCORD_CDD',
+                'ATTESTATION_REFUS_CDD',
             },
             OngletsChecklist.decision_sic.name: {
                 'ATTESTATION_ACCORD_SIC',
                 'ATTESTATION_ACCORD_ANNEXE_SIC',
+                'ATTESTATION_REFUS_SIC',
                 'ATTESTATION_ACCORD_CDD',
+                'ATTESTATION_REFUS_CDD',
             },
-            'send-email': set(),
         }
 
         # Add documents from the specific questions
