@@ -43,12 +43,11 @@ from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueD
 from admission.ddd.admission.dtos.resume import (
     ResumeEtEmplacementsDocumentsPropositionDTO,
 )
-from admission.ddd.admission.formation_continue.domain.model.enums import (
-    OngletsChecklist,
-)
-from admission.ddd.admission.enums.statut import STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER_OU_ANNULEE
 from admission.ddd.admission.formation_continue.commands import (
     RecupererResumeEtEmplacementsDocumentsPropositionQuery,
+)
+from admission.ddd.admission.enums.statut import (
+    STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER_OU_ANNULEE,
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     OngletsChecklist,
@@ -62,7 +61,6 @@ from admission.forms.admission.continuing_education.checklist import (
     DecisionDenyForm,
     DecisionFacApprovalForm,
     DecisionHoldForm,
-    DecisionValidationForm,
     SendToFacForm,
     StudentReportForm,
 )
@@ -73,7 +71,6 @@ from admission.mail_templates import (
     ADMISSION_EMAIL_DECISION_FAC_APPROVAL_WITHOUT_CONDITION,
     ADMISSION_EMAIL_DECISION_IUFC_COMMENT_FOR_FAC,
     ADMISSION_EMAIL_DECISION_ON_HOLD,
-    ADMISSION_EMAIL_DECISION_VALIDATION,
 )
 from admission.utils import (
     get_backoffice_admission_url,
@@ -466,7 +463,7 @@ class ChecklistView(
                 for tab_name, tab_documents in documents_by_tab.items():
                     document_model_name = document_identifier[-1]
 
-                    if document_model_name in tab_documents:
+                    if document_model_name in tab_documents or admission_document.onglet_checklist_associe == tab_name:
                         if not added_document:
                             experience_name = curriculum_experiences_names_by_uuid.get(document_identifier[1], '')
 
@@ -488,6 +485,8 @@ class ChecklistView(
                         context['documents'][tab_name].append(added_document)
 
             for tab_name in context['documents']:
-                context['documents'][tab_name].sort(key=lambda doc: doc.libelle)
+                context['documents'][tab_name].sort(
+                    key=lambda doc: (not doc.est_emplacement_document_libre, doc.libelle)
+                )
 
         return context
