@@ -23,6 +23,8 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import List, Optional
+
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocumentIdentity
 from admission.ddd.admission.formation_generale.commands import RetyperDocumentCommand
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
@@ -32,7 +34,7 @@ from admission.ddd.admission.repository.i_emplacement_document import IEmplaceme
 def retyper_document(
     cmd: 'RetyperDocumentCommand',
     emplacement_document_repository: 'IEmplacementDocumentRepository',
-) -> EmplacementDocumentIdentity:
+) -> List[Optional[EmplacementDocumentIdentity]]:
     document_from_identity = EmplacementDocumentIdentity(
         identifiant=cmd.identifiant_source,
         proposition_id=PropositionIdentity(uuid=cmd.uuid_proposition),
@@ -42,9 +44,8 @@ def retyper_document(
         proposition_id=PropositionIdentity(uuid=cmd.uuid_proposition),
     )
 
-    emplacement_document_repository.echanger_emplacements(
+    return emplacement_document_repository.echanger_emplacements(
         entity_id_from=document_from_identity,
         entity_id_to=document_to_identity,
         auteur=cmd.auteur,
     )
-    return document_from_identity

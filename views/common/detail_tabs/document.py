@@ -441,11 +441,12 @@ class DeleteDocumentView(DocumentFormView):
             ),
         )
 
-        if self.document:
-            if self.document.type in EMPLACEMENTS_DOCUMENTS_RECLAMABLES:
-                self.htmx_trigger_form_extra['next'] = 'missing'
+        if self.document and self.document.type == TypeEmplacementDocument.NON_LIBRE.name:
+            self.htmx_trigger_form_extra['next'] = 'missing'
+            self.htmx_trigger_form_extra['refresh_details'] = document_id.identifiant
+        else:
+            self.htmx_trigger_form_extra['delete_document'] = document_id.identifiant
 
-        self.htmx_trigger_form_extra['refresh_details'] = document_id.identifiant
         self.htmx_trigger_form_extra['refresh_list'] = True
 
         messages.success(self.request, _('The document has been deleted'))
@@ -644,7 +645,7 @@ class RetypeDocumentView(DocumentFormView):
         return context
 
     def form_valid(self, form):
-        document_id = message_bus_instance.invoke(
+        document_ids = message_bus_instance.invoke(
             self.command(
                 uuid_proposition=self.admission_uuid,
                 identifiant_source=self.document_identifier,
@@ -652,5 +653,12 @@ class RetypeDocumentView(DocumentFormView):
                 auteur=self.request.user.person.global_id,
             )
         )
-        self.htmx_trigger_form_extra['refresh_details'] = document_id.identifiant
+
+        if document_ids[0]:
+            # The source has been updated
+            self.htmx_trigger_form_extra['refresh_details'] = self.document_identifier
+        else:
+            # The source has been deleted
+            self.htmx_trigger_form_extra['delete_document'] = self.document_identifier
+
         return super().form_valid(form)

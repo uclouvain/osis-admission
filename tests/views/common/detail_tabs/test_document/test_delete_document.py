@@ -34,6 +34,7 @@ from django.test import override_settings
 from admission.ddd.admission.enums.emplacement_document import (
     IdentifiantBaseEmplacementDocument,
 )
+from admission.models import AdmissionFormItem
 from admission.tests.views.common.detail_tabs.test_document import BaseDocumentViewTestCase
 
 
@@ -122,8 +123,9 @@ class DeleteDocumentTestCase(BaseDocumentViewTestCase):
 
         self.assertEqual(response.status_code, 204)
         self.general_admission.refresh_from_db()
-        self.assertIsNotNone(self.general_admission.requested_documents.get(self.sic_free_requestable_document))
+        self.assertIsNone(self.general_admission.requested_documents.get(self.sic_free_requestable_document))
         self.assertIsNone(self.general_admission.specific_question_answers.get(specific_question_uuid))
+        self.assertFalse(AdmissionFormItem.objects.filter(uuid=specific_question_uuid).exists())
 
         # Check last modification data
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
@@ -234,8 +236,9 @@ class DeleteDocumentTestCase(BaseDocumentViewTestCase):
 
         self.assertEqual(response.status_code, 204)
         self.general_admission.refresh_from_db()
-        self.assertIsNotNone(self.general_admission.requested_documents.get(self.fac_free_requestable_document))
+        self.assertIsNone(self.general_admission.requested_documents.get(self.fac_free_requestable_document))
         self.assertIsNone(self.general_admission.specific_question_answers.get(specific_question_uuid))
+        self.assertFalse(AdmissionFormItem.objects.filter(uuid=specific_question_uuid).exists())
 
         # Check last modification data
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
@@ -449,8 +452,9 @@ class DeleteDocumentTestCase(BaseDocumentViewTestCase):
 
         self.assertEqual(response.status_code, 204)
         self.doctorate_admission.refresh_from_db()
-        self.assertIsNotNone(self.doctorate_admission.requested_documents.get(self.sic_free_requestable_document))
+        self.assertIsNone(self.doctorate_admission.requested_documents.get(self.sic_free_requestable_document))
         self.assertIsNone(self.doctorate_admission.specific_question_answers.get(specific_question_uuid))
+        self.assertFalse(AdmissionFormItem.objects.filter(uuid=specific_question_uuid).exists())
 
         # Check last modification data
         self.assertEqual(self.doctorate_admission.modified_at, datetime.datetime.now())
@@ -573,8 +577,9 @@ class DeleteDocumentTestCase(BaseDocumentViewTestCase):
 
         self.assertEqual(response.status_code, 204)
         self.doctorate_admission.refresh_from_db()
-        self.assertIsNotNone(self.doctorate_admission.requested_documents.get(self.fac_free_requestable_document))
+        self.assertIsNone(self.doctorate_admission.requested_documents.get(self.fac_free_requestable_document))
         self.assertIsNone(self.doctorate_admission.specific_question_answers.get(specific_question_uuid))
+        self.assertFalse(AdmissionFormItem.objects.filter(uuid=specific_question_uuid).exists())
 
         # Check last modification data
         self.assertEqual(self.doctorate_admission.modified_at, datetime.datetime.now())
