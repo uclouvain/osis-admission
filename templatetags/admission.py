@@ -42,7 +42,7 @@ from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import SafeString, mark_safe
 from django.utils.translation import get_language, gettext
 from django.utils.translation import gettext_lazy as _
-from django.utils.translation import pgettext
+from django.utils.translation import pgettext, pgettext_lazy
 from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_history.models import HistoryEntry
 from rules.templatetags import rules
@@ -139,11 +139,14 @@ from base.models.person import Person
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
 from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
+    ExperienceAcademiqueDTO,
+    ExperienceNonAcademiqueDTO,
     MessageCurriculumDTO,
 )
-from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
+    ExperienceParcoursInterneDTO,
+)
 from osis_role.templatetags.osis_role import has_perm
 from reference.models.country import Country
 from reference.models.language import Language
@@ -340,10 +343,10 @@ TAB_TREES = {
         Tab('send-mail', _('Send a mail'), 'envelope'): [
             Tab('send-mail', _('Send a mail'), 'envelope'),
         ],
-        Tab('comments', pgettext('tab', 'Comments'), 'comments'): [
-            Tab('comments', pgettext('tab', 'Comments'), 'comments')
+        Tab('comments', pgettext_lazy('tab', 'Comments'), 'comments'): [
+            Tab('comments', pgettext_lazy('tab', 'Comments'), 'comments')
         ],
-        Tab('history', pgettext('tab', 'History'), 'history'): [
+        Tab('history', pgettext_lazy('tab', 'History'), 'history'): [
             Tab('history-all', _('All history')),
             Tab('history', _('Status changes')),
         ],
@@ -354,8 +357,8 @@ TAB_TREES = {
         Tab('doctorate-education', _('Course choice'), 'person-chalkboard'): [
             Tab('training-choice', _('Course choice')),
         ],
-        Tab('doctorate', pgettext('tab', 'Research'), 'graduation-cap'): [
-            Tab('project', pgettext('tab', 'Research')),
+        Tab('doctorate', pgettext_lazy('tab', 'Research'), 'graduation-cap'): [
+            Tab('project', pgettext_lazy('tab', 'Research')),
             Tab('cotutelle', _('Cotutelle')),
             Tab('supervision', _('Supervision')),
         ],
@@ -367,10 +370,10 @@ TAB_TREES = {
         Tab('documents', _('Documents'), 'folder-open'): [
             Tab('documents', _('Documents'), 'folder-open'),
         ],
-        Tab('comments', pgettext('tab', 'Comments'), 'comments'): [
-            Tab('comments', pgettext('tab', 'Comments'), 'comments')
+        Tab('comments', pgettext_lazy('tab', 'Comments'), 'comments'): [
+            Tab('comments', pgettext_lazy('tab', 'Comments'), 'comments')
         ],
-        Tab('history', pgettext('tab', 'History'), 'history'): [
+        Tab('history', pgettext_lazy('tab', 'History'), 'history'): [
             Tab('history-all', _('All history')),
             Tab('history', _('Status changes')),
         ],
@@ -407,10 +410,10 @@ TAB_TREES = {
         Tab('additional-information', _('Additional information'), 'puzzle-piece'): [
             Tab('specific-questions', _('Specific aspects')),
         ],
-        Tab('comments', pgettext('tab', 'Comments'), 'comments'): [
-            Tab('comments', pgettext('tab', 'Comments'), 'comments')
+        Tab('comments', pgettext_lazy('tab', 'Comments'), 'comments'): [
+            Tab('comments', pgettext_lazy('tab', 'Comments'), 'comments')
         ],
-        Tab('history', pgettext('tab', 'History'), 'history'): [
+        Tab('history', pgettext_lazy('tab', 'History'), 'history'): [
             Tab('history-all', _('All history')),
             Tab('history', _('Status changes')),
         ],

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,17 +26,17 @@
 import itertools
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixStatutPropositionDoctorale,
     STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE,
+    ChoixStatutPropositionDoctorale,
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutPropositionContinue,
     STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE,
+    ChoixStatutPropositionContinue,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
-    STATUTS_PROPOSITION_GENERALE_NON_SOUMISE_OU_FRAIS_DOSSIER_EN_ATTENTE,
     STATUTS_PROPOSITION_GENERALE_NON_SOUMISE,
+    STATUTS_PROPOSITION_GENERALE_NON_SOUMISE_OU_FRAIS_DOSSIER_EN_ATTENTE,
+    ChoixStatutPropositionGenerale,
 )
 
 
@@ -50,9 +50,12 @@ def choix_statuts_toute_proposition_ordonnes():
 
     # Association entre les statuts déjà présents de formation générale et les statuts spécifiques à placer juste après
     choix_specifiques = {
-        ChoixStatutPropositionGenerale.EN_BROUILLON.name: ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE,
-        ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name: ChoixStatutPropositionDoctorale.CA_A_COMPLETER,
-        ChoixStatutPropositionGenerale.CONFIRMEE.name: ChoixStatutPropositionContinue.EN_ATTENTE,
+        ChoixStatutPropositionGenerale.EN_BROUILLON.name: (ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE,),
+        ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name: (
+            ChoixStatutPropositionDoctorale.CA_A_COMPLETER,
+            ChoixStatutPropositionDoctorale.CA_EN_ATTENTE_DE_SIGNATURE,
+        ),
+        ChoixStatutPropositionGenerale.CONFIRMEE.name: (ChoixStatutPropositionContinue.EN_ATTENTE,),
     }
 
     nb_choix = len(choix) + len(choix_specifiques)
@@ -62,9 +65,11 @@ def choix_statuts_toute_proposition_ordonnes():
         choix_courant = choix[index]
 
         if choix_courant[0] in choix_specifiques:
-            statut_specifique = choix_specifiques[choix_courant[0]]
-            index += 1
-            choix.insert(index, (statut_specifique.name, statut_specifique.value))
+            statuts_specifiques = choix_specifiques[choix_courant[0]]
+
+            for statut_specifique in statuts_specifiques:
+                index += 1
+                choix.insert(index, (statut_specifique.name, statut_specifique.value))
 
         index += 1
 
