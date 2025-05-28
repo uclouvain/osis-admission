@@ -35,9 +35,14 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     ChoixStatutChecklist,
+    OngletsChecklist,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     SituationPropositionNonCddException,
+    StatutChecklistDecisionCddDoitEtreDifferentClotureException,
 )
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
     PropositionAdmissionSC3DPConfirmeeFactory,
@@ -161,3 +166,26 @@ class TestSpecifierInformationsAcceptationPropositionParCdd(TestCase):
         self.proposition.statut = ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_FAC
         resultat = self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
         self.assertEqual(resultat.uuid, 'uuid-SC3DP-confirmee')
+
+    def test_should_lever_exception_si_statut_checklist_invalide(self):
+        self.proposition.statut = ChoixStatutPropositionDoctorale.COMPLETEE_POUR_FAC
+        self.proposition.autres_motifs_refus = ['Autre motif']
+
+        statuts_decision_cdd = ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT[OngletsChecklist.decision_cdd.name]
+
+        statuts_invalides = {
+            'CLOTURE',
+        }
+
+        for identifiant_statut in statuts_invalides:
+            statut = statuts_decision_cdd[identifiant_statut]
+            self.proposition.checklist_actuelle.decision_cdd.statut = statut.statut
+            self.proposition.checklist_actuelle.decision_cdd.extra = statut.extra.copy()
+
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
+
+            self.assertIsInstance(
+                context.exception.exceptions.pop(),
+                StatutChecklistDecisionCddDoitEtreDifferentClotureException,
+            )

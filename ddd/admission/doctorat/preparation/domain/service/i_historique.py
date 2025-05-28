@@ -158,6 +158,10 @@ class IHistorique(interface.DomainService):
         raise NotImplementedError
 
     @classmethod
+    def historiser_cloture_cdd(cls, proposition: Proposition, gestionnaire: str):
+        raise NotImplementedError
+
+    @classmethod
     def historiser_refus_sic(cls, proposition: Proposition, message: EmailMessage, gestionnaire: str):
         raise NotImplementedError
 

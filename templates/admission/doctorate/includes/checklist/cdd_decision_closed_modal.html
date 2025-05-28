@@ -1,5 +1,5 @@
 {% extends "admission/modal/modal.html" %}
-{% load i18n enums %}
+{% load i18n %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -26,20 +26,21 @@
 {% endcomment %}
 
 
-{% block modal_id %}cdd-decision-send-to-sic-modal{% endblock %}
+{% block modal_id %}cdd-decision-closed-modal{% endblock %}
 
-{% block modal_title %}{% translate "Confirm the submit" %}{% endblock %}
+{% block modal_title %}{% translate "Confirm the status change" %}{% endblock %}
 
 {% block modal_body %}
   <p>
-    {% translate 'Are you confirming that the application will be sent to the SIC?' %}
+    {% translate "The closing of the application has important consequences (transfer of the application to the SIC, status reset, etc). Do you confirm the closing?" %}
   </p>
 {% endblock %}
 
 {% block modal_footer %}
   <button
       class="btn btn-primary"
-      hx-post="{% url view.base_namespace|add:':cdd-decision-send-to-sic' uuid=view.kwargs.uuid %}{% if current.statut == "GEST_BLOCAGE" and current.extra.decision == 'EN_DECISION' %}?refusal=1{% endif %}"
+      hx-post="{% url view.base_namespace|add:':cdd-decision-closed' uuid=view.kwargs.uuid %}"
+      hx-swap="none"
       data-dismiss="modal"
   >
     {% translate 'Confirm' %}
