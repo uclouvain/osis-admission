@@ -228,6 +228,7 @@ class Proposition(interface.RootEntity):
     financabilite_derogation_derniere_notification_par: str = ''
 
     # Décision facultaire & sic
+    certificat_refus_cdd: List[str] = attr.Factory(list)
     certificat_approbation_cdd: List[str] = attr.Factory(list)
     certificat_approbation_sic: List[str] = attr.Factory(list)
     certificat_approbation_sic_annexe: List[str] = attr.Factory(list)
@@ -1055,6 +1056,20 @@ class Proposition(interface.RootEntity):
             libelle=__('Approval'),
         )
 
+    def specifier_motifs_refus_par_cdd(
+        self,
+        uuids_motifs: List[str],
+        autres_motifs: List[str],
+        auteur_modification: str,
+    ):
+        SpecifierNouvellesInformationsDecisionCDDValidatorList(
+            statut=self.statut,
+        ).validate()
+        self.specifier_refus_par_cdd()
+        self.motifs_refus = [MotifRefusIdentity(uuid=uuid_motif) for uuid_motif in uuids_motifs]
+        self.autres_motifs_refus = autres_motifs
+        self.auteur_derniere_modification = auteur_modification
+
     def specifier_refus_par_cdd(self):
         self.checklist_actuelle.decision_cdd = StatutChecklist(
             statut=ChoixStatutChecklist.GEST_BLOCAGE,
@@ -1078,10 +1093,12 @@ class Proposition(interface.RootEntity):
     def refuser_par_cdd(self, auteur_modification: str):
         RefuserParCDDValidatorList(
             statut=self.statut,
+            motifs_refus=self.motifs_refus,
+            autres_motifs_refus=self.autres_motifs_refus,
         ).validate()
 
         self.specifier_refus_par_cdd()
-        self.statut = ChoixStatutPropositionDoctorale.INSCRIPTION_REFUSEE
+        self.statut = ChoixStatutPropositionDoctorale.RETOUR_DE_FAC
         self.auteur_derniere_modification = auteur_modification
 
     def soumettre_au_sic_lors_de_la_decision_cdd(self, auteur_modification: str):

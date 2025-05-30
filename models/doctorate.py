@@ -36,9 +36,7 @@ from osis_document.contrib import FileField
 from osis_signature.contrib.fields import SignatureProcessField
 from rest_framework.settings import api_settings
 
-from admission.admission_utils.copy_documents import copy_documents
 from admission.constants import CONTEXT_DOCTORATE
-from admission.ddd import DUREE_MAXIMALE_PROGRAMME, DUREE_MINIMALE_PROGRAMME
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
@@ -78,7 +76,7 @@ from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd.interface import BusinessException
 
 from .base import BaseAdmission, BaseAdmissionQuerySet, admission_directory_path
-from .checklist import RefusalReason
+from .checklist import DoctorateRefusalReason, RefusalReason
 from .mixins import DocumentCopyModelMixin
 
 __all__ = [
@@ -437,6 +435,12 @@ class DoctorateAdmission(DocumentCopyModelMixin, BaseAdmission):
     )
 
     # CDD & SIC approval
+    cdd_refusal_certificate = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('Refusal certificate of the CDD'),
+        mimetypes=[PDF_MIME_TYPE],
+    )
     cdd_approval_certificate = FileField(
         blank=True,
         upload_to=admission_directory_path,
@@ -458,7 +462,7 @@ class DoctorateAdmission(DocumentCopyModelMixin, BaseAdmission):
     refusal_reasons = models.ManyToManyField(
         blank=True,
         related_name='+',
-        to='admission.RefusalReason',
+        to='admission.DoctorateRefusalReason',
         verbose_name=_('Refusal reasons'),
     )
     other_refusal_reasons = ArrayField(
@@ -849,7 +853,10 @@ class PropositionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
             .prefetch_related(
                 Prefetch(
                     'refusal_reasons',
-                    queryset=RefusalReason.objects.select_related('category').order_by('category__order', 'order'),
+                    queryset=DoctorateRefusalReason.objects.select_related('category').order_by(
+                        'category__order',
+                        'order',
+                    ),
                 ),
             )
         )

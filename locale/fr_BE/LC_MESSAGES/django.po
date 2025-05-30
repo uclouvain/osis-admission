@@ -1188,6 +1188,9 @@ msgstr "Commentaire de la CDD pour le SIC"
 msgid "CDD decision"
 msgstr "Décision CDD"
 
+msgid "CDD decision: refusal"
+msgstr "Décision de la CDD : refus"
+
 msgid "CDD process"
 msgstr "Traitement de la CDD"
 
@@ -2368,6 +2371,18 @@ msgstr "Formation doctorale"
 msgid "Doctorate enrolment applications"
 msgstr "Demandes d'inscription en doctorat"
 
+msgid "Doctorate refusal reason"
+msgstr "Motif de refus pour doctorat"
+
+msgid "Doctorate refusal reason categories"
+msgstr "Catégories des motifs de refus pour doctorat"
+
+msgid "Doctorate refusal reason category"
+msgstr "Catégorie d'un motif de refus pour doctorat"
+
+msgid "Doctorate refusal reasons"
+msgstr "Motifs de refus pour doctorat"
+
 msgid "Doctorate thesis field"
 msgstr "Domaine de la thèse de doctorat"
 
@@ -2703,11 +2718,6 @@ msgid ""
 msgstr ""
 "E-mail envoyé au candidat lorsque la CDD approuve une proposition en "
 "formation doctorale d'un candidat ayant un diplôme belge."
-
-msgid "Email sent to the candidate when the CDD refuses a doctorate admission."
-msgstr ""
-"E-mail envoyé au candidat lorsque la CDD refuse une proposition en formation "
-"doctorale."
 
 msgid ""
 "Email sent to the candidate when the faculty approve the application with "
@@ -5874,6 +5884,9 @@ msgstr "Attestation de refus SIC"
 msgid "Refusal certificate of faculty"
 msgstr "Attestation de refus facultaire"
 
+msgid "Refusal certificate of the CDD"
+msgstr "Attestation de refus de la CDD"
+
 msgid "Refusal document link"
 msgstr "Lien du document de refus"
 
@@ -7446,6 +7459,17 @@ msgid ""
 msgstr ""
 "Ce document ne représente pas un engagement de prise en charge ou d'aide "
 "financière de la part de l'UCLouvain."
+
+msgid ""
+"This document is an internal document containing the details of the CDD's "
+"decision. Under no circumstances will it be sent in this form to the "
+"candidate. The candidate will receive a letter from SIC containing the "
+"various details of the CDD's decision."
+msgstr ""
+"Ce document est un document interne qui reprend les éléments de la décision "
+"de la CDD. Il n’est en aucun cas transmis sous cette forme au candidat ou à "
+"la candidate. Le ou la candidat·e recevra un courrier de SIC qui insérera "
+"les divers éléments de la décision de la CDD."
 
 msgid ""
 "This document is an internal document containing the details of the "

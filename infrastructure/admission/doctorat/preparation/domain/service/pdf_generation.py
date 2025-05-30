@@ -29,6 +29,8 @@ from typing import Dict, List, Optional, Union
 from django.conf import settings
 from django.utils import timezone, translation
 from django.utils.translation import override
+from osis_comment.models import CommentEntry
+from osis_history.models import HistoryEntry
 
 from admission.constants import ORDERED_CAMPUSES_UUIDS
 from admission.ddd.admission.doctorat.preparation.commands import (
@@ -38,6 +40,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeAdmission,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
+    OngletsChecklist,
     TypeDeRefus,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
@@ -192,6 +195,43 @@ class PDFGeneration(IPDFGeneration):
             'groupe_supervision': groupe_supervision_dto,
             'cdd_president': cdd_president[0] if cdd_president else None,
         }
+
+    @classmethod
+    @override(settings.LANGUAGE_CODE)
+    def generer_attestation_refus_cdd(
+        cls,
+        proposition: Proposition,
+        gestionnaire: PersonneConnueUclDTO,
+        proposition_repository: IPropositionRepository,
+        unites_enseignement_translator: IUnitesEnseignementTranslator,
+    ) -> None:
+        # Get the information to display on the pdf
+        proposition_dto = proposition_repository.get_dto_for_gestionnaire(
+            proposition.entity_id,
+            unites_enseignement_translator,
+        )
+
+        cdd_decision_comment = CommentEntry.objects.filter(
+            object_uuid=proposition_dto.uuid,
+            tags=[OngletsChecklist.decision_cdd.name, 'CDD_FOR_SIC'],
+        ).first()
+
+        # Generate the pdf
+        token = admission_generate_pdf(
+            admission=None,
+            template='admission/exports/cdd_refusal_certificate.html',
+            filename='cdd_refusal_certificate.pdf',
+            context={
+                'proposition': proposition_dto,
+                'manager': gestionnaire,
+                'cdd_decision_comment': cdd_decision_comment,
+            },
+            stylesheets=WeasyprintStylesheets.get_stylesheets(),
+            author=gestionnaire.matricule,
+        )
+
+        # Store the token of the pdf
+        proposition.certificat_refus_cdd = [token]
 
     @classmethod
     @override(settings.LANGUAGE_CODE)

@@ -35,6 +35,7 @@ from admission.ddd.admission.doctorat.preparation.commands import (
     EnvoyerPropositionAuSicLorsDeLaDecisionCddCommand,
     RefuserPropositionParCddCommand,
     SpecifierInformationsAcceptationPropositionParCddCommand,
+    SpecifierMotifsRefusPropositionParCDDCommand,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_CDD_POUR_DECISION,
@@ -49,12 +50,12 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
 from admission.ddd.admission.doctorat.preparation.dtos import PromoteurDTO
 from admission.forms.admission.checklist import (
     DoctorateCddDecisionApprovalForm,
+    DoctorateFacDecisionRefusalForm,
     SendEMailForm,
 )
 from admission.mail_templates import (
     ADMISSION_EMAIL_CDD_APPROVAL_DOCTORATE_WITH_BELGIAN_DIPLOMA,
     ADMISSION_EMAIL_CDD_APPROVAL_DOCTORATE_WITHOUT_BELGIAN_DIPLOMA,
-    ADMISSION_EMAIL_CDD_REFUSAL_DOCTORATE,
 )
 from admission.utils import get_access_titles_names, get_salutation_prefix
 from admission.views.common.detail_tabs.checklist import change_admission_status
@@ -93,6 +94,7 @@ class CddDecisionMixin(CheckListDefaultContextMixin):
             STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD
         )
         context['is_sic'] = self.is_sic
+        context['fac_decision_refusal_form'] = self.cdd_decision_refusal_form
 
         context.setdefault('history_entries', {})
 
@@ -123,27 +125,12 @@ class CddDecisionMixin(CheckListDefaultContextMixin):
         }
 
         if self.request.method == 'GET':
-            # Load the email template
-            subject, body = get_email(
-                template_identifier=ADMISSION_EMAIL_CDD_REFUSAL_DOCTORATE,
-                language=self.proposition.langue_contact_candidat,
-                proposition_dto=self.proposition,
-                extra_tokens={
-                    'greetings': get_salutation_prefix(self.admission.candidate),
-                    'doctoral_commission': self.management_entity_title,
-                    'sender_name': f'{self.request.user.person.first_name} {self.request.user.person.last_name}',
-                },
-            )
-
-            form_kwargs['initial'] = {
-                'subject': subject,
-                'body': body,
-            }
+            form_kwargs['initial'] = {'reasons': self.admission_refusal_reasons}
 
         else:
             form_kwargs['data'] = self.request.POST
 
-        return SendEMailForm(**form_kwargs)
+        return DoctorateFacDecisionRefusalForm(**form_kwargs)
 
     @cached_property
     def cdd_decision_approval_final_form(self):
@@ -277,7 +264,12 @@ class CddDecisionSendToSicView(
     def form_valid(self, form):
         try:
             message_bus_instance.invoke(
-                EnvoyerPropositionAuSicLorsDeLaDecisionCddCommand(
+                RefuserPropositionParCddCommand(
+                    uuid_proposition=self.admission_uuid,
+                    gestionnaire=self.request.user.person.global_id,
+                )
+                if self.request.GET.get('refusal') and self.is_fac
+                else EnvoyerPropositionAuSicLorsDeLaDecisionCddCommand(
                     uuid_proposition=self.admission_uuid,
                     gestionnaire=self.request.user.person.global_id,
                     envoi_par_cdd=self.is_fac,
@@ -303,7 +295,15 @@ class CddRefusalDecisionView(
     urlpatterns = {'cdd-decision-refusal': 'cdd-decision/cdd-decision-refusal'}
     template_name = 'admission/doctorate/includes/checklist/cdd_decision_refusal_form.html'
     htmx_template_name = 'admission/doctorate/includes/checklist/cdd_decision_refusal_form.html'
-    permission_required = 'admission.checklist_change_faculty_decision'
+
+    def get_permission_required(self):
+        return (
+            (
+                'admission.checklist_faculty_decision_transfer_to_sic_with_decision'
+                if 'save_transfer' in self.request.POST
+                else 'admission.checklist_change_faculty_decision'
+            ),
+        )
 
     def get_form(self, form_class=None):
         return self.cdd_decision_refusal_form
@@ -311,14 +311,21 @@ class CddRefusalDecisionView(
     def form_valid(self, form):
         try:
             message_bus_instance.invoke(
-                RefuserPropositionParCddCommand(
+                SpecifierMotifsRefusPropositionParCDDCommand(
                     uuid_proposition=self.admission_uuid,
+                    uuids_motifs=form.cleaned_data['reasons'],
+                    autres_motifs=form.cleaned_data['other_reasons'],
                     gestionnaire=self.request.user.person.global_id,
-                    objet_message=form.cleaned_data['subject'],
-                    corps_message=form.cleaned_data['body'],
                 )
             )
-            self.htmx_refresh = True
+            if 'save-transfer' in self.request.POST:
+                message_bus_instance.invoke(
+                    RefuserPropositionParCddCommand(
+                        uuid_proposition=self.admission_uuid,
+                        gestionnaire=self.request.user.person.global_id,
+                    )
+                )
+                self.htmx_refresh = True
         except MultipleBusinessExceptions as multiple_exceptions:
             self.message_on_failure = multiple_exceptions.exceptions.pop().message
             return self.form_invalid(form)
