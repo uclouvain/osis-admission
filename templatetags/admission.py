@@ -889,6 +889,7 @@ def checklist_state_button(context, **kwargs):
             'open_modal',
             'htmx_post',
             'sub_id',
+            'replace_extra',
         ]
     }
 

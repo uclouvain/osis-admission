@@ -435,6 +435,17 @@ onglet_specificites_formation = ConfigurationOngletChecklist(
             statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
         ),
         ConfigurationStatutChecklist(
+            identifiant='AVIS_EXPERT',
+            libelle=_('Expert opinion'),
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='A_COMPLETER',
+            libelle=_('To be completed'),
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+            extra={'to_be_completed': '1'},
+        ),
+        ConfigurationStatutChecklist(
             identifiant='A_COMPLETER_APRES_INSCRIPTION',
             libelle=_('To be completed after application'),
             statut=ChoixStatutChecklist.GEST_BLOCAGE_ULTERIEUR,
@@ -443,6 +454,7 @@ onglet_specificites_formation = ConfigurationOngletChecklist(
             identifiant='INSUFFISANT',
             libelle=_('Insufficient'),
             statut=ChoixStatutChecklist.GEST_BLOCAGE,
+            extra={'insufficient': '1'},
         ),
         ConfigurationStatutChecklist(
             identifiant='SUFFISANT',
