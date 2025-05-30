@@ -3552,10 +3552,10 @@ msgstr "Je suis réfugié·e"
 
 msgid ""
 "I am a refugee, an asylum seeker, or a stateless person or have subsidiary/"
-"temporary protection (Belgian student status category 2)"
+"temporary protection in Belgium (Belgian student status category 2)"
 msgstr ""
 "Je suis réfugié·e, demandeur d'asile, apatride, ou je bénéficie d’une "
-"protection subsidiaire/temporaire (assimilation 2)"
+"protection subsidiaire/temporaire en Belgique (assimilation 2)"
 
 msgid "I am a stateless person"
 msgstr "Je suis apatride"
