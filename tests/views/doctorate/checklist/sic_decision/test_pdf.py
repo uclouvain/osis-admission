@@ -29,6 +29,7 @@ from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import TestCase
 
+from admission.constants import ORDERED_CAMPUSES_UUIDS
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
     ENTITY_CDE,
 )
@@ -61,6 +62,7 @@ from admission.tests.factories.roles import (
     SicManagementRoleFactory,
 )
 from admission.tests.views.doctorate.checklist.sic_decision.base import SicPatchMixin
+from base.models.enums.organization_type import MAIN
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -83,6 +85,8 @@ class SicDecisionPdfPreviewViewTestCase(SicPatchMixin, TestCase):
         cls.training = DoctorateFactory(
             management_entity=cls.first_doctoral_commission,
             academic_year=cls.academic_years[0],
+            enrollment_campus__uuid=ORDERED_CAMPUSES_UUIDS['LOUVAIN_LA_NEUVE_UUID'],
+            enrollment_campus__organization__type=MAIN,
         )
 
         cls.sic_manager_user = SicManagementRoleFactory(entity=cls.first_doctoral_commission).person.user
@@ -171,12 +175,32 @@ class SicDecisionPdfPreviewViewTestCase(SicPatchMixin, TestCase):
             pdf='accord',
         )
 
+        cls.refusal_url = resolve_url(
+            'admission:doctorate:sic-decision-pdf-preview',
+            uuid=cls.admission.uuid,
+            pdf='refus',
+        )
+
     def test_pdf_preview_is_forbidden_with_fac_user(self):
         self.client.force_login(user=self.fac_manager_user)
 
         response = self.client.get(self.url, **self.default_headers)
 
         self.assertEqual(response.status_code, 403)
+
+    def test_refusal_pdf_preview(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        response = self.client.get(self.refusal_url, **self.default_headers)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, 'http://dummyurlfile/a-token')
+
+        self.get_pdf_from_template_patcher.assert_called_once()
+
+        # Check the documents names
+        call_args = self.get_pdf_from_template_patcher.call_args_list[0]
+        self.assertEqual(call_args[0][0], 'admission/exports/sic_refusal_certificate.html')
 
     def test_pdf_preview(self):
         self.client.force_login(user=self.sic_manager_user)

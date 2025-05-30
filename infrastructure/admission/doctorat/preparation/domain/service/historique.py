@@ -467,6 +467,26 @@ class Historique(IHistorique):
         )
 
     @classmethod
+    def historiser_specification_motifs_refus_sic(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+        statut_original: ChoixStatutPropositionDoctorale,
+    ):
+        if statut_original == proposition.statut:
+            return
+
+        gestionnaire_dto = PersonneConnueUclTranslator().get(matricule=gestionnaire)
+
+        add_history_entry(
+            proposition.entity_id.uuid,
+            'Des motifs de refus ont été spécifiés par SIC.',
+            'Refusal reasons have been specified by SIC.',
+            '{gestionnaire_dto.prenom} {gestionnaire_dto.nom}'.format(gestionnaire_dto=gestionnaire_dto),
+            tags=['proposition', 'sic-decision', 'specify-refusal-reasons', 'status-changed'],
+        )
+
+    @classmethod
     def historiser_specification_informations_acceptation_sic(
         cls,
         proposition: Proposition,
