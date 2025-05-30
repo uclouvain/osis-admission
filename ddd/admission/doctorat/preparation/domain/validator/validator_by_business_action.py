@@ -774,6 +774,21 @@ class RefuserParSicAValiderValidatorList(TwoStepsMultipleBusinessExceptionListVa
 
 
 @attr.dataclass(frozen=True, slots=True)
+class RefuserParSicValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    statut: ChoixStatutPropositionDoctorale
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldSicPeutDonnerDecision(
+                statut=self.statut,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
 class RedonnerLaMainAuCandidatValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     statut: ChoixStatutPropositionDoctorale
 

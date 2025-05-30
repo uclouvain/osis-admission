@@ -4,11 +4,11 @@ from django.db import migrations
 from osis_mail_template import MailTemplateMigration
 
 from admission.mail_templates.checklist.doctorate import (
-    ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS_DOCTORATE,
     ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CANDIDATE_DOCTORATE,
-    ADMISSION_EMAIL_SIC_REFUSAL_DOCTORATE,
+    ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS_DOCTORATE,
     ADMISSION_EMAIL_SIC_APPROVAL_DOCTORATE,
     ADMISSION_EMAIL_SIC_APPROVAL_EU_DOCTORATE,
+    ADMISSION_EMAIL_SIC_REFUSAL_DOCTORATE,
     INSCRIPTION_EMAIL_SIC_APPROVAL_DOCTORATE,
 )
 
@@ -31,10 +31,10 @@ class Migration(migrations.Migration):
             contents={
                 'en': '''<p>Dear colleagues,</p>
 
-                <p>                
+                <p>
                     A dossier has been submitted to you to check the authenticity of the diplomas.
-                    This is the dossier of {candidate_last_name}, {candidate_first_name}, 
-                    <a href="{admission_link_back}" target="_blank">{admission_reference}</a>, 
+                    This is the dossier of {candidate_last_name}, {candidate_first_name},
+                    <a href="{admission_link_back}" target="_blank">{admission_reference}</a>,
                     {candidate_nationality_country}.
                     Thank you for your cooperation.
                 </p>
@@ -45,10 +45,10 @@ class Migration(migrations.Migration):
                 ''',
                 'fr-be': '''<p>Cher·ère·s Collègues,</p>
 
-                <p>                
+                <p>
                     Un dossier vous est soumis en vérification afin de vérifier l’authenticité des diplômes.
-                    Il s'agit du dossier de {candidate_last_name}, {candidate_first_name}, 
-                    <a href="{admission_link_back}" target="_blank">{admission_reference}</a>, 
+                    Il s'agit du dossier de {candidate_last_name}, {candidate_first_name},
+                    <a href="{admission_link_back}" target="_blank">{admission_reference}</a>,
                     {candidate_nationality_country}.
                     Nous vous remercions pour votre bonne collaboration.
                 </p>
@@ -71,22 +71,22 @@ class Migration(migrations.Migration):
                 'en': '''<p>Dear Sir/Madam,</p>
 
                  <p>
-                     As part of your application for admission to the {training_title} ({training_campus}) - 
-                     {training_acronym} programme and as specified in the online application you completed, we are 
+                     As part of your application for admission to the {training_title} ({training_campus}) -
+                     {training_acronym} programme and as specified in the online application you completed, we are
                      authenticating your previous academic record.
                  </p>
 
                  <p>
-                     Without a response from the various institutions you have attended, we will not be able to proceed 
+                     Without a response from the various institutions you have attended, we will not be able to proceed
                      with your application.
-                 </p>     
+                 </p>
 
                 <p>
                     We are working hard to obtain authentication of your background as soon as possible.
                 </p>
 
                 <p>
-                    However, further analysis of your application and responding to your application for admission are 
+                    However, further analysis of your application and responding to your application for admission are
                     now dependent on the responsiveness of your previous educational institutions.
                 </p>
 
@@ -101,22 +101,22 @@ class Migration(migrations.Migration):
                 'fr-be': '''<p>Madame, Monsieur,</p>
 
                  <p>
-                     Dans le cadre de votre demande d’admission pour le programme {training_title} ({training_campus}) - 
-                     {training_acronym} et comme précisé dans la demande en ligne que vous avez complétée, nous 
+                     Dans le cadre de votre demande d’admission pour le programme {training_title} ({training_campus}) -
+                     {training_acronym} et comme précisé dans la demande en ligne que vous avez complétée, nous
                      procédons à une authentification de votre parcours académique antérieur.
                  </p>
 
                  <p>
-                     Sans réponse de la part des différents établissements que vous avez fréquentés, il ne nous sera 
+                     Sans réponse de la part des différents établissements que vous avez fréquentés, il ne nous sera
                      pas possible de donner suite à votre demande d’admission.
-                 </p>     
+                 </p>
 
                 <p>
                      Nous nous mobilisons pour obtenir l’authentification de votre parcours dans les meilleurs délais.
                 </p>
 
                 <p>
-                   Cependant, la suite de l’analyse de votre dossier et le délai de réponse à votre demande d’admission 
+                   Cependant, la suite de l’analyse de votre dossier et le délai de réponse à votre demande d’admission
                    sont maintenant tributaires de la réactivité de vos établissements d’enseignement antérieurs.
                 </p>
 
@@ -138,10 +138,10 @@ class Migration(migrations.Migration):
             },
             contents={
                 'en': '',
-                'fr-be': '''<p>A l'attention de {candidate},</p>
+                'fr-be': '''<p>A l'attention de {candidate_first_name} {candidate_last_name},</p>
 
-                <p>Votre demande d'inscription à l'année académique {academic_year} au programme {admission_training}
-                  nous est bien parvenue et nous vous en remercions.</p>
+                <p>Votre demande d'inscription à l'année académique {academic_year} au programme {training_acronym} /
+                  {training_title} nous est bien parvenue et nous vous en remercions.</p>
 
                 <p>Après analyse de votre dossier, nous sommes au regret de vous informer que votre demande d'inscription n'a
                   pu faire l'objet d'une réponse favorable.</p>
@@ -167,18 +167,18 @@ class Migration(migrations.Migration):
                 <br>
 
                 <p>
-                    We are pleased to inform you that you are authorised to enrol in the {training_title} 
+                    We are pleased to inform you that you are authorised to enrol in the {training_title}
                     ({training_campus}) - {training_acronym} for the {academic_year} academic year.
                 </p>
 
                 <p>
-                    Please download your enrolment authorisation which contains all the relevant information and any 
+                    Please download your enrolment authorisation which contains all the relevant information and any
                     conditions that need to be met before registering.
                 </p>
 
                 <p style="text-align: center; padding-top: 5px; padding-bottom: 10px;">
                     <span style="color: #dc3545; border: 1px solid #dc3545; padding: 10px; border-radius: 10px;">
-                        Download: 
+                        Download:
                         <a
                             href="{enrollment_authorization_document_link}"
                             target="_blank"
@@ -188,14 +188,14 @@ class Migration(migrations.Migration):
                 </p>
 
                 <p>
-                    If you require a student visa, please use the enrolment authorisation and the visa application to 
-                    apply via your local Belgian embassy or consulate. For more information, 
+                    If you require a student visa, please use the enrolment authorisation and the visa application to
+                    apply via your local Belgian embassy or consulate. For more information,
                     consult the <a href="https://dofi.ibz.be/en" target="_blank" style="color: #0000EE;">Belgian Immigration Office</a>.
                 </p>
 
                 <p style="text-align: center; padding-top: 5px; padding-bottom: 10px;">
                     <span style="color: #dc3545; border: 1px solid #dc3545; padding: 10px; border-radius: 10px;">
-                        Download: 
+                        Download:
                         <a
                             href="{visa_application_document_link}"
                             target="_blank"
@@ -205,30 +205,30 @@ class Migration(migrations.Migration):
                 </p>
 
                 <p>
-                    After you have obtained your visa, please send us the signed enrolment authorisation and any 
-                    additional documents to the email address below. These documents are required to finalise your 
+                    After you have obtained your visa, please send us the signed enrolment authorisation and any
+                    additional documents to the email address below. These documents are required to finalise your
                     enrolment.
                 </p>
 
                 <p style="text-align: center; padding-top: 5px; padding-bottom: 10px;">
                     <span style="color: #0000EE; border: 1px solid #0000EE; padding: 10px; border-radius: 10px;">
-                        Send to: 
+                        Send to:
                         <a href="mailto:{admission_email}" target="_blank" style="color: #0000EE;">{admission_email}</a>
                     </span>
                 </p>
 
                 <p>
-                    For enrolment questions, please see 
+                    For enrolment questions, please see
                     <a href="https://uclouvain.be/en/study/inscriptions" target="_blank" style="color: #0000EE;">our website</a>.
                 </p>
 
                 <p>
-                    The <a href="https://uclouvain.be/en/study/academic-calendar-1.html" target="_blank" style="color: #0000EE;">academic year</a> 
+                    The <a href="https://uclouvain.be/en/study/academic-calendar-1.html" target="_blank" style="color: #0000EE;">academic year</a>
                     begins on {academic_year_start_date}.
                 </p>
 
                 <p>
-                    For questions concerning your arrival in Belgium, please see 
+                    For questions concerning your arrival in Belgium, please see
                     <a href="https://uclouvain.be/en/study/inscriptions/welcome-to-international-students.html" target="_blank" style="color: #0000EE;">
                     our international students webpage</a>.
                 </p>
@@ -250,18 +250,18 @@ class Migration(migrations.Migration):
                 <br>
 
                 <p>
-                    Nous avons le plaisir de vous informer que vous êtes autorisé·e à vous inscrire au programme 
+                    Nous avons le plaisir de vous informer que vous êtes autorisé·e à vous inscrire au programme
                     {training_title} ({training_campus}) - {training_acronym} pour l'année académique {academic_year}.
                 </p>
 
                 <p>
-                    Veuillez télécharger votre autorisation d'inscription qui comprend toutes les informations utiles et 
+                    Veuillez télécharger votre autorisation d'inscription qui comprend toutes les informations utiles et
                     les éventuelles conditions à remplir préalablement à votre inscription.
                 </p>
 
                 <p style="text-align: center; padding-top: 5px; padding-bottom: 10px;">
                     <span style="color: #dc3545; border: 1px solid #dc3545; padding: 10px; border-radius: 10px;">
-                        Télécharger : 
+                        Télécharger :
                         <a
                             href="{enrollment_authorization_document_link}"
                             target="_blank"
@@ -271,15 +271,15 @@ class Migration(migrations.Migration):
                 </p>
 
                 <p>
-                    Si vous êtes concerné·e par l'obtention d'un visa d'études, l'autorisation d'inscription accompagnée du 
-                    formulaire pour la demande de visa vous permettent d'entamer ces démarches auprès de l'ambassade ou du 
-                    consulat de Belgique local·e. Nous vous invitons à consulter le 
+                    Si vous êtes concerné·e par l'obtention d'un visa d'études, l'autorisation d'inscription accompagnée du
+                    formulaire pour la demande de visa vous permettent d'entamer ces démarches auprès de l'ambassade ou du
+                    consulat de Belgique local·e. Nous vous invitons à consulter le
                     <a href="https://dofi.ibz.be/fr" target="_blank" style="color: #0000EE;">site officiel de l'Office des étrangers</a>.
                 </p>
 
                 <p style="text-align: center; padding-top: 5px; padding-bottom: 10px;">
                     <span style="color: #dc3545; border: 1px solid #dc3545; padding: 10px; border-radius: 10px;">
-                        Télécharger : 
+                        Télécharger :
                         <a
                             href="{visa_application_document_link}"
                             target="_blank"
@@ -289,14 +289,14 @@ class Migration(migrations.Migration):
                 </p>
 
                 <p>
-                    Afin de finaliser votre inscription à l'Université, nous vous remercions de nous transmettre 
-                    l'autorisation signée ainsi que les éventuels documents complémentaires à l'adresse ci-dessous. 
+                    Afin de finaliser votre inscription à l'Université, nous vous remercions de nous transmettre
+                    l'autorisation signée ainsi que les éventuels documents complémentaires à l'adresse ci-dessous.
                     Nous vous rappelons qu'il est impératif de nous renvoyer ces documents après l'obtention de votre visa.
                 </p>
 
                 <p style="text-align: center; padding-top: 5px; padding-bottom: 10px;">
                     <span style="color: #0000EE; border: 1px solid #0000EE; padding: 10px; border-radius: 10px;">
-                        Envoyer à : 
+                        Envoyer à :
                         <a href="mailto:{admission_email}" target="_blank" style="color: #0000EE;">
                             {admission_email}
                         </a>
@@ -304,19 +304,19 @@ class Migration(migrations.Migration):
                 </p>
 
                 <p>
-                    Pour toute question relative à l'inscription, nous vous invitons à consulter 
+                    Pour toute question relative à l'inscription, nous vous invitons à consulter
                     <a href="https://uclouvain.be/fr/etudier/inscriptions" target="_blank" style="color: #0000EE;">notre site</a>.
                 </p>
 
                 <p>
-                    Nous vous informons que le début de l'année académique est fixé au {academic_year_start_date} 
-                    (<a href="https://uclouvain.be/fr/etudier/calendrier-academique.html" target="_blank" style="color: #0000EE;">Calendrier 
+                    Nous vous informons que le début de l'année académique est fixé au {academic_year_start_date}
+                    (<a href="https://uclouvain.be/fr/etudier/calendrier-academique.html" target="_blank" style="color: #0000EE;">Calendrier
                     académique</a>).
                 </p>
 
                 <p>
-                    Si vous avez des questions concernant votre arrivée en Belgique, vous avez à votre disposition 
-                    toute une série d'informations sur 
+                    Si vous avez des questions concernant votre arrivée en Belgique, vous avez à votre disposition
+                    toute une série d'informations sur
                     <a href="https://uclouvain.be/fr/etudier/inscriptions/bienvenue-aux-etudiants-internationaux-et-aux-etudiantes-internationales.html" target="_blank" style="color: #0000EE;">
                     notre page</a>.
                 </p>
@@ -347,18 +347,18 @@ class Migration(migrations.Migration):
                 <br>
 
                 <p>
-                    We are pleased to inform you that you are authorised to enrol in the {training_title} 
+                    We are pleased to inform you that you are authorised to enrol in the {training_title}
                     ({training_campus}) - {training_acronym} for the {academic_year} academic year.
                 </p>
 
                 <p>
-                    Please download your enrolment authorisation which contains all the relevant information and any 
+                    Please download your enrolment authorisation which contains all the relevant information and any
                     conditions that need to be met before registering.
                 </p>
 
                 <p style="text-align: center; padding-top: 5px; padding-bottom: 10px;">
                     <span style="color: #dc3545; border: 1px solid #dc3545; padding: 10px; border-radius: 10px;">
-                        Download: 
+                        Download:
                         <a
                             href="{enrollment_authorization_document_link}"
                             target="_blank"
@@ -368,30 +368,30 @@ class Migration(migrations.Migration):
                 </p>
 
                 <p>
-                    Please send us the signed enrolment authorisation and any 
-                    additional documents to the email address below. These documents are required to finalise your 
+                    Please send us the signed enrolment authorisation and any
+                    additional documents to the email address below. These documents are required to finalise your
                     enrolment.
                 </p>
 
                 <p style="text-align: center; padding-top: 5px; padding-bottom: 10px;">
                     <span style="color: #0000EE; border: 1px solid #0000EE; padding: 10px; border-radius: 10px;">
-                        Send to: 
+                        Send to:
                         <a href="mailto:{admission_email}" target="_blank" style="color: #0000EE;">{admission_email}</a>
                     </span>
                 </p>
 
                 <p>
-                    For enrolment questions, please see 
+                    For enrolment questions, please see
                     <a href="https://uclouvain.be/en/study/inscriptions" target="_blank" style="color: #0000EE;">our website</a>.
                 </p>
 
                 <p>
-                    The <a href="https://uclouvain.be/en/study/academic-calendar-1.html" target="_blank" style="color: #0000EE;">academic year</a> 
+                    The <a href="https://uclouvain.be/en/study/academic-calendar-1.html" target="_blank" style="color: #0000EE;">academic year</a>
                     begins on {academic_year_start_date}.
                 </p>
 
                 <p>
-                    For questions concerning your arrival in Belgium, please see 
+                    For questions concerning your arrival in Belgium, please see
                     <a href="https://uclouvain.be/en/study/inscriptions/welcome-to-international-students.html" target="_blank" style="color: #0000EE;">
                     our international students webpage</a>.
                 </p>
@@ -413,18 +413,18 @@ class Migration(migrations.Migration):
                 <br>
 
                 <p>
-                    Nous avons le plaisir de vous informer que vous êtes autorisé·e à vous inscrire au programme 
+                    Nous avons le plaisir de vous informer que vous êtes autorisé·e à vous inscrire au programme
                     {training_title} ({training_campus}) - {training_acronym} pour l'année académique {academic_year}.
                 </p>
 
                 <p>
-                    Veuillez télécharger votre autorisation d'inscription qui comprend toutes les informations utiles et 
+                    Veuillez télécharger votre autorisation d'inscription qui comprend toutes les informations utiles et
                     les éventuelles conditions à remplir préalablement à votre inscription.
                 </p>
 
                 <p style="text-align: center; padding-top: 5px; padding-bottom: 10px;">
                     <span style="color: #dc3545; border: 1px solid #dc3545; padding: 10px; border-radius: 10px;">
-                        Télécharger : 
+                        Télécharger :
                         <a
                             href="{enrollment_authorization_document_link}"
                             target="_blank"
@@ -434,13 +434,13 @@ class Migration(migrations.Migration):
                 </p>
 
                 <p>
-                    Afin de finaliser votre inscription à l'Université, nous vous remercions de nous transmettre 
+                    Afin de finaliser votre inscription à l'Université, nous vous remercions de nous transmettre
                     l'autorisation signée ainsi que les éventuels documents complémentaires à l'adresse ci-dessous.
                 </p>
 
                 <p style="text-align: center; padding-top: 5px; padding-bottom: 10px;">
                     <span style="color: #0000EE; border: 1px solid #0000EE; padding: 10px; border-radius: 10px;">
-                        Envoyer à : 
+                        Envoyer à :
                         <a href="mailto:{admission_email}" target="_blank" style="color: #0000EE;">
                             {admission_email}
                         </a>
@@ -448,19 +448,19 @@ class Migration(migrations.Migration):
                 </p>
 
                 <p>
-                    Pour toute question relative à l'inscription, nous vous invitons à consulter 
+                    Pour toute question relative à l'inscription, nous vous invitons à consulter
                     <a href="https://uclouvain.be/fr/etudier/inscriptions" target="_blank" style="color: #0000EE;">notre site</a>.
                 </p>
 
                 <p>
-                    Nous vous informons que le début de l'année académique est fixé au {academic_year_start_date} 
-                    (<a href="https://uclouvain.be/fr/etudier/calendrier-academique.html" target="_blank" style="color: #0000EE;">Calendrier 
+                    Nous vous informons que le début de l'année académique est fixé au {academic_year_start_date}
+                    (<a href="https://uclouvain.be/fr/etudier/calendrier-academique.html" target="_blank" style="color: #0000EE;">Calendrier
                     académique</a>).
                 </p>
 
                 <p>
-                    Si vous avez des questions concernant votre arrivée en Belgique, vous avez à votre disposition 
-                    toute une série d'informations sur 
+                    Si vous avez des questions concernant votre arrivée en Belgique, vous avez à votre disposition
+                    toute une série d'informations sur
                     <a href="https://uclouvain.be/fr/etudier/inscriptions/bienvenue-aux-etudiants-internationaux-et-aux-etudiantes-internationales.html" target="_blank" style="color: #0000EE;">
                     notre page</a>.
                 </p>
@@ -488,7 +488,7 @@ class Migration(migrations.Migration):
             },
             contents={
                 'en': '''<p>Your file number: {admission_reference}</p>
-                <p>Dear Prénom Nom,</p> 
+                <p>Dear Prénom Nom,</p>
                 <p>We have the pleasure of informing you that your application for enrolment for the {academic_year} academic year in the programme {training_title} [{training_acronym}] ({training_campus}) has been accepted.</p>
 
                 {contact_person_paragraph}

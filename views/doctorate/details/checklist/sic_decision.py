@@ -46,6 +46,7 @@ from admission.ddd.admission.doctorat.preparation.commands import (
     ApprouverAdmissionParSicCommand,
     ApprouverInscriptionParSicCommand,
     RecupererPdfTemporaireDecisionSicQuery,
+    RefuserPropositionParSicCommand,
     SpecifierBesoinDeDerogationSicCommand,
     SpecifierInformationsAcceptationInscriptionParSicCommand,
     SpecifierInformationsAcceptationPropositionParSicCommand,
@@ -74,11 +75,16 @@ from admission.forms.admission.checklist import (
     SicDecisionApprovalDocumentsForm,
     SicDecisionDerogationForm,
     SicDecisionFinalApprovalForm,
+    SicDecisionFinalRefusalForm,
+)
+from admission.infrastructure.admission.doctorat.preparation.domain.service.notification import (
+    EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN,
 )
 from admission.infrastructure.utils import CHAMPS_DOCUMENTS_EXPERIENCES_CURRICULUM
 from admission.mail_templates import (
     ADMISSION_EMAIL_SIC_APPROVAL_DOCTORATE,
     ADMISSION_EMAIL_SIC_APPROVAL_EU_DOCTORATE,
+    ADMISSION_EMAIL_SIC_REFUSAL_DOCTORATE,
     EMAIL_TEMPLATE_ENROLLMENT_GENERATED_NOMA_TOKEN,
     INSCRIPTION_EMAIL_SIC_APPROVAL_DOCTORATE,
 )
@@ -100,6 +106,7 @@ from admission.views.common.detail_tabs.checklist import (
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from admission.views.doctorate.details.checklist.mixins import (
     CheckListDefaultContextMixin,
+    get_email,
 )
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.mandate_type import MandateTypes
@@ -136,6 +143,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['sic_decision_refusal_form'] = self.sic_decision_refusal_form
+        context['sic_decision_refusal_final_form'] = self.sic_decision_refusal_final_form
         context['display_sic_decision_approval_info_panel'] = self.display_sic_decision_approval_info_panel()
 
         # Get information about the decision sending by the SIC if any and only in the final statuses
@@ -300,6 +308,37 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             .first()
         )
         return director
+
+    @cached_property
+    def sic_decision_refusal_final_form(self):
+        form_kwargs = {
+            'prefix': 'sic-decision-refusal-final',
+            'with_email': True,
+        }
+
+        if self.request.method == 'GET':
+            # Load the email template
+            subject, body = get_email(
+                template_identifier=ADMISSION_EMAIL_SIC_REFUSAL_DOCTORATE,
+                language=settings.LANGUAGE_CODE_FR,
+                proposition_dto=self.proposition,
+                extra_tokens={
+                    'greetings': get_salutation_prefix(self.admission.candidate, settings.LANGUAGE_CODE_FR),
+                    'doctoral_commission': self.proposition.doctorat.intitule_entite_gestion,
+                    'sender_name': f'{self.request.user.person.first_name} {self.request.user.person.last_name}',
+                    'document_link': EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN,
+                },
+            )
+
+            form_kwargs['initial'] = {
+                'subject': subject,
+                'body': body,
+            }
+
+        elif self.request.POST and 'sic-decision-refusal-final-submitted' in self.request.POST:
+            form_kwargs['data'] = self.request.POST
+
+        return SicDecisionFinalRefusalForm(**form_kwargs)
 
     @cached_property
     def sic_decision_approval_final_form(self):
@@ -602,6 +641,26 @@ class SicRefusalFinalDecisionView(
     template_name = 'admission/general_education/includes/checklist/sic_decision_refusal_final_form.html'
     htmx_template_name = 'admission/general_education/includes/checklist/sic_decision_refusal_final_form.html'
     permission_required = 'admission.checklist_change_sic_decision'
+
+    def get_form(self, form_class=None):
+        return self.sic_decision_refusal_final_form
+
+    def form_valid(self, form):
+        try:
+            message_bus_instance.invoke(
+                RefuserPropositionParSicCommand(
+                    uuid_proposition=self.admission_uuid,
+                    objet_message=form.cleaned_data.get('subject', ''),
+                    corps_message=form.cleaned_data.get('body', ''),
+                    auteur=self.request.user.person.global_id,
+                )
+            )
+            self.htmx_refresh = True
+        except MultipleBusinessExceptions as multiple_exceptions:
+            self.message_on_failure = multiple_exceptions.exceptions.pop().message
+            return self.form_invalid(form)
+
+        return super().form_valid(form)
 
 
 class SicApprovalFinalDecisionView(
