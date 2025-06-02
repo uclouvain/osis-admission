@@ -26,10 +26,8 @@
 
 import ast
 import datetime
-import uuid
 from typing import List
 from unittest import mock
-from unittest.mock import MagicMock
 
 import freezegun
 import mock
@@ -66,16 +64,9 @@ from admission.ddd.admission.dtos.liste import (
     DemandeRechercheDTO,
     VisualiseurAdmissionDTO,
 )
-from admission.ddd.admission.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.enums.liste import TardiveModificationReorientationFiltre
 from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.ddd.admission.formation_continue.commands import (
-    ListerDemandesQuery as ListerDemandesContinuesQuery,
-)
-from admission.ddd.admission.formation_continue.commands import (
-    RecupererResumePropositionQuery,
-)
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixEdition,
     ChoixInscriptionATitre,
@@ -85,9 +76,6 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     OngletsChecklist as OngletsChecklistContinue,
-)
-from admission.ddd.admission.formation_continue.dtos.liste import (
-    DemandeRechercheDTO as DemandeContinueRechercheDTO,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
@@ -99,10 +87,6 @@ from admission.ddd.admission.test.factory.profil import (
     AnneeExperienceAcademiqueDTOFactory,
     ExperienceAcademiqueDTOFactory,
     ExperienceNonAcademiqueDTOFactory,
-)
-from admission.models.base import (
-    AdmissionProfessionalValuatedExperiences,
-    BaseAdmission,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.admission_viewer import AdmissionViewerFactory
@@ -127,7 +111,10 @@ from admission.tests.factories.form_item import (
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.person import CompletePersonFactory
-from admission.tests.factories.roles import SicManagementRoleFactory
+from admission.tests.factories.roles import (
+    DoctorateCommitteeMemberRoleFactory,
+    SicManagementRoleFactory,
+)
 from admission.tests.factories.supervision import PromoterFactory
 from admission.views.excel_exports import (
     SPECIFIC_QUESTION_SEPARATOR,
@@ -140,8 +127,6 @@ from base.models.enums.civil_state import CivilState
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
 from base.models.enums.got_diploma import GotDiploma
-from base.models.enums.person_address_type import PersonAddressType
-from base.models.person_address import PersonAddress
 from base.tests import QueriesAssertionsMixin
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.campus import CampusFactory
@@ -1388,6 +1373,7 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
             person=cls.candidate,
             registration_id='01234567',
         )
+        cls.doctorate_committee_member = DoctorateCommitteeMemberRoleFactory().person.user
 
         cls.default_params = {
             'annee_academique': 2022,
@@ -1412,6 +1398,13 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
         response = self.client.get(self.url)
 
         self.assertEqual(response.status_code, 403)
+
+    def test_export_doctorate_committee_member(self):
+        self.client.force_login(user=self.doctorate_committee_member)
+
+        response = self.client.get(self.url)
+
+        self.assertRedirects(response, expected_url=self.list_url, fetch_redirect_response=False)
 
     def test_export_sic_management_user(self):
         self.client.force_login(user=self.sic_management_user)

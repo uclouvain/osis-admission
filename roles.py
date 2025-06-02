@@ -32,7 +32,7 @@ from admission.auth.roles.admission_reader import AdmissionReader
 from admission.auth.roles.ca_member import CommitteeMember
 from admission.auth.roles.candidate import Candidate
 from admission.auth.roles.central_manager import CentralManager
-from admission.auth.roles.doctorate_reader import DoctorateReader
+from admission.auth.roles.doctorate_committee_member import DoctorateCommitteeMember
 from admission.auth.roles.program_manager import ProgramManager
 from admission.auth.roles.promoter import Promoter
 from admission.auth.roles.sceb import Sceb
@@ -41,7 +41,7 @@ from osis_role import role
 
 role.role_manager.register(Candidate)
 role.role_manager.register(CommitteeMember)
-role.role_manager.register(DoctorateReader)
+role.role_manager.register(DoctorateCommitteeMember)
 role.role_manager.register(Promoter)
 role.role_manager.register(Sceb)
 role.role_manager.register(ProgramManager)
