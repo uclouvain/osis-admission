@@ -534,6 +534,9 @@ CORRESPONDANCE_CHAMPS_INFORMATIONS_ADDITIONNELLES = {
     'ATTESTATION_INSCRIPTION_REGULIERE': 'regular_registration_proof',
     'FORMULAIRE_REORIENTATION': 'reorientation_form',
     'FORMULAIRE_MODIFICATION_INSCRIPTION': 'registration_change_form',
+    'ATTESTATION_INSCRIPTION_REGULIERE_POUR_MODIFICATION_INSCRIPTION': (
+        'regular_registration_proof_for_registration_change'
+    ),
     'ADDITIONAL_DOCUMENTS': 'additional_documents',
 }
 

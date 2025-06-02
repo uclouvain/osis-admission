@@ -5090,6 +5090,9 @@ msgstr ""
 msgid "Proof of regular registration"
 msgstr ""
 
+msgid "Proof of regular registration for registration change"
+msgstr ""
+
 msgid "Proof of scholarship"
 msgstr ""
 

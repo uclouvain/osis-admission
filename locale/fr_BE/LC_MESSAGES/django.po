@@ -5656,6 +5656,9 @@ msgstr ""
 msgid "Proof of regular registration"
 msgstr "Attestation d'inscription régulière'"
 
+msgid "Proof of regular registration for registration change"
+msgstr "Attestation d'inscription régulière pour la modification d'inscription externe"
+
 msgid "Proof of scholarship"
 msgstr "Preuve d'octroi de la bourse"
 

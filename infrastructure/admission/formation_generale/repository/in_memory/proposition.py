@@ -331,6 +331,9 @@ class PropositionInMemoryRepository(
             elements_confirmation=proposition.elements_confirmation,
             est_modification_inscription_externe=proposition.est_modification_inscription_externe,
             formulaire_modification_inscription=proposition.formulaire_modification_inscription,
+            attestation_inscription_reguliere_pour_modification_inscription=(
+                proposition.attestation_inscription_reguliere_pour_modification_inscription
+            ),
             est_reorientation_inscription_externe=proposition.est_reorientation_inscription_externe,
             attestation_inscription_reguliere=proposition.attestation_inscription_reguliere,
             formulaire_reorientation=proposition.formulaire_reorientation,
