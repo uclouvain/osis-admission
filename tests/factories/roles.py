@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ import factory
 from admission.auth.roles.ca_member import CommitteeMember
 from admission.auth.roles.candidate import Candidate
 from admission.auth.roles.central_manager import CentralManager
-from admission.auth.roles.doctorate_reader import DoctorateReader
+from admission.auth.roles.doctorate_committee_member import DoctorateCommitteeMember
 from admission.auth.roles.program_manager import ProgramManager
 from admission.auth.roles.promoter import Promoter
 from admission.auth.roles.sic_management import SicManagement
@@ -59,10 +59,24 @@ class CaMemberRoleFactory(BaseFactory):
         django_get_or_create = ('person',)
 
 
-class DoctorateReaderRoleFactory(BaseFactory):
+class DoctorateCommitteeMemberRoleFactory(EducationGroupRoleModelFactory):
     class Meta:
-        model = DoctorateReader
+        model = DoctorateCommitteeMember
         django_get_or_create = ('person',)
+
+    education_group = None
+
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        if not kwargs:
+            kwargs = {}
+
+        if not kwargs.get('education_group'):
+            from admission.tests.factories.doctorate import DoctorateFactory
+
+            kwargs['education_group'] = DoctorateFactory().education_group
+
+        return super()._create(model_class, *args, **kwargs)
 
 
 class CentralManagerRoleFactory(BaseFactory):
