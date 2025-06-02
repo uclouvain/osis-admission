@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -59,10 +59,24 @@ class CaMemberRoleFactory(BaseFactory):
         django_get_or_create = ('person',)
 
 
-class DoctorateReaderRoleFactory(BaseFactory):
+class DoctorateReaderRoleFactory(EducationGroupRoleModelFactory):
     class Meta:
         model = DoctorateReader
         django_get_or_create = ('person',)
+
+    education_group = None
+
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        if not kwargs:
+            kwargs = {}
+
+        if not kwargs.get('education_group'):
+            from admission.tests.factories.doctorate import DoctorateFactory
+
+            kwargs['education_group'] = DoctorateFactory().education_group
+
+        return super()._create(model_class, *args, **kwargs)
 
 
 class CentralManagerRoleFactory(BaseFactory):

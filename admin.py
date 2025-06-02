@@ -927,7 +927,7 @@ class AdmissionTaskAdmin(admin.ModelAdmin):
 # Roles
 
 
-@admin.register(DoctorateReader, Sceb)
+@admin.register(Sceb)
 class HijackRoleModelAdmin(HijackUserAdminMixin, RoleModelAdmin):
     list_select_related = ['person__user']
 
@@ -1022,7 +1022,7 @@ class AdmissionReaderAdmin(HijackUserAdminMixin, EducationGroupRoleModelAdmin):
         return obj.person.user
 
 
-@admin.register(ProgramManager)
+@admin.register(ProgramManager, DoctorateReader)
 class ProgramManagerAdmin(HijackUserAdminMixin, EducationGroupRoleModelAdmin):
     list_select_related = ['person__user']
     list_display = ['person', 'education_group_most_recent_acronym']
