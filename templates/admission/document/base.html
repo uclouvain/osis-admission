@@ -327,10 +327,10 @@
                   }
 
                   {# Load the details of a document if the form has an impact on it #}
-                  if (customEventDetail.refresh_details) {
+                  if (customEventDetail.refresh_details || customEventDetail.delete_document) {
                       htmx.ajax(
                           'GET',
-                          base_details_url.replace('custom_identifier', customEventDetail.refresh_details),
+                          customEventDetail.refresh_details ? base_details_url.replace('custom_identifier', customEventDetail.refresh_details) : base_details_url,
                           {
                               target: '#document-details',
                               swap: 'outerHTML',
