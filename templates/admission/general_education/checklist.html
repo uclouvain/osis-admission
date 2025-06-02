@@ -462,12 +462,6 @@
       <div id="document-content" hx-indicator="#document-details">
         {% for tab, documents in documents.items %}
           <div role="tabpanel" class="documents-tab" id="{{ tab }}-documents">
-            <label for="{{ tab }}-documents-select">
-              {% translate 'Document' %}
-              {% if documents|has_free_documents %}
-                <span class="fa-solid fa-dice"></span>
-              {% endif %}
-            </label>
             <form
               method="GET"
               {# By default, the document identifier is submitted through an url param, but since we submit #}
@@ -501,6 +495,7 @@
                 <i class="fa-solid fa-angle-right"></i>
               </button>
             </form>
+            <label for="{{ tab }}-documents-select">{% translate 'Document' %}</label>
           </div>
         {% endfor %}
         {% include 'admission/document/document_detail.html' %}
@@ -599,11 +594,13 @@
               return formatDocumentOption(option, 'selected-document-option');
           }
 
-          $('.documents-select').select2({
+          const defaultDocumentSelect2Options = {
               templateResult: formatResultDocumentOption,
               templateSelection: formatSelectedDocumentOption,
               placeholder: '{% translate "No document" %}',
-          });
+          };
+
+          $('.documents-select').select2(defaultDocumentSelect2Options);
 
           function refreshDocumentsSelectButtons(jQuerySelect) {
               /*
@@ -878,6 +875,22 @@
                   if (event.originalEvent.detail.refresh_details) {
                       const selectedTab = window.location.hash || defaultTab;
                       const currentSelect = $(`${selectedTab}-documents-select`);
+                      currentSelect[0].dispatchEvent(new Event('select2:select'));
+                  }
+                  {# Remove the options related to the deleted document and choose the first one of the current tab #}
+                  else if (event.originalEvent.detail.delete_document) {
+                      const optionsToDelete = $(`#document-content option[value="${event.originalEvent.detail.delete_document}"]`);
+
+                      optionsToDelete.each(function() {
+                        const relatedSelect = $(this).parent('select');
+                        $(this).remove();
+                        relatedSelect.select2(defaultDocumentSelect2Options);
+                      });
+
+                      const selectedTab = window.location.hash || defaultTab;
+                      const currentSelect = $(`${selectedTab}-documents-select`);
+
+                      currentSelect.find('option:not(:disabled):first').prop('selected', 'selected');
                       currentSelect[0].dispatchEvent(new Event('select2:select'));
                   }
               }
@@ -1431,6 +1444,17 @@
 
     .select2-results__option:not([role="group"]):has(.free-document), .select2-selection:has(.free-document) {
       background-color: #ffc90e;
+    }
+
+    .documents-tab {
+      display: flex;
+      flex-direction: column-reverse;  /* Use reverse to use the + selector in the next rule */
+    }
+
+    .documents-tab form:has(option[data-free-document="1"]) + label::after {
+      font-family: "Font Awesome 5 Pro";
+      content: "\f522";
+      margin-left: 5px;
     }
 
   </style>

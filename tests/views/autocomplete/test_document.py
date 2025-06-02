@@ -62,16 +62,6 @@ class DocumentTypesForSwappingAutocompleteTestCase(TestCase):
                 est_emplacement_document_libre=False,
             ),
             mock.Mock(
-                identifiant='id-13',
-                requis_automatiquement=False,
-                nom_onglet='tab-1',
-                onglet='tab-1',
-                document_uuids=self.document_uuids,
-                libelle='doc-13',
-                type=TypeEmplacementDocument.NON_LIBRE.name,
-                est_emplacement_document_libre=False,
-            ),
-            mock.Mock(
                 identifiant='id-21',
                 requis_automatiquement=False,
                 nom_onglet='tab-2',
