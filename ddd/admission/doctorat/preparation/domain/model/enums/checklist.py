@@ -42,6 +42,7 @@ class ChoixStatutChecklist(ChoiceEnum):
 class DecisionCDDEnum(ChoiceEnum):
     EN_DECISION = 'EN_DECISION'
     HORS_DECISION = 'HORS_DECISION'
+    CLOTURE = 'CLOTURE'
 
 
 class DerogationFinancement(ChoiceEnum):

@@ -3746,6 +3746,9 @@ msgid ""
 "Is your admission request linked with a FNRS, FRIA, FRESH or CSC application?"
 msgstr ""
 
+msgid "It is not possible to go from the \"Closed\" status to this status."
+msgstr ""
+
 msgid ""
 "It is not possible to go from the \"To validate IUFC\" status to this status."
 msgstr ""
@@ -6206,6 +6209,11 @@ msgstr ""
 msgid ""
 "The closing of the application has important consequences (canceling the "
 "requested documents, status reset, etc). Do you confirm the closing?"
+msgstr ""
+
+msgid ""
+"The closing of the application has important consequences (transfer of the "
+"application to the SIC, status reset, etc). Do you confirm the closing?"
 msgstr ""
 
 #, python-format

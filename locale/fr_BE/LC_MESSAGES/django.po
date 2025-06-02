@@ -4185,6 +4185,9 @@ msgstr ""
 "Votre demande d'admission est-elle en lien avec une candidature FNRS, FRIA, "
 "FRESH, CSC"
 
+msgid "It is not possible to go from the \"Closed\" status to this status."
+msgstr "Il n'est pas possible de passer du statut \"Clôturée\" à ce statut."
+
 msgid ""
 "It is not possible to go from the \"To validate IUFC\" status to this status."
 msgstr ""
@@ -6873,6 +6876,14 @@ msgid ""
 msgstr ""
 "La clôture du dossier a des conséquences importantes (annulation des "
 "documents demandés, réinitialisation des états, etc). Confirmez-vous la "
+"clôture ?"
+
+msgid ""
+"The closing of the application has important consequences (transfer of the "
+"application to the SIC, status reset, etc). Do you confirm the closing?"
+msgstr ""
+"La clôture du dossier a des conséquences importantes (rapatriement du "
+"dossier en SIC, réinitialisation des états, etc). Confirmez-vous la "
 "clôture ?"
 
 #, python-format

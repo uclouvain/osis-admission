@@ -576,6 +576,23 @@ COMMAND_HANDLERS = {
         groupe_supervision_repository=_groupe_supervision_repository,
         notification=_notification,
     ),
+    CloturerPropositionParCddCommand: lambda msg_bus, cmd: cloturer_proposition_par_cdd(
+        cmd,
+        proposition_repository=_proposition_repository,
+        historique=_historique,
+    ),
+    PasserEtatPrisEnChargeDecisionCddCommand: lambda msg_bus, cmd: passer_etat_pris_en_charge_decision_cdd(
+        cmd,
+        proposition_repository=_proposition_repository,
+    ),
+    PasserEtatATraiterDecisionCddCommand: lambda msg_bus, cmd: passer_etat_a_traiter_decision_cdd(
+        cmd,
+        proposition_repository=_proposition_repository,
+    ),
+    PasserEtatACompleterParSicDecisionCddCommand: lambda msg_bus, cmd: passer_etat_a_completer_par_sic_decision_cdd(
+        cmd,
+        proposition_repository=_proposition_repository,
+    ),
     EnvoyerPropositionAuSicLorsDeLaDecisionCddCommand: (
         lambda msg_bus, cmd: envoyer_proposition_au_sic_lors_de_la_decision_cdd(
             cmd,

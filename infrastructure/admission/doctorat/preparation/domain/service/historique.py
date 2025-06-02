@@ -397,6 +397,17 @@ class Historique(IHistorique):
         )
 
     @classmethod
+    def historiser_cloture_cdd(cls, proposition: Proposition, gestionnaire: str):
+        gestionnaire_dto = PersonneConnueUclTranslator().get(gestionnaire)
+        add_history_entry(
+            object_uuid=proposition.entity_id.uuid,
+            message_fr='Le dossier a été clôturé par la CDD.',
+            message_en='The dossier has been closed by the CDD.',
+            author="{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
+            tags=["proposition", "cdd-decision", "closed", "status-changed"],
+        )
+
+    @classmethod
     def historiser_refus_sic(cls, proposition: Proposition, message: EmailMessage, gestionnaire: str):
         gestionnaire_dto = PersonneConnueUclTranslator().get(gestionnaire)
 
