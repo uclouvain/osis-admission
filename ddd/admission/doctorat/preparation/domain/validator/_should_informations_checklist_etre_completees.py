@@ -37,8 +37,10 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     BesoinDeDerogation,
     ChoixStatutChecklist,
+    OngletsChecklist,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
     StatutChecklist,
     StatutsChecklistDoctorale,
 )
@@ -51,9 +53,11 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     EtatChecklistDecisionSicNonValidePourApprouverUneInscription,
     EtatChecklistFinancabiliteNonValidePourApprouverDemande,
     InscriptionTardiveAvecConditionAccesException,
+    MotifRefusCDDNonSpecifieException,
     ParcoursAnterieurNonSuffisantException,
     SituationPropositionNonCddException,
     SituationPropositionNonSICException,
+    StatutChecklistDecisionCddDoitEtreDifferentClotureException,
     StatutsChecklistExperiencesEtreValidesException,
     TitreAccesEtreSelectionneException,
     TitreAccesEtreSelectionnePourEnvoyerASICException,
@@ -61,6 +65,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 from admission.ddd.admission.domain.model.complement_formation import (
     ComplementFormationIdentity,
 )
+from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
 from admission.ddd.admission.domain.model.titre_acces_selectionnable import (
     TitreAccesSelectionnable,
 )
@@ -99,6 +104,30 @@ class ShouldCddPeutDonnerDecision(BusinessValidator):
     def validate(self, *args, **kwargs):
         if self.statut.name not in STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD:
             raise SituationPropositionNonCddException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldStatutChecklistEtreDifferentCloture(BusinessValidator):
+    checklist_decision_cdd: StatutChecklist
+
+    def validate(self, *args, **kwargs):
+        statut_cloture = ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT[OngletsChecklist.decision_cdd.name]['CLOTURE']
+
+        if statut_cloture.matches(
+            status=self.checklist_decision_cdd.statut.name,
+            extra=self.checklist_decision_cdd.extra,
+        ):
+            raise StatutChecklistDecisionCddDoitEtreDifferentClotureException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldSpecifierMotifRefusCDD(BusinessValidator):
+    motifs_refus: List[MotifRefusIdentity]
+    autres_motifs_refus: List[str]
+
+    def validate(self, *args, **kwargs):
+        if not self.motifs_refus and not self.autres_motifs_refus:
+            raise MotifRefusCDDNonSpecifieException
 
 
 @attr.dataclass(frozen=True, slots=True)

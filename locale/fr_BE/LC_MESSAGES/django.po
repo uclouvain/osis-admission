@@ -608,12 +608,13 @@ msgstr ""
 "Tous les membres du comité d'accompagnement doivent approuver la proposition."
 
 msgid ""
-"All experiences must be in the 'Validated' status or in the 'To complete after "
-"enrolment' status so that the previous experience can be changed to the "
-"'Sufficient' status."
+"All experiences must be in the 'Validated' status or in the 'To complete "
+"after enrolment' status so that the previous experience can be changed to "
+"the 'Sufficient' status."
 msgstr ""
-"L'ensemble des expériences doivent être à l'état 'Validé' ou à l'état 'A compléter après inscription' pour que le "
-"parcours antérieur puisse passer à l'état 'Suffisant'."
+"L'ensemble des expériences doivent être à l'état 'Validé' ou à l'état 'A "
+"compléter après inscription' pour que le parcours antérieur puisse passer à "
+"l'état 'Suffisant'."
 
 msgid "All history"
 msgstr "Historique complet"
@@ -1075,7 +1076,8 @@ msgid "Bachelor"
 msgstr "Bachelier"
 
 msgid "Bachelor's course entrance exam"
-msgstr "Examen d'admission aux études de premier cycle de l'enseignement supérieur"
+msgstr ""
+"Examen d'admission aux études de premier cycle de l'enseignement supérieur"
 
 msgid "Back to checklist"
 msgstr "Retour à la checklist"
@@ -1095,6 +1097,9 @@ msgstr "Compte bancaire"
 
 msgid "Belgian"
 msgstr "Belge"
+
+msgid "Belgian National Register Number"
+msgstr "Numéro de registre national belge"
 
 msgid "Belgian diploma"
 msgstr "Diplôme belge"
@@ -1182,6 +1187,9 @@ msgstr "Commentaire de la CDD pour le SIC"
 
 msgid "CDD decision"
 msgstr "Décision CDD"
+
+msgid "CDD decision: refusal"
+msgstr "Décision de la CDD : refus"
 
 msgid "CDD process"
 msgstr "Traitement de la CDD"
@@ -1667,6 +1675,9 @@ msgstr "Date de l'épreuve de confirmation"
 msgid "Contact"
 msgstr "Contact"
 
+msgid "Contact address"
+msgstr "Adresse de contact"
+
 msgid "Contact details"
 msgstr "Coordonnées"
 
@@ -1925,6 +1936,9 @@ msgid_plural "Course duration: %(years)s years."
 msgstr[0] "Durée des études : 1 an."
 msgstr[1] "Durée des études : %(years)s ans."
 
+msgid "Course manager(s)"
+msgstr "Gestionnaire(s) de formation"
+
 msgid "Course name"
 msgstr "Intitulé de la formation"
 
@@ -1968,8 +1982,14 @@ msgstr "Date de création"
 msgid "Credits earned"
 msgstr "Crédits acquis"
 
+msgid "Current employer"
+msgstr "Employeur actuel"
+
 msgid "Current funding"
 msgstr "Financement actuel"
+
+msgid "Current occupation"
+msgstr "Fonction actuelle"
 
 msgid "Curriculum"
 msgstr "Curriculum"
@@ -2351,6 +2371,18 @@ msgstr "Formation doctorale"
 msgid "Doctorate enrolment applications"
 msgstr "Demandes d'inscription en doctorat"
 
+msgid "Doctorate refusal reason"
+msgstr "Motif de refus pour doctorat"
+
+msgid "Doctorate refusal reason categories"
+msgstr "Catégories des motifs de refus pour doctorat"
+
+msgid "Doctorate refusal reason category"
+msgstr "Catégorie d'un motif de refus pour doctorat"
+
+msgid "Doctorate refusal reasons"
+msgstr "Motifs de refus pour doctorat"
+
 msgid "Doctorate thesis field"
 msgstr "Domaine de la thèse de doctorat"
 
@@ -2687,11 +2719,6 @@ msgstr ""
 "E-mail envoyé au candidat lorsque la CDD approuve une proposition en "
 "formation doctorale d'un candidat ayant un diplôme belge."
 
-msgid "Email sent to the candidate when the CDD refuses a doctorate admission."
-msgstr ""
-"E-mail envoyé au candidat lorsque la CDD refuse une proposition en formation "
-"doctorale."
-
 msgid ""
 "Email sent to the candidate when the faculty approve the application with "
 "conditions."
@@ -2733,6 +2760,9 @@ msgstr ""
 
 msgid "Emails of the training managers"
 msgstr "Emails des gestionnaires de la formation"
+
+msgid "Emergency contact"
+msgstr "Contact en cas d'urgence"
 
 msgid "Emergency contact (telephone number)"
 msgstr "Contact en cas d'urgence (numéro de téléphone)"
@@ -3398,6 +3428,9 @@ msgstr "Mention obtenue"
 msgid "Graduation of {program_name}"
 msgstr "L'obtention de votre diplôme de {program_name}"
 
+msgid "Graduation year"
+msgstr "Année d'obtention"
+
 msgid "Greetings depending on the gender of the candidate"
 msgstr "Salutations en fonction du genre du candidat"
 
@@ -3529,10 +3562,10 @@ msgstr "Je suis réfugié·e"
 
 msgid ""
 "I am a refugee, an asylum seeker, or a stateless person or have subsidiary/"
-"temporary protection (Belgian student status category 2)"
+"temporary protection in Belgium (Belgian student status category 2)"
 msgstr ""
 "Je suis réfugié·e, demandeur d'asile, apatride, ou je bénéficie d’une "
-"protection subsidiaire/temporaire (assimilation 2)"
+"protection subsidiaire/temporaire en Belgique (assimilation 2)"
 
 msgid "I am a stateless person"
 msgstr "Je suis apatride"
@@ -4152,6 +4185,9 @@ msgstr ""
 "Votre demande d'admission est-elle en lien avec une candidature FNRS, FRIA, "
 "FRESH, CSC"
 
+msgid "It is not possible to go from the \"Closed\" status to this status."
+msgstr "Il n'est pas possible de passer du statut \"Clôturée\" à ce statut."
+
 msgid ""
 "It is not possible to go from the \"To validate IUFC\" status to this status."
 msgstr ""
@@ -4183,6 +4219,9 @@ msgstr "Langue"
 
 msgid "Language regime"
 msgstr "Régime linguistique"
+
+msgid "Last degree level"
+msgstr "Niveau du dernier diplôme"
 
 msgid "Last email sent by"
 msgstr "Dernière email envoyé par"
@@ -4661,6 +4700,9 @@ msgstr "Autres prénoms"
 msgid "Missing"
 msgstr "Manquants"
 
+msgid "Mobile phone (GSM)"
+msgstr "Téléphone mobile (GSM)"
+
 msgid "Mobility months amount"
 msgstr "Nombre de mois de mobilité"
 
@@ -4688,6 +4730,9 @@ msgstr "ID Mollie"
 
 msgid "Most recent year of enrolment"
 msgstr "Dernière année d'inscription"
+
+msgid "Most recent year of enrolment at UCL"
+msgstr "Dernière année d'inscription UCL"
 
 msgid "Motivation"
 msgstr "Motivation"
@@ -4747,9 +4792,6 @@ msgstr "Mon conjoint"
 
 msgid "NO"
 msgstr "Non"
-
-msgid "NOMA"
-msgstr "NOMA"
 
 msgid "NOMA not found"
 msgstr "NOMA non trouvé"
@@ -5091,6 +5133,9 @@ msgctxt "ways_hear_about_training"
 msgid "Other"
 msgstr "Autre"
 
+msgid "Other academic courses"
+msgstr "Autres formations"
+
 msgid "Other additional conditions"
 msgstr "Autres conditions complémentaires"
 
@@ -5251,6 +5296,9 @@ msgstr "Numéro de passeport"
 
 msgid "Past experiences authentication"
 msgstr "Authentification parcours"
+
+msgid "Past non-academic activities (prof. and not prof.)"
+msgstr "Activités non-académiques passées (prof. et non prof.)"
 
 msgid "Pay by training cheque"
 msgstr "Paye par chèque formation"
@@ -5530,6 +5578,9 @@ msgctxt "male gender"
 msgid "President of the %(cdd_title)s"
 msgstr "Président de la %(cdd_title)s"
 
+msgid "Previous NOMA"
+msgstr "Précédent NOMA"
+
 msgid "Previous admission"
 msgstr "Demande précédente"
 
@@ -5604,6 +5655,9 @@ msgstr ""
 
 msgid "Proof of regular registration"
 msgstr "Attestation d'inscription régulière'"
+
+msgid "Proof of regular registration for registration change"
+msgstr "Attestation d'inscription régulière pour la modification d'inscription externe"
 
 msgid "Proof of scholarship"
 msgstr "Preuve d'octroi de la bourse"
@@ -5728,6 +5782,9 @@ msgstr "Refus de dérogation facultaire"
 msgid "REFUS_DIRECTION"
 msgstr "Refus dérogation direction"
 
+msgid "REFUS_DOCTORAT"
+msgstr "Refus doctorat"
+
 msgid "REFUS_DOSSIER_TARDIF"
 msgstr "Refus dossier tardif"
 
@@ -5836,6 +5893,9 @@ msgstr "Attestation de refus SIC"
 msgid "Refusal certificate of faculty"
 msgstr "Attestation de refus facultaire"
 
+msgid "Refusal certificate of the CDD"
+msgstr "Attestation de refus de la CDD"
+
 msgid "Refusal document link"
 msgstr "Lien du document de refus"
 
@@ -5890,6 +5950,9 @@ msgstr "Droits d'inscription"
 
 msgid "Registration required"
 msgstr "Inscription au rôle requise"
+
+msgid "Registration type"
+msgstr "Inscription à titre"
 
 msgid "Related experience"
 msgstr "Expérience associée"
@@ -6646,7 +6709,8 @@ msgid ""
 msgstr ""
 "Le passage à l'état 'Dérogation accordée' est réservé aux demandes de type "
 "inscription dont la situation de dérogation à la finançabilité est 'accord "
-"de dérogation facultaire' ou pour lesquelles une dérogation du VRAE a été obtenue."
+"de dérogation facultaire' ou pour lesquelles une dérogation du VRAE a été "
+"obtenue."
 
 msgid "The 'Dispensation needed' status is reserved to enrolment application."
 msgstr ""
@@ -6815,6 +6879,14 @@ msgid ""
 msgstr ""
 "La clôture du dossier a des conséquences importantes (annulation des "
 "documents demandés, réinitialisation des états, etc). Confirmez-vous la "
+"clôture ?"
+
+msgid ""
+"The closing of the application has important consequences (transfer of the "
+"application to the SIC, status reset, etc). Do you confirm the closing?"
+msgstr ""
+"La clôture du dossier a des conséquences importantes (rapatriement du "
+"dossier en SIC, réinitialisation des états, etc). Confirmez-vous la "
 "clôture ?"
 
 #, python-format
@@ -7406,6 +7478,17 @@ msgstr ""
 "financière de la part de l'UCLouvain."
 
 msgid ""
+"This document is an internal document containing the details of the CDD's "
+"decision. Under no circumstances will it be sent in this form to the "
+"candidate. The candidate will receive a letter from SIC containing the "
+"various details of the CDD's decision."
+msgstr ""
+"Ce document est un document interne qui reprend les éléments de la décision "
+"de la CDD. Il n’est en aucun cas transmis sous cette forme au candidat ou à "
+"la candidate. Le ou la candidat·e recevra un courrier de SIC qui insérera "
+"les divers éléments de la décision de la CDD."
+
+msgid ""
 "This document is an internal document containing the details of the "
 "faculty's decision. Under no circumstances will it be sent in this form to "
 "the candidate. The candidate will receive a letter from SIC containing the "
@@ -7600,6 +7683,9 @@ msgstr ""
 msgctxt "admission"
 msgid "Training acronym"
 msgstr "Sigle formation"
+
+msgid "Training assistance"
+msgstr "Aide à la formation"
 
 msgid "Training of the admission"
 msgstr "Formation de la proposition"
@@ -8532,6 +8618,9 @@ msgctxt "feminine"
 msgid "modified"
 msgstr "modifiée"
 
+msgid "no"
+msgstr "non"
+
 #, python-format
 msgid "on %(date)s at %(hour)s"
 msgstr "le %(date)s at %(hour)s"
@@ -8585,9 +8674,6 @@ msgstr "utilisation"
 msgid "yes"
 msgstr "oui"
 
-msgid "yes,no"
-msgstr "oui,non"
-
 msgid "yes,no,"
 msgstr "oui,non,"
 
@@ -8617,3 +8703,7 @@ msgstr ""
 #, python-brace-format
 msgid "{items} types out of {total}"
 msgstr "{items} types sur {total}"
+
+#, python-brace-format
+msgid "{obj.dates_formatees} : {obj.fonction} at {obj.employeur}"
+msgstr "{obj.dates_formatees} : {obj.fonction} à {obj.employeur}"

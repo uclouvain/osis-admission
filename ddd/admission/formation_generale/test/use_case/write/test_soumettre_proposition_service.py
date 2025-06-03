@@ -59,12 +59,8 @@ from admission.infrastructure.message_bus_in_memory import (
 )
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
-from ddd.logic.financabilite.dtos.catalogue import FormationDTO
-from ddd.logic.financabilite.dtos.parcours import (
-    ParcoursAcademiqueExterneDTO,
-    ParcoursAcademiqueInterneDTO,
-    ParcoursDTO,
-)
+from ddd.logic.financabilite.domain.model.catalogue import Formation
+from ddd.logic.financabilite.domain.model.parcours import ParcoursAcademiqueInterne, ParcoursAcademiqueExterne, Parcours
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
     AcademicYear,
     AcademicYearIdentity,
@@ -111,10 +107,10 @@ class TestSoumettrePropositionGenerale(TestCase):
             FormationGeneraleInMemoryTranslator(),
         )
         self.financabilite_fetcher.save(
-            ParcoursDTO(
+            Parcours(
                 matricule_fgs='0000000001',
-                parcours_academique_interne=ParcoursAcademiqueInterneDTO(programmes_cycles=[]),
-                parcours_academique_externe=ParcoursAcademiqueExterneDTO(experiences=[]),
+                parcours_academique_interne=ParcoursAcademiqueInterne(programmes_cycles=[]),
+                parcours_academique_externe=ParcoursAcademiqueExterne(experiences=[]),
                 annee_diplome_etudes_secondaires=2015,
                 nombre_tentative_de_passer_concours_pass_et_las=0,
             )
@@ -159,10 +155,10 @@ class TestSoumettrePropositionGenerale(TestCase):
             self.proposition_repository.save(proposition)
 
             self.financabilite_fetcher.save(
-                ParcoursDTO(
+                Parcours(
                     matricule_fgs=proposition.matricule_candidat,
-                    parcours_academique_interne=ParcoursAcademiqueInterneDTO(programmes_cycles=[]),
-                    parcours_academique_externe=ParcoursAcademiqueExterneDTO(experiences=[]),
+                    parcours_academique_interne=ParcoursAcademiqueInterne(programmes_cycles=[]),
+                    parcours_academique_externe=ParcoursAcademiqueExterne(experiences=[]),
                     annee_diplome_etudes_secondaires=2015,
                     nombre_tentative_de_passer_concours_pass_et_las=0,
                 )
@@ -208,10 +204,10 @@ class TestSoumettrePropositionGenerale(TestCase):
             self.proposition_repository.save(proposition)
 
             self.financabilite_fetcher.save(
-                ParcoursDTO(
+                Parcours(
                     matricule_fgs=proposition.matricule_candidat,
-                    parcours_academique_interne=ParcoursAcademiqueInterneDTO(programmes_cycles=[]),
-                    parcours_academique_externe=ParcoursAcademiqueExterneDTO(experiences=[]),
+                    parcours_academique_interne=ParcoursAcademiqueInterne(programmes_cycles=[]),
+                    parcours_academique_externe=ParcoursAcademiqueExterne(experiences=[]),
                     annee_diplome_etudes_secondaires=2015,
                     nombre_tentative_de_passer_concours_pass_et_las=0,
                 )
@@ -242,10 +238,10 @@ class TestSoumettrePropositionGenerale(TestCase):
             FormationGeneraleInMemoryTranslator(),
         )
         self.financabilite_fetcher.save(
-            ParcoursDTO(
+            Parcours(
                 matricule_fgs='0000000001',
-                parcours_academique_interne=ParcoursAcademiqueInterneDTO(programmes_cycles=[]),
-                parcours_academique_externe=ParcoursAcademiqueExterneDTO(experiences=[]),
+                parcours_academique_interne=ParcoursAcademiqueInterne(programmes_cycles=[]),
+                parcours_academique_externe=ParcoursAcademiqueExterne(experiences=[]),
                 annee_diplome_etudes_secondaires=2015,
                 nombre_tentative_de_passer_concours_pass_et_las=0,
             )
@@ -272,17 +268,17 @@ class TestSoumettrePropositionGenerale(TestCase):
         )
 
         self.financabilite_fetcher.save(
-            ParcoursDTO(
+            Parcours(
                 matricule_fgs='0000000001',
-                parcours_academique_interne=ParcoursAcademiqueInterneDTO(programmes_cycles=[]),
-                parcours_academique_externe=ParcoursAcademiqueExterneDTO(experiences=[]),
+                parcours_academique_interne=ParcoursAcademiqueInterne(programmes_cycles=[]),
+                parcours_academique_externe=ParcoursAcademiqueExterne(experiences=[]),
                 annee_diplome_etudes_secondaires=2015,
                 nombre_tentative_de_passer_concours_pass_et_las=0,
             )
         )
 
         self.financabilite_fetcher.formations.append(
-            FormationDTO(
+            Formation(
                 sigle='MASTER-SCI',
                 annee=2021,
                 type=TrainingType.MASTER_MC.name,

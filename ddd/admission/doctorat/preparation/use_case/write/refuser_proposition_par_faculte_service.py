@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,20 +26,34 @@
 from admission.ddd.admission.doctorat.preparation.commands import (
     RefuserPropositionParCddCommand,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
-from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import INotification
-from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    PropositionIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import (
+    IHistorique,
+)
+from admission.ddd.admission.doctorat.preparation.domain.service.i_pdf_generation import (
+    IPDFGeneration,
+)
+from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
+    IPropositionRepository,
+)
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
-from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
+from admission.ddd.admission.domain.service.i_unites_enseignement_translator import (
+    IUnitesEnseignementTranslator,
+)
+from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import (
+    IPersonneConnueUclTranslator,
+)
 
 
 def refuser_proposition_par_cdd(
     cmd: RefuserPropositionParCddCommand,
     proposition_repository: 'IPropositionRepository',
     historique: 'IHistorique',
+    pdf_generation: 'IPDFGeneration',
     personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
-    notification: 'INotification',
+    unites_enseignement_translator: 'IUnitesEnseignementTranslator',
 ) -> PropositionIdentity:
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
@@ -48,21 +62,18 @@ def refuser_proposition_par_cdd(
     # THEN
     gestionnaire_dto = personne_connue_ucl_translator.get(cmd.gestionnaire)
 
-    proposition_repository.save(entity=proposition)
-
-    message = notification.envoyer_message_libre_au_candidat(
+    pdf_generation.generer_attestation_refus_cdd(
         proposition=proposition,
-        objet_message=cmd.objet_message,
-        corps_message=cmd.corps_message,
-        matricule_emetteur=cmd.gestionnaire,
-        cc_promoteurs=True,
-        cc_membres_ca=True,
+        gestionnaire=gestionnaire_dto,
+        proposition_repository=proposition_repository,
+        unites_enseignement_translator=unites_enseignement_translator,
     )
+
+    proposition_repository.save(entity=proposition)
 
     historique.historiser_refus_cdd(
         proposition=proposition,
         gestionnaire=gestionnaire_dto,
-        message=message,
     )
 
     return proposition.entity_id

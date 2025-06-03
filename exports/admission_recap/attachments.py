@@ -508,6 +508,15 @@ def get_specific_questions_attachments(
                 candidate_language=context.identification.langue_contact,
             )
         )
+        attachments.append(
+            Attachment(
+                identifier='ATTESTATION_INSCRIPTION_REGULIERE_POUR_MODIFICATION_INSCRIPTION',
+                label=DocumentsQuestionsSpecifiques['ATTESTATION_INSCRIPTION_REGULIERE_POUR_MODIFICATION_INSCRIPTION'],
+                uuids=context.proposition.attestation_inscription_reguliere_pour_modification_inscription,
+                required=True,
+                candidate_language=context.identification.langue_contact,
+            )
+        )
     attachments.extend(get_dynamic_questions_attachments(specific_questions))
     attachments.append(
         Attachment(

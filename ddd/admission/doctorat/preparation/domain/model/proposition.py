@@ -83,14 +83,20 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
     ApprouverInscriptionParSicValidatorList,
     ApprouverParCDDValidatorList,
     ApprouverParSicAValiderValidatorList,
+    CloturerParCDDValidatorList,
     CompletionPropositionValidatorList,
     DemanderCandidatModificationCaValidatorList,
     GestionnairePeutSoumettreAuSicLorsDeLaDecisionCDDValidatorList,
     ModifierStatutChecklistParcoursAnterieurValidatorList,
     ModifierTypeAdmissionValidatorList,
+    PasserEtatACompleterParSicDecisionCDDValidatorList,
+    PasserEtatATraiterDecisionCDDValidatorList,
+    PasserEtatPrisEnChargeDecisionCDDValidatorList,
     PropositionProjetDoctoralValidatorList,
     RedonnerLaMainAuCandidatValidatorList,
     RefuserParCDDValidatorList,
+    RefuserParSicAValiderValidatorList,
+    RefuserParSicValidatorList,
     SICPeutSoumettreAuCDDLorsDeLaDecisionCDDValidatorList,
     SoumettreCAValidatorList,
     SpecifierInformationsApprobationInscriptionValidatorList,
@@ -228,9 +234,11 @@ class Proposition(interface.RootEntity):
     financabilite_derogation_derniere_notification_par: str = ''
 
     # Décision facultaire & sic
+    certificat_refus_cdd: List[str] = attr.Factory(list)
     certificat_approbation_cdd: List[str] = attr.Factory(list)
     certificat_approbation_sic: List[str] = attr.Factory(list)
     certificat_approbation_sic_annexe: List[str] = attr.Factory(list)
+    certificat_refus_sic: List[str] = attr.Factory(list)
 
     motifs_refus: List[MotifRefusIdentity] = attr.Factory(list)
     autres_motifs_refus: List[str] = attr.Factory(list)
@@ -992,6 +1000,24 @@ class Proposition(interface.RootEntity):
             email_personne_contact_programme_annuel=email_personne_contact_programme_annuel,
         )
 
+    def specifier_motifs_refus_par_sic(
+        self,
+        auteur_modification: str,
+        uuids_motifs: List[str],
+        autres_motifs: List[str],
+    ):
+        RefuserParSicAValiderValidatorList(statut=self.statut).validate()
+
+        self.statut = ChoixStatutPropositionDoctorale.ATTENTE_VALIDATION_DIRECTION
+        self.checklist_actuelle.decision_sic = StatutChecklist(
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+            libelle=__('Refusal'),
+            extra={'en_cours': "refusal"},
+        )
+        self.auteur_derniere_modification = auteur_modification
+        self.motifs_refus = [MotifRefusIdentity(uuid=uuid_motif) for uuid_motif in uuids_motifs]
+        self.autres_motifs_refus = autres_motifs
+
     def approuver_par_sic(
         self,
         auteur_modification: str,
@@ -1055,6 +1081,21 @@ class Proposition(interface.RootEntity):
             libelle=__('Approval'),
         )
 
+    def specifier_motifs_refus_par_cdd(
+        self,
+        uuids_motifs: List[str],
+        autres_motifs: List[str],
+        auteur_modification: str,
+    ):
+        SpecifierNouvellesInformationsDecisionCDDValidatorList(
+            statut=self.statut,
+            checklist_decision_cdd=self.checklist_actuelle.decision_cdd,
+        ).validate()
+        self.specifier_refus_par_cdd()
+        self.motifs_refus = [MotifRefusIdentity(uuid=uuid_motif) for uuid_motif in uuids_motifs]
+        self.autres_motifs_refus = autres_motifs
+        self.auteur_derniere_modification = auteur_modification
+
     def specifier_refus_par_cdd(self):
         self.checklist_actuelle.decision_cdd = StatutChecklist(
             statut=ChoixStatutChecklist.GEST_BLOCAGE,
@@ -1068,6 +1109,7 @@ class Proposition(interface.RootEntity):
         ApprouverParCDDValidatorList(
             statut=self.statut,
             titres_selectionnes=titres_selectionnes,
+            checklist_decision_cdd=self.checklist_actuelle.decision_cdd,
         ).validate()
 
         self.specifier_acceptation_par_cdd()
@@ -1077,11 +1119,14 @@ class Proposition(interface.RootEntity):
 
     def refuser_par_cdd(self, auteur_modification: str):
         RefuserParCDDValidatorList(
+            checklist_decision_cdd=self.checklist_actuelle.decision_cdd,
             statut=self.statut,
+            motifs_refus=self.motifs_refus,
+            autres_motifs_refus=self.autres_motifs_refus,
         ).validate()
 
         self.specifier_refus_par_cdd()
-        self.statut = ChoixStatutPropositionDoctorale.INSCRIPTION_REFUSEE
+        self.statut = ChoixStatutPropositionDoctorale.RETOUR_DE_FAC
         self.auteur_derniere_modification = auteur_modification
 
     def soumettre_au_sic_lors_de_la_decision_cdd(self, auteur_modification: str):
@@ -1101,6 +1146,7 @@ class Proposition(interface.RootEntity):
     ):
         SpecifierNouvellesInformationsDecisionCDDValidatorList(
             statut=self.statut,
+            checklist_decision_cdd=self.checklist_actuelle.decision_cdd,
         ).validate()
         self.auteur_derniere_modification = auteur_modification
 
@@ -1147,3 +1193,65 @@ class Proposition(interface.RootEntity):
             statut=self.statut,
         ).validate()
         self.statut = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC
+
+    def refuser_par_sic(self, auteur_modification: str):
+        RefuserParSicValidatorList(
+            statut=self.statut,
+        ).validate()
+
+        self.checklist_actuelle.decision_sic = StatutChecklist(
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+            libelle=__('Refusal'),
+            extra={'blocage': 'refusal'},
+        )
+        self.statut = ChoixStatutPropositionDoctorale.INSCRIPTION_REFUSEE
+        self.auteur_derniere_modification = auteur_modification
+
+    def cloturer_par_cdd(self, auteur_modification: str):
+        CloturerParCDDValidatorList(
+            statut=self.statut,
+            checklist_decision_cdd=self.checklist_actuelle.decision_cdd,
+        ).validate()
+
+        self.statut = ChoixStatutPropositionDoctorale.CLOTUREE
+        self.checklist_actuelle.decision_cdd = StatutChecklist(
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+            libelle=__('Closed'),
+            extra={'decision': DecisionCDDEnum.CLOTURE.name},
+        )
+        self.auteur_derniere_modification = auteur_modification
+
+    def passer_etat_a_traiter_decision_cdd(self, auteur_modification):
+        PasserEtatATraiterDecisionCDDValidatorList(
+            statut=self.statut,
+        ).validate()
+        self.checklist_actuelle.decision_cdd = StatutChecklist(
+            statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
+            libelle=__('To be processed'),
+        )
+        self.auteur_derniere_modification = auteur_modification
+
+    def passer_etat_pris_en_charge_decision_cdd(self, auteur_modification):
+        PasserEtatPrisEnChargeDecisionCDDValidatorList(
+            statut=self.statut,
+            checklist_decision_cdd=self.checklist_actuelle.decision_cdd,
+        ).validate()
+
+        self.checklist_actuelle.decision_cdd = StatutChecklist(
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+            libelle=__('Taken in charge'),
+        )
+        self.auteur_derniere_modification = auteur_modification
+
+    def passer_etat_a_completer_par_sic_decision_cdd(self, auteur_modification):
+        PasserEtatACompleterParSicDecisionCDDValidatorList(
+            statut=self.statut,
+            checklist_decision_cdd=self.checklist_actuelle.decision_cdd,
+        ).validate()
+
+        self.checklist_actuelle.decision_cdd = StatutChecklist(
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+            libelle=__('To be completed by SIC'),
+            extra={'decision': DecisionCDDEnum.HORS_DECISION.name},
+        )
+        self.auteur_derniere_modification = auteur_modification

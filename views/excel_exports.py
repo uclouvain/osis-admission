@@ -27,7 +27,7 @@
 import ast
 import datetime
 import uuid
-from typing import Dict, Union
+from typing import Dict
 
 from django.conf import settings
 from django.contrib import messages
@@ -43,6 +43,7 @@ from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy, pgettext
 from django.views import View
 from osis_async.models import AsyncTask
+from osis_comment.models import CommentEntry
 from osis_export.contrib.export_mixins import ExcelFileExportMixin, ExportMixin
 from osis_export.models import Export
 from osis_export.models.enums.types import ExportTypes
@@ -67,9 +68,11 @@ from admission.ddd.admission.doctorat.preparation.dtos.liste import DemandeReche
 from admission.ddd.admission.doctorat.preparation.read_view.repository.i_tableau_bord import (
     ITableauBordRepositoryAdmissionMixin,
 )
+from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.ddd.admission.dtos.liste import (
     DemandeRechercheDTO as TouteDemandeRechercheDTO,
 )
+from admission.ddd.admission.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.enums import TypeItemFormulaire
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.enums.liste import TardiveModificationReorientationFiltre
@@ -78,9 +81,15 @@ from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_continue.commands import (
     ListerDemandesQuery as ListerDemandesContinuesQuery,
 )
+from admission.ddd.admission.formation_continue.commands import (
+    RecupererResumePropositionQuery as RecupererResumePropositionContinueQuery,
+)
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixEdition,
+    ChoixInscriptionATitre,
+    ChoixMoyensDecouverteFormation,
     ChoixStatutPropositionContinue,
+    ChoixTypeAdresseFacturation,
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     OngletsChecklist as OngletsChecklistContinue,
@@ -88,6 +97,7 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
 from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT_CONTINUE,
 )
+from admission.ddd.admission.formation_continue.dtos import PropositionDTO
 from admission.ddd.admission.formation_continue.dtos.liste import (
     DemandeRechercheDTO as DemandeContinueRechercheDTO,
 )
@@ -103,14 +113,22 @@ from admission.forms.admission.filter import (
 )
 from admission.forms.doctorate.cdd.filter import DoctorateListFilterForm
 from admission.models import AdmissionFormItem, SupervisionActor
-from admission.models.epc_injection import EPCInjectionStatus
 from admission.templatetags.admission import admission_status
 from admission.utils import add_messages_into_htmx_response
+from admission.views import PaginatedList
 from base.models.campus import Campus
+from base.models.enums.civil_state import CivilState
 from base.models.enums.education_group_types import TrainingType
+from base.models.enums.got_diploma import GotDiploma
 from base.models.person import Person
+from base.utils.utils import format_academic_year
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
+    ExperienceNonAcademiqueDTO,
+)
 from infrastructure.messages_bus import message_bus_instance
+from osis_profile.models.enums.curriculum import ActivitySector, ActivityType
 from reference.models.country import Country
+from reference.models.enums.cycle import Cycle
 from reference.models.scholarship import Scholarship
 
 __all__ = [
@@ -188,16 +206,16 @@ class BaseAdmissionExcelExportView(
 
     def get_row_data_specific_questions_answers(
         self,
-        proposition_dto: Union[TouteDemandeRechercheDTO,],
+        initial_specific_questions_answers: Dict,
     ):
         """
         Get the answers of the specific questions of the proposition based on a list of configurations.
-        :param proposition_dto: The DTO of the proposition.
+        :param initial_specific_questions_answers: The answers to the specific questions.
         :return: The concatenation of the answers of the specific questions.
         """
         specific_questions_answers = []
 
-        for specific_question_uuid, specific_question_answer in proposition_dto.reponses_questions_specifiques.items():
+        for specific_question_uuid, specific_question_answer in initial_specific_questions_answers.items():
             form_item = self.specific_questions.get(specific_question_uuid)
 
             if form_item:
@@ -433,7 +451,7 @@ class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
             row.derniere_modification_le.strftime(FULL_DATE_FORMAT),
             row.date_confirmation.strftime(FULL_DATE_FORMAT) if row.date_confirmation else '',
             row.adresse_email_candidat,
-            self.get_row_data_specific_questions_answers(row),
+            self.get_row_data_specific_questions_answers(row.reponses_questions_specifiques),
         ]
 
     def get_filters(self):
@@ -461,6 +479,7 @@ class ContinuingAdmissionListExcelExportView(BaseAdmissionExcelExportView):
     permission_required = 'admission.view_continuing_enrolment_applications'
     redirect_url_name = 'admission:continuing-education:list'
     urlpatterns = 'continuing-admissions-list'
+    with_specific_questions = True
 
     def get_formatted_filters_parameters_worksheet(self, filters: str) -> Dict:
         formatted_filters = super().get_formatted_filters_parameters_worksheet(filters)
@@ -536,15 +555,50 @@ class ContinuingAdmissionListExcelExportView(BaseAdmissionExcelExportView):
 
     def get_header(self):
         return [
-            _('Application no.'),
             _('Last name'),
             _('First name'),
-            _('NOMA'),
             _('Email address'),
+            _('State'),
+            _('Gender'),
+            _('Civil status'),
+            _('Nationality'),
+            _('Date of birth'),
+            _('Place of birth'),
+            _('Country of birth'),
+            _('Belgian National Register Number'),
+            _('Identity card number'),
+            _('Passport number'),
+            _('Have you previously enrolled at UCLouvain?'),
+            _('Most recent year of enrolment at UCL'),
+            _('Previous NOMA'),
+            _('Legal domicile'),
+            _('Contact address'),
+            _('Emergency contact'),
+            _('Mobile phone (GSM)'),
+            _('Secondary school diploma'),
+            _('Secondary school graduation year'),
+            _('Last degree level'),
+            pgettext('admission', 'Institute'),
+            _('Graduation year'),
+            _('Other academic courses'),
+            _('Current occupation'),
+            _('Current employer'),
+            _('Sector'),
+            _('Past non-academic activities (prof. and not prof.)'),
+            _('Motivations'),
             pgettext('admission', 'Course'),
-            _('Edition'),
             _('Faculty'),
-            _('Paid'),
+            _('Course manager(s)'),
+            _('How did you hear about this course?'),
+            _('Registration type'),
+            _('Head office name'),
+            _('Unique business number'),
+            _('VAT number'),
+            _('Billing address'),
+            _('Specific questions'),
+            _('Training assistance'),
+            _('Registration required'),
+            _('In payement order'),
             _('Reduced rights'),
             _('Pay by training cheque'),
             _('CEP'),
@@ -553,48 +607,233 @@ class ContinuingAdmissionListExcelExportView(BaseAdmissionExcelExportView):
             _('Experience knowledge valorisation'),
             _('Assessment test presented'),
             _('Assessment test succeeded'),
+            _('TFF label'),
             _('Certificate provided'),
-            _('Status'),
-            _('EPC injection'),
-            _('Confirmation date'),
-            _('Last modif.'),
-            _('Modification author'),
+            _('Comment'),
         ]
 
-    def get_row_data(self, row: DemandeContinueRechercheDTO):
+    @classmethod
+    def _format_yes_no(cls, value):
+        if value:
+            return str(_('yes'))
+        elif value is False:
+            return str(_('no'))
+        return ''
+
+    def get_row_data(self, row: uuid.UUID):
+        resume_proposition: ResumePropositionDTO = message_bus_instance.invoke(
+            RecupererResumePropositionContinueQuery(uuid_proposition=str(row))
+        )
+
+        student_form_comment = CommentEntry.objects.filter(
+            object_uuid=row,
+            tags=[OngletsChecklistContinue.fiche_etudiant.name],
+        ).first()
+
+        proposition: PropositionDTO = resume_proposition.proposition
+        identification = resume_proposition.identification
+        coordinates = resume_proposition.coordonnees
+
+        billing_address = {
+            ChoixTypeAdresseFacturation.CONTACT.name: coordinates.adresse_correspondance_formatee(' - '),
+            ChoixTypeAdresseFacturation.RESIDENTIEL.name: coordinates.adresse_domicile_legale_formatee(' - '),
+            ChoixTypeAdresseFacturation.AUTRE.name: (
+                proposition.adresse_facturation.adresse_formatee(' - ') if proposition.adresse_facturation else ''
+            ),
+        }.get(proposition.type_adresse_facturation, '')
+
+        # Get the information about the last graduated academic experience
+        last_experience_with_diploma = self._get_last_academic_experience(
+            academic_experiences=resume_proposition.curriculum.experiences_academiques,
+        )
+
+        if last_experience_with_diploma:
+            last_diploma_year = last_experience_with_diploma.derniere_annee + 1
+            last_diploma_level = str(Cycle.get_value(last_experience_with_diploma.cycle_formation))
+            last_diploma_institute = last_experience_with_diploma.nom_institut
+        else:
+            last_diploma_level = ''
+            last_diploma_institute = ''
+            last_diploma_year = ''
+
+        # Get the information about the current working activity
+        (
+            current_activities,
+            current_activities_employer,
+            current_activities_sector,
+            past_activities,
+        ) = self._get_non_academic_activities_columns(resume_proposition.curriculum.experiences_non_academiques)
+
         return [
-            row.numero_demande,
-            row.nom_candidat,
-            row.prenom_candidat,
-            row.noma_candidat,
-            row.courriel_candidat,
-            row.formation,
-            str(ChoixEdition.get_value(row.edition)) if row.edition else '',
-            row.sigle_faculte,
-            yesno(row.paye, _('yes,no')),
-            yesno(row.droits_reduits, _('yes,no')),
-            yesno(row.paye_par_cheque_formation, _('yes,no')),
-            yesno(row.cep, _('yes,no')),
-            yesno(row.etalement_des_paiements, _('yes,no')),
-            yesno(row.etalement_de_la_formation, _('yes,no')),
-            yesno(row.valorisation_des_acquis_d_experience, _('yes,no')),
-            yesno(row.a_presente_l_epreuve_d_evaluation, _('yes,no')),
-            yesno(row.a_reussi_l_epreuve_d_evaluation, _('yes,no')),
-            yesno(row.diplome_produit, _('yes,no')),
-            str(ChoixStatutPropositionContinue.get_value(row.etat_demande)),
-            str(EPCInjectionStatus.get_value(row.etat_injection_epc)) if row.etat_injection_epc else '',
-            row.date_confirmation.strftime(FULL_DATE_FORMAT) if row.date_confirmation else '',
-            row.derniere_modification_le.strftime(FULL_DATE_FORMAT),
-            row.derniere_modification_par,
+            identification.nom,
+            identification.prenom,
+            proposition.adresse_email_candidat,
+            str(ChoixStatutPropositionContinue.get_value(proposition.statut)),
+            str(ChoixGenre.get_value(identification.genre)),
+            str(CivilState.get_value(identification.etat_civil)),
+            identification.nom_pays_nationalite,
+            (
+                identification.date_naissance.isoformat()
+                if identification.date_naissance
+                else str(identification.annee_naissance or '')
+            ),
+            identification.lieu_naissance,
+            identification.nom_pays_naissance,
+            identification.numero_registre_national_belge,
+            identification.numero_carte_identite,
+            identification.numero_passeport,
+            self._format_yes_no(identification.annee_derniere_inscription_ucl is not None),
+            format_academic_year(identification.annee_derniere_inscription_ucl),
+            identification.noma_derniere_inscription_ucl,
+            coordinates.adresse_domicile_legale_formatee(' - '),
+            coordinates.adresse_correspondance_formatee(' - '),
+            coordinates.numero_contact_urgence,
+            coordinates.numero_mobile,
+            str(GotDiploma.get_value(resume_proposition.etudes_secondaires.diplome_etudes_secondaires)),
+            (
+                resume_proposition.etudes_secondaires.annee_diplome_etudes_secondaires + 1
+                if resume_proposition.etudes_secondaires.annee_diplome_etudes_secondaires
+                else ''
+            ),
+            last_diploma_level,
+            last_diploma_institute,
+            last_diploma_year,
+            '\n'.join(
+                f'{experience.titre_formate}, {experience.nom_institut}'
+                for experience in resume_proposition.curriculum.experiences_academiques
+                if experience != last_experience_with_diploma
+            ),
+            current_activities,
+            current_activities_employer,
+            current_activities_sector,
+            past_activities,
+            proposition.motivations,
+            proposition.formation.sigle,
+            proposition.formation.sigle_entite_gestion,
+            '',  # TODO program manager
+            '\n'.join(
+                str(ChoixMoyensDecouverteFormation.get_value(moyen))
+                for moyen in proposition.moyens_decouverte_formation + [proposition.autre_moyen_decouverte_formation]
+            ),
+            str(ChoixInscriptionATitre.get_value(proposition.inscription_a_titre)),
+            proposition.nom_siege_social,
+            proposition.numero_unique_entreprise,
+            proposition.numero_tva_entreprise,
+            billing_address,
+            self.get_row_data_specific_questions_answers(proposition.reponses_questions_specifiques),
+            self._format_yes_no(proposition.aide_a_la_formation),
+            self._format_yes_no(proposition.inscription_au_role_obligatoire),
+            self._format_yes_no(proposition.en_ordre_de_paiement),
+            self._format_yes_no(proposition.droits_reduits),
+            self._format_yes_no(proposition.paye_par_cheque_formation),
+            self._format_yes_no(proposition.cep),
+            self._format_yes_no(proposition.etalement_des_paiments),
+            self._format_yes_no(proposition.etalement_de_la_formation),
+            self._format_yes_no(proposition.valorisation_des_acquis_d_experience),
+            self._format_yes_no(proposition.a_presente_l_epreuve_d_evaluation),
+            self._format_yes_no(proposition.a_reussi_l_epreuve_d_evaluation),
+            proposition.intitule_du_tff,
+            self._format_yes_no(proposition.diplome_produit),
+            student_form_comment.content if student_form_comment else '',
         ]
+
+    @staticmethod
+    def _get_non_academic_activities_columns(non_academic_experiences):
+        """
+        From a list of non academic experiences, retrieve the formatted columns.
+        :param non_academic_experiences: A list of non academic experiences
+        :return: the columns as a tuple : (current functions, current employers, current sectors, past activities)
+        """
+        today_date = datetime.date.today()
+
+        current_activity_prefix = ''
+        current_activities = ''
+        current_activities_employer = ''
+        current_activities_sector = ''
+        default_activity_function_format = '{obj.libelle_type}'
+        activity_function_format = {
+            ActivityType.WORK.name: '{obj.fonction}',
+            ActivityType.OTHER.name: '{obj.autre_activite}',
+        }
+
+        past_activity_prefix = ''
+        past_activities = ''
+        default_activity_description_format = '{obj.dates_formatees} : {obj.libelle_type}'
+        activity_description_format = {
+            ActivityType.WORK.name: str(_('{obj.dates_formatees} : {obj.fonction} at {obj.employeur}')),
+            ActivityType.OTHER.name: '{obj.dates_formatees} : {obj.autre_activite}',
+        }
+
+        for activity in non_academic_experiences:
+            if activity.date_debut <= today_date <= activity.date_fin:
+                activity_function = activity_function_format.get(
+                    activity.type,
+                    default_activity_function_format,
+                ).format(obj=activity)
+
+                current_activities += f'{current_activity_prefix}{activity_function}'
+                current_activities_employer += f'{current_activity_prefix}{activity.employeur}'
+                current_activities_sector += f'{current_activity_prefix}{ActivitySector.get_value(activity.secteur)}'
+                current_activity_prefix = '\n'
+
+            else:
+                activity_description = activity_description_format.get(
+                    activity.type,
+                    default_activity_description_format,
+                ).format(obj=activity)
+
+                past_activities += f'{past_activity_prefix}{activity_description}'
+                past_activity_prefix = '\n'
+
+        return current_activities, current_activities_employer, current_activities_sector, past_activities
+
+    @staticmethod
+    def _get_last_academic_experience(academic_experiences):
+        """
+        From a list of academic experiences, return the last one (based on the graduation year and on the program cycle)
+        :param academic_experiences: A list of academic experiences
+        :return: The last experience, or None if there is no graduating experience
+        """
+        last_experience = None
+        last_experience_year = 0
+        last_experience_cycle_value = 0
+
+        cycle_value = {
+            Cycle.FIRST_CYCLE.name: 1,
+            Cycle.SECOND_CYCLE.name: 2,
+            Cycle.THIRD_CYCLE.name: 3,
+        }
+
+        for experience in academic_experiences:
+            current_year = experience.derniere_annee
+            current_cycle_value = cycle_value.get(experience.cycle_formation, 0)
+
+            if experience.a_obtenu_diplome and (
+                current_year > last_experience_year
+                or current_year == last_experience_year
+                and current_cycle_value > last_experience_cycle_value
+            ):
+                last_experience = experience
+                last_experience_year = current_year
+                last_experience_cycle_value = current_cycle_value
+
+        return last_experience
+
+    def get_export_objects(self, **kwargs):
+        paginated_list_of_objects: PaginatedList[DemandeContinueRechercheDTO] = super().get_export_objects(**kwargs)
+        return paginated_list_of_objects.complete_ids_list
 
     def get_filters(self):
         form = ContinuingAdmissionsFilterForm(user=self.request.user, data=self.request.GET)
         if form.is_valid():
             filters = form.cleaned_data
-            filters.pop('taille_page', None)
-            filters.pop('page', None)
             filters.pop('liste_travail', None)
+
+            # We just want to retrieve the uuids of the propositions matching the input filters (via the
+            # complete_ids_list property) and not the default data retrieved by the command : the desired data will
+            # be loaded in get_row_data).
+            filters['taille_page'] = 0
+            filters['page'] = 0
 
             ordering_field = self.request.GET.get('o')
             if ordering_field:
@@ -719,9 +958,9 @@ class DoctorateAdmissionListExcelExportView(BaseAdmissionExcelExportView):
 
         dashboard_indicator = formatted_filters.get('indicateur_tableau_bord')
         if dashboard_indicator:
-            mapping_filter_key_value['indicateur_tableau_bord'] = (
-                ITableauBordRepositoryAdmissionMixin.libelles_indicateurs_admission.get(dashboard_indicator)
-            )
+            mapping_filter_key_value[
+                'indicateur_tableau_bord'
+            ] = ITableauBordRepositoryAdmissionMixin.libelles_indicateurs_admission.get(dashboard_indicator)
 
         # Format boolean values
         # > "Yes" / "No" / ""
