@@ -33,7 +33,7 @@ from base.models.utils.utils import ChoiceEnum
 
 class ChoixStatutPropositionDoctorale(ChoiceEnum):
     EN_BROUILLON = _('In draft form')
-    EN_ATTENTE_DE_SIGNATURE = _('Waiting for signature')
+    EN_ATTENTE_DE_SIGNATURE = _('In the process of signing')
     CONFIRMEE = _('Application confirmed')
     ANNULEE = _('Cancelled application')
 
@@ -43,7 +43,7 @@ class ChoixStatutPropositionDoctorale(ChoiceEnum):
     RETOUR_DE_FAC = _('Feedback from Fac')
 
     CA_A_COMPLETER = _('Support committee to be completed')
-    CA_EN_ATTENTE_DE_SIGNATURE = _('Support committee waiting for signature')
+    CA_EN_ATTENTE_DE_SIGNATURE = _('In the process of re-signing')
 
     A_COMPLETER_POUR_SIC = _('To be completed for the Enrolment Office (SIC)')
     COMPLETEE_POUR_SIC = _('Completed for SIC')
