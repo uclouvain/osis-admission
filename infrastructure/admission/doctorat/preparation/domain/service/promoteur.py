@@ -26,7 +26,7 @@
 from typing import List, Optional
 
 from django.contrib.postgres.search import SearchVector
-from django.db.models import F, Q, Exists, OuterRef
+from django.db.models import Exists, F, OuterRef, Q
 from django.db.models.functions import Coalesce
 from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
@@ -129,12 +129,12 @@ class PromoteurTranslator(IPromoteurTranslator):
     @classmethod
     def _get_queryset(cls, matricule):
         return Person.objects.alias(
-            # Is the person a student?
-            is_student=Exists(Student.objects.filter(person=OuterRef('pk'))),
+            # Is the person a student and not a tutor?
+            is_student_and_not_tutor=Exists(Student.objects.filter(person=OuterRef('pk'), person__tutor__isnull=True)),
         ).filter(
             global_id=matricule,
             # Remove unexistent users
             user_id__isnull=False,
-            # Remove students
-            is_student=False,
+            # Remove students who aren't tutors
+            is_student_and_not_tutor=False,
         )
