@@ -86,7 +86,11 @@ from admission.forms import (
 from admission.forms.admission.document import ChangeRequestDocumentForm
 from admission.models import DoctorateAdmission, GeneralEducationAdmission
 from admission.models.base import training_campus_subquery
-from admission.models.checklist import AdditionalApprovalCondition, RefusalReason
+from admission.models.checklist import (
+    AdditionalApprovalCondition,
+    DoctorateRefusalReason,
+    RefusalReason,
+)
 from admission.views.autocomplete.learning_unit_years import (
     LearningUnitYearAutocomplete,
 )
@@ -327,6 +331,8 @@ def get_group_by_choices(
 
 
 class FacDecisionRefusalForm(forms.Form):
+    model_reason = RefusalReason
+
     reasons = forms.MultipleChoiceField(
         label=_('Reasons'),
         widget=FilterFieldWidget(
@@ -353,7 +359,7 @@ class FacDecisionRefusalForm(forms.Form):
                 self.other_reasons.append(reason)
                 other_reasons_choices.append([reason, reason])
 
-        all_reasons = RefusalReason.objects.select_related('category').all().order_by('category__order', 'order')
+        all_reasons = self.model_reason.objects.select_related('category').all().order_by('category__order', 'order')
         category = getattr(self, 'reasons_category', None)
         if category:
             all_reasons = all_reasons.filter(Q(category__name=category) | Q(uuid__in=self.categorized_reasons))
@@ -386,6 +392,10 @@ class FacDecisionRefusalForm(forms.Form):
             cleaned_data['reasons'] = []
 
         return cleaned_data
+
+
+class DoctorateFacDecisionRefusalForm(FacDecisionRefusalForm):
+    model_reason = DoctorateRefusalReason
 
 
 class TrainingModelChoiceField(forms.ModelChoiceField):
@@ -1210,6 +1220,12 @@ class SicDecisionRefusalForm(FacDecisionRefusalForm):
         self.fields['reasons'].required = False
 
 
+class DoctorateSicDecisionRefusalForm(DoctorateFacDecisionRefusalForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['reasons'].required = False
+
+
 class SicDecisionDerogationForm(forms.Form):
     dispensation_needed = forms.ChoiceField(
         label=_('Non-progression dispensation needed'),
@@ -1307,6 +1323,10 @@ class FinancabilityDispensationRefusalForm(FacDecisionRefusalForm):
         self.fields['reasons'].widget.free_options_placeholder = _(
             'Your past experiences does not ensure the expected garanties for success'
         )
+
+
+class DoctorateFinancabilityDispensationRefusalForm(FinancabilityDispensationRefusalForm):
+    model_reason = DoctorateRefusalReason
 
 
 class FinancabiliteDispensationVraeForm(forms.ModelForm):

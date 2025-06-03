@@ -52,19 +52,15 @@ from admission.forms.admission.checklist import (
     CommentForm,
     DoctorateFinancabiliteApprovalForm,
     DoctorateFinancabiliteNotFinanceableForm,
-    FinancabiliteApprovalForm,
+    DoctorateFinancabilityDispensationRefusalForm,
     FinancabiliteDispensationForm,
-    FinancabiliteNotFinanceableForm,
     FinancabiliteNotificationForm,
-    FinancabilityDispensationRefusalForm,
 )
 from admission.mail_templates import (
-    ADMISSION_EMAIL_FINANCABILITY_DISPENSATION_NOTIFICATION,
     ADMISSION_EMAIL_FINANCABILITY_DISPENSATION_NOTIFICATION_DOCTORATE,
 )
 from admission.utils import (
     add_close_modal_into_htmx_response,
-    format_academic_year,
     get_training_url,
 )
 from admission.views.common.detail_tabs.checklist import change_admission_status
@@ -74,6 +70,7 @@ from admission.views.doctorate.details.checklist.mixins import (
 )
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.utils.htmx import HtmxPermissionRequiredMixin
+from base.utils.utils import format_academic_year
 from infrastructure.messages_bus import message_bus_instance
 
 __all__ = [
@@ -108,7 +105,7 @@ class FinancabiliteContextMixin(CheckListDefaultContextMixin):
                 'reasons': self.admission_refusal_reasons,
             }
 
-        return FinancabilityDispensationRefusalForm(**form_kwargs)
+        return DoctorateFinancabilityDispensationRefusalForm(**form_kwargs)
 
     @cached_property
     def financability_dispensation_notification_form(self):

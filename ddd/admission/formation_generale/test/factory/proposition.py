@@ -242,6 +242,9 @@ class PropositionFactory(factory.Factory):
             est_bachelier_belge=True,
             est_modification_inscription_externe=True,
             formulaire_modification_inscription=['uuid-formulaire_modification_inscription'],
+            attestation_inscription_reguliere_pour_modification_inscription=[
+                'uuid-attestation_inscription_reguliere_pour_modification_inscription'
+            ],
         )
         est_confirmee = factory.Trait(
             statut=ChoixStatutPropositionGenerale.CONFIRMEE,

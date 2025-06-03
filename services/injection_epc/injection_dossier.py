@@ -586,6 +586,7 @@ class InjectionEPCAdmission:
         double_diplome = getattr(admission_generale, 'double_degree_scholarship', None)
         type_demande_bourse = getattr(admission_generale, 'international_scholarship', None)
         type_erasmus = getattr(admission_generale, 'erasmus_mundus_scholarship', None)
+        derogation_vrae = getattr(admission_generale, 'financabilite_dispensation_vrae', None)
         financabilite_checklist = admission.checklist.get('current', {}).get('financabilite', {})
         etat_financabilite = {
             'INITIAL_NON_CONCERNE': EtatFinancabilite.NON_CONCERNE.name,
@@ -620,6 +621,7 @@ class InjectionEPCAdmission:
             'reorientation': bool(admission_generale) and admission_generale.is_external_reorientation,
             'modification_programme': bool(admission_generale) and admission_generale.is_external_modification,
             'inscription_tardive': bool(admission_generale) and admission_generale.late_enrollment,
+            'derogation_vrae': derogation_vrae,
         }
 
     @staticmethod

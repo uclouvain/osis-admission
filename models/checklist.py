@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -84,6 +84,56 @@ class RefusalReason(OrderedModel):
     class Meta(OrderedModel.Meta):
         verbose_name = _('Refusal reason')
         verbose_name_plural = _('Refusal reasons')
+
+
+class DoctorateRefusalReasonCategory(OrderedModel):
+    uuid = models.UUIDField(
+        db_index=True,
+        default=uuid.uuid4,
+        editable=False,
+        primary_key=True,
+    )
+
+    name = models.CharField(
+        max_length=255,
+        verbose_name=_('Name'),
+    )
+
+    def __str__(self):
+        return self.name
+
+    class Meta(OrderedModel.Meta):
+        verbose_name = _('Doctorate refusal reason category')
+        verbose_name_plural = _('Doctorate refusal reason categories')
+
+
+class DoctorateRefusalReason(OrderedModel):
+    uuid = models.UUIDField(
+        db_index=True,
+        default=uuid.uuid4,
+        editable=False,
+        primary_key=True,
+    )
+
+    name = RichTextField(
+        verbose_name=_('Name'),
+        config_name='link_only',
+    )
+
+    category = models.ForeignKey(
+        on_delete=models.CASCADE,
+        to=DoctorateRefusalReasonCategory,
+        verbose_name=_('Category'),
+    )
+
+    order_with_respect_to = 'category'
+
+    def __str__(self):
+        return mark_safe(self.name)
+
+    class Meta(OrderedModel.Meta):
+        verbose_name = _('Doctorate refusal reason')
+        verbose_name_plural = _('Doctorate refusal reasons')
 
 
 class AdditionalApprovalCondition(models.Model):

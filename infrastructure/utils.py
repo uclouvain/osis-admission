@@ -534,6 +534,9 @@ CORRESPONDANCE_CHAMPS_INFORMATIONS_ADDITIONNELLES = {
     'ATTESTATION_INSCRIPTION_REGULIERE': 'regular_registration_proof',
     'FORMULAIRE_REORIENTATION': 'reorientation_form',
     'FORMULAIRE_MODIFICATION_INSCRIPTION': 'registration_change_form',
+    'ATTESTATION_INSCRIPTION_REGULIERE_POUR_MODIFICATION_INSCRIPTION': (
+        'regular_registration_proof_for_registration_change'
+    ),
     'ADDITIONAL_DOCUMENTS': 'additional_documents',
 }
 
@@ -601,6 +604,7 @@ CORRESPONDANCE_CHAMPS_SYSTEME = {
     'DOSSIER_ANALYSE': 'pdf_recap',
     'ATTESTATION_ACCORD_FACULTAIRE': 'fac_approval_certificate',
     'ATTESTATION_ACCORD_CDD': 'cdd_approval_certificate',
+    'ATTESTATION_REFUS_CDD': 'cdd_refusal_certificate',
     'ATTESTATION_REFUS_FACULTAIRE': 'fac_refusal_certificate',
     'JUSTIFICATIF_DEROGATION_DELEGUE_VRAE': 'delegate_vrae_dispensation_certificate',
     'ATTESTATION_ACCORD_SIC': 'sic_approval_certificate',

@@ -142,6 +142,12 @@ class GeneralEducationAdmission(BaseAdmission):
         upload_to=admission_directory_path,
         blank=True,
     )
+    regular_registration_proof_for_registration_change = FileField(
+        verbose_name=_("Proof of regular registration for registration change"),
+        max_files=1,
+        upload_to=admission_directory_path,
+        blank=True,
+    )
     reorientation_form = FileField(
         verbose_name=_("Completed and signed reorientation form"),
         max_files=1,

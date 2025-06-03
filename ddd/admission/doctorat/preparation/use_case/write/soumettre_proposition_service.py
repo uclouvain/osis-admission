@@ -49,10 +49,10 @@ from admission.ddd.admission.domain.service.i_elements_confirmation import IElem
 from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
-from admission.ddd.admission.enums.question_specifique import Onglets
 from admission.ddd.admission.domain.service.profil_soumis_candidat import (
     ProfilSoumisCandidatTranslator,
 )
+from admission.ddd.admission.enums.question_specifique import Onglets
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.service.financabilite import Financabilite
@@ -118,11 +118,6 @@ def soumettre_proposition(
         annee=formation.entity_id.annee,
     )
 
-    etat_financabilite_2023 = financabilite_fetcher.recuperer_etat_financabilite_2023(
-        matricule_fgs=proposition.matricule_candidat,
-        sigle_formation=formation.entity_id.sigle,
-    )
-
     # WHEN
     VerifierProposition().verifier(
         proposition_candidat=proposition,
@@ -161,7 +156,6 @@ def soumettre_proposition(
         parcours=parcours,
         formation=formation_dto,
         est_en_reorientation=False,
-        etat_financabilite_2023=etat_financabilite_2023,
     ).determiner()
 
     proposition.nettoyer_reponses_questions_specifiques(questions_specifiques)
