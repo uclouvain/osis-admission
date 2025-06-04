@@ -586,6 +586,7 @@ COMMAND_HANDLERS = {
             cmd,
             proposition_repository=PropositionRepository(),
             profil_candidat_translator=ProfilCandidatTranslator(),
+            doctorat_translator=DoctoratTranslator(),
         )
     ),
     SpecifierInformationsAcceptationPropositionParSicCommand: (
@@ -710,6 +711,7 @@ COMMAND_HANDLERS = {
             profil_candidat_translator=ProfilCandidatTranslator(),
             academic_year_repository=AcademicYearRepository(),
             experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
+            doctorat_translator=DoctoratTranslator(),
         )
     ),
     VerifierExperienceCurriculumApresSoumissionQuery: (
@@ -717,6 +719,7 @@ COMMAND_HANDLERS = {
             cmd,
             proposition_repository=PropositionRepository(),
             profil_candidat_translator=ProfilCandidatTranslator(),
+            doctorat_translator=DoctoratTranslator(),
         )
     ),
     ModifierChecklistChoixFormationCommand: lambda msg_bus, cmd: modifier_checklist_choix_formation(

@@ -441,6 +441,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 sigle_entite_gestion=admission.training_management_faculty
                 or admission.sigle_entite_gestion,  # from annotation
                 credits=admission.training.credits,
+                grade_academique=admission.training_academic_grade,  # From annotation
             ),
             adresses_emails_gestionnaires_formation=(
                 ProgramManager.objects.filter(education_group_id=admission.training.education_group_id).values_list(

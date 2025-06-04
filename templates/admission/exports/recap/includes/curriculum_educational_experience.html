@@ -240,7 +240,7 @@
             {% field_data _('Acquired bloc 1 credits total number') experience.credits_acquis_bloc_1 %}
           </div>
         </div>
-      {% elif experience.est_formation_master_fwb %}
+      {% elif experience.est_formation_master_fwb and experience.grade_academique_formation and experience.grade_academique_formation == proposition.formation.grade_academique %}
         <div class="row">
           <div class="col-md-6">
             {% field_data _('Were there any prerequisite courses?') experience.avec_complements %}

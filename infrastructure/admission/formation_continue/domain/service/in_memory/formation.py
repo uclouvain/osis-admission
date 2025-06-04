@@ -222,6 +222,7 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             campus_inscription=entity.campus_inscription,
             code=entity.code,
             credits=entity.credits,
+            grade_academique='1',
         )
 
     @classmethod
@@ -260,6 +261,7 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
                 campus=training.campus or '',
                 intitule_en=training.intitule_en,
                 intitule_fr=training.intitule_fr,
+                grade_academique='1',
             )
 
         raise FormationNonTrouveeException

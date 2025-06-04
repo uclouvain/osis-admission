@@ -47,6 +47,7 @@ class FormationEtendue(Formation):
     sigle_entite_gestion: str
     code: str
     credits: int
+    grade_academique: str
 
 
 class CampusFactory(factory.Factory):
@@ -89,3 +90,4 @@ class FormationFactory(factory.Factory):
     campus_inscription = factory.SubFactory(CampusFactory)
     sigle_entite_gestion = factory.Sequence(lambda n: 'SIGLE%02d' % n)
     credits = 180
+    grade_academique = '1'

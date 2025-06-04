@@ -641,6 +641,7 @@ class GeneralEducationAdmissionManager(models.Manager.from_queryset(BaseAdmissio
             .annotate_training_management_entity()
             .annotate_training_management_faculty()
             .annotate_with_reference()
+            .annotate_training_academic_grade()
         )
 
     def for_manager_dto(self):
