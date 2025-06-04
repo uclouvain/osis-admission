@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -29,11 +29,8 @@ from admission.forms import REQUIRED_FIELD_CLASS
 from admission.forms.specific_question import ConfigurableFormMixin
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.file_field import MaxOneFileUploadField
-from osis_profile import BE_ISO_CODE, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
-from osis_profile.forms.experience_academique import (
-    CurriculumAcademicExperienceForm,
-)
-from osis_profile.models.enums.curriculum import TranscriptType
+from osis_profile.forms.experience_academique import CurriculumAcademicExperienceForm
+from reference.models.enums.cycle import Cycle
 
 
 class GlobalCurriculumForm(ConfigurableFormMixin):
@@ -89,28 +86,24 @@ class GlobalCurriculumForm(ConfigurableFormMixin):
 
 
 class CurriculumAcademicExperienceAdmissionForm(CurriculumAcademicExperienceForm):
-    def clean(self):
-        cleaned_data = super().clean()
-        self.clean_files_fields(cleaned_data)
-        return cleaned_data
+    def __init__(self, *args, **kwargs):
+        self.admission_training_academic_grade = kwargs.pop('admission_training_academic_grade')
+        super().__init__(*args, **kwargs)
 
-    def clean_files_fields(self, cleaned_data):
-        obtained_diploma = cleaned_data.get('obtained_diploma')
-        if obtained_diploma:
-            required_fields = ['graduate_degree']
-            for field in required_fields:
-                if not cleaned_data.get(field):
-                    self.add_error(field, FIELD_REQUIRED_MESSAGE)
+    def clean_master_fwb_fields(self, cleaned_data, with_fwb_fields, program_cycle, program_academic_grade):
+        if with_fwb_fields and program_cycle == Cycle.SECOND_CYCLE.name:
+            if program_academic_grade and program_academic_grade == self.admission_training_academic_grade:
+                # The questions are displayed if the experience training is the admission training
+                if cleaned_data.get('with_complement') is None:
+                    self.add_error('with_complement', FIELD_REQUIRED_MESSAGE)
+            else:
+                # The questions are not displayed -> keep initial data
+                cleaned_data['with_complement'] = self.initial.get('with_complement')
+                cleaned_data['complement_registered_credit_number'] = self.initial.get(
+                    'complement_registered_credit_number'
+                )
+                cleaned_data['complement_acquired_credit_number'] = self.initial.get(
+                    'complement_acquired_credit_number'
+                )
 
-        global_transcript = cleaned_data.get('transcript_type') == TranscriptType.ONE_FOR_ALL_YEARS.name
-        if global_transcript and not cleaned_data.get('transcript'):
-            self.add_error('transcript', FIELD_REQUIRED_MESSAGE)
-
-        country = cleaned_data.get('country')
-        be_country = bool(country and country.iso_code == BE_ISO_CODE)
-        linguistic_regime = cleaned_data.get('linguistic_regime')
-        if not be_country and linguistic_regime and linguistic_regime.code not in REGIMES_LINGUISTIQUES_SANS_TRADUCTION:
-            if obtained_diploma and not cleaned_data.get('graduate_degree_translation'):
-                self.add_error('graduate_degree_translation', FIELD_REQUIRED_MESSAGE)
-            if global_transcript and not cleaned_data.get('transcript_translation'):
-                self.add_error('transcript_translation', FIELD_REQUIRED_MESSAGE)
+        super().clean_master_fwb_fields(cleaned_data, with_fwb_fields, program_cycle, program_academic_grade)

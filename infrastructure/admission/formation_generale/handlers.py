@@ -629,6 +629,7 @@ COMMAND_HANDLERS = {
             cmd,
             proposition_repository=PropositionRepository(),
             profil_candidat_translator=ProfilCandidatTranslator(),
+            formation_translator=FormationGeneraleTranslator(),
         )
     ),
     SpecifierInformationsAcceptationPropositionParSicCommand: (
@@ -778,6 +779,7 @@ COMMAND_HANDLERS = {
             profil_candidat_translator=ProfilCandidatTranslator(),
             academic_year_repository=AcademicYearRepository(),
             experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
+            formation_translator=FormationGeneraleTranslator(),
         )
     ),
     RecupererPeriodeInscriptionSpecifiqueBachelierMedecineDentisterieQuery: (
@@ -791,6 +793,7 @@ COMMAND_HANDLERS = {
             cmd,
             proposition_repository=PropositionRepository(),
             profil_candidat_translator=ProfilCandidatTranslator(),
+            formation_translator=FormationGeneraleTranslator(),
         )
     ),
 }

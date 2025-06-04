@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -30,28 +30,35 @@ from unittest.mock import patch
 import freezegun
 from django.conf import settings
 from django.test import TestCase, override_settings
-from osis_history.models import HistoryEntry
 from django.utils.translation import override
+from osis_history.models import HistoryEntry
 
-from admission.models import ContinuingEducationAdmission
 from admission.ddd.admission.dtos import AdressePersonnelleDTO
 from admission.ddd.admission.dtos.campus import CampusDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
-from admission.ddd.admission.formation_continue.commands import RecupererPropositionQuery
+from admission.ddd.admission.formation_continue.commands import (
+    RecupererPropositionQuery,
+)
 from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixEdition,
+    ChoixMoyensDecouverteFormation,
     ChoixStatutPropositionContinue,
     ChoixTypeAdresseFacturation,
-    ChoixMoyensDecouverteFormation,
-    ChoixEdition,
 )
-from admission.ddd.admission.formation_continue.domain.validator.exceptions import PropositionNonTrouveeException
+from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
+    PropositionNonTrouveeException,
+)
 from admission.ddd.admission.formation_continue.dtos import PropositionDTO
-from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from admission.models import ContinuingEducationAdmission
+from admission.tests.factories.continuing_education import (
+    ContinuingEducationAdmissionFactory,
+)
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.campus import CampusFactory
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
+from base.tests.factories.hops import HopsFactory
 from base.tests.factories.student import StudentFactory
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile import BE_ISO_CODE
@@ -135,6 +142,10 @@ class GetPropositionDTOTestCase(TestCase):
             street_number='20',
             sic_enrollment_email='sic_mons@example.be',
         )
+        self.hops = HopsFactory(
+            education_group_year=self.admission.training,
+            ares_graca=10,
+        )
 
         version = self.admission.training.educationgroupversion_set.first()
         version.root_group.main_teaching_campus = self.teaching_campus
@@ -212,6 +223,7 @@ class GetPropositionDTOTestCase(TestCase):
                 ),
                 sigle_entite_gestion='SCH',
                 credits=180,
+                grade_academique='10',
             ),
         )
         self.assertEqual(result.reference, f'L-SCH22-{self.admission}')
