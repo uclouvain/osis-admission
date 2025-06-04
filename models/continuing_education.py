@@ -396,6 +396,7 @@ class ContinuingEducationAdmissionManager(models.Manager.from_queryset(BaseAdmis
             .annotate_several_admissions_in_progress()
             .annotate_submitted_profile_countries_names()
             .annotate_admission_epc_injection_status()
+            .annotate_training_academic_grade()
         )
 
 

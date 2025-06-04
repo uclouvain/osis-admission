@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,18 +27,36 @@
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.domain.service.resume_proposition import ResumeProposition
 from admission.ddd.admission.enums import TypeItemFormulaire
-from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
+from admission.ddd.admission.enums.valorisation_experience import (
+    ExperiencesCVRecuperees,
+)
 from admission.ddd.admission.formation_generale.commands import (
     ApprouverAdmissionParSicCommand,
 )
-from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.formation_generale.domain.service.emplacement_document import EmplacementDocumentService
-from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
-from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation import IPDFGeneration
-from admission.ddd.admission.formation_generale.events import AdmissionApprouveeParSicEvent
-from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
-from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
-from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    PropositionIdentity,
+)
+from admission.ddd.admission.formation_generale.domain.service.emplacement_document import (
+    EmplacementDocumentService,
+)
+from admission.ddd.admission.formation_generale.domain.service.i_historique import (
+    IHistorique,
+)
+from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation import (
+    IPDFGeneration,
+)
+from admission.ddd.admission.formation_generale.events import (
+    AdmissionApprouveeParSicEvent,
+)
+from admission.ddd.admission.formation_generale.repository.i_proposition import (
+    IPropositionRepository,
+)
+from admission.ddd.admission.repository.i_emplacement_document import (
+    IEmplacementDocumentRepository,
+)
+from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
+    IExperienceParcoursInterneTranslator,
+)
 
 
 def approuver_admission_par_sic(
@@ -90,6 +108,7 @@ def approuver_admission_par_sic(
         academic_year_repository=academic_year_repository,
         profil_candidat_translator=profil_candidat_translator,
         experience_parcours_interne_translator=experience_parcours_interne_translator,
+        grade_academique_formation_proposition=proposition_dto.formation.grade_academique,
     )
 
     # THEN

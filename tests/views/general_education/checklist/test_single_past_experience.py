@@ -66,6 +66,7 @@ from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
+from base.tests.factories.hops import HopsFactory
 from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
 from osis_profile.models.enums.curriculum import EvaluationSystem, Result
 
@@ -82,6 +83,10 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
         cls.training = GeneralEducationTrainingFactory(
             management_entity=cls.commission,
             academic_year=cls.academic_years[0],
+        )
+        cls.hops = HopsFactory(
+            education_group_year=cls.training,
+            ares_graca=1,
         )
 
         cls.candidate = CompletePersonFactory(language=settings.LANGUAGE_CODE_FR)
@@ -300,6 +305,49 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
 
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
+
+        # The experience training isn't the same as the admission one so the checking is different
+        experience = EducationalExperienceFactory(
+            person=self.candidate,
+            obtained_diploma=False,
+            country=self.experiences[0].country,
+            evaluation_type='',
+            with_fwb_master_fields=True,
+            with_complement=None,
+        )
+        experience.program.code_grade_acad = '2'
+        experience.program.save()
+
+        EducationalExperienceYearFactory(
+            educational_experience=experience,
+            academic_year=self.general_admission.training.academic_year,
+            result=Result.SUCCESS.name,
+            registered_credit_number=10,
+            acquired_credit_number=10,
+        )
+
+        url = (
+            resolve_url(
+                self.url_name,
+                uuid=self.general_admission.uuid,
+            )
+            + f'?identifier={experience.uuid}&type={TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name}'
+        )
+
+        response = self.client.post(
+            url,
+            **self.default_headers,
+            data={'status': ChoixStatutChecklist.GEST_REUSSITE.name},
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.assertNotIn(
+            "L'expérience académique 'Computer science' est incomplète.",
+            [m.message for m in response.context['messages']],
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_change_the_checklist_status_to_a_status_with_authentication(self):
         self.client.force_login(user=self.sic_manager_user)
