@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,16 +23,24 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocumentIdentity
+from typing import List, Optional
+
+from admission.ddd.admission.domain.model.emplacement_document import (
+    EmplacementDocumentIdentity,
+)
 from admission.ddd.admission.formation_continue.commands import RetyperDocumentCommand
-from admission.ddd.admission.formation_continue.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
+from admission.ddd.admission.formation_continue.domain.model.proposition import (
+    PropositionIdentity,
+)
+from admission.ddd.admission.repository.i_emplacement_document import (
+    IEmplacementDocumentRepository,
+)
 
 
 def retyper_document(
     cmd: 'RetyperDocumentCommand',
     emplacement_document_repository: 'IEmplacementDocumentRepository',
-) -> EmplacementDocumentIdentity:
+) -> List[Optional[EmplacementDocumentIdentity]]:
     document_from_identity = EmplacementDocumentIdentity(
         identifiant=cmd.identifiant_source,
         proposition_id=PropositionIdentity(uuid=cmd.uuid_proposition),
@@ -42,9 +50,8 @@ def retyper_document(
         proposition_id=PropositionIdentity(uuid=cmd.uuid_proposition),
     )
 
-    emplacement_document_repository.echanger_emplacements(
+    return emplacement_document_repository.echanger_emplacements(
         entity_id_from=document_from_identity,
         entity_id_to=document_to_identity,
         auteur=cmd.auteur,
     )
-    return document_from_identity

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,12 +25,16 @@
 # ##############################################################################
 
 import datetime
+import json
 
 import freezegun
 from django.shortcuts import resolve_url
 from django.test import override_settings
 
-from admission.tests.views.common.detail_tabs.test_document import BaseDocumentViewTestCase
+from admission.models import AdmissionFormItem
+from admission.tests.views.common.detail_tabs.test_document import (
+    BaseDocumentViewTestCase,
+)
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
@@ -78,7 +82,12 @@ class RetypeDocumentTestCase(BaseDocumentViewTestCase):
             self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
             self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
 
-        with ((self.subTest('Post a valid form to empty doc'))):
+            htmx_triggers = json.loads(response.headers.get('HX-Trigger', '{}')).get('formValidation', {})
+            self.assertTrue(htmx_triggers.get('refresh_list'))
+            self.assertEqual(htmx_triggers.get('refresh_details'), self.non_free_document_identifier)
+            self.assertIsNone(htmx_triggers.get('delete_document'))
+
+        with self.subTest('Post a valid form to empty doc'):
             other_doc = self.sic_free_requestable_document.split('.')[-1]
             self.general_admission.specific_question_answers[other_doc] = []
             self.general_admission.save()
@@ -101,6 +110,11 @@ class RetypeDocumentTestCase(BaseDocumentViewTestCase):
             # Check last modification data
             self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
             self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+
+            htmx_triggers = json.loads(response.headers.get('HX-Trigger', '{}')).get('formValidation', {})
+            self.assertTrue(htmx_triggers.get('refresh_list'))
+            self.assertEqual(htmx_triggers.get('refresh_details'), self.non_free_document_identifier)
+            self.assertIsNone(htmx_triggers.get('delete_document'))
 
     @freezegun.freeze_time('2022-01-01', as_kwarg='frozen_time')
     def test_doctorate_sic_manager_retypes_a_document(self, frozen_time):
@@ -130,10 +144,10 @@ class RetypeDocumentTestCase(BaseDocumentViewTestCase):
                 resolve_url(
                     base_url,
                     uuid=self.doctorate_admission.uuid,
-                    identifier=self.non_free_document_identifier,
+                    identifier=self.sic_free_requestable_document,
                 ),
                 data={
-                    'identifier': self.sic_free_requestable_document,
+                    'identifier': self.non_free_document_identifier,
                 },
                 **self.default_headers,
             )
@@ -144,6 +158,11 @@ class RetypeDocumentTestCase(BaseDocumentViewTestCase):
             # Check last modification data
             self.assertEqual(self.doctorate_admission.modified_at, datetime.datetime.now())
             self.assertEqual(self.doctorate_admission.last_update_author, self.sic_manager_user.person)
+
+            htmx_triggers = json.loads(response.headers.get('HX-Trigger', '{}')).get('formValidation', {})
+            self.assertTrue(htmx_triggers.get('refresh_list'))
+            self.assertEqual(htmx_triggers.get('refresh_details'), self.sic_free_requestable_document)
+            self.assertIsNone(htmx_triggers.get('delete_document'))
 
         with self.subTest('Post a valid form to empty doc'):
             other_doc = self.sic_free_requestable_document.split('.')[-1]
@@ -154,10 +173,10 @@ class RetypeDocumentTestCase(BaseDocumentViewTestCase):
                 resolve_url(
                     base_url,
                     uuid=self.doctorate_admission.uuid,
-                    identifier=self.non_free_document_identifier,
+                    identifier=self.sic_free_requestable_document,
                 ),
                 data={
-                    'identifier': self.sic_free_requestable_document,
+                    'identifier': self.non_free_document_identifier,
                 },
                 **self.default_headers,
             )
@@ -168,3 +187,42 @@ class RetypeDocumentTestCase(BaseDocumentViewTestCase):
             # Check last modification data
             self.assertEqual(self.doctorate_admission.modified_at, datetime.datetime.now())
             self.assertEqual(self.doctorate_admission.last_update_author, self.sic_manager_user.person)
+
+            htmx_triggers = json.loads(response.headers.get('HX-Trigger', '{}')).get('formValidation', {})
+            self.assertTrue(htmx_triggers.get('refresh_list'))
+            self.assertEqual(htmx_triggers.get('refresh_details'), self.sic_free_requestable_document)
+            self.assertIsNone(htmx_triggers.get('delete_document'))
+
+            related_question = AdmissionFormItem.objects.filter(uuid=other_doc)
+            self.assertTrue(related_question.exists())
+
+            # The target document is empty so the free document will be deleted
+            self.doctorate_admission.curriculum = []
+            self.doctorate_admission.save(update_fields=['curriculum'])
+
+            response = self.client.post(
+                resolve_url(
+                    base_url,
+                    uuid=self.doctorate_admission.uuid,
+                    identifier=self.sic_free_requestable_document,
+                ),
+                data={
+                    'identifier': self.non_free_document_identifier,
+                },
+                **self.default_headers,
+            )
+            self.assertEqual(response.status_code, 200)
+
+            self.doctorate_admission.refresh_from_db()
+
+            # Check last modification data
+            self.assertEqual(self.doctorate_admission.modified_at, datetime.datetime.now())
+            self.assertEqual(self.doctorate_admission.last_update_author, self.sic_manager_user.person)
+
+            htmx_triggers = json.loads(response.headers.get('HX-Trigger', '{}')).get('formValidation', {})
+            self.assertTrue(htmx_triggers.get('refresh_list'))
+            self.assertIsNone(htmx_triggers.get('refresh_details'))
+            self.assertEqual(htmx_triggers.get('delete_document'), self.sic_free_requestable_document)
+
+            related_question = AdmissionFormItem.objects.filter(uuid=other_doc)
+            self.assertFalse(related_question.exists())

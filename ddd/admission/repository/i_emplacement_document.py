@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,11 +25,18 @@
 # ##############################################################################
 import datetime
 from abc import ABCMeta
-from typing import List, Optional, Dict, Set
+from typing import Dict, List, Optional, Set
 
-from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument, EmplacementDocumentIdentity
+from admission.ddd.admission.domain.model.emplacement_document import (
+    EmplacementDocument,
+    EmplacementDocumentIdentity,
+)
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument
+from admission.ddd.admission.enums.emplacement_document import (
+    EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES,
+    StatutEmplacementDocument,
+    TypeEmplacementDocument,
+)
 from osis_common.ddd import interface
 
 
@@ -116,15 +123,37 @@ class IEmplacementDocumentRepository(interface.AbstractRepository, metaclass=ABC
         entity_id_from: EmplacementDocumentIdentity,
         entity_id_to: EmplacementDocumentIdentity,
         auteur: str,
-    ) -> None:
+    ) -> List[Optional[EmplacementDocumentIdentity]]:
         entity_to = cls.get(entity_id_to)
         entity_to_type = entity_to.type
+        entity_to_checklist_tab = entity_to.onglet_checklist_associe
         entity_from = cls.get(entity_id_from)
 
         entity_to.entity_id = entity_id_from
         entity_to.type = entity_from.type
+        entity_to.onglet_checklist_associe = entity_from.onglet_checklist_associe
 
         entity_from.entity_id = entity_id_to
         entity_from.type = entity_to_type
+        entity_from.onglet_checklist_associe = entity_to_checklist_tab
 
-        cls.save_multiple(entities=[entity_to, entity_from], auteur=auteur)
+        emplacements_a_supprimer: List[EmplacementDocument] = []
+        emplacements_a_sauvegarder: List[EmplacementDocument] = []
+        identifiants_entites: List[Optional[EmplacementDocumentIdentity]] = []
+
+        for emplacement in [entity_to, entity_from]:
+            # Si un emplacement de document libre réclamable ne contient plus de document après échange, on le supprime
+            if emplacement.type.name in EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES and not emplacement.uuids_documents:
+                emplacements_a_supprimer.append(emplacement)
+                identifiants_entites.append(None)
+            else:
+                emplacements_a_sauvegarder.append(emplacement)
+                identifiants_entites.append(emplacement.entity_id)
+
+        if emplacements_a_sauvegarder:
+            cls.save_multiple(entities=emplacements_a_sauvegarder, auteur=auteur)
+
+        for emplacement in emplacements_a_supprimer:
+            cls.delete(entity_id=emplacement.entity_id, auteur=auteur)
+
+        return identifiants_entites
