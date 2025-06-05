@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,12 +26,18 @@
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import TestCase
-from django.utils.translation import override
+from django.utils.translation import override, gettext
 
 from base.models.enums.learning_container_year_types import LearningContainerYearType
-from base.models.enums.learning_unit_year_subtypes import LEARNING_UNIT_YEAR_SUBTYPES, FULL
-from base.tests.factories.external_learning_unit_year import ExternalLearningUnitYearFactory
+from base.models.enums.learning_unit_year_subtypes import (
+    FULL,
+)
+from base.models.enums.proposal_type import ProposalType
+from base.tests.factories.external_learning_unit_year import (
+    ExternalLearningUnitYearFactory,
+)
 from base.tests.factories.learning_unit_year import LearningUnitYearFactory
+from base.tests.factories.proposal_learning_unit import ProposalLearningUnitFactory
 from base.tests.factories.user import UserFactory
 
 
@@ -64,6 +70,10 @@ class AutocompleteTestCase(TestCase):
             specific_title='Informatique B',
             specific_title_english='Computer Science B',
             subtype=FULL,
+        )
+        second_learning_unit_proposal = ProposalLearningUnitFactory(
+            learning_unit_year=second_learning_unit,
+            type=ProposalType.CREATION.name,
         )
         first_learning_unit = LearningUnitYearFactory(
             acronym="FOOBAR1",
@@ -99,6 +109,9 @@ class AutocompleteTestCase(TestCase):
             {
                 'id': first_learning_unit.acronym,
                 'text': f'{first_learning_unit.acronym} - {first_learning_unit.complete_title_i18n}',
+                'selected_text': f'{first_learning_unit.acronym} - {first_learning_unit.complete_title_i18n}',
+                'disabled': False,
+                'title': '',
             },
         )
 
@@ -122,6 +135,9 @@ class AutocompleteTestCase(TestCase):
                 {
                     'id': first_learning_unit.acronym,
                     'text': f'{first_learning_unit.acronym} - {first_learning_unit.complete_title_i18n}',
+                    'selected_text': f'{first_learning_unit.acronym} - {first_learning_unit.complete_title_i18n}',
+                    'disabled': False,
+                    'title': '',
                 },
             )
             self.assertEqual(results[0]['id'], first_learning_unit.acronym)
@@ -145,6 +161,47 @@ class AutocompleteTestCase(TestCase):
                     'id': learning_unit_without_english_title.acronym,
                     'text': f'{learning_unit_without_english_title.acronym} - '
                     f'{learning_unit_without_english_title.complete_title}',
+                    'selected_text': f'{learning_unit_without_english_title.acronym} - '
+                    f'{learning_unit_without_english_title.complete_title}',
+                    'disabled': False,
+                    'title': '',
                 },
             )
             self.assertEqual(results[0]['id'], learning_unit_without_english_title.acronym)
+
+            # Search by acronym a learning unit with a proposal (creation)
+            response = self.client.get(url, data={'forward': '{"year": "2022"}', 'q': 'FOOBAR2'}, format="json")
+            self.assertEqual(response.status_code, 200)
+
+            results = response.json()['results']
+            self.assertEqual(len(results), 1)
+            self.assertEqual(
+                results[0],
+                {
+                    'id': second_learning_unit.acronym,
+                    'text': f'{second_learning_unit.acronym} - {second_learning_unit.complete_title_i18n}',
+                    'selected_text': f'{second_learning_unit.acronym} - {second_learning_unit.complete_title_i18n}',
+                    'disabled': False,
+                    'title': '',
+                },
+            )
+
+            # Search by acronym a learning unit with a proposal (deletion)
+            second_learning_unit_proposal.type = ProposalType.SUPPRESSION.name
+            second_learning_unit_proposal.save(update_fields=['type'])
+            response = self.client.get(url, data={'forward': '{"year": "2022"}', 'q': 'FOOBAR2'}, format="json")
+            self.assertEqual(response.status_code, 200)
+
+            results = response.json()['results']
+            icon = '<i class="far fa-file deleted-learning-unit-icon"></i>'
+            self.assertEqual(len(results), 1)
+            self.assertEqual(
+                results[0],
+                {
+                    'id': second_learning_unit.acronym,
+                    'text': f'{icon}{second_learning_unit.acronym} - {second_learning_unit.complete_title_i18n}',
+                    'selected_text': f'{second_learning_unit.acronym} - {second_learning_unit.complete_title_i18n}',
+                    'disabled': True,
+                    'title': gettext('LU proposed for deletion'),
+                },
+            )
