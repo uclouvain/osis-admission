@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,38 +25,56 @@
 # ##############################################################################
 
 import uuid
-from typing import Union, List
+from typing import List, Union
 from uuid import UUID
 
 from django.contrib import messages
-from django.db.models import ProtectedError, QuerySet, OuterRef, Exists
+from django.db.models import Exists, OuterRef, ProtectedError, QuerySet
 from django.forms import forms
-from django.shortcuts import redirect, get_object_or_404, resolve_url
+from django.shortcuts import get_object_or_404, redirect, resolve_url
 from django.urls import reverse
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
 
 from admission.admission_utils.copy_documents import copy_documents
-from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
+from admission.ddd.admission.formation_generale.domain.service.checklist import (
+    Checklist,
+)
+from admission.forms.admission.curriculum import (
+    CurriculumAcademicExperienceAdmissionForm,
+)
 from admission.models import EPCInjection as AdmissionEPCInjection
 from admission.models.base import (
     AdmissionEducationalValuatedExperiences,
     AdmissionProfessionalValuatedExperiences,
+    BaseAdmission,
 )
-from admission.models.base import BaseAdmission
 from admission.models.checklist import FreeAdditionalApprovalCondition
-from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
+from admission.models.epc_injection import (
+    EPCInjectionStatus as AdmissionEPCInjectionStatus,
+)
+from admission.models.epc_injection import EPCInjectionType
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
-from osis_profile.models import ProfessionalExperience, EducationalExperience, EducationalExperienceYear
+from osis_profile.models import (
+    EducationalExperience,
+    EducationalExperienceYear,
+    ProfessionalExperience,
+)
+from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection
 from osis_profile.models.epc_injection import (
-    EPCInjection as CurriculumEPCInjection,
     EPCInjectionStatus as CurriculumEPCInjectionStatus,
 )
-from osis_profile.views.delete_experience_academique import DeleteExperienceAcademiqueView
-from osis_profile.views.delete_experience_non_academique import DeleteExperienceNonAcademiqueView
+from osis_profile.views.delete_experience_academique import (
+    DeleteExperienceAcademiqueView,
+)
+from osis_profile.views.delete_experience_non_academique import (
+    DeleteExperienceNonAcademiqueView,
+)
 from osis_profile.views.edit_experience_academique import EditExperienceAcademiqueView
-from osis_profile.views.edit_experience_non_academique import EditExperienceNonAcademiqueView
+from osis_profile.views.edit_experience_non_academique import (
+    EditExperienceNonAcademiqueView,
+)
 from osis_profile.views.parcours_externe_mixins import DeleteEducationalExperienceMixin
 
 __all__ = [
@@ -82,6 +100,7 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
     template_name = 'admission/forms/curriculum_educational_experience.html'
     permission_required = 'admission.change_admission_curriculum'
     update_admission_author = True
+    base_form = CurriculumAcademicExperienceAdmissionForm
 
     def has_permission(self):
         return super().has_permission() and (
@@ -91,6 +110,11 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
                 for field in ['external_id', 'cv_injection', 'admission_injection']
             )
         )
+
+    def get_base_form_kwargs(self):
+        return {
+            'admission_training_academic_grade': self.proposition.formation.grade_academique,
+        }
 
     def traitement_specifique(self, experience_uuid: UUID, experiences_supprimees: List[UUID] = None):
         pass

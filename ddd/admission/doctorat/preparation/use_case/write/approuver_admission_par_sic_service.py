@@ -130,6 +130,7 @@ def approuver_admission_par_sic(
         academic_year_repository=academic_year_repository,
         profil_candidat_translator=profil_candidat_translator,
         experience_parcours_interne_translator=experience_parcours_interne_translator,
+        grade_academique_formation_proposition=resume_dto.proposition.doctorat.grade_academique,
     )
 
     # THEN
