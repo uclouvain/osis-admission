@@ -24,7 +24,7 @@
 {% endcomment %}
 <div
   id="container_{{ field.name }}"
-  class="field-with-tooltip form-group {{ classes }} {% if field.errors %}has-error{% elif field.form.is_bound %}has-success{% endif %}"
+  class="field-with-tooltip form-group {{ classes }} {% if field.errors %}has-error{% endif %}"
 >
   {% if field.is_hidden %}
     {% bootstrap_field field %}
