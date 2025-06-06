@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -30,16 +30,25 @@ from django.test import TestCase
 from django.utils.translation import gettext_lazy as _
 
 from admission.auth.scope import Scope
-from admission.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
+    ENTITY_CDE,
+)
 from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
+from admission.models import (
+    ContinuingEducationAdmission,
+    DoctorateAdmission,
+    GeneralEducationAdmission,
+)
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from admission.tests.factories.continuing_education import (
+    ContinuingEducationAdmissionFactory,
+)
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import (
     CentralManagerRoleFactory,
-    SicManagementRoleFactory,
+    DoctorateCommitteeMemberRoleFactory,
     ProgramManagerRoleFactory,
+    SicManagementRoleFactory,
 )
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
@@ -117,6 +126,10 @@ class PersonDetailViewTestCase(TestCase):
             candidate=cls.doctorate_admission.candidate,
             admitted=True,
         )
+
+        cls.doctorate_committee_member = DoctorateCommitteeMemberRoleFactory(
+            education_group=cls.doctorate_admission.training.education_group,
+        ).person.user
 
         cls.confirmed_doctorate_url = resolve_url(
             'admission:doctorate:person',
@@ -219,6 +232,11 @@ class PersonDetailViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['admission'].uuid, self.doctorate_admission.uuid)
         self.assertEqual(response.context['person'], self.doctorate_admission.candidate)
+
+    def test_doctoral_person_detail_doctorate_committee_member(self):
+        self.client.force_login(user=self.doctorate_committee_member)
+        response = self.client.get(self.doctorate_url)
+        self.assertEqual(response.status_code, 200)
 
     def test_doctoral_person_detail_sic_manager(self):
         self.client.force_login(user=self.sic_manager_user)

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -36,16 +36,21 @@ from django.utils.translation import gettext
 from osis_history.models import HistoryEntry
 from osis_notification.models import EmailNotification
 
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
 from admission.ddd.admission.enums.emplacement_document import (
-    TypeEmplacementDocument,
     StatutEmplacementDocument,
     StatutReclamationEmplacementDocument,
+    TypeEmplacementDocument,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
-from admission.tests.views.common.detail_tabs.test_document import BaseDocumentViewTestCase
+from admission.tests.factories.roles import DoctorateCommitteeMemberRoleFactory
+from admission.tests.views.common.detail_tabs.test_document import (
+    BaseDocumentViewTestCase,
+)
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.file_field import PDF_MIME_TYPE
 
@@ -1010,6 +1015,28 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
             entry.author,
             f'{self.second_doctorate_fac_manager_user.person.first_name} {self.second_doctorate_fac_manager_user.person.last_name}',
         )
+
+    def test_doctorate_document_detail_doctorate_committee_member(self):
+        doctorate_committee_member = DoctorateCommitteeMemberRoleFactory(
+            education_group=self.doctorate_admission.training.education_group,
+        ).person.user
+
+        self.client.force_login(user=doctorate_committee_member)
+
+        url = resolve_url('admission:doctorate:documents', uuid=self.doctorate_admission.uuid)
+
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+
+        single_document_url = resolve_url(
+            'admission:doctorate:document:detail',
+            uuid=self.doctorate_admission.uuid,
+            identifier=self.non_free_document_identifier,
+        )
+
+        response = self.client.get(single_document_url)
+        self.assertEqual(response.status_code, 200)
 
     def test_doctorate_document_detail_view(self):
         self.init_documents(for_sic=True, admission=self.doctorate_admission)

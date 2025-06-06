@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -29,9 +29,14 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
+    ENTITY_CDE,
+)
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.roles import ProgramManagerRoleFactory
+from admission.tests.factories.roles import (
+    DoctorateCommitteeMemberRoleFactory,
+    ProgramManagerRoleFactory,
+)
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -57,6 +62,9 @@ class CotutelleTestCase(TestCase):
 
         # Users
         cls.program_manager_user = ProgramManagerRoleFactory(
+            education_group=cls.admission.training.education_group
+        ).person.user
+        cls.doctorate_committee_member = DoctorateCommitteeMemberRoleFactory(
             education_group=cls.admission.training.education_group
         ).person.user
 
@@ -102,10 +110,20 @@ class CotutelleTestCase(TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 403)
 
+        # Doctorate reader
+        self.client.force_login(user=self.doctorate_committee_member)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 403)
+
     def test_cotutelle_get(self):
         self.client.force_login(user=self.program_manager_user)
         response = self.client.get(self.details_url)
         self.assertTemplateUsed(response, 'admission/doctorate/details/cotutelle.html')
+
+    def test_cotutelle_get_with_doctorate_committee_member(self):
+        self.client.force_login(user=self.doctorate_committee_member)
+        response = self.client.get(self.details_url)
+        self.assertEqual(response.status_code, 200)
 
     def test_cotutelle_get_form(self):
         self.client.force_login(user=self.program_manager_user)
