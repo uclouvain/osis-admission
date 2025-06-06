@@ -75,6 +75,9 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
     ORGANISATION_ONGLETS_CHECKLIST as ORGANISATION_ONGLETS_CHECKLIST_GENERALE,
 )
 from admission.forms.checklist_state_filter import ChecklistStateFilterField
+from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+    AnneeInscriptionFormationTranslator,
+)
 from admission.models import (
     Accounting,
     AdmissionTask,
@@ -1042,6 +1045,12 @@ class WorkingListForm(forms.ModelForm):
         label=_('Admission statuses'),
         required=False,
         choices=CHOIX_STATUT_TOUTE_PROPOSITION,
+    )
+
+    admission_education_types = forms.TypedMultipleChoiceField(
+        label=_('Admission education types'),
+        required=False,
+        choices=AnneeInscriptionFormationTranslator.EDUCATION_TYPES_CHOICES,
     )
 
     class Meta:

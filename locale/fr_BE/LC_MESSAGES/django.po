@@ -533,6 +533,9 @@ msgstr "Conditions d'accès non remplies."
 msgid "Admission context"
 msgstr "Contexte d'admission"
 
+msgid "Admission education types"
+msgstr "Les types de formation de l'admission"
+
 msgid "Admission export"
 msgstr "Export d'admission"
 
@@ -3801,6 +3804,9 @@ msgstr ""
 
 msgid "IBAN account number"
 msgstr "Numéro de compte IBAN"
+
+msgid "INCHANGE"
+msgstr "Inchangé"
 
 msgid "INITIAL_CANDIDAT"
 msgstr "Initial candidat"

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,14 +29,15 @@ from django.contrib.auth.models import User
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
-from admission.models.working_list import WorkingList
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     OngletsChecklist,
 )
+from admission.models.working_list import WorkingList
 from admission.tests.factories.working_list import WorkingListFactory
+from base.models.enums.education_group_types import TrainingType
 
 
 class WorkingListAutocompleteTestCase(TestCase):
@@ -65,6 +66,7 @@ class WorkingListAutocompleteTestCase(TestCase):
                 ChoixStatutPropositionGenerale.EN_BROUILLON.name,
                 ChoixStatutPropositionGenerale.ANNULEE.name,
             ],
+            admission_education_types=[TrainingType.BACHELOR.name],
             admission_type=TypeDemande.INSCRIPTION.name,
             order=1,
             quarantine=True,
@@ -78,6 +80,7 @@ class WorkingListAutocompleteTestCase(TestCase):
             admission_statuses=[
                 ChoixStatutPropositionGenerale.CONFIRMEE.name,
             ],
+            admission_education_types=[TrainingType.CERTIFICATE_OF_PARTICIPATION.name],
             order=0,
             quarantine=False,
         )
@@ -105,6 +108,7 @@ class WorkingListAutocompleteTestCase(TestCase):
         self.assertEqual(results[0]['checklist_filters_mode'], '')
         self.assertEqual(results[0]['checklist_filters'], [[] for tab_name in OngletsChecklist.get_names()])
         self.assertEqual(results[0]['admission_statuses'], [ChoixStatutPropositionGenerale.CONFIRMEE.name])
+        self.assertCountEqual(results[0]['admission_education_types'], [TrainingType.CERTIFICATE_OF_PARTICIPATION.name])
         self.assertEqual(results[0]['admission_type'], '')
         self.assertEqual(results[0]['quarantine'], False)
 
@@ -125,6 +129,7 @@ class WorkingListAutocompleteTestCase(TestCase):
                 ChoixStatutPropositionGenerale.ANNULEE.name,
             ],
         )
+        self.assertCountEqual(results[1]['admission_education_types'], [TrainingType.BACHELOR.name])
         self.assertEqual(results[1]['admission_type'], TypeDemande.INSCRIPTION.name)
         self.assertEqual(results[1]['quarantine'], True)
 
