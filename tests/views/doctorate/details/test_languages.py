@@ -44,7 +44,7 @@ from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.language import LanguageKnowledgeFactory
 from admission.tests.factories.roles import (
     CentralManagerRoleFactory,
-    DoctorateReaderRoleFactory,
+    DoctorateCommitteeMemberRoleFactory,
     ProgramManagerRoleFactory,
 )
 from base.tests.factories.academic_year import AcademicYearFactory
@@ -80,7 +80,7 @@ class DoctorateAdmissionLanguagesDetailViewTestCase(TestCase):
         cls.program_manager = ProgramManagerRoleFactory(
             education_group=cls.admission.training.education_group
         ).person.user
-        cls.doctorate_reader_user = DoctorateReaderRoleFactory(
+        cls.doctorate_committee_member = DoctorateCommitteeMemberRoleFactory(
             education_group=cls.admission.training.education_group,
         ).person.user
 
@@ -129,7 +129,7 @@ class DoctorateAdmissionLanguagesDetailViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
         # Doctorate reader
-        self.client.force_login(user=self.doctorate_reader_user)
+        self.client.force_login(user=self.doctorate_committee_member)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
 

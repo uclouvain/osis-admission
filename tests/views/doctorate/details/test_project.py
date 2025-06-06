@@ -49,7 +49,7 @@ from admission.models import AdmissionViewer, DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.roles import (
     CandidateFactory,
-    DoctorateReaderRoleFactory,
+    DoctorateCommitteeMemberRoleFactory,
     ProgramManagerRoleFactory,
     SicManagementRoleFactory,
 )
@@ -130,7 +130,7 @@ class DoctorateAdmissionProjectDetailViewTestCase(TestCase):
 
         cls.sic_user = SicManagementRoleFactory(entity=first_doctoral_commission).person.user
         cls.manager = ProgramManagerRoleFactory(education_group=admission.training.education_group).person.user
-        cls.doctorate_reader = DoctorateReaderRoleFactory(
+        cls.doctorate_committee_member = DoctorateCommitteeMemberRoleFactory(
             education_group=admission.training.education_group
         ).person.user
 
@@ -158,8 +158,8 @@ class DoctorateAdmissionProjectDetailViewTestCase(TestCase):
         self.assertIsNotNone(response.context.get('admission'))
         self.assertIsNone(response.context.get('folder'))
 
-    def test_project_detail_doctorate_reader(self):
-        self.client.force_login(user=self.doctorate_reader)
+    def test_project_detail_doctorate_committee_member(self):
+        self.client.force_login(user=self.doctorate_committee_member)
 
         url = reverse('admission:doctorate:project', args=[self.admissions[0].uuid])
 

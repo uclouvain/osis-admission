@@ -52,7 +52,7 @@ from admission.tests.factories.curriculum import (
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import (
     CandidateFactory,
-    DoctorateReaderRoleFactory,
+    DoctorateCommitteeMemberRoleFactory,
     ProgramManagerRoleFactory,
     SicManagementRoleFactory,
 )
@@ -142,7 +142,7 @@ class CurriculumEducationalExperienceDetailViewTestCase(TestCase):
             candidate=cls.candidate,
         )
 
-        cls.doctorate_reader = DoctorateReaderRoleFactory(
+        cls.doctorate_committee_member = DoctorateCommitteeMemberRoleFactory(
             education_group=cls.doctorate_admission.training.education_group,
         ).person.user
 
@@ -258,8 +258,8 @@ class CurriculumEducationalExperienceDetailViewTestCase(TestCase):
         response = self.client.get(self.doctorate_url)
         self.assertEqual(response.status_code, 200)
 
-    def test_doctorate_with_doctorate_reader(self):
-        self.client.force_login(user=self.doctorate_reader)
+    def test_doctorate_with_doctorate_committee_member(self):
+        self.client.force_login(user=self.doctorate_committee_member)
         response = self.client.get(self.doctorate_url)
         self.assertEqual(response.status_code, 200)
 

@@ -42,7 +42,7 @@ from admission.tests.factories.general_education import GeneralEducationAdmissio
 from admission.tests.factories.history import HistoryEntryFactory
 from admission.tests.factories.roles import (
     CentralManagerRoleFactory,
-    DoctorateReaderRoleFactory,
+    DoctorateCommitteeMemberRoleFactory,
     SicManagementRoleFactory,
 )
 from base.tests.factories.academic_year import AcademicYearFactory
@@ -108,7 +108,7 @@ class HistoryAPIViewTestCase(TestCase):
             candidate__phone_mobile='0123456789',
         )
 
-        cls.doctorate_reader = DoctorateReaderRoleFactory(
+        cls.doctorate_committee_member = DoctorateCommitteeMemberRoleFactory(
             education_group=cls.doctorate_admission.training.education_group
         ).person.user
 
@@ -167,7 +167,7 @@ class HistoryAPIViewTestCase(TestCase):
         self.assertEqual(historic_entries[0]['tags'], ['doctorate-education'])
         self.assertEqual(historic_entries[0]['message'], 'Historique de formation doctorale')
 
-    def test_historic_api_with_sic_manager_and_doctorate_reader(self):
-        self.client.force_login(user=self.doctorate_reader)
+    def test_historic_api_with_sic_manager_and_doctorate_committee_member(self):
+        self.client.force_login(user=self.doctorate_committee_member)
         response = self.client.get(self.doctorate_url)
         self.assertEqual(response.status_code, 200)

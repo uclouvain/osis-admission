@@ -5521,10 +5521,10 @@ msgstr ""
 msgid "Role: Committee members"
 msgstr ""
 
-msgid "Role: Doctorate reader"
+msgid "Role: Doctorate committee member"
 msgstr ""
 
-msgid "Role: Doctorate readers"
+msgid "Role: Doctorate committee members"
 msgstr ""
 
 msgid "Role: Program manager"

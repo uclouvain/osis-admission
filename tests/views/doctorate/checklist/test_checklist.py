@@ -50,7 +50,7 @@ from admission.tests.factories.doctorate import DoctorateFactory
 from admission.tests.factories.form_item import AdmissionFormItemFactory
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import (
-    DoctorateReaderRoleFactory,
+    DoctorateCommitteeMemberRoleFactory,
     SicManagementRoleFactory,
 )
 from base.forms.utils.file_field import PDF_MIME_TYPE
@@ -79,7 +79,7 @@ class ChecklistViewTestCase(TestCase):
         cls.candidate = cls.admission.candidate
 
         cls.sic_manager_user = SicManagementRoleFactory(entity=cls.first_doctoral_commission).person.user
-        cls.doctorate_reader = DoctorateReaderRoleFactory(education_group=cls.training.education_group).person.user
+        cls.doctorate_committee_member = DoctorateCommitteeMemberRoleFactory(education_group=cls.training.education_group).person.user
 
         cls.file_metadata = {
             'name': 'myfile',
@@ -136,7 +136,7 @@ class ChecklistViewTestCase(TestCase):
         self.assertContains(response, self.training.acronym)
         self.assertContains(response, self.training.title)
 
-        self.client.force_login(user=self.doctorate_reader)
+        self.client.force_login(user=self.doctorate_committee_member)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 

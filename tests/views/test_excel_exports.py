@@ -112,7 +112,7 @@ from admission.tests.factories.form_item import (
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import (
-    DoctorateReaderRoleFactory,
+    DoctorateCommitteeMemberRoleFactory,
     SicManagementRoleFactory,
 )
 from admission.tests.factories.supervision import PromoterFactory
@@ -1373,7 +1373,7 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
             person=cls.candidate,
             registration_id='01234567',
         )
-        cls.doctorate_reader_user = DoctorateReaderRoleFactory().person.user
+        cls.doctorate_committee_member = DoctorateCommitteeMemberRoleFactory().person.user
 
         cls.default_params = {
             'annee_academique': 2022,
@@ -1399,8 +1399,8 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
 
         self.assertEqual(response.status_code, 403)
 
-    def test_export_doctorate_reader(self):
-        self.client.force_login(user=self.doctorate_reader_user)
+    def test_export_doctorate_committee_member(self):
+        self.client.force_login(user=self.doctorate_committee_member)
 
         response = self.client.get(self.url)
 

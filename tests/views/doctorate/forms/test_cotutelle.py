@@ -34,7 +34,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formatio
 )
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.roles import (
-    DoctorateReaderRoleFactory,
+    DoctorateCommitteeMemberRoleFactory,
     ProgramManagerRoleFactory,
 )
 from base.tests.factories.academic_year import AcademicYearFactory
@@ -64,7 +64,7 @@ class CotutelleTestCase(TestCase):
         cls.program_manager_user = ProgramManagerRoleFactory(
             education_group=cls.admission.training.education_group
         ).person.user
-        cls.doctorate_reader = DoctorateReaderRoleFactory(
+        cls.doctorate_committee_member = DoctorateCommitteeMemberRoleFactory(
             education_group=cls.admission.training.education_group
         ).person.user
 
@@ -111,7 +111,7 @@ class CotutelleTestCase(TestCase):
         self.assertEqual(response.status_code, 403)
 
         # Doctorate reader
-        self.client.force_login(user=self.doctorate_reader)
+        self.client.force_login(user=self.doctorate_committee_member)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 403)
 
@@ -120,8 +120,8 @@ class CotutelleTestCase(TestCase):
         response = self.client.get(self.details_url)
         self.assertTemplateUsed(response, 'admission/doctorate/details/cotutelle.html')
 
-    def test_cotutelle_get_with_doctorate_reader(self):
-        self.client.force_login(user=self.doctorate_reader)
+    def test_cotutelle_get_with_doctorate_committee_member(self):
+        self.client.force_login(user=self.doctorate_committee_member)
         response = self.client.get(self.details_url)
         self.assertEqual(response.status_code, 200)
 

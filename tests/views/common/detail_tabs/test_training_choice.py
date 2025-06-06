@@ -54,7 +54,7 @@ from admission.tests.factories.form_item import (
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import (
     CandidateFactory,
-    DoctorateReaderRoleFactory,
+    DoctorateCommitteeMemberRoleFactory,
     ProgramManagerRoleFactory,
     SicManagementRoleFactory,
 )
@@ -124,7 +124,7 @@ class TrainingChoiceDetailViewTestCase(TestCase):
         cls.doctorate_program_manager_user = ProgramManagerRoleFactory(
             education_group=cls.doctorate_admission.training.education_group
         ).person.user
-        cls.doctorate_reader = DoctorateReaderRoleFactory(
+        cls.doctorate_committee_member = DoctorateCommitteeMemberRoleFactory(
             education_group=cls.doctorate_admission.training.education_group
         ).person.user
 
@@ -271,7 +271,7 @@ class TrainingChoiceDetailViewTestCase(TestCase):
         response = self.client.get(self.doctorate_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        self.client.force_login(self.doctorate_reader)
+        self.client.force_login(self.doctorate_committee_member)
         response = self.client.get(self.doctorate_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 

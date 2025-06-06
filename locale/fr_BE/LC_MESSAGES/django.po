@@ -6105,11 +6105,11 @@ msgstr "Rôle: Membre du comité"
 msgid "Role: Committee members"
 msgstr "Rôle: Membres du comité"
 
-msgid "Role: Doctorate reader"
-msgstr "Rôle: Lecteur doctorat"
+msgid "Role: Doctorate committee member"
+msgstr "Rôle: Membre de la commission doctorale"
 
-msgid "Role: Doctorate readers"
-msgstr "Rôle: Lecteurs doctorat"
+msgid "Role: Doctorate committee members"
+msgstr "Rôle: Membres de la commission doctorale"
 
 msgid "Role: Program manager"
 msgstr "Rôle: Gestionnaire d'admission d'un programme"

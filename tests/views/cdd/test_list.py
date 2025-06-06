@@ -66,7 +66,7 @@ from admission.models import DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.roles import (
     CandidateFactory,
-    DoctorateReaderRoleFactory,
+    DoctorateCommitteeMemberRoleFactory,
     ProgramManagerRoleFactory,
     SicManagementRoleFactory,
 )
@@ -290,7 +290,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             person=program_manager_person,
         )
         cls.program_manager_user = program_manager_person.user
-        cls.doctorate_reader_user = DoctorateReaderRoleFactory(
+        cls.doctorate_committee_member = DoctorateCommitteeMemberRoleFactory(
             education_group=cls.admissions[0].training.education_group,
         ).person.user
 
@@ -322,8 +322,8 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['object_list'], [])
 
-    def test_form_initialization_for_a_doctorate_reader(self):
-        self.client.force_login(user=self.doctorate_reader_user)
+    def test_form_initialization_for_a_doctorate_committee_member(self):
+        self.client.force_login(user=self.doctorate_committee_member)
 
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)

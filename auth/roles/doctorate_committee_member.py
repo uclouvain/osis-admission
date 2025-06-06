@@ -39,18 +39,13 @@ from base.models.education_group import EducationGroup
 from education_group.contrib.models import EducationGroupRoleModel
 
 
-class DoctorateReader(EducationGroupRoleModel):
-
+class DoctorateCommitteeMember(EducationGroupRoleModel):
     education_group = models.ForeignKey(EducationGroup, on_delete=models.CASCADE, related_name='+')
 
-    @property
-    def education_group_most_recent_acronym(self):  # pragma: no cover
-        return self.education_group.most_recent_acronym
-
     class Meta:
-        verbose_name = _("Role: Doctorate reader")
-        verbose_name_plural = _("Role: Doctorate readers")
-        group_name = "doctorate_reader"
+        verbose_name = _("Role: Doctorate committee member")
+        verbose_name_plural = _("Role: Doctorate committee members")
+        group_name = "doctorate_committee_member"
 
     @classmethod
     def rule_set(cls):

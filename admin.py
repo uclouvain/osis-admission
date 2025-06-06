@@ -48,7 +48,7 @@ from osis_document.contrib import FileField
 from admission.auth.roles.ca_member import CommitteeMember
 from admission.auth.roles.candidate import Candidate
 from admission.auth.roles.central_manager import CentralManager
-from admission.auth.roles.doctorate_reader import DoctorateReader
+from admission.auth.roles.doctorate_committee_member import DoctorateCommitteeMember
 from admission.auth.roles.program_manager import ProgramManager
 from admission.auth.roles.promoter import Promoter
 from admission.auth.roles.sceb import Sceb
@@ -1022,7 +1022,7 @@ class AdmissionReaderAdmin(HijackUserAdminMixin, EducationGroupRoleModelAdmin):
         return obj.person.user
 
 
-@admin.register(ProgramManager, DoctorateReader)
+@admin.register(ProgramManager, DoctorateCommitteeMember)
 class ProgramManagerAdmin(HijackUserAdminMixin, EducationGroupRoleModelAdmin):
     list_select_related = ['person__user']
     list_display = ['person', 'education_group_most_recent_acronym']

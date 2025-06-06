@@ -53,7 +53,7 @@ from admission.tests.factories.curriculum import (
     ProfessionalExperienceFactory,
 )
 from admission.tests.factories.roles import (
-    DoctorateReaderRoleFactory,
+    DoctorateCommitteeMemberRoleFactory,
     ProgramManagerRoleFactory,
 )
 from admission.tests.factories.supervision import (
@@ -94,7 +94,7 @@ class SupervisionTestCase(TestCase):
             education_group=cls.admission.training.education_group
         ).person.user
 
-        cls.doctorate_reader = DoctorateReaderRoleFactory(
+        cls.doctorate_committee_member = DoctorateCommitteeMemberRoleFactory(
             education_group=cls.admission.training.education_group
         ).person.user
 
@@ -137,8 +137,8 @@ class SupervisionTestCase(TestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
-    def test_access_with_doctorate_reader(self):
-        self.client.force_login(user=self.doctorate_reader)
+    def test_access_with_doctorate_committee_member(self):
+        self.client.force_login(user=self.doctorate_committee_member)
 
         response = self.client.get(self.detail_url)
         self.assertEqual(response.status_code, 302)

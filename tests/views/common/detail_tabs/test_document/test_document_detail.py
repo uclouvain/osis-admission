@@ -47,7 +47,7 @@ from admission.ddd.admission.enums.emplacement_document import (
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
-from admission.tests.factories.roles import DoctorateReaderRoleFactory
+from admission.tests.factories.roles import DoctorateCommitteeMemberRoleFactory
 from admission.tests.views.common.detail_tabs.test_document import (
     BaseDocumentViewTestCase,
 )
@@ -1016,12 +1016,12 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
             f'{self.second_doctorate_fac_manager_user.person.first_name} {self.second_doctorate_fac_manager_user.person.last_name}',
         )
 
-    def test_doctorate_document_detail_doctorate_reader(self):
-        doctorate_reader = DoctorateReaderRoleFactory(
+    def test_doctorate_document_detail_doctorate_committee_member(self):
+        doctorate_committee_member = DoctorateCommitteeMemberRoleFactory(
             education_group=self.doctorate_admission.training.education_group,
         ).person.user
 
-        self.client.force_login(user=doctorate_reader)
+        self.client.force_login(user=doctorate_committee_member)
 
         url = resolve_url('admission:doctorate:documents', uuid=self.doctorate_admission.uuid)
 

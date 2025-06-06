@@ -46,7 +46,7 @@ from admission.tests.factories.curriculum import (
 )
 from admission.tests.factories.roles import (
     CandidateFactory,
-    DoctorateReaderRoleFactory,
+    DoctorateCommitteeMemberRoleFactory,
     ProgramManagerRoleFactory,
     SicManagementRoleFactory,
 )
@@ -86,7 +86,7 @@ class DoctorateAccountingDetailViewTestCase(TestCase):
         self.program_manager_user = ProgramManagerRoleFactory(
             education_group=self.doctorate_admission.training.education_group
         ).person.user
-        self.doctorate_reader = DoctorateReaderRoleFactory(
+        self.doctorate_committee_member = DoctorateCommitteeMemberRoleFactory(
             education_group=self.doctorate_admission.training.education_group
         ).person.user
 
@@ -113,7 +113,7 @@ class DoctorateAccountingDetailViewTestCase(TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        self.client.force_login(self.doctorate_reader)
+        self.client.force_login(self.doctorate_committee_member)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
