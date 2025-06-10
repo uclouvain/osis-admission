@@ -4220,6 +4220,9 @@ msgstr "Clés"
 msgid "Knowledge of languages"
 msgstr "Connaissance des langues"
 
+msgid "LU proposed for deletion"
+msgstr "UE en proposition de suppression"
+
 msgid "Language"
 msgstr "Langue"
 
@@ -5663,7 +5666,9 @@ msgid "Proof of regular registration"
 msgstr "Attestation d'inscription régulière'"
 
 msgid "Proof of regular registration for registration change"
-msgstr "Attestation d'inscription régulière pour la modification d'inscription externe"
+msgstr ""
+"Attestation d'inscription régulière pour la modification d'inscription "
+"externe"
 
 msgid "Proof of scholarship"
 msgstr "Preuve d'octroi de la bourse"
@@ -6892,8 +6897,7 @@ msgid ""
 "application to the SIC, status reset, etc). Do you confirm the closing?"
 msgstr ""
 "La clôture du dossier a des conséquences importantes (rapatriement du "
-"dossier en SIC, réinitialisation des états, etc). Confirmez-vous la "
-"clôture ?"
+"dossier en SIC, réinitialisation des états, etc). Confirmez-vous la clôture ?"
 
 #, python-format
 msgid ""

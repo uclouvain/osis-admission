@@ -3780,6 +3780,9 @@ msgstr ""
 msgid "Knowledge of languages"
 msgstr ""
 
+msgid "LU proposed for deletion"
+msgstr ""
+
 msgid "Language"
 msgstr ""
 
