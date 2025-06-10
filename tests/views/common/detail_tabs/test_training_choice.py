@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -30,19 +30,33 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
-from admission.models import GeneralEducationAdmission, ContinuingEducationAdmission, DoctorateAdmission
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.enums import Onglets
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+)
+from admission.models import (
+    ContinuingEducationAdmission,
+    DoctorateAdmission,
+    GeneralEducationAdmission,
+)
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
-from admission.tests.factories.form_item import AdmissionFormItemInstantiationFactory, MessageAdmissionFormItemFactory
+from admission.tests.factories.continuing_education import (
+    ContinuingEducationAdmissionFactory,
+)
+from admission.tests.factories.form_item import (
+    AdmissionFormItemInstantiationFactory,
+    MessageAdmissionFormItemFactory,
+)
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import (
-    SicManagementRoleFactory,
     CandidateFactory,
+    DoctorateCommitteeMemberRoleFactory,
     ProgramManagerRoleFactory,
+    SicManagementRoleFactory,
 )
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -108,6 +122,9 @@ class TrainingChoiceDetailViewTestCase(TestCase):
 
         cls.doctorate_sic_manager_user = SicManagementRoleFactory(entity=doctorate_entity).person.user
         cls.doctorate_program_manager_user = ProgramManagerRoleFactory(
+            education_group=cls.doctorate_admission.training.education_group
+        ).person.user
+        cls.doctorate_committee_member = DoctorateCommitteeMemberRoleFactory(
             education_group=cls.doctorate_admission.training.education_group
         ).person.user
 
@@ -251,6 +268,10 @@ class TrainingChoiceDetailViewTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.client.force_login(self.doctorate_program_manager_user)
+        response = self.client.get(self.doctorate_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.client.force_login(self.doctorate_committee_member)
         response = self.client.get(self.doctorate_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 

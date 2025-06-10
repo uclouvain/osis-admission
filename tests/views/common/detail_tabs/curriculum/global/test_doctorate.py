@@ -43,6 +43,7 @@ from admission.tests.factories.curriculum import (
 )
 from admission.tests.factories.roles import (
     CentralManagerRoleFactory,
+    DoctorateCommitteeMemberRoleFactory,
     ProgramManagerRoleFactory,
 )
 from base.models.enums.teaching_type import TeachingTypeEnum
@@ -105,6 +106,14 @@ class CurriculumGlobalDetailsViewForDoctorateTestCase(TestCase):
 
     def test_get_curriculum_with_sic_manager_user(self):
         self.client.force_login(user=self.sic_manager_user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_curriculum_with_doctorate_committee_member(self):
+        doctorate_committee_member = DoctorateCommitteeMemberRoleFactory(
+            education_group=self.doctorate_admission.training.education_group
+        ).person.user
+        self.client.force_login(user=doctorate_committee_member)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
 

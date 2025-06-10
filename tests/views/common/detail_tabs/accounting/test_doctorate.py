@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -30,12 +30,26 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
+    ENTITY_CDE,
+)
+from admission.ddd.admission.enums import (
+    ChoixAffiliationSport,
+    ChoixTypeCompteBancaire,
+    TypeSituationAssimilation,
+)
 from admission.models import DoctorateAdmission
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
-from admission.ddd.admission.enums import TypeSituationAssimilation, ChoixAffiliationSport, ChoixTypeCompteBancaire
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.curriculum import EducationalExperienceFactory, EducationalExperienceYearFactory
-from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory, CandidateFactory
+from admission.tests.factories.curriculum import (
+    EducationalExperienceFactory,
+    EducationalExperienceYearFactory,
+)
+from admission.tests.factories.roles import (
+    CandidateFactory,
+    DoctorateCommitteeMemberRoleFactory,
+    ProgramManagerRoleFactory,
+    SicManagementRoleFactory,
+)
 from base.models.enums.community import CommunityEnum
 from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
 from base.tests.factories.academic_year import AcademicYearFactory, get_current_year
@@ -72,6 +86,9 @@ class DoctorateAccountingDetailViewTestCase(TestCase):
         self.program_manager_user = ProgramManagerRoleFactory(
             education_group=self.doctorate_admission.training.education_group
         ).person.user
+        self.doctorate_committee_member = DoctorateCommitteeMemberRoleFactory(
+            education_group=self.doctorate_admission.training.education_group
+        ).person.user
 
         # Targeted url
         self.url = resolve_url('admission:doctorate:accounting', uuid=self.doctorate_admission.uuid)
@@ -93,6 +110,10 @@ class DoctorateAccountingDetailViewTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.client.force_login(self.program_manager_user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.client.force_login(self.doctorate_committee_member)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
