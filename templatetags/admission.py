@@ -1236,7 +1236,6 @@ def experience_details_template(
         res_context['custom_base_template'] = 'admission/exports/recap/includes/curriculum_educational_experience.html'
         res_context['title'] = _('Academic experience')
         res_context['with_single_header_buttons'] = True
-        res_context['proposition'] = resume_proposition.proposition
         res_context.update(get_educational_experience_context(resume_proposition, experience))
 
     elif experience.__class__ == ExperienceNonAcademiqueDTO:

@@ -1669,7 +1669,7 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
 
         self.assertEqual(first_form.cleaned_data['is_102_change_of_course'], None)
 
-        # No specified value for the with complement field -> keep initial data
+        # No specified value for the with complement field -> clean data
         response = self.client.post(
             self.form_url,
             data={
@@ -1683,13 +1683,11 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
         self.assertNotIn(FIELD_REQUIRED_MESSAGE, base_form.errors.get('with_complement', []))
 
         self.assertEqual(base_form.cleaned_data['block_1_acquired_credit_number'], None)
+        self.assertEqual(base_form.cleaned_data['with_complement'], None)
+        self.assertEqual(base_form.cleaned_data['complement_registered_credit_number'], None)
+        self.assertEqual(base_form.cleaned_data['complement_acquired_credit_number'], None)
 
-        # Keep initial data
-        self.assertEqual(base_form.cleaned_data['with_complement'], True)
-        self.assertEqual(base_form.cleaned_data['complement_registered_credit_number'], 30)
-        self.assertEqual(base_form.cleaned_data['complement_acquired_credit_number'], 29)
-
-        # No complement -> keep initial data
+        # No complement -> clean data
         response = self.client.post(
             self.form_url,
             data={
@@ -1702,16 +1700,16 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
 
         base_form = response.context['base_form']
         self.assertEqual(base_form.cleaned_data['block_1_acquired_credit_number'], None)
-        self.assertEqual(base_form.cleaned_data['with_complement'], True)
-        self.assertEqual(base_form.cleaned_data['complement_registered_credit_number'], 30)
-        self.assertEqual(base_form.cleaned_data['complement_acquired_credit_number'], 29)
+        self.assertEqual(base_form.cleaned_data['with_complement'], False)
+        self.assertEqual(base_form.cleaned_data['complement_registered_credit_number'], None)
+        self.assertEqual(base_form.cleaned_data['complement_acquired_credit_number'], None)
 
         year_formset = response.context['year_formset']
         first_form = year_formset.forms[0]
 
         self.assertEqual(first_form.cleaned_data['is_102_change_of_course'], None)
 
-        # With complement -> keep initial data
+        # With complement -> update data
         response = self.client.post(
             self.form_url,
             data=default_data,
@@ -1722,8 +1720,8 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
         base_form = response.context['base_form']
         self.assertEqual(base_form.cleaned_data['block_1_acquired_credit_number'], None)
         self.assertEqual(base_form.cleaned_data['with_complement'], True)
-        self.assertEqual(base_form.cleaned_data['complement_registered_credit_number'], 30)
-        self.assertEqual(base_form.cleaned_data['complement_acquired_credit_number'], 29)
+        self.assertEqual(base_form.cleaned_data['complement_registered_credit_number'], 10)
+        self.assertEqual(base_form.cleaned_data['complement_acquired_credit_number'], 9)
 
         year_formset = response.context['year_formset']
         first_form = year_formset.forms[0]
@@ -1745,8 +1743,8 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
         base_form = response.context['base_form']
         self.assertEqual(base_form.cleaned_data['block_1_acquired_credit_number'], None)
         self.assertEqual(base_form.cleaned_data['with_complement'], True)
-        self.assertEqual(base_form.cleaned_data['complement_registered_credit_number'], 30)
-        self.assertEqual(base_form.cleaned_data['complement_acquired_credit_number'], 29)
+        self.assertEqual(base_form.cleaned_data['complement_registered_credit_number'], 10)
+        self.assertEqual(base_form.cleaned_data['complement_acquired_credit_number'], 9)
 
         year_formset = response.context['year_formset']
         first_form = year_formset.forms[0]

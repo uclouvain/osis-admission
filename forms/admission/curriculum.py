@@ -91,19 +91,13 @@ class CurriculumAcademicExperienceAdmissionForm(CurriculumAcademicExperienceForm
         super().__init__(*args, **kwargs)
 
     def clean_master_fwb_fields(self, cleaned_data, with_fwb_fields, program_cycle, program_academic_grade):
-        if with_fwb_fields and program_cycle == Cycle.SECOND_CYCLE.name:
-            if program_academic_grade and program_academic_grade == self.admission_training_academic_grade:
-                # The questions are displayed if the experience training is the admission training
-                if cleaned_data.get('with_complement') is None:
-                    self.add_error('with_complement', FIELD_REQUIRED_MESSAGE)
-            else:
-                # The questions are not displayed -> keep initial data
-                cleaned_data['with_complement'] = self.initial.get('with_complement')
-                cleaned_data['complement_registered_credit_number'] = self.initial.get(
-                    'complement_registered_credit_number'
-                )
-                cleaned_data['complement_acquired_credit_number'] = self.initial.get(
-                    'complement_acquired_credit_number'
-                )
-
+        # The questions are mandatory if the experience training is the admission training
+        if (
+            with_fwb_fields
+            and program_cycle == Cycle.SECOND_CYCLE.name
+            and program_academic_grade
+            and program_academic_grade == self.admission_training_academic_grade
+            and cleaned_data.get('with_complement') is None
+        ):
+            self.add_error('with_complement', FIELD_REQUIRED_MESSAGE)
         super().clean_master_fwb_fields(cleaned_data, with_fwb_fields, program_cycle, program_academic_grade)
