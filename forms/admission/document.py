@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -32,13 +32,18 @@ from django import forms
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.utils.safestring import mark_safe
-from django.utils.translation import gettext_lazy as _, get_language, pgettext_lazy
+from django.utils.translation import get_language
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext_lazy
 
-from admission.models.categorized_free_document import CategorizedFreeDocument, TOKEN_ACADEMIC_YEAR
+from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
+    OngletsChecklist as OngletsChecklistDoctorat,
+)
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.emplacement_document import (
-    StatutReclamationEmplacementDocument,
     DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION,
+    StatutReclamationEmplacementDocument,
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     OngletsChecklist as OngletsChecklistFormationContinue,
@@ -46,22 +51,24 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     OngletsChecklist as OngletsChecklistFormationGenerale,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
-    OngletsChecklist as OngletsChecklistDoctorat,
-)
 from admission.forms import (
     OTHER_EMPTY_CHOICE,
+    AdmissionHTMLCharField,
     autocomplete,
     get_year_choices,
-    AdmissionHTMLCharField,
+)
+from admission.models.categorized_free_document import (
+    TOKEN_ACADEMIC_YEAR,
+    CategorizedFreeDocument,
 )
 from admission.templatetags.admission import (
-    formatted_language,
     document_request_status_css_class,
+    formatted_language,
 )
-from admission.constants import CONTEXT_GENERAL, CONTEXT_CONTINUING, CONTEXT_DOCTORATE
-from admission.views.autocomplete.categorized_free_documents import CategorizedFreeDocumentsAutocomplete
-from base.forms.utils import FIELD_REQUIRED_MESSAGE
+from admission.views.autocomplete.categorized_free_documents import (
+    CategorizedFreeDocumentsAutocomplete,
+)
+from base.forms.utils import EMPTY_CHOICE, FIELD_REQUIRED_MESSAGE
 from base.forms.utils.choice_field import BLANK_CHOICE
 from base.forms.utils.datefield import CustomDateInput
 from base.forms.utils.file_field import MaxOneFileUploadField
@@ -114,7 +121,7 @@ def get_request_status_choices(only_limited_request_choices):
 class FreeDocumentHelperFormMixin(forms.Form):
     checklist_tab = forms.ChoiceField(
         label=_('Document category'),
-        required=False,
+        required=True,
     )
 
     document_type = forms.ModelChoiceField(
@@ -150,7 +157,7 @@ class FreeDocumentHelperFormMixin(forms.Form):
         self.current_language = get_language()
 
         self.fields['checklist_tab'].choices = (
-            OTHER_EMPTY_CHOICE
+            EMPTY_CHOICE
             + {
                 CONTEXT_GENERAL: OngletsChecklistFormationGenerale.choices_except(
                     OngletsChecklistFormationGenerale.experiences_parcours_anterieur,

@@ -1477,6 +1477,11 @@ def get_document_details_url(context, document: EmplacementDocumentDTO):
 
 
 @register.filter
+def has_free_documents(documents: List[EmplacementDocumentDTO]):
+    return any(document.est_emplacement_document_libre for document in documents)
+
+
+@register.filter
 def osis_language_name(code):
     if not code:
         return ''
