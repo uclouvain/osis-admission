@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,19 +24,22 @@
 #
 # ##############################################################################
 from enum import Enum
-from typing import List, Optional, Dict
+from typing import Dict, List, Optional
 
 import attr
-from django.utils.translation import gettext_lazy as _, pgettext_lazy
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext_lazy
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
-    ChoixStatutChecklist,
-    OngletsChecklist,
-    DerogationFinancement,
-    DecisionCDDEnum,
     BesoinDeDerogation,
+    ChoixStatutChecklist,
+    DecisionCDDEnum,
+    DerogationFinancement,
+    OngletsChecklist,
 )
-from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
+from admission.ddd.admission.domain.model.enums.authentification import (
+    EtatAuthentificationParcours,
+)
 from osis_common.ddd import interface
 
 
@@ -411,6 +414,12 @@ onglet_decision_cdd = ConfigurationOngletChecklist(
             libelle=_('To be completed by SIC'),
             statut=ChoixStatutChecklist.GEST_BLOCAGE,
             extra={'decision': DecisionCDDEnum.HORS_DECISION.name},
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='CLOTURE',
+            libelle=_('Closed'),
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+            extra={'decision': DecisionCDDEnum.CLOTURE.name},
         ),
         ConfigurationStatutChecklist(
             identifiant='REFUS',

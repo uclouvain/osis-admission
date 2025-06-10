@@ -143,6 +143,7 @@ class PoolQuestionsView(APIPermissionRequiredMixin, RetrieveAPIView):
                 'is_belgian_bachelor',
                 'is_external_modification',
                 'registration_change_form',
+                'regular_registration_proof_for_registration_change',
             ]
 
         class DynamicPoolQuestionsSerializer(PoolQuestionsSerializer):
@@ -164,6 +165,7 @@ class PoolQuestionsView(APIPermissionRequiredMixin, RetrieveAPIView):
             'is_external_modification': None,
             'is_external_reorientation': None,
             'registration_change_form': [],
+            'regular_registration_proof_for_registration_change': [],
             'regular_registration_proof': [],
             'reorientation_form': [],
             # Add user input

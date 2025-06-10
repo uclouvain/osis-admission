@@ -38,9 +38,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     ChoixStatutChecklist,
 )
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
-    IdentificationNonCompleteeException,
-)
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
     PropositionAdmissionSC3DPConfirmeeFactory,
 )
@@ -56,21 +53,13 @@ from admission.infrastructure.admission.doctorat.preparation.repository.in_memor
 from admission.infrastructure.admission.domain.service.in_memory.elements_confirmation import (
     ElementsConfirmationInMemory,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
-    ProfilCandidatInMemoryTranslator,
-)
 from admission.infrastructure.message_bus_in_memory import (
     message_bus_in_memory_instance,
 )
-from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
-from ddd.logic.financabilite.dtos.catalogue import FormationDTO
-from ddd.logic.financabilite.dtos.parcours import (
-    ParcoursAcademiqueExterneDTO,
-    ParcoursAcademiqueInterneDTO,
-    ParcoursDTO,
-)
+from ddd.logic.financabilite.domain.model.catalogue import Formation
+from ddd.logic.financabilite.domain.model.parcours import Parcours, ParcoursAcademiqueExterne, ParcoursAcademiqueInterne
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
     AcademicYear,
     AcademicYearIdentity,
@@ -90,16 +79,16 @@ class TestVerifierPropositionServiceCommun(TestCase):
         super().setUpClass()
         cls.financabilite_fetcher = FinancabiliteInMemoryFetcher()
         cls.financabilite_fetcher.save(
-            ParcoursDTO(
+            Parcours(
                 matricule_fgs='0123456789',
-                parcours_academique_interne=ParcoursAcademiqueInterneDTO(programmes_cycles=[]),
-                parcours_academique_externe=ParcoursAcademiqueExterneDTO(experiences=[]),
+                parcours_academique_interne=ParcoursAcademiqueInterne(programmes_cycles=[]),
+                parcours_academique_externe=ParcoursAcademiqueExterne(experiences=[]),
                 annee_diplome_etudes_secondaires=2015,
                 nombre_tentative_de_passer_concours_pass_et_las=0,
             )
         )
         cls.financabilite_fetcher.formations.append(
-            FormationDTO(
+            Formation(
                 sigle='SC3DP',
                 annee=2020,
                 type=TrainingType.PHD.name,

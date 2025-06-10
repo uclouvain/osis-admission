@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,15 +23,21 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List, Dict
+from typing import Dict, List
 
 from django.conf import settings
-from django.utils.translation import get_language
+from django.utils.translation import get_language, gettext_lazy
 
 from base.models.enums.learning_container_year_types import LearningContainerYearType
-from ddd.logic.learning_unit.commands import LearningUnitAndPartimSearchCommand, SearchDetailClassesEffectivesCommand
+from base.models.enums.proposal_type import ProposalType
+from ddd.logic.learning_unit.commands import (
+    LearningUnitAndPartimSearchCommand,
+    SearchDetailClassesEffectivesCommand,
+)
 from infrastructure.messages_bus import message_bus_instance
-from learning_unit.views.autocomplete import LearningUnitYearAutoComplete as BaseLearningUnitYearAutoComplete
+from learning_unit.views.autocomplete import (
+    LearningUnitYearAutoComplete as BaseLearningUnitYearAutoComplete,
+)
 
 __all__ = [
     'LearningUnitYearAndClassesAutocomplete',
@@ -68,6 +74,8 @@ class LearningUnitYearAutocomplete(BaseLearningUnitYearAutoComplete):
         settings.LANGUAGE_CODE_FR: 'full_title',
         settings.LANGUAGE_CODE_EN: 'full_title_en',
     }
+    prefix_icon = {ProposalType.SUPPRESSION.name: '<i class="far fa-file deleted-learning-unit-icon"></i>'}
+    option_title = {ProposalType.SUPPRESSION.name: gettext_lazy('LU proposed for deletion')}
 
     def get_list(self):
         search = self.q
@@ -92,11 +100,14 @@ class LearningUnitYearAutocomplete(BaseLearningUnitYearAutoComplete):
         results = [
             {
                 'id': dto.code,
-                'text': self.get_learning_unit_title(dto),
+                'selected_text': (learning_title := self.get_learning_unit_title(dto)),
+                'text': f'{self.prefix_icon.get(dto.proposal_type, "")}{learning_title}',
+                'title': self.option_title.get(dto.proposal_type, ''),
+                'disabled': dto.proposal_type == ProposalType.SUPPRESSION.name,
             }
             for dto in results
         ]
-        return sorted(results, key=lambda elt: elt['text'])
+        return sorted(results, key=lambda elt: elt['selected_text'])
 
     @classmethod
     def get_learning_unit_title(cls, dto):

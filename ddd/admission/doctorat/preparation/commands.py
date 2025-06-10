@@ -574,8 +574,22 @@ class EnvoyerPropositionAuSicLorsDeLaDecisionCddCommand(interface.CommandRequest
 class RefuserPropositionParCddCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str
-    objet_message: str
-    corps_message: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RefuserPropositionParSicCommand(interface.CommandRequest):
+    uuid_proposition: str
+    auteur: str
+    objet_message: str = ''
+    corps_message: str = ''
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierMotifsRefusPropositionParCDDCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+    uuids_motifs: List[str] = attr.Factory(list)
+    autres_motifs: List[str] = attr.Factory(list)
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -606,6 +620,30 @@ class SpecifierInformationsAcceptationPropositionParCddCommand(interface.Command
     nom_personne_contact_programme_annuel: str = ''
     email_personne_contact_programme_annuel: str = ''
     commentaire_programme_conjoint: str = ''
+
+
+@attr.dataclass(frozen=True, slots=True)
+class CloturerPropositionParCddCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class PasserEtatATraiterDecisionCddCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class PasserEtatPrisEnChargeDecisionCddCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class PasserEtatACompleterParSicDecisionCddCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -726,6 +764,14 @@ class SpecifierInformationsAcceptationInscriptionParSicCommand(interface.Command
     commentaire_complements_formation: str = ''
     nom_personne_contact_programme_annuel: str = ''
     email_personne_contact_programme_annuel: str = ''
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierMotifsRefusPropositionParSicCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+    uuids_motifs: List[str] = attr.Factory(list)
+    autres_motifs: List[str] = attr.Factory(list)
 
 
 @attr.dataclass(frozen=True, slots=True)

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,29 +23,43 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 from email.message import EmailMessage
 from typing import Optional
 
 from django.conf import settings
-from django.utils import translation
+from django.utils import formats, translation
+from osis_history.utilities import add_history_entry
 
-from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import (
+    PromoteurIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import (
     GroupeDeSupervision,
     SignataireIdentity,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition, PropositionIdentity
-from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    Proposition,
+    PropositionIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import (
+    IHistorique,
+)
 from admission.ddd.admission.doctorat.preparation.dtos import AvisDTO
-from admission.infrastructure.admission.doctorat.preparation.domain.service.membre_CA import MembreCATranslator
-from admission.infrastructure.admission.doctorat.preparation.domain.service.promoteur import PromoteurTranslator
+from admission.infrastructure.admission.doctorat.preparation.domain.service.membre_CA import (
+    MembreCATranslator,
+)
+from admission.infrastructure.admission.doctorat.preparation.domain.service.promoteur import (
+    PromoteurTranslator,
+)
 from admission.infrastructure.utils import get_message_to_historize
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
-from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
-from osis_history.utilities import add_history_entry
-import datetime
-from django.utils import formats
+from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import (
+    PersonneConnueUclTranslator,
+)
 
 
 class Historique(IHistorique):
@@ -345,17 +359,8 @@ class Historique(IHistorique):
         )
 
     @classmethod
-    def historiser_refus_cdd(cls, proposition: Proposition, gestionnaire: PersonneConnueUclDTO, message: EmailMessage):
-        message_a_historiser = get_message_to_historize(message)
+    def historiser_refus_cdd(cls, proposition: Proposition, gestionnaire: PersonneConnueUclDTO):
         sender = '{gestionnaire_dto.prenom} {gestionnaire_dto.nom}'.format(gestionnaire_dto=gestionnaire)
-
-        add_history_entry(
-            proposition.entity_id.uuid,
-            message_a_historiser[settings.LANGUAGE_CODE_FR],
-            message_a_historiser[settings.LANGUAGE_CODE_EN],
-            sender,
-            tags=['proposition', 'cdd-decision', 'refusal', 'message'],
-        )
 
         add_history_entry(
             proposition.entity_id.uuid,
@@ -392,19 +397,29 @@ class Historique(IHistorique):
         )
 
     @classmethod
+    def historiser_cloture_cdd(cls, proposition: Proposition, gestionnaire: str):
+        gestionnaire_dto = PersonneConnueUclTranslator().get(gestionnaire)
+        add_history_entry(
+            object_uuid=proposition.entity_id.uuid,
+            message_fr='Le dossier a été clôturé par la CDD.',
+            message_en='The dossier has been closed by the CDD.',
+            author="{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
+            tags=["proposition", "cdd-decision", "closed", "status-changed"],
+        )
+
+    @classmethod
     def historiser_refus_sic(cls, proposition: Proposition, message: EmailMessage, gestionnaire: str):
         gestionnaire_dto = PersonneConnueUclTranslator().get(gestionnaire)
 
-        if message is not None:
-            message_a_historiser = get_message_to_historize(message)
+        message_a_historiser = get_message_to_historize(message)
 
-            add_history_entry(
-                proposition.entity_id.uuid,
-                message_a_historiser[settings.LANGUAGE_CODE_FR],
-                message_a_historiser[settings.LANGUAGE_CODE_EN],
-                "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
-                tags=["proposition", "sic-decision", "refusal", "message"],
-            )
+        add_history_entry(
+            proposition.entity_id.uuid,
+            message_a_historiser[settings.LANGUAGE_CODE_FR],
+            message_a_historiser[settings.LANGUAGE_CODE_EN],
+            "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
+            tags=["proposition", "sic-decision", "refusal", "message"],
+        )
 
         add_history_entry(
             proposition.entity_id.uuid,
@@ -459,6 +474,26 @@ class Historique(IHistorique):
             message_a_historiser[settings.LANGUAGE_CODE_EN],
             "{gestionnaire_dto.prenom} {gestionnaire_dto.nom}".format(gestionnaire_dto=gestionnaire_dto),
             tags=["proposition", "sic-decision", "approval", "message"],
+        )
+
+    @classmethod
+    def historiser_specification_motifs_refus_sic(
+        cls,
+        proposition: Proposition,
+        gestionnaire: str,
+        statut_original: ChoixStatutPropositionDoctorale,
+    ):
+        if statut_original == proposition.statut:
+            return
+
+        gestionnaire_dto = PersonneConnueUclTranslator().get(matricule=gestionnaire)
+
+        add_history_entry(
+            proposition.entity_id.uuid,
+            'Des motifs de refus ont été spécifiés par SIC.',
+            'Refusal reasons have been specified by SIC.',
+            '{gestionnaire_dto.prenom} {gestionnaire_dto.nom}'.format(gestionnaire_dto=gestionnaire_dto),
+            tags=['proposition', 'sic-decision', 'specify-refusal-reasons', 'status-changed'],
         )
 
     @classmethod

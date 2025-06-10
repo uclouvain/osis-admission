@@ -281,6 +281,7 @@ class CompleterQuestionsSpecifiquesParGestionnaireCommand(interface.CommandReque
 
     est_modification_inscription_externe: Optional[bool] = None
     formulaire_modification_inscription: List[str] = attr.Factory(list)
+    attestation_inscription_reguliere_pour_modification_inscription: List[str] = attr.Factory(list)
 
     est_non_resident_au_sens_decret: Optional[bool] = None
 
