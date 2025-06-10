@@ -5766,6 +5766,15 @@ msgstr "Refusée"
 msgid "REFUS_AGREGATION"
 msgstr "Refus agrégation"
 
+msgid "REFUS_ARTICLE_95_ACCES_MS_ENSEIGNEMENT"
+msgstr "Refus 95 - accès MS enseignement"
+
+msgid "REFUS_ARTICLE_95_ACCES_S4"
+msgstr "Refus 95 - accès S4"
+
+msgid "REFUS_ARTICLE_95_ACCES_S5"
+msgstr "Refus 95 - accès S5"
+
 msgid "REFUS_ARTICLE_95_GENERIQUE_IRRECEVABILITE"
 msgstr "Refus 95 générique - irrecevabilité"
 

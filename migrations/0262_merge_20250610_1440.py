@@ -7,6 +7,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("admission", "0254_workinglist_admission_education_group_and_more"),
+        ("admission", "0254_alter_generaleducationadmission_refusal_type"),
         (
             "admission",
             "0261_generaleducationadmission_regular_registration_proof_for_registration_change",
