@@ -29,7 +29,6 @@ from collections import defaultdict
 from contextlib import suppress
 from typing import Dict, Iterable, List, Union, Optional
 
-import weasyprint
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -292,6 +291,8 @@ class WeasyprintStylesheets:
     @classmethod
     def get_stylesheets(cls):
         """Get the stylesheets needed to generate the pdf"""
+        import weasyprint
+
         # Load the stylesheets once and cache them
         if not hasattr(cls, '_stylesheet'):
             setattr(
@@ -311,6 +312,8 @@ class WeasyprintStylesheets:
     @classmethod
     def get_stylesheets_bootstrap_5(cls):
         """Get the stylesheets needed to generate the pdf"""
+        import weasyprint
+
         # Load the stylesheets once and cache them
         if not hasattr(cls, '_stylesheet_bs5'):
             setattr(

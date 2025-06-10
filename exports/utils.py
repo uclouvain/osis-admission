@@ -23,10 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
 from django.template.loader import render_to_string
 from django.utils import translation
-from weasyprint import HTML
 
 from osis_common.utils.url_fetcher import django_url_fetcher
 from osis_document.api.utils import change_remote_metadata
@@ -36,6 +34,8 @@ def get_pdf_from_template(template_name, stylesheets, context) -> bytes:
     """
     Generate a PDF given a template name, stylesheets and context and returns it as bytes
     """
+    from weasyprint import HTML
+
     html_string = render_to_string(template_name, context)
     html = HTML(string=html_string, url_fetcher=django_url_fetcher, base_url="file:")
     return html.write_pdf(presentational_hints=True, stylesheets=stylesheets)
