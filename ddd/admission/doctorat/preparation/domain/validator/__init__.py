@@ -72,6 +72,8 @@ from ._should_informations_checklist_etre_completees import (
     ShouldSelectionnerTitreAccesPourEnvoyerASIC,
     ShouldSicPeutDonnerDecision,
     ShouldSICPeutSoumettreACddLorsDeLaDecisionCdd,
+    ShouldSpecifierMotifRefusCDD,
+    ShouldStatutChecklistEtreDifferentCloture,
     ShouldStatutsChecklistExperiencesEtreValidees,
     ShouldTitreAccesEtreSelectionne,
 )
@@ -146,6 +148,7 @@ __all__ = [
     "ShouldSICPeutSoumettreACddLorsDeLaDecisionCdd",
     "ShouldGestionnairePeutSoumettreAuSicLorsDeLaDecisionCdd",
     "ShouldCddPeutDonnerDecision",
+    "ShouldSpecifierMotifRefusCDD",
     "ShouldPropositionEtreInscriptionTardiveAvecConditionAcces",
     "ShouldSelectionnerTitreAccesPourEnvoyerASIC",
     "ShouldSicPeutDonnerDecision",
@@ -161,4 +164,5 @@ __all__ = [
     "ShouldPeutDemanderCandidatModificationCaFacultaire",
     "ShouldPropositionStatutEtreCorrectPourSoumissionCA",
     "ShouldStatutsChecklistExperiencesEtreValidees",
+    "ShouldStatutChecklistEtreDifferentCloture",
 ]

@@ -59,10 +59,7 @@ from admission.infrastructure.admission.formation_generale.repository.in_memory.
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
-from ddd.logic.financabilite.dtos.parcours import (
-    ParcoursDTO, ParcoursAcademiqueInterneDTO,
-    ParcoursAcademiqueExterneDTO,
-)
+from ddd.logic.financabilite.domain.model.parcours import ParcoursAcademiqueExterne, ParcoursAcademiqueInterne, Parcours
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from infrastructure.financabilite.domain.service.in_memory.financabilite import FinancabiliteInMemoryFetcher
@@ -336,10 +333,10 @@ class ElementsConfirmationTestCase(TestCase):
 
     @freezegun.freeze_time('2024-10-15')
     def test_soumettre_elements_confirmation_differents_radio(self):
-        FinancabiliteInMemoryFetcher.save(ParcoursDTO(
+        FinancabiliteInMemoryFetcher.save(Parcours(
             matricule_fgs='0000000001',
-            parcours_academique_interne=ParcoursAcademiqueInterneDTO(programmes_cycles=[]),
-            parcours_academique_externe=ParcoursAcademiqueExterneDTO(experiences=[]),
+            parcours_academique_interne=ParcoursAcademiqueInterne(programmes_cycles=[]),
+            parcours_academique_externe=ParcoursAcademiqueExterne(experiences=[]),
             annee_diplome_etudes_secondaires=2015,
             nombre_tentative_de_passer_concours_pass_et_las=0,
         ))

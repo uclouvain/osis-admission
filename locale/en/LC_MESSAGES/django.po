@@ -993,6 +993,9 @@ msgstr ""
 msgid "Belgian"
 msgstr ""
 
+msgid "Belgian National Register Number"
+msgstr ""
+
 msgid "Belgian diploma"
 msgstr ""
 
@@ -1073,6 +1076,9 @@ msgid "CDD comment for the SIC"
 msgstr ""
 
 msgid "CDD decision"
+msgstr ""
+
+msgid "CDD decision: refusal"
 msgstr ""
 
 msgid "CDD process"
@@ -1535,6 +1541,9 @@ msgstr ""
 msgid "Contact"
 msgstr ""
 
+msgid "Contact address"
+msgstr ""
+
 msgid "Contact details"
 msgstr ""
 
@@ -1746,6 +1755,9 @@ msgid_plural "Course duration: %(years)s years."
 msgstr[0] ""
 msgstr[1] ""
 
+msgid "Course manager(s)"
+msgstr ""
+
 msgid "Course name"
 msgstr ""
 
@@ -1787,7 +1799,13 @@ msgstr ""
 msgid "Credits earned"
 msgstr ""
 
+msgid "Current employer"
+msgstr ""
+
 msgid "Current funding"
+msgstr ""
+
+msgid "Current occupation"
 msgstr ""
 
 msgid "Curriculum"
@@ -2163,6 +2181,18 @@ msgstr ""
 msgid "Doctorate enrolment applications"
 msgstr ""
 
+msgid "Doctorate refusal reason"
+msgstr ""
+
+msgid "Doctorate refusal reason categories"
+msgstr ""
+
+msgid "Doctorate refusal reason category"
+msgstr ""
+
+msgid "Doctorate refusal reasons"
+msgstr ""
+
 msgid "Doctorate thesis field"
 msgstr ""
 
@@ -2455,9 +2485,6 @@ msgid ""
 "candidate with a Belgian diploma."
 msgstr ""
 
-msgid "Email sent to the candidate when the CDD refuses a doctorate admission."
-msgstr ""
-
 msgid ""
 "Email sent to the candidate when the faculty approve the application with "
 "conditions."
@@ -2487,6 +2514,9 @@ msgid ""
 msgstr ""
 
 msgid "Emails of the training managers"
+msgstr ""
+
+msgid "Emergency contact"
 msgstr ""
 
 msgid "Emergency contact (telephone number)"
@@ -3099,6 +3129,9 @@ msgstr ""
 msgid "Graduation of {program_name}"
 msgstr ""
 
+msgid "Graduation year"
+msgstr ""
+
 msgid "Greetings depending on the gender of the candidate"
 msgstr ""
 
@@ -3211,7 +3244,7 @@ msgstr ""
 
 msgid ""
 "I am a refugee, an asylum seeker, or a stateless person or have subsidiary/"
-"temporary protection (Belgian student status category 2)"
+"temporary protection in Belgium (Belgian student status category 2)"
 msgstr ""
 
 msgid "I am a stateless person"
@@ -3713,6 +3746,9 @@ msgid ""
 "Is your admission request linked with a FNRS, FRIA, FRESH or CSC application?"
 msgstr ""
 
+msgid "It is not possible to go from the \"Closed\" status to this status."
+msgstr ""
+
 msgid ""
 "It is not possible to go from the \"To validate IUFC\" status to this status."
 msgstr ""
@@ -3742,6 +3778,9 @@ msgid "Language"
 msgstr ""
 
 msgid "Language regime"
+msgstr ""
+
+msgid "Last degree level"
 msgstr ""
 
 msgid "Last email sent by"
@@ -4160,6 +4199,9 @@ msgstr ""
 msgid "Missing"
 msgstr ""
 
+msgid "Mobile phone (GSM)"
+msgstr ""
+
 msgid "Mobility months amount"
 msgstr ""
 
@@ -4186,6 +4228,9 @@ msgid "Mollie ID"
 msgstr ""
 
 msgid "Most recent year of enrolment"
+msgstr ""
+
+msgid "Most recent year of enrolment at UCL"
 msgstr ""
 
 msgid "Motivation"
@@ -4243,9 +4288,6 @@ msgstr ""
 
 msgid "NO"
 msgstr "No"
-
-msgid "NOMA"
-msgstr ""
 
 msgid "NOMA not found"
 msgstr ""
@@ -4570,6 +4612,9 @@ msgctxt "ways_hear_about_training"
 msgid "Other"
 msgstr ""
 
+msgid "Other academic courses"
+msgstr ""
+
 msgid "Other additional conditions"
 msgstr ""
 
@@ -4727,6 +4772,9 @@ msgid "Passport number"
 msgstr ""
 
 msgid "Past experiences authentication"
+msgstr ""
+
+msgid "Past non-academic activities (prof. and not prof.)"
 msgstr ""
 
 msgid "Pay by training cheque"
@@ -4968,6 +5016,9 @@ msgctxt "male gender"
 msgid "President of the %(cdd_title)s"
 msgstr ""
 
+msgid "Previous NOMA"
+msgstr ""
+
 msgid "Previous admission"
 msgstr ""
 
@@ -5037,6 +5088,9 @@ msgid ""
 msgstr ""
 
 msgid "Proof of regular registration"
+msgstr ""
+
+msgid "Proof of regular registration for registration change"
 msgstr ""
 
 msgid "Proof of scholarship"
@@ -5153,6 +5207,9 @@ msgstr "Faculty dispensation refusal"
 msgid "REFUS_DIRECTION"
 msgstr ""
 
+msgid "REFUS_DOCTORAT"
+msgstr "Doctorate refusal"
+
 msgid "REFUS_DOSSIER_TARDIF"
 msgstr ""
 
@@ -5260,6 +5317,9 @@ msgstr ""
 msgid "Refusal certificate of faculty"
 msgstr ""
 
+msgid "Refusal certificate of the CDD"
+msgstr ""
+
 msgid "Refusal document link"
 msgstr ""
 
@@ -5313,6 +5373,9 @@ msgid "Registration fees"
 msgstr ""
 
 msgid "Registration required"
+msgstr ""
+
+msgid "Registration type"
 msgstr ""
 
 msgid "Related experience"
@@ -6151,6 +6214,11 @@ msgid ""
 "requested documents, status reset, etc). Do you confirm the closing?"
 msgstr ""
 
+msgid ""
+"The closing of the application has important consequences (transfer of the "
+"application to the SIC, status reset, etc). Do you confirm the closing?"
+msgstr ""
+
 #, python-format
 msgid ""
 "The committee also validates the activities carried out as part of your "
@@ -6651,6 +6719,13 @@ msgid ""
 msgstr ""
 
 msgid ""
+"This document is an internal document containing the details of the CDD's "
+"decision. Under no circumstances will it be sent in this form to the "
+"candidate. The candidate will receive a letter from SIC containing the "
+"various details of the CDD's decision."
+msgstr ""
+
+msgid ""
 "This document is an internal document containing the details of the "
 "faculty's decision. Under no circumstances will it be sent in this form to "
 "the candidate. The candidate will receive a letter from SIC containing the "
@@ -6804,6 +6879,9 @@ msgstr ""
 
 msgctxt "admission"
 msgid "Training acronym"
+msgstr ""
+
+msgid "Training assistance"
 msgstr ""
 
 msgid "Training of the admission"
@@ -7616,6 +7694,9 @@ msgctxt "feminine"
 msgid "modified"
 msgstr ""
 
+msgid "no"
+msgstr ""
+
 #, python-format
 msgid "on %(date)s at %(hour)s"
 msgstr ""
@@ -7669,9 +7750,6 @@ msgstr ""
 msgid "yes"
 msgstr ""
 
-msgid "yes,no"
-msgstr ""
-
 msgid "yes,no,"
 msgstr ""
 
@@ -7698,4 +7776,8 @@ msgstr ""
 
 #, python-brace-format
 msgid "{items} types out of {total}"
+msgstr ""
+
+#, python-brace-format
+msgid "{obj.dates_formatees} : {obj.fonction} at {obj.employeur}"
 msgstr ""

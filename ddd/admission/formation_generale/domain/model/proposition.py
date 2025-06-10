@@ -180,6 +180,7 @@ class Proposition(interface.RootEntity):
 
     est_modification_inscription_externe: Optional[bool] = None
     formulaire_modification_inscription: List[str] = attr.Factory(list)
+    attestation_inscription_reguliere_pour_modification_inscription: List[str] = attr.Factory(list)
 
     est_non_resident_au_sens_decret: Optional[bool] = None
 
@@ -361,6 +362,7 @@ class Proposition(interface.RootEntity):
             self.formulaire_reorientation = []
         if pool != AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_ENROLLMENT_CHANGE:
             self.formulaire_modification_inscription = []
+            self.attestation_inscription_reguliere_pour_modification_inscription = []
         self.est_inscription_tardive = est_inscription_tardive
         self.profil_soumis_candidat = profil_candidat_soumis
         self.auteur_derniere_modification = self.matricule_candidat
@@ -867,6 +869,7 @@ class Proposition(interface.RootEntity):
         formulaire_reorientation: List[str],
         est_modification_inscription_externe: Optional[bool],
         formulaire_modification_inscription: List[str],
+        attestation_inscription_reguliere_pour_modification_inscription: List[str],
         est_non_resident_au_sens_decret: Optional[bool],
     ):
         self.auteur_derniere_modification = auteur_modification
@@ -882,6 +885,9 @@ class Proposition(interface.RootEntity):
         self.formulaire_reorientation = formulaire_reorientation
         self.est_modification_inscription_externe = est_modification_inscription_externe
         self.formulaire_modification_inscription = formulaire_modification_inscription
+        self.attestation_inscription_reguliere_pour_modification_inscription = (
+            attestation_inscription_reguliere_pour_modification_inscription
+        )
         if self.est_modification_inscription_externe:
             self.est_inscription_tardive = False
 

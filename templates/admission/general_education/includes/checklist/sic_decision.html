@@ -73,7 +73,6 @@
       {% htmx_comment_form comment_forms.decision_sic__derogation disabled=True %}
     {% endif %}
 
-    {% if view.is_general %}
     {# Refusal panel #}
     {% if current.extra.en_cours == 'refusal' or current.extra.blocage == 'refusal' %}
       <div class="panel panel-default">
@@ -95,8 +94,10 @@
         </div>
         <div class="panel-body">
           <dl>
+            {% if view.is_general %}
             <dt>{% trans "Refusal type" %}</dt>
             <dd class="mb-15">{{ admission.type_de_refus|enum_display:'TypeDeRefus' }}</dd>
+            {% endif %}
 
             <dt>{% trans "Reasons" %}</dt>
             <dd>
@@ -122,7 +123,6 @@
           </dl>
         </div>
       </div>
-    {% endif %}
     {% endif %}
 
     {# Approval panel #}

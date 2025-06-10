@@ -68,6 +68,7 @@ class PoolQuestionsSerializer(serializers.ModelSerializer):
             'reorientation_form',
             'is_external_modification',
             'registration_change_form',
+            'regular_registration_proof_for_registration_change',
             'is_non_resident',
             'reorientation_pool_end_date',
             'reorientation_pool_academic_year',

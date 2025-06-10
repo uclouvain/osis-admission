@@ -23,14 +23,12 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List, TypeVar, Optional
+from typing import List, Optional, TypeVar
 
 from django.core import paginator
 from django.utils.functional import cached_property
 
-from admission.admission_utils.list import (
-    list_to_dict_with_prev_and_next_elements,
-)
+from admission.admission_utils.list import list_to_dict_with_prev_and_next_elements
 
 T = TypeVar('T')
 
@@ -42,7 +40,7 @@ class PaginatedList(List[T]):
         :param complete_list: The list of ids of the objects.
         :param id_attribute: The attribute of the object that contains the id.
         """
-        self._complete_list = complete_list
+        self.complete_ids_list = complete_list
         self._id_attribute = id_attribute
         self._sorted_elements = None
         super().__init__(*args, **kwargs)
@@ -50,10 +48,10 @@ class PaginatedList(List[T]):
     @property
     def sorted_elements(self):
         # Computed only once and based on the initial list
-        if self._complete_list is not None:
+        if self.complete_ids_list is not None:
             if self._sorted_elements is None:
                 self._sorted_elements = list_to_dict_with_prev_and_next_elements(
-                    list_to_process=self._complete_list,
+                    list_to_process=self.complete_ids_list,
                     id_attribute=self._id_attribute,
                 )
             return self._sorted_elements

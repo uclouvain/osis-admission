@@ -33,7 +33,6 @@ from django.utils import timezone, translation
 from django.utils.formats import date_format
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
-from django.utils.translation import ngettext
 from django.views.generic import FormView, TemplateView
 from django.views.generic.base import RedirectView
 from osis_comment.models import CommentEntry
@@ -43,16 +42,15 @@ from osis_history.utilities import add_history_entry
 from osis_mail_template.exceptions import EmptyMailTemplateContent
 from osis_mail_template.models import MailTemplate
 
-from admission.ddd.admission.commands import RechercherParcoursAnterieurQuery
 from admission.ddd.admission.doctorat.preparation.commands import (
     ApprouverAdmissionParSicCommand,
     ApprouverInscriptionParSicCommand,
-    RecupererDocumentsPropositionQuery,
     RecupererPdfTemporaireDecisionSicQuery,
-    RecupererResumeEtEmplacementsDocumentsPropositionQuery,
+    RefuserPropositionParSicCommand,
     SpecifierBesoinDeDerogationSicCommand,
     SpecifierInformationsAcceptationInscriptionParSicCommand,
     SpecifierInformationsAcceptationPropositionParSicCommand,
+    SpecifierMotifsRefusPropositionParSicCommand,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
@@ -65,12 +63,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist 
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
     onglet_decision_sic,
 )
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
-    CurriculumAdmissionDTO,
-)
-from admission.ddd.admission.dtos.resume import (
-    ResumeEtEmplacementsDocumentsPropositionDTO,
-)
 from admission.ddd.admission.enums.emplacement_document import (
     OngletsDemande,
     StatutReclamationEmplacementDocument,
@@ -79,14 +71,20 @@ from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.forms.admission.checklist import (
     CommentForm,
     DoctorateSicDecisionApprovalForm,
+    DoctorateSicDecisionRefusalForm,
     SicDecisionApprovalDocumentsForm,
     SicDecisionDerogationForm,
     SicDecisionFinalApprovalForm,
+    SicDecisionFinalRefusalForm,
+)
+from admission.infrastructure.admission.doctorat.preparation.domain.service.notification import (
+    EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN,
 )
 from admission.infrastructure.utils import CHAMPS_DOCUMENTS_EXPERIENCES_CURRICULUM
 from admission.mail_templates import (
     ADMISSION_EMAIL_SIC_APPROVAL_DOCTORATE,
     ADMISSION_EMAIL_SIC_APPROVAL_EU_DOCTORATE,
+    ADMISSION_EMAIL_SIC_REFUSAL_DOCTORATE,
     EMAIL_TEMPLATE_ENROLLMENT_GENERATED_NOMA_TOKEN,
     INSCRIPTION_EMAIL_SIC_APPROVAL_DOCTORATE,
 )
@@ -96,7 +94,6 @@ from admission.mail_templates.checklist import (
     EMAIL_TEMPLATE_VISA_APPLICATION_DOCUMENT_URL_DOCTORATE_TOKEN,
 )
 from admission.utils import (
-    format_academic_year,
     get_backoffice_admission_url,
     get_portal_admission_url,
     get_salutation_prefix,
@@ -109,11 +106,13 @@ from admission.views.common.detail_tabs.checklist import (
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from admission.views.doctorate.details.checklist.mixins import (
     CheckListDefaultContextMixin,
+    get_email,
 )
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
 from base.utils.htmx import HtmxPermissionRequiredMixin
+from base.utils.utils import format_academic_year
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
@@ -128,6 +127,8 @@ __all__ = [
     'SicDecisionApprovalPanelView',
     'SicDecisionDispensationView',
     'SicDecisionChangeStatusView',
+    'SicRefusalDecisionView',
+    'SicRefusalFinalDecisionView',
     'SicDecisionPdfPreviewView',
 ]
 
@@ -141,6 +142,8 @@ ENTITY_SIC = 'SIC'
 class SicDecisionMixin(CheckListDefaultContextMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['sic_decision_refusal_form'] = self.sic_decision_refusal_form
+        context['sic_decision_refusal_final_form'] = self.sic_decision_refusal_final_form
         context['display_sic_decision_approval_info_panel'] = self.display_sic_decision_approval_info_panel()
 
         # Get information about the decision sending by the SIC if any and only in the final statuses
@@ -248,6 +251,21 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
         return display_panel
 
     @cached_property
+    def sic_decision_refusal_form(self):
+        prefix = 'sic-decision-refusal'
+        form_kwargs = {
+            'prefix': prefix,
+        }
+        if self.request.method == 'POST' and f'save-{prefix}' in self.request.POST:
+            form_kwargs['data'] = self.request.POST
+        else:
+            form_kwargs['initial'] = {
+                'reasons': self.admission_refusal_reasons,
+            }
+
+        return DoctorateSicDecisionRefusalForm(**form_kwargs)
+
+    @cached_property
     def sic_decision_approval_form_requestable_documents(self):
         documents = self.proposition_resume.emplacements_documents
         return [document for document in documents if document.est_reclamable and document.est_a_reclamer]
@@ -290,6 +308,37 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             .first()
         )
         return director
+
+    @cached_property
+    def sic_decision_refusal_final_form(self):
+        form_kwargs = {
+            'prefix': 'sic-decision-refusal-final',
+            'with_email': True,
+        }
+
+        if self.request.method == 'GET':
+            # Load the email template
+            subject, body = get_email(
+                template_identifier=ADMISSION_EMAIL_SIC_REFUSAL_DOCTORATE,
+                language=settings.LANGUAGE_CODE_FR,
+                proposition_dto=self.proposition,
+                extra_tokens={
+                    'greetings': get_salutation_prefix(self.admission.candidate, settings.LANGUAGE_CODE_FR),
+                    'doctoral_commission': self.proposition.doctorat.intitule_entite_gestion,
+                    'sender_name': f'{self.request.user.person.first_name} {self.request.user.person.last_name}',
+                    'document_link': EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN,
+                },
+            )
+
+            form_kwargs['initial'] = {
+                'subject': subject,
+                'body': body,
+            }
+
+        elif self.request.POST and 'sic-decision-refusal-final-submitted' in self.request.POST:
+            form_kwargs['data'] = self.request.POST
+
+        return SicDecisionFinalRefusalForm(**form_kwargs)
 
     @cached_property
     def sic_decision_approval_final_form(self):
@@ -546,6 +595,72 @@ class SicApprovalEnrolmentDecisionView(SicApprovalDecisionView):
         message_bus_instance.invoke(
             SpecifierInformationsAcceptationInscriptionParSicCommand(**self.get_common_command_kwargs(form))
         )
+
+
+class SicRefusalDecisionView(
+    SicDecisionMixin,
+    AdmissionFormMixin,
+    HtmxPermissionRequiredMixin,
+    FormView,
+):
+    name = 'sic-decision-refusal'
+    urlpatterns = {'sic-decision-refusal': 'sic-decision/sic-decision-refusal'}
+    template_name = 'admission/general_education/includes/checklist/sic_decision_refusal_form.html'
+    htmx_template_name = 'admission/general_education/includes/checklist/sic_decision_refusal_form.html'
+    permission_required = 'admission.checklist_change_sic_decision'
+
+    def get_form(self, form_class=None):
+        return self.sic_decision_refusal_form
+
+    def form_valid(self, form):
+        try:
+            message_bus_instance.invoke(
+                SpecifierMotifsRefusPropositionParSicCommand(
+                    uuid_proposition=self.admission_uuid,
+                    gestionnaire=self.request.user.person.global_id,
+                    uuids_motifs=form.cleaned_data['reasons'],
+                    autres_motifs=form.cleaned_data['other_reasons'],
+                )
+            )
+            self.htmx_refresh = True
+        except MultipleBusinessExceptions as multiple_exceptions:
+            self.message_on_failure = multiple_exceptions.exceptions.pop().message
+            return self.form_invalid(form)
+
+        return super().form_valid(form)
+
+
+class SicRefusalFinalDecisionView(
+    SicDecisionMixin,
+    AdmissionFormMixin,
+    HtmxPermissionRequiredMixin,
+    FormView,
+):
+    name = 'sic-decision-refusal-final'
+    urlpatterns = {'sic-decision-refusal-final': 'sic-decision/sic-decision-refusal-final'}
+    template_name = 'admission/general_education/includes/checklist/sic_decision_refusal_final_form.html'
+    htmx_template_name = 'admission/general_education/includes/checklist/sic_decision_refusal_final_form.html'
+    permission_required = 'admission.checklist_change_sic_decision'
+
+    def get_form(self, form_class=None):
+        return self.sic_decision_refusal_final_form
+
+    def form_valid(self, form):
+        try:
+            message_bus_instance.invoke(
+                RefuserPropositionParSicCommand(
+                    uuid_proposition=self.admission_uuid,
+                    objet_message=form.cleaned_data.get('subject', ''),
+                    corps_message=form.cleaned_data.get('body', ''),
+                    auteur=self.request.user.person.global_id,
+                )
+            )
+            self.htmx_refresh = True
+        except MultipleBusinessExceptions as multiple_exceptions:
+            self.message_on_failure = multiple_exceptions.exceptions.pop().message
+            return self.form_invalid(form)
+
+        return super().form_valid(form)
 
 
 class SicApprovalFinalDecisionView(

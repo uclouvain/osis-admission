@@ -223,7 +223,6 @@ from admission.templatetags.admission import authentication_css_class, bg_class_
 from admission.utils import (
     access_title_country,
     add_close_modal_into_htmx_response,
-    format_academic_year,
     get_access_titles_names,
     get_backoffice_admission_url,
     get_missing_curriculum_periods,
@@ -246,6 +245,7 @@ from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
 from base.utils.htmx import HtmxPermissionRequiredMixin
+from base.utils.utils import format_academic_year
 from ddd.logic.shared_kernel.profil.commands import (
     RecupererExperiencesParcoursInterneQuery,
 )
@@ -3006,6 +3006,7 @@ class ChecklistView(
             'frais_dossier': assimilation_documents,
             'choix_formation': {
                 'FORMULAIRE_REORIENTATION',
+                'ATTESTATION_INSCRIPTION_REGULIERE_POUR_MODIFICATION_INSCRIPTION',
                 'ATTESTATION_INSCRIPTION_REGULIERE',
                 'FORMULAIRE_MODIFICATION_INSCRIPTION',
             },
