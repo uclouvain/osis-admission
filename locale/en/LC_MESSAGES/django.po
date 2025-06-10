@@ -475,6 +475,9 @@ msgstr ""
 msgid "Admission context"
 msgstr ""
 
+msgid "Admission education types"
+msgstr ""
+
 msgid "Admission export"
 msgstr ""
 
@@ -3413,6 +3416,9 @@ msgstr ""
 
 msgid "IBAN account number"
 msgstr ""
+
+msgid "INCHANGE"
+msgstr "Unchanged"
 
 msgid "INITIAL_CANDIDAT"
 msgstr "Initial candidate"
