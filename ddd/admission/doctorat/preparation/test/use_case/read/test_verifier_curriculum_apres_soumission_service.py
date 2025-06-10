@@ -156,6 +156,7 @@ class TestVerifierCurriculumApresSoumissionService(TestCase):
             type_institut='',
             nom_formation_equivalente_communaute_fr='',
             cycle_formation='',
+            grade_academique_formation='1',
         )
 
         cls.params_defaut_experience_non_academique = {
@@ -426,6 +427,27 @@ class TestVerifierCurriculumApresSoumissionService(TestCase):
                 context.exception.exceptions,
                 [
                     'L\'expérience académique \'Formation AA\' est incomplète.',
+                    'De Septembre 2010 à Février 2011',
+                    'De Septembre 2012 à Février 2013',
+                ],
+            )
+
+        with mock.patch.multiple(
+            self.experience_academiques_complete,
+            a_obtenu_diplome=False,
+            communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
+            cycle_formation=Cycle.SECOND_CYCLE.name,
+            avec_complements=True,
+            credits_inscrits_complements=10,
+            credits_acquis_complements=None,
+            grade_academique_formation='2',
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd)
+
+            self.assertAnneesCurriculum(
+                context.exception.exceptions,
+                [
                     'De Septembre 2010 à Février 2011',
                     'De Septembre 2012 à Février 2013',
                 ],

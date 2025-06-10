@@ -218,8 +218,11 @@ from admission.mail_templates.checklist import (
 )
 from admission.models import EPCInjection
 from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
-from admission.models.online_payment import PaymentStatus, PaymentMethod
-from admission.templatetags.admission import authentication_css_class, bg_class_by_checklist_experience
+from admission.models.online_payment import PaymentMethod, PaymentStatus
+from admission.templatetags.admission import (
+    authentication_css_class,
+    bg_class_by_checklist_experience,
+)
 from admission.utils import (
     access_title_country,
     add_close_modal_into_htmx_response,
@@ -389,7 +392,9 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
         return {
             str(experience.uuid)
             for experience in self.proposition_resume.resume.curriculum.experiences_academiques
-            if experience.champs_credits_bloc_1_et_complements_non_remplis
+            if experience.champs_credits_bloc_1_et_complements_non_remplis(
+                self.proposition_resume.resume.proposition.formation.grade_academique,
+            )
         }
 
     def get_context_data(self, **kwargs):

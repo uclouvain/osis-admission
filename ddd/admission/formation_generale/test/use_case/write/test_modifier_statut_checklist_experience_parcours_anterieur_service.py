@@ -65,9 +65,8 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
         self.proposition_repository = PropositionInMemoryRepository()
         self.addCleanup(self.proposition_repository.reset)
         self.message_bus = message_bus_in_memory_instance
-        self.proposition_repository.initialiser_checklist_proposition(
-            PropositionIdentity(uuid='uuid-MASTER-SCI-CONFIRMED'),
-        )
+        self.proposition_identity = PropositionIdentity(uuid='uuid-MASTER-SCI-CONFIRMED')
+        self.proposition_repository.initialiser_checklist_proposition(self.proposition_identity)
         self.candidat_translator = ProfilCandidatInMemoryTranslator()
         self.experiences_academiques = self.candidat_translator.experiences_academiques
         self.experience = next(exp for exp in self.experiences_academiques if exp.personne == '0000000001')
@@ -183,7 +182,6 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
         )
 
     def test_should_verifier_experience_academique_complete_pour_passage_a_valide(self):
-
         with mock.patch.multiple(
             self.experience,
             a_obtenu_diplome=False,
@@ -212,7 +210,28 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
             self.experience,
             a_obtenu_diplome=False,
             communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
-            cycle_formation=Cycle.FIRST_CYCLE.name,
+            cycle_formation=Cycle.SECOND_CYCLE.name,
+            avec_complements=None,
+            grade_academique_formation='2',
+        ):
+            proposition_id = self.message_bus.invoke(
+                ModifierStatutChecklistExperienceParcoursAnterieurCommand(
+                    uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
+                    uuid_experience=self.experience_uuid,
+                    type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
+                    statut=ChoixStatutChecklist.GEST_REUSSITE.name,
+                    statut_authentification=False,
+                    gestionnaire='0123456789',
+                )
+            )
+
+            self.assertEqual(proposition_id, self.proposition_identity)
+
+        with mock.patch.multiple(
+            self.experience,
+            a_obtenu_diplome=False,
+            communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
+            cycle_formation=Cycle.SECOND_CYCLE.name,
             avec_complements=True,
             credits_inscrits_complements=None,
             credits_acquis_complements=10,
@@ -238,7 +257,7 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
             self.experience,
             a_obtenu_diplome=False,
             communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
-            cycle_formation=Cycle.FIRST_CYCLE.name,
+            cycle_formation=Cycle.SECOND_CYCLE.name,
             avec_complements=True,
             credits_inscrits_complements=10,
             credits_acquis_complements=None,

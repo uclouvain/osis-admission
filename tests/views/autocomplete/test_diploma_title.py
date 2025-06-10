@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -74,6 +74,7 @@ class DiplomaTitleAutocompleteTestCase(TestCase):
             'text': univ_prefix + not_active_diploma_title.title,
             'selected_text': univ_prefix + not_active_diploma_title.title,
             'cycle': not_active_diploma_title.cycle,
+            'academic_grade': not_active_diploma_title.code_grade_acad,
         }
 
         cls.master_title_data = {
@@ -81,6 +82,7 @@ class DiplomaTitleAutocompleteTestCase(TestCase):
             'text': univ_prefix + master_title.title,
             'selected_text': univ_prefix + master_title.title,
             'cycle': master_title.cycle,
+            'academic_grade': master_title.code_grade_acad,
         }
 
         cls.bachelor_title_data = {
@@ -88,6 +90,7 @@ class DiplomaTitleAutocompleteTestCase(TestCase):
             'text': univ_prefix + bachelor_title.title,
             'selected_text': univ_prefix + bachelor_title.title,
             'cycle': bachelor_title.cycle,
+            'academic_grade': bachelor_title.code_grade_acad,
         }
 
         cls.politic_title_data = {
@@ -95,6 +98,7 @@ class DiplomaTitleAutocompleteTestCase(TestCase):
             'text': snu_prefix + politic_title.title,
             'selected_text': snu_prefix + politic_title.title,
             'cycle': politic_title.cycle,
+            'academic_grade': politic_title.code_grade_acad,
         }
 
         cls.user = User.objects.create_user(

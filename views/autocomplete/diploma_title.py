@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,7 +26,10 @@
 from dal import autocomplete
 
 from base.models.enums.establishment_type import EstablishmentTypeEnum
-from reference.models.diploma_title import DiplomaTitle, get_diploma_label_with_study_type
+from reference.models.diploma_title import (
+    DiplomaTitle,
+    get_diploma_label_with_study_type,
+)
 from reference.models.enums.study_type import StudyType
 
 __all__ = [
@@ -76,6 +79,7 @@ class DiplomaTitleAutocomplete(autocomplete.Select2QuerySetView):
                 'text': get_label_function(result),
                 'selected_text': get_label_function(result),
                 'cycle': result.cycle,
+                'academic_grade': result.code_grade_acad,
             }
             for result in context['object_list']
         ]
