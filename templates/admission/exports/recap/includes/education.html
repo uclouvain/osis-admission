@@ -97,10 +97,28 @@
   {% elif formation.type == 'BACHELOR' and etudes_secondaires.alternative_secondaires %}
     {% panel _('Secondary studies') edit_link_button=edit_link_button edit_link_button_in_new_tab=edit_link_button_in_new_tab %}
       {% field_data _('Do you have a secondary school diploma?') _('No') %}
+      {% if hide_files %}
+        {% if etudes_secondaires.alternative_secondaires.examen_admission_premier_cycle %}
+          {% field_data _("Certificate of passing the bachelor's course entrance exam") _("Specified") %}
+        {% else %}
+          {% field_data _("Certificate of passing the bachelor's course entrance exam") _("Not specified") %}
+        {% endif %}
+        {% if etudes_secondaires.alternative_secondaires.examen_admission_premier_cycle_annee %}
+          {% field_data _("Year of obtaining this proof") etudes_secondaires.alternative_secondaires.examen_admission_premier_cycle_annee|add:1 %}
+        {% else %}
+          {% field_data _("Year of obtaining this proof") "" %}
+        {% endif %}
+      {% endif %}
     {% endpanel %}
+
     {% if not hide_files %}
       {% panel _('Attachments') %}
         {% field_data _("Certificate of passing the bachelor's course entrance exam") etudes_secondaires.alternative_secondaires.examen_admission_premier_cycle %}
+        {% if etudes_secondaires.alternative_secondaires.examen_admission_premier_cycle_annee %}
+          {% field_data _("Year of obtaining this proof") etudes_secondaires.alternative_secondaires.examen_admission_premier_cycle_annee|add:1 %}
+        {% else %}
+          {% field_data _("Year of obtaining this proof") "" %}
+        {% endif %}
       {% endpanel %}
     {% endif %}
 
