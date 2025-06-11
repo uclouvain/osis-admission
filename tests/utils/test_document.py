@@ -72,6 +72,8 @@ from admission.tests.factories.secondary_studies import (
 from admission.tests.factories.supervision import PromoterFactory
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.tests import TestCaseWithQueriesAssertions
+from osis_profile.models.enums.exam import ExamTypes
+from osis_profile.tests.factories.exam import ExamFactory
 from reference.tests.factories.language import FrenchLanguageFactory
 
 
@@ -611,11 +613,9 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
 
         self.assertIsNone(document)
 
-        HighSchoolDiplomaAlternativeFactory(person=self.general_admission.candidate)
-
         # first cycle admission exam
         file_uuid = uuid.uuid4()
-        self.general_admission.candidate.highschooldiplomaalternative.first_cycle_admission_exam = [file_uuid]
+        exam = HighSchoolDiplomaAlternativeFactory(person=self.general_admission.candidate, certificate=[file_uuid])
         self.general_admission.candidate.foreignhighschooldiploma.save()
 
         document = get_document_from_identifier(
@@ -624,8 +624,36 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
         )
 
         self.assertIsNotNone(document)
-        self.assertEqual(document.obj, self.general_admission.candidate.highschooldiplomaalternative)
-        self.assertEqual(document.field, 'first_cycle_admission_exam')
+        self.assertEqual(document.obj, exam)
+        self.assertEqual(document.field, 'certificate')
+        self.assertEqual(document.uuids, [file_uuid])
+
+    def test_get_non_free_exams_document(self):
+        base_identifier = OngletsDemande.EXAMS.name
+
+        # High school diploma alternative
+        document = get_document_from_identifier(
+            self.general_admission,
+            f'{base_identifier}.ATTESTATION_DE_REUSSITE_CONCOURS_D_ENTREE_OU_D_ADMISSION',
+        )
+        self.assertIsNone(document)
+
+        # first cycle admission exam
+        file_uuid = uuid.uuid4()
+        exam = ExamFactory(
+            education_group_year_exam__education_group_year=self.general_admission.training,
+            type=ExamTypes.FORMATION.name,
+            person=self.general_admission.candidate,
+            certificate=[file_uuid],
+        )
+
+        document = get_document_from_identifier(
+            self.general_admission,
+            f'{base_identifier}.ATTESTATION_DE_REUSSITE_CONCOURS_D_ENTREE_OU_D_ADMISSION',
+        )
+        self.assertIsNotNone(document)
+        self.assertEqual(document.obj, exam)
+        self.assertEqual(document.field, 'certificate')
         self.assertEqual(document.uuids, [file_uuid])
 
     def test_get_non_free_language_document(self):

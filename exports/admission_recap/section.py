@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,52 +23,75 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional, List, Dict
+from typing import Dict, List, Optional
 
-from django.utils.translation import gettext as _, override
+from django.utils.translation import gettext as _
+from django.utils.translation import override
 
 from admission.calendar.admission_calendar import (
-    AdmissionPoolExternalReorientationCalendar,
     AdmissionPoolExternalEnrollmentChangeCalendar,
+    AdmissionPoolExternalReorientationCalendar,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixTypeAdmission
-from admission.ddd.admission.domain.model.formation import est_formation_medecine_ou_dentisterie
-from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixTypeAdmission,
+)
+from admission.ddd.admission.domain.model.formation import (
+    est_formation_medecine_ou_dentisterie,
+)
+from admission.ddd.admission.domain.service.i_elements_confirmation import (
+    IElementsConfirmation,
+)
+from admission.ddd.admission.domain.service.i_profil_candidat import (
+    IProfilCandidatTranslator,
+)
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import ResumePropositionDTO
-from admission.ddd.admission.enums import Onglets, CHOIX_AFFILIATION_SPORT_SELON_SITE
-from admission.ddd.admission.enums.emplacement_document import OngletsDemande, IdentifiantBaseEmplacementDocument
-from admission.ddd.admission.formation_generale.domain.model.enums import STATUTS_PROPOSITION_GENERALE_NON_SOUMISE
+from admission.ddd.admission.enums import CHOIX_AFFILIATION_SPORT_SELON_SITE, Onglets
+from admission.ddd.admission.enums.emplacement_document import (
+    IdentifiantBaseEmplacementDocument,
+    OngletsDemande,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    STATUTS_PROPOSITION_GENERALE_NON_SOUMISE,
+)
 from admission.exports.admission_recap.attachments import (
     Attachment,
-    get_identification_attachments,
-    get_training_choice_attachments,
-    get_secondary_studies_attachments,
-    get_curriculum_attachments,
-    get_curriculum_academic_experience_attachments,
-    get_curriculum_non_academic_experience_attachments,
-    get_specific_questions_attachments,
     get_accounting_attachments,
-    get_research_project_attachments,
-    get_languages_attachments,
-    get_cotutelle_attachments,
-    get_supervision_group_attachments,
-    get_requestable_free_documents,
-    get_dynamic_questions_attachments,
     get_authorization_attachments,
+    get_cotutelle_attachments,
+    get_curriculum_academic_experience_attachments,
+    get_curriculum_attachments,
+    get_curriculum_non_academic_experience_attachments,
+    get_dynamic_questions_attachments,
+    get_exams_attachments,
+    get_identification_attachments,
+    get_languages_attachments,
+    get_requestable_free_documents,
+    get_research_project_attachments,
+    get_secondary_studies_attachments,
+    get_specific_questions_attachments,
+    get_supervision_group_attachments,
+    get_training_choice_attachments,
 )
 from admission.exports.admission_recap.constants import (
-    TRAINING_TYPES_WITH_EQUIVALENCE,
     FORMATTED_RELATIONSHIPS,
+    TRAINING_TYPES_WITH_EQUIVALENCE,
 )
-from admission.infrastructure.admission.domain.service.calendrier_inscription import CalendrierInscription
+from admission.infrastructure.admission.domain.service.calendrier_inscription import (
+    CalendrierInscription,
+)
 from admission.utils import WeasyprintStylesheets
 from base.models.enums.education_group_types import TrainingType
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
+    ExperienceAcademiqueDTO,
+    ExperienceNonAcademiqueDTO,
+)
 from osis_profile import BE_ISO_CODE, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
+from osis_profile.models import EducationGroupYearExam
 from osis_profile.models.enums.curriculum import CURRICULUM_ACTIVITY_LABEL
-from osis_profile.views.edit_experience_academique import SYSTEMES_EVALUATION_AVEC_CREDITS
+from osis_profile.views.edit_experience_academique import (
+    SYSTEMES_EVALUATION_AVEC_CREDITS,
+)
 
 
 class Section:
@@ -111,6 +134,7 @@ class Section:
                     'coordonnees': context.coordonnees,
                     'curriculum': context.curriculum,
                     'etudes_secondaires': context.etudes_secondaires,
+                    'examen': context.examens,
                     'connaissances_langues': context.connaissances_langues,
                     'proposition': context.proposition,
                     'comptabilite': context.comptabilite,
@@ -211,6 +235,27 @@ def get_secondary_studies_section(
             context,
             **education_extra_context,
         ),
+        load_content=load_content,
+    )
+
+
+def get_exams_section(
+    context: ResumePropositionDTO,
+    load_content: bool,
+) -> Section:
+    """Returns the exams section."""
+    extra_context = {
+        'education_group_year_exam': EducationGroupYearExam.objects.filter(
+            education_group_year__acronym=context.proposition.formation.sigle,
+            education_group_year__academic_year__year=context.proposition.formation.annee,
+        ).first(),
+    }
+    return Section(
+        identifier=OngletsDemande.EXAMS,
+        content_template='admission/exports/recap/includes/exams.html',
+        extra_context=extra_context,
+        context=context,
+        attachments=get_exams_attachments(context),
         load_content=load_content,
     )
 
@@ -588,6 +633,9 @@ def get_sections(
 
     if hide_curriculum and specific_questions_by_tab[Onglets.CURRICULUM.name]:
         pdf_sections.append(get_curriculum_specific_questions_section(context, specific_questions_by_tab, load_content))
+
+    if context.est_proposition_generale:
+        pdf_sections.append(get_exams_section(context, load_content))
 
     if context.est_proposition_generale or context.est_proposition_continue:
         pdf_sections.append(get_specific_questions_section(context, specific_questions_by_tab, load_content))
