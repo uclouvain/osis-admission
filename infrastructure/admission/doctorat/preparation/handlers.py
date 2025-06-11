@@ -487,12 +487,17 @@ COMMAND_HANDLERS = {
             historique=Historique(),
         )
     ),
+    SpecifierMotifsRefusPropositionParCDDCommand: lambda msg_bus, cmd: specifier_motifs_refus_proposition_par_cdd(
+        cmd,
+        proposition_repository=PropositionRepository(),
+    ),
     RefuserPropositionParCddCommand: lambda msg_bus, cmd: refuser_proposition_par_cdd(
         cmd,
         proposition_repository=PropositionRepository(),
         historique=Historique(),
+        pdf_generation=PDFGeneration(),
+        unites_enseignement_translator=UnitesEnseignementTranslator(),
         personne_connue_ucl_translator=PersonneConnueUclTranslator(),
-        notification=Notification(),
     ),
     SpecifierInformationsAcceptationPropositionParCddCommand: (
         lambda msg_bus, cmd: specifier_informations_acceptation_proposition_par_cdd(
@@ -513,6 +518,23 @@ COMMAND_HANDLERS = {
         experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
         groupe_supervision_repository=GroupeDeSupervisionRepository(),
         notification=Notification(),
+    ),
+    CloturerPropositionParCddCommand: lambda msg_bus, cmd: cloturer_proposition_par_cdd(
+        cmd,
+        proposition_repository=PropositionRepository(),
+        historique=Historique(),
+    ),
+    PasserEtatPrisEnChargeDecisionCddCommand: lambda msg_bus, cmd: passer_etat_pris_en_charge_decision_cdd(
+        cmd,
+        proposition_repository=PropositionRepository(),
+    ),
+    PasserEtatATraiterDecisionCddCommand: lambda msg_bus, cmd: passer_etat_a_traiter_decision_cdd(
+        cmd,
+        proposition_repository=PropositionRepository(),
+    ),
+    PasserEtatACompleterParSicDecisionCddCommand: lambda msg_bus, cmd: passer_etat_a_completer_par_sic_decision_cdd(
+        cmd,
+        proposition_repository=PropositionRepository(),
     ),
     EnvoyerPropositionAuSicLorsDeLaDecisionCddCommand: (
         lambda msg_bus, cmd: envoyer_proposition_au_sic_lors_de_la_decision_cdd(
@@ -587,6 +609,13 @@ COMMAND_HANDLERS = {
             historique=Historique(),
         )
     ),
+    SpecifierMotifsRefusPropositionParSicCommand: (
+        lambda msg_bus, cmd: specifier_motifs_refus_proposition_par_sic(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            historique=Historique(),
+        )
+    ),
     ApprouverAdmissionParSicCommand: (
         lambda msg_bus, cmd: approuver_admission_par_sic(
             message_bus=msg_bus,
@@ -621,6 +650,17 @@ COMMAND_HANDLERS = {
             personne_connue_translator=PersonneConnueUclTranslator(),
             experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
+        )
+    ),
+    RefuserPropositionParSicCommand: (
+        lambda msg_bus, cmd: refuser_proposition_par_sic(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
+            historique=Historique(),
+            notification=Notification(),
+            pdf_generation=PDFGeneration(),
+            campus_repository=UclouvainCampusRepository(),
         )
     ),
     EnvoyerEmailApprobationInscriptionAuCandidatCommand: (

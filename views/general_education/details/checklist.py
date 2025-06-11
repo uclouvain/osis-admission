@@ -225,7 +225,6 @@ from admission.templatetags.admission import authentication_css_class, bg_class_
 from admission.utils import (
     access_title_country,
     add_close_modal_into_htmx_response,
-    format_academic_year,
     get_access_titles_names,
     get_backoffice_admission_url,
     get_missing_curriculum_periods,
@@ -248,6 +247,7 @@ from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
 from base.utils.htmx import HtmxPermissionRequiredMixin
+from base.utils.utils import format_academic_year
 from ddd.logic.shared_kernel.profil.commands import (
     RecupererExperiencesParcoursInterneQuery,
 )
@@ -3035,6 +3035,7 @@ class ChecklistView(
             'frais_dossier': assimilation_documents,
             'choix_formation': {
                 'FORMULAIRE_REORIENTATION',
+                'ATTESTATION_INSCRIPTION_REGULIERE_POUR_MODIFICATION_INSCRIPTION',
                 'ATTESTATION_INSCRIPTION_REGULIERE',
                 'FORMULAIRE_MODIFICATION_INSCRIPTION',
             },
@@ -3175,6 +3176,7 @@ class ChecklistView(
                     admission_document
                     for admission_document in admission_documents
                     if admission_document.identifiant.split('.')[-1] in tab_documents
+                    or admission_document.onglet_checklist_associe == tab_name
                 ]
                 for tab_name, tab_documents in documents_by_tab.items()
             }
@@ -3346,9 +3348,9 @@ class ChecklistView(
                         )
                     )
 
-            # Sort the documents by label
+            # Sort the documents by document type (free documents first) and label
             for documents in context['documents'].values():
-                documents.sort(key=lambda doc: doc.libelle)
+                documents.sort(key=lambda doc: (not doc.est_emplacement_document_libre, doc.libelle))
 
             # Some tabs also contain the documents of each experience
             context['documents']['parcours_anterieur'].extend(prefixed_past_experiences_documents)

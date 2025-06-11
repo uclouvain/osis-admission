@@ -631,6 +631,22 @@ class StatutsChecklistExperiencesEtreValidesException(BusinessException):
         super().__init__(message, **kwargs)
 
 
+class MotifRefusCDDNonSpecifieException(BusinessException):
+    status_code = "PROPOSITION-70"
+
+    def __init__(self, **kwargs):
+        message = _("When refusing a proposition, the reason must be specified.")
+        super().__init__(message, **kwargs)
+
+
+class StatutChecklistDecisionCddDoitEtreDifferentClotureException(BusinessException):
+    status_code = "PROPOSITION-71"
+
+    def __init__(self, **kwargs):
+        message = _('It is not possible to go from the "Closed" status to this status.')
+        super().__init__(message, **kwargs)
+
+
 class MembreNonExterneException(BusinessException):
     status_code = "PROPOSITION-14"
 
@@ -701,7 +717,7 @@ class PropositionNonEnAttenteDeSignatureException(BusinessException):
     status_code = "DOCTORAT-8"
 
     def __init__(self, **kwargs):
-        message = _("The proposition must be in the 'waiting for signature' status.")
+        message = _("The proposition must be in the 'In the process of signing' status.")
         super().__init__(message, **kwargs)
 
 
@@ -735,5 +751,5 @@ class PropositionStatutIncorrectPourSoumissionCAException(BusinessException):
     status_code = "DOCTORAT-11"
 
     def __init__(self, **kwargs):
-        message = _("The proposition must be in the 'Support committee waiting for signature' status.")
+        message = _("The proposition must be in the 'In the process of re-signing' status.")
         super().__init__(message, **kwargs)

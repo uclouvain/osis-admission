@@ -33,7 +33,6 @@ from django.db.models import (
     Q,
     TextField,
 )
-from django.db.models.functions import Concat
 from django.utils.decorators import method_decorator
 from django.utils.translation import get_language
 from django.views.decorators.cache import cache_page
@@ -278,9 +277,10 @@ class PersonSearchingBackend(BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         search_term = request.GET.get(self.searching_param, '')
         return queryset.filter(
-            Q(first_name__icontains=search_term)
-            | Q(last_name__icontains=search_term)
-            | Q(global_id__contains=search_term)
+            *[
+                Q(first_name__icontains=term) | Q(last_name__icontains=term) | Q(global_id__icontains=search_term)
+                for term in search_term.split()
+            ],
         )
 
     def get_schema_operation_parameters(self, view):  # pragma: no cover
@@ -359,11 +359,11 @@ class AutocompletePersonView(ListAPIView):
             | Q(last_name='')
         )
         .alias(
-            # Remove students
-            is_student=Exists(Student.objects.filter(person=OuterRef('pk'))),
+            # Remove students who aren't tutors
+            is_student_and_not_tutor=Exists(Student.objects.filter(person=OuterRef('pk'), person__tutor__isnull=True)),
         )
-        .filter(is_student=False)
-        .order_by('last_name', 'first_name')
+        .filter(is_student_and_not_tutor=False)
+        .order_by('first_name', 'last_name')
     )
 
 

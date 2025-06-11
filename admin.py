@@ -38,7 +38,7 @@ from django.shortcuts import resolve_url
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
-from django.utils.translation import ngettext, pgettext, pgettext_lazy
+from django.utils.translation import ngettext, pgettext
 from django_admin_listfilter_dropdown.filters import RelatedDropdownFilter
 from django_json_widget.widgets import JSONEditorWidget
 from hijack.contrib.admin import HijackUserAdminMixin
@@ -75,6 +75,9 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
     ORGANISATION_ONGLETS_CHECKLIST as ORGANISATION_ONGLETS_CHECKLIST_GENERALE,
 )
 from admission.forms.checklist_state_filter import ChecklistStateFilterField
+from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+    AnneeInscriptionFormationTranslator,
+)
 from admission.models import (
     Accounting,
     AdmissionTask,
@@ -88,6 +91,8 @@ from admission.models.base import BaseAdmission
 from admission.models.categorized_free_document import CategorizedFreeDocument
 from admission.models.checklist import (
     AdditionalApprovalCondition,
+    DoctorateRefusalReason,
+    DoctorateRefusalReasonCategory,
     FreeAdditionalApprovalCondition,
     RefusalReason,
     RefusalReasonCategory,
@@ -108,7 +113,6 @@ from admission.services.injection_epc.injection_dossier import InjectionEPCAdmis
 from admission.views.mollie_webhook import MollieWebHook
 from base.models.academic_year import AcademicYear
 from base.models.education_group_type import EducationGroupType
-from base.models.entity_version import EntityVersion
 from base.models.enums.education_group_categories import Categories
 from base.models.person import Person
 from base.models.person_merge_proposal import PersonMergeStatus
@@ -802,6 +806,23 @@ class RefusalReasonAdmin(DisplayTranslatedNameMixin, OrderedModelAdmin):
         return mark_safe(obj.name)
 
 
+@admin.register(DoctorateRefusalReasonCategory)
+class DoctorateRefusalReasonCategoryAdmin(DisplayTranslatedNameMixin, OrderedModelAdmin):
+    list_display = ['name', 'move_up_down_links', 'order']
+    search_fields = ['name']
+
+
+@admin.register(DoctorateRefusalReason)
+class DoctorateRefusalReasonAdmin(DisplayTranslatedNameMixin, OrderedModelAdmin):
+    autocomplete_fields = ['category']
+    list_display = ['safe_name', 'category', 'move_up_down_links', 'order']
+    list_filter = ['category']
+
+    @admin.display(description=_('Name'))
+    def safe_name(self, obj):
+        return mark_safe(obj.name)
+
+
 @admin.register(AdditionalApprovalCondition)
 class AdditionalApprovalConditionAdmin(DisplayTranslatedNameMixin, admin.ModelAdmin):
     list_display = ['safe_name_fr', 'safe_name_en']
@@ -1024,6 +1045,12 @@ class WorkingListForm(forms.ModelForm):
         label=_('Admission statuses'),
         required=False,
         choices=CHOIX_STATUT_TOUTE_PROPOSITION,
+    )
+
+    admission_education_types = forms.TypedMultipleChoiceField(
+        label=_('Admission education types'),
+        required=False,
+        choices=AnneeInscriptionFormationTranslator.EDUCATION_TYPES_CHOICES,
     )
 
     class Meta:

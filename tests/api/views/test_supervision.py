@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -30,21 +30,28 @@ from osis_signature.models import StateHistory
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.models.enums.actor_type import ActorType
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     MembreCANonTrouveException,
     PromoteurNonTrouveException,
 )
+from admission.models.enums.actor_type import ActorType
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.roles import CandidateFactory
-from admission.tests.factories.supervision import CaMemberFactory, ExternalPromoterFactory, PromoterFactory, \
-    ExternalCaMemberFactory
+from admission.tests.factories.supervision import (
+    CaMemberFactory,
+    ExternalCaMemberFactory,
+    ExternalPromoterFactory,
+    PromoterFactory,
+)
 from base.models.enums.entity_type import EntityType
 from base.tests import QueriesAssertionsMixin
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
+from base.tests.factories.student import StudentFactory
 from base.tests.factories.tutor import TutorFactory
 from reference.tests.factories.country import CountryFactory
 
@@ -186,6 +193,32 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         membres_ca = response.json()['signatures_membres_CA']
         self.assertEqual(membres_ca[0]['membre_CA']['prenom'], 'John')
 
+    def test_supervision_ajouter_membre_ca_etudiant_tuteur(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        person = PersonFactory(first_name="Jim")
+
+        data = {
+            'matricule': person.global_id,
+            'actor_type': ActorType.CA_MEMBER.name,
+            **self.empty_external_data,
+        }
+
+        StudentFactory(person=person)
+
+        response = self.client.put(self.url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.json()['non_field_errors'][0]['status_code'], MembreCANonTrouveException.status_code)
+
+        TutorFactory(person=person)
+
+        response = self.client.put(self.url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+
+        response = self.client.get(self.url)
+        membres_ca = response.json()['signatures_membres_CA']
+        self.assertEqual(membres_ca[0]['membre_CA']['prenom'], 'Jim')
+
     def test_supervision_ajouter_membre_ca_externe(self):
         self.client.force_authenticate(user=self.candidate.user)
 
@@ -232,6 +265,33 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         promoteurs = response.json()['signatures_promoteurs']
         self.assertEqual(len(promoteurs), 2)
         self.assertIn('John', [promoteur['promoteur']['prenom'] for promoteur in promoteurs])
+
+    def test_supervision_ajouter_promoteur_etudiant_tuteur(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        person = PersonFactory(first_name="Jim")
+
+        data = {
+            'matricule': person.global_id,
+            'actor_type': ActorType.PROMOTER.name,
+            **self.empty_external_data,
+        }
+
+        StudentFactory(person=person)
+
+        response = self.client.put(self.url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.json()['non_field_errors'][0]['status_code'], PromoteurNonTrouveException.status_code)
+
+        TutorFactory(person=person)
+
+        response = self.client.put(self.url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+
+        response = self.client.get(self.url)
+        promoteurs = response.json()['signatures_promoteurs']
+        self.assertEqual(len(promoteurs), 2)
+        self.assertIn('Jim', [promoteur['promoteur']['prenom'] for promoteur in promoteurs])
 
     def test_supervision_ajouter_promoteur_externe(self):
         self.client.force_authenticate(user=self.candidate.user)

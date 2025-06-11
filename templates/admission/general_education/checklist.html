@@ -383,13 +383,15 @@
           <div class="form-group btn-group status-group" role="group">
             {% if initial.statut == 'INITIAL_NON_CONCERNE' %}
               {% translate 'Not concerned' context 'checklist' as not_concerned_label %}
-              {% checklist_state_button tab='specificites_formation' label=not_concerned_label icon='xmark' state='INITIAL_NON_CONCERNE' class='muted' %}
+              {% checklist_state_button tab='specificites_formation' label=not_concerned_label icon='xmark' state='INITIAL_NON_CONCERNE' class='muted' replace_extra=True %}
             {% else %}
-              {% checklist_state_button tab='specificites_formation' label=_("To be processed") icon='user' state='INITIAL_CANDIDAT' class='muted' %}
+              {% checklist_state_button tab='specificites_formation' label=_("To be processed") icon='user' state='INITIAL_CANDIDAT' class='muted' replace_extra=True %}
             {% endif %}
-            {% checklist_state_button tab='specificites_formation' label=_("To be completed after application") icon='circle-arrow-right' state='GEST_BLOCAGE_ULTERIEUR' class='info' %}
-            {% checklist_state_button tab='specificites_formation' label=_("Insufficient") icon='circle-stop' state='GEST_BLOCAGE' class='danger' %}
-            {% checklist_state_button tab='specificites_formation' label=_("Sufficient") icon='check' state='GEST_REUSSITE' class='success' %}
+            {% checklist_state_button tab='specificites_formation' label=_("Expert opinion") icon='pencil' state='GEST_EN_COURS' class='warning' replace_extra=True %}
+            {% checklist_state_button tab='specificites_formation' label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' to_be_completed='1' class='danger' replace_extra=True %}
+            {% checklist_state_button tab='specificites_formation' label=_("To be completed after application") icon='circle-arrow-right' state='GEST_BLOCAGE_ULTERIEUR' class='info' replace_extra=True %}
+            {% checklist_state_button tab='specificites_formation' label=_("Insufficient") icon='circle-stop' state='GEST_BLOCAGE' insufficient='1' class='danger' replace_extra=True %}
+            {% checklist_state_button tab='specificites_formation' label=_("Sufficient") icon='check' state='GEST_REUSSITE' class='success' replace_extra=True %}
           </div>
 
           {% bootstrap_form comment_forms.specificites_formation %}
@@ -469,7 +471,6 @@
       <div id="document-content" hx-indicator="#document-details">
         {% for tab, documents in documents.items %}
           <div role="tabpanel" class="documents-tab" id="{{ tab }}-documents">
-            <label for="{{ tab }}-documents-select">{% translate 'Document' %}</label>
             <form
               method="GET"
               {# By default, the document identifier is submitted through an url param, but since we submit #}
@@ -493,6 +494,7 @@
                     value="{{ document.identifiant }}"
                     data-document-status="{{ document.statut }}"
                     data-mandatory-document="{% if document.requis_automatiquement %}1{% else %}0{% endif %}"
+                    data-free-document="{% if document.est_emplacement_document_libre %}1{% else %}0{% endif %}"
                   >{{ document.libelle }}</option>
                 {% endfor %}
               </select>
@@ -502,6 +504,7 @@
                 <i class="fa-solid fa-angle-right"></i>
               </button>
             </form>
+            <label for="{{ tab }}-documents-select">{% translate 'Document' %}</label>
           </div>
         {% endfor %}
         {% include 'admission/document/document_detail.html' %}
@@ -584,6 +587,9 @@
           function formatDocumentOption(option, optionClasses) {
               const formattedOption = $(`<span class="${optionClasses}"></span>`);
               formattedOption.text(option.text);
+              if (option.element && option.element.dataset.freeDocument === '1') {
+                  formattedOption.prepend('<span class="fa-solid fa-dice document-icon free-document"></span>');
+              }
               if (option.element && option.element.dataset.documentStatus === 'COMPLETE_APRES_RECLAMATION') {
                   formattedOption.prepend('<span class="fa-solid fa-envelope document-icon"></span>');
               }
@@ -591,17 +597,19 @@
           }
 
           function formatResultDocumentOption(option) {
-              return formatDocumentOption(option, 'flex-content-no-wrap');
+              return formatDocumentOption(option, 'flex-content-no-wrap-no-justify');
           }
           function formatSelectedDocumentOption(option) {
               return formatDocumentOption(option, 'selected-document-option');
           }
 
-          $('.documents-select').select2({
+          const defaultDocumentSelect2Options = {
               templateResult: formatResultDocumentOption,
               templateSelection: formatSelectedDocumentOption,
               placeholder: '{% translate "No document" %}',
-          });
+          };
+
+          $('.documents-select').select2(defaultDocumentSelect2Options);
 
           function refreshDocumentsSelectButtons(jQuerySelect) {
               /*
@@ -876,6 +884,22 @@
                   if (event.originalEvent.detail.refresh_details) {
                       const selectedTab = window.location.hash || defaultTab;
                       const currentSelect = $(`${selectedTab}-documents-select`);
+                      currentSelect[0].dispatchEvent(new Event('select2:select'));
+                  }
+                  {# Remove the options related to the deleted document and choose the first one of the current tab #}
+                  else if (event.originalEvent.detail.delete_document) {
+                      const optionsToDelete = $(`#document-content option[value="${event.originalEvent.detail.delete_document}"]`);
+
+                      optionsToDelete.each(function() {
+                        const relatedSelect = $(this).parent('select');
+                        $(this).remove();
+                        relatedSelect.select2(defaultDocumentSelect2Options);
+                      });
+
+                      const selectedTab = window.location.hash || defaultTab;
+                      const currentSelect = $(`${selectedTab}-documents-select`);
+
+                      currentSelect.find('option:not(:disabled):first').prop('selected', 'selected');
                       currentSelect[0].dispatchEvent(new Event('select2:select'));
                   }
               }
@@ -1426,5 +1450,21 @@
     .disabled-comment textarea {
       background-color: #eee;
     }
+
+    .select2-results__option:not([role="group"]):has(.free-document), .select2-selection:has(.free-document) {
+      background-color: #ffc90e;
+    }
+
+    .documents-tab {
+      display: flex;
+      flex-direction: column-reverse;  /* Use reverse to use the + selector in the next rule */
+    }
+
+    .documents-tab form:has(option[data-free-document="1"]) + label::after {
+      font-family: "Font Awesome 5 Pro";
+      content: "\f522";
+      margin-left: 5px;
+    }
+
   </style>
 {% endblock style %}

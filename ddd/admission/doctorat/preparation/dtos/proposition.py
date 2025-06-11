@@ -42,7 +42,7 @@ from ..domain.model.enums import (
     STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE,
     ChoixTypeAdmission,
 )
-from ..domain.model.enums.checklist import DroitsInscriptionMontant
+from ..domain.model.enums.checklist import DroitsInscriptionMontant, TypeDeRefus
 from .doctorat_formation import DoctoratFormationDTO
 from .motif_refus import MotifRefusDTO
 
@@ -127,9 +127,11 @@ class PropositionDTO(interface.DTO):
     financabilite_derogation_derniere_notification_le: Optional[datetime.datetime]
     financabilite_derogation_derniere_notification_par: str
 
+    certificat_refus_cdd: List[str]
     certificat_approbation_cdd: List[str]
     certificat_approbation_sic: List[str]
     certificat_approbation_sic_annexe: List[str]
+    certificat_refus_sic: List[str]
 
     doit_fournir_visa_etudes: Optional[bool]
     visa_etudes_d: List[str]
@@ -226,3 +228,7 @@ class PropositionGestionnaireDTO(PropositionDTO):
             if self.droits_inscription_montant == DroitsInscriptionMontant.AUTRE.name
             else self.droits_inscription_montant_valeur
         )
+
+    @property
+    def type_de_refus(self):
+        return TypeDeRefus.REFUS_DOCTORAT.name

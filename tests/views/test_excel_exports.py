@@ -26,8 +26,10 @@
 
 import ast
 import datetime
+import uuid
 from typing import List
 from unittest import mock
+from unittest.mock import MagicMock
 
 import freezegun
 import mock
@@ -59,19 +61,27 @@ from admission.ddd.admission.doctorat.preparation.dtos.liste import (
 from admission.ddd.admission.doctorat.preparation.read_view.domain.enums.tableau_bord import (
     IndicateurTableauBordEnum,
 )
+from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.ddd.admission.dtos.liste import (
     DemandeRechercheDTO,
     VisualiseurAdmissionDTO,
 )
+from admission.ddd.admission.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.enums.liste import TardiveModificationReorientationFiltre
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_continue.commands import (
     ListerDemandesQuery as ListerDemandesContinuesQuery,
 )
+from admission.ddd.admission.formation_continue.commands import (
+    RecupererResumePropositionQuery,
+)
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixEdition,
+    ChoixInscriptionATitre,
+    ChoixMoyensDecouverteFormation,
     ChoixStatutPropositionContinue,
+    ChoixTypeAdresseFacturation,
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     OngletsChecklist as OngletsChecklistContinue,
@@ -85,10 +95,27 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     OngletsChecklist as OngletsChecklistGenerale,
 )
+from admission.ddd.admission.test.factory.profil import (
+    AnneeExperienceAcademiqueDTOFactory,
+    ExperienceAcademiqueDTOFactory,
+    ExperienceNonAcademiqueDTOFactory,
+)
+from admission.models.base import (
+    AdmissionProfessionalValuatedExperiences,
+    BaseAdmission,
+)
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.admission_viewer import AdmissionViewerFactory
+from admission.tests.factories.comment import CommentEntryFactory
 from admission.tests.factories.continuing_education import (
     ContinuingEducationAdmissionFactory,
+)
+from admission.tests.factories.curriculum import (
+    AdmissionEducationalValuatedExperiencesFactory,
+    AdmissionProfessionalValuatedExperiencesFactory,
+    EducationalExperienceFactory,
+    EducationalExperienceYearFactory,
+    ProfessionalExperienceFactory,
 )
 from admission.tests.factories.form_item import (
     AdmissionFormItemInstantiationFactory,
@@ -99,6 +126,7 @@ from admission.tests.factories.form_item import (
     TextAdmissionFormItemFactory,
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
+from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import SicManagementRoleFactory
 from admission.tests.factories.supervision import PromoterFactory
 from admission.views.excel_exports import (
@@ -108,18 +136,27 @@ from admission.views.excel_exports import (
     ContinuingAdmissionListExcelExportView,
     DoctorateAdmissionListExcelExportView,
 )
+from base.models.enums.civil_state import CivilState
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
+from base.models.enums.got_diploma import GotDiploma
+from base.models.enums.person_address_type import PersonAddressType
+from base.models.person_address import PersonAddress
 from base.tests import QueriesAssertionsMixin
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.campus import CampusFactory
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
+from base.tests.factories.organization import OrganizationFactory
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.student import StudentFactory
 from infrastructure.messages_bus import message_bus_instance
+from osis_profile.models import EducationalExperience, ProfessionalExperience
+from osis_profile.models.enums.curriculum import ActivitySector, ActivityType
 from program_management.models.education_group_version import EducationGroupVersion
+from reference.models.enums.cycle import Cycle
 from reference.tests.factories.country import CountryFactory
+from reference.tests.factories.diploma_title import DiplomaTitleFactory
 from reference.tests.factories.scholarship import (
     DoctorateScholarshipFactory,
     DoubleDegreeScholarshipFactory,
@@ -677,11 +714,57 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
         )
 
         # Admissions
-        candidate = PersonFactory(
+        candidate = CompletePersonFactory(
             first_name="John",
             last_name="Doe",
             email='john.doe@example.be',
+            private_email='john.doe@example.private.be',
+            gender=ChoixGenre.H.name,
+            civil_state=CivilState.LEGAL_COHABITANT.name,
+            country_of_citizenship=CountryFactory(name='B1'),
+            birth_date=datetime.date(2020, 1, 1),
+            birth_place='Place 1',
+            birth_country=CountryFactory(name='B2'),
+            national_number='N1',
+            id_card_number='N2',
+            passport_number='N3',
+            last_registration_year=AcademicYearFactory(year=2015),
+            last_registration_id='NOMA1',
+            emergency_contact_phone='010203',
+            phone_mobile='01020304',
+            graduated_from_high_school=GotDiploma.YES.name,
+            graduated_from_high_school_year=AcademicYearFactory(year=2014),
         )
+        experiences = EducationalExperience.objects.filter(person=candidate)
+        experience = experiences[0]
+        experience.obtained_diploma = True
+        experience.education_name = ('',)
+        experience.institute_name = ('',)
+        experience.institute = OrganizationFactory(
+            name='I1',
+        )
+        experience.program = DiplomaTitleFactory(
+            title='Computer science 1',
+            cycle=Cycle.FIRST_CYCLE.name,
+        )
+        experience.save()
+
+        past_non_academic_activity = ProfessionalExperience.objects.filter(
+            person=candidate,
+        ).first()
+        past_non_academic_activity.type = ActivityType.INTERNSHIP.name
+        past_non_academic_activity.save()
+
+        current_non_academic_activity = ProfessionalExperienceFactory(
+            person=candidate,
+            start_date=datetime.date(2022, 1, 1),
+            end_date=datetime.date(2023, 4, 1),
+            type=ActivityType.WORK.name,
+            role='R1',
+            sector=ActivitySector.ASSOCIATIVE.name,
+            institute_name='IA1',
+        )
+        cls.address_country_name = candidate.personaddress_set.first().country.name
         cls.admission = ContinuingEducationAdmissionFactory(
             candidate=candidate,
             status=ChoixStatutPropositionContinue.CONFIRMEE.name,
@@ -692,9 +775,68 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
             training__academic_year=academic_years[1],
             determined_academic_year=academic_years[2],
             edition=ChoixEdition.DEUX.name,
-            in_payement_order=True,
             modified_at=datetime.datetime(2023, 1, 3),
             last_update_author=candidate,
+            head_office_name='HO1',
+            unique_business_number='U1',
+            vat_number='VAT1',
+            billing_address_type=ChoixTypeAdresseFacturation.AUTRE.name,
+            billing_address_street='School street',
+            billing_address_street_number='12',
+            billing_address_postal_code='1000',
+            billing_address_city='Bruxelles',
+            billing_address_country=CountryFactory(name='BE3'),
+            in_payement_order=False,
+            reduced_rights=True,
+            pay_by_training_cheque=None,
+            cep=False,
+            payement_spread=True,
+            training_spread=None,
+            experience_knowledge_valorisation=False,
+            assessment_test_presented=True,
+            assessment_test_succeeded=None,
+            certificate_provided=False,
+            tff_label='TFF',
+            ways_to_find_out_about_the_course=[
+                ChoixMoyensDecouverteFormation.ANCIENS_ETUDIANTS.name,
+                ChoixMoyensDecouverteFormation.LINKEDIN.name,
+            ],
+            other_way_to_find_out_about_the_course='Other way',
+        )
+
+        cls.text_form_item = AdmissionFormItemInstantiationFactory(
+            form_item=TextAdmissionFormItemFactory(
+                internal_label='Q2',
+                active=True,
+            ),
+            academic_year=cls.admission.determined_academic_year,
+        ).form_item
+        cls.text_form_item_uuid = str(cls.text_form_item.uuid)
+
+        cls.admission.specific_question_answers = {
+            cls.text_form_item_uuid: 'T1',
+        }
+        cls.admission.save()
+
+        CommentEntryFactory(
+            object_uuid=cls.admission.uuid,
+            content='TEST',
+            tags=[OngletsChecklistContinue.fiche_etudiant.name],
+        )
+
+        AdmissionEducationalValuatedExperiencesFactory(
+            baseadmission=cls.admission,
+            educationalexperience=experience,
+        )
+
+        AdmissionProfessionalValuatedExperiencesFactory(
+            baseadmission=cls.admission,
+            professionalexperience=past_non_academic_activity,
+        )
+
+        AdmissionProfessionalValuatedExperiencesFactory(
+            baseadmission=cls.admission,
+            professionalexperience=current_non_academic_activity,
         )
 
         cls.student = StudentFactory(
@@ -820,78 +962,292 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
 
     def test_export_content(self):
         view = ContinuingAdmissionListExcelExportView()
+        view.initialize_specific_questions()
         header = view.get_header()
 
-        results: List[DemandeContinueRechercheDTO] = message_bus_instance.invoke(
-            ListerDemandesContinuesQuery(numero=self.admission.reference)
-        )
-
-        self.assertEqual(len(results), 1)
-
-        result = results[0]
-
-        row_data = view.get_row_data(result)
+        row_data = view.get_row_data(self.admission.uuid)
 
         self.assertEqual(len(header), len(row_data))
 
-        self.assertEqual(row_data[0], result.numero_demande)
-        self.assertEqual(row_data[1], result.nom_candidat)
-        self.assertEqual(row_data[2], result.prenom_candidat)
-        self.assertEqual(row_data[3], result.noma_candidat)
-        self.assertEqual(row_data[4], result.courriel_candidat)
-        self.assertEqual(row_data[5], f'{result.sigle_formation} - {result.intitule_formation}')
-        self.assertEqual(row_data[6], '2')
-        self.assertEqual(row_data[7], result.sigle_faculte)
-        self.assertEqual(row_data[8], 'oui')
-        self.assertEqual(row_data[9], 'non')
-        self.assertEqual(row_data[10], 'non')
-        self.assertEqual(row_data[11], 'non')
-        self.assertEqual(row_data[12], 'non')
+        self.assertEqual(row_data[0], 'Doe')
+        self.assertEqual(row_data[1], 'John')
+        self.assertEqual(row_data[2], 'john.doe@example.private.be')
+        self.assertEqual(row_data[3], str(ChoixStatutPropositionContinue.CONFIRMEE.value))
+        self.assertEqual(row_data[4], str(ChoixGenre.H.value))
+        self.assertEqual(row_data[5], str(CivilState.LEGAL_COHABITANT.value))
+        self.assertEqual(row_data[6], 'B1')
+        self.assertEqual(row_data[7], '2020-01-01'),
+        self.assertEqual(row_data[8], 'Place 1')
+        self.assertEqual(row_data[9], 'B2')
+        self.assertEqual(row_data[10], 'N1')
+        self.assertEqual(row_data[11], 'N2')
+        self.assertEqual(row_data[12], 'N3')
+        self.assertEqual(row_data[13], 'oui')
+        self.assertEqual(row_data[14], '2015-2016')
+        self.assertEqual(row_data[15], 'NOMA1')
+        self.assertEqual(row_data[16], f'University street 1 - 1348 Louvain-la-Neuve - {self.address_country_name}')
+        self.assertEqual(row_data[17], f'University street 2 - 1348 Louvain-la-Neuve - {self.address_country_name}')
+        self.assertEqual(row_data[18], '010203')
+        self.assertEqual(row_data[19], '01020304')
+        self.assertEqual(row_data[20], str(GotDiploma.YES.value))
+        self.assertEqual(row_data[21], 2015)
+        self.assertEqual(row_data[22], str(Cycle.FIRST_CYCLE.value))
+        self.assertEqual(row_data[23], 'I1')
+        self.assertEqual(row_data[24], 2023)
+        self.assertEqual(row_data[25], '')
+        self.assertEqual(row_data[26], 'R1')
+        self.assertEqual(row_data[27], 'IA1')
+        self.assertEqual(row_data[28], str(ActivitySector.ASSOCIATIVE.value))
+        self.assertEqual(row_data[29], f'01/2021-03/2021 : {ActivityType.INTERNSHIP.value}')
+        self.assertEqual(row_data[30], 'My motivations')
+        self.assertEqual(row_data[31], self.admission.training.acronym)
+        self.assertEqual(row_data[32], 'ABCDEF')
+        self.assertEqual(row_data[33], '')
+        self.assertEqual(
+            row_data[34],
+            '{}\n{}\n{}'.format(
+                ChoixMoyensDecouverteFormation.ANCIENS_ETUDIANTS.value,
+                ChoixMoyensDecouverteFormation.LINKEDIN.value,
+                'Other way',
+            ),
+        )
+        self.assertEqual(row_data[35], str(ChoixInscriptionATitre.PRIVE.value))
+        self.assertEqual(row_data[36], 'HO1')
+        self.assertEqual(row_data[37], 'U1')
+        self.assertEqual(row_data[38], 'VAT1')
+        self.assertEqual(row_data[39], 'School street 12 - 1000 Bruxelles - BE3')
+        self.assertEqual(row_data[40], 'Q2 : T1')
+        self.assertEqual(row_data[41], 'non')
+        self.assertEqual(row_data[42], 'oui')
+        self.assertEqual(row_data[43], 'non')
+        self.assertEqual(row_data[44], 'oui')
+        self.assertEqual(row_data[45], '')
+        self.assertEqual(row_data[46], 'non')
+        self.assertEqual(row_data[47], 'oui')
+        self.assertEqual(row_data[48], '')
+        self.assertEqual(row_data[49], 'non')
+        self.assertEqual(row_data[50], 'oui')
+        self.assertEqual(row_data[51], '')
+        self.assertEqual(row_data[52], 'TFF')
+        self.assertEqual(row_data[53], 'non')
+        self.assertEqual(row_data[54], 'TEST')
+
+        self.admission.billing_address_type = ChoixTypeAdresseFacturation.CONTACT.name
+        self.admission.save()
+
+        self.admission.candidate.last_registration_year = None
+        self.admission.candidate.graduated_from_high_school = GotDiploma.NO.name
+        self.admission.candidate.graduated_from_high_school_year = None
+
+        self.admission.candidate.save()
+
+        new_experience = EducationalExperienceFactory(
+            person=self.admission.candidate,
+            education_name='',
+            program=DiplomaTitleFactory(
+                title='Computer science 2',
+                cycle=Cycle.SECOND_CYCLE.name,
+            ),
+            obtained_diploma=True,
+        )
+        new_experience_year = EducationalExperienceYearFactory(
+            academic_year__year=2010,
+            educational_experience=new_experience,
+        )
+        AdmissionEducationalValuatedExperiencesFactory(
+            baseadmission=self.admission,
+            educationalexperience=new_experience,
+        )
+
+        row_data = view.get_row_data(self.admission.uuid)
+
+        # Last UCL registration
         self.assertEqual(row_data[13], 'non')
-        self.assertEqual(row_data[14], 'non')
-        self.assertEqual(row_data[15], 'non')
-        self.assertEqual(row_data[16], 'non')
-        self.assertEqual(row_data[17], 'non')
-        self.assertEqual(row_data[18], ChoixStatutPropositionContinue.CONFIRMEE.value)
-        self.assertEqual(row_data[19], '')
-        self.assertEqual(row_data[20], '2023/01/01, 00:00:00')
-        self.assertEqual(row_data[21], '2023/01/03, 00:00:00')
-        self.assertEqual(row_data[22], 'Candidat')
+        self.assertEqual(row_data[14], '')
 
-        # Check the export when some specific fields are empty or have a specific value
-        self.admission.edition = ''
-        self.admission.in_payement_order = False
-        self.admission.submitted_at = None
-        self.admission.save()
+        # High school diploma
+        self.assertEqual(row_data[20], str(GotDiploma.NO.value))
+        self.assertEqual(row_data[21], '')
 
-        results: List[DemandeContinueRechercheDTO] = message_bus_instance.invoke(
-            ListerDemandesContinuesQuery(numero=self.admission.reference)
+        # Academic experience
+        self.assertEqual(row_data[25], '2010-2011 : Computer science 2, Institute')
+
+        # Billing address
+        self.assertEqual(row_data[39], f'University street 2 - 1348 Louvain-la-Neuve - {self.address_country_name}')
+
+    def test_last_experience_with_diploma(self):
+        # No experience
+        experiences = []
+        experience = ContinuingAdmissionListExcelExportView._get_last_academic_experience(experiences)
+
+        self.assertIsNone(experience)
+
+        # One experience
+        experiences = [
+            ExperienceAcademiqueDTOFactory(
+                a_obtenu_diplome=False,
+                annees=[AnneeExperienceAcademiqueDTOFactory(annee=2020)],
+                cycle_formation='',
+            )
+        ]
+
+        experience = ContinuingAdmissionListExcelExportView._get_last_academic_experience(experiences)
+
+        self.assertIsNone(experience)
+
+        experiences = [
+            ExperienceAcademiqueDTOFactory(
+                a_obtenu_diplome=True,
+                annees=[AnneeExperienceAcademiqueDTOFactory(annee=2020)],
+                cycle_formation='',
+            )
+        ]
+
+        experience = ContinuingAdmissionListExcelExportView._get_last_academic_experience(experiences)
+
+        self.assertEqual(experience, experiences[0])
+
+        # This is the graduating experience
+        experiences = [
+            ExperienceAcademiqueDTOFactory(
+                a_obtenu_diplome=True,
+                annees=[AnneeExperienceAcademiqueDTOFactory(annee=2020)],
+                cycle_formation='',
+            ),
+            ExperienceAcademiqueDTOFactory(
+                a_obtenu_diplome=False,
+                annees=[AnneeExperienceAcademiqueDTOFactory(annee=2021)],
+                cycle_formation='',
+            ),
+        ]
+
+        experience = ContinuingAdmissionListExcelExportView._get_last_academic_experience(experiences)
+
+        self.assertEqual(experience, experiences[0])
+
+        # This is the latest experience
+        experiences = [
+            ExperienceAcademiqueDTOFactory(
+                a_obtenu_diplome=True,
+                annees=[AnneeExperienceAcademiqueDTOFactory(annee=2020)],
+                cycle_formation='',
+            ),
+            ExperienceAcademiqueDTOFactory(
+                a_obtenu_diplome=True,
+                annees=[AnneeExperienceAcademiqueDTOFactory(annee=2021)],
+                cycle_formation='',
+            ),
+        ]
+
+        experience = ContinuingAdmissionListExcelExportView._get_last_academic_experience(experiences)
+
+        self.assertEqual(experience, experiences[1])
+
+        # This is the experience of the highest cycle
+        experiences = [
+            ExperienceAcademiqueDTOFactory(
+                a_obtenu_diplome=True,
+                annees=[AnneeExperienceAcademiqueDTOFactory(annee=2020)],
+                cycle_formation=Cycle.THIRD_CYCLE.name,
+            ),
+            ExperienceAcademiqueDTOFactory(
+                a_obtenu_diplome=True,
+                annees=[AnneeExperienceAcademiqueDTOFactory(annee=2020)],
+                cycle_formation=Cycle.SECOND_CYCLE.name,
+            ),
+        ]
+
+        experience = ContinuingAdmissionListExcelExportView._get_last_academic_experience(experiences)
+
+        self.assertEqual(experience, experiences[0])
+
+        experiences = [
+            ExperienceAcademiqueDTOFactory(
+                a_obtenu_diplome=True,
+                annees=[AnneeExperienceAcademiqueDTOFactory(annee=2020)],
+                cycle_formation='',
+            ),
+            ExperienceAcademiqueDTOFactory(
+                a_obtenu_diplome=True,
+                annees=[AnneeExperienceAcademiqueDTOFactory(annee=2020)],
+                cycle_formation=Cycle.FIRST_CYCLE.name,
+            ),
+        ]
+
+        experience = ContinuingAdmissionListExcelExportView._get_last_academic_experience(experiences)
+
+        self.assertEqual(experience, experiences[1])
+
+    def test_get_non_academic_activities_columns(self):
+        # No experience
+        experiences = []
+
+        columns = ContinuingAdmissionListExcelExportView._get_non_academic_activities_columns(experiences)
+
+        self.assertEqual(columns[0], '')
+        self.assertEqual(columns[1], '')
+        self.assertEqual(columns[2], '')
+        self.assertEqual(columns[3], '')
+
+        experiences = [
+            # Current activities
+            # > Work
+            ExperienceNonAcademiqueDTOFactory(
+                type=ActivityType.WORK.name,
+                date_debut=datetime.date(2023, 1, 1),
+                date_fin=datetime.date(2023, 1, 31),
+                fonction='Manager',
+                secteur=ActivitySector.PRIVATE.name,
+                employeur='UCL',
+            ),
+            # > Internship
+            ExperienceNonAcademiqueDTOFactory(
+                type=ActivityType.INTERNSHIP.name,
+                date_debut=datetime.date(2023, 1, 1),
+                date_fin=datetime.date(2023, 1, 31),
+            ),
+            # > Other activity
+            ExperienceNonAcademiqueDTOFactory(
+                type=ActivityType.OTHER.name,
+                date_debut=datetime.date(2023, 1, 1),
+                date_fin=datetime.date(2023, 1, 31),
+                autre_activite='Other activity',
+            ),
+            # Past activities
+            # > Other activity
+            ExperienceNonAcademiqueDTOFactory(
+                type=ActivityType.OTHER.name,
+                date_debut=datetime.date(2022, 1, 1),
+                date_fin=datetime.date(2022, 3, 31),
+                autre_activite='Other activity',
+            ),
+            # > Internship
+            ExperienceNonAcademiqueDTOFactory(
+                type=ActivityType.VOLUNTEERING.name,
+                date_debut=datetime.date(2022, 1, 1),
+                date_fin=datetime.date(2022, 2, 28),
+            ),
+            # > Work
+            ExperienceNonAcademiqueDTOFactory(
+                type=ActivityType.WORK.name,
+                date_debut=datetime.date(2022, 1, 1),
+                date_fin=datetime.date(2022, 1, 31),
+                fonction='Manager 0',
+                secteur=ActivitySector.PRIVATE.name,
+                employeur='UCL 0',
+            ),
+        ]
+        columns = ContinuingAdmissionListExcelExportView._get_non_academic_activities_columns(experiences)
+
+        self.assertEqual(columns[0], f'Manager\n{ActivityType.INTERNSHIP.value}\nOther activity')
+        self.assertEqual(columns[1], 'UCL\n\n')
+        self.assertEqual(columns[2], f'{ActivitySector.PRIVATE.value}\n\n')
+        self.assertEqual(
+            columns[3],
+            f'01/2022-03/2022 : Other activity'
+            f'\n01/2022-02/2022 : {ActivityType.VOLUNTEERING.value}'
+            f'\n01/2022 : Manager 0 à UCL 0',
         )
-
-        self.assertEqual(len(results), 1)
-
-        result = results[0]
-
-        row_data = view.get_row_data(result)
-
-        self.assertEqual(row_data[6], '')
-        self.assertEqual(row_data[8], 'non')
-        self.assertEqual(row_data[20], '')
-
-        self.admission.in_payement_order = None
-        self.admission.save()
-
-        results: List[DemandeContinueRechercheDTO] = message_bus_instance.invoke(
-            ListerDemandesContinuesQuery(numero=self.admission.reference)
-        )
-
-        self.assertEqual(len(results), 1)
-
-        result = results[0]
-
-        row_data = view.get_row_data(result)
-
-        self.assertEqual(row_data[8], 'non')
 
     def test_export_configuration(self):
         candidate = PersonFactory()

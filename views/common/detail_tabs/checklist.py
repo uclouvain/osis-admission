@@ -128,6 +128,7 @@ class ChangeStatusView(LoadDossierViewMixin, APIView):
                 extra=request.data.dict(),
                 admission=admission,
                 author=self.request.user.person,
+                replace_extra=self.request.GET.get('replace_extra') == '1',
             )
         except BusinessException as e:
             messages.error(request, str(e.message))

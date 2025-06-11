@@ -8,7 +8,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -89,12 +89,14 @@
 
           {# Working lists #}
           const stateInput = $('#id_etats');
+          const educationTypesInput = $('#id_types_formation');
           const typeInput = $('#id_type');
           const filterModeInputs = $('input[name="mode_filtres_etats_checklist"]');
           const checklistFiltersInputs = $('#checklist-filters-container .multi-widget input[type="checkbox"]');
           const toggleChecklistFiltersButton = $('#toggle-checklist-filters');
           const quarantineInput = $('#id_quarantaine');
           let selectWorkListInProgress = false;
+          const unchangedValue = '{{UNCHANGED_KEY}}';
 
           {# Toggle the checklist filters #}
           toggleChecklistFiltersButton.on('click', function () {
@@ -111,7 +113,7 @@
 
           toggleChecklistFiltersButton.val(checklistFiltersInputs.filter(':checked').length > 0 ? 'off' : 'on').trigger('click');
 
-          $('#id_etats, #id_type, input[name="mode_filtres_etats_checklist"], #checklist-filters-container .multi-widget input[type="checkbox"], #id_quarantaine').on('change', function () {
+          $('#id_etats, #id_type, input[name="mode_filtres_etats_checklist"], #checklist-filters-container .multi-widget input[type="checkbox"], #id_quarantaine, #id_types_formation').on('change', function () {
               {# Reset the selected working list if the values of the dependent inputs change except if this change was triggered from the working list #}
               if (selectWorkListInProgress) return;
               $('#id_liste_travail').val('').trigger('change');
@@ -123,7 +125,8 @@
               selectWorkListInProgress = true;
 
               stateInput.val(data.admission_statuses).trigger('change');
-              typeInput.val([data.admission_type]).trigger('change');
+              educationTypesInput.val(data.admission_education_types).trigger('change');
+              if (data.admission_type !== unchangedValue) typeInput.val([data.admission_type]).trigger('change');
               quarantineInput.val({
                 true: 'True',
                 false: 'False',

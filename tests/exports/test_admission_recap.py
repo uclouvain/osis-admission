@@ -43,7 +43,7 @@ from admission.calendar.admission_calendar import (
     AdmissionPoolExternalEnrollmentChangeCalendar,
     AdmissionPoolExternalReorientationCalendar,
 )
-from admission.constants import JPEG_MIME_TYPE, PNG_MIME_TYPE, ORDERED_CAMPUSES_UUIDS
+from admission.constants import JPEG_MIME_TYPE, ORDERED_CAMPUSES_UUIDS, PNG_MIME_TYPE
 from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixEtatSignature,
@@ -145,7 +145,9 @@ from admission.exports.admission_recap.section import (
     get_supervision_section,
     get_training_choice_section,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import UnfrozenDTO
+from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+    UnfrozenDTO,
+)
 from admission.models import AdmissionTask
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import (
@@ -1512,6 +1514,9 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             est_non_resident_au_sens_decret=None,
             est_reorientation_inscription_externe=None,
             formulaire_modification_inscription=['uuid-formulaire-modification-inscription'],
+            attestation_inscription_reguliere_pour_modification_inscription=[
+                'uuid-attestation-inscription-reguliere-pour-modification-inscription'
+            ],
             documents_demandes={},
             documents_libres_sic_uclouvain=[],
             documents_libres_fac_uclouvain=[],
@@ -1629,6 +1634,8 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             certificat_approbation_sic=[],
             certificat_approbation_sic_annexe=[],
             certificat_approbation_cdd=[],
+            certificat_refus_cdd=[],
+            certificat_refus_sic=[],
             doit_fournir_visa_etudes=False,
             visa_etudes_d=['uuid-visa-etudes-d'],
             certificat_autorisation_signe=['uuid-certificat-autorisation-signe'],
@@ -3276,7 +3283,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
 
             attachments = section.attachments
 
-            self.assertEqual(len(attachments), 2)
+            self.assertEqual(len(attachments), 3)
 
             self.assertEqual(
                 attachments[0].identifier,
@@ -3288,9 +3295,22 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 self.general_bachelor_context.proposition.formulaire_modification_inscription,
             )
             self.assertTrue(attachments[0].required)
-            self.assertEqual(attachments[1].identifier, 'ADDITIONAL_DOCUMENTS')
-            self.assertEqual(attachments[1].label, DocumentsQuestionsSpecifiques['ADDITIONAL_DOCUMENTS'])
-            self.assertEqual(attachments[1].uuids, self.admission.additional_documents)
+            self.assertEqual(
+                attachments[1].identifier,
+                'ATTESTATION_INSCRIPTION_REGULIERE_POUR_MODIFICATION_INSCRIPTION',
+            )
+            self.assertEqual(
+                attachments[1].label,
+                DocumentsQuestionsSpecifiques['ATTESTATION_INSCRIPTION_REGULIERE_POUR_MODIFICATION_INSCRIPTION'],
+            )
+            self.assertEqual(
+                attachments[1].uuids,
+                self.general_bachelor_context.proposition.attestation_inscription_reguliere_pour_modification_inscription,
+            )
+            self.assertTrue(attachments[1].required)
+            self.assertEqual(attachments[2].identifier, 'ADDITIONAL_DOCUMENTS')
+            self.assertEqual(attachments[2].label, DocumentsQuestionsSpecifiques['ADDITIONAL_DOCUMENTS'])
+            self.assertEqual(attachments[2].uuids, self.admission.additional_documents)
 
             # The pool is not open...
             with freezegun.freeze_time('2023-10-1'):
@@ -3317,7 +3337,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                     )
                     attachments = section.attachments
 
-                    self.assertEqual(len(attachments), 2)
+                    self.assertEqual(len(attachments), 3)
 
                     self.assertEqual(attachments[0].identifier, 'FORMULAIRE_MODIFICATION_INSCRIPTION')
                     self.assertEqual(
@@ -3329,7 +3349,23 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                         self.general_bachelor_context.proposition.formulaire_modification_inscription,
                     )
                     self.assertTrue(attachments[0].required)
-                    self.assertEqual(attachments[1].identifier, 'ADDITIONAL_DOCUMENTS')
+                    self.assertEqual(
+                        attachments[1].identifier,
+                        'ATTESTATION_INSCRIPTION_REGULIERE_POUR_MODIFICATION_INSCRIPTION',
+                    )
+                    self.assertEqual(
+                        attachments[1].label,
+                        DocumentsQuestionsSpecifiques[
+                            'ATTESTATION_INSCRIPTION_REGULIERE_POUR_MODIFICATION_INSCRIPTION'
+                        ],
+                    )
+                    proposition = self.general_bachelor_context.proposition
+                    self.assertEqual(
+                        attachments[1].uuids,
+                        proposition.attestation_inscription_reguliere_pour_modification_inscription,
+                    )
+                    self.assertTrue(attachments[1].required)
+                    self.assertEqual(attachments[2].identifier, 'ADDITIONAL_DOCUMENTS')
 
         with mock.patch.multiple(
             self.general_bachelor_context.proposition,

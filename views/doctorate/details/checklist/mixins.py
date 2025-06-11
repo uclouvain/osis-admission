@@ -66,6 +66,7 @@ from admission.views.common.mixins import LoadDossierViewMixin
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.entity_version import EntityVersion
 from base.models.person_merge_proposal import PersonMergeStatus
+from base.utils.utils import format_academic_year
 from ddd.logic.shared_kernel.profil.commands import (
     RecupererExperiencesParcoursInterneQuery,
 )
@@ -272,7 +273,7 @@ def get_email(template_identifier, language, proposition_dto: PropositionGestion
             'admission_link_front': get_portal_admission_url('doctorate', str(proposition_dto.uuid)),
             'admission_link_back': get_backoffice_admission_url('doctorate', str(proposition_dto.uuid)),
             'training_campus': proposition_dto.formation.campus.nom,
-            'academic_year': proposition_dto.formation.annee,
+            'academic_year': format_academic_year(proposition_dto.formation.annee),
             **extra_tokens,
         }
 

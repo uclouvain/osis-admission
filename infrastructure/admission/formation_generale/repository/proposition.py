@@ -296,6 +296,9 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'reorientation_form': entity.formulaire_reorientation,
                 'is_external_modification': entity.est_modification_inscription_externe,
                 'registration_change_form': entity.formulaire_modification_inscription,
+                'regular_registration_proof_for_registration_change': (
+                    entity.attestation_inscription_reguliere_pour_modification_inscription
+                ),
                 'is_non_resident': entity.est_non_resident_au_sens_decret,
                 'status': entity.statut.name,
                 'specific_question_answers': entity.reponses_questions_specifiques,
@@ -556,6 +559,9 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             est_bachelier_belge=admission.is_belgian_bachelor,
             est_reorientation_inscription_externe=admission.is_external_reorientation,
             attestation_inscription_reguliere=admission.regular_registration_proof,
+            attestation_inscription_reguliere_pour_modification_inscription=(
+                admission.regular_registration_proof_for_registration_change
+            ),
             formulaire_reorientation=admission.reorientation_form,
             est_modification_inscription_externe=admission.is_external_modification,
             formulaire_modification_inscription=admission.registration_change_form,
@@ -822,6 +828,9 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             formulaire_modification_inscription=admission.registration_change_form,
             est_reorientation_inscription_externe=admission.is_external_reorientation,
             attestation_inscription_reguliere=admission.regular_registration_proof,
+            attestation_inscription_reguliere_pour_modification_inscription=(
+                admission.regular_registration_proof_for_registration_change
+            ),
             formulaire_reorientation=admission.reorientation_form,
             pdf_recapitulatif=admission.pdf_recap,
             documents_demandes=admission.requested_documents,
