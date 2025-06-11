@@ -1319,7 +1319,10 @@ class TestVerifierPropositionService(TestCase):
     def test_should_etre_ok_si_alternative_etudes_secondaires_complet_pour_bachelier(self):
         self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.NO.name,
-            alternative_secondaires=AlternativeSecondairesDTO(examen_admission_premier_cycle=['examen.pdf']),
+            alternative_secondaires=AlternativeSecondairesDTO(
+                examen_admission_premier_cycle=['examen.pdf'],
+                examen_admission_premier_cycle_annee=2025,
+            ),
         )
         id_proposition = self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
         self.assertEqual(id_proposition, self.bachelier_proposition.entity_id)
