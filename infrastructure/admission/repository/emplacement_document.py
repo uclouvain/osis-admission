@@ -31,7 +31,7 @@ from typing import List, Optional, Set, Union
 
 from django.conf import settings
 from django.db import transaction
-from django.db.models import Case, F, Q, UUIDField, When
+from django.db.models import Case, F, OuterRef, Q, Subquery, UUIDField, When
 from django.utils.dateparse import parse_date, parse_datetime
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
@@ -87,7 +87,8 @@ from admission.services.injection_epc.injection_dossier import (
 )
 from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
-from osis_profile.models import OSIS_PROFILE_MODELS
+from osis_profile.models import OSIS_PROFILE_MODELS, Exam
+from osis_profile.models.enums.exam import ExamTypes
 from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection
 from osis_profile.models.epc_injection import (
     EPCInjectionStatus as CurriculumEPCInjectionStatus,
@@ -265,21 +266,27 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
                 admission__training__education_group_type__name=TrainingType.BACHELOR.name,
             )
             .annotate(
+                exam_secondary=Subquery(
+                    Exam.objects.filter(
+                        type=ExamTypes.PREMIER_CYCLE.name,
+                        person=OuterRef('admission__candidate'),
+                    ).values('uuid')[:1]
+                ),
                 experience_uuid=Case(
                     When(
                         admission__candidate__belgianhighschooldiploma__isnull=False,
                         then=F('admission__candidate__belgianhighschooldiploma__uuid'),
                     ),
                     When(
-                        admission__candidate__highschooldiplomaalternative__isnull=False,
-                        then=F('admission__candidate__highschooldiplomaalternative__uuid'),
-                    ),
-                    When(
                         admission__candidate__foreignhighschooldiploma__isnull=False,
                         then=F('admission__candidate__foreignhighschooldiploma__uuid'),
                     ),
+                    When(
+                        exam_secondary__isnull=False,
+                        then=F('exam_secondary'),
+                    ),
                     output_field=UUIDField(),
-                )
+                ),
             )
             .exclude(experience_uuid__isnull=True)
             .values_list('experience_uuid', flat=True)
@@ -461,24 +468,6 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
             getattr(admission, model_field).remove(entity.uuids_documents[0])
             admission.save(update_fields=admission_update_fields)
 
-        elif entity.type.name in EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES:
-            with transaction.atomic():
-                # Don't keep the data related to the document request and the answer to the specific question
-                admission.requested_documents.pop(entity.entity_id.identifiant, None)
-                admission.specific_question_answers.pop(specific_question_uuid, None)
-                admission_update_fields.append('requested_documents')
-                admission.save(update_fields=admission_update_fields)
-
-                # Remove the specific question
-                form_item_instantiation_to_delete = (
-                    AdmissionFormItemInstantiation.objects.filter(form_item__uuid=specific_question_uuid)
-                    .select_related('form_item')
-                    .first()
-                )
-                related_form_item = form_item_instantiation_to_delete.form_item
-                form_item_instantiation_to_delete.delete()
-                related_form_item.delete()
-
         elif entity.type.name in EMPLACEMENTS_DOCUMENTS_RECLAMABLES:
             # Remove the document from the field of the related object
             if supprimer_donnees:
@@ -500,7 +489,17 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
             else:
                 admission.requested_documents.pop(entity.entity_id.identifiant, None)
 
-                admission.save(update_fields=['requested_documents', 'modified_at', 'last_update_author'])
+                with transaction.atomic():
+                    admission.save(update_fields=['requested_documents', 'modified_at', 'last_update_author'])
+
+                    # Remove the specific question for a free question
+                    if entity.type.name in EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES:
+                        form_item_instantiation_to_delete = AdmissionFormItemInstantiation.objects.filter(
+                            form_item__uuid=specific_question_uuid
+                        ).first()
+                        related_form_item = form_item_instantiation_to_delete.form_item
+                        form_item_instantiation_to_delete.delete()
+                        related_form_item.delete()
 
         else:
             raise NotImplementedError
