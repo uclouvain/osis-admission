@@ -4800,78 +4800,6 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
-  /propositions/general-education/{uuid}/exam:
-    get:
-      operationId: retrieve_exam_general_education_admission
-      parameters:
-      - in: path
-        name: uuid
-        schema:
-          type: string
-          format: uuid
-        required: true
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
-      tags:
-      - person
-      security:
-      - tokenAuth: []
-      - Token: []
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Exam'
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-    put:
-      operationId: update_exam_general_education_admission
-      parameters:
-      - in: path
-        name: uuid
-        schema:
-          type: string
-          format: uuid
-        required: true
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
-      tags:
-      - person
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Exam'
-      security:
-      - tokenAuth: []
-      - Token: []
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Exam'
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
   /propositions/general-education/{uuid}/identification:
     get:
       operationId: retrieve_general_identification
@@ -7959,39 +7887,6 @@ components:
       type: string
       description: "* `ECTS_CREDITS` - Crédits ECTS\n* `NON_EUROPEAN_CREDITS` - Crédits\
         \ non-européens\n* `NO_CREDIT_SYSTEM` - Pas de système de crédits "
-    Exam:
-      type: object
-      properties:
-        required:
-          type: boolean
-          readOnly: true
-        title_fr:
-          type: string
-          readOnly: true
-        title_en:
-          type: string
-          readOnly: true
-        help_text_fr:
-          type: string
-          readOnly: true
-        help_text_en:
-          type: string
-          readOnly: true
-        certificate:
-          type: array
-          items:
-            type: string
-          title: Attestation de réussite de l'examen d'admission aux études de premier
-            cycle de l'enseignement supérieur
-          maxItems: 1
-        year:
-          type: integer
-          maximum: 2147483647
-          minimum: -2147483648
-          nullable: true
-        is_valuated:
-          type: boolean
-          readOnly: true
     ExternalDoctoratePropositionDTO:
       type: object
       description: |-
@@ -8794,18 +8689,13 @@ components:
     HighSchoolDiplomaAlternative:
       type: object
       properties:
-        certificate:
+        first_cycle_admission_exam:
           type: array
           items:
             type: string
           title: Attestation de réussite de l'examen d'admission aux études de premier
             cycle de l'enseignement supérieur
           maxItems: 1
-        year:
-          type: integer
-          maximum: 2147483647
-          minimum: -2147483648
-          nullable: true
     IdentificationDTO:
       type: object
       description: |-

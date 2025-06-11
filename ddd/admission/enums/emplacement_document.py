@@ -99,7 +99,6 @@ class OngletsDemande(ChoiceEnum):
     CHOIX_FORMATION = _('Course choice')
     ETUDES_SECONDAIRES = _('Secondary studies')
     CURRICULUM = _('Curriculum')
-    EXAMS = _('Exams')
     LANGUES = _('Knowledge of languages')
     COMPTABILITE = _('Accounting')
     PROJET = pgettext_lazy('tab', 'Research')
@@ -176,11 +175,6 @@ DocumentsEtudesSecondaires = {
     'ALTERNATIVE_SECONDAIRES_EXAMEN_ADMISSION_PREMIER_CYCLE': _(
         "Certificate of passing the bachelor's course entrance exam"
     ),
-}
-
-
-DocumentsExamens = {
-    'ATTESTATION_DE_REUSSITE_CONCOURS_D_ENTREE_OU_D_ADMISSION': _("Proof of passing the exam"),
 }
 
 

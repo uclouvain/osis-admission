@@ -91,12 +91,6 @@ class VerifierProposition(interface.DomainService):
                 profil_candidat_translator=profil_candidat_translator,
             ),
             partial(
-                profil_candidat_service.verifier_examens,
-                matricule=proposition_candidat.matricule_candidat,
-                formation=formation,
-                profil_candidat_translator=profil_candidat_translator,
-            ),
-            partial(
                 profil_candidat_service.verifier_curriculum_formation_generale,
                 proposition_candidat,
                 formation.type,

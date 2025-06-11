@@ -334,6 +334,7 @@ class BoursesEtudesNonRenseignees(BusinessException):
         message = _("The information about the scholarships must be specified in the 'Course choice' tab.")
         super().__init__(message, **kwargs)
 
+
 class StatutsChecklistExperiencesEtreValidesException(BusinessException):
     status_code = "FORMATION-GENERALE-37"
 
@@ -356,12 +357,4 @@ class DateLimitePaiementDepasseeException(BusinessException):
             date_limite=date_limite.strftime("%d/%m/%Y"),
             anac=display_as_academic_year(annee_formation),
         )
-        super().__init__(message, **kwargs)
-
-
-class ExamenNonCompletesException(BusinessException):
-    status_code = "FORMATION-GENERALE-39"
-
-    def __init__(self, **kwargs):
-        message = _("Exam must be completed for this training.")
         super().__init__(message, **kwargs)

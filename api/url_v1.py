@@ -146,7 +146,6 @@ urlpatterns = [
     path('propositions/general-education/<uuid:uuid>/person', views.GeneralPersonView),
     path('propositions/general-education/<uuid:uuid>/coordonnees', views.GeneralCoordonneesView),
     path('propositions/general-education/<uuid:uuid>/secondary-studies', views.GeneralSecondaryStudiesView),
-    path('propositions/general-education/<uuid:uuid>/exam', views.GeneralExamView),
     path('propositions/general-education/<uuid:uuid>/specific-question', views.GeneralSpecificQuestionAPIView),
     path('propositions/general-education/<uuid:uuid>/identification', views.GeneralIdentificationView),
     path('propositions/general-education/<uuid:uuid>/curriculum', views.GeneralCurriculumView),

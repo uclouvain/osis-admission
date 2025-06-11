@@ -51,7 +51,6 @@ from .dashboard import DashboardSerializer
 from .diplomatic_post import DiplomaticPostSerializer
 from .doctorate import *
 from .documents import *
-from .exam import ExamSerializer
 from .languages_knowledge import *
 from .payment import *
 from .pdf_recap import PDFRecapSerializer

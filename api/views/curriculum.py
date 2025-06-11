@@ -290,7 +290,7 @@ class ExperienceViewSet(
                     filter=Q(valuated_from_admission__isnull=False),
                 ),
             )
-            if self.kwargs.get('uuid')
+            if self.request
             else self.model.objects.none()
         )
 
@@ -304,7 +304,7 @@ class ExperienceViewSet(
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        if self.kwargs.get('uuid'):
+        if self.request:
             context['candidate'] = self.candidate
         return context
 
