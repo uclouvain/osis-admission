@@ -551,6 +551,8 @@ class GeneralEducationPropositionDTOSerializer(
                 'update_coordinates',
                 'retrieve_secondary_studies',
                 'update_secondary_studies',
+                'retrieve_exam',
+                'update_exam',
                 'retrieve_curriculum',
                 'update_curriculum',
                 # Project

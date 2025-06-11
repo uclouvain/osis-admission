@@ -97,7 +97,9 @@ from epc.tests.factories.inscription_programme_annuel import (
 from epc.tests.factories.inscription_programme_cycle import (
     InscriptionProgrammeCycleFactory,
 )
+from osis_profile.models import BelgianHighSchoolDiploma, Exam, ForeignHighSchoolDiploma
 from osis_profile.models.enums.education import ForeignDiplomaTypes
+from osis_profile.models.enums.exam import ExamTypes
 
 
 @freezegun.freeze_time('2023-01-01')
@@ -975,6 +977,64 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
         valuated_experience.refresh_from_db()
         self.assertEqual(valuated_experience.is_access_title, False)
 
+<<<<<<< HEAD
+=======
+        selected_access_titles_names = response.context.get('selected_access_titles_names')
+
+        self.assertIsNone(selected_access_titles_names)
+
+        # Select a known and valuated experience (with predefined institute and program)
+        valuated_experience.educationalexperience.institute = self.first_institute
+        valuated_experience.educationalexperience.program = self.first_diploma
+        valuated_experience.educationalexperience.education_name = ''
+        valuated_experience.educationalexperience.institute_name = ''
+        valuated_experience.educationalexperience.save()
+
+        response = self.client.post(
+            valid_url,
+            **self.default_headers,
+            data={
+                'access-title': 'on',
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertDjangoMessage(response, gettext('Your data have been saved.'))
+
+        selected_access_titles_names = response.context.get('selected_access_titles_names')
+
+        self.assertIsNotNone(selected_access_titles_names)
+        self.assertEqual(len(selected_access_titles_names), 1)
+
+        self.assertEqual(selected_access_titles_names[0], 'Informatique (2022-2023) - UCL')
+
+        valuated_experience.refresh_from_db()
+        self.assertEqual(valuated_experience.is_access_title, True)
+
+        # Select a known and valuated experience (with fwb equivalent program)
+        BelgianHighSchoolDiploma.objects.filter(person=self.candidate).delete()
+        ForeignHighSchoolDiploma.objects.filter(person=self.candidate).delete()
+        Exam.objects.filter(person=self.candidate, type=ExamTypes.PREMIER_CYCLE.name).delete()
+
+        valuated_experience.educationalexperience.fwb_equivalent_program = self.second_diploma
+        valuated_experience.educationalexperience.save()
+
+        response = self.client.post(
+            valid_url,
+            **self.default_headers,
+            data={
+                'access-title': 'on',
+            },
+        )
+
+        selected_access_titles_names = response.context.get('selected_access_titles_names')
+
+        self.assertIsNotNone(selected_access_titles_names)
+        self.assertEqual(len(selected_access_titles_names), 1)
+
+        self.assertEqual(selected_access_titles_names[0], 'Informatique (Commerce) (2022-2023) - UCL')
+
+>>>>>>> 3a6a2be13 (Fix OS-1340 & OS-1343: [V1.B] Front-office: Parcours antérieur > Sous-onglet Examens : concours d'entrée en médecine & examen d'admission d'ingénieur civil & [V1.B] Front-office : Etudes secondaires pour inscription à bachelier > Examen d'accès au premier cycle > Ajout d'une année)
     def test_specify_a_cv_non_educational_experience_as_access_title(self):
         self.client.force_login(user=self.sic_manager_user)
 
@@ -1119,7 +1179,7 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
 
         high_school_diploma_alternative = HighSchoolDiplomaAlternativeFactory(
             person=self.candidate,
-            first_cycle_admission_exam=['token.pdf'],
+            certificate=['token.pdf'],
         )
 
         response = self.client.post(
@@ -1137,7 +1197,7 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
         self.assertTrue(self.admission.are_secondary_studies_access_title)
 
         # The candidate specified that he has secondary education but without more information
-        self.candidate.highschooldiplomaalternative.delete()
+        Exam.objects.filter(person=self.candidate, type=ExamTypes.PREMIER_CYCLE.name).delete()
 
         self.admission.are_secondary_studies_access_title = False
         self.admission.save()
