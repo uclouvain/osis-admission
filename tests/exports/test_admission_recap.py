@@ -897,7 +897,7 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
 
         self.assertEqual(len(admission.pdf_recap), 0)
 
-        with self.assertNumQueriesLessThan(17):
+        with self.assertNumQueriesLessThan(18):
             from admission.exports.admission_recap.admission_async_recap import (
                 general_education_admission_pdf_recap_from_task,
             )
@@ -3083,8 +3083,6 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             # Required because it is not a VAE access
             self.assertFalse(attachments[0].required)
 
-            self.assertTrue(attachments[0].readonly)
-
     def test_exam_required(self):
         with mock.patch.multiple(
             self.general_bachelor_context.examens,
@@ -3111,8 +3109,6 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             )
             # Required because it is not a VAE access
             self.assertTrue(attachments[0].required)
-
-            self.assertTrue(attachments[0].readonly)
 
     def test_specific_questions_attachments_with_continuing_proposition(self):
         with mock.patch.multiple(

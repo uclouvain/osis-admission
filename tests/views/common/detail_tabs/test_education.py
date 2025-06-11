@@ -65,7 +65,6 @@ from osis_profile import BE_ISO_CODE
 from osis_profile.models import (
     BelgianHighSchoolDiploma,
     ForeignHighSchoolDiploma,
-    HighSchoolDiplomaAlternative,
 )
 from osis_profile.models.enums.education import Equivalence, ForeignDiplomaTypes
 from reference.tests.factories.country import CountryFactory

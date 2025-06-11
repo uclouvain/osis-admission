@@ -93,7 +93,6 @@ from osis_profile.models import (
     BelgianHighSchoolDiploma,
     Exam,
     ForeignHighSchoolDiploma,
-    HighSchoolDiplomaAlternative,
 )
 from osis_profile.models.enums.education import (
     EducationalType,
@@ -103,13 +102,13 @@ from osis_profile.models.enums.education import (
 )
 from osis_profile.models.enums.exam import ExamTypes
 from osis_profile.models.epc_injection import (
+    EPCInjection as CurriculumEPCInjection,
     EPCInjectionStatus as CurriculumEPCInjectionStatus,
 )
 from osis_profile.models.epc_injection import ExperienceType
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.domain import DomainFactory
 from reference.tests.factories.language import FrenchLanguageFactory, LanguageFactory
-
 
 @freezegun.freeze_time("2022-01-01")
 class AdmissionEducationFormViewForMasterTestCase(TestCase):

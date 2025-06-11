@@ -241,14 +241,12 @@ def get_secondary_studies_section(
 
 def get_exams_section(
     context: ResumePropositionDTO,
+    education_group_year_exam: EducationGroupYearExam,
     load_content: bool,
 ) -> Section:
     """Returns the exams section."""
     extra_context = {
-        'education_group_year_exam': EducationGroupYearExam.objects.filter(
-            education_group_year__acronym=context.proposition.formation.sigle,
-            education_group_year__academic_year__year=context.proposition.formation.annee,
-        ).first(),
+        'education_group_year_exam': education_group_year_exam,
     }
     return Section(
         identifier=OngletsDemande.EXAMS,
@@ -602,6 +600,7 @@ def get_sections(
     with_free_requestable_documents=False,
     hide_curriculum=False,
     with_additional_documents=True,
+    education_group_year_exam: Optional[EducationGroupYearExam]=None,
 ):
     specific_questions_by_tab = get_dynamic_questions_by_tab(specific_questions)
 
@@ -635,7 +634,7 @@ def get_sections(
         pdf_sections.append(get_curriculum_specific_questions_section(context, specific_questions_by_tab, load_content))
 
     if context.est_proposition_generale:
-        pdf_sections.append(get_exams_section(context, load_content))
+        pdf_sections.append(get_exams_section(context, education_group_year_exam, load_content))
 
     if context.est_proposition_generale or context.est_proposition_continue:
         pdf_sections.append(get_specific_questions_section(context, specific_questions_by_tab, load_content))

@@ -108,8 +108,9 @@ from osis_profile.models import (
     BelgianHighSchoolDiploma,
     EducationalExperience,
     ForeignHighSchoolDiploma,
-    ProfessionalExperience,
+    ProfessionalExperience, Exam,
 )
+from osis_profile.models.enums.exam import ExamTypes
 
 
 class FacultyDecisionViewTestCase(TestCase):

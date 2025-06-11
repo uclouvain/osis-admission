@@ -28,6 +28,9 @@ from typing import List
 from admission.ddd.admission.domain.service.i_emplacements_documents_proposition import (
     IEmplacementsDocumentsPropositionTranslator,
 )
+from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
+from admission.ddd.admission.dtos.resume import ResumePropositionDTO
+from admission.exports.admission_recap.section import get_sections
 from base.forms.utils.file_field import PDF_MIME_TYPE
 
 
@@ -70,3 +73,16 @@ class EmplacementsDocumentsPropositionInMemoryTranslator(IEmplacementsDocumentsP
     @classmethod
     def recuperer_metadonnees_par_uuid_document(cls, uuids_documents: List[str]) -> dict:
         return {uuid: cls.metadata.get(uuid, {}) for uuid in uuids_documents}
+
+    @classmethod
+    def get_sections(
+        cls,
+        resume_dto: ResumePropositionDTO,
+        questions_specifiques: List[QuestionSpecifiqueDTO],
+        avec_documents_libres: bool,
+    ) -> dict:
+        return get_sections(
+            context=resume_dto,
+            specific_questions=questions_specifiques,
+            with_free_requestable_documents=avec_documents_libres,
+        )

@@ -522,8 +522,8 @@ class HighSchoolDiplomaAlternativeTestCase(APITestCase):
         cls.high_school_diploma_alternative_data = {
             "graduated_from_high_school": GotDiploma.NO.name,
             "high_school_diploma_alternative": {
-                "first_cycle_admission_exam": [cls.file_uuid],
-                "first_cycle_admission_exam_year": cls.admission.determined_academic_year.year + 1,
+                "certificate": [cls.file_uuid],
+                "year": cls.admission.determined_academic_year.year + 1,
             },
         }
         AdmissionAcademicCalendarFactory.produce_all_required()
@@ -560,7 +560,7 @@ class HighSchoolDiplomaAlternativeTestCase(APITestCase):
         self.create_high_school_diploma_alternative(self.high_school_diploma_alternative_data)
         response = self.client.get(self.url)
         self.assertEqual(
-            response.json()["high_school_diploma_alternative"]["first_cycle_admission_exam"],
+            response.json()["high_school_diploma_alternative"]["certificate"],
             [self.file_uuid],
         )
 
