@@ -51,8 +51,6 @@ from admission.api.views.languages_knowledge import (
     CommonLanguagesKnowledgeViewSet,
     LanguagesKnowledgeViewSet,
 )
-from admission.api.views.exam import GeneralExamView
-from admission.api.views.languages_knowledge import LanguagesKnowledgeViewSet
 from admission.api.views.payment import (
     ApplicationFeesListView,
     OpenApplicationFeesPaymentView,

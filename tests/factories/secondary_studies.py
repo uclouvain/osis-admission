@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -28,12 +28,8 @@ import factory
 
 from admission.tests.factories import PdfUploadFactory
 from base.tests.factories.academic_year import AcademicYearFactory
-from osis_profile.models import BelgianHighSchoolDiploma, Exam, ForeignHighSchoolDiploma
-from osis_profile.models.enums.education import (
-    BelgianCommunitiesOfEducation,
-    EducationalType,
-)
-from osis_profile.models.enums.exam import ExamTypes
+from osis_profile.models import BelgianHighSchoolDiploma, ForeignHighSchoolDiploma, HighSchoolDiplomaAlternative
+from osis_profile.models.enums.education import BelgianCommunitiesOfEducation, EducationalType
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.language import LanguageFactory
 
@@ -64,7 +60,6 @@ class ForeignHighSchoolDiplomaFactory(HighSchoolDiplomaFactory):
 
 class HighSchoolDiplomaAlternativeFactory(factory.django.DjangoModelFactory):
     person = factory.SubFactory('base.tests.factories.person.PersonFactory')
-    type = ExamTypes.PREMIER_CYCLE.name
 
     class Meta:
-        model = Exam
+        model = HighSchoolDiplomaAlternative

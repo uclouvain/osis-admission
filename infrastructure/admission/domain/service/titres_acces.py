@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -35,13 +35,12 @@ from base.models.person import Person
 from osis_profile.models import (
     BelgianHighSchoolDiploma,
     EducationalExperience,
-    EducationalExperienceYear,
-    Exam,
     ForeignHighSchoolDiploma,
+    HighSchoolDiplomaAlternative,
     ProfessionalExperience,
+    EducationalExperienceYear,
 )
 from osis_profile.models.enums.curriculum import Result
-from osis_profile.models.enums.exam import ExamTypes
 from reference.models.enums.cycle import Cycle
 
 
@@ -58,7 +57,7 @@ class TitresAcces(ITitresAcces):
                     ForeignHighSchoolDiploma.objects.filter(person_id=models.OuterRef('pk'))
                 ),
                 diplome_alternatif=models.Exists(
-                    Exam.objects.filter(person_id=models.OuterRef('pk'), type=ExamTypes.PREMIER_CYCLE.name)
+                    HighSchoolDiplomaAlternative.objects.filter(person_id=models.OuterRef('pk'))
                 ),
             )
             .annotate(

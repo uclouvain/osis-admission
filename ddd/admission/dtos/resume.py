@@ -37,7 +37,6 @@ from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumen
 from admission.ddd.admission.dtos.etudes_secondaires import (
     EtudesSecondairesAdmissionDTO,
 )
-from admission.ddd.admission.dtos.examen import ExamenDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.formation_continue import dtos as dtos_formation_continue
 from admission.ddd.admission.formation_generale import dtos as dtos_formation_generale
@@ -72,7 +71,6 @@ class ResumeCandidatDTO(interface.DTO):
     curriculum: CurriculumAdmissionDTO
     etudes_secondaires: Optional[EtudesSecondairesAdmissionDTO]
     connaissances_langues: Optional[List[dtos_doctorat.ConnaissanceLangueDTO]]
-    examens: ExamenDTO
 
 
 @attr.dataclass(frozen=True, slots=True)

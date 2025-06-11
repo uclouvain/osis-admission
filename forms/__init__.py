@@ -25,7 +25,7 @@
 # ##############################################################################
 import datetime
 import html
-from typing import Dict, Iterable, List, Mapping, Optional, Union
+from typing import List, Optional, Dict, Union, Mapping, Iterable
 
 import phonenumbers
 from dal import forward
@@ -155,17 +155,13 @@ class PhoneField(forms.CharField):
         raise ValidationError(_('Invalid phone number'))
 
 
-def get_academic_year_choices(
-    min_year=MINIMUM_SELECTABLE_YEAR, max_year=MAXIMUM_SELECTABLE_YEAR, format_label_function=None
-):
+def get_academic_year_choices(min_year=MINIMUM_SELECTABLE_YEAR, max_year=MAXIMUM_SELECTABLE_YEAR):
     """Return the list of choices of academic years between min_year and max_year"""
     academic_years = AcademicYear.objects.min_max_years(
         min_year=min_year,
         max_year=max_year,
     ).order_by('-year')
-    if format_label_function is None:
-        format_label_function = format_to_academic_year
-    return [(academic_year.year, format_label_function(academic_year.year)) for academic_year in academic_years]
+    return [(academic_year.year, format_to_academic_year(academic_year.year)) for academic_year in academic_years]
 
 
 def get_year_choices(min_year=1920, max_year=None, full_format=False, empty_label=' - '):

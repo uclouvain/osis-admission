@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,11 +26,8 @@
 import rules
 from rules import RuleSet
 
-from admission.auth.predicates import continuing, doctorate, general
-from admission.auth.predicates.common import (
-    has_education_group_of_types,
-    is_part_of_education_group,
-)
+from admission.auth.predicates.common import has_education_group_of_types, is_part_of_education_group
+from admission.auth.predicates import general, continuing, doctorate
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
@@ -62,7 +59,6 @@ class AdmissionReader(ParcoursViewer):
             'admission.view_admission_person': is_part_of_education_group,
             'admission.view_admission_coordinates': is_part_of_education_group,
             'admission.view_admission_secondary_studies': is_part_of_education_group,
-            'admission.view_admission_exam': is_part_of_education_group,
             'admission.view_admission_languages': is_part_of_education_group,
             'admission.view_admission_curriculum': is_part_of_education_group,
             # Project
