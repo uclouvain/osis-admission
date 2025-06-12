@@ -191,7 +191,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
         return value
 
     @classmethod
-    def save(cls, entity: 'Proposition') -> None:
+    def save(cls, entity: 'Proposition', mise_a_jour_date_derniere_modification=True) -> None:
         training = EducationGroupYear.objects.get(
             acronym=entity.formation_id.sigle,
             academic_year__year=entity.formation_id.annee,
@@ -270,11 +270,13 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
         if years:
             academic_years = {year.year: year for year in AcademicYear.objects.filter(year__in=years)}
 
+        # FIXME remove when upgrading to Django 5.2? https://code.djangoproject.com/ticket/35890
+        modified_at_fields = {'modified_at': timezone.now()} if mise_a_jour_date_derniere_modification else {}
+
         admission, _ = GeneralEducationAdmission.objects.update_or_create(
             uuid=entity.entity_id.uuid,
             defaults={
-                # FIXME remove when upgrading to Django 5.2? https://code.djangoproject.com/ticket/35890
-                'modified_at': timezone.now(),
+                **modified_at_fields,
                 'candidate': candidate,
                 'training': training,
                 'determined_academic_year': entity.annee_calculee and academic_years[entity.annee_calculee],
