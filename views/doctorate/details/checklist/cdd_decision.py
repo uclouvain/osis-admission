@@ -184,6 +184,8 @@ class CddDecisionMixin(CheckListDefaultContextMixin):
                     'greetings': get_salutation_prefix(self.admission.candidate),
                     'doctoral_commission': self.proposition.doctorat.intitule_entite_gestion,
                     'sender_name': f'{self.request.user.person.first_name} {self.request.user.person.last_name}',
+                    'management_entity_acronym': self.proposition.doctorat.sigle_entite_gestion,
+                    'program_managers_names': self.admission_program_managers_names,
                 },
             )
 

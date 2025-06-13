@@ -52,6 +52,26 @@ templates.register(
                 description=_("Actors, comma-separated"),
                 example="Jean, Eudes",
             ),
+            Token(
+                name='management_entity_name',
+                description=_('Name of the management entity'),
+                example='Faculté des sciences économiques, sociales, politiques et de communication',
+            ),
+            Token(
+                name='management_entity_acronym',
+                description=_('Acronym of the management entity'),
+                example='ESPO',
+            ),
+            Token(
+                name='salutation',
+                description=_("Greetings depending on the gender of the candidate"),
+                example="Cher·ère",
+            ),
+            Token(
+                name='program_managers_names',
+                description=_("List of names of the program managers."),
+                example='John Doe, Jane Doe',
+            ),
         ]
     ),
     tag=DOCTORATE_ADMISSION_TAG,
@@ -77,6 +97,26 @@ signataire_tokens = [
         name='admission_link_front_supervision',
         description=_("Link to the admission supervisory panel (front-office)"),
         example="http://dev.studies.uclouvain.be/somewhere/some-uuid/supervision",
+    ),
+    Token(
+        name='management_entity_name',
+        description=_('Name of the management entity'),
+        example='Faculté des sciences économiques, sociales, politiques et de communication',
+    ),
+    Token(
+        name='management_entity_acronym',
+        description=_('Acronym of the management entity'),
+        example='ESPO',
+    ),
+    Token(
+        name='salutation',
+        description=_("Greetings depending on the gender of the recipient"),
+        example="Cher·ère",
+    ),
+    Token(
+        name='program_managers_names',
+        description=_("List of names of the program managers."),
+        example='John Doe, Jane Doe',
     ),
 ]
 
