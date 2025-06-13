@@ -34,7 +34,7 @@ from admission.ddd.admission.doctorat.preparation.commands import (
 )
 from admission.forms.admission.doctorate.checklist import ProjetRechercheDemanderModificationCAForm
 from admission.mail_templates import ADMISSION_EMAIL_SUPERVISION_MODIFICATION_DOCTORATE
-from admission.utils import get_portal_admission_url
+from admission.utils import get_portal_admission_url, get_salutation_prefix
 from admission.views.common.mixins import AdmissionFormMixin
 from admission.views.doctorate.details.checklist.mixins import CheckListDefaultContextMixin
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
@@ -71,6 +71,10 @@ class ProjetRechercheContextMixin(CheckListDefaultContextMixin):
             'admissions_link_front': get_portal_admission_url('doctorate', str(self.admission_uuid)) + 'supervision/',
             'sender_name': f'{person.first_name} {person.last_name}',
             'phd_committee': self.proposition.formation.intitule_entite_gestion,
+            'management_entity_acronym': self.proposition.doctorat.sigle_entite_gestion,
+            'management_entity_name': self.proposition.doctorat.intitule_entite_gestion,
+            'program_managers_names': self.admission_program_managers_names,
+            'salutation': get_salutation_prefix(self.admission.candidate),
         }
 
         try:

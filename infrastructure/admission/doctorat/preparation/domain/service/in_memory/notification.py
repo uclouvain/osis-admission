@@ -33,6 +33,7 @@ from admission.ddd.admission.doctorat.preparation.dtos import AvisDTO, Propositi
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.repository.i_digit import IDigitRepository
+from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
 
 
 class NotificationInMemory(INotification):
@@ -78,11 +79,19 @@ class NotificationInMemory(INotification):
         pass
 
     @classmethod
-    def demande_verification_titre_acces(cls, proposition: Proposition) -> EmailMessage:
+    def demande_verification_titre_acces(
+        cls,
+        proposition: Proposition,
+        gestionnaire: PersonneConnueUclDTO,
+    ) -> EmailMessage:
         pass
 
     @classmethod
-    def informer_candidat_verification_parcours_en_cours(cls, proposition: Proposition) -> EmailMessage:
+    def informer_candidat_verification_parcours_en_cours(
+        cls,
+        proposition: Proposition,
+        gestionnaire: PersonneConnueUclDTO,
+    ) -> EmailMessage:
         pass
 
     @classmethod

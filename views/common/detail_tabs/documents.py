@@ -326,7 +326,11 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
             'admission_link_front': get_portal_admission_url(self.current_context, self.admission_uuid),
             'admission_link_back': get_backoffice_admission_url(self.current_context, self.admission_uuid),
             'salutation': get_salutation_prefix(self.admission.candidate),
+            'sender_name': self.current_user_name,
         }
+
+        if self.is_doctorate:
+            tokens['program_managers_names'] = self.admission_program_managers_names
 
         return mail_template.render_subject(tokens=tokens), mail_template.body_as_html(tokens=tokens)
 
