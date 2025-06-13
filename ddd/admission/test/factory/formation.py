@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -81,6 +81,8 @@ class FormationFactory(factory.Factory):
 
     entity_id = factory.SubFactory(FormationIdentityFactory)
     intitule = factory.Faker('sentence')
+    intitule_fr = factory.Faker('sentence')
+    intitule_en = factory.Faker('sentence')
     code = factory.Sequence(lambda n: 'code%02d' % n)
     code_domaine = '01A'
     campus = factory.SubFactory(CampusFactory)

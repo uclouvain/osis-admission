@@ -168,6 +168,8 @@ class DoctoratTranslator(IDoctoratTranslator):
                 entity_id=FormationIdentity(sigle=dto.acronym, annee=dto.year),
                 entite_ucl_id=UCLEntityIdentity(code=dto.management_entity_acronym),
                 type=TrainingType[dto.type],
+                intitule_fr=dto.title_fr,
+                intitule_en=dto.title_en,
             )
         except TrainingNotFoundException:
             raise DoctoratNonTrouveException

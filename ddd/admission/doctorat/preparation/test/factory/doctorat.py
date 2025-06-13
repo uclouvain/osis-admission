@@ -67,6 +67,8 @@ class _DoctoratFactory(factory.Factory):
     campus = factory.Iterator(CAMPUS_LETTRE_DOSSIER.keys())
     campus_inscription = factory.Iterator(CAMPUS_LETTRE_DOSSIER.keys())
     intitule = factory.Faker('sentence')
+    intitule_fr = factory.Faker('sentence')
+    intitule_en = factory.Faker('sentence')
     intitule_secteur = factory.Faker('sentence')
     sigle = factory.Faker('word')
     code_secteur = factory.Faker('word')

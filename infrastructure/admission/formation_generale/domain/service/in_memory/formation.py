@@ -269,6 +269,8 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
                 type=training.type,
                 code_domaine=training.code_domaine,
                 campus=training.campus or '',
+                intitule_en=training.intitule_en,
+                intitule_fr=training.intitule_fr,
             )
 
         raise FormationNonTrouveeException

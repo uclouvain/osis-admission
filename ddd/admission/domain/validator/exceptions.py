@@ -25,6 +25,8 @@
 ##############################################################################
 from typing import Optional
 
+from django.conf import settings
+from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
 
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
@@ -198,15 +200,26 @@ class PosteDiplomatiqueNonTrouveException(BusinessException):
 
 class ResidenceAuSensDuDecretNonDisponiblePourInscriptionException(BusinessException):
     status_code = "ADMISSION-20"
-    message = _(
-        'As you are applying for a limited course as a non-resident (as defined by government decree) candidate, '
-        'applications for the 2024-2025 academic year must be submitted via this '
-        '<a href="https://fishe.uclouvain.be/portail/inscription/" target="_blank">'
-        'specific platform</a>.'
-    )
 
-    def __init__(self, **kwargs):
-        super().__init__(self.message, **kwargs)
+    @classmethod
+    def get_message(cls, nom_formation_fr, nom_formation_en):
+        return _(
+            'You cannot continue your application. The registration procedure for the <em>%(training_name)s</em> '
+            'for non-resident students is managed on another registration platform. We invite '
+            'you to consult the complete registration procedure on the following page: '
+            '<a href="https://www.uclouvain.be/en/enrolment/limited-enrolment-courses" target="_blank">'
+            'https://www.uclouvain.be/en/enrolment/limited-enrolment-courses</a>'
+        ) % {
+            'training_name': (
+                nom_formation_en
+                if nom_formation_en and get_language() == settings.LANGUAGE_CODE_EN
+                else nom_formation_fr
+            )
+        }
+
+    def __init__(self, nom_formation_fr, nom_formation_en, **kwargs):
+        message = self.get_message(nom_formation_fr=nom_formation_fr, nom_formation_en=nom_formation_en)
+        super().__init__(message, **kwargs)
 
 
 class DocumentsReclamesImmediatementNonCompletesException(BusinessException):

@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.conf import settings
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
@@ -44,8 +45,11 @@ class PoolQuestionsSerializer(serializers.ModelSerializer):
     forbid_enrolment_limited_course_for_non_resident = serializers.SerializerMethodField()
 
     @extend_schema_field(OpenApiTypes.STR)
-    def get_forbid_enrolment_limited_course_for_non_resident(self, _):
-        return ResidenceAuSensDuDecretNonDisponiblePourInscriptionException.message
+    def get_forbid_enrolment_limited_course_for_non_resident(self, obj):
+        return ResidenceAuSensDuDecretNonDisponiblePourInscriptionException.get_message(
+            nom_formation_fr=obj.training.title,
+            nom_formation_en=obj.training.title_english,
+        )
 
     def get_field_names(self, *args, **kwargs):
         field_names = super().get_field_names(*args, **kwargs)

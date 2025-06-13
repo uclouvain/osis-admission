@@ -144,7 +144,6 @@ class VerifierProposition(interface.DomainService):
                 proposition=proposition_candidat,
                 matricule_candidat=proposition_candidat.matricule_candidat,
                 titres_acces=titres,
-                type_formation=formation.type,
                 profil_candidat_translator=profil_candidat_translator,
                 formation_translator=formation_translator,
                 annee_soumise=annee_soumise,

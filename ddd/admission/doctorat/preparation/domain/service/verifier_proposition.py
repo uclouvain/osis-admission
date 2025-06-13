@@ -27,6 +27,7 @@ from functools import partial
 from typing import List
 
 from admission.calendar.admission_calendar import DIPLOMES_ACCES_BELGE
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import DoctoratFormation
 from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import (
     GroupeDeSupervision,
 )
@@ -48,9 +49,6 @@ from admission.ddd.admission.domain.service.i_profil_candidat import (
 )
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
 from admission.ddd.admission.domain.service.profil_candidat import ProfilCandidat
-from admission.ddd.admission.domain.service.verifier_questions_specifiques import (
-    VerifierQuestionsSpecifiques,
-)
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from base.ddd.utils.business_validator import execute_functions_and_aggregate_exceptions
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
@@ -71,6 +69,7 @@ class VerifierProposition(interface.DomainService):
         formation_translator: 'IDoctoratTranslator',
         calendrier_inscription: 'ICalendrierInscription',
         maximum_propositions_service: 'IMaximumPropositionsAutorisees',
+        formation: 'DoctoratFormation',
         annee_soumise: int = None,
         pool_soumis: 'AcademicCalendarTypes' = None,
     ) -> None:
@@ -98,11 +97,11 @@ class VerifierProposition(interface.DomainService):
                 proposition=None,
                 matricule_candidat=proposition_candidat.matricule_candidat,
                 titres_acces=titres,
-                type_formation=TrainingType.PHD,
                 profil_candidat_translator=profil_candidat_translator,
                 formation_translator=formation_translator,
                 annee_soumise=annee_soumise,
                 pool_soumis=pool_soumis,
+                formation=formation,
             ),
             partial(
                 maximum_propositions_service.verifier_nombre_propositions_envoyees_formation_doctorale,

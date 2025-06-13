@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,14 +27,26 @@ from functools import partial
 from typing import List
 
 from admission.ddd.admission.domain.model.question_specifique import QuestionSpecifique
-from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
-from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.domain.service.i_calendrier_inscription import (
+    ICalendrierInscription,
+)
+from admission.ddd.admission.domain.service.i_maximum_propositions import (
+    IMaximumPropositionsAutorisees,
+)
+from admission.ddd.admission.domain.service.i_profil_candidat import (
+    IProfilCandidatTranslator,
+)
 from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
 from admission.ddd.admission.domain.service.profil_candidat import ProfilCandidat
-from admission.ddd.admission.domain.service.verifier_questions_specifiques import VerifierQuestionsSpecifiques
-from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition
-from admission.ddd.admission.formation_continue.domain.service.i_formation import IFormationContinueTranslator
+from admission.ddd.admission.domain.service.verifier_questions_specifiques import (
+    VerifierQuestionsSpecifiques,
+)
+from admission.ddd.admission.formation_continue.domain.model.proposition import (
+    Proposition,
+)
+from admission.ddd.admission.formation_continue.domain.service.i_formation import (
+    IFormationContinueTranslator,
+)
 from base.ddd.utils.business_validator import execute_functions_and_aggregate_exceptions
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from osis_common.ddd import interface
@@ -122,11 +134,11 @@ class VerifierProposition(interface.DomainService):
                 proposition=proposition_candidat,
                 matricule_candidat=proposition_candidat.matricule_candidat,
                 titres_acces=titres,
-                type_formation=formation.type,
                 profil_candidat_translator=profil_candidat_translator,
                 formation_translator=formation_translator,
                 annee_soumise=annee_soumise,
                 pool_soumis=pool_soumis,
+                formation=formation,
             ),
             partial(
                 maximum_propositions_service.verifier_nombre_propositions_envoyees_formation_continue,

@@ -75,6 +75,11 @@ def verifier_proposition(
         onglets=Onglets.get_names(),
     )
 
+    formation = formation_translator.get(
+        sigle=proposition_candidat.formation_id.sigle,
+        annee=proposition_candidat.formation_id.annee,
+    )
+
     # WHEN
     VerifierProposition.verifier(
         proposition_candidat,
@@ -86,6 +91,7 @@ def verifier_proposition(
         formation_translator,
         calendrier_inscription,
         maximum_propositions_service,
+        formation,
     )
 
     # THEN

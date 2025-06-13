@@ -298,7 +298,10 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         self.assertNotIn(
             {
                 'status_code': ResidenceAuSensDuDecretNonDisponiblePourInscriptionException.status_code,
-                'detail': ResidenceAuSensDuDecretNonDisponiblePourInscriptionException.message,
+                'detail': ResidenceAuSensDuDecretNonDisponiblePourInscriptionException.get_message(
+                    nom_formation_fr=admission.training.title,
+                    nom_formation_en=admission.training.title_english,
+                ),
             },
             admission.detailed_status,
         )
@@ -391,7 +394,10 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         self.assertIn(
             {
                 'status_code': ResidenceAuSensDuDecretNonDisponiblePourInscriptionException.status_code,
-                'detail': ResidenceAuSensDuDecretNonDisponiblePourInscriptionException.message,
+                'detail': ResidenceAuSensDuDecretNonDisponiblePourInscriptionException.get_message(
+                    nom_formation_fr=admission.training.title,
+                    nom_formation_en=admission.training.title_english,
+                ),
             },
             admission.detailed_status,
         )
