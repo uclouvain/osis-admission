@@ -118,6 +118,10 @@ class PropositionInMemoryRepository(
     }
 
     @classmethod
+    def save(cls, entity: 'Proposition', mise_a_jour_date_derniere_modification=True) -> None:
+        return super().save(entity)
+
+    @classmethod
     def get(cls, entity_id: 'PropositionIdentity') -> 'Proposition':
         proposition = super().get(entity_id)
         if not proposition:
@@ -231,7 +235,7 @@ class PropositionInMemoryRepository(
                 formation_id=FormationIdentityFactory(sigle="MASTER-SCI", annee=2021),
                 curriculum=['file1.pdf'],
                 est_confirmee=True,
-                pot_calcule=random.choice(list(ADMISSION_POOL_ACADEMIC_CALENDAR_TYPES))
+                pot_calcule=random.choice(list(ADMISSION_POOL_ACADEMIC_CALENDAR_TYPES)),
             ),
             PropositionFactory(
                 entity_id=factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-CERTIFICATE-CONFIRMED'),
