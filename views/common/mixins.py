@@ -29,6 +29,8 @@ from typing import Dict, List, Optional, Union
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.cache import cache
+from django.db.models import Value
+from django.db.models.functions import Concat
 from django.shortcuts import resolve_url
 from django.template.loader import render_to_string
 from django.utils.functional import cached_property
@@ -36,6 +38,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from django.views.generic.base import ContextMixin
 
+from admission.auth.roles.program_manager import ProgramManager
 from admission.calendar.admission_digit_ticket_submission import (
     AdmissionDigitTicketSubmissionCalendar,
 )
@@ -199,6 +202,22 @@ class AdmissionViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextMix
 
     def get_access_title_country(self):
         return access_title_country(self.selected_access_titles.values())
+
+    @property
+    def current_user_name(self):
+        return f'{self.request.user.person.first_name} {self.request.user.person.last_name}'
+
+    @cached_property
+    def admission_program_managers_names(self):
+        return ', '.join(
+            ProgramManager.objects.filter(
+                education_group_id=self.admission.training.education_group_id,
+            )
+            .annotate(
+                person_name=Concat('person__first_name', Value(' '), 'person__last_name'),
+            )
+            .values_list('person_name', flat=True)
+        )
 
 
 class LoadDossierViewMixin(AdmissionViewMixin):

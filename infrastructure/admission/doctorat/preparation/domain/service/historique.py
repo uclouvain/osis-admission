@@ -520,12 +520,11 @@ class Historique(IHistorique):
     def historiser_demande_verification_titre_acces(
         cls,
         proposition: Proposition,
-        gestionnaire: str,
+        gestionnaire: PersonneConnueUclDTO,
         message: EmailMessage,
         uuid_experience: str,
     ):
-        manager_dto = PersonneConnueUclTranslator().get(gestionnaire)
-        manager_name = f"{manager_dto.prenom} {manager_dto.nom}"
+        manager_name = f"{gestionnaire.prenom} {gestionnaire.nom}"
 
         now = datetime.datetime.now()
 
@@ -553,12 +552,11 @@ class Historique(IHistorique):
     def historiser_information_candidat_verification_parcours_en_cours(
         cls,
         proposition: Proposition,
-        gestionnaire: str,
+        gestionnaire: PersonneConnueUclDTO,
         message: EmailMessage,
         uuid_experience: str,
     ):
-        manager_dto = PersonneConnueUclTranslator().get(gestionnaire)
-        manager_name = f"{manager_dto.prenom} {manager_dto.nom}"
+        manager_name = f"{gestionnaire.prenom} {gestionnaire.nom}"
 
         now = datetime.datetime.now()
 

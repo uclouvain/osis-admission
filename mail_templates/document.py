@@ -99,6 +99,11 @@ DOCUMENT_TOKENS = admission_common_tokens + [
         description=_('Mail salutation'),
         example='Chère',
     ),
+    Token(
+        name='sender_name',
+        description=_('Name of the manager sending the email'),
+        example="John Doe",
+    ),
 ]
 
 ADMISSION_EMAIL_REQUEST_SIC_DOCUMENTS_GENERAL = 'osis-admission-request-sic-documents-general'
@@ -131,7 +136,14 @@ templates.register(
         'in his application for doctorate education'
     ),
     tag=DOCTORATE_ADMISSION_TAG,
-    tokens=DOCUMENT_TOKENS,
+    tokens=DOCUMENT_TOKENS
+    + [
+        Token(
+            name='program_managers_names',
+            description=_("List of names of the program managers."),
+            example='John Doe, Jane Doe',
+        ),
+    ],
 )
 
 ADMISSION_EMAIL_REQUEST_FAC_DOCUMENTS_DOCTORATE = 'osis-admission-request-fac-documents-doctorate'
@@ -142,7 +154,14 @@ templates.register(
         'in his application for doctorate education'
     ),
     tag=DOCTORATE_ADMISSION_TAG,
-    tokens=DOCUMENT_TOKENS,
+    tokens=DOCUMENT_TOKENS
+    + [
+        Token(
+            name='program_managers_names',
+            description=_("List of names of the program managers."),
+            example='John Doe, Jane Doe',
+        ),
+    ],
 )
 
 
@@ -260,7 +279,24 @@ templates.register(
         'and some are still missing for doctorate education'
     ),
     tag=DOCTORATE_ADMISSION_TAG,
-    tokens=DOCUMENTS_CONFIRM_TOKENS,
+    tokens=DOCUMENTS_CONFIRM_TOKENS
+    + [
+        Token(
+            name='management_entity_name',
+            description=_('Name of the management entity'),
+            example='Faculté des sciences économiques, sociales, politiques et de communication',
+        ),
+        Token(
+            name='management_entity_acronym',
+            description=_('Acronym of the management entity'),
+            example='ESPO',
+        ),
+        Token(
+            name='program_managers_names',
+            description=_("List of names of the program managers."),
+            example='John Doe, Jane Doe',
+        ),
+    ],
 )
 
 ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_DOCTORATE = (
@@ -273,5 +309,22 @@ templates.register(
         'for doctorate education'
     ),
     tag=DOCTORATE_ADMISSION_TAG,
-    tokens=DOCUMENTS_CONFIRM_TOKENS,
+    tokens=DOCUMENTS_CONFIRM_TOKENS
+    + [
+        Token(
+            name='management_entity_name',
+            description=_('Name of the management entity'),
+            example='Faculté des sciences économiques, sociales, politiques et de communication',
+        ),
+        Token(
+            name='management_entity_acronym',
+            description=_('Acronym of the management entity'),
+            example='ESPO',
+        ),
+        Token(
+            name='program_managers_names',
+            description=_("List of names of the program managers."),
+            example='John Doe, Jane Doe',
+        ),
+    ],
 )

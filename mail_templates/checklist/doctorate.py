@@ -79,6 +79,16 @@ templates.register(
             description=_("Refusal document link"),
             example="https://osis.uclouvain.be/...",
         ),
+        Token(
+            name='management_entity_acronym',
+            description=_('Acronym of the management entity'),
+            example='ESPO',
+        ),
+        Token(
+            name='program_managers_names',
+            description=_("List of names of the program managers."),
+            example='John Doe, Jane Doe',
+        ),
     ],
 )
 
@@ -133,6 +143,26 @@ ADMISSION_EMAIL_SIC_APPROVAL_TOKENS = CHECKLIST_TOKENS + [
         name='training_acronym',
         description=_('Acronym of the training'),
         example='SPRI2MS/DI',
+    ),
+    Token(
+        name='management_entity_name',
+        description=_('Name of the management entity'),
+        example='Faculté des sciences économiques, sociales, politiques et de communication',
+    ),
+    Token(
+        name='management_entity_acronym',
+        description=_('Acronym of the management entity'),
+        example='ESPO',
+    ),
+    Token(
+        name='program_managers_names',
+        description=_("List of names of the program managers."),
+        example='John Doe, Jane Doe',
+    ),
+    Token(
+        name='sender_name',
+        description=_('Name of the manager sending the email'),
+        example="John Doe",
     ),
 ]
 templates.register(
@@ -240,6 +270,26 @@ INSCRIPTION_EMAIL_SIC_APPROVAL_TOKENS = CHECKLIST_TOKENS + [
             'ci-dessous sont à nous fournir dès que possible à l’adresse info-mons@uclouvain.be :'
         ),
     ),
+    Token(
+        name='management_entity_name',
+        description=_('Name of the management entity'),
+        example='Faculté des sciences économiques, sociales, politiques et de communication',
+    ),
+    Token(
+        name='management_entity_acronym',
+        description=_('Acronym of the management entity'),
+        example='ESPO',
+    ),
+    Token(
+        name='program_managers_names',
+        description=_("List of names of the program managers."),
+        example='John Doe, Jane Doe',
+    ),
+    Token(
+        name='sender_name',
+        description=_('Name of the manager sending the email'),
+        example="John Doe",
+    ),
 ]
 templates.register(
     INSCRIPTION_EMAIL_SIC_APPROVAL_DOCTORATE,
@@ -272,6 +322,26 @@ templates.register(
             description=_('Acronym of the training'),
             example='SPRI2MS/DI',
         ),
+        Token(
+            name='management_entity_name',
+            description=_('Name of the management entity'),
+            example='Faculté des sciences économiques, sociales, politiques et de communication',
+        ),
+        Token(
+            name='management_entity_acronym',
+            description=_('Acronym of the management entity'),
+            example='ESPO',
+        ),
+        Token(
+            name='program_managers_names',
+            description=_("List of names of the program managers."),
+            example='John Doe, Jane Doe',
+        ),
+        Token(
+            name='sender_name',
+            description=_('Name of the manager sending the email'),
+            example="John Doe",
+        ),
     ],
 )
 
@@ -296,6 +366,31 @@ templates.register(
             name='training_campus',
             description=_('Teaching campus of the training'),
             example="Louvain-la-Neuve",
+        ),
+        Token(
+            name='management_entity_name',
+            description=_('Name of the management entity'),
+            example='Faculté des sciences économiques, sociales, politiques et de communication',
+        ),
+        Token(
+            name='management_entity_acronym',
+            description=_('Acronym of the management entity'),
+            example='ESPO',
+        ),
+        Token(
+            name='salutation',
+            description=_("Greetings depending on the gender of the candidate"),
+            example="Cher·ère",
+        ),
+        Token(
+            name='program_managers_names',
+            description=_("List of names of the program managers."),
+            example='John Doe, Jane Doe',
+        ),
+        Token(
+            name='sender_name',
+            description=_('Name of the manager sending the email'),
+            example="John Doe",
         ),
     ],
 )
@@ -342,6 +437,31 @@ templates.register(
             description=_("Contact link"),
             example="https://osis.uclouvain.be/...",
         ),
+        Token(
+            name='management_entity_name',
+            description=_('Name of the management entity'),
+            example='Faculté des sciences économiques, sociales, politiques et de communication',
+        ),
+        Token(
+            name='management_entity_acronym',
+            description=_('Acronym of the management entity'),
+            example='ESPO',
+        ),
+        Token(
+            name='salutation',
+            description=_("Greetings depending on the gender of the candidate"),
+            example="Cher·ère",
+        ),
+        Token(
+            name='program_managers_names',
+            description=_("List of names of the program managers."),
+            example='John Doe, Jane Doe',
+        ),
+        Token(
+            name='sender_name',
+            description=_('Name of the manager sending the email'),
+            example="John Doe",
+        ),
     ],
 )
 
@@ -383,6 +503,16 @@ templates.register(
             description=_('Name of the doctoral commission'),
             example="Commission CD1",
         ),
+        Token(
+            name='management_entity_acronym',
+            description=_('Acronym of the management entity'),
+            example='ESPO',
+        ),
+        Token(
+            name='program_managers_names',
+            description=_("List of names of the program managers."),
+            example='John Doe, Jane Doe',
+        ),
     ],
 )
 
@@ -423,6 +553,16 @@ templates.register(
             description=_('Name of the doctoral commission'),
             example="Commission CD1",
         ),
+        Token(
+            name='management_entity_acronym',
+            description=_('Acronym of the management entity'),
+            example='ESPO',
+        ),
+        Token(
+            name='program_managers_names',
+            description=_("List of names of the program managers."),
+            example='John Doe, Jane Doe',
+        ),
     ],
 )
 
@@ -460,6 +600,26 @@ templates.register(
             name='phd_committee',
             description=_('PhD Committee'),
             example="John Doe",
+        ),
+        Token(
+            name='management_entity_name',
+            description=_('Name of the management entity'),
+            example='Faculté des sciences économiques, sociales, politiques et de communication',
+        ),
+        Token(
+            name='management_entity_acronym',
+            description=_('Acronym of the management entity'),
+            example='ESPO',
+        ),
+        Token(
+            name='salutation',
+            description=_("Greetings depending on the gender of the candidate"),
+            example="Cher·ère",
+        ),
+        Token(
+            name='program_managers_names',
+            description=_("List of names of the program managers."),
+            example='John Doe, Jane Doe',
         ),
     ],
 )

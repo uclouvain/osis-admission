@@ -64,6 +64,21 @@ templates.register(
             description=_('Mail salutation'),
             example='Chère',
         ),
+        Token(
+            name='management_entity_name',
+            description=_('Name of the management entity'),
+            example='Faculté des sciences économiques, sociales, politiques et de communication',
+        ),
+        Token(
+            name='management_entity_acronym',
+            description=_('Acronym of the management entity'),
+            example='ESPO',
+        ),
+        Token(
+            name='program_managers_names',
+            description=_("List of names of the program managers."),
+            example='John Doe, Jane Doe',
+        ),
     ],
     tag=DOCTORATE_ADMISSION_TAG,
 )
@@ -177,6 +192,26 @@ templates.register(
             name='actor_last_name',
             description=_("The last name of the recipient"),
             example="Smith",
+        ),
+        Token(
+            name='management_entity_name',
+            description=_('Name of the management entity'),
+            example='Faculté des sciences économiques, sociales, politiques et de communication',
+        ),
+        Token(
+            name='management_entity_acronym',
+            description=_('Acronym of the management entity'),
+            example='ESPO',
+        ),
+        Token(
+            name='salutation',
+            description=_("Greetings depending on the gender of the recipient"),
+            example="Cher·ère",
+        ),
+        Token(
+            name='program_managers_names',
+            description=_("List of names of the program managers."),
+            example='John Doe, Jane Doe',
         ),
     ],
     tag=DOCTORATE_ADMISSION_TAG,

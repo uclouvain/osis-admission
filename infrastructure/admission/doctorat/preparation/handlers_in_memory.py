@@ -664,6 +664,7 @@ COMMAND_HANDLERS = {
             proposition_repository=_proposition_repository,
             notification=_notification,
             historique=_historique,
+            personne_connue_ucl_translator=_personne_connue_ucl_translator,
         )
     ),
     SpecifierMotifsRefusPropositionParSicCommand: (

@@ -31,6 +31,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.proposition impor
 from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
 from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import INotification
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
+from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
 
 
 def modifier_authentification_experience_parcours_anterieur(
@@ -38,6 +39,7 @@ def modifier_authentification_experience_parcours_anterieur(
     proposition_repository: 'IPropositionRepository',
     notification: 'INotification',
     historique: 'IHistorique',
+    personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
 ) -> 'PropositionIdentity':
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition = proposition_repository.get(entity_id=proposition_id)
@@ -50,14 +52,17 @@ def modifier_authentification_experience_parcours_anterieur(
 
     proposition_repository.save(proposition)
 
+    gestionnaire_dto = personne_connue_ucl_translator.get(cmd.gestionnaire)
+
     message = notification.modifier_authentification_experience_parcours(
         proposition=proposition,
         etat_authentification=cmd.etat_authentification,
+        gestionnaire=gestionnaire_dto,
     )
 
     historique.historiser_modification_authentification_experience_parcours(
         proposition=proposition,
-        gestionnaire=cmd.gestionnaire,
+        gestionnaire=gestionnaire_dto,
         etat_authentification=cmd.etat_authentification,
         message=message,
         uuid_experience=cmd.uuid_experience,

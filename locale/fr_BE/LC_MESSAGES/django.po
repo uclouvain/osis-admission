@@ -3434,6 +3434,9 @@ msgstr "Année d'obtention"
 msgid "Greetings depending on the gender of the candidate"
 msgstr "Salutations en fonction du genre du candidat"
 
+msgid "Greetings depending on the gender of the recipient"
+msgstr "Salutations en fonction du genre du destinataire"
+
 msgid "Grounds for denied"
 msgstr "Motif de refus"
 
@@ -4830,7 +4833,7 @@ msgid "Name of the management entity"
 msgstr "Nom de l'entité de gestion"
 
 msgid "Name of the manager sending the email"
-msgstr "Nom du gestionnaire qui envois l'email"
+msgstr "Nom du gestionnaire qui envoie l'email"
 
 msgid "Name of the working list"
 msgstr "Nom de la liste de travail"
@@ -5663,7 +5666,9 @@ msgid "Proof of regular registration"
 msgstr "Attestation d'inscription régulière'"
 
 msgid "Proof of regular registration for registration change"
-msgstr "Attestation d'inscription régulière pour la modification d'inscription externe"
+msgstr ""
+"Attestation d'inscription régulière pour la modification d'inscription "
+"externe"
 
 msgid "Proof of scholarship"
 msgstr "Preuve d'octroi de la bourse"
@@ -6889,8 +6894,7 @@ msgid ""
 "application to the SIC, status reset, etc). Do you confirm the closing?"
 msgstr ""
 "La clôture du dossier a des conséquences importantes (rapatriement du "
-"dossier en SIC, réinitialisation des états, etc). Confirmez-vous la "
-"clôture ?"
+"dossier en SIC, réinitialisation des états, etc). Confirmez-vous la clôture ?"
 
 #, python-format
 msgid ""
@@ -7216,13 +7220,12 @@ msgstr "La proposition doit être en brouillon pour réaliser cette action."
 
 msgid "The proposition must be in the 'In the process of re-signing' status."
 msgstr ""
-"La proposition doit être en cours de resignature du CA pour réaliser "
-"cette action."
+"La proposition doit être en cours de resignature du CA pour réaliser cette "
+"action."
 
 msgid "The proposition must be in the 'In the process of signing' status."
 msgstr ""
-"La proposition doit être en cours de signature pour réaliser "
-"cette action."
+"La proposition doit être en cours de signature pour réaliser cette action."
 
 msgid "The proposition must be in the 'draft' or 'processed by fac' status."
 msgstr ""

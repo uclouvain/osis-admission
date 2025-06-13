@@ -607,6 +607,7 @@ COMMAND_HANDLERS = {
             proposition_repository=PropositionRepository(),
             notification=Notification(),
             historique=Historique(),
+            personne_connue_ucl_translator=PersonneConnueUclTranslator(),
         )
     ),
     SpecifierMotifsRefusPropositionParSicCommand: (

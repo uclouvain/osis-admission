@@ -208,7 +208,7 @@ class HistoriqueInMemory(IHistorique):
     def historiser_demande_verification_titre_acces(
         cls,
         proposition: Proposition,
-        gestionnaire: str,
+        gestionnaire: PersonneConnueUclDTO,
         message: EmailMessage,
         uuid_experience: str,
     ):
@@ -218,7 +218,7 @@ class HistoriqueInMemory(IHistorique):
     def historiser_information_candidat_verification_parcours_en_cours(
         cls,
         proposition: Proposition,
-        gestionnaire: str,
+        gestionnaire: PersonneConnueUclDTO,
         message: EmailMessage,
         uuid_experience: str,
     ):

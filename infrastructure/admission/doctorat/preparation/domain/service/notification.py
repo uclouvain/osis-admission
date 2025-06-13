@@ -31,7 +31,7 @@ from django.db.models import OuterRef, Subquery
 from django.shortcuts import resolve_url
 from django.utils import translation
 from django.utils.functional import lazy
-from django.utils.translation import get_language, gettext
+from django.utils.translation import get_language, gettext, pgettext_lazy
 from django.utils.translation import gettext_lazy as _
 from osis_async.models import AsyncTask
 from osis_document.api.utils import get_remote_token, get_remote_tokens
@@ -47,6 +47,7 @@ from osis_signature.enums import SignatureState
 from osis_signature.models import Actor
 from osis_signature.utils import get_signing_token
 
+from admission.admission_utils.admission_program_managers_names import get_admission_program_managers_names
 from admission.ddd import MAIL_INSCRIPTION_DEFAUT, MAIL_VERIFICATEUR_CURSUS
 from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import (
     PromoteurIdentity,
@@ -110,11 +111,14 @@ from admission.utils import (
 )
 from base.models.person import Person
 from base.utils.utils import format_academic_year
+from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
 
 EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN = 'SERA_AUTOMATIQUEMENT_REMPLACE_PAR_LE_LIEN'
 
 
 class Notification(INotification):
+    default_salutation_prefix = pgettext_lazy('other gender', 'Dear')
+
     @classmethod
     def _get_doctorate_title_translation(cls, doctorat_id: 'FormationIdentity'):
         """Populate the translations of doctorate title and lazy return them"""
@@ -183,6 +187,11 @@ class Notification(INotification):
             'supervision',
         )
         actor_list = SupervisionActor.objects.filter(process=admission.supervision_group).select_related('person')
+        common_tokens['management_entity_name'] = admission.title_entite_gestion
+        common_tokens['management_entity_acronym'] = admission.sigle_entite_gestion
+        common_tokens['program_managers_names'] = get_admission_program_managers_names(
+            admission.training.education_group_id
+        )
 
         # Envoyer aux gestionnaires CDD
         for manager in get_admission_cdd_managers(admission.training.education_group_id):
@@ -210,8 +219,9 @@ class Notification(INotification):
                 **common_tokens,
                 "actors_as_list_items": '<li></li>'.join(actor_list_str),
                 "actors_comma_separated": ', '.join(actor_list_str),
+                'salutation': get_salutation_prefix(admission.candidate),
             },
-            recipients=[candidat.email],
+            recipients=[candidat.private_email],
         )
         EmailNotificationHandler.create(email_message, person=candidat)
 
@@ -223,6 +233,7 @@ class Notification(INotification):
                 "signataire_first_name": actor.first_name,
                 "signataire_last_name": actor.last_name,
                 "signataire_role": actor.get_type_display(),
+                'salutation': get_salutation_prefix(actor.person) if actor.person_id else cls.default_salutation_prefix,
             }
             if actor.is_external:
                 tokens["admission_link_front"] = cls._lien_invitation_externe(proposition, actor)
@@ -268,6 +279,9 @@ class Notification(INotification):
             "signataire_first_name": signataire.first_name,
             "signataire_last_name": signataire.last_name,
             "signataire_role": actor_role,
+            'management_entity_name': admission.title_entite_gestion,
+            'management_entity_acronym': admission.sigle_entite_gestion,
+            'program_managers_names': get_admission_program_managers_names(admission.training.education_group_id),
         }
         email_message = generate_email(
             ADMISSION_EMAIL_SIGNATURE_CANDIDATE,
@@ -277,8 +291,9 @@ class Notification(INotification):
                 "comment": avis.commentaire_externe,
                 "decision": ChoixEtatSignature.get_value(avis.etat),
                 "reason": avis.motif_refus,
+                "salutation": get_salutation_prefix(admission.candidate),
             },
-            recipients=[candidat.email],
+            recipients=[candidat.private_email],
         )
         EmailNotificationHandler.create(email_message, person=candidat)
 
@@ -301,11 +316,15 @@ class Notification(INotification):
                         "reason": avis.motif_refus,
                         "actor_first_name": other_promoter.first_name,
                         "actor_last_name": other_promoter.last_name,
+                        "salutation": get_salutation_prefix(other_promoter.person)
+                        if other_promoter.person_id
+                        else cls.default_salutation_prefix,
                     },
                     recipients=[other_promoter.email],
                 )
                 EmailNotificationHandler.create(
-                    email_message, person=other_promoter.person_id and other_promoter.person
+                    email_message,
+                    person=other_promoter.person_id and other_promoter.person,
                 )
 
     @classmethod
@@ -346,6 +365,11 @@ class Notification(INotification):
         common_tokens['admission_reference'] = admission.formatted_reference
         common_tokens['recap_link'] = common_tokens['admission_link_front'] + 'pdf-recap'
         common_tokens['salutation'] = get_salutation_prefix(person=admission.candidate)
+        common_tokens['management_entity_name'] = admission.title_entite_gestion
+        common_tokens['management_entity_acronym'] = admission.sigle_entite_gestion
+        common_tokens['program_managers_names'] = get_admission_program_managers_names(
+            admission.training.education_group_id
+        )
 
         actors_invited = admission.supervision_group.actors.select_related('person')
         email_message = generate_email(
@@ -385,6 +409,14 @@ class Notification(INotification):
                     **cls.get_common_tokens(proposition, candidat),
                     "actor_first_name": actor.first_name,
                     "actor_last_name": actor.last_name,
+                    'salutation': get_salutation_prefix(person=actor.person)
+                    if actor.person_id
+                    else cls.default_salutation_prefix,
+                    'management_entity_name': admission.title_entite_gestion,
+                    'management_entity_acronym': admission.sigle_entite_gestion,
+                    'program_managers_names': get_admission_program_managers_names(
+                        admission.training.education_group_id
+                    ),
                 },
                 recipients=[actor.email],
             )
@@ -406,8 +438,18 @@ class Notification(INotification):
         actor.refresh_from_db()
 
         # Tokens communs
-        candidat = Person.objects.get(global_id=proposition.matricule_candidat)
-        common_tokens = cls.get_common_tokens(proposition, candidat)
+        admission = (
+            DoctorateAdmission.objects.select_related('candidate')
+            .annotate_training_management_entity()
+            .get(uuid=proposition.entity_id.uuid)
+        )
+        common_tokens = cls.get_common_tokens(proposition, admission.candidate)
+        common_tokens['management_entity_name'] = admission.title_entite_gestion
+        common_tokens['management_entity_acronym'] = admission.sigle_entite_gestion
+        common_tokens['program_managers_names'] = get_admission_program_managers_names(
+            admission.training.education_group_id
+        )
+        common_tokens['salutation'] = pgettext_lazy('other gender', 'Dear')
 
         # Envoyer aux acteurs n'ayant pas répondu
         tokens = {
@@ -488,6 +530,8 @@ class Notification(INotification):
 
         html_list_by_status = get_requested_documents_html_lists(liste_documents_reclames, liste_documents_dto)
 
+        program_managers_names = get_admission_program_managers_names(admission.training.education_group_id)
+
         tokens = {
             'admission_reference': proposition.reference,
             'candidate_first_name': proposition.prenom_candidat,
@@ -507,6 +551,9 @@ class Notification(INotification):
             'training_year': format_academic_year(proposition.annee_calculee),
             'admission_link_front': get_portal_admission_url('doctorate', proposition.uuid),
             'admission_link_back': get_backoffice_admission_url('doctorate', proposition.uuid),
+            'management_entity_name': proposition.doctorat.intitule_entite_gestion,
+            'management_entity_acronym': proposition.doctorat.sigle_entite_gestion,
+            'program_managers_names': program_managers_names,
         }
 
         email_message = generate_email(
@@ -562,7 +609,11 @@ class Notification(INotification):
         return "{a.first_name} {a.last_name} <{a.email}>".format(a=actor)
 
     @classmethod
-    def demande_verification_titre_acces(cls, proposition: Proposition) -> EmailMessage:
+    def demande_verification_titre_acces(
+        cls,
+        proposition: Proposition,
+        gestionnaire: PersonneConnueUclDTO,
+    ) -> EmailMessage:
         admission: BaseAdmission = (
             BaseAdmission.objects.with_training_management_and_reference()
             .select_related('candidate__country_of_citizenship', 'training')
@@ -588,6 +639,10 @@ class Notification(INotification):
                 'training_year': format_academic_year(proposition.annee_calculee),
                 'admission_link_front': get_portal_admission_url('doctorate', str(admission.uuid)),
                 'admission_link_back': get_backoffice_admission_url('doctorate', str(admission.uuid)),
+                'sender_name': f'{gestionnaire.prenom} {gestionnaire.nom}',
+                'management_entity_acronym': admission.sigle_entite_gestion,
+                'management_entity_name': admission.title_entite_gestion,
+                'program_managers_names': get_admission_program_managers_names(admission.training.education_group_id),
             }
 
             email_message = generate_email(
@@ -602,7 +657,11 @@ class Notification(INotification):
             return email_message
 
     @classmethod
-    def informer_candidat_verification_parcours_en_cours(cls, proposition: Proposition) -> EmailMessage:
+    def informer_candidat_verification_parcours_en_cours(
+        cls,
+        proposition: Proposition,
+        gestionnaire: PersonneConnueUclDTO,
+    ) -> EmailMessage:
         admission: BaseAdmission = (
             BaseAdmission.objects.with_training_management_and_reference()
             .select_related('candidate', 'training')
@@ -624,6 +683,11 @@ class Notification(INotification):
                 'training_year': format_academic_year(proposition.annee_calculee),
                 'admission_link_front': get_portal_admission_url('doctorate', str(admission.uuid)),
                 'admission_link_back': get_backoffice_admission_url('doctorate', str(admission.uuid)),
+                'sender_name': f'{gestionnaire.prenom} {gestionnaire.nom}',
+                'management_entity_acronym': admission.sigle_entite_gestion,
+                'management_entity_name': admission.title_entite_gestion,
+                'program_managers_names': get_admission_program_managers_names(admission.training.education_group_id),
+                'salutation': get_salutation_prefix(admission.candidate),
             }
 
             email_message = generate_email(

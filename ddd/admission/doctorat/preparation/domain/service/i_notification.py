@@ -38,9 +38,7 @@ from admission.ddd.admission.domain.model.emplacement_document import Emplacemen
 from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.repository.i_digit import IDigitRepository
-from admission.ddd.admission.shared_kernel.email_destinataire.repository.i_email_destinataire import (
-    IEmailDestinataireRepository,
-)
+from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
 from osis_common.ddd import interface
 
 
@@ -98,6 +96,7 @@ class INotification(interface.DomainService):
         cls,
         proposition: Proposition,
         etat_authentification: str,
+        gestionnaire: PersonneConnueUclDTO,
     ) -> Optional[EmailMessage]:
         methode_notification = {
             EtatAuthentificationParcours.AUTHENTIFICATION_DEMANDEE.name: cls.demande_verification_titre_acces,
@@ -107,16 +106,24 @@ class INotification(interface.DomainService):
         }.get(etat_authentification)
 
         if methode_notification:
-            return methode_notification(proposition)
+            return methode_notification(proposition, gestionnaire)
 
     @classmethod
     @abstractmethod
-    def demande_verification_titre_acces(cls, proposition: Proposition) -> EmailMessage:
+    def demande_verification_titre_acces(
+        cls,
+        proposition: Proposition,
+        gestionnaire: PersonneConnueUclDTO,
+    ) -> EmailMessage:
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
-    def informer_candidat_verification_parcours_en_cours(cls, proposition: Proposition) -> EmailMessage:
+    def informer_candidat_verification_parcours_en_cours(
+        cls,
+        proposition: Proposition,
+        gestionnaire: PersonneConnueUclDTO,
+    ) -> EmailMessage:
         raise NotImplementedError
 
     @classmethod

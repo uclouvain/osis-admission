@@ -327,6 +327,8 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
                     'doctoral_commission': self.proposition.doctorat.intitule_entite_gestion,
                     'sender_name': f'{self.request.user.person.first_name} {self.request.user.person.last_name}',
                     'document_link': EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN,
+                    'management_entity_acronym': self.proposition.doctorat.sigle_entite_gestion,
+                    'program_managers_names': self.admission_program_managers_names,
                 },
             )
 
@@ -367,6 +369,10 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             'admission_link_back': get_backoffice_admission_url('doctorate', self.admission_uuid),
             'training_campus': self.proposition.formation.campus.nom,
             'training_acronym': self.proposition.formation.sigle,
+            'management_entity_name': self.proposition.formation.intitule_entite_gestion,
+            'management_entity_acronym': self.proposition.formation.sigle_entite_gestion,
+            'program_managers_names': self.admission_program_managers_names,
+            'sender_name': self.current_user_name,
         }
 
         if self.proposition.type == TypeDemande.ADMISSION.name:
