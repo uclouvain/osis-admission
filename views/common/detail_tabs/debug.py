@@ -103,7 +103,6 @@ class DebugView(LoadDossierViewMixin, TemplateView):
             data['financabilite_logs'] = buffer.getvalue()
             logger.removeHandler(handler)
 
-        self.admission.update_detailed_status(self.request.user.person)
         data['verify_project'] = self.admission.detailed_status
 
         return data
