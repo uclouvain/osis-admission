@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -33,27 +33,39 @@ from django.contrib.auth.models import User
 from django.shortcuts import resolve_url
 from django.test import TestCase, override_settings
 
-from admission.models import (
-    GeneralEducationAdmission,
-    AdmissionFormItem,
-    ContinuingEducationAdmission,
-    DoctorateAdmission,
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
+    ENTITY_CDE,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
 from admission.ddd.admission.enums.emplacement_document import (
-    TypeEmplacementDocument,
-    EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES,
     EMPLACEMENTS_DOCUMENTS_LIBRES_NON_RECLAMABLES,
-    OngletsDemande,
+    EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES,
     IDENTIFIANT_BASE_EMPLACEMENT_DOCUMENT_LIBRE_PAR_TYPE,
+    OngletsDemande,
     StatutReclamationEmplacementDocument,
+    TypeEmplacementDocument,
 )
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+)
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    OngletsChecklist as OngletsChecklistContinue,
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    OngletsChecklist as OngletsChecklistGenerale,
+)
 from admission.infrastructure.utils import MODEL_FIELD_BY_FREE_MANAGER_DOCUMENT_TYPE
+from admission.models import (
+    AdmissionFormItem,
+    ContinuingEducationAdmission,
+    DoctorateAdmission,
+    GeneralEducationAdmission,
+)
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import (
     ContinuingEducationAdmissionFactory,
@@ -65,7 +77,10 @@ from admission.tests.factories.general_education import (
     GeneralEducationTrainingFactory,
 )
 from admission.tests.factories.person import CompletePersonFactory
-from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
+from admission.tests.factories.roles import (
+    ProgramManagerRoleFactory,
+    SicManagementRoleFactory,
+)
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
@@ -219,12 +234,16 @@ class BaseDocumentViewTestCase(TestCase):
 
         if admission.admission_context == 'continuing-education':
             document_type = document_type.replace('SIC', 'FAC')
+            default_tab = OngletsChecklistContinue.fiche_etudiant.name
+        else:
+            default_tab = OngletsChecklistGenerale.donnees_personnelles.name
 
         if document_type in EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES:
             default_base_url = f'admission:{admission.admission_context}:document:free-candidate-request'
             default_data = {
                 'free-document-request-form-author': user.person.global_id,
                 'free-document-request-form-file_name': 'My file name',
+                'free-document-request-form-checklist_tab': default_tab,
                 'free-document-request-form-reason': 'My reason',
                 'free-document-request-form-request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
             }
@@ -335,9 +354,9 @@ class BaseDocumentViewTestCase(TestCase):
         patcher = mock.patch('admission.exports.admission_recap.admission_recap.Pdf')
         patched = patcher.start()
         patched.new.return_value = mock.MagicMock(pdf_version=1)
-        self.outline_root = (
-            patched.new.return_value.open_outline.return_value.__enter__.return_value.root
-        ) = mock.MagicMock()
+        self.outline_root = patched.new.return_value.open_outline.return_value.__enter__.return_value.root = (
+            mock.MagicMock()
+        )
         patched.open.return_value.__enter__.return_value = mock.Mock(pdf_version=1, pages=[None])
 
         patcher = mock.patch('admission.exports.admission_recap.attachments.get_raw_content_remotely')

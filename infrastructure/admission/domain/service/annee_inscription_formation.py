@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,15 +24,16 @@
 #
 ##############################################################################
 import datetime
-from typing import Optional, Dict
+from typing import Dict, Optional
 
-from admission.constants import CONTEXT_GENERAL, CONTEXT_DOCTORATE, CONTEXT_CONTINUING
+from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
 from admission.ddd.admission.domain.enums import TypeFormation
-
-from admission.ddd.admission.domain.service.i_annee_inscription_formation import IAnneeInscriptionFormationTranslator
+from admission.ddd.admission.domain.service.i_annee_inscription_formation import (
+    IAnneeInscriptionFormationTranslator,
+)
 from base.models.academic_calendar import AcademicCalendar
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
-from base.models.enums.education_group_types import TrainingType, AllTypes
+from base.models.enums.education_group_types import AllTypes, TrainingType
 
 ADMISSION_EDUCATION_TYPE_BY_ADMISSION_CONTEXT = {
     'general-education': {
@@ -85,6 +86,10 @@ class AnneeInscriptionFormationTranslator(IAnneeInscriptionFormationTranslator):
         for admission_type, osis_types in OSIS_ADMISSION_EDUCATION_TYPES_MAPPING.items()
         for osis_type in osis_types
     }
+
+    EDUCATION_TYPES_CHOICES = [
+        (training_key, TrainingType.get_value(training_key)) for training_key in ADMISSION_EDUCATION_TYPE_BY_OSIS_TYPE
+    ]
 
     ADMISSION_CALENDAR_TYPE_BY_ADMISSION_EDUCATION_TYPE = {
         TypeFormation.BACHELIER.name: AcademicCalendarTypes.GENERAL_EDUCATION_ENROLLMENT,

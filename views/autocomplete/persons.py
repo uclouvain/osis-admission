@@ -100,7 +100,7 @@ class JuryMembersAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetV
 
         qs = (
             Person.objects.filter(Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(global_id__icontains=q))
-            .exclude(Exists(Student.objects.filter(person=OuterRef('pk'))))
+            .exclude(Exists(Student.objects.filter(person=OuterRef('pk'), person__tutor__isnull=True)))
             .order_by('last_name', 'first_name')
             .values(
                 'first_name',
@@ -118,7 +118,12 @@ class PersonAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetView):
         q = self.request.GET.get('q', '')
         qs = Person.objects
         if q:
-            qs = qs.filter(Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(global_id__icontains=q))
+            qs = qs.filter(
+                *[
+                    Q(first_name__icontains=term) | Q(last_name__icontains=term) | Q(global_id__icontains=term)
+                    for term in q.split()
+                ],
+            )
         qs = (
             qs.exclude(
                 Q(user_id__isnull=True)
@@ -127,7 +132,7 @@ class PersonAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetView):
                 | Q(first_name='')
                 | Q(last_name='')
             )
-            .exclude(Exists(Student.objects.filter(person=OuterRef('pk'))))
+            .exclude(Exists(Student.objects.filter(person=OuterRef('pk'), person__tutor__isnull=True)))
             .order_by('last_name', 'first_name')
             .values(
                 'first_name',

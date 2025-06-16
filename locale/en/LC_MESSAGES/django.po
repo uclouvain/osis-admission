@@ -475,6 +475,9 @@ msgstr ""
 msgid "Admission context"
 msgstr ""
 
+msgid "Admission education types"
+msgstr ""
+
 msgid "Admission export"
 msgstr ""
 
@@ -3414,6 +3417,9 @@ msgstr ""
 msgid "IBAN account number"
 msgstr ""
 
+msgid "INCHANGE"
+msgstr "Unchanged"
+
 msgid "INITIAL_CANDIDAT"
 msgstr "Initial candidate"
 
@@ -3596,6 +3602,12 @@ msgctxt "ways_hear_about_training"
 msgid "In the press"
 msgstr ""
 
+msgid "In the process of re-signing"
+msgstr ""
+
+msgid "In the process of signing"
+msgstr ""
+
 msgid "Include"
 msgstr ""
 
@@ -3772,6 +3784,9 @@ msgid "Keys"
 msgstr ""
 
 msgid "Knowledge of languages"
+msgstr ""
+
+msgid "LU proposed for deletion"
 msgstr ""
 
 msgid "Language"
@@ -5174,6 +5189,15 @@ msgstr "Denied"
 msgid "REFUS_AGREGATION"
 msgstr ""
 
+msgid "REFUS_ARTICLE_95_ACCES_MS_ENSEIGNEMENT"
+msgstr ""
+
+msgid "REFUS_ARTICLE_95_ACCES_S4"
+msgstr ""
+
+msgid "REFUS_ARTICLE_95_ACCES_S5"
+msgstr ""
+
 msgid "REFUS_ARTICLE_95_GENERIQUE_IRRECEVABILITE"
 msgstr ""
 
@@ -5997,9 +6021,6 @@ msgstr ""
 msgid "Support committee to be completed"
 msgstr ""
 
-msgid "Support committee waiting for signature"
-msgstr ""
-
 msgid "Supporting documents"
 msgstr ""
 
@@ -6498,9 +6519,10 @@ msgstr ""
 msgid "The proposition must be in draft form to realize this action."
 msgstr ""
 
-msgid ""
-"The proposition must be in the 'Support committee waiting for signature' "
-"status."
+msgid "The proposition must be in the 'In the process of re-signing' status."
+msgstr ""
+
+msgid "The proposition must be in the 'In the process of signing' status."
 msgstr ""
 
 msgid "The proposition must be in the 'draft' or 'processed by fac' status."
@@ -6509,9 +6531,6 @@ msgstr ""
 msgid ""
 "The proposition must be in the 'draft', 'Support committee to be completed' "
 "or 'processed by fac' status."
-msgstr ""
-
-msgid "The proposition must be in the 'waiting for signature' status."
 msgstr ""
 
 msgid "The proposition must be managed by FAC to realized this action."
@@ -7092,9 +7111,6 @@ msgstr "Work contract"
 
 msgctxt "equivalence_status"
 msgid "Waiting"
-msgstr ""
-
-msgid "Waiting for signature"
 msgstr ""
 
 msgid "Wallonie Bruxelles International (WBI)"

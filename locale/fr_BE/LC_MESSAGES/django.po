@@ -533,6 +533,9 @@ msgstr "Conditions d'accès non remplies."
 msgid "Admission context"
 msgstr "Contexte d'admission"
 
+msgid "Admission education types"
+msgstr "Les types de formation de l'admission"
+
 msgid "Admission export"
 msgstr "Export d'admission"
 
@@ -3802,6 +3805,9 @@ msgstr ""
 msgid "IBAN account number"
 msgstr "Numéro de compte IBAN"
 
+msgid "INCHANGE"
+msgstr "Inchangé"
+
 msgid "INITIAL_CANDIDAT"
 msgstr "Initial candidat"
 
@@ -4027,6 +4033,12 @@ msgctxt "ways_hear_about_training"
 msgid "In the press"
 msgstr "Dans la presse"
 
+msgid "In the process of re-signing"
+msgstr "En cours de resignature du CA"
+
+msgid "In the process of signing"
+msgstr "En cours de signature"
+
 msgid "Include"
 msgstr "Inclure"
 
@@ -4213,6 +4225,9 @@ msgstr "Clés"
 
 msgid "Knowledge of languages"
 msgstr "Connaissance des langues"
+
+msgid "LU proposed for deletion"
+msgstr "UE en proposition de suppression"
 
 msgid "Language"
 msgstr "Langue"
@@ -5657,7 +5672,9 @@ msgid "Proof of regular registration"
 msgstr "Attestation d'inscription régulière'"
 
 msgid "Proof of regular registration for registration change"
-msgstr "Attestation d'inscription régulière pour la modification d'inscription externe"
+msgstr ""
+"Attestation d'inscription régulière pour la modification d'inscription "
+"externe"
 
 msgid "Proof of scholarship"
 msgstr "Preuve d'octroi de la bourse"
@@ -5748,6 +5765,15 @@ msgstr "Refusée"
 
 msgid "REFUS_AGREGATION"
 msgstr "Refus agrégation"
+
+msgid "REFUS_ARTICLE_95_ACCES_MS_ENSEIGNEMENT"
+msgstr "Refus 95 - accès MS enseignement"
+
+msgid "REFUS_ARTICLE_95_ACCES_S4"
+msgstr "Refus 95 - accès S4"
+
+msgid "REFUS_ARTICLE_95_ACCES_S5"
+msgstr "Refus 95 - accès S5"
 
 msgid "REFUS_ARTICLE_95_GENERIQUE_IRRECEVABILITE"
 msgstr "Refus 95 générique - irrecevabilité"
@@ -6606,10 +6632,7 @@ msgid "Supervisory panel report of the confirmation paper"
 msgstr "Procès-verbal de l'épreuve de confirmation"
 
 msgid "Support committee to be completed"
-msgstr "Comité d'accompagnement à compléter"
-
-msgid "Support committee waiting for signature"
-msgstr "En attente de signature du comité d’accompagnement"
+msgstr "CA à compléter"
 
 msgid "Supporting documents"
 msgstr "Justificatifs"
@@ -6886,8 +6909,7 @@ msgid ""
 "application to the SIC, status reset, etc). Do you confirm the closing?"
 msgstr ""
 "La clôture du dossier a des conséquences importantes (rapatriement du "
-"dossier en SIC, réinitialisation des états, etc). Confirmez-vous la "
-"clôture ?"
+"dossier en SIC, réinitialisation des états, etc). Confirmez-vous la clôture ?"
 
 #, python-format
 msgid ""
@@ -7211,12 +7233,15 @@ msgstr "La proposition doit être concernée par le paiement."
 msgid "The proposition must be in draft form to realize this action."
 msgstr "La proposition doit être en brouillon pour réaliser cette action."
 
-msgid ""
-"The proposition must be in the 'Support committee waiting for signature' "
-"status."
+msgid "The proposition must be in the 'In the process of re-signing' status."
 msgstr ""
-"La proposition doit être en attente de signature par le comité "
-"d’accompagnement pour réaliser cette action."
+"La proposition doit être en cours de resignature du CA pour réaliser "
+"cette action."
+
+msgid "The proposition must be in the 'In the process of signing' status."
+msgstr ""
+"La proposition doit être en cours de signature pour réaliser "
+"cette action."
 
 msgid "The proposition must be in the 'draft' or 'processed by fac' status."
 msgstr ""
@@ -7229,10 +7254,6 @@ msgid ""
 msgstr ""
 "La proposition doit être en brouillon, en attente de signature par le comité "
 "d’accompagnement ou en traitement par fac pour réaliser cette action."
-
-msgid "The proposition must be in the 'waiting for signature' status."
-msgstr ""
-"La proposition doit être en attente de signature pour réaliser cette action."
 
 msgid "The proposition must be managed by FAC to realized this action."
 msgstr "La proposition doit être gérée par FAC pour réaliser cette action."
@@ -7902,9 +7923,6 @@ msgstr "Contrat de travail"
 msgctxt "equivalence_status"
 msgid "Waiting"
 msgstr "En attente"
-
-msgid "Waiting for signature"
-msgstr "En attente de signature"
 
 msgid "Wallonie Bruxelles International (WBI)"
 msgstr "Wallonie Bruxelles International (WBI)"

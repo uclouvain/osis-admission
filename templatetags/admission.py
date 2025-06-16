@@ -42,7 +42,7 @@ from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import SafeString, mark_safe
 from django.utils.translation import get_language, gettext
 from django.utils.translation import gettext_lazy as _
-from django.utils.translation import pgettext
+from django.utils.translation import pgettext, pgettext_lazy
 from osis_document.api.utils import get_remote_metadata, get_remote_token
 from osis_history.models import HistoryEntry
 from rules.templatetags import rules
@@ -343,10 +343,10 @@ TAB_TREES = {
         Tab('send-mail', _('Send a mail'), 'envelope'): [
             Tab('send-mail', _('Send a mail'), 'envelope'),
         ],
-        Tab('comments', pgettext('tab', 'Comments'), 'comments'): [
-            Tab('comments', pgettext('tab', 'Comments'), 'comments')
+        Tab('comments', pgettext_lazy('tab', 'Comments'), 'comments'): [
+            Tab('comments', pgettext_lazy('tab', 'Comments'), 'comments')
         ],
-        Tab('history', pgettext('tab', 'History'), 'history'): [
+        Tab('history', pgettext_lazy('tab', 'History'), 'history'): [
             Tab('history-all', _('All history')),
             Tab('history', _('Status changes')),
         ],
@@ -357,8 +357,8 @@ TAB_TREES = {
         Tab('doctorate-education', _('Course choice'), 'person-chalkboard'): [
             Tab('training-choice', _('Course choice')),
         ],
-        Tab('doctorate', pgettext('tab', 'Research'), 'graduation-cap'): [
-            Tab('project', pgettext('tab', 'Research')),
+        Tab('doctorate', pgettext_lazy('tab', 'Research'), 'graduation-cap'): [
+            Tab('project', pgettext_lazy('tab', 'Research')),
             Tab('cotutelle', _('Cotutelle')),
             Tab('supervision', _('Supervision')),
         ],
@@ -370,10 +370,10 @@ TAB_TREES = {
         Tab('documents', _('Documents'), 'folder-open'): [
             Tab('documents', _('Documents'), 'folder-open'),
         ],
-        Tab('comments', pgettext('tab', 'Comments'), 'comments'): [
-            Tab('comments', pgettext('tab', 'Comments'), 'comments')
+        Tab('comments', pgettext_lazy('tab', 'Comments'), 'comments'): [
+            Tab('comments', pgettext_lazy('tab', 'Comments'), 'comments')
         ],
-        Tab('history', pgettext('tab', 'History'), 'history'): [
+        Tab('history', pgettext_lazy('tab', 'History'), 'history'): [
             Tab('history-all', _('All history')),
             Tab('history', _('Status changes')),
         ],
@@ -410,10 +410,10 @@ TAB_TREES = {
         Tab('additional-information', _('Additional information'), 'puzzle-piece'): [
             Tab('specific-questions', _('Specific aspects')),
         ],
-        Tab('comments', pgettext('tab', 'Comments'), 'comments'): [
-            Tab('comments', pgettext('tab', 'Comments'), 'comments')
+        Tab('comments', pgettext_lazy('tab', 'Comments'), 'comments'): [
+            Tab('comments', pgettext_lazy('tab', 'Comments'), 'comments')
         ],
-        Tab('history', pgettext('tab', 'History'), 'history'): [
+        Tab('history', pgettext_lazy('tab', 'History'), 'history'): [
             Tab('history-all', _('All history')),
             Tab('history', _('Status changes')),
         ],
@@ -1474,6 +1474,11 @@ def get_document_details_url(context, document: EmplacementDocumentDTO):
         return f'{base_url}?{urlencode(query_params)}'
 
     return base_url
+
+
+@register.filter
+def has_free_documents(documents: List[EmplacementDocumentDTO]):
+    return any(document.est_emplacement_document_libre for document in documents)
 
 
 @register.filter
