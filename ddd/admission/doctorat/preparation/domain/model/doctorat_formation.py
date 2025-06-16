@@ -46,6 +46,8 @@ class DoctoratFormation(interface.Entity):
     entity_id: 'FormationIdentity'
     entite_ucl_id: 'UCLEntityIdentity'
     type: 'TrainingType'
+    intitule_fr: str
+    intitule_en: str
 
     def est_entite_CDE(self):
         return self.entite_ucl_id.code == ENTITY_CDE

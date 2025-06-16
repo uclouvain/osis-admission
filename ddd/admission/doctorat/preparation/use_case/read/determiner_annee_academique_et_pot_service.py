@@ -26,6 +26,7 @@
 
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
 from admission.ddd.admission.doctorat.preparation.commands import DeterminerAnneeAcademiqueEtPotQuery
+from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
@@ -40,10 +41,12 @@ def determiner_annee_academique_et_pot(
     titres_acces: 'ITitresAcces',
     profil_candidat_translator: 'IProfilCandidatTranslator',
     calendrier_inscription: 'ICalendrierInscription',
+    doctorat_translator: 'IDoctoratTranslator',
 ) -> 'InfosDetermineesDTO':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition = proposition_repository.get(entity_id=proposition_id)
+    formation = doctorat_translator.get(sigle=proposition.formation_id.sigle, annee=proposition.formation_id.annee)
 
     # THEN
     titres = titres_acces.recuperer_titres_access(proposition.matricule_candidat, TrainingType.PHD)
@@ -51,6 +54,6 @@ def determiner_annee_academique_et_pot(
         formation_id=proposition.formation_id,
         matricule_candidat=proposition.matricule_candidat,
         titres_acces=titres,
-        type_formation=TrainingType.PHD,
+        formation=formation,
         profil_candidat_translator=profil_candidat_translator,
     )

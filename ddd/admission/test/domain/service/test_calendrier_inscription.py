@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from unittest.mock import PropertyMock
+from unittest.mock import PropertyMock, MagicMock
 
 import freezegun
 import mock
@@ -93,7 +93,7 @@ class CalendrierInscriptionTestCase(TestCase):
             proposition=proposition,
             matricule_candidat=proposition.matricule_candidat,
             titres_acces=Titres(AdmissionConditionsDTOFactory()),
-            type_formation=TrainingType.PHD,
+            formation=MagicMock(type=TrainingType.PHD),
             profil_candidat_translator=self.profil_candidat_translator,
         )
         self.assertEqual(dto.pool, AcademicCalendarTypes.DOCTORATE_EDUCATION_ENROLLMENT)
@@ -107,7 +107,7 @@ class CalendrierInscriptionTestCase(TestCase):
             proposition=proposition,
             matricule_candidat=proposition.matricule_candidat,
             titres_acces=Titres(AdmissionConditionsDTOFactory()),
-            type_formation=TrainingType.UNIVERSITY_FIRST_CYCLE_CERTIFICATE,
+            formation=MagicMock(type=TrainingType.UNIVERSITY_FIRST_CYCLE_CERTIFICATE),
             profil_candidat_translator=self.profil_candidat_translator,
         )
         self.assertEqual(dto.pool, AcademicCalendarTypes.CONTINUING_EDUCATION_ENROLLMENT)
@@ -129,7 +129,7 @@ class CalendrierInscriptionTestCase(TestCase):
                 proposition=proposition,
                 matricule_candidat=proposition.matricule_candidat,
                 titres_acces=Titres(AdmissionConditionsDTOFactory()),
-                type_formation=TrainingType.BACHELOR,
+                formation=MagicMock(type=TrainingType.BACHELOR),
                 profil_candidat_translator=self.profil_candidat_translator,
                 formation_translator=self.formation_translator,
             )
@@ -153,7 +153,7 @@ class CalendrierInscriptionTestCase(TestCase):
                 proposition=proposition,
                 matricule_candidat=proposition.matricule_candidat,
                 titres_acces=Titres(AdmissionConditionsDTOFactory()),
-                type_formation=TrainingType.BACHELOR,
+                formation=MagicMock(type=TrainingType.BACHELOR),
                 profil_candidat_translator=self.profil_candidat_translator,
                 formation_translator=self.formation_translator,
             )
@@ -177,7 +177,7 @@ class CalendrierInscriptionTestCase(TestCase):
                 proposition=proposition,
                 matricule_candidat=proposition.matricule_candidat,
                 titres_acces=Titres(AdmissionConditionsDTOFactory()),
-                type_formation=TrainingType.BACHELOR,
+                formation=MagicMock(type=TrainingType.BACHELOR),
                 profil_candidat_translator=self.profil_candidat_translator,
                 formation_translator=self.formation_translator,
             )
@@ -193,7 +193,7 @@ class CalendrierInscriptionTestCase(TestCase):
             proposition=proposition,
             matricule_candidat=proposition.matricule_candidat,
             titres_acces=Titres(AdmissionConditionsDTOFactory()),
-            type_formation=TrainingType.BACHELOR,
+            formation=MagicMock(type=TrainingType.BACHELOR),
             profil_candidat_translator=self.profil_candidat_translator,
         )
         self.assertEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_ENROLLMENT_CHANGE)
@@ -212,7 +212,7 @@ class CalendrierInscriptionTestCase(TestCase):
                 proposition=proposition,
                 matricule_candidat=proposition.matricule_candidat,
                 titres_acces=Titres(AdmissionConditionsDTOFactory()),
-                type_formation=TrainingType.BACHELOR,
+                formation=MagicMock(type=TrainingType.BACHELOR),
                 profil_candidat_translator=self.profil_candidat_translator,
             )
             pool = dto.pool
@@ -237,7 +237,7 @@ class CalendrierInscriptionTestCase(TestCase):
                 proposition=proposition,
                 matricule_candidat=proposition.matricule_candidat,
                 titres_acces=Titres(AdmissionConditionsDTOFactory()),
-                type_formation=TrainingType.BACHELOR,
+                formation=MagicMock(type=TrainingType.BACHELOR),
                 profil_candidat_translator=self.profil_candidat_translator,
                 formation_translator=self.formation_translator,
             )
@@ -261,7 +261,7 @@ class CalendrierInscriptionTestCase(TestCase):
                 proposition=proposition,
                 matricule_candidat=proposition.matricule_candidat,
                 titres_acces=Titres(AdmissionConditionsDTOFactory()),
-                type_formation=TrainingType.BACHELOR,
+                formation=MagicMock(type=TrainingType.BACHELOR),
                 profil_candidat_translator=self.profil_candidat_translator,
                 formation_translator=self.formation_translator,
             )
@@ -282,7 +282,7 @@ class CalendrierInscriptionTestCase(TestCase):
                 proposition=proposition,
                 matricule_candidat=proposition.matricule_candidat,
                 titres_acces=Titres(AdmissionConditionsDTOFactory()),
-                type_formation=TrainingType.BACHELOR,
+                formation=MagicMock(type=TrainingType.BACHELOR),
                 profil_candidat_translator=self.profil_candidat_translator,
                 formation_translator=self.formation_translator,
             )
@@ -299,7 +299,7 @@ class CalendrierInscriptionTestCase(TestCase):
             proposition=proposition,
             matricule_candidat=proposition.matricule_candidat,
             titres_acces=Titres(AdmissionConditionsDTOFactory()),
-            type_formation=TrainingType.BACHELOR,
+            formation=MagicMock(type=TrainingType.BACHELOR),
             profil_candidat_translator=self.profil_candidat_translator,
         )
         self.assertEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_EXTERNAL_REORIENTATION)
@@ -319,7 +319,7 @@ class CalendrierInscriptionTestCase(TestCase):
                 proposition=proposition,
                 matricule_candidat=proposition.matricule_candidat,
                 titres_acces=Titres(AdmissionConditionsDTOFactory()),
-                type_formation=TrainingType.BACHELOR,
+                formation=MagicMock(type=TrainingType.BACHELOR),
                 profil_candidat_translator=self.profil_candidat_translator,
             )
             pool = dto.pool
@@ -341,7 +341,7 @@ class CalendrierInscriptionTestCase(TestCase):
                 proposition=proposition,
                 matricule_candidat=proposition.matricule_candidat,
                 titres_acces=Titres(AdmissionConditionsDTOFactory()),
-                type_formation=TrainingType.BACHELOR,
+                formation=MagicMock(type=TrainingType.BACHELOR),
                 profil_candidat_translator=self.profil_candidat_translator,
             )
             pool = dto.pool
@@ -361,7 +361,7 @@ class CalendrierInscriptionTestCase(TestCase):
                 proposition=proposition,
                 matricule_candidat=proposition.matricule_candidat,
                 titres_acces=Titres(AdmissionConditionsDTOFactory()),
-                type_formation=TrainingType.BACHELOR,
+                formation=MagicMock(type=TrainingType.BACHELOR),
                 profil_candidat_translator=self.profil_candidat_translator,
                 formation_translator=self.formation_translator,
             )
@@ -383,7 +383,7 @@ class CalendrierInscriptionTestCase(TestCase):
                 proposition=proposition,
                 matricule_candidat=proposition.matricule_candidat,
                 titres_acces=Titres(AdmissionConditionsDTOFactory()),
-                type_formation=TrainingType.BACHELOR,
+                formation=MagicMock(type=TrainingType.BACHELOR),
                 profil_candidat_translator=self.profil_candidat_translator,
                 formation_translator=self.formation_translator,
             )
@@ -404,7 +404,7 @@ class CalendrierInscriptionTestCase(TestCase):
             proposition=proposition,
             matricule_candidat=proposition.matricule_candidat,
             titres_acces=Titres(AdmissionConditionsDTOFactory()),
-            type_formation=TrainingType.BACHELOR,
+            formation=MagicMock(type=TrainingType.BACHELOR),
             profil_candidat_translator=self.profil_candidat_translator,
         )
         self.assertEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_NON_RESIDENT_QUOTA)
@@ -422,7 +422,7 @@ class CalendrierInscriptionTestCase(TestCase):
                 proposition=proposition,
                 matricule_candidat=proposition.matricule_candidat,
                 titres_acces=Titres(AdmissionConditionsDTOFactory()),
-                type_formation=TrainingType.BACHELOR,
+                formation=MagicMock(type=TrainingType.BACHELOR),
                 profil_candidat_translator=self.profil_candidat_translator,
             )
             pool = dto.pool
@@ -440,7 +440,7 @@ class CalendrierInscriptionTestCase(TestCase):
                 proposition=proposition,
                 matricule_candidat=proposition.matricule_candidat,
                 titres_acces=Titres(AdmissionConditionsDTOFactory()),
-                type_formation=TrainingType.BACHELOR,
+                formation=MagicMock(type=TrainingType.BACHELOR),
                 profil_candidat_translator=self.profil_candidat_translator,
             )
 
@@ -454,7 +454,7 @@ class CalendrierInscriptionTestCase(TestCase):
                 proposition=proposition,
                 matricule_candidat=proposition.matricule_candidat,
                 titres_acces=Titres(AdmissionConditionsDTOFactory()),
-                type_formation=TrainingType.BACHELOR,
+                formation=MagicMock(type=TrainingType.BACHELOR),
                 profil_candidat_translator=self.profil_candidat_translator,
             )
 
@@ -476,7 +476,7 @@ class CalendrierInscriptionTestCase(TestCase):
                 proposition=proposition,
                 matricule_candidat=proposition.matricule_candidat,
                 titres_acces=Titres(AdmissionConditionsDTOFactory(diplomation_secondaire_belge=True), *conditions),
-                type_formation=TrainingType.BACHELOR,
+                formation=MagicMock(type=TrainingType.BACHELOR),
                 profil_candidat_translator=self.profil_candidat_translator,
                 formation_translator=self.formation_translator,
             )
@@ -493,7 +493,7 @@ class CalendrierInscriptionTestCase(TestCase):
             proposition=proposition,
             matricule_candidat=proposition.matricule_candidat,
             titres_acces=Titres(AdmissionConditionsDTOFactory()),
-            type_formation=TrainingType.MASTER_M1,
+            formation=MagicMock(type=TrainingType.MASTER_M1),
             profil_candidat_translator=self.profil_candidat_translator,
         )
         self.assertEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_VIP)
@@ -511,7 +511,7 @@ class CalendrierInscriptionTestCase(TestCase):
             proposition=proposition,
             matricule_candidat=proposition.matricule_candidat,
             titres_acces=Titres(AdmissionConditionsDTOFactory(diplomation_secondaire_belge=True), *conditions),
-            type_formation=TrainingType.BACHELOR,
+            formation=MagicMock(type=TrainingType.BACHELOR),
             profil_candidat_translator=self.profil_candidat_translator,
         )
         self.assertEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_INSTITUT_CHANGE)
@@ -532,7 +532,7 @@ class CalendrierInscriptionTestCase(TestCase):
             proposition=proposition,
             matricule_candidat=proposition.matricule_candidat,
             titres_acces=Titres(AdmissionConditionsDTOFactory()),
-            type_formation=TrainingType.BACHELOR,
+            formation=MagicMock(type=TrainingType.BACHELOR),
             profil_candidat_translator=self.profil_candidat_translator,
         )
         self.assertEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_HUE_UCL_PATHWAY_CHANGE)
@@ -552,7 +552,7 @@ class CalendrierInscriptionTestCase(TestCase):
             proposition=proposition,
             matricule_candidat=proposition.matricule_candidat,
             titres_acces=Titres(AdmissionConditionsDTOFactory(diplomation_secondaire_belge=True), *conditions),
-            type_formation=TrainingType.BACHELOR,
+            formation=MagicMock(type=TrainingType.BACHELOR),
             profil_candidat_translator=self.profil_candidat_translator,
         )
         self.assertEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_UE5_BELGIAN)
@@ -578,7 +578,7 @@ class CalendrierInscriptionTestCase(TestCase):
             proposition=proposition,
             matricule_candidat=proposition.matricule_candidat,
             titres_acces=Titres(AdmissionConditionsDTOFactory()),
-            type_formation=TrainingType.CERTIFICATE,
+            formation=MagicMock(type=TrainingType.CERTIFICATE),
             profil_candidat_translator=self.profil_candidat_translator,
         )
         self.assertEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_UE5_BELGIAN)
@@ -600,7 +600,7 @@ class CalendrierInscriptionTestCase(TestCase):
             proposition=proposition,
             matricule_candidat=proposition.matricule_candidat,
             titres_acces=Titres(AdmissionConditionsDTOFactory()),
-            type_formation=TrainingType.CERTIFICATE,
+            formation=MagicMock(type=TrainingType.CERTIFICATE),
             profil_candidat_translator=self.profil_candidat_translator,
         )
         self.assertEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_VIP)
@@ -620,7 +620,7 @@ class CalendrierInscriptionTestCase(TestCase):
             proposition=proposition,
             matricule_candidat=proposition.matricule_candidat,
             titres_acces=Titres(AdmissionConditionsDTOFactory(diplomation_secondaire_etranger=True), *conditions),
-            type_formation=TrainingType.BACHELOR,
+            formation=MagicMock(type=TrainingType.BACHELOR),
             profil_candidat_translator=self.profil_candidat_translator,
         )
         self.assertEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_UE5_NON_BELGIAN)
@@ -644,7 +644,7 @@ class CalendrierInscriptionTestCase(TestCase):
             proposition=proposition,
             matricule_candidat=proposition.matricule_candidat,
             titres_acces=Titres(AdmissionConditionsDTOFactory(diplomation_secondaire_etranger=True), *conditions),
-            type_formation=TrainingType.BACHELOR,
+            formation=MagicMock(type=TrainingType.BACHELOR),
             profil_candidat_translator=self.profil_candidat_translator,
         )
         self.assertEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_UE5_NON_BELGIAN)
@@ -664,7 +664,7 @@ class CalendrierInscriptionTestCase(TestCase):
             proposition=proposition,
             matricule_candidat=proposition.matricule_candidat,
             titres_acces=Titres(AdmissionConditionsDTOFactory()),
-            type_formation=TrainingType.BACHELOR,
+            formation=MagicMock(type=TrainingType.BACHELOR),
             profil_candidat_translator=self.profil_candidat_translator,
         )
         self.assertEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_HUE5_BELGIUM_RESIDENCY)
@@ -683,7 +683,7 @@ class CalendrierInscriptionTestCase(TestCase):
             proposition=proposition,
             matricule_candidat=proposition.matricule_candidat,
             titres_acces=Titres(AdmissionConditionsDTOFactory()),
-            type_formation=TrainingType.BACHELOR,
+            formation=MagicMock(type=TrainingType.BACHELOR),
             profil_candidat_translator=self.profil_candidat_translator,
         )
         self.assertEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_HUE5_FOREIGN_RESIDENCY)
