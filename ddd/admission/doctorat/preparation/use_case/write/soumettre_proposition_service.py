@@ -129,6 +129,7 @@ def soumettre_proposition(
         formation_translator=doctorat_translator,
         calendrier_inscription=calendrier_inscription,
         maximum_propositions_service=maximum_propositions_service,
+        formation=formation,
         annee_soumise=cmd.annee,
         pool_soumis=AcademicCalendarTypes[cmd.pool],
     )

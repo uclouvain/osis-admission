@@ -33,6 +33,7 @@ from django.utils.formats import date_format
 from django.utils.translation import gettext
 
 from admission.calendar.admission_calendar import *
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import DoctoratFormation
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     IdentificationNonCompleteeException,
 )
@@ -100,13 +101,13 @@ class ICalendrierInscription(interface.DomainService):
         formation_id: 'FormationIdentity',
         matricule_candidat: str,
         titres_acces: 'Titres',
-        type_formation: 'TrainingType',
+        formation: 'Union[Formation, DoctoratFormation]',
         profil_candidat_translator: 'IProfilCandidatTranslator',
         proposition: Optional['Proposition'] = None,
     ) -> 'InfosDetermineesDTO':
-
+        type_formation = formation.type
         pool_ouverts = cls.get_pool_ouverts()
-        cls.verifier_residence_au_sens_du_decret(formation_id.sigle, proposition)
+        cls.verifier_residence_au_sens_du_decret(formation_id.sigle, proposition, formation)
         cls.verifier_reorientation_renseignee_si_eligible(type_formation, formation_id, proposition, pool_ouverts)
         cls.verifier_modification_renseignee_si_eligible(type_formation, formation_id, proposition, pool_ouverts)
         cls.verifier_formation_contingentee_ouvert(formation_id.sigle, proposition, formation_id.annee, pool_ouverts)
@@ -204,18 +205,17 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
         proposition: 'Proposition',
         matricule_candidat: str,
         titres_acces: 'Titres',
-        type_formation: 'TrainingType',
+        formation: Union['Formation', 'DoctoratFormation'],
         profil_candidat_translator: 'IProfilCandidatTranslator',
         formation_translator: 'IFormationTranslator',
         annee_soumise: int = None,
         pool_soumis: 'AcademicCalendarTypes' = None,
-        formation: 'Formation' = None,
     ) -> None:
         determination = cls.determiner_annee_academique_et_pot(
             formation_id,
             matricule_candidat,
             titres_acces,
-            type_formation,
+            formation,
             profil_candidat_translator,
             proposition,
         )
@@ -315,7 +315,12 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
             raise ModificationInscriptionExterneNonConfirmeeException()
 
     @classmethod
-    def verifier_residence_au_sens_du_decret(cls, sigle: str, proposition: Optional['Proposition']):
+    def verifier_residence_au_sens_du_decret(
+        cls,
+        sigle: str,
+        proposition: Optional['Proposition'],
+        formation: Union['Formation', 'DoctoratFormation'],
+    ):
         """Si le candidat s'inscrit dans une formation contingentée et n'a pas répondu à la question
         sur la résidence au sens du décret."""
         if cls.inscrit_formation_contingentee(sigle) and proposition:
@@ -325,7 +330,10 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
                 cls.INTERDIRE_INSCRIPTION_ETUDES_CONTINGENTES_POUR_NON_RESIDENT
                 and proposition.est_non_resident_au_sens_decret is True
             ):
-                raise ResidenceAuSensDuDecretNonDisponiblePourInscriptionException()
+                raise ResidenceAuSensDuDecretNonDisponiblePourInscriptionException(
+                    nom_formation_fr=formation.intitule_fr,
+                    nom_formation_en=formation.intitule_en,
+                )
 
     @classmethod
     def verifier_formation_contingentee_ouvert(

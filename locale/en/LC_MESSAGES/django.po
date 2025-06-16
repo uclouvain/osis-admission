@@ -846,13 +846,6 @@ msgid ""
 "be sent. Do you still want to send the application to the faculty?"
 msgstr ""
 
-msgid ""
-"As you are applying for a limited course as a non-resident (as defined by "
-"government decree) candidate, applications for the 2024-2025 academic year "
-"must be submitted via this <a href=\"https://fishe.uclouvain.be/portail/"
-"inscription/\" target=\"_blank\">specific platform</a>."
-msgstr ""
-
 msgid "Ask candidate to modify supervision committee"
 msgstr ""
 
@@ -7431,6 +7424,16 @@ msgstr ""
 
 msgid ""
 "You cannot ask for both modification and reorientation at the same time."
+msgstr ""
+
+#, python-format
+msgid ""
+"You cannot continue your application. The registration procedure for the "
+"<em>%(training_name)s</em> for non-resident students is managed on another "
+"registration platform. We invite you to consult the complete registration "
+"procedure on the following page: <a href=\"https://www.uclouvain.be/en/"
+"enrolment/limited-enrolment-courses\" target=\"_blank\">https://www."
+"uclouvain.be/en/enrolment/limited-enrolment-courses</a>"
 msgstr ""
 
 msgid "You cannot enter a language more than once, please correct the form."

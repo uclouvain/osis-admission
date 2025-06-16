@@ -175,6 +175,8 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
                     if campus is not None
                     else None
                 ),
+                intitule_fr=dto.title_fr,
+                intitule_en=dto.title_en,
             )
 
         except TrainingNotFoundException:
