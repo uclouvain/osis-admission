@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,10 +23,18 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
-from admission.ddd.admission.doctorat.preparation.commands import SpecifierFinancabiliteResultatCalculCommand
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import (
+    PropositionIdentityBuilder,
+)
+from admission.ddd.admission.doctorat.preparation.commands import (
+    SpecifierFinancabiliteResultatCalculCommand,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    PropositionIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
+    IPropositionRepository,
+)
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 
 
@@ -43,6 +51,6 @@ def specifier_financabilite_resultat_calcul(
         financabilite_regle_calcule=EtatFinancabilite[cmd.financabilite_regle_calcule],
         financabilite_regle_calcule_situation=cmd.financabilite_regle_calcule_situation,
     )
-    proposition_repository.save(proposition)
+    proposition_repository.save(entity=proposition, mise_a_jour_date_derniere_modification=False)
 
     return proposition_id

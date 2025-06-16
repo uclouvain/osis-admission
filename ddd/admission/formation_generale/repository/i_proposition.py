@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,14 +26,20 @@
 import abc
 from typing import List, Optional
 
-from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
+from admission.ddd.admission.domain.service.i_unites_enseignement_translator import (
+    IUnitesEnseignementTranslator,
+)
 from admission.ddd.admission.formation_generale.domain.model.proposition import (
     Proposition,
     PropositionIdentity,
 )
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
-from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
-from admission.ddd.admission.repository.i_proposition import IGlobalPropositionRepository
+from admission.ddd.admission.formation_generale.dtos.proposition import (
+    PropositionGestionnaireDTO,
+)
+from admission.ddd.admission.repository.i_proposition import (
+    IGlobalPropositionRepository,
+)
 from osis_common.ddd.interface import ApplicationService
 
 
@@ -73,7 +79,7 @@ class IPropositionRepository(IGlobalPropositionRepository):
 
     @classmethod
     @abc.abstractmethod
-    def save(cls, entity: 'Proposition') -> None:  # type: ignore[override]
+    def save(cls, entity: 'Proposition', mise_a_jour_date_derniere_modification=True) -> None:  # type: ignore[override]
         raise NotImplementedError
 
     @classmethod

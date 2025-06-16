@@ -345,7 +345,12 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
         raise NotImplementedError
 
     @classmethod
-    def save(cls, entity: 'Proposition', dupliquer_documents=False) -> None:
+    def save(
+        cls,
+        entity: 'Proposition',
+        dupliquer_documents=False,
+        mise_a_jour_date_derniere_modification=True,
+    ) -> None:
         doctorate = EducationGroupYear.objects.get(
             acronym=entity.sigle_formation,
             academic_year__year=entity.annee,
@@ -406,12 +411,14 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
         if years:
             academic_years = {year.year: year for year in AcademicYear.objects.filter(year__in=years)}
 
+        # FIXME remove when upgrading to Django 5.2? https://code.djangoproject.com/ticket/35890
+        modified_at_fields = {'modified_at': timezone.now()} if mise_a_jour_date_derniere_modification else {}
+
         admission, _ = DoctorateAdmission.objects.update_or_create(
             uuid=entity.entity_id.uuid,
             defaults={
+                **modified_at_fields,
                 'duplicate_documents_when_saving': dupliquer_documents,  # Indicate if the documents must be duplicated
-                # FIXME remove when upgrading to Django 5.2? https://code.djangoproject.com/ticket/35890
-                'modified_at': timezone.now(),
                 'reference': entity.reference,
                 'type': entity.type_admission.name,
                 'status': entity.statut.name,
