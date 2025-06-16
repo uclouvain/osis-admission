@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,39 +26,49 @@
 from typing import Union
 
 from django.contrib import messages
-from django.http import HttpResponse, Http404
+from django.http import Http404, HttpResponse
 from django.utils.functional import cached_property
-from django.utils.translation import gettext as _, get_language
-from django.views.generic import TemplateView, FormView, RedirectView
+from django.utils.translation import get_language
+from django.utils.translation import gettext as _
+from django.views.generic import FormView, RedirectView, TemplateView
 from osis_document.utils import get_file_url
 from rest_framework.status import HTTP_204_NO_CONTENT
 
-from admission.constants import CONTEXT_GENERAL, CONTEXT_CONTINUING, CONTEXT_DOCTORATE
-from admission.ddd.admission.doctorat.preparation import commands as doctorate_education_commands
-from admission.ddd.admission.enums.emplacement_document import (
-    TypeEmplacementDocument,
-    EMPLACEMENTS_FAC,
-    EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES,
-    EMPLACEMENTS_SIC,
-    EMPLACEMENTS_DOCUMENTS_RECLAMABLES,
-    EMPLACEMENTS_DOCUMENTS_INTERNES,
-    DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION,
+from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
+from admission.ddd.admission.doctorat.preparation import (
+    commands as doctorate_education_commands,
 )
-from admission.ddd.admission.formation_continue import commands as continuing_education_commands
-from admission.ddd.admission.formation_generale import commands as general_education_commands
+from admission.ddd.admission.enums.emplacement_document import (
+    DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION,
+    EMPLACEMENTS_DOCUMENTS_INTERNES,
+    EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES,
+    EMPLACEMENTS_DOCUMENTS_RECLAMABLES,
+    EMPLACEMENTS_FAC,
+    EMPLACEMENTS_SIC,
+    TypeEmplacementDocument,
+)
+from admission.ddd.admission.formation_continue import (
+    commands as continuing_education_commands,
+)
+from admission.ddd.admission.formation_generale import (
+    commands as general_education_commands,
+)
 from admission.exports.admission_recap.admission_recap import admission_pdf_recap
 from admission.forms.admission.document import (
-    RequestFreeDocumentForm,
-    RequestDocumentForm,
-    ReplaceDocumentForm,
-    UploadDocumentForm,
-    RequestFreeDocumentWithDefaultFileForm,
     ChangeRequestDocumentForm,
+    ReplaceDocumentForm,
+    RequestDocumentForm,
+    RequestFreeDocumentForm,
+    RequestFreeDocumentWithDefaultFileForm,
     RetypeDocumentForm,
+    UploadDocumentForm,
     UploadManagerDocumentForm,
 )
-from admission.infrastructure.utils import get_document_from_identifier, AdmissionDocument
-from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
+from admission.infrastructure.utils import (
+    AdmissionDocument,
+    get_document_from_identifier,
+)
+from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd import interface
@@ -246,8 +256,7 @@ class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, Htmx
     name = 'document-detail'
 
     def get_context_data(self, **kwargs):
-        from osis_document.api.utils import get_remote_token
-        from osis_document.api.utils import get_remote_metadata
+        from osis_document.api.utils import get_remote_metadata, get_remote_token
 
         context = TemplateView().get_context_data(**kwargs)
         context['view'] = self
@@ -441,11 +450,12 @@ class DeleteDocumentView(DocumentFormView):
             ),
         )
 
-        if self.document:
-            if self.document.type in EMPLACEMENTS_DOCUMENTS_RECLAMABLES:
-                self.htmx_trigger_form_extra['next'] = 'missing'
+        if self.document and self.document.type == TypeEmplacementDocument.NON_LIBRE.name:
+            self.htmx_trigger_form_extra['next'] = 'missing'
+            self.htmx_trigger_form_extra['refresh_details'] = document_id.identifiant
+        else:
+            self.htmx_trigger_form_extra['delete_document'] = document_id.identifiant
 
-        self.htmx_trigger_form_extra['refresh_details'] = document_id.identifiant
         self.htmx_trigger_form_extra['refresh_list'] = True
 
         messages.success(self.request, _('The document has been deleted'))
@@ -644,7 +654,7 @@ class RetypeDocumentView(DocumentFormView):
         return context
 
     def form_valid(self, form):
-        document_id = message_bus_instance.invoke(
+        document_ids = message_bus_instance.invoke(
             self.command(
                 uuid_proposition=self.admission_uuid,
                 identifiant_source=self.document_identifier,
@@ -652,5 +662,12 @@ class RetypeDocumentView(DocumentFormView):
                 auteur=self.request.user.person.global_id,
             )
         )
-        self.htmx_trigger_form_extra['refresh_details'] = document_id.identifiant
+
+        if document_ids[0]:
+            # The source has been updated
+            self.htmx_trigger_form_extra['refresh_details'] = self.document_identifier
+        else:
+            # The source has been deleted
+            self.htmx_trigger_form_extra['delete_document'] = self.document_identifier
+
         return super().form_valid(form)

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,19 +24,27 @@
 #
 # ##############################################################################
 import datetime
-from typing import Optional, List, Set
+import uuid
+from typing import List, Optional, Set
 
-from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument, EmplacementDocumentIdentity
+from admission.ddd.admission.domain.model.emplacement_document import (
+    EmplacementDocument,
+    EmplacementDocumentIdentity,
+)
 from admission.ddd.admission.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.domain.validator.exceptions import EmplacementDocumentNonTrouveException
+from admission.ddd.admission.domain.validator.exceptions import (
+    EmplacementDocumentNonTrouveException,
+)
 from admission.ddd.admission.enums.emplacement_document import (
-    TypeEmplacementDocument,
+    OngletsDemande,
     StatutEmplacementDocument,
     StatutReclamationEmplacementDocument,
-    OngletsDemande,
+    TypeEmplacementDocument,
 )
-from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
-from osis_common.ddd.interface import EntityIdentity, ApplicationService
+from admission.ddd.admission.repository.i_emplacement_document import (
+    IEmplacementDocumentRepository,
+)
+from osis_common.ddd.interface import ApplicationService, EntityIdentity
 
 
 class EmplacementDocumentInMemoryRepository(IEmplacementDocumentRepository):
@@ -53,7 +61,7 @@ class EmplacementDocumentInMemoryRepository(IEmplacementDocumentRepository):
                     identifiant='ID1',
                     proposition_id=PropositionIdentity(uuid='uuid-MASTER-SCI'),
                 ),
-                uuids_documents=[],
+                uuids_documents=[uuid.uuid4()],
                 type=TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC,
                 statut=StatutEmplacementDocument.A_RECLAMER,
                 statut_reclamation=StatutReclamationEmplacementDocument.IMMEDIATEMENT,
@@ -71,7 +79,7 @@ class EmplacementDocumentInMemoryRepository(IEmplacementDocumentRepository):
                     identifiant='ID2',
                     proposition_id=PropositionIdentity(uuid='uuid-MASTER-SCI'),
                 ),
-                uuids_documents=[],
+                uuids_documents=[uuid.uuid4()],
                 type=TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC,
                 statut=StatutEmplacementDocument.A_RECLAMER,
                 statut_reclamation=StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT,
@@ -89,7 +97,7 @@ class EmplacementDocumentInMemoryRepository(IEmplacementDocumentRepository):
                     identifiant='ID3',
                     proposition_id=PropositionIdentity(uuid='uuid-MASTER-SCC'),
                 ),
-                uuids_documents=[],
+                uuids_documents=[uuid.uuid4()],
                 type=TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC,
                 statut=StatutEmplacementDocument.A_RECLAMER,
                 justification_gestionnaire='Ma raison 3',
@@ -106,7 +114,7 @@ class EmplacementDocumentInMemoryRepository(IEmplacementDocumentRepository):
                     identifiant='ID4',
                     proposition_id=PropositionIdentity(uuid='uuid-MASTER-SCI'),
                 ),
-                uuids_documents=[],
+                uuids_documents=[uuid.uuid4()],
                 type=TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC,
                 statut=StatutEmplacementDocument.A_RECLAMER,
                 justification_gestionnaire='Ma raison 4',
@@ -123,7 +131,7 @@ class EmplacementDocumentInMemoryRepository(IEmplacementDocumentRepository):
                     identifiant=f'{OngletsDemande.SUITE_AUTORISATION.name}.VISA_ETUDES',
                     proposition_id=PropositionIdentity(uuid='uuid-MASTER-SCI-APPROVED'),
                 ),
-                uuids_documents=[],
+                uuids_documents=[uuid.uuid4()],
                 type=TypeEmplacementDocument.NON_LIBRE,
                 statut=StatutEmplacementDocument.NON_ANALYSE,
                 justification_gestionnaire='Ma raison 4',
@@ -140,7 +148,7 @@ class EmplacementDocumentInMemoryRepository(IEmplacementDocumentRepository):
                     identifiant=f'{OngletsDemande.SUITE_AUTORISATION.name}.AUTORISATION_PDF_SIGNEE',
                     proposition_id=PropositionIdentity(uuid='uuid-MASTER-SCI-APPROVED'),
                 ),
-                uuids_documents=[],
+                uuids_documents=[uuid.uuid4()],
                 type=TypeEmplacementDocument.NON_LIBRE,
                 statut=StatutEmplacementDocument.NON_ANALYSE,
                 justification_gestionnaire='Ma raison 4',
@@ -157,7 +165,7 @@ class EmplacementDocumentInMemoryRepository(IEmplacementDocumentRepository):
                     identifiant=f'{OngletsDemande.SUITE_AUTORISATION.name}.VISA_ETUDES',
                     proposition_id=PropositionIdentity(uuid='uuid-SC3DP-APPROVED'),
                 ),
-                uuids_documents=[],
+                uuids_documents=[uuid.uuid4()],
                 type=TypeEmplacementDocument.NON_LIBRE,
                 statut=StatutEmplacementDocument.NON_ANALYSE,
                 justification_gestionnaire='Ma raison 4',
@@ -174,7 +182,7 @@ class EmplacementDocumentInMemoryRepository(IEmplacementDocumentRepository):
                     identifiant=f'{OngletsDemande.SUITE_AUTORISATION.name}.AUTORISATION_PDF_SIGNEE',
                     proposition_id=PropositionIdentity(uuid='uuid-SC3DP-APPROVED'),
                 ),
-                uuids_documents=[],
+                uuids_documents=[uuid.uuid4()],
                 type=TypeEmplacementDocument.NON_LIBRE,
                 statut=StatutEmplacementDocument.NON_ANALYSE,
                 justification_gestionnaire='Ma raison 4',
@@ -191,7 +199,7 @@ class EmplacementDocumentInMemoryRepository(IEmplacementDocumentRepository):
                     identifiant='ID1-FC',
                     proposition_id=PropositionIdentity(uuid='uuid-USCC4'),
                 ),
-                uuids_documents=[],
+                uuids_documents=[uuid.uuid4()],
                 type=TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC,
                 statut=StatutEmplacementDocument.A_RECLAMER,
                 statut_reclamation=StatutReclamationEmplacementDocument.IMMEDIATEMENT,
@@ -209,7 +217,7 @@ class EmplacementDocumentInMemoryRepository(IEmplacementDocumentRepository):
                     identifiant='ID2-FC',
                     proposition_id=PropositionIdentity(uuid='uuid-USCC4'),
                 ),
-                uuids_documents=[],
+                uuids_documents=[uuid.uuid4()],
                 type=TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC,
                 statut=StatutEmplacementDocument.A_RECLAMER,
                 statut_reclamation=StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT,
@@ -227,7 +235,7 @@ class EmplacementDocumentInMemoryRepository(IEmplacementDocumentRepository):
                     identifiant='ID3-FC',
                     proposition_id=PropositionIdentity(uuid='uuid-MASTER-SCC'),
                 ),
-                uuids_documents=[],
+                uuids_documents=[uuid.uuid4()],
                 type=TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC,
                 statut=StatutEmplacementDocument.A_RECLAMER,
                 justification_gestionnaire='Ma raison 3',
@@ -244,7 +252,7 @@ class EmplacementDocumentInMemoryRepository(IEmplacementDocumentRepository):
                     identifiant='ID4-FC',
                     proposition_id=PropositionIdentity(uuid='uuid-USCC4'),
                 ),
-                uuids_documents=[],
+                uuids_documents=[uuid.uuid4()],
                 type=TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC,
                 statut=StatutEmplacementDocument.A_RECLAMER,
                 justification_gestionnaire='Ma raison 4',
@@ -261,7 +269,7 @@ class EmplacementDocumentInMemoryRepository(IEmplacementDocumentRepository):
                     identifiant='ID1-FD',
                     proposition_id=PropositionIdentity(uuid='uuid-SC3DP-promoteur-membre'),
                 ),
-                uuids_documents=[],
+                uuids_documents=[uuid.uuid4()],
                 type=TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC,
                 statut=StatutEmplacementDocument.A_RECLAMER,
                 statut_reclamation=StatutReclamationEmplacementDocument.IMMEDIATEMENT,
@@ -279,7 +287,7 @@ class EmplacementDocumentInMemoryRepository(IEmplacementDocumentRepository):
                     identifiant='LIBRE_CANDIDAT.36de0c3d-3c06-4c93-8eb4-c8648f04f142',
                     proposition_id=PropositionIdentity(uuid='uuid-SC3DP-promoteur-membre'),
                 ),
-                uuids_documents=[],
+                uuids_documents=[uuid.uuid4()],
                 type=TypeEmplacementDocument.LIBRE_RECLAMABLE_FAC,
                 statut=StatutEmplacementDocument.A_RECLAMER,
                 statut_reclamation=StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT,
