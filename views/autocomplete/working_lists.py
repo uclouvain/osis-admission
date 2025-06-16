@@ -74,6 +74,7 @@ class WorkingListAutocomplete(autocomplete.Select2QuerySetView):
                     for checklist_tab in ORGANISATION_ONGLETS_CHECKLIST_GENERALE
                 ],
                 'admission_statuses': result.admission_statuses,
+                'admission_education_types': result.admission_education_types,
                 'admission_type': result.admission_type,
                 'quarantine': result.quarantine,
             }

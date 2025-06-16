@@ -533,6 +533,9 @@ msgstr "Conditions d'accès non remplies."
 msgid "Admission context"
 msgstr "Contexte d'admission"
 
+msgid "Admission education types"
+msgstr "Les types de formation de l'admission"
+
 msgid "Admission export"
 msgstr "Export d'admission"
 
@@ -3791,6 +3794,9 @@ msgstr ""
 msgid "IBAN account number"
 msgstr "Numéro de compte IBAN"
 
+msgid "INCHANGE"
+msgstr "Inchangé"
+
 msgid "INITIAL_CANDIDAT"
 msgstr "Initial candidat"
 
@@ -4208,6 +4214,9 @@ msgstr "Clés"
 
 msgid "Knowledge of languages"
 msgstr "Connaissance des langues"
+
+msgid "LU proposed for deletion"
+msgstr "UE en proposition de suppression"
 
 msgid "Language"
 msgstr "Langue"
@@ -5745,6 +5754,15 @@ msgstr "Refusée"
 
 msgid "REFUS_AGREGATION"
 msgstr "Refus agrégation"
+
+msgid "REFUS_ARTICLE_95_ACCES_MS_ENSEIGNEMENT"
+msgstr "Refus 95 - accès MS enseignement"
+
+msgid "REFUS_ARTICLE_95_ACCES_S4"
+msgstr "Refus 95 - accès S4"
+
+msgid "REFUS_ARTICLE_95_ACCES_S5"
+msgstr "Refus 95 - accès S5"
 
 msgid "REFUS_ARTICLE_95_GENERIQUE_IRRECEVABILITE"
 msgstr "Refus 95 générique - irrecevabilité"

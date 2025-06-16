@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 # ##############################################################################
 
 import datetime
+import json
 import uuid
 
 import freezegun
@@ -34,7 +35,10 @@ from django.test import override_settings
 from admission.ddd.admission.enums.emplacement_document import (
     IdentifiantBaseEmplacementDocument,
 )
-from admission.tests.views.common.detail_tabs.test_document import BaseDocumentViewTestCase
+from admission.models import AdmissionFormItem
+from admission.tests.views.common.detail_tabs.test_document import (
+    BaseDocumentViewTestCase,
+)
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
@@ -95,6 +99,12 @@ class DeleteDocumentTestCase(BaseDocumentViewTestCase):
         )
 
         self.assertEqual(response.status_code, 204)
+
+        htmx_triggers = json.loads(response.headers.get('HX-Trigger', '{}')).get('formValidation', {})
+        self.assertTrue(htmx_triggers.get('refresh_list'))
+        self.assertIsNone(htmx_triggers.get('refresh_details'))
+        self.assertEqual(htmx_triggers.get('delete_document'), self.sic_free_non_requestable_internal_document)
+
         self.general_admission.refresh_from_db()
         self.assertNotIn(document_uuid, self.general_admission.uclouvain_sic_documents)
 
@@ -121,9 +131,16 @@ class DeleteDocumentTestCase(BaseDocumentViewTestCase):
         )
 
         self.assertEqual(response.status_code, 204)
+
+        htmx_triggers = json.loads(response.headers.get('HX-Trigger', '{}')).get('formValidation', {})
+        self.assertTrue(htmx_triggers.get('refresh_list'))
+        self.assertIsNone(htmx_triggers.get('refresh_details'))
+        self.assertEqual(htmx_triggers.get('delete_document'), self.sic_free_requestable_document)
+
         self.general_admission.refresh_from_db()
-        self.assertIsNotNone(self.general_admission.requested_documents.get(self.sic_free_requestable_document))
+        self.assertIsNone(self.general_admission.requested_documents.get(self.sic_free_requestable_document))
         self.assertIsNone(self.general_admission.specific_question_answers.get(specific_question_uuid))
+        self.assertFalse(AdmissionFormItem.objects.filter(uuid=specific_question_uuid).exists())
 
         # Check last modification data
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
@@ -145,6 +162,11 @@ class DeleteDocumentTestCase(BaseDocumentViewTestCase):
         )
 
         self.assertEqual(response.status_code, 204)
+
+        htmx_triggers = json.loads(response.headers.get('HX-Trigger', '{}')).get('formValidation', {})
+        self.assertTrue(htmx_triggers.get('refresh_list'))
+        self.assertEqual(htmx_triggers.get('refresh_details'), self.non_free_document_identifier)
+        self.assertIsNone(htmx_triggers.get('delete_document'))
 
         self.general_admission.refresh_from_db()
         self.assertEqual(self.general_admission.curriculum, [])
@@ -207,6 +229,12 @@ class DeleteDocumentTestCase(BaseDocumentViewTestCase):
         )
 
         self.assertEqual(response.status_code, 204)
+
+        htmx_triggers = json.loads(response.headers.get('HX-Trigger', '{}')).get('formValidation', {})
+        self.assertTrue(htmx_triggers.get('refresh_list'))
+        self.assertIsNone(htmx_triggers.get('refresh_details'))
+        self.assertEqual(htmx_triggers.get('delete_document'), self.fac_free_non_requestable_internal_document)
+
         self.general_admission.refresh_from_db()
         self.assertNotIn(document_uuid, self.general_admission.uclouvain_fac_documents)
 
@@ -233,9 +261,16 @@ class DeleteDocumentTestCase(BaseDocumentViewTestCase):
         )
 
         self.assertEqual(response.status_code, 204)
+
+        htmx_triggers = json.loads(response.headers.get('HX-Trigger', '{}')).get('formValidation', {})
+        self.assertTrue(htmx_triggers.get('refresh_list'))
+        self.assertIsNone(htmx_triggers.get('refresh_details'))
+        self.assertEqual(htmx_triggers.get('delete_document'), self.fac_free_requestable_document)
+
         self.general_admission.refresh_from_db()
-        self.assertIsNotNone(self.general_admission.requested_documents.get(self.fac_free_requestable_document))
+        self.assertIsNone(self.general_admission.requested_documents.get(self.fac_free_requestable_document))
         self.assertIsNone(self.general_admission.specific_question_answers.get(specific_question_uuid))
+        self.assertFalse(AdmissionFormItem.objects.filter(uuid=specific_question_uuid).exists())
 
         # Check last modification data
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
@@ -449,8 +484,9 @@ class DeleteDocumentTestCase(BaseDocumentViewTestCase):
 
         self.assertEqual(response.status_code, 204)
         self.doctorate_admission.refresh_from_db()
-        self.assertIsNotNone(self.doctorate_admission.requested_documents.get(self.sic_free_requestable_document))
+        self.assertIsNone(self.doctorate_admission.requested_documents.get(self.sic_free_requestable_document))
         self.assertIsNone(self.doctorate_admission.specific_question_answers.get(specific_question_uuid))
+        self.assertFalse(AdmissionFormItem.objects.filter(uuid=specific_question_uuid).exists())
 
         # Check last modification data
         self.assertEqual(self.doctorate_admission.modified_at, datetime.datetime.now())
@@ -573,8 +609,9 @@ class DeleteDocumentTestCase(BaseDocumentViewTestCase):
 
         self.assertEqual(response.status_code, 204)
         self.doctorate_admission.refresh_from_db()
-        self.assertIsNotNone(self.doctorate_admission.requested_documents.get(self.fac_free_requestable_document))
+        self.assertIsNone(self.doctorate_admission.requested_documents.get(self.fac_free_requestable_document))
         self.assertIsNone(self.doctorate_admission.specific_question_answers.get(specific_question_uuid))
+        self.assertFalse(AdmissionFormItem.objects.filter(uuid=specific_question_uuid).exists())
 
         # Check last modification data
         self.assertEqual(self.doctorate_admission.modified_at, datetime.datetime.now())

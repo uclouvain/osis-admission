@@ -23,35 +23,21 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List, Optional
-
-from admission.ddd.admission.domain.model.emplacement_document import (
-    EmplacementDocumentIdentity,
-)
-from admission.ddd.admission.formation_generale.commands import RetyperDocumentCommand
-from admission.ddd.admission.formation_generale.domain.model.proposition import (
-    PropositionIdentity,
-)
-from admission.ddd.admission.repository.i_emplacement_document import (
-    IEmplacementDocumentRepository,
-)
+from django.db.models import F
 
 
-def retyper_document(
-    cmd: 'RetyperDocumentCommand',
-    emplacement_document_repository: 'IEmplacementDocumentRepository',
-) -> List[Optional[EmplacementDocumentIdentity]]:
-    document_from_identity = EmplacementDocumentIdentity(
-        identifiant=cmd.identifiant_source,
-        proposition_id=PropositionIdentity(uuid=cmd.uuid_proposition),
-    )
-    document_to_identity = EmplacementDocumentIdentity(
-        identifiant=cmd.identifiant_cible,
-        proposition_id=PropositionIdentity(uuid=cmd.uuid_proposition),
+def update_determined_academic_year_for_submitted_admissions(base_admission_model):
+    qs = (
+        base_admission_model.objects.filter(
+            submitted_at__isnull=False,
+        )
+        .exclude(
+            determined_academic_year_id=F('training__academic_year_id'),
+        )
+        .select_related('training')
     )
 
-    return emplacement_document_repository.echanger_emplacements(
-        entity_id_from=document_from_identity,
-        entity_id_to=document_to_identity,
-        auteur=cmd.auteur,
-    )
+    for admission in qs:
+        admission.determined_academic_year_id = admission.training.academic_year_id
+
+    base_admission_model.objects.bulk_update(qs, ['determined_academic_year_id'])

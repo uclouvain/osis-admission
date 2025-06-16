@@ -23,35 +23,23 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List, Optional
+from django.db import migrations
 
-from admission.ddd.admission.domain.model.emplacement_document import (
-    EmplacementDocumentIdentity,
-)
-from admission.ddd.admission.formation_generale.commands import RetyperDocumentCommand
-from admission.ddd.admission.formation_generale.domain.model.proposition import (
-    PropositionIdentity,
-)
-from admission.ddd.admission.repository.i_emplacement_document import (
-    IEmplacementDocumentRepository,
+from admission.migrations.utils.synchronise_determined_academic_year import (
+    update_determined_academic_year_for_submitted_admissions,
 )
 
 
-def retyper_document(
-    cmd: 'RetyperDocumentCommand',
-    emplacement_document_repository: 'IEmplacementDocumentRepository',
-) -> List[Optional[EmplacementDocumentIdentity]]:
-    document_from_identity = EmplacementDocumentIdentity(
-        identifiant=cmd.identifiant_source,
-        proposition_id=PropositionIdentity(uuid=cmd.uuid_proposition),
-    )
-    document_to_identity = EmplacementDocumentIdentity(
-        identifiant=cmd.identifiant_cible,
-        proposition_id=PropositionIdentity(uuid=cmd.uuid_proposition),
-    )
+def update_determined_academic_year(apps, schema_editor):
+    BaseAdmission = apps.get_model('admission', 'BaseAdmission')
+    update_determined_academic_year_for_submitted_admissions(base_admission_model=BaseAdmission)
 
-    return emplacement_document_repository.echanger_emplacements(
-        entity_id_from=document_from_identity,
-        entity_id_to=document_to_identity,
-        auteur=cmd.auteur,
-    )
+
+class Migration(migrations.Migration):
+    dependencies = [
+        ('admission', '0261_generaleducationadmission_regular_registration_proof_for_registration_change'),
+    ]
+
+    operations = [
+        migrations.RunPython(code=update_determined_academic_year, reverse_code=migrations.RunPython.noop),
+    ]
