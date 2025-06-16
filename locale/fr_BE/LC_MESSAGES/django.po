@@ -533,6 +533,9 @@ msgstr "Conditions d'accès non remplies."
 msgid "Admission context"
 msgstr "Contexte d'admission"
 
+msgid "Admission education types"
+msgstr "Les types de formation de l'admission"
+
 msgid "Admission export"
 msgstr "Export d'admission"
 
@@ -3802,6 +3805,9 @@ msgstr ""
 msgid "IBAN account number"
 msgstr "Numéro de compte IBAN"
 
+msgid "INCHANGE"
+msgstr "Inchangé"
+
 msgid "INITIAL_CANDIDAT"
 msgstr "Initial candidat"
 
@@ -4219,6 +4225,9 @@ msgstr "Clés"
 
 msgid "Knowledge of languages"
 msgstr "Connaissance des langues"
+
+msgid "LU proposed for deletion"
+msgstr "UE en proposition de suppression"
 
 msgid "Language"
 msgstr "Langue"
@@ -5663,7 +5672,9 @@ msgid "Proof of regular registration"
 msgstr "Attestation d'inscription régulière'"
 
 msgid "Proof of regular registration for registration change"
-msgstr "Attestation d'inscription régulière pour la modification d'inscription externe"
+msgstr ""
+"Attestation d'inscription régulière pour la modification d'inscription "
+"externe"
 
 msgid "Proof of scholarship"
 msgstr "Preuve d'octroi de la bourse"
@@ -5754,6 +5765,15 @@ msgstr "Refusée"
 
 msgid "REFUS_AGREGATION"
 msgstr "Refus agrégation"
+
+msgid "REFUS_ARTICLE_95_ACCES_MS_ENSEIGNEMENT"
+msgstr "Refus 95 - accès MS enseignement"
+
+msgid "REFUS_ARTICLE_95_ACCES_S4"
+msgstr "Refus 95 - accès S4"
+
+msgid "REFUS_ARTICLE_95_ACCES_S5"
+msgstr "Refus 95 - accès S5"
 
 msgid "REFUS_ARTICLE_95_GENERIQUE_IRRECEVABILITE"
 msgstr "Refus 95 générique - irrecevabilité"
@@ -6889,8 +6909,7 @@ msgid ""
 "application to the SIC, status reset, etc). Do you confirm the closing?"
 msgstr ""
 "La clôture du dossier a des conséquences importantes (rapatriement du "
-"dossier en SIC, réinitialisation des états, etc). Confirmez-vous la "
-"clôture ?"
+"dossier en SIC, réinitialisation des états, etc). Confirmez-vous la clôture ?"
 
 #, python-format
 msgid ""
