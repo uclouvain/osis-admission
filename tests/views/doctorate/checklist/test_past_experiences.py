@@ -97,7 +97,9 @@ from epc.tests.factories.inscription_programme_annuel import (
 from epc.tests.factories.inscription_programme_cycle import (
     InscriptionProgrammeCycleFactory,
 )
+from osis_profile.models import BelgianHighSchoolDiploma, Exam, ForeignHighSchoolDiploma
 from osis_profile.models.enums.education import ForeignDiplomaTypes
+from osis_profile.models.enums.exam import ExamTypes
 
 
 @freezegun.freeze_time('2023-01-01')
@@ -1119,7 +1121,7 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
 
         high_school_diploma_alternative = HighSchoolDiplomaAlternativeFactory(
             person=self.candidate,
-            first_cycle_admission_exam=['token.pdf'],
+            certificate=['token.pdf'],
         )
 
         response = self.client.post(
@@ -1137,7 +1139,7 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
         self.assertTrue(self.admission.are_secondary_studies_access_title)
 
         # The candidate specified that he has secondary education but without more information
-        self.candidate.highschooldiplomaalternative.delete()
+        Exam.objects.filter(person=self.candidate, type=ExamTypes.PREMIER_CYCLE.name).delete()
 
         self.admission.are_secondary_studies_access_title = False
         self.admission.save()
