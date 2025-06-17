@@ -467,6 +467,25 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
             # Remove the document from the admission field
             getattr(admission, model_field).remove(entity.uuids_documents[0])
             admission.save(update_fields=admission_update_fields)
+            
+        elif entity.type.name in EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES:
+            with transaction.atomic():
+                # Don't keep the data related to the document request and the answer to the specific question
+                admission.requested_documents.pop(entity.entity_id.identifiant, None)
+                admission.specific_question_answers.pop(specific_question_uuid, None)
+                admission_update_fields.append('requested_documents')
+                admission.save(update_fields=admission_update_fields)
+
+                # Remove the specific question
+                form_item_instantiation_to_delete = (
+                    AdmissionFormItemInstantiation.objects.filter(form_item__uuid=specific_question_uuid)
+                    .select_related('form_item')
+                    .first()
+                )
+                related_form_item = form_item_instantiation_to_delete.form_item
+                form_item_instantiation_to_delete.delete()
+                related_form_item.delete()
+
 
         elif entity.type.name in EMPLACEMENTS_DOCUMENTS_RECLAMABLES:
             # Remove the document from the field of the related object
@@ -489,17 +508,7 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
             else:
                 admission.requested_documents.pop(entity.entity_id.identifiant, None)
 
-                with transaction.atomic():
-                    admission.save(update_fields=['requested_documents', 'modified_at', 'last_update_author'])
-
-                    # Remove the specific question for a free question
-                    if entity.type.name in EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES:
-                        form_item_instantiation_to_delete = AdmissionFormItemInstantiation.objects.filter(
-                            form_item__uuid=specific_question_uuid
-                        ).first()
-                        related_form_item = form_item_instantiation_to_delete.form_item
-                        form_item_instantiation_to_delete.delete()
-                        related_form_item.delete()
+                admission.save(update_fields=['requested_documents', 'modified_at', 'last_update_author'])
 
         else:
             raise NotImplementedError
