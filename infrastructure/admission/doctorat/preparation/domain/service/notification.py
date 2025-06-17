@@ -27,7 +27,6 @@ from email.message import EmailMessage
 from typing import List, Optional, Union
 
 from django.conf import settings
-from django.db.models import OuterRef, Subquery
 from django.shortcuts import resolve_url
 from django.utils import translation
 from django.utils.functional import lazy
@@ -108,6 +107,7 @@ from admission.utils import (
     get_backoffice_admission_url,
     get_portal_admission_url,
     get_salutation_prefix,
+    get_ca_member_salutation_prefix,
 )
 from base.models.person import Person
 from base.utils.utils import format_academic_year
@@ -186,7 +186,9 @@ class Notification(INotification):
             common_tokens["admission_link_front"],
             'supervision',
         )
-        actor_list = SupervisionActor.objects.filter(process=admission.supervision_group).select_related('person')
+        actor_list = SupervisionActor.objects.filter(process=admission.supervision_group).select_related(
+            'person__tutor'
+        )
         common_tokens['management_entity_name'] = admission.title_entite_gestion
         common_tokens['management_entity_acronym'] = admission.sigle_entite_gestion
         common_tokens['program_managers_names'] = get_admission_program_managers_names(
@@ -233,7 +235,7 @@ class Notification(INotification):
                 "signataire_first_name": actor.first_name,
                 "signataire_last_name": actor.last_name,
                 "signataire_role": actor.get_type_display(),
-                'salutation': get_salutation_prefix(actor.person) if actor.person_id else cls.default_salutation_prefix,
+                'salutation': get_ca_member_salutation_prefix(actor),
             }
             if actor.is_external:
                 tokens["admission_link_front"] = cls._lien_invitation_externe(proposition, actor)
@@ -300,11 +302,12 @@ class Notification(INotification):
         # Notifier les autres promoteurs en cas de refus
         if avis.etat == ChoixEtatSignature.DECLINED.name:
             other_promoters = (
-                admission.supervision_group.actors.select_related('person')
-                .annotate(type=Subquery(SupervisionActor.objects.filter(actor_ptr=OuterRef('pk')).values('type')[:1]))
+                SupervisionActor.objects.filter(process_id=admission.supervision_group_id)
+                .select_related('person__tutor')
                 .filter(type=ActorType.PROMOTER.name)
                 .exclude(uuid=signataire_id.uuid)
             )
+
             for other_promoter in other_promoters:
                 email_message = generate_email(
                     ADMISSION_EMAIL_SIGNATURE_REFUSAL,
@@ -316,9 +319,7 @@ class Notification(INotification):
                         "reason": avis.motif_refus,
                         "actor_first_name": other_promoter.first_name,
                         "actor_last_name": other_promoter.last_name,
-                        "salutation": get_salutation_prefix(other_promoter.person)
-                        if other_promoter.person_id
-                        else cls.default_salutation_prefix,
+                        "salutation": get_ca_member_salutation_prefix(other_promoter),
                     },
                     recipients=[other_promoter.email],
                 )
@@ -399,7 +400,12 @@ class Notification(INotification):
     def notifier_suppression_membre(cls, proposition: Proposition, signataire_id: 'SignataireIdentity') -> None:
         # Notifier uniquement si le signataire a déjà signé
         admission = PropositionProxy.objects.get(uuid=proposition.entity_id.uuid)
-        actor = admission.supervision_group.actors.select_related('person').get(uuid=signataire_id.uuid)
+        actor = (
+            SupervisionActor.objects.filter(process_id=admission.supervision_group_id)
+            .select_related('person__tutor')
+            .get(uuid=signataire_id.uuid)
+        )
+
         if actor.state in [SignatureState.APPROVED.name, SignatureState.DECLINED.name]:
             candidat = Person.objects.get(global_id=proposition.matricule_candidat)
             email_message = generate_email(
@@ -409,9 +415,7 @@ class Notification(INotification):
                     **cls.get_common_tokens(proposition, candidat),
                     "actor_first_name": actor.first_name,
                     "actor_last_name": actor.last_name,
-                    'salutation': get_salutation_prefix(person=actor.person)
-                    if actor.person_id
-                    else cls.default_salutation_prefix,
+                    'salutation': get_ca_member_salutation_prefix(actor),
                     'management_entity_name': admission.title_entite_gestion,
                     'management_entity_acronym': admission.sigle_entite_gestion,
                     'program_managers_names': get_admission_program_managers_names(
@@ -449,7 +453,7 @@ class Notification(INotification):
         common_tokens['program_managers_names'] = get_admission_program_managers_names(
             admission.training.education_group_id
         )
-        common_tokens['salutation'] = pgettext_lazy('other gender', 'Dear')
+        common_tokens['salutation'] = get_ca_member_salutation_prefix(actor)
 
         # Envoyer aux acteurs n'ayant pas répondu
         tokens = {
