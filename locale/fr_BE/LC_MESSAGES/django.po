@@ -5623,6 +5623,18 @@ msgstr "Adresse e-mail professionnelle"
 msgid "Professional experiences"
 msgstr "Expériences professionnelles"
 
+msgctxt "female gender"
+msgid "Professor"
+msgstr "Professeure"
+
+msgctxt "male gender"
+msgid "Professor"
+msgstr "Professeur"
+
+msgctxt "other gender"
+msgid "Professor"
+msgstr "Professeur·e"
+
 msgid "Program proposition"
 msgstr "Proposition de programme"
 
