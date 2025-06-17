@@ -184,7 +184,7 @@ class TestVerifierPropositionServiceCommun(TestCase):
 
         self.assertEqual(
             updated_proposition.checklist_initiale.financabilite.statut,
-            ChoixStatutChecklist.INITIAL_NON_CONCERNE,
+            ChoixStatutChecklist.INITIAL_CANDIDAT,
         )
         self.assertEqual(
             updated_proposition.checklist_initiale.choix_formation.statut,

@@ -662,7 +662,7 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
             'Curriculum > Travail 01/2021-03/2021',
         )
         self.assertEqual(call_args_by_tab['curriculum'].title, 'Curriculum')
-        self.assertEqual(call_args_by_tab['exams'].title, 'Exams')
+        self.assertEqual(call_args_by_tab['exams'].title, 'Examens')
         self.assertEqual(call_args_by_tab['specific_question'].title, 'Informations complémentaires')
         self.assertEqual(call_args_by_tab['accounting'].title, 'Comptabilité')
         self.assertEqual(call_args_by_tab['confirmation'].title, 'Finalisation')
@@ -3065,6 +3065,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
         ):
             section = get_exams_section(
                 self.general_bachelor_context,
+                None,
                 False,
             )
             attachments = section.attachments
@@ -3092,6 +3093,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
         ):
             section = get_exams_section(
                 self.general_bachelor_context,
+                None,
                 False,
             )
             attachments = section.attachments
