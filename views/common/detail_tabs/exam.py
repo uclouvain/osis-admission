@@ -70,6 +70,7 @@ class ExamDetailView(LoadDossierViewMixin, TemplateView):
                 else:
                     titre = self.education_group_year_exam.title_en
             context_data['examen'] = ExamenDTO(
+                uuid=str(exam.uuid),
                 requis=self.education_group_year_exam is not None,
                 titre=titre,
                 attestation=exam.certificate,

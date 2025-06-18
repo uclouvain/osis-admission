@@ -187,7 +187,7 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
 
             if getattr(high_school_diploma, 'academic_graduation_year', None):
                 high_school_diploma_experience_year = high_school_diploma.academic_graduation_year.year
-            elif isinstance(high_school_diploma, Exam):
+            elif isinstance(high_school_diploma, Exam) and high_school_diploma.year is not None:
                 high_school_diploma_experience_year = high_school_diploma.year.year
 
         elif getattr(admission.candidate, 'graduated_from_high_school_year', None):
