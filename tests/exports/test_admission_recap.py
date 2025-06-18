@@ -1233,6 +1233,8 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             ),
         )
         examens_dto = _ExamenDTO(
+            uuid='',
+            titre='Exam titre',
             requis=False,
             attestation=[],
             annee=None,
@@ -3075,7 +3077,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             self.assertEqual(attachments[0].identifier, 'ATTESTATION_DE_REUSSITE_CONCOURS_D_ENTREE_OU_D_ADMISSION')
             self.assertEqual(
                 attachments[0].label,
-                DocumentsExamens['ATTESTATION_DE_REUSSITE_CONCOURS_D_ENTREE_OU_D_ADMISSION'],
+                'Exam titre',
             )
             self.assertEqual(
                 attachments[0].uuids,
@@ -3103,7 +3105,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             self.assertEqual(attachments[0].identifier, 'ATTESTATION_DE_REUSSITE_CONCOURS_D_ENTREE_OU_D_ADMISSION')
             self.assertEqual(
                 attachments[0].label,
-                DocumentsExamens['ATTESTATION_DE_REUSSITE_CONCOURS_D_ENTREE_OU_D_ADMISSION'],
+                'Exam titre',
             )
             self.assertEqual(
                 attachments[0].uuids,
