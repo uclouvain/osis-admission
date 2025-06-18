@@ -89,6 +89,7 @@ class SicEnrolmentApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         )
         cls.experience_uuid = str(cls.admission.candidate.educationalexperience_set.first().uuid)
         cls.admission.checklist['current']['parcours_anterieur']['statut'] = ChoixStatutChecklist.GEST_REUSSITE.name
+        cls.admission.checklist['current']['donnees_personnelles']['statut'] = ChoixStatutChecklist.GEST_REUSSITE.name
         cls.admission.save()
         cls.url = resolve_url(
             'admission:doctorate:sic-decision-enrolment-approval',
