@@ -75,7 +75,6 @@ from admission.ddd.admission.dtos import (
 from admission.ddd.admission.dtos.etudes_secondaires import (
     EtudesSecondairesAdmissionDTO,
 )
-from admission.ddd.admission.dtos.examen import ExamenDTO
 from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
@@ -88,7 +87,8 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
 from admission.models import EPCInjection as AdmissionEPCInjection
 from admission.models.base import (
     AdmissionEducationalValuatedExperiences,
-    AdmissionProfessionalValuatedExperiences, BaseAdmission,
+    AdmissionProfessionalValuatedExperiences,
+    BaseAdmission,
 )
 from admission.models.epc_injection import (
     EPCInjectionStatus as AdmissionEPCInjectionStatus,
@@ -107,6 +107,7 @@ from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     DiplomeEtrangerEtudesSecondairesDTO,
     ValorisationEtudesSecondairesDTO,
 )
+from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     AnneeExperienceAcademiqueDTO,
     CurriculumAExperiencesDTO,
@@ -699,15 +700,26 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             education_group_year__academic_year__year=formation_annee,
         ).first()
         if education_group_year_exam is None:
-            return ExamenDTO(requis=False, attestation=[], annee=None)
+            return ExamenDTO(uuid='', requis=False, titre='', attestation=[], annee=None)
         exam = Exam.objects.filter(
             person__global_id=matricule,
             type=ExamTypes.FORMATION.name,
             education_group_year_exam=education_group_year_exam,
         ).first()
+        titre = (
+            education_group_year_exam.title_fr
+            if get_language() == settings.LANGUAGE_CODE_FR
+            else education_group_year_exam.title_en
+        )
         if exam is None:
-            return ExamenDTO(requis=True, attestation=[], annee=None)
-        return ExamenDTO(requis=True, attestation=exam.certificate, annee=exam.year.year if exam.year else None)
+            return ExamenDTO(uuid='', requis=True, titre=titre, attestation=[], annee=None)
+        return ExamenDTO(
+            uuid=str(exam.uuid),
+            requis=True,
+            titre=titre,
+            attestation=exam.certificate,
+            annee=exam.year.year if exam.year else None,
+        )
 
     @classmethod
     def get_experiences_non_academiques(

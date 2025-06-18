@@ -100,6 +100,7 @@ from epc.tests.factories.inscription_programme_cycle import (
 from osis_profile.models import BelgianHighSchoolDiploma, Exam, ForeignHighSchoolDiploma
 from osis_profile.models.enums.education import ForeignDiplomaTypes
 from osis_profile.models.enums.exam import ExamTypes
+from osis_profile.tests.factories.exam import ExamFactory
 
 
 @freezegun.freeze_time('2023-01-01')
@@ -853,6 +854,12 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
     def setUp(self) -> None:
         self.candidate = CompletePersonFactory(language=settings.LANGUAGE_CODE_FR)
 
+        self.exam = ExamFactory(
+            person=self.candidate,
+            year=self.academic_years[1],
+            education_group_year_exam__education_group_year=self.training,
+        )
+
         self.educational_experiences = self.candidate.educationalexperience_set.all()
         self.educational_experiences.update(obtained_diploma=True)
         self.non_educational_experience = ProfessionalExperienceFactory(person=self.candidate)
@@ -1161,6 +1168,50 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
 
         self.admission.refresh_from_db()
         self.assertTrue(self.admission.are_secondary_studies_access_title)
+
+    def test_specify_the_exam_as_access_title(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        # Select a known experience (be diploma)
+        response = self.client.post(
+            f'{self.url}?experience_uuid={self.exam.uuid}'
+            f'&experience_type={TypeTitreAccesSelectionnable.EXAMENS.name}',
+            **self.default_headers,
+            data={
+                'access-title': 'on',
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertDjangoMessage(response, gettext('Your data have been saved.'))
+
+        self.admission.refresh_from_db()
+        self.assertTrue(self.admission.is_exam_access_title)
+
+        selected_access_titles_names = response.context.get('selected_access_titles_names')
+
+        self.assertIsNotNone(selected_access_titles_names)
+        self.assertEqual(len(selected_access_titles_names), 1)
+
+        self.assertEqual(selected_access_titles_names[0], self.exam.education_group_year_exam.title_fr + ' (2022-2023)')
+
+        # Unselect a known experience (be diploma)
+        response = self.client.post(
+            f'{self.url}?experience_uuid={self.exam.uuid}'
+            f'&experience_type={TypeTitreAccesSelectionnable.EXAMENS.name}',
+            **self.default_headers,
+            data={},
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertDjangoMessage(response, gettext('Your data have been saved.'))
+
+        self.admission.refresh_from_db()
+        self.assertFalse(self.admission.is_exam_access_title)
+
+        selected_access_titles_names = response.context.get('selected_access_titles_names')
+
+        self.assertIsNone(selected_access_titles_names)
 
     def test_specify_an_internal_experience_as_access_title(self):
         self.client.force_login(user=self.sic_manager_user)

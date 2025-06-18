@@ -73,7 +73,6 @@ from admission.ddd.admission.domain.model.enums.condition_acces import (
 from admission.ddd.admission.domain.validator.exceptions import (
     ExperienceNonTrouveeException,
 )
-from admission.ddd.admission.dtos.examen import ExamenDTO
 from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.dtos.resume import (
@@ -220,8 +219,11 @@ from admission.mail_templates.checklist import (
 )
 from admission.models import EPCInjection
 from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
-from admission.models.online_payment import PaymentStatus, PaymentMethod
-from admission.templatetags.admission import authentication_css_class, bg_class_by_checklist_experience
+from admission.models.online_payment import PaymentMethod, PaymentStatus
+from admission.templatetags.admission import (
+    authentication_css_class,
+    bg_class_by_checklist_experience,
+)
 from admission.utils import (
     access_title_country,
     add_close_modal_into_htmx_response,
@@ -251,6 +253,7 @@ from base.utils.utils import format_academic_year
 from ddd.logic.shared_kernel.profil.commands import (
     RecupererExperiencesParcoursInterneQuery,
 )
+from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
@@ -597,32 +600,6 @@ class PastExperiencesMixin:
             f'{self.base_namespace}:past-experiences-access-title',
             uuid=self.kwargs['uuid'],
         )
-
-    @cached_property
-    def education_group_year_exam(self):
-        return EducationGroupYearExam.objects.filter(education_group_year=self.admission.training).first()
-
-    @cached_property
-    def examen(self):
-        try:
-            exam = Exam.objects.get(
-                person=self.admission.candidate,
-                type=ExamTypes.FORMATION.name,
-                education_group_year_exam__education_group_year=self.admission.training,
-            )
-            return ExamenDTO(
-                requis=self.education_group_year_exam is not None,
-                attestation=exam.certificate,
-                annee=exam.year.year if exam.year else None,
-            )
-        except Exam.DoesNotExist:
-            return None
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['education_group_year_exam'] = self.education_group_year_exam
-        context['examen'] = self.examen
-        return context
 
 
 # Fac decision
@@ -3446,6 +3423,7 @@ class ChecklistView(
             experiences_academiques=resume.curriculum.experiences_academiques,
             experiences_professionnelles=resume.curriculum.experiences_non_academiques,
             etudes_secondaires=resume.etudes_secondaires,
+            examens=resume.examens,
             experiences_parcours_interne=self.internal_experiences,
             additional_messages=self.curriculum_additional_messages(),
         )

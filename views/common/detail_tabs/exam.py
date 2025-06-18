@@ -25,19 +25,20 @@
 # ##############################################################################
 from functools import cached_property
 
+from django.conf import settings
 from django.core.exceptions import PermissionDenied
-from django.views.generic import TemplateView
+from django.utils.translation import get_language
 from django.utils.translation import gettext as _
+from django.views.generic import TemplateView
 
-from admission.ddd.admission.dtos.examen import ExamenDTO
 from admission.views.common.mixins import LoadDossierViewMixin
+from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
+from osis_profile.models import EducationGroupYearExam, Exam
+from osis_profile.models.enums.exam import ExamTypes
 
 __all__ = [
     'ExamDetailView',
 ]
-
-from osis_profile.models import Exam, EducationGroupYearExam
-from osis_profile.models.enums.exam import ExamTypes
 
 
 class ExamDetailView(LoadDossierViewMixin, TemplateView):
@@ -62,8 +63,15 @@ class ExamDetailView(LoadDossierViewMixin, TemplateView):
                 type=ExamTypes.FORMATION.name,
                 education_group_year_exam__education_group_year=self.admission.training,
             )
+            titre = ''
+            if self.education_group_year_exam is not None:
+                if get_language() == settings.LANGUAGE_CODE_FR:
+                    titre = self.education_group_year_exam.title_fr
+                else:
+                    titre = self.education_group_year_exam.title_en
             context_data['examen'] = ExamenDTO(
                 requis=self.education_group_year_exam is not None,
+                titre=titre,
                 attestation=exam.certificate,
                 annee=exam.year.year if exam.year else None,
             )
