@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,29 +29,42 @@ import freezegun
 from django.db import IntegrityError
 from django.test import TestCase
 
-from admission.constants import CONTEXT_GENERAL, CONTEXT_CONTINUING, CONTEXT_DOCTORATE
-from admission.models import AdmissionViewer, ContinuingEducationAdmissionProxy
-from admission.models.base import admission_directory_path, BaseAdmission
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     continuing_education_types_as_set,
     doctorate_types_as_set,
 )
+from admission.models import AdmissionViewer, ContinuingEducationAdmissionProxy
+from admission.models.base import BaseAdmission, admission_directory_path
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.admission_viewer import AdmissionViewerFactory
-from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from admission.tests.factories.continuing_education import (
+    ContinuingEducationAdmissionFactory,
+)
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from base.models.entity_version import EntityVersion
-from base.models.enums.education_group_types import TrainingType, AllTypes
+from base.models.enums.education_group_types import AllTypes, TrainingType
 from base.models.enums.entity_type import EntityType
 from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group_type import EducationGroupTypeFactory
-from base.tests.factories.entity_version import MainEntityVersionFactory, EntityVersionFactory
+from base.tests.factories.entity_version import (
+    EntityVersionFactory,
+    MainEntityVersionFactory,
+)
 from base.tests.factories.person import PersonFactory
-from epc.tests.factories.inscription_programme_annuel import InscriptionProgrammeAnnuelFactory
+from epc.tests.factories.inscription_programme_annuel import (
+    InscriptionProgrammeAnnuelFactory,
+)
 
 
 class BaseTestCase(TestCase):
@@ -171,7 +184,7 @@ class AdmissionInQuarantineTestCase(TestCase):
 
         for status in PersonMergeStatus:
             proposal.status = status.name
-            proposal.validation = {}
+            proposal.validation = {'valid': True}
             proposal.save()
 
             admission = BaseAdmission.objects.get(pk=admission.pk)
@@ -181,6 +194,14 @@ class AdmissionInQuarantineTestCase(TestCase):
 
             # The admission is always in quarantine if there is an error during the digit ticket validation
             proposal.validation = {'valid': False}
+            proposal.save()
+
+            admission = BaseAdmission.objects.get(pk=admission.pk)
+
+            self.assertTrue(admission.is_in_quarantine)
+
+            # The admission is always in quarantine if the valid property is not specified
+            proposal.validation = {}
             proposal.save()
 
             admission = BaseAdmission.objects.get(pk=admission.pk)

@@ -27,7 +27,7 @@ import os
 import uuid
 from collections import defaultdict
 from contextlib import suppress
-from typing import Dict, Iterable, List, Union, Optional
+from typing import Dict, Iterable, List, Optional, Union
 
 import weasyprint
 from django.conf import settings
@@ -98,7 +98,7 @@ from reference.models.scholarship import Scholarship
 def get_cached_admission_perm_obj(admission_uuid):
     qs = DoctorateAdmission.objects.select_related(
         'supervision_group',
-        'candidate__personmergeproposal',
+        'candidate',
         'training__academic_year',
         'training__education_group_type',
         'determined_academic_year',
@@ -111,7 +111,7 @@ def get_cached_admission_perm_obj(admission_uuid):
 
 def get_cached_general_education_admission_perm_obj(admission_uuid):
     qs = GeneralEducationAdmission.objects.select_related(
-        'candidate__personmergeproposal',
+        'candidate',
         'training__academic_year',
         'training__education_group_type',
         'determined_academic_year',
@@ -124,7 +124,7 @@ def get_cached_general_education_admission_perm_obj(admission_uuid):
 
 def get_cached_continuing_education_admission_perm_obj(admission_uuid):
     qs = ContinuingEducationAdmission.objects.select_related(
-        'candidate__personmergeproposal',
+        'candidate',
         'training__academic_year',
         'training__specificiufcinformations',
     )

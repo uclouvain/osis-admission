@@ -394,9 +394,9 @@ class BaseAdmissionQuerySet(models.QuerySet):
             Q(candidate__personmergeproposal__isnull=False)
             & Q(
                 Q(candidate__personmergeproposal__status__in=PersonMergeStatus.quarantine_statuses())
-                |
                 # Cas validation ticket Digit en erreur
-                ~Q(candidate__personmergeproposal__validation__valid=True)
+                | ~Q(candidate__personmergeproposal__validation__valid=True)
+                | ~Q(candidate__personmergeproposal__validation__has_key='valid')
             )
         )
 

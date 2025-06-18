@@ -164,13 +164,7 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
             if has_comment:
                 checklist_additional_icons['decision_cdd'] = 'fa-regular fa-comment'
 
-        person_merge_proposal = getattr(self.admission.candidate, 'personmergeproposal', None)
-        if person_merge_proposal and (
-            person_merge_proposal.status in PersonMergeStatus.quarantine_statuses()
-            or not person_merge_proposal.validation.get('valid', True)
-        ):
-            # Cas display warning when quarantaine
-            # (cf. admission/infrastructure/admission/domain/service/lister_toutes_demandes.py)
+        if self.demande_est_en_quarantaine:
             checklist_additional_icons['donnees_personnelles'] = 'fas fa-warning text-warning'
 
         candidate_admissions: List[DemandeRechercheDTO] = message_bus_instance.invoke(
