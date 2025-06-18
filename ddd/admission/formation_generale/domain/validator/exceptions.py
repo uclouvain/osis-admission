@@ -334,6 +334,7 @@ class BoursesEtudesNonRenseignees(BusinessException):
         message = _("The information about the scholarships must be specified in the 'Course choice' tab.")
         super().__init__(message, **kwargs)
 
+
 class StatutsChecklistExperiencesEtreValidesException(BusinessException):
     status_code = "FORMATION-GENERALE-37"
 
@@ -364,4 +365,12 @@ class ExamenNonCompletesException(BusinessException):
 
     def __init__(self, **kwargs):
         message = _("Exam must be completed for this training.")
+        super().__init__(message, **kwargs)
+
+
+class EtatChecklistDonneesPersonnellesNonValidePourApprouverDemande(BusinessException):
+    status_code = "FORMATION-GENERALE-40"
+
+    def __init__(self, **kwargs):
+        message = _('The status of the checklist for the personal data must be "Validated".')
         super().__init__(message, **kwargs)

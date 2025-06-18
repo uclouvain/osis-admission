@@ -6615,6 +6615,10 @@ msgid ""
 "or \"Financable\" or \"Dispensation granted\"."
 msgstr ""
 
+msgid ""
+"The status of the checklist for the personal data must be \"Validated\"."
+msgstr ""
+
 #, python-brace-format
 msgid ""
 "The status of the request is currently \"{current_status}\". Only the "

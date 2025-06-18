@@ -1,0 +1,53 @@
+{% load admission i18n strings %}
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% with initial=original_admission.checklist.initial.donnees_personnelles current=original_admission.checklist.current.donnees_personnelles %}
+  <div
+    id="personal-data-statuses"
+    class="form-group btn-group status-group"
+    role="group"
+    hx-swap-oob="true"
+  >
+    {% concat view.base_namespace ':personal-data-change-status' as personal_data_base_url %}
+    {% url personal_data_base_url view.kwargs.uuid initial.statut as initial_status_url %}
+    {% url personal_data_base_url view.kwargs.uuid 'GEST_BLOCAGE' as blocking_status_url %}
+    {% url personal_data_base_url view.kwargs.uuid 'GEST_REUSSITE' as success_status_url %}
+    {% translate initial.libelle as initial_state_label %}
+    {% checklist_state_button tab='donnees_personnelles' label=initial_state_label icon='user' state=initial.statut class='muted' htmx_post=initial_status_url %}
+    {% checklist_state_button tab='donnees_personnelles' label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' class='danger' fraud='0' htmx_post=blocking_status_url %}
+    {% checklist_state_button tab='donnees_personnelles' label=_("Fraudster") icon='circle-stop' state='GEST_BLOCAGE' class='danger' fraud='1' htmx_post=blocking_status_url %}
+    {% checklist_state_button tab='donnees_personnelles' label=_("Validated") icon='check' state='GEST_REUSSITE' class='success' htmx_post=success_status_url %}
+  </div>
+  {% if request.htmx %}
+    {# Update the checklist menu item status #}
+    {% include "admission/general_education/checklist_menu_item_status.html" with statut=current.statut item_name='donnees_personnelles' %}
+    {# Update the sic decision statuses #}
+    {% if view.is_doctorate %}
+      {% include 'admission/doctorate/includes/checklist/sic_decision_statuses.html' with proposition=admission current=original_admission.checklist.current.decision_sic %}
+    {% else %}
+      {% include 'admission/general_education/includes/checklist/sic_decision_statuses.html' with proposition=admission current=original_admission.checklist.current.decision_sic %}
+    {% endif %}
+  {% endif %}
+{% endwith %}

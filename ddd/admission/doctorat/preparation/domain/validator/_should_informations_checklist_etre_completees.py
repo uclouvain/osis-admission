@@ -51,6 +51,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     DemandeDoitEtreInscriptionException,
     DocumentAReclamerImmediatException,
     EtatChecklistDecisionSicNonValidePourApprouverUneInscription,
+    EtatChecklistDonneesPersonnellesNonValidePourApprouverDemande,
     EtatChecklistFinancabiliteNonValidePourApprouverDemande,
     InscriptionTardiveAvecConditionAccesException,
     MotifRefusCDDNonSpecifieException,
@@ -299,3 +300,12 @@ class ShouldFinancabiliteEtreDansEtatCorrectPourApprouverDemande(BusinessValidat
             and self.checklist_actuelle.financabilite.statut != ChoixStatutChecklist.GEST_REUSSITE
         ):
             raise EtatChecklistFinancabiliteNonValidePourApprouverDemande
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldDonneesPersonnellesEtreDansEtatCorrectPourApprouverDemande(BusinessValidator):
+    checklist_actuelle: StatutsChecklistDoctorale
+
+    def validate(self, *args, **kwargs):
+        if self.checklist_actuelle.donnees_personnelles.statut != ChoixStatutChecklist.GEST_REUSSITE:
+            raise EtatChecklistDonneesPersonnellesNonValidePourApprouverDemande
