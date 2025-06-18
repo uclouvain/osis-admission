@@ -690,6 +690,7 @@ class QuarantaineFilter(admin.SimpleListFilter):
             quarantaine=Case(
                 When(
                     Q(candidate__personmergeproposal__status__in=PersonMergeStatus.quarantine_statuses())
+                    | ~Q(candidate__personmergeproposal__validation__has_key='valid')
                     | ~Q(candidate__personmergeproposal__validation__valid=True),
                     then=Value(True),
                 ),

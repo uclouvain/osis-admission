@@ -117,7 +117,7 @@ from admission.utils import (
     person_is_sic,
 )
 from admission.views.list import BaseAdmissionList
-from base.models.person_merge_proposal import PersonMergeStatus
+from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.gestion_des_comptes.queries import GetPropositionFusionQuery
 from infrastructure.messages_bus import message_bus_instance
@@ -296,7 +296,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         elif contexte == CONTEXT_CONTINUING:
             if not self.admission.training.specificiufcinformations.registration_required:
                 return False, "La formation doit avoir l'inscription au rôle requise"
-        personmergeproposal = getattr(self.admission.candidate, 'personmergeproposal', None)
+        personmergeproposal = self.current_merge_proposal
         if not (personmergeproposal and personmergeproposal.registration_id_sent_to_digit):
             return False, "Il manque le noma"
         if not self.admission.candidate.global_id.startswith('00'):
@@ -310,11 +310,15 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         return True, ''
 
     @cached_property
+    def current_merge_proposal(self):
+        return PersonMergeProposal.objects.filter(original_person=self.admission.candidate).first()
+
+    @cached_property
     def demande_est_en_quarantaine(self) -> bool:
-        person_merge_proposal = getattr(self.admission.candidate, 'personmergeproposal', None)
+        person_merge_proposal = self.current_merge_proposal
         if person_merge_proposal and (
             person_merge_proposal.status in PersonMergeStatus.quarantine_statuses()
-            or not person_merge_proposal.validation.get('valid', True)
+            or not person_merge_proposal.validation.get('valid', False)
         ):
             # Cas display warning when quarantaine
             # (cf. admission/infrastructure/admission/domain/service/lister_toutes_demandes.py)
