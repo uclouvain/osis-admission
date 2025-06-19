@@ -72,6 +72,7 @@ from admission.models import (
     ContinuingEducationAdmission,
     DoctorateAdmission,
     GeneralEducationAdmission,
+    SupervisionActor,
 )
 from backoffice.settings.rest_framework.exception_handler import get_error_data
 from base.auth.roles.program_manager import ProgramManager
@@ -334,6 +335,32 @@ def get_salutation_prefix(person: Person, language: Optional[str] = '') -> str:
             ChoixGenre.F.name: pgettext('female gender', 'Dear'),
             ChoixGenre.X.name: pgettext('other gender', 'Dear'),
         }.get(person.gender or ChoixGenre.X.name)
+
+
+def get_ca_member_salutation_prefix(actor: SupervisionActor) -> str:
+    """
+    Return the translated salutation prefix for a supervision actor depending on the gender and on the doctorate title.
+    :param actor: The given actor. To be more efficient, prefetch the tutor related to the actor person.
+    :return: The salutation prefix as a string in the language of the actor.
+    """
+    with override(language=actor.language):
+        if actor.person_id:
+            # Member with related person
+            if hasattr(actor.person, 'tutor'):
+                # Tutor
+                return {
+                    ChoixGenre.H.name: pgettext('male gender', 'Professor'),
+                    ChoixGenre.F.name: pgettext('female gender', 'Professor'),
+                    ChoixGenre.X.name: pgettext('other gender', 'Professor'),
+                }.get(actor.person.gender or ChoixGenre.X.name)
+            else:
+                return get_salutation_prefix(actor.person)
+        elif actor.is_doctor:
+            # External tutor member
+            return pgettext('other gender', 'Professor')
+        else:
+            # External not tutor member
+            return pgettext('other gender', 'Dear')
 
 
 def access_title_country(selectable_access_titles: Iterable[TitreAccesSelectionnableDTO]) -> str:

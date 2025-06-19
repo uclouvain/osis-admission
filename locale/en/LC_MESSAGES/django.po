@@ -3137,6 +3137,9 @@ msgstr ""
 msgid "Greetings depending on the gender of the candidate"
 msgstr ""
 
+msgid "Greetings depending on the gender of the recipient"
+msgstr ""
+
 msgid "Grounds for denied"
 msgstr ""
 
@@ -5070,6 +5073,18 @@ msgid "Professional email"
 msgstr ""
 
 msgid "Professional experiences"
+msgstr ""
+
+msgctxt "female gender"
+msgid "Professor"
+msgstr ""
+
+msgctxt "male gender"
+msgid "Professor"
+msgstr ""
+
+msgctxt "other gender"
+msgid "Professor"
 msgstr ""
 
 msgid "Program proposition"
