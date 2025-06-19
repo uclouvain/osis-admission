@@ -36,6 +36,7 @@ from django.views.generic.edit import FormMixin
 from admission.constants import DEFAULT_PAGINATOR_SIZE
 from admission.ddd.admission.commands import ListerToutesDemandesQuery
 from admission.forms.admission.filter import AllAdmissionsFilterForm
+from admission.models.working_list import UNCHANGED_KEY
 from admission.utils import add_messages_into_htmx_response
 from admission.views import ListPaginator
 from base.views.common import display_error_messages
@@ -87,6 +88,7 @@ class BaseAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, HtmxMixin, 
         kwargs['htmx_template_name'] = self.htmx_template_name
         kwargs['default_form_values'] = {field.name: field.initial for field in self.form if field.initial}
         kwargs['now'] = datetime.datetime.now()
+        kwargs['UNCHANGED_KEY'] = UNCHANGED_KEY
         return super().get_context_data(**kwargs)
 
     def get_paginate_by(self, queryset):

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -36,16 +36,20 @@ from django.utils.translation import gettext
 from osis_history.models import HistoryEntry
 from osis_notification.models import EmailNotification
 
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
 from admission.ddd.admission.enums.emplacement_document import (
-    TypeEmplacementDocument,
     StatutEmplacementDocument,
     StatutReclamationEmplacementDocument,
+    TypeEmplacementDocument,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
-from admission.tests.views.common.detail_tabs.test_document import BaseDocumentViewTestCase
+from admission.tests.views.common.detail_tabs.test_document import (
+    BaseDocumentViewTestCase,
+)
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.file_field import PDF_MIME_TYPE
 
@@ -172,7 +176,7 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
                 'deadline_at': '2022-01-15',
                 'automatically_required': False,
                 'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
-                'related_checklist_tab': '',
+                'related_checklist_tab': 'donnees_personnelles',
             },
         )
 
@@ -237,7 +241,7 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
                 'deadline_at': '',
                 'automatically_required': False,
                 'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
-                'related_checklist_tab': '',
+                'related_checklist_tab': 'donnees_personnelles',
             },
         )
 
@@ -416,7 +420,7 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
                 'deadline_at': '2022-01-15',
                 'automatically_required': False,
                 'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
-                'related_checklist_tab': '',
+                'related_checklist_tab': 'donnees_personnelles',
             },
         )
 
@@ -481,7 +485,7 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
                 'deadline_at': '',
                 'automatically_required': False,
                 'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
-                'related_checklist_tab': '',
+                'related_checklist_tab': 'donnees_personnelles',
             },
         )
 
@@ -674,7 +678,7 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
                 'deadline_at': '2022-01-15',
                 'automatically_required': False,
                 'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
-                'related_checklist_tab': '',
+                'related_checklist_tab': 'donnees_personnelles',
             },
         )
 
@@ -739,7 +743,7 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
                 'deadline_at': '',
                 'automatically_required': False,
                 'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
-                'related_checklist_tab': '',
+                'related_checklist_tab': 'donnees_personnelles',
             },
         )
 
@@ -923,7 +927,7 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
                 'deadline_at': '2022-01-15',
                 'automatically_required': False,
                 'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
-                'related_checklist_tab': '',
+                'related_checklist_tab': 'donnees_personnelles',
             },
         )
 
@@ -988,7 +992,7 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
                 'deadline_at': '',
                 'automatically_required': False,
                 'request_status': StatutReclamationEmplacementDocument.IMMEDIATEMENT.name,
-                'related_checklist_tab': '',
+                'related_checklist_tab': 'donnees_personnelles',
             },
         )
 

@@ -570,3 +570,15 @@ a.no-link {
   /* Do not use the global overlay as we want to have access to the page elements even if one of them is not loaded yet */
   display: none !important;
 }
+
+i.deleted-learning-unit-icon::after {
+  position:relative;
+  bottom:-6px;
+  left:-5px;
+  font-size: 10px;
+  color: black;
+  border-radius: 50%;
+  padding: 2px;
+  content: 'S';
+  background: #ff7979;
+}

@@ -23,35 +23,20 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List, Optional
+from django.db.models import Value
+from django.db.models.functions import Concat
 
-from admission.ddd.admission.domain.model.emplacement_document import (
-    EmplacementDocumentIdentity,
-)
-from admission.ddd.admission.formation_generale.commands import RetyperDocumentCommand
-from admission.ddd.admission.formation_generale.domain.model.proposition import (
-    PropositionIdentity,
-)
-from admission.ddd.admission.repository.i_emplacement_document import (
-    IEmplacementDocumentRepository,
-)
+from admission.auth.roles.program_manager import ProgramManager
 
 
-def retyper_document(
-    cmd: 'RetyperDocumentCommand',
-    emplacement_document_repository: 'IEmplacementDocumentRepository',
-) -> List[Optional[EmplacementDocumentIdentity]]:
-    document_from_identity = EmplacementDocumentIdentity(
-        identifiant=cmd.identifiant_source,
-        proposition_id=PropositionIdentity(uuid=cmd.uuid_proposition),
-    )
-    document_to_identity = EmplacementDocumentIdentity(
-        identifiant=cmd.identifiant_cible,
-        proposition_id=PropositionIdentity(uuid=cmd.uuid_proposition),
-    )
-
-    return emplacement_document_repository.echanger_emplacements(
-        entity_id_from=document_from_identity,
-        entity_id_to=document_to_identity,
-        auteur=cmd.auteur,
+def get_admission_program_managers_names(education_group_id):
+    """
+    Return the concatenation of the names of the admission program managers of the specified education group.
+    :param education_group_id: The id of the education group
+    :return: a string containing the names of the managers
+    """
+    return ', '.join(
+        ProgramManager.objects.filter(education_group_id=education_group_id)
+        .annotate(person_name=Concat('person__first_name', Value(' '), 'person__last_name'))
+        .values_list('person_name', flat=True)
     )

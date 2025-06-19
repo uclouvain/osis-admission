@@ -475,6 +475,9 @@ msgstr ""
 msgid "Admission context"
 msgstr ""
 
+msgid "Admission education types"
+msgstr ""
+
 msgid "Admission export"
 msgstr ""
 
@@ -3128,6 +3131,9 @@ msgstr ""
 msgid "Greetings depending on the gender of the candidate"
 msgstr ""
 
+msgid "Greetings depending on the gender of the recipient"
+msgstr ""
+
 msgid "Grounds for denied"
 msgstr ""
 
@@ -3406,6 +3412,9 @@ msgstr ""
 
 msgid "IBAN account number"
 msgstr ""
+
+msgid "INCHANGE"
+msgstr "Unchanged"
 
 msgid "INITIAL_CANDIDAT"
 msgstr "Initial candidate"
@@ -3771,6 +3780,9 @@ msgid "Keys"
 msgstr ""
 
 msgid "Knowledge of languages"
+msgstr ""
+
+msgid "LU proposed for deletion"
 msgstr ""
 
 msgid "Language"
@@ -5051,6 +5063,18 @@ msgstr ""
 msgid "Professional experiences"
 msgstr ""
 
+msgctxt "female gender"
+msgid "Professor"
+msgstr ""
+
+msgctxt "male gender"
+msgid "Professor"
+msgstr ""
+
+msgctxt "other gender"
+msgid "Professor"
+msgstr ""
+
 msgid "Program proposition"
 msgstr ""
 
@@ -5171,6 +5195,15 @@ msgid "REFUSEE"
 msgstr "Denied"
 
 msgid "REFUS_AGREGATION"
+msgstr ""
+
+msgid "REFUS_ARTICLE_95_ACCES_MS_ENSEIGNEMENT"
+msgstr ""
+
+msgid "REFUS_ARTICLE_95_ACCES_S4"
+msgstr ""
+
+msgid "REFUS_ARTICLE_95_ACCES_S5"
 msgstr ""
 
 msgid "REFUS_ARTICLE_95_GENERIQUE_IRRECEVABILITE"

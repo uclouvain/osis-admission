@@ -533,6 +533,9 @@ msgstr "Conditions d'accès non remplies."
 msgid "Admission context"
 msgstr "Contexte d'admission"
 
+msgid "Admission education types"
+msgstr "Les types de formation de l'admission"
+
 msgid "Admission export"
 msgstr "Export d'admission"
 
@@ -3423,6 +3426,9 @@ msgstr "Année d'obtention"
 msgid "Greetings depending on the gender of the candidate"
 msgstr "Salutations en fonction du genre du candidat"
 
+msgid "Greetings depending on the gender of the recipient"
+msgstr "Salutations en fonction du genre du destinataire"
+
 msgid "Grounds for denied"
 msgstr "Motif de refus"
 
@@ -3790,6 +3796,9 @@ msgstr ""
 
 msgid "IBAN account number"
 msgstr "Numéro de compte IBAN"
+
+msgid "INCHANGE"
+msgstr "Inchangé"
 
 msgid "INITIAL_CANDIDAT"
 msgstr "Initial candidat"
@@ -4208,6 +4217,9 @@ msgstr "Clés"
 
 msgid "Knowledge of languages"
 msgstr "Connaissance des langues"
+
+msgid "LU proposed for deletion"
+msgstr "UE en proposition de suppression"
 
 msgid "Language"
 msgstr "Langue"
@@ -4819,7 +4831,7 @@ msgid "Name of the management entity"
 msgstr "Nom de l'entité de gestion"
 
 msgid "Name of the manager sending the email"
-msgstr "Nom du gestionnaire qui envois l'email"
+msgstr "Nom du gestionnaire qui envoie l'email"
 
 msgid "Name of the working list"
 msgstr "Nom de la liste de travail"
@@ -5609,6 +5621,18 @@ msgstr "Adresse e-mail professionnelle"
 msgid "Professional experiences"
 msgstr "Expériences professionnelles"
 
+msgctxt "female gender"
+msgid "Professor"
+msgstr "Professeure"
+
+msgctxt "male gender"
+msgid "Professor"
+msgstr "Professeur"
+
+msgctxt "other gender"
+msgid "Professor"
+msgstr "Professeur·e"
+
 msgid "Program proposition"
 msgstr "Proposition de programme"
 
@@ -5745,6 +5769,15 @@ msgstr "Refusée"
 
 msgid "REFUS_AGREGATION"
 msgstr "Refus agrégation"
+
+msgid "REFUS_ARTICLE_95_ACCES_MS_ENSEIGNEMENT"
+msgstr "Refus 95 - accès MS enseignement"
+
+msgid "REFUS_ARTICLE_95_ACCES_S4"
+msgstr "Refus 95 - accès S4"
+
+msgid "REFUS_ARTICLE_95_ACCES_S5"
+msgstr "Refus 95 - accès S5"
 
 msgid "REFUS_ARTICLE_95_GENERIQUE_IRRECEVABILITE"
 msgstr "Refus 95 générique - irrecevabilité"
