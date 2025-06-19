@@ -3426,6 +3426,9 @@ msgstr "Année d'obtention"
 msgid "Greetings depending on the gender of the candidate"
 msgstr "Salutations en fonction du genre du candidat"
 
+msgid "Greetings depending on the gender of the recipient"
+msgstr "Salutations en fonction du genre du destinataire"
+
 msgid "Grounds for denied"
 msgstr "Motif de refus"
 
@@ -4828,7 +4831,7 @@ msgid "Name of the management entity"
 msgstr "Nom de l'entité de gestion"
 
 msgid "Name of the manager sending the email"
-msgstr "Nom du gestionnaire qui envois l'email"
+msgstr "Nom du gestionnaire qui envoie l'email"
 
 msgid "Name of the working list"
 msgstr "Nom de la liste de travail"
@@ -5617,6 +5620,18 @@ msgstr "Adresse e-mail professionnelle"
 
 msgid "Professional experiences"
 msgstr "Expériences professionnelles"
+
+msgctxt "female gender"
+msgid "Professor"
+msgstr "Professeure"
+
+msgctxt "male gender"
+msgid "Professor"
+msgstr "Professeur"
+
+msgctxt "other gender"
+msgid "Professor"
+msgstr "Professeur·e"
 
 msgid "Program proposition"
 msgstr "Proposition de programme"
