@@ -41,10 +41,12 @@ from django.test import TestCase, override_settings
 from django.utils.translation import gettext
 from osis_history.models import HistoryEntry
 from osis_notification.models import EmailNotification
+from rest_framework.status import HTTP_200_OK
 
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
     ENTITY_CDE,
 )
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
     ChoixStatutPropositionGenerale,
@@ -107,8 +109,9 @@ from epc.tests.factories.inscription_programme_cycle import (
 from osis_profile.models import (
     BelgianHighSchoolDiploma,
     EducationalExperience,
+    Exam,
     ForeignHighSchoolDiploma,
-    ProfessionalExperience, Exam,
+    ProfessionalExperience,
 )
 from osis_profile.models.enums.exam import ExamTypes
 
@@ -1624,6 +1627,7 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         self.general_admission.annual_program_contact_person_name = ''
         self.general_admission.annual_program_contact_person_email = ''
         self.general_admission.join_program_fac_comment = ''
+        self.general_admission.communication_to_the_candidate = ''
         self.general_admission.save()
 
         response = self.client.get(self.url, **self.default_headers)
@@ -1641,6 +1645,8 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         self.assertEqual(form.initial.get('annual_program_contact_person_name'), '')
         self.assertEqual(form.initial.get('annual_program_contact_person_email'), '')
         self.assertEqual(form.initial.get('join_program_fac_comment'), '')
+        self.assertEqual(form.initial.get('communication_to_the_candidate'), '')
+        self.assertIsNotNone(form.fields.get('communication_to_the_candidate'))
         self.assertEqual(form.initial.get('with_additional_approval_conditions'), None)
         self.assertEqual(form.initial.get('all_additional_approval_conditions'), [])
 
@@ -1759,6 +1765,50 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
                 'name_en': free_approval_conditions[0].name_en,
             },
         )
+
+    def test_approval_decision_form_with_enrolment(self):
+        self.client.force_login(user=self.fac_manager_user)
+
+        self.general_admission.type_demande = TypeDemande.INSCRIPTION.name
+        self.general_admission.save(update_fields=['type_demande'])
+
+        response = self.client.get(self.url, **self.default_headers)
+
+        self.assertEqual(response.status_code, HTTP_200_OK)
+
+        form = response.context['fac_decision_approval_form']
+
+        self.assertIsNone(form.fields.get('communication_to_the_candidate'))
+
+        response = self.client.post(
+            self.url,
+            data={
+                'fac-decision-approval-another_training': False,
+                'fac-decision-approval-with_prerequisite_courses': 'False',
+                'fac-decision-approval-with_additional_approval_conditions': 'False',
+                'fac-decision-approval-communication_to_the_candidate': 'Communication to the candidate',
+                'fac-decision-approval-program_planned_years_number': 1,
+                'fac-decision-TOTAL_FORMS': '0',
+                'fac-decision-INITIAL_FORMS': '0',
+                'fac-decision-MIN_NUM_FORMS': '0',
+                'fac-decision-MAX_NUM_FORMS': '1000',
+            },
+            **self.default_headers,
+        )
+
+        # Check the response
+        self.assertEqual(response.status_code, 200)
+
+        form = response.context['fac_decision_approval_form']
+        formset = response.context['fac_decision_free_approval_condition_formset']
+
+        self.assertTrue(form.is_valid())
+        self.assertTrue(formset.is_valid())
+
+        # Check that the admission has been updated
+        self.general_admission.refresh_from_db()
+
+        self.assertEqual(self.general_admission.communication_to_the_candidate, '')
 
     def test_approval_decision_form_submitting_with_invalid_data(self):
         self.client.force_login(user=self.fac_manager_user)
@@ -1984,6 +2034,7 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
                 'fac-decision-approval-annual_program_contact_person_name': 'John Doe',
                 'fac-decision-approval-annual_program_contact_person_email': 'john.doe@example.be',
                 'fac-decision-approval-join_program_fac_comment': 'Comment about the join program',
+                'fac-decision-approval-communication_to_the_candidate': 'Communication to the candidate',
                 'fac-decision-TOTAL_FORMS': '2',
                 'fac-decision-INITIAL_FORMS': '0',
                 'fac-decision-MIN_NUM_FORMS': '0',
@@ -2033,6 +2084,7 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         self.assertEqual(self.general_admission.annual_program_contact_person_name, 'John Doe')
         self.assertEqual(self.general_admission.annual_program_contact_person_email, 'john.doe@example.be')
         self.assertEqual(self.general_admission.join_program_fac_comment, 'Comment about the join program')
+        self.assertEqual(self.general_admission.communication_to_the_candidate, 'Communication to the candidate')
 
         # Check the creation of the free additional conditions
         conditions: QuerySet[FreeAdditionalApprovalCondition] = FreeAdditionalApprovalCondition.objects.filter(
@@ -2116,6 +2168,7 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
             'fac-decision-approval-annual_program_contact_person_name': 'John Doe',
             'fac-decision-approval-annual_program_contact_person_email': 'john.doe@example.be',
             'fac-decision-approval-join_program_fac_comment': 'Comment about the join program',
+            'fac-decision-approval-communication_to_the_candidate': 'Communication to the candidate',
             'save-transfer': '1',
         }
 
@@ -2182,6 +2235,7 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         self.assertEqual(self.general_admission.annual_program_contact_person_name, 'John Doe')
         self.assertEqual(self.general_admission.annual_program_contact_person_email, 'john.doe@example.be')
         self.assertEqual(self.general_admission.join_program_fac_comment, 'Comment about the join program')
+        self.assertEqual(self.general_admission.communication_to_the_candidate, 'Communication to the candidate')
 
         # Check the creation of the free additional conditions
         conditions: QuerySet[FreeAdditionalApprovalCondition] = FreeAdditionalApprovalCondition.objects.filter(

@@ -177,6 +177,12 @@ msgstr ""
 msgid "A close mail has already been sent to the candidate."
 msgstr ""
 
+msgid "A comment from the CDD for the SIC is specified"
+msgstr ""
+
+msgid "A comment from the faculty for the SIC is specified"
+msgstr ""
+
 msgid "A deny mail has already been sent to the candidate."
 msgstr ""
 
@@ -1449,9 +1455,6 @@ msgid "Comments"
 msgstr ""
 
 msgid "Commitment and declaration"
-msgstr ""
-
-msgid "Communication to the candidate"
 msgstr ""
 
 #, python-brace-format
@@ -3030,6 +3033,9 @@ msgid "Free and uploaded by FAC for the managers"
 msgstr ""
 
 msgid "Free and uploaded by SIC for the managers"
+msgstr ""
+
+msgid "Free comment for the candidate"
 msgstr ""
 
 msgid "Free documents"
@@ -4965,6 +4971,11 @@ msgid ""
 msgstr ""
 
 msgid ""
+"Please note that you are allowed to enroll in a different program than the "
+"one you originally applied for. For more information, contact your faculty."
+msgstr ""
+
+msgid ""
 "Please provide a copy of the residence permit covering the entire course, "
 "including the assessment test (except for online courses)."
 msgstr ""
@@ -6239,6 +6250,9 @@ msgid "The application is in IUFC"
 msgstr ""
 
 msgid "The application is in faculty"
+msgstr ""
+
+msgid "The application is in quarantine"
 msgstr ""
 
 msgid ""

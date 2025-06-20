@@ -316,9 +316,7 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        checklist_additional_icons = {}
 
-        context['checklist_additional_icons'] = checklist_additional_icons
         context['can_update_checklist_tab'] = self.can_update_checklist_tab
         context['can_change_payment'] = self.request.user.has_perm('admission.change_payment', self.admission)
         context['can_change_faculty_decision'] = self.request.user.has_perm(

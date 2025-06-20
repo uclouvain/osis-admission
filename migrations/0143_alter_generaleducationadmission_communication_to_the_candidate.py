@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='generaleducationadmission',
             name='communication_to_the_candidate',
-            field=models.TextField(blank=True, default='', verbose_name='Communication to the candidate'),
+            field=models.TextField(blank=True, default='', verbose_name='Free comment for the candidate'),
         ),
     ]
