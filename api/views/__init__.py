@@ -47,12 +47,11 @@ from admission.api.views.documents import (
     DoctorateRequestedDocumentListView,
     GeneralRequestedDocumentListView,
 )
+from admission.api.views.exam import GeneralExamView
 from admission.api.views.languages_knowledge import (
     CommonLanguagesKnowledgeViewSet,
     LanguagesKnowledgeViewSet,
 )
-from admission.api.views.exam import GeneralExamView
-from admission.api.views.languages_knowledge import LanguagesKnowledgeViewSet
 from admission.api.views.payment import (
     ApplicationFeesListView,
     OpenApplicationFeesPaymentView,
@@ -70,6 +69,7 @@ from admission.api.views.person import (
     IdentificationDTOView,
     PersonViewSet,
 )
+from admission.api.views.person_last_enrolment import *
 from admission.api.views.pool_questions import PoolQuestionsView
 from admission.api.views.project import *
 from admission.api.views.proposition import (

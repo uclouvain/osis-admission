@@ -56,6 +56,7 @@ from .languages_knowledge import *
 from .payment import *
 from .pdf_recap import PDFRecapSerializer
 from .person import *
+from .person_last_enrolment import PersonLastEnrolmentSerializer
 from .project import *
 from .secondary_studies import HighSchoolDiplomaSerializer
 from .specific_question import (

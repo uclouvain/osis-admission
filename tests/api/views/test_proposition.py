@@ -102,7 +102,7 @@ class PropositionCreatePermissionsViewTestCase(CheckActionLinksMixin, APITestCas
         json_response = response.json()
         self.assertActionLinks(
             json_response['links'],
-            ['create_person', 'create_coordinates', 'create_training_choice'],
+            ['create_person', 'create_person_last_enrolment', 'create_coordinates', 'create_training_choice'],
             [],
         )
 
@@ -117,7 +117,7 @@ class PropositionCreatePermissionsViewTestCase(CheckActionLinksMixin, APITestCas
         json_response = response.json()
         self.assertActionLinks(
             json_response['links'],
-            ['create_training_choice', 'create_coordinates'],
+            ['create_person_last_enrolment', 'create_training_choice', 'create_coordinates'],
             ['create_person'],
         )
 
@@ -207,6 +207,7 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
                 'retrieve_training_choice',
                 'update_training_choice',
                 'update_person',
+                'update_person_last_enrolment',
                 'update_coordinates',
                 'update_secondary_studies',
                 'update_curriculum',
@@ -416,6 +417,7 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
                 'retrieve_training_choice',
                 'update_training_choice',
                 'update_person',
+                'update_person_last_enrolment',
                 'update_coordinates',
                 'update_secondary_studies',
                 'update_curriculum',
@@ -738,6 +740,7 @@ class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixi
         allowed_actions = [
             'retrieve_person',
             'update_person',
+            'update_person_last_enrolment',
             'retrieve_coordinates',
             'update_coordinates',
             'retrieve_training_choice',

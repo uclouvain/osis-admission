@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Admission API
-  version: 1.1.2dev1438
+  version: 1.1.3
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -1029,6 +1029,39 @@ paths:
       - $ref: '#/components/parameters/X-User-LastName'
       - $ref: '#/components/parameters/X-User-Email'
       - $ref: '#/components/parameters/X-User-GlobalID'
+  /person_last_enrolment:
+    put:
+      operationId: person_last_enrolment_update
+      description: Change view of the information concerning the person's last registration
+      tags:
+      - person
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonLastEnrolment'
+      security:
+      - tokenAuth: []
+      - Token: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonLastEnrolment'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
   /propositions:
     get:
       operationId: list_propositions
@@ -1850,6 +1883,45 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PersonIdentification'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /propositions/continuing-education/{uuid}/person_last_enrolment:
+    put:
+      operationId: propositions_continuing_education_person_last_enrolment_update
+      description: Change view of the information concerning the person's last registration
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      tags:
+      - person
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonLastEnrolment'
+      security:
+      - tokenAuth: []
+      - Token: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonLastEnrolment'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -3172,6 +3244,45 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PersonIdentification'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /propositions/doctorate/{uuid}/person_last_enrolment:
+    put:
+      operationId: propositions_doctorate_person_last_enrolment_update
+      description: Change view of the information concerning the person's last registration
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      tags:
+      - person
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonLastEnrolment'
+      security:
+      - tokenAuth: []
+      - Token: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonLastEnrolment'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -5117,6 +5228,45 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+  /propositions/general-education/{uuid}/person_last_enrolment:
+    put:
+      operationId: propositions_general_education_person_last_enrolment_update
+      description: Change view of the information concerning the person's last registration
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      tags:
+      - person
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonLastEnrolment'
+      security:
+      - tokenAuth: []
+      - Token: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonLastEnrolment'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
   /propositions/general-education/{uuid}/pool-questions:
     get:
       operationId: retrieve_pool_questions
@@ -6469,6 +6619,8 @@ components:
               $ref: '#/components/schemas/ActionLink'
             update_person:
               $ref: '#/components/schemas/ActionLink'
+            update_person_last_enrolment:
+              $ref: '#/components/schemas/ActionLink'
             retrieve_coordinates:
               $ref: '#/components/schemas/ActionLink'
             update_coordinates:
@@ -6624,6 +6776,8 @@ components:
             retrieve_person:
               $ref: '#/components/schemas/ActionLink'
             update_person:
+              $ref: '#/components/schemas/ActionLink'
+            update_person_last_enrolment:
               $ref: '#/components/schemas/ActionLink'
             retrieve_coordinates:
               $ref: '#/components/schemas/ActionLink'
@@ -7504,6 +7658,8 @@ components:
               $ref: '#/components/schemas/ActionLink'
             update_person:
               $ref: '#/components/schemas/ActionLink'
+            update_person_last_enrolment:
+              $ref: '#/components/schemas/ActionLink'
             retrieve_coordinates:
               $ref: '#/components/schemas/ActionLink'
             update_coordinates:
@@ -7645,6 +7801,8 @@ components:
             retrieve_person:
               $ref: '#/components/schemas/ActionLink'
             update_person:
+              $ref: '#/components/schemas/ActionLink'
+            update_person_last_enrolment:
               $ref: '#/components/schemas/ActionLink'
             retrieve_coordinates:
               $ref: '#/components/schemas/ActionLink'
@@ -8559,6 +8717,8 @@ components:
               $ref: '#/components/schemas/ActionLink'
             update_person:
               $ref: '#/components/schemas/ActionLink'
+            update_person_last_enrolment:
+              $ref: '#/components/schemas/ActionLink'
             retrieve_coordinates:
               $ref: '#/components/schemas/ActionLink'
             update_coordinates:
@@ -8703,6 +8863,8 @@ components:
             retrieve_person:
               $ref: '#/components/schemas/ActionLink'
             update_person:
+              $ref: '#/components/schemas/ActionLink'
+            update_person_last_enrolment:
               $ref: '#/components/schemas/ActionLink'
             retrieve_coordinates:
               $ref: '#/components/schemas/ActionLink'
@@ -9731,6 +9893,17 @@ components:
         last_registration_id:
           type: string
           maxLength: 10
+    PersonLastEnrolment:
+      type: object
+      properties:
+        last_registration_year:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        last_registration_id:
+          type: string
+          maxLength: 10
     PoolEnum:
       enum:
       - ADMISSION_POOL_EXTERNAL_REORIENTATION
@@ -9944,6 +10117,8 @@ components:
           type: object
           properties:
             create_person:
+              $ref: '#/components/schemas/ActionLink'
+            create_person_last_enrolment:
               $ref: '#/components/schemas/ActionLink'
             create_coordinates:
               $ref: '#/components/schemas/ActionLink'
