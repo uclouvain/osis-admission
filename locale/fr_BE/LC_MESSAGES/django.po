@@ -221,6 +221,12 @@ msgstr "Carte A"
 msgid "A close mail has already been sent to the candidate."
 msgstr "Un courrier de clotûre a déjà été envoyé au candidat."
 
+msgid "A comment from the CDD for the SIC is specified"
+msgstr "Un commentaire de la CDD pour le SIC est présent "
+
+msgid "A comment from the faculty for the SIC is specified"
+msgstr "Un commentaire de la faculté pour le SIC est présent"
+
 msgid "A deny mail has already been sent to the candidate."
 msgstr "Un courrier de refus a été envoyé au candidat."
 
@@ -3309,6 +3315,9 @@ msgstr "Libre et téléversé par FAC pour les gestionnaires"
 msgid "Free and uploaded by SIC for the managers"
 msgstr "Libre et téléversé par SIC pour les gestionnaires"
 
+msgid "Free comment for the candidate"
+msgstr "Commentaire libre à destination du·de la candidat·e"
+
 msgid "Free documents"
 msgstr "Documents libres"
 
@@ -4190,8 +4199,7 @@ msgid "Is non-resident (as defined in decree)"
 msgstr "Est non-résident (au sens du décret)"
 
 msgid "Is the exam the access title for this admission?"
-msgstr ""
-"L'examen est-il le titre d'accès de cette proposition ?"
+msgstr "L'examen est-il le titre d'accès de cette proposition ?"
 
 msgid ""
 "Is your admission request linked with a FNRS, FRIA, FRESH or CSC application?"
@@ -6882,6 +6890,9 @@ msgstr "La demande est actuellement en IUFC"
 msgid "The application is in faculty"
 msgstr "La demande est actuellement en faculté"
 
+msgid "The application is in quarantine"
+msgstr "La demande est en quarantaine"
+
 msgid ""
 "The authorization can not be done while there is one or more documents to be "
 "requested immediately."
@@ -8341,13 +8352,13 @@ msgid ""
 "enrolment/limited-enrolment-courses\" target=\"_blank\">https://www."
 "uclouvain.be/en/enrolment/limited-enrolment-courses</a>"
 msgstr ""
-"Vous ne pouvez pas poursuivre votre demande. La procédure d’inscription "
-"au programme de <em>%(training_name)s</em> pour les étudiants non-résidents "
-"est gérée sur une autre plateforme d’inscription. Nous vous invitons à "
-"prendre connaissance de la procédure d’inscription complète sur la page "
-"suivante : <a href=\"https://www.uclouvain.be/fr/"
-"inscriptions/etudes-contingentees\" target=\"_blank\">https://www."
-"uclouvain.be/fr/inscriptions/etudes-contingentees</a>"
+"Vous ne pouvez pas poursuivre votre demande. La procédure d’inscription au "
+"programme de <em>%(training_name)s</em> pour les étudiants non-résidents est "
+"gérée sur une autre plateforme d’inscription. Nous vous invitons à prendre "
+"connaissance de la procédure d’inscription complète sur la page suivante : "
+"<a href=\"https://www.uclouvain.be/fr/inscriptions/etudes-contingentees\" "
+"target=\"_blank\">https://www.uclouvain.be/fr/inscriptions/etudes-"
+"contingentees</a>"
 
 msgid "You cannot enter a language more than once, please correct the form."
 msgstr ""
@@ -8767,3 +8778,8 @@ msgstr "{items} types sur {total}"
 #, python-brace-format
 msgid "{obj.dates_formatees} : {obj.fonction} at {obj.employeur}"
 msgstr "{obj.dates_formatees} : {obj.fonction} à {obj.employeur}"
+
+#, fuzzy
+#~| msgid "Communication to the candidate"
+#~ msgid "Communication to the candidat"
+#~ msgstr "Communication au candidat"

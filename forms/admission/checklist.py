@@ -498,16 +498,17 @@ class CommonApprovalForm(forms.ModelForm):
             'prerequisite_courses_fac_comment',
             'annual_program_contact_person_name',
             'annual_program_contact_person_email',
-            'join_program_fac_comment',
+            'communication_to_the_candidate',
             'with_prerequisite_courses',
         ]
         labels = {
             'annual_program_contact_person_name': _('First name and last name'),
             'annual_program_contact_person_email': pgettext_lazy('admission', 'Email'),
+            'communication_to_the_candidate': _('Free comment for the candidate'),
         }
         widgets = {
             'prerequisite_courses_fac_comment': CKEditorWidget(config_name='comment_link_only'),
-            'join_program_fac_comment': CKEditorWidget(config_name='comment_link_only'),
+            'communication_to_the_candidate': CKEditorWidget(config_name='comment_link_only'),
             'with_prerequisite_courses': forms.RadioSelect(choices=[(True, _('Yes')), (False, _('No'))]),
         }
 

@@ -82,7 +82,7 @@ class TestSpecifierInformationsAcceptationPropositionParCdd(TestCase):
             'commentaire_complements_formation': '',
             'nom_personne_contact_programme_annuel': '',
             'email_personne_contact_programme_annuel': '',
-            'commentaire_programme_conjoint': '',
+            'communication_au_candidat': '',
             'gestionnaire': '0123456789',
         }
 
@@ -106,7 +106,7 @@ class TestSpecifierInformationsAcceptationPropositionParCdd(TestCase):
         self.assertEqual(proposition.commentaire_complements_formation, '')
         self.assertEqual(proposition.nom_personne_contact_programme_annuel_annuel, '')
         self.assertEqual(proposition.email_personne_contact_programme_annuel_annuel, '')
-        self.assertEqual(proposition.commentaire_programme_conjoint, '')
+        self.assertEqual(proposition.communication_au_candidat, '')
 
     def test_should_etre_ok_si_completee_pour_fac_avec_max_informations(self):
         self.proposition.statut = ChoixStatutPropositionDoctorale.COMPLETEE_POUR_FAC
@@ -121,7 +121,7 @@ class TestSpecifierInformationsAcceptationPropositionParCdd(TestCase):
                 commentaire_complements_formation='Mon commentaire concernant les compléments de formation',
                 nom_personne_contact_programme_annuel='John Doe',
                 email_personne_contact_programme_annuel='john.doe@uclouvain.be',
-                commentaire_programme_conjoint='Mon commentaire concernant le programme conjoint',
+                communication_au_candidat='Mon commentaire pour le candidat',
                 gestionnaire='0123456789',
             )
         )
@@ -147,7 +147,7 @@ class TestSpecifierInformationsAcceptationPropositionParCdd(TestCase):
         )
         self.assertEqual(proposition.nom_personne_contact_programme_annuel_annuel, 'John Doe')
         self.assertEqual(proposition.email_personne_contact_programme_annuel_annuel, 'john.doe@uclouvain.be')
-        self.assertEqual(proposition.commentaire_programme_conjoint, 'Mon commentaire concernant le programme conjoint')
+        self.assertEqual(proposition.communication_au_candidat, 'Mon commentaire pour le candidat')
 
     def test_should_lever_exception_si_statut_non_conforme(self):
         statuts_invalides = ChoixStatutPropositionDoctorale.get_names_except(

@@ -366,7 +366,7 @@ class CddApprovalDecisionView(
                     commentaire_complements_formation=form.cleaned_data['prerequisite_courses_fac_comment'],
                     nom_personne_contact_programme_annuel=form.cleaned_data['annual_program_contact_person_name'],
                     email_personne_contact_programme_annuel=form.cleaned_data['annual_program_contact_person_email'],
-                    commentaire_programme_conjoint=form.cleaned_data['join_program_fac_comment'],
+                    communication_au_candidat=form.cleaned_data['communication_to_the_candidate'],
                     gestionnaire=self.request.user.person.global_id,
                 )
             )

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -28,7 +28,9 @@ import uuid
 import factory
 from django.test import TestCase
 
-from admission.ddd.admission.domain.model.complement_formation import ComplementFormationIdentity
+from admission.ddd.admission.domain.model.complement_formation import (
+    ComplementFormationIdentity,
+)
 from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
 )
@@ -37,8 +39,8 @@ from admission.ddd.admission.formation_generale.commands import (
     SpecifierInformationsAcceptationPropositionParFaculteCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
+    ChoixStatutPropositionGenerale,
 )
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     SituationPropositionNonFACException,
@@ -51,7 +53,9 @@ from admission.ddd.admission.test.factory.formation import FormationIdentityFact
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from admission.infrastructure.message_bus_in_memory import (
+    message_bus_in_memory_instance,
+)
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 
 
@@ -87,7 +91,7 @@ class TestSpecifierInformationsAcceptationPropositionParFaculte(TestCase):
             'nombre_annees_prevoir_programme': 2,
             'nom_personne_contact_programme_annuel': '',
             'email_personne_contact_programme_annuel': '',
-            'commentaire_programme_conjoint': '',
+            'communication_au_candidat': '',
             'gestionnaire': '0123456789',
         }
 
@@ -113,7 +117,7 @@ class TestSpecifierInformationsAcceptationPropositionParFaculte(TestCase):
         self.assertEqual(proposition.nombre_annees_prevoir_programme, 2)
         self.assertEqual(proposition.nom_personne_contact_programme_annuel_annuel, '')
         self.assertEqual(proposition.email_personne_contact_programme_annuel_annuel, '')
-        self.assertEqual(proposition.commentaire_programme_conjoint, '')
+        self.assertEqual(proposition.communication_au_candidat, '')
 
     def test_should_etre_ok_si_completee_pour_fac_avec_max_informations(self):
         self.proposition.statut = ChoixStatutPropositionGenerale.COMPLETEE_POUR_FAC
@@ -142,7 +146,7 @@ class TestSpecifierInformationsAcceptationPropositionParFaculte(TestCase):
                 nombre_annees_prevoir_programme=3,
                 nom_personne_contact_programme_annuel='John Doe',
                 email_personne_contact_programme_annuel='john.doe@uclouvain.be',
-                commentaire_programme_conjoint='Mon commentaire concernant le programme conjoint',
+                communication_au_candidat='Mon commentaire pour le candidat',
                 gestionnaire='0123456789',
             )
         )
@@ -190,7 +194,7 @@ class TestSpecifierInformationsAcceptationPropositionParFaculte(TestCase):
         self.assertEqual(proposition.nombre_annees_prevoir_programme, 3)
         self.assertEqual(proposition.nom_personne_contact_programme_annuel_annuel, 'John Doe')
         self.assertEqual(proposition.email_personne_contact_programme_annuel_annuel, 'john.doe@uclouvain.be')
-        self.assertEqual(proposition.commentaire_programme_conjoint, 'Mon commentaire concernant le programme conjoint')
+        self.assertEqual(proposition.communication_au_candidat, 'Mon commentaire pour le candidat')
 
     def test_should_lever_exception_si_statut_non_conforme(self):
         statuts_invalides = ChoixStatutPropositionGenerale.get_names_except(

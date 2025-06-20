@@ -950,7 +950,7 @@ class CddApprovalDecisionViewTestCase(TestCase):
         self.admission.prerequisite_courses_fac_comment = ''
         self.admission.annual_program_contact_person_name = ''
         self.admission.annual_program_contact_person_email = ''
-        self.admission.join_program_fac_comment = ''
+        self.admission.communication_to_the_candidate = ''
         self.admission.save()
 
         response = self.client.get(self.url, **self.default_headers)
@@ -964,7 +964,7 @@ class CddApprovalDecisionViewTestCase(TestCase):
         self.assertEqual(form.initial.get('prerequisite_courses_fac_comment'), '')
         self.assertEqual(form.initial.get('annual_program_contact_person_name'), '')
         self.assertEqual(form.initial.get('annual_program_contact_person_email'), '')
-        self.assertEqual(form.initial.get('join_program_fac_comment'), '')
+        self.assertEqual(form.initial.get('communication_to_the_candidate'), '')
 
         # Prerequisite courses
         prerequisite_courses = [
@@ -1076,7 +1076,7 @@ class CddApprovalDecisionViewTestCase(TestCase):
         self.assertEqual(self.admission.prerequisite_courses_fac_comment, '')
         self.assertEqual(self.admission.annual_program_contact_person_name, '')
         self.assertEqual(self.admission.annual_program_contact_person_email, '')
-        self.assertEqual(self.admission.join_program_fac_comment, '')
+        self.assertEqual(self.admission.communication_to_the_candidate, '')
 
         # Some prerequisite courses are required but no one is specified for now
         response = self.client.post(
@@ -1134,7 +1134,7 @@ class CddApprovalDecisionViewTestCase(TestCase):
                 'cdd-decision-approval-prerequisite_courses_fac_comment': 'Comment about the additional trainings',
                 'cdd-decision-approval-annual_program_contact_person_name': 'John Doe',
                 'cdd-decision-approval-annual_program_contact_person_email': 'john.doe@example.be',
-                'cdd-decision-approval-join_program_fac_comment': 'Comment about the join program',
+                'cdd-decision-approval-communication_to_the_candidate': 'Communication to the candidate',
             },
             **self.default_headers,
         )
@@ -1167,7 +1167,7 @@ class CddApprovalDecisionViewTestCase(TestCase):
         )
         self.assertEqual(self.admission.annual_program_contact_person_name, 'John Doe')
         self.assertEqual(self.admission.annual_program_contact_person_email, 'john.doe@example.be')
-        self.assertEqual(self.admission.join_program_fac_comment, 'Comment about the join program')
+        self.assertEqual(self.admission.communication_to_the_candidate, 'Communication to the candidate')
 
     def test_approval_decision_is_not_possible_if_the_current_status_is_closed(self):
         self.client.force_login(user=self.fac_manager_user)

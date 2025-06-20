@@ -209,7 +209,7 @@
             {% display admission.nom_personne_contact_programme_annuel_annuel '-' admission.email_personne_contact_programme_annuel_annuel as contact_person %}
             {% field_data _('Contact person for the design of the annual program')  contact_person %}
 
-            {% field_data _('CDD comment about the collaborative program') admission.commentaire_programme_conjoint|safe %}
+            {% field_data _('Free comment for the candidate') admission.communication_au_candidat|safe %}
           </div>
         </div>
       </div>

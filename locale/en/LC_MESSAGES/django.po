@@ -177,6 +177,12 @@ msgstr ""
 msgid "A close mail has already been sent to the candidate."
 msgstr ""
 
+msgid "A comment from the CDD for the SIC is specified"
+msgstr ""
+
+msgid "A comment from the faculty for the SIC is specified"
+msgstr ""
+
 msgid "A deny mail has already been sent to the candidate."
 msgstr ""
 
@@ -3014,6 +3020,9 @@ msgid "Free and uploaded by FAC for the managers"
 msgstr ""
 
 msgid "Free and uploaded by SIC for the managers"
+msgstr ""
+
+msgid "Free comment for the candidate"
 msgstr ""
 
 msgid "Free documents"
@@ -6222,6 +6231,9 @@ msgid "The application is in IUFC"
 msgstr ""
 
 msgid "The application is in faculty"
+msgstr ""
+
+msgid "The application is in quarantine"
 msgstr ""
 
 msgid ""

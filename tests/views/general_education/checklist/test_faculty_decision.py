@@ -107,8 +107,9 @@ from epc.tests.factories.inscription_programme_cycle import (
 from osis_profile.models import (
     BelgianHighSchoolDiploma,
     EducationalExperience,
+    Exam,
     ForeignHighSchoolDiploma,
-    ProfessionalExperience, Exam,
+    ProfessionalExperience,
 )
 from osis_profile.models.enums.exam import ExamTypes
 
@@ -1623,7 +1624,7 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         self.general_admission.program_planned_years_number = None
         self.general_admission.annual_program_contact_person_name = ''
         self.general_admission.annual_program_contact_person_email = ''
-        self.general_admission.join_program_fac_comment = ''
+        self.general_admission.communication_to_the_candidate = ''
         self.general_admission.save()
 
         response = self.client.get(self.url, **self.default_headers)
@@ -1640,7 +1641,7 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         self.assertEqual(form.initial.get('program_planned_years_number'), None)
         self.assertEqual(form.initial.get('annual_program_contact_person_name'), '')
         self.assertEqual(form.initial.get('annual_program_contact_person_email'), '')
-        self.assertEqual(form.initial.get('join_program_fac_comment'), '')
+        self.assertEqual(form.initial.get('communication_to_the_candidate'), '')
         self.assertEqual(form.initial.get('with_additional_approval_conditions'), None)
         self.assertEqual(form.initial.get('all_additional_approval_conditions'), [])
 
@@ -1983,7 +1984,7 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
                 'fac-decision-approval-program_planned_years_number': 5,
                 'fac-decision-approval-annual_program_contact_person_name': 'John Doe',
                 'fac-decision-approval-annual_program_contact_person_email': 'john.doe@example.be',
-                'fac-decision-approval-join_program_fac_comment': 'Comment about the join program',
+                'fac-decision-approval-communication_to_the_candidate': 'Communication to the candidate',
                 'fac-decision-TOTAL_FORMS': '2',
                 'fac-decision-INITIAL_FORMS': '0',
                 'fac-decision-MIN_NUM_FORMS': '0',
@@ -2032,7 +2033,7 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         self.assertEqual(self.general_admission.program_planned_years_number, 5)
         self.assertEqual(self.general_admission.annual_program_contact_person_name, 'John Doe')
         self.assertEqual(self.general_admission.annual_program_contact_person_email, 'john.doe@example.be')
-        self.assertEqual(self.general_admission.join_program_fac_comment, 'Comment about the join program')
+        self.assertEqual(self.general_admission.communication_to_the_candidate, 'Communication to the candidate')
 
         # Check the creation of the free additional conditions
         conditions: QuerySet[FreeAdditionalApprovalCondition] = FreeAdditionalApprovalCondition.objects.filter(
@@ -2115,7 +2116,7 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
             'fac-decision-approval-program_planned_years_number': 5,
             'fac-decision-approval-annual_program_contact_person_name': 'John Doe',
             'fac-decision-approval-annual_program_contact_person_email': 'john.doe@example.be',
-            'fac-decision-approval-join_program_fac_comment': 'Comment about the join program',
+            'fac-decision-approval-communication_to_the_candidate': 'Communication to the candidate',
             'save-transfer': '1',
         }
 
@@ -2181,7 +2182,7 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         self.assertEqual(self.general_admission.program_planned_years_number, 5)
         self.assertEqual(self.general_admission.annual_program_contact_person_name, 'John Doe')
         self.assertEqual(self.general_admission.annual_program_contact_person_email, 'john.doe@example.be')
-        self.assertEqual(self.general_admission.join_program_fac_comment, 'Comment about the join program')
+        self.assertEqual(self.general_admission.communication_to_the_candidate, 'Communication to the candidate')
 
         # Check the creation of the free additional conditions
         conditions: QuerySet[FreeAdditionalApprovalCondition] = FreeAdditionalApprovalCondition.objects.filter(
