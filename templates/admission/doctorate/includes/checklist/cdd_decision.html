@@ -210,6 +210,10 @@
             {% field_data _('Contact person for the design of the annual program')  contact_person %}
 
             {% field_data _('CDD comment about the collaborative program') admission.commentaire_programme_conjoint|safe %}
+
+            {% if admission.est_admission %}
+              {% field_data _('Free comment for the candidate') admission.communication_au_candidat|safe %}
+            {% endif %}
           </div>
         </div>
       </div>

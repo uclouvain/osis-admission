@@ -23,12 +23,12 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List, Set
+from collections import defaultdict
+from typing import Dict, List
 
 from django.conf import settings
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _
-from django.utils.translation import override
+from django.utils.translation import gettext, override
 from osis_comment.models import CommentEntry
 from osis_mail_template.models import MailTemplate
 
@@ -61,6 +61,7 @@ from admission.utils import (
     get_portal_admission_list_url,
     get_portal_admission_url,
 )
+from admission.views.common.detail_tabs.checklist import ChecklistTabIcon
 from admission.views.common.detail_tabs.comments import COMMENT_TAG_CDD_FOR_SIC
 from admission.views.common.mixins import LoadDossierViewMixin
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
@@ -150,8 +151,7 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        checklist_additional_icons = {}
-        checklist_additional_icons_title = {}
+        checklist_additional_icons: Dict[str, List[ChecklistTabIcon]] = defaultdict(list)
 
         # A SIC user has an additional icon for the decision of the faculty if a fac manager wrote a comment
         if self.is_sic:
@@ -163,17 +163,23 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
                 .exclude(content='')
                 .exists()
             )
-            if has_comment:
-                checklist_additional_icons['decision_cdd'] = 'fa-regular fa-comment'
+            checklist_additional_icons['decision_cdd'].append(
+                ChecklistTabIcon(
+                    identifier='cdd_comment',
+                    icon='fa-regular fa-comment',
+                    title=gettext('A comment from the CDD for the SIC is specified'),
+                    displayed=has_comment,
+                )
+            )
 
-        person_merge_proposal = getattr(self.admission.candidate, 'personmergeproposal', None)
-        if person_merge_proposal and (
-            person_merge_proposal.status in PersonMergeStatus.quarantine_statuses()
-            or not person_merge_proposal.validation.get('valid', True)
-        ):
-            # Cas display warning when quarantaine
-            # (cf. admission/infrastructure/admission/domain/service/lister_toutes_demandes.py)
-            checklist_additional_icons['donnees_personnelles'] = 'fas fa-warning text-warning'
+        checklist_additional_icons['donnees_personnelles'].append(
+            ChecklistTabIcon(
+                identifier='quarantine',
+                icon='fas fa-warning text-warning',
+                title=gettext('The application is in quarantine'),
+                displayed=self.demande_est_en_quarantaine,
+            )
+        )
 
         candidate_admissions: List[DemandeRechercheDTO] = message_bus_instance.invoke(
             ListerToutesDemandesQuery(
@@ -197,28 +203,33 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
         context['toutes_les_demandes'] = candidate_admissions
         context['autres_demandes'] = submitted_for_the_current_year_admissions
 
-        if any(
-            admission
-            for admission in submitted_for_the_current_year_admissions
-            if admission.etat_demande in STATUTS_TOUTE_PROPOSITION_AUTORISEE
-        ):
-            checklist_additional_icons['choix_formation'] = 'fa-solid fa-square-2'
-            checklist_additional_icons_title['choix_formation'] = _(
-                'Another admission has been authorized for this candidate for this academic year.'
+        checklist_additional_icons['choix_formation'].append(
+            ChecklistTabIcon(
+                identifier='other_authorized_admission',
+                icon='fa-solid fa-square-2',
+                title=gettext('Another admission has been authorized for this candidate for this academic year.'),
+                displayed=any(
+                    admission
+                    for admission in submitted_for_the_current_year_admissions
+                    if admission.etat_demande in STATUTS_TOUTE_PROPOSITION_AUTORISEE
+                ),
             )
+        )
 
-        if any(
-            admission
-            for admission in submitted_for_the_current_year_admissions
-            if admission.sigle_formation == self.proposition.formation.sigle
-        ):
-            checklist_additional_icons['choix_formation'] = 'fa-solid fa-triangle-exclamation'
-            checklist_additional_icons_title['choix_formation'] = _(
-                'The candidate has already applied for this course for this academic year.'
+        checklist_additional_icons['choix_formation'].append(
+            ChecklistTabIcon(
+                identifier='similar_course',
+                icon='fa-solid fa-triangle-exclamation',
+                title=gettext('The candidate has already applied for this course for this academic year.'),
+                displayed=any(
+                    admission
+                    for admission in submitted_for_the_current_year_admissions
+                    if admission.sigle_formation == self.proposition.formation.sigle
+                ),
             )
+        )
 
         context['checklist_additional_icons'] = checklist_additional_icons
-        context['checklist_additional_icons_title'] = checklist_additional_icons_title
         context['can_update_checklist_tab'] = self.can_update_checklist_tab
         context['can_change_payment'] = self.request.user.has_perm('admission.change_payment', self.admission)
         context['can_change_faculty_decision'] = self.request.user.has_perm(
