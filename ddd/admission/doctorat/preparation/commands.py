@@ -611,6 +611,7 @@ class SpecifierInformationsAcceptationPropositionParCddCommand(interface.Command
     nom_personne_contact_programme_annuel: str = ''
     email_personne_contact_programme_annuel: str = ''
     commentaire_programme_conjoint: str = ''
+    communication_au_candidat: str = ''
 
 
 @attr.dataclass(frozen=True, slots=True)
