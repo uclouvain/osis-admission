@@ -41,7 +41,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     DocumentAReclamerImmediatException,
-    EtatChecklistDonneesPersonnellesNonValidePourApprouverDemande,
     ParcoursAnterieurNonSuffisantException,
 )
 from admission.ddd.admission.doctorat.preparation.test.factory.groupe_de_supervision import (
@@ -212,15 +211,6 @@ class TestApprouverAdmissionParSic(TestCase):
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
         self.assertIsInstance(context.exception.exceptions.pop(), ParcoursAnterieurNonSuffisantException)
-
-    def test_should_lever_exception_si_donnees_personnelles_non_validees(self):
-        self.proposition.checklist_actuelle.donnees_personnelles.statut = ChoixStatutChecklist.INITIAL_CANDIDAT
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
-        self.assertIsInstance(
-            context.exception.exceptions.pop(),
-            EtatChecklistDonneesPersonnellesNonValidePourApprouverDemande,
-        )
 
     def test_should_lever_exception_si_document_a_reclamer_immediatement(self):
         self.proposition.documents_demandes = {

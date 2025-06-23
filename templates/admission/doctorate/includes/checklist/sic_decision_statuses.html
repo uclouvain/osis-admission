@@ -72,10 +72,7 @@
   {% else %}
     {% checklist_state_button tab='decision_sic' label=_("REFUSEE") icon='circle-stop' state='GEST_BLOCAGE' blocage="refusal" class='danger' disabled=True %}
   {% endif %}
-  {% if original_admission.checklist.current.donnees_personnelles.statut != 'GEST_REUSSITE' %}
-    {% translate 'The status of the checklist for the personal data must be "Validated".' as approval_disabled_tooltip %}
-    {% checklist_state_button tab='decision_sic' label=_("Approved") icon='check' state='GEST_REUSSITE' class='success' tooltip=approval_disabled_tooltip|force_escape disabled=True %}
-  {% elif original_admission.checklist.current.financabilite.statut != 'INITIAL_NON_CONCERNE' and original_admission.checklist.current.financabilite.statut != 'GEST_REUSSITE' %}
+  {% if original_admission.checklist.current.financabilite.statut != 'INITIAL_NON_CONCERNE' and original_admission.checklist.current.financabilite.statut != 'GEST_REUSSITE' %}
     {% translate 'The status of the checklist for the financability must be "Not concerned" or "Financable" or "Dispensation granted".' as approval_disabled_tooltip %}
     {% checklist_state_button tab='decision_sic' label=_("Approved") icon='check' state='GEST_REUSSITE' class='success' tooltip=approval_disabled_tooltip|force_escape disabled=True %}
   {% elif original_admission.is_in_quarantine %}

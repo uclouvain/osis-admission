@@ -157,7 +157,6 @@ class SicApprovalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
             communication_to_the_candidate='',
         )
         self.admission.checklist['current']['parcours_anterieur']['statut'] = ChoixStatutChecklist.GEST_REUSSITE.name
-        self.admission.checklist['current']['donnees_personnelles']['statut'] = ChoixStatutChecklist.GEST_REUSSITE.name
         self.admission.checklist['current']['financabilite']['statut'] = ChoixStatutChecklist.GEST_REUSSITE.name
         self.admission.checklist['current']['financabilite']['extra'] = {'reussite': 'financable'}
         self.admission.save(update_fields=['checklist'])
