@@ -64,7 +64,7 @@ from admission.models import DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.roles import (
     CandidateFactory,
-    DoctorateReaderRoleFactory,
+    DoctorateCommitteeMemberRoleFactory,
     ProgramManagerRoleFactory,
     SicManagementRoleFactory,
 )
@@ -97,7 +97,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.factory = RequestFactory()
-        cls.doctorate_reader_user = DoctorateReaderRoleFactory().person.user
+        cls.doctorate_committee_member = DoctorateCommitteeMemberRoleFactory().person.user
 
         # Create some academic years
         academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]

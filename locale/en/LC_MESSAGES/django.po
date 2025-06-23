@@ -5568,10 +5568,10 @@ msgstr ""
 msgid "Role: Committee members"
 msgstr ""
 
-msgid "Role: Doctorate reader"
+msgid "Role: Doctorate committee member"
 msgstr ""
 
-msgid "Role: Doctorate readers"
+msgid "Role: Doctorate committee members"
 msgstr ""
 
 msgid "Role: Program manager"
@@ -6793,8 +6793,7 @@ msgstr ""
 #, python-format
 msgid ""
 "This experience has been added by the applicant in <a "
-"href=\"%(admission_url)s\" target=\"_blank\">another application</a>. You "
-"have the option to integrate it in the current application."
+"href=\"%(admission_url)s\" target=\"_blank\">another application</a>."
 msgstr ""
 
 msgid "This field is required if the first name is missing."
@@ -7516,6 +7515,9 @@ msgstr ""
 msgid ""
 "You do not specify if you are applying as resident or non-resident (as "
 "defined by government decree)."
+msgstr ""
+
+msgid "You have the option to integrate it in the current application."
 msgstr ""
 
 msgid ""
