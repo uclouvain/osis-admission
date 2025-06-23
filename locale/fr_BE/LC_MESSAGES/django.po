@@ -4196,8 +4196,7 @@ msgid "Is non-resident (as defined in decree)"
 msgstr "Est non-résident (au sens du décret)"
 
 msgid "Is the exam the access title for this admission?"
-msgstr ""
-"L'examen est-il le titre d'accès de cette proposition ?"
+msgstr "L'examen est-il le titre d'accès de cette proposition ?"
 
 msgid ""
 "Is your admission request linked with a FNRS, FRIA, FRESH or CSC application?"
@@ -5794,6 +5793,9 @@ msgstr "Refus 95 - accès S4"
 
 msgid "REFUS_ARTICLE_95_ACCES_S5"
 msgstr "Refus 95 - accès S5"
+
+msgid "REFUS_ARTICLE_95_CERTIFICAT"
+msgstr "Refus 95 - certificat"
 
 msgid "REFUS_ARTICLE_95_GENERIQUE_IRRECEVABILITE"
 msgstr "Refus 95 générique - irrecevabilité"
