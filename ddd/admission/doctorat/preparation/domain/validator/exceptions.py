@@ -647,14 +647,6 @@ class StatutChecklistDecisionCddDoitEtreDifferentClotureException(BusinessExcept
         super().__init__(message, **kwargs)
 
 
-class EtatChecklistDonneesPersonnellesNonValidePourApprouverDemande(BusinessException):
-    status_code = "PROPOSITION-72"
-
-    def __init__(self, **kwargs):
-        message = _('The status of the checklist for the personal data must be "Validated".')
-        super().__init__(message, **kwargs)
-
-
 class MembreNonExterneException(BusinessException):
     status_code = "PROPOSITION-14"
 

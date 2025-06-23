@@ -705,9 +705,6 @@ class ApprouverAdmissionParSicValidatorList(TwoStepsMultipleBusinessExceptionLis
             ShouldSicPeutDonnerDecision(
                 statut=self.statut,
             ),
-            ShouldDonneesPersonnellesEtreDansEtatCorrectPourApprouverDemande(
-                checklist_actuelle=self.checklist,
-            ),
             ShouldFinancabiliteEtreDansEtatCorrectPourApprouverDemande(
                 checklist_actuelle=self.checklist,
             ),
@@ -736,9 +733,6 @@ class ApprouverInscriptionParSicValidatorList(TwoStepsMultipleBusinessExceptionL
         return [
             ShouldSicPeutDonnerDecision(
                 statut=self.statut,
-            ),
-            ShouldDonneesPersonnellesEtreDansEtatCorrectPourApprouverDemande(
-                checklist_actuelle=self.checklist,
             ),
             ShouldFinancabiliteEtreDansEtatCorrectPourApprouverDemande(
                 checklist_actuelle=self.checklist,

@@ -98,7 +98,6 @@ from admission.ddd.admission.formation_generale.domain.validator import (
 )
 from admission.ddd.admission.formation_generale.domain.validator._should_informations_checklist_etre_completees import (
     ShouldChecklistEtreDansEtatCorrectPourApprouverInscription,
-    ShouldDonneesPersonnellesEtreDansEtatCorrectPourApprouverDemande,
     ShouldFinancabiliteEtreDansEtatCorrectPourApprouverDemande,
     ShouldNePasAvoirDeDocumentReclameImmediat,
     ShouldParcoursAnterieurEtreSuffisant,
@@ -523,9 +522,6 @@ class ApprouverAdmissionParSicValidatorList(TwoStepsMultipleBusinessExceptionLis
             ShouldSicPeutDonnerDecision(
                 statut=self.statut,
             ),
-            ShouldDonneesPersonnellesEtreDansEtatCorrectPourApprouverDemande(
-                checklist_actuelle=self.checklist,
-            ),
             ShouldFinancabiliteEtreDansEtatCorrectPourApprouverDemande(
                 checklist_actuelle=self.checklist,
             ),
@@ -566,9 +562,6 @@ class ApprouverInscriptionParSicValidatorList(TwoStepsMultipleBusinessExceptionL
         return [
             ShouldSicPeutDonnerDecision(
                 statut=self.statut,
-            ),
-            ShouldDonneesPersonnellesEtreDansEtatCorrectPourApprouverDemande(
-                checklist_actuelle=self.checklist,
             ),
             ShouldFinancabiliteEtreDansEtatCorrectPourApprouverDemande(
                 checklist_actuelle=self.checklist,

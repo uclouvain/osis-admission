@@ -327,6 +327,5 @@ class PropositionFactory(factory.Factory):
                 StatutsChecklistGeneraleFactory,
                 financabilite__statut=ChoixStatutChecklist.GEST_REUSSITE,
                 financabilite__extra={'reussite': 'financable'},
-                donnees_personnelles__statut=ChoixStatutChecklist.GEST_REUSSITE,
             ),
         )
