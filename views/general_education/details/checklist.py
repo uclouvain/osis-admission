@@ -39,7 +39,6 @@ from django.urls import reverse
 from django.utils import timezone, translation
 from django.utils.formats import date_format
 from django.utils.functional import cached_property
-from django.utils.safestring import mark_safe
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import ngettext, override, pgettext
@@ -67,9 +66,6 @@ from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     message_candidat_avec_pae_avant_2015,
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
-from admission.ddd.admission.domain.model.enums.condition_acces import (
-    TypeTitreAccesSelectionnable,
-)
 from admission.ddd.admission.domain.validator.exceptions import (
     ExperienceNonTrouveeException,
 )
@@ -79,9 +75,6 @@ from admission.ddd.admission.dtos.resume import (
     ResumeCandidatDTO,
     ResumeEtEmplacementsDocumentsPropositionDTO,
     ResumePropositionDTO,
-)
-from admission.ddd.admission.dtos.titre_acces_selectionnable import (
-    TitreAccesSelectionnableDTO,
 )
 from admission.ddd.admission.enums import Onglets, TypeItemFormulaire
 from admission.ddd.admission.enums.emplacement_document import (
@@ -114,8 +107,6 @@ from admission.ddd.admission.formation_generale.commands import (
     RecupererListePaiementsPropositionQuery,
     RecupererPdfTemporaireDecisionSicQuery,
     RecupererResumeEtEmplacementsDocumentsPropositionQuery,
-    RecupererResumePropositionQuery,
-    RecupererTitresAccesSelectionnablesPropositionQuery,
     RefuserAdmissionParSicCommand,
     RefuserInscriptionParSicCommand,
     RefuserPropositionParFaculteCommand,
@@ -160,7 +151,6 @@ from admission.ddd.admission.formation_generale.domain.service.checklist import 
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     ConditionAccesEtreSelectionneException,
     FormationNonTrouveeException,
-    StatutsChecklistExperiencesEtreValidesException,
     TitreAccesEtreSelectionneException,
 )
 from admission.ddd.admission.formation_generale.dtos.proposition import (
@@ -225,7 +215,6 @@ from admission.templatetags.admission import (
     bg_class_by_checklist_experience,
 )
 from admission.utils import (
-    access_title_country,
     add_close_modal_into_htmx_response,
     get_access_titles_names,
     get_backoffice_admission_url,
@@ -314,6 +303,7 @@ __all__ = [
     'SicDecisionDispensationView',
     'SicDecisionChangeStatusView',
     'SicDecisionPdfPreviewView',
+    'PersonalDataChangeStatusView',
 ]
 
 
@@ -512,6 +502,36 @@ def get_email(template_identifier, language, proposition_dto: PropositionGestion
             mail_template.render_subject(tokens),
             mail_template.body_as_html(tokens),
         )
+
+
+class PersonalDataChangeStatusView(
+    AdmissionFormMixin,
+    LoadDossierViewMixin,
+    HtmxPermissionRequiredMixin,
+    FormView,
+):
+    urlpatterns = {'personal-data-change-status': 'personal-data-change-status/<str:status>'}
+    template_name = 'admission/general_education/includes/checklist/personal_data.html'
+    permission_required = 'admission.change_checklist'
+    form_class = Form
+
+    def form_valid(self, form):
+        admission = self.get_permission_object()
+
+        extra = {}
+        if 'fraud' in self.request.POST:
+            extra['fraud'] = self.request.POST['fraud']
+
+        change_admission_status(
+            tab=OngletsChecklist.donnees_personnelles.name,
+            admission_status=self.kwargs['status'],
+            extra=extra,
+            admission=admission,
+            author=self.request.user.person,
+            replace_extra=True,
+        )
+
+        return super().form_valid(form)
 
 
 class PaymentsListView(AdmissionViewMixin, TemplateView):
@@ -1790,11 +1810,21 @@ class SicDecisionDelegateVraeDispensationView(
         return super().form_valid(form)
 
 
-class SicDecisionChangeStatusView(HtmxPermissionRequiredMixin, SicDecisionMixin, TemplateView):
+class SicDecisionChangeStatusView(
+    PropositionFromResumeMixin,
+    HtmxPermissionRequiredMixin,
+    SicDecisionMixin,
+    TemplateView,
+):
     urlpatterns = {'sic-decision-change-status': 'sic-decision-change-checklist-status/<str:status>'}
     template_name = 'admission/general_education/includes/checklist/sic_decision.html'
     permission_required = 'admission.checklist_change_sic_decision'
     http_method_names = ['post']
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['requested_documents_dtos'] = self.sic_decision_approval_form_requestable_documents
+        return context
 
     def post(self, request, *args, **kwargs):
         admission = self.get_permission_object()

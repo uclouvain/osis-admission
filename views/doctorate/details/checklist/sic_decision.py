@@ -761,11 +761,21 @@ class SicDecisionDispensationView(
         return super().form_valid(form)
 
 
-class SicDecisionChangeStatusView(HtmxPermissionRequiredMixin, SicDecisionMixin, TemplateView):
+class SicDecisionChangeStatusView(
+    PropositionFromResumeMixin,
+    HtmxPermissionRequiredMixin,
+    SicDecisionMixin,
+    TemplateView,
+):
     urlpatterns = {'sic-decision-change-status': 'sic-decision-change-checklist-status/<str:status>'}
     template_name = 'admission/general_education/includes/checklist/sic_decision.html'
     permission_required = 'admission.checklist_change_sic_decision'
     http_method_names = ['post']
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['requested_documents_dtos'] = self.sic_decision_approval_form_requestable_documents
+        return context
 
     def post(self, request, *args, **kwargs):
         admission = self.get_permission_object()
