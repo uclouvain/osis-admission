@@ -575,6 +575,7 @@ COMMAND_HANDLERS = {
         titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
         experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
         profil_candidat_translator=ProfilCandidatTranslator(),
+        formation_translator=FormationGeneraleTranslator(),
     ),
     SpecifierConditionAccesPropositionCommand: lambda msg_bus, cmd: specifier_condition_acces_proposition(
         cmd,
