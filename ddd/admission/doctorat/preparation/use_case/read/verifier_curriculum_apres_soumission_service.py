@@ -24,15 +24,14 @@
 #
 # ##############################################################################
 
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.domain.service.profil_candidat import ProfilCandidat
-from admission.ddd.admission.doctorat.preparation.commands import VerifierCurriculumApresSoumissionQuery
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
+from admission.ddd.admission.doctorat.preparation.commands import VerifierCurriculumApresSoumissionQuery
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
-from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
+from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.domain.service.profil_candidat import ProfilCandidat
 from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
 
 
@@ -40,7 +39,6 @@ def verifier_curriculum_apres_soumission(
     cmd: 'VerifierCurriculumApresSoumissionQuery',
     proposition_repository: 'IPropositionRepository',
     profil_candidat_translator: 'IProfilCandidatTranslator',
-    academic_year_repository: 'IAcademicYearRepository',
     experience_parcours_interne_translator: 'IExperienceParcoursInterneTranslator',
 ) -> 'PropositionIdentity':
     # GIVEN
@@ -50,7 +48,6 @@ def verifier_curriculum_apres_soumission(
     # WHEN
     ProfilCandidat.verifier_curriculum_formation_doctorale_apres_soumission(
         proposition=proposition,
-        academic_year_repository=academic_year_repository,
         profil_candidat_translator=profil_candidat_translator,
         experience_parcours_interne_translator=experience_parcours_interne_translator,
         verification_experiences_completees=True,
