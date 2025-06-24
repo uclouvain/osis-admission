@@ -64,7 +64,7 @@
         {% endif %}
     {% endpanel %}
 
-    {% panel _("PhD research project") %}
+    {% panel _("Doctoral research project") %}
         {% field_data _("Project title") admission.titre_projet %}
         {% field_data _("Project resume") admission.resume_projet|linebreaks %}
         {% field_data _("Thesis language") admission.nom_langue_redaction_these %}
@@ -74,8 +74,8 @@
         {% field_data _("Research institute") institut_these|default_if_none:'' %}
         {% field_data _("Thesis location") admission.lieu_these %}
 
-        {% field_data _("PhD research project") admission.documents_projet %}
-        {% field_data _("PhD proposal") admission.proposition_programme_doctoral %}
+        {% field_data _("Doctoral research project") admission.documents_projet %}
+        {% field_data _("Doctoral training proposal") admission.proposition_programme_doctoral %}
         {% field_data _("Complementary training proposition") admission.projet_formation_complementaire %}
         {% field_data _("Gantt chart") admission.graphe_gantt %}
         {% field_data _("Letters of recommendation") admission.lettres_recommandation %}
