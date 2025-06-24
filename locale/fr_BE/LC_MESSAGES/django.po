@@ -2340,6 +2340,12 @@ msgstr "Souhaitez-vous passer la demande dans l'état \"%(status)s\" ?"
 msgid "Doctoral commissions"
 msgstr "Commissions doctorales"
 
+msgid "Doctoral research project"
+msgstr "Projet de recherche doctorale"
+
+msgid "Doctoral training proposal"
+msgstr "Projet de formation doctorale"
+
 msgid "Doctorate Ethics Regulations"
 msgstr "Règlement de déontologie"
 
@@ -5381,14 +5387,8 @@ msgstr "Lien du document de l'annexe de la Commission doctorale de domaine"
 msgid "PhD already done"
 msgstr "Doctorat déjà réalisé"
 
-msgid "PhD proposal"
-msgstr "Projet de formation doctorale"
-
 msgid "PhD research experience"
 msgstr "Expérience de recherche doctorale"
-
-msgid "PhD research project"
-msgstr "Projet de recherche doctorale"
 
 msgid "Place of birth"
 msgstr "Lieu de naissance"
