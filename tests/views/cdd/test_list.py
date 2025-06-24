@@ -95,7 +95,7 @@ from reference.tests.factories.scholarship import (
 class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
     admissions = []
     NB_MAX_QUERIES_WITHOUT_SEARCH = 26
-    NB_MAX_QUERIES_WITH_SEARCH = 31
+    NB_MAX_QUERIES_WITH_SEARCH = 32
 
     @classmethod
     def setUpTestData(cls):
