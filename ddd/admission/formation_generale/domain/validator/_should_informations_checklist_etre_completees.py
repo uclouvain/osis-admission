@@ -80,6 +80,7 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
     TitreAccesEtreSelectionnePourEnvoyerASICException,
 )
 from base.ddd.utils.business_validator import BusinessValidator
+from base.models.enums.education_group_types import TrainingType
 from epc.models.enums.condition_acces import ConditionAcces
 
 
@@ -269,6 +270,7 @@ class ShouldStatutsChecklistExperiencesEtreValidees(BusinessValidator):
     uuids_experiences_valorisees: set[str]
     checklist: StatutsChecklistGenerale
     statut: ChoixStatutChecklist
+    type_formation: TrainingType
 
     def validate(self, *args, **kwargs):
         if self.statut == ChoixStatutChecklist.GEST_REUSSITE:
@@ -278,7 +280,9 @@ class ShouldStatutsChecklistExperiencesEtreValidees(BusinessValidator):
             }
             # Le passage à l'état valide nécessite que toutes les expériences valorisées soient passées à l'état valide
             uuids_experiences_valorisees = self.uuids_experiences_valorisees.copy()
-            uuids_experiences_valorisees.add(OngletsDemande.ETUDES_SECONDAIRES.name)
+
+            if self.type_formation == TrainingType.BACHELOR:
+                uuids_experiences_valorisees.add(OngletsDemande.ETUDES_SECONDAIRES.name)
 
             for experience in self.checklist.parcours_anterieur.enfants:
                 identifiant_experience = experience.extra.get('identifiant')

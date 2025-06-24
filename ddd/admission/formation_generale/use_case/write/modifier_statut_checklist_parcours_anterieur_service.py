@@ -39,6 +39,9 @@ from admission.ddd.admission.formation_generale.domain.builder.proposition_ident
 from admission.ddd.admission.formation_generale.domain.model.proposition import (
     PropositionIdentity,
 )
+from admission.ddd.admission.formation_generale.domain.service.i_formation import (
+    IFormationGeneraleTranslator,
+)
 from admission.ddd.admission.formation_generale.repository.i_proposition import (
     IPropositionRepository,
 )
@@ -53,9 +56,11 @@ def modifier_statut_checklist_parcours_anterieur(
     titre_acces_selectionnable_repository: 'ITitreAccesSelectionnableRepository',
     experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
     profil_candidat_translator: 'IProfilCandidatTranslator',
+    formation_translator: 'IFormationGeneraleTranslator',
 ) -> 'PropositionIdentity':
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition = proposition_repository.get(entity_id=proposition_id)
+    formation = formation_translator.get(entity_id=proposition.formation_id)
 
     titres_acces_selectionnes = titre_acces_selectionnable_repository.search_by_proposition(
         proposition_identity=proposition_id,
@@ -72,6 +77,7 @@ def modifier_statut_checklist_parcours_anterieur(
         titres_acces_selectionnes=titres_acces_selectionnes,
         auteur_modification=cmd.gestionnaire,
         uuids_experiences_valorisees=uuids_experiences_valorisees,
+        type_formation=formation.type,
     )
 
     proposition_repository.save(proposition)
