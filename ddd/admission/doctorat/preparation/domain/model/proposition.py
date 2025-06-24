@@ -1051,7 +1051,6 @@ class Proposition(interface.RootEntity):
             ProfilCandidatService.verifier_curriculum_formation_doctorale_apres_soumission(
                 proposition=self,
                 curriculum_dto=curriculum_dto,
-                academic_year_repository=academic_year_repository,
                 profil_candidat_translator=profil_candidat_translator,
                 experience_parcours_interne_translator=experience_parcours_interne_translator,
                 verification_experiences_completees=False,
