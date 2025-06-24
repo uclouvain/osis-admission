@@ -446,7 +446,7 @@ class GeneralEducationAdmission(BaseAdmission):
     )
     communication_to_the_candidate = models.TextField(
         default='',
-        verbose_name=_("Communication to the candidate"),
+        verbose_name=_("Free comment for the candidate"),
         blank=True,
     )
     must_provide_student_visa_d = models.BooleanField(
