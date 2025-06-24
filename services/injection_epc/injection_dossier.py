@@ -270,6 +270,7 @@ class InjectionEPCAdmission:
         etudes_secondaires, alternative = cls._get_etudes_secondaires(candidat=candidat, admission=admission)
         admission_generale = getattr(admission, 'generaleducationadmission', None)
         admission_iufc = getattr(admission, 'continuingeducationadmission', None)
+        admission_doctorat = getattr(admission, 'doctorateadmission', None)
         documents_specifiques = cls._recuperer_documents_specifiques(admission)
         auteur_autorisation_sic = HistoryEntry.objects.filter(
             Q(tags__contains=TAGS_AUTORISATION_SIC) | Q(tags__contains=TAGS_APPROBATION_PROPOSITION),
@@ -301,7 +302,7 @@ class InjectionEPCAdmission:
             ) if admission_generale else None,
             "adresses": cls._get_adresses(adresses=adresses),
             "documents": (
-                InjectionEPCCurriculum._recuperer_documents(admission_generale or admission_iufc)
+                InjectionEPCCurriculum._recuperer_documents(admission_generale or admission_iufc or admission_doctorat)
                 + documents_specifiques
             ),
             "documents_manquants": cls._recuperer_documents_manquants(admission=admission),
