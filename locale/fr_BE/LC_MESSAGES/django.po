@@ -185,10 +185,10 @@ msgstr ""
 "l’adresse <a href=\"mailto:{mail}\">{mail}</a> :</p>"
 
 msgid ""
-"<strong>Warning</strong> the candidate is reported as a <strong>fraudster</"
-"strong>"
+"<strong>Warning</strong> the candidate is reported as <strong>fraudster</"
+"strong> by the ARES"
 msgstr ""
-"<strong>Attention</strong> le candidat est signalé <strong>fraudeur</strong>"
+"<strong>Attention</strong> le candidat est signalé <strong>fraudeur</strong> par l'ARES"
 
 #, python-format
 msgid ""
@@ -3282,14 +3282,8 @@ msgstr "Ancien·ne étudiant·e UCLouvain"
 msgid "Fraudster"
 msgstr "Fraudeur"
 
-msgid "Fraudster (ARES)"
-msgstr "Fraudeur (ARES)"
-
 msgid "Fraudster status from ARES"
 msgstr "Statut fraudeur d'après l'ARES"
-
-msgid "Fraudster status from SIC"
-msgstr "Statut fraudeur d'après SIC"
 
 msgid "Free additional approval condition"
 msgstr "Condition complémentaire d'acceptation libre"
@@ -4190,8 +4184,7 @@ msgid "Is non-resident (as defined in decree)"
 msgstr "Est non-résident (au sens du décret)"
 
 msgid "Is the exam the access title for this admission?"
-msgstr ""
-"L'examen est-il le titre d'accès de cette proposition ?"
+msgstr "L'examen est-il le titre d'accès de cette proposition ?"
 
 msgid ""
 "Is your admission request linked with a FNRS, FRIA, FRESH or CSC application?"
@@ -4909,9 +4902,6 @@ msgstr ""
 
 msgid "No enrolment application"
 msgstr "Aucune demande d'inscription n'a été trouvée"
-
-msgid "No fraud identified"
-msgstr "Pas de fraude identifiée"
 
 msgid "No general enrolment"
 msgstr "Aucune inscription en formation générale n'a été trouvée"
@@ -6333,6 +6323,11 @@ msgstr "Envoyer en faculté"
 
 msgid "Sender"
 msgstr "Expéditeur"
+
+msgid ""
+"Sending the authorization is impossible while the personal data are in the "
+"\"Fraudster\" status."
+msgstr "L’envoi de l’autorisation est impossible lorsque les données personnelles sont à l'état \"Fraudeur\"."
 
 msgid "Sent to EPC"
 msgstr "Envoyée à EPC"

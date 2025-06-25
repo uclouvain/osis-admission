@@ -139,8 +139,8 @@
             </button>
         </form>
     {% endif %}
-    {% if admission.fraudeur_ares %}
-      <span class="label label-danger">{% translate 'Fraudster (ARES)' %}</span>
+    {% if original_admission.checklist.current.donnees_personnelles.statut == 'GEST_BLOCAGE' and original_admission.checklist.current.donnees_personnelles.extra.fraud == '1' %}
+      <span class="label label-danger">{% translate 'Fraudster' %}</span>
     {% endif %}
     {% if admission.candidat_vip %}
       <span class="label label-success">{% translate 'VIP' %}</span>
