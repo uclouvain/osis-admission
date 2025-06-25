@@ -124,8 +124,8 @@
   </div>
   <div id="admission-badges" class="min-width">
     {% include 'admission/includes/epc_injection_button.html' %}
-    {% if admission.fraudeur_ares %}
-      <span class="label label-danger">{% translate 'Fraudster (ARES)' %}</span>
+    {% if admission.est_fraudeur %}
+      <span class="label label-danger">{% translate 'Fraudster' %}</span>
     {% endif %}
     {% if admission.candidat_vip %}
       <span class="label label-success">{% translate 'VIP' %}</span>
@@ -135,9 +135,6 @@
     {% endif %}
     {% if admission.est_reorientation_inscription_externe %}
       <span class="label label-admission-primary">{% translate 'External reorientation' %}</span>
-    {% endif %}
-    {% if admission.non_financable %}
-      <span class="label label-danger">{% translate 'Not fundable' %}</span>
     {% endif %}
     {% if admission.candidat_a_plusieurs_demandes %}
       <span
