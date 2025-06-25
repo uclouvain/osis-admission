@@ -47,7 +47,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     BesoinDeDerogationDelegueVrae,
     ChoixStatutPropositionGenerale,
     DerogationFinancement,
-    PoursuiteDeCycle,
+    PoursuiteDeCycle, ChoixStatutChecklist,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import (
     Proposition,
@@ -942,6 +942,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
         is_french_language = get_language() == settings.LANGUAGE_CODE_FR
         proposition = cls._load_dto(admission)
         poursuite_de_cycle_a_specifier = proposition.formation.type == TrainingType.BACHELOR.name
+        checklist_actuelle = admission.checklist.get('current')
 
         return PropositionGestionnaireDTO(
             **dto_to_dict(proposition),
@@ -975,12 +976,13 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             poursuite_de_cycle_a_specifier=poursuite_de_cycle_a_specifier,
             poursuite_de_cycle=admission.cycle_pursuit if poursuite_de_cycle_a_specifier else '',
             candidat_a_plusieurs_demandes=admission.has_several_admissions_in_progress,  # from annotation
-            titre_acces='',  # TODO
             candidat_assimile=admission.accounting
             and admission.accounting.assimilation_situation
             and admission.accounting.assimilation_situation != TypeSituationAssimilation.AUCUNE_ASSIMILATION.name,
-            fraudeur_ares=False,  # TODO
-            non_financable=False,  # TODO,
+            est_fraudeur=(
+                checklist_actuelle['donnees_personnelles']['statut'] == ChoixStatutChecklist.GEST_BLOCAGE.name
+                and checklist_actuelle['donnees_personnelles']['extra'].get('fraud') == '1'
+            ) if checklist_actuelle else False,
             est_inscription_tardive=admission.late_enrollment,
             profil_soumis_candidat=(
                 ProfilCandidatDTO.from_dict(

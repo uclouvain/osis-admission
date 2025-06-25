@@ -438,22 +438,16 @@
         {% include "admission/general_education/includes/checklist/sic_decision_approval_final_modal.html" %}
         {% include "admission/general_education/includes/checklist/sic_decision_delegate_vrae_dispensation_modal.html" %}
 
+        {% if autres_demandes %}
         <div class="info-part">
-          {% include 'admission/general_education/includes/checklist/sic_decision_sic_fraud_status.html' %}
           <dl>
-            <dt>{% trans "Fraudster status from ARES" %}</dt>
-            <dd class="mb-15">
-              Not implemented yet.
-            </dd>
-
-            {% if autres_demandes %}
               <dt>{% trans "Other demand(s) by the candidate." %}</dt>
               <dd>
                 {% include 'admission/includes/lite_admission_list.html' with with_title=True %}
               </dd>
-            {% endif %}
           </dl>
         </div>
+        {% endif %}
 
       </div>
 
@@ -1067,6 +1061,19 @@
           // Update computed rule on financabilite tab show
           $('#list-group-link-financabilite').on('show.bs.tab', function() {
               htmx.trigger('#financabilite-computed-rule', 'financabiliteComputeRule');
+          });
+
+          // Update ares result
+          $('#list-group-link-donnees_personnelles').on('show.bs.tab', function() {
+            if (document.getElementById('ares-fraudster-result-donnees_personnelles') !== null) {
+              htmx.trigger('#ares-fraudster-result-donnees_personnelles', 'fraudAresResult');
+            }
+          });
+
+          $('#list-group-link-decision_sic').on('show.bs.tab', function() {
+              if (document.getElementById('ares-fraudster-result-decision_sic') !== null) {
+                htmx.trigger('#ares-fraudster-result-decision_sic', 'fraudAresResult');
+              }
           });
 
           // Pass the ckeditor data to the form data if necessary

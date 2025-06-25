@@ -34,6 +34,7 @@
         <div
             data-toggle="tab"
             href="#{{ checklist_item_name }}"
+            id="list-group-link-{{ checklist_item_name }}"
         >
           <a>
             {% include 'admission/continuing_education/checklist_menu_item_status.html' with statut=statut extra=current.extra item_name=checklist_item_name %}
