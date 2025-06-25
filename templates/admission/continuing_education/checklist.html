@@ -566,6 +566,14 @@
                 if (editor) editor.updateElement();
             });
           });
+
+          // Update ares result
+          $('#list-group-link-donnees_personnelles').on('show.bs.tab', function() {
+            if (document.getElementById('ares-fraudster-result-donnees_personnelles') !== null) {
+              htmx.trigger('#ares-fraudster-result-donnees_personnelles', 'fraudAresResult');
+            }
+          });
+
       })(jQuery);
   </script>
 {% endblock script %}

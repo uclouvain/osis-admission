@@ -192,6 +192,11 @@ onglet_donnees_personnelles = ConfigurationOngletChecklist(
             extra={'fraud': '0'},
         ),
         ConfigurationStatutChecklist(
+            identifiant='AVIS_EXPERT',
+            libelle=_('Expert opinion'),
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+        ),
+        ConfigurationStatutChecklist(
             identifiant='FRAUDEUR',
             libelle=_('Fraudster'),
             statut=ChoixStatutChecklist.GEST_BLOCAGE,

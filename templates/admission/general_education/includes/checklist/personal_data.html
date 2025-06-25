@@ -30,6 +30,7 @@
 {% endif %}
 
 {% with initial=original_admission.checklist.initial.donnees_personnelles current=original_admission.checklist.current.donnees_personnelles can_update_checklist_tab=can_update_personal_data_tab %}
+  {% include 'admission/details/includes/checklist/fraud_ares_status.html' with container_id="donnees_personnelles" %}
   <div
     id="personal-data-statuses"
     class="form-group btn-group status-group"
@@ -39,6 +40,7 @@
     {% concat view.base_namespace ':personal-data-change-status' as personal_data_base_url %}
     {% url personal_data_base_url view.kwargs.uuid initial.statut as initial_status_url %}
     {% url personal_data_base_url view.kwargs.uuid 'GEST_EN_COURS' as in_progress_status_url %}
+    {% url personal_data_base_url view.kwargs.uuid 'GEST_EN_COURS' as ongoing_status_url %}
     {% url personal_data_base_url view.kwargs.uuid 'GEST_BLOCAGE' as blocking_status_url %}
     {% url personal_data_base_url view.kwargs.uuid 'GEST_REUSSITE' as success_status_url %}
     {% translate initial.libelle as initial_state_label %}
@@ -54,12 +56,14 @@
     {% checklist_state_button tab='donnees_personnelles' label=initial_state_label icon='user' state=initial.statut class='muted' htmx_post=initial_status_url disabled=cannot_change_personal_data_checklist_status_to_be_processed force_enabled=True %}
     {% checklist_state_button tab='donnees_personnelles' label=cleaned_label icon='pencil' state='GEST_EN_COURS' class='warning' htmx_post=in_progress_status_url disabled=cannot_change_personal_data_checklist_status_cleaned force_enabled=True %}
     {% checklist_state_button tab='donnees_personnelles' label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' class='danger' fraud='0' htmx_post=blocking_status_url %}
+    {% checklist_state_button tab='donnees_personnelles' label=_("Expert opinion") icon='pencil' state='GEST_EN_COURS' class='warning' en_cours='expert_opinion' htmx_post=ongoing_status_url %}
     {% checklist_state_button tab='donnees_personnelles' label=_("Fraudster") icon='circle-stop' state='GEST_BLOCAGE' class='danger' fraud='1' htmx_post=blocking_status_url %}
     {% checklist_state_button tab='donnees_personnelles' label=validated_label icon='check' state='GEST_REUSSITE' class='success' htmx_post=success_status_url %}
   </div>
   {% if request.htmx %}
     {# Update the checklist menu item status #}
     {% include "admission/general_education/checklist_menu_item_status.html" with statut=current.statut item_name='donnees_personnelles' %}
+
     {# Update the sic decision statuses #}
     {% if view.is_doctorate %}
       {% include 'admission/doctorate/includes/checklist/sic_decision_statuses.html' with proposition=admission current=original_admission.checklist.current.decision_sic %}
