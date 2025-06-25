@@ -29,6 +29,7 @@
       id="sic-decision-container"
       hx-swap-oob="true"
   >
+    {% include 'admission/general_education/includes/checklist/fraud_ares_status.html' with container_id="decision_sic" %}
     {% if view.is_doctorate %}
     {% include 'admission/doctorate/includes/checklist/sic_decision_statuses.html' with proposition=resume_proposition.proposition current=current  %}
     {% else %}

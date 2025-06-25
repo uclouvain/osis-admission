@@ -238,6 +238,7 @@ from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
+from base.services.fraudeurs import FraudeursService
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from base.utils.utils import format_academic_year
 from ddd.logic.shared_kernel.profil.commands import (
@@ -260,6 +261,7 @@ from osis_role.templatetags.osis_role import has_perm
 from parcours_interne import etudiants_PCE_avant_2015
 
 __all__ = [
+    'FraudsterCheckView',
     'ChecklistView',
     'ChangeExtraView',
     'ApplicationFeesView',
@@ -538,6 +540,23 @@ def get_email(template_identifier, language, proposition_dto: PropositionGestion
             mail_template.render_subject(tokens),
             mail_template.body_as_html(tokens),
         )
+
+
+class FraudsterCheckView(AdmissionViewMixin, HtmxPermissionRequiredMixin, TemplateView):
+    urlpatterns = {'fraudster-check': 'fraudster-check'}
+    template_name = 'admission/general_education/includes/checklist/fraud_ares_status.html'
+    permission_required = 'admission.change_checklist'
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        admission = self.get_permission_object()
+        is_fraudster_from_ares = FraudeursService.verifier(
+            niss=admission.candidate.national_number,
+            nom=admission.candidate.last_name,
+            prenom=admission.candidate.first_name,
+            date_naissance=admission.candidate.birth_date,
+        )
+        return self.render_to_response(self.get_context_data(is_fraudster_from_ares=is_fraudster_from_ares))
 
 
 class PersonalDataChangeStatusView(
