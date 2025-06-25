@@ -29,6 +29,7 @@ from django.db.models import Exists, OuterRef
 from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
 
+from admission.constants import UCL_EMAIL_SUFFIX
 from admission.ddd.admission.doctorat.preparation.domain.model._membre_CA import (
     MembreCAIdentity,
 )
@@ -95,8 +96,9 @@ class MembreCATranslator(IMembreCATranslator):
             is_student_and_not_tutor=Exists(Student.objects.filter(person=OuterRef('pk'), person__tutor__isnull=True)),
         ).filter(
             global_id=matricule,
-            # Remove unexistent users
-            user_id__isnull=False,
+            # Keep only persons with internal account and email address
+            global_id__startswith='0',
+            email__endswith=UCL_EMAIL_SUFFIX,
             # Remove students who aren't tutors
             is_student_and_not_tutor=False,
         )
