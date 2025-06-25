@@ -142,8 +142,8 @@ msgid ""
 msgstr ""
 
 msgid ""
-"<strong>Warning</strong> the candidate is reported as a <strong>fraudster</"
-"strong>"
+"<strong>Warning</strong> the candidate is reported as <strong>fraudster</"
+"strong> by the ARES"
 msgstr ""
 
 #, python-format
@@ -3007,13 +3007,7 @@ msgstr ""
 msgid "Fraudster"
 msgstr ""
 
-msgid "Fraudster (ARES)"
-msgstr ""
-
 msgid "Fraudster status from ARES"
-msgstr ""
-
-msgid "Fraudster status from SIC"
 msgstr ""
 
 msgid "Free additional approval condition"
@@ -4436,9 +4430,6 @@ msgstr ""
 msgid "No enrolment application"
 msgstr ""
 
-msgid "No fraud identified"
-msgstr ""
-
 msgid "No general enrolment"
 msgstr ""
 
@@ -5773,6 +5764,11 @@ msgid "Send to faculty"
 msgstr ""
 
 msgid "Sender"
+msgstr ""
+
+msgid ""
+"Sending the authorization is impossible while the personal data are in the "
+"\"Fraudster\" status."
 msgstr ""
 
 msgid "Sent to EPC"
