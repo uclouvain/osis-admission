@@ -82,7 +82,6 @@ from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervi
 from admission.models import DoctorateAdmission, SupervisionActor
 from admission.models.enums.actor_type import ActorType
 from base.models.person import Person
-from osis_role.contrib.permissions import _get_roles_assigned_to_user
 from reference.models.country import Country
 
 
@@ -338,8 +337,8 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
             signataire_id = MembreCAIdentity(str(new_actor.uuid))
         if proposition_status != ChoixStatutPropositionDoctorale.EN_BROUILLON:
             new_actor.switch_state(SignatureState.INVITED)
-        # Make sure the person has relevant role and group
-        if person and group_name not in _get_roles_assigned_to_user(person.user):
+        # Make sure the person has relevant role
+        if person:
             model.objects.update_or_create(person=person)
         return signataire_id
 

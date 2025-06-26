@@ -30,6 +30,7 @@ from django.db.models import Exists, F, OuterRef, Q
 from django.db.models.functions import Concat
 
 from admission.auth.roles.candidate import Candidate
+from admission.constants import UCL_EMAIL_SUFFIX
 from admission.ddd.admission.doctorat.preparation.commands import (
     RechercherPromoteursQuery,
 )
@@ -125,12 +126,11 @@ class PersonAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetView):
                 ],
             )
         qs = (
-            qs.exclude(
-                Q(user_id__isnull=True)
-                | Q(global_id='')
-                | Q(global_id__isnull=True)
-                | Q(first_name='')
-                | Q(last_name='')
+            qs.exclude(Q(first_name='') | Q(last_name=''))
+            .filter(
+                # Keep only persons with internal account and email address
+                global_id__startswith='0',
+                email__endswith=UCL_EMAIL_SUFFIX,
             )
             .exclude(Exists(Student.objects.filter(person=OuterRef('pk'), person__tutor__isnull=True)))
             .order_by('last_name', 'first_name')
@@ -158,7 +158,11 @@ class TutorAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetView):
                 last_name=F("person__last_name"),
                 global_id=F("person__global_id"),
             )
-            .exclude(Q(person__user_id__isnull=True) | Q(person__global_id=''))
+            .filter(
+                # Keep only persons with internal account and email address
+                global_id__startswith='0',
+                email__endswith=UCL_EMAIL_SUFFIX,
+            )
             .distinct()
             .values(
                 'first_name',

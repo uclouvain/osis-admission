@@ -40,17 +40,17 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 from admission.models.enums.actor_type import ActorType
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
+from admission.tests.factories.person import InternalPersonFactory
 from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.supervision import (
     CaMemberFactory,
-    ExternalCaMemberFactory,
     ExternalPromoterFactory,
     PromoterFactory,
 )
 from base.models.enums.entity_type import EntityType
 from base.tests import QueriesAssertionsMixin
 from base.tests.factories.entity_version import EntityVersionFactory
-from base.tests.factories.person import PersonFactory
+from base.tests.factories.person import ExternalPersonFactory, PersonFactory
 from base.tests.factories.student import StudentFactory
 from base.tests.factories.tutor import TutorFactory
 from reference.tests.factories.country import CountryFactory
@@ -165,7 +165,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         self.assertIsNone(admission.supervision_group)
         url = resolve_url("admission_api_v1:supervision", uuid=admission.uuid)
         data = {
-            'matricule': PersonFactory(first_name="John").global_id,
+            'matricule': InternalPersonFactory(first_name="John").global_id,
             'actor_type': ActorType.CA_MEMBER.name,
             **self.empty_external_data,
         }
@@ -182,7 +182,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         self.client.force_authenticate(user=self.candidate.user)
 
         data = {
-            'matricule': PersonFactory(first_name="John").global_id,
+            'matricule': InternalPersonFactory(first_name="John").global_id,
             'actor_type': ActorType.CA_MEMBER.name,
             **self.empty_external_data,
         }
@@ -196,7 +196,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
     def test_supervision_ajouter_membre_ca_etudiant_tuteur(self):
         self.client.force_authenticate(user=self.candidate.user)
 
-        person = PersonFactory(first_name="Jim")
+        person = InternalPersonFactory(first_name="Jim")
 
         data = {
             'matricule': person.global_id,
@@ -250,11 +250,23 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json()['non_field_errors'][0]['status_code'], MembreCANonTrouveException.status_code)
 
+    def test_supervision_ajouter_membre_ca_avec_compte_externe(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        data = {
+            'matricule': ExternalPersonFactory().global_id,
+            'actor_type': ActorType.CA_MEMBER.name,
+            **self.empty_external_data,
+        }
+        response = self.client.put(self.url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.json()['non_field_errors'][0]['status_code'], MembreCANonTrouveException.status_code)
+
     def test_supervision_ajouter_promoteur(self):
         self.client.force_authenticate(user=self.candidate.user)
 
         data = {
-            'matricule': TutorFactory(person__first_name="John").person.global_id,
+            'matricule': TutorFactory(person=InternalPersonFactory(first_name="John")).person.global_id,
             'actor_type': ActorType.PROMOTER.name,
             **self.empty_external_data,
         }
@@ -269,7 +281,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
     def test_supervision_ajouter_promoteur_etudiant_tuteur(self):
         self.client.force_authenticate(user=self.candidate.user)
 
-        person = PersonFactory(first_name="Jim")
+        person = InternalPersonFactory(first_name="Jim")
 
         data = {
             'matricule': person.global_id,
@@ -328,10 +340,22 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json()['non_field_errors'][0]['status_code'], PromoteurNonTrouveException.status_code)
 
+    def test_supervision_ajouter_promoteur_avec_compte_externe(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        data = {
+            'matricule': ExternalPersonFactory().global_id,
+            'actor_type': ActorType.PROMOTER.name,
+            **self.empty_external_data,
+        }
+        response = self.client.put(self.url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.json()['non_field_errors'][0]['status_code'], PromoteurNonTrouveException.status_code)
+
     def test_supervision_ajouter_membre_no_role(self):
         self.client.force_authenticate(user=self.no_role_user)
         data = {
-            'matricule': TutorFactory(person__first_name="Joe").person.global_id,
+            'matricule': TutorFactory(person=InternalPersonFactory(first_name="Joe")).person.global_id,
             'actor_type': ActorType.PROMOTER.name,
             **self.empty_external_data,
         }
@@ -341,7 +365,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
     def test_supervision_ajouter_membre_other_candidate(self):
         self.client.force_authenticate(user=self.other_candidate_user)
         data = {
-            'matricule': TutorFactory(person__first_name="Joe").person.global_id,
+            'matricule': TutorFactory(person=InternalPersonFactory(first_name="Joe")).person.global_id,
             'actor_type': ActorType.PROMOTER.name,
             **self.empty_external_data,
         }
@@ -355,7 +379,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         # The current user is not yet a supervisor of the current admission
         self.client.force_authenticate(user=other_promoter.person.user)
         data = {
-            'matricule': TutorFactory(person__first_name="Joe").person.global_id,
+            'matricule': TutorFactory(person=InternalPersonFactory(first_name="Joe")).person.global_id,
             'actor_type': ActorType.PROMOTER.name,
             **self.empty_external_data,
         }
@@ -365,7 +389,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         # The current user is now a supervisor of the current admission
         self.client.force_authenticate(user=self.promoter.person.user)
         data = {
-            'matricule': TutorFactory(person__first_name="Joe").person.global_id,
+            'matricule': TutorFactory(person=InternalPersonFactory(first_name="Joe")).person.global_id,
             'actor_type': ActorType.PROMOTER.name,
             **self.empty_external_data,
         }
@@ -382,7 +406,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         # The current user is not yet a supervisor of the admission
         self.client.force_authenticate(user=other_member.person.user)
         data = {
-            'matricule': PersonFactory(first_name="Joe").global_id,
+            'matricule': InternalPersonFactory(first_name="Joe").global_id,
             'actor_type': ActorType.CA_MEMBER.name,
             **self.empty_external_data,
         }
@@ -392,7 +416,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         # The current user is now a supervisor of the admission
         self.client.force_authenticate(user=member.person.user)
         data = {
-            'matricule': PersonFactory(first_name="Joe").global_id,
+            'matricule': InternalPersonFactory(first_name="Joe").global_id,
             'actor_type': ActorType.CA_MEMBER.name,
             **self.empty_external_data,
         }
@@ -507,7 +531,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         data = {
-            'matricule': TutorFactory(person__first_name="Joe").person.global_id,
+            'matricule': TutorFactory(person=InternalPersonFactory(first_name="Joe")).person.global_id,
             'actor_type': ActorType.PROMOTER.name,
         }
         response = self.client.put(self.url, data=data)
@@ -534,7 +558,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
 
         # Add CA member
         data = {
-            'matricule': PersonFactory(first_name="Joe").global_id,
+            'matricule': InternalPersonFactory(first_name="Joe").global_id,
             'actor_type': ActorType.CA_MEMBER.name,
             **self.empty_external_data,
         }

@@ -27,6 +27,7 @@ from django.shortcuts import resolve_url
 from django.test import override_settings
 from rest_framework.test import APITestCase
 
+from admission.tests.factories.person import InternalPersonFactory
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.student import StudentFactory
 from base.tests.factories.tutor import TutorFactory
@@ -41,7 +42,8 @@ class PersonAutocompleteTestCase(APITestCase):
 
     def test_autocomplete_persons(self):
         self.client.force_authenticate(user=self.user)
-        PersonFactory(first_name="Jean-Marc", global_id="00005789")
+        internal_global_id = '00005789'
+        person = InternalPersonFactory(first_name="Jean-Marc", global_id=internal_global_id)
         response = self.client.get(
             resolve_url('autocomplete-person') + '?search=jean',
             format="json",
@@ -55,12 +57,33 @@ class PersonAutocompleteTestCase(APITestCase):
         self.assertEqual(response.status_code, 200, response.content)
         self.assertEqual(response.json()['count'], 1)
 
+        # External global id
+        person.global_id = '12345678'
+        person.save()
+        response = self.client.get(
+            resolve_url('autocomplete-person') + '?search=jean',
+            format="json",
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(response.json()['count'], 0)
+
+        # External email address
+        person.global_id = internal_global_id
+        person.email = 'john.doe@test.be'
+        person.save()
+        response = self.client.get(
+            resolve_url('autocomplete-person') + '?search=jean',
+            format="json",
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(response.json()['count'], 0)
+
     def test_autocomplete_persons_depending_on_roles(self):
         self.client.force_authenticate(user=self.user)
 
         url = resolve_url('autocomplete-person') + '?search=5789'
 
-        person = PersonFactory(global_id="00005789")
+        person = InternalPersonFactory(global_id="00005789")
 
         response = self.client.get(url, format="json")
         self.assertEqual(response.status_code, 200, response.content)

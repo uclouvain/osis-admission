@@ -43,6 +43,7 @@ from rest_framework.response import Response
 
 from admission.api import serializers
 from admission.api.serializers import PersonSerializer
+from admission.constants import UCL_EMAIL_SUFFIX
 from admission.ddd.admission.doctorat.preparation.commands import (
     RechercherDoctoratQuery,
 )
@@ -334,7 +335,11 @@ class AutocompleteTutorView(ListAPIView):
             last_name=F("person__last_name"),
             global_id=F("person__global_id"),
         )
-        .exclude(Q(person__user_id__isnull=True) | Q(person__global_id=''))
+        # Keep only persons with internal account and email address
+        .filter(
+            person__global_id__startswith='0',
+            person__email__endswith=UCL_EMAIL_SUFFIX,
+        )
         .distinct('global_id')
         .select_related("person")
     )
@@ -350,19 +355,17 @@ class AutocompletePersonView(ListAPIView):
     filter_backends = [PersonSearchingBackend]
     serializer_class = PersonSerializer
     queryset = (
-        Person.objects.exclude(
-            # Remove unexistent users
-            Q(user_id__isnull=True)
-            | Q(global_id='')
-            | Q(global_id__isnull=True)
-            | Q(first_name='')
-            | Q(last_name='')
-        )
+        Person.objects.exclude(Q(first_name='') | Q(last_name=''))
         .alias(
-            # Remove students who aren't tutors
             is_student_and_not_tutor=Exists(Student.objects.filter(person=OuterRef('pk'), person__tutor__isnull=True)),
         )
-        .filter(is_student_and_not_tutor=False)
+        .filter(
+            # Keep only persons with internal account and email address
+            global_id__startswith='0',
+            email__endswith=UCL_EMAIL_SUFFIX,
+            # Remove students who aren't tutors
+            is_student_and_not_tutor=False,
+        )
         .order_by('first_name', 'last_name')
     )
 

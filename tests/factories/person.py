@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ import uuid
 
 import factory
 
+from admission.constants import UCL_EMAIL_SUFFIX
 from admission.tests.factories import PdfUploadFactory
 from admission.tests.factories.curriculum import (
     EducationalExperienceFactory,
@@ -36,9 +37,7 @@ from admission.tests.factories.curriculum import (
     ProfessionalExperienceFactory,
 )
 from admission.tests.factories.language import LanguageKnowledgeFactory
-from admission.tests.factories.secondary_studies import (
-    BelgianHighSchoolDiplomaFactory,
-)
+from admission.tests.factories.secondary_studies import BelgianHighSchoolDiplomaFactory
 from base import models as mdl
 from base.models.enums.civil_state import CivilState
 from base.models.enums.got_diploma import GotDiploma
@@ -48,7 +47,11 @@ from base.tests.factories.person import PersonFactory
 from base.tests.factories.person_address import PersonAddressFactory
 from osis_profile.models.enums.curriculum import Result
 from reference.tests.factories.country import CountryFactory
-from reference.tests.factories.language import EnglishLanguageFactory, FrenchLanguageFactory, LanguageFactory
+from reference.tests.factories.language import (
+    EnglishLanguageFactory,
+    FrenchLanguageFactory,
+    LanguageFactory,
+)
 
 
 class CompletePersonFactory(PersonFactory):
@@ -250,3 +253,7 @@ class IncompletePersonForIUFCFactory(CompletePersonFactory):
             city='Louvain-la-Neuve',
             country=CountryFactory(iso_code="BE"),
         )
+
+
+class InternalPersonFactory(PersonFactory):
+    email = factory.Faker('email', domain=UCL_EMAIL_SUFFIX)
