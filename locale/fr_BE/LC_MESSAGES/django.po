@@ -7221,6 +7221,10 @@ msgstr ""
 "La personne dont les études secondaires ont été valorisées par cette "
 "admission"
 
+msgid "The professional experience is missing a certificate."
+msgstr ""
+"L'expérience professionnelle n'a pas de certificat."
+
 msgid ""
 "The professional experiences that have been valuated from this admission."
 msgstr ""
