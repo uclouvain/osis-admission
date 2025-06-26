@@ -84,6 +84,7 @@ class SupervisionTestCase(TestCase):
             training__academic_year=academic_years[0],
             proximity_commission=ChoixCommissionProximiteCDEouCLSM.ECONOMY.name,
             supervision_group=_ProcessFactory(),
+            submitted=True,
         )
 
         # Users

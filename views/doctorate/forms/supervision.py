@@ -341,7 +341,7 @@ class DoctorateAdmissionRequestSignaturesView(PermissionRequiredMixin, BusinessE
 class DoctorateAdmissionSendBackToTheCandidateView(PermissionRequiredMixin, BusinessExceptionFormViewMixin, FormView):
     urlpatterns = 'send-back-to-candidate'
     form_class = forms.Form
-    permission_required = 'admission.change_admission_project'
+    permission_required = 'admission.send_back_to_candidate'
 
     def get_permission_object(self):
         return get_cached_admission_perm_obj(self.kwargs.get('uuid'))

@@ -64,6 +64,12 @@ def signing_in_progress(self, user: User, obj: DoctorateAdmission):
 
 
 @predicate(bind=True)
+@predicate_failed_msg(message=_("Invitations have not been sent"))
+def signing_in_progress_before_submition(self, user: User, obj: DoctorateAdmission):
+    return obj.status == ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name
+
+
+@predicate(bind=True)
 @predicate_failed_msg(message=_("You must be invited to complete this admission."))
 def is_invited_to_complete(self, user: User, obj: DoctorateAdmission):
     return obj.status in STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CANDIDAT
