@@ -30,8 +30,6 @@ from django.db import IntegrityError
 from django.test import TestCase
 
 from admission.constants import CONTEXT_GENERAL, CONTEXT_CONTINUING, CONTEXT_DOCTORATE
-from admission.models import AdmissionViewer, ContinuingEducationAdmissionProxy
-from admission.models.base import admission_directory_path, BaseAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
@@ -39,6 +37,8 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
     continuing_education_types_as_set,
     doctorate_types_as_set,
 )
+from admission.models import AdmissionViewer, ContinuingEducationAdmissionProxy
+from admission.models.base import admission_directory_path, BaseAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.admission_viewer import AdmissionViewerFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
