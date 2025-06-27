@@ -81,6 +81,7 @@ class DoctorateAdmissionMemberSupervisionForm(forms.Form):
     pays = forms.CharField(
         label=_("Country"),
         required=False,
+        # TODO use an autocomplete from base / reference with iso codes as id (also todo in parcours_doctoral)
         widget=autocomplete.ListSelect2(
             url="country-autocomplete",
             attrs={
