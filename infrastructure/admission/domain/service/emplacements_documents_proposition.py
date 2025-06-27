@@ -28,6 +28,10 @@ from typing import List, Dict
 from admission.ddd.admission.domain.service.i_emplacements_documents_proposition import (
     IEmplacementsDocumentsPropositionTranslator,
 )
+from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
+from admission.ddd.admission.dtos.resume import ResumePropositionDTO
+from admission.exports.admission_recap.section import get_sections
+from osis_profile.models import EducationGroupYearExam
 
 
 class EmplacementsDocumentsPropositionTranslator(IEmplacementsDocumentsPropositionTranslator):
@@ -42,3 +46,22 @@ class EmplacementsDocumentsPropositionTranslator(IEmplacementsDocumentsPropositi
             uuid: metadata[tokens[uuid]] if uuid in tokens and tokens[uuid] in metadata else {}
             for uuid in uuids_documents
         }
+
+    @classmethod
+    def get_sections(
+        cls,
+        resume_dto: ResumePropositionDTO,
+        questions_specifiques: List[QuestionSpecifiqueDTO],
+        avec_documents_libres: bool,
+    ) -> dict:
+        education_group_year_exam = EducationGroupYearExam.objects.filter(
+            education_group_year__acronym=resume_dto.proposition.formation.sigle,
+            education_group_year__academic_year__year=resume_dto.proposition.formation.annee,
+        ).first()
+
+        return get_sections(
+            context=resume_dto,
+            specific_questions=questions_specifiques,
+            with_free_requestable_documents=avec_documents_libres,
+            education_group_year_exam=education_group_year_exam,
+        )

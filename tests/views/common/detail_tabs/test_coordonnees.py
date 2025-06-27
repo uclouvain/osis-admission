@@ -44,6 +44,7 @@ from admission.tests.factories.continuing_education import (
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import (
     CentralManagerRoleFactory,
+    DoctorateCommitteeMemberRoleFactory,
     SicManagementRoleFactory,
 )
 from base.models.enums.person_address_type import PersonAddressType
@@ -122,6 +123,10 @@ class CoordonneesDetailViewTestCase(TestCase):
             candidate=cls.doctorate_admission.candidate,
             admitted=True,
         )
+
+        cls.doctorate_committee_member = DoctorateCommitteeMemberRoleFactory(
+            education_group=cls.doctorate_admission.training.education_group,
+        ).person.user
 
         cls.confirmed_doctorate_url = resolve_url(
             'admission:doctorate:coordonnees',
@@ -231,6 +236,11 @@ class CoordonneesDetailViewTestCase(TestCase):
     def test_doctorate_coordonnees_detail_central_manager_user(self):
         self.client.force_login(user=self.central_manager.person.user)
 
+        response = self.client.get(self.doctorate_url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_doctorate_coordonnes_detail_doctorate_committee_member(self):
+        self.client.force_login(user=self.doctorate_committee_member)
         response = self.client.get(self.doctorate_url)
         self.assertEqual(response.status_code, 200)
 
