@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -28,38 +28,41 @@ from django import forms
 from django.contrib import messages
 from django.http import Http404
 from django.shortcuts import redirect, resolve_url
-from django.views.generic.edit import FormView
 from django.utils.translation import gettext_lazy as _
+from django.views.generic.edit import FormView
 from rest_framework.settings import api_settings
 
-from admission.models.enums.actor_type import ActorType
 from admission.ddd.admission.doctorat.preparation.commands import (
-    RenvoyerInvitationSignatureExterneCommand,
-    DemanderSignaturesCommand,
     ApprouverPropositionParPdfCommand,
+    DemanderSignaturesCommand,
     DesignerPromoteurReferenceCommand,
-    ModifierMembreSupervisionExterneCommand,
-    SupprimerMembreCACommand,
-    SupprimerPromoteurCommand,
     GetGroupeDeSupervisionCommand,
-    VerifierProjetQuery,
     IdentifierMembreCACommand,
     IdentifierPromoteurCommand,
+    ModifierMembreSupervisionExterneCommand,
     RedonnerLaMainAuCandidatCommand,
+    RenvoyerInvitationSignatureExterneCommand,
+    SupprimerMembreCACommand,
+    SupprimerPromoteurCommand,
+    VerifierProjetQuery,
 )
 from admission.forms.admission.doctorate.supervision import (
-    DoctorateAdmissionSupervisionForm,
-    DoctorateAdmissionMemberSupervisionForm,
-    DoctorateAdmissionApprovalByPdfForm,
     ACTOR_EXTERNAL,
     EXTERNAL_FIELDS,
+    DoctorateAdmissionApprovalByPdfForm,
+    DoctorateAdmissionMemberSupervisionForm,
+    DoctorateAdmissionSupervisionForm,
 )
-from admission.utils import get_cached_admission_perm_obj, gather_business_exceptions
+from admission.models.enums.actor_type import ActorType
+from admission.utils import gather_business_exceptions, get_cached_admission_perm_obj
 from admission.views.common.mixins import LoadDossierViewMixin
-from admission.views.mixins.business_exceptions_form_view_mixin import BusinessExceptionFormViewMixin
+from admission.views.mixins.business_exceptions_form_view_mixin import (
+    BusinessExceptionFormViewMixin,
+)
 from base.views.common import display_error_messages, display_info_messages
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import PermissionRequiredMixin
+from reference.models.country import Country
 
 __namespace__ = None
 
@@ -106,6 +109,11 @@ class DoctorateAdmissionAddActorFormView(LoadDossierViewMixin, BusinessException
             data = {**data, **{f: '' for f in EXTERNAL_FIELDS}}
         else:
             matricule = ''
+        pays = data.get('pays')
+        if pays:
+            data['pays'] = Country.objects.filter(pk=pays).values('iso_code').first()
+            if data['pays'] is not None:
+                data['pays'] = data['pays']['iso_code']
         return {
             'matricule_auteur': self.request.user.person.global_id,
             'type': data['type'],
