@@ -79,11 +79,13 @@ class ProjectViewTestCase(TestCase):
             type=ChoixTypeAdmission.ADMISSION.name,
             thesis_institute=cls.institute,
             thesis_language=cls.language,
+            submitted=True,
         )
 
         cls.pre_admission = DoctorateAdmissionFactory(
             training=cls.admission.training,
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
+            submitted=True,
         )
 
         EnglishLanguageFactory()

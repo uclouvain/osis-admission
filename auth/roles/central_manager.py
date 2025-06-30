@@ -150,6 +150,12 @@ class CentralManager(EntityRoleModel):
             )
             & ~is_sent_to_epc,
             'admission.view_admission_project': is_entity_manager,
+            'admission.change_admission_project': is_entity_manager
+            & doctorate.signing_in_progress_before_submition
+            & ~is_sent_to_epc,
+            'admission.send_back_to_candidate': is_entity_manager
+            & doctorate.signing_in_progress_before_submition
+            & ~is_sent_to_epc,
             'admission.view_admission_cotutelle': doctorate.is_admission & is_entity_manager,
             'admission.view_admission_supervision': is_entity_manager,
             'admission.view_admission_accounting': is_entity_manager,
