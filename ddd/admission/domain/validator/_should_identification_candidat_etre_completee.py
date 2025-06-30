@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ from typing import List, Optional
 import attr
 
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    AutresPrenomsTropLongException,
     CarteIdentiteeNonSpecifieeException,
     DateOuAnneeNaissanceNonSpecifieeException,
     DetailsPasseportNonSpecifiesException,
@@ -36,9 +37,12 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     NomEtPrenomNonSpecifiesException,
     NumeroIdentiteBelgeNonSpecifieException,
     NumeroIdentiteNonSpecifieException,
+    PrenomTropLongException,
     SpecifierNOMASiDejaInscritException,
 )
-from admission.ddd.admission.domain.model._candidat_signaletique import CandidatSignaletique
+from admission.ddd.admission.domain.model._candidat_signaletique import (
+    CandidatSignaletique,
+)
 from base.ddd.utils.business_validator import BusinessValidator
 from osis_profile import BE_ISO_CODE
 
@@ -70,6 +74,24 @@ class ShouldCandidatSpecifierNomOuPrenom(BusinessValidator):
     def validate(self, *args, **kwargs):
         if not self.nom and not self.prenom:
             raise NomEtPrenomNonSpecifiesException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldCandidatPrenomEtreSuffisammentCourt(BusinessValidator):
+    prenom: Optional[str]
+
+    def validate(self, *args, **kwargs):
+        if len(self.prenom) > 20:
+            raise PrenomTropLongException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldCandidatAutresPrenomsEtreSuffisammentCourt(BusinessValidator):
+    autres_prenoms: Optional[str]
+
+    def validate(self, *args, **kwargs):
+        if len(self.autres_prenoms) > 40:
+            raise AutresPrenomsTropLongException
 
 
 @attr.dataclass(frozen=True, slots=True)
