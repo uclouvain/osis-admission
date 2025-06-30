@@ -302,8 +302,8 @@ DocumentsComptabilite = {
 
 DocumentsProjetRecherche = {
     'PREUVE_BOURSE': _('Proof of scholarship'),
-    'DOCUMENTS_PROJET': _('PhD research project'),
-    'PROPOSITION_PROGRAMME_DOCTORAL': _('PhD proposal'),
+    'DOCUMENTS_PROJET': _('Doctoral research project'),
+    'PROPOSITION_PROGRAMME_DOCTORAL': _('Doctoral training proposal'),
     'PROJET_FORMATION_COMPLEMENTAIRE': _('Complementary training proposition'),
     'GRAPHE_GANTT': _("Gantt chart"),
     'LETTRES_RECOMMANDATION': _("Letters of recommendation"),

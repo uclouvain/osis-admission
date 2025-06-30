@@ -2154,6 +2154,12 @@ msgstr ""
 msgid "Doctoral commissions"
 msgstr ""
 
+msgid "Doctoral research project"
+msgstr ""
+
+msgid "Doctoral training proposal"
+msgstr ""
+
 msgid "Doctorate Ethics Regulations"
 msgstr ""
 
@@ -4856,13 +4862,7 @@ msgstr ""
 msgid "PhD already done"
 msgstr ""
 
-msgid "PhD proposal"
-msgstr ""
-
 msgid "PhD research experience"
-msgstr ""
-
-msgid "PhD research project"
 msgstr ""
 
 msgid "Place of birth"
