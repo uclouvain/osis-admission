@@ -113,6 +113,7 @@ class EducationalExperienceFactory(factory.django.DjangoModelFactory):
                 DiplomaTitleFactory,
                 title='Computer science',
                 cycle=Cycle.SECOND_CYCLE.name,
+                code_grade_acad='1',
             ),
             institute=factory.SubFactory(
                 OrganizationFactory,

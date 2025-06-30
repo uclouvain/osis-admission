@@ -783,23 +783,15 @@ class DisplayTagTestCase(TestCase):
 
         template_params = experience_details_template(**kwargs)
 
-        self.assertEqual(template_params['curex_link_button'], '')
         self.assertEqual(
-            template_params['edit_link_button'],
-            '/osis_profile/{noma}/parcours_externe/edit/experience_non_academique/{experience_uuid}'
-            '?next=mypath&next_hash_url=parcours_anterieur__{experience_uuid}'.format(
+            template_params['curex_link_button'],
+            '/osis_profile/{noma}/parcours_externe/edit/experience_non_academique/{experience_uuid}'.format(
                 noma='0123456',
                 experience_uuid=kwargs['experience'].uuid,
             ),
         )
-        self.assertEqual(
-            template_params['duplicate_link_button'],
-            '/admissions/general-education/{proposition_uuid}/update/curriculum/non_educational/{experience_uuid}'
-            '/duplicate?next=mypath&next_hash_url=parcours_anterieur__{experience_uuid}'.format(
-                proposition_uuid=proposition_uuid,
-                experience_uuid=kwargs['experience'].uuid,
-            ),
-        )
+        self.assertEqual(template_params['edit_link_button'], '')
+        self.assertEqual(template_params['duplicate_link_button'], '')
         self.assertEqual(template_params['delete_link_button'], '')
 
         # Without the right to update the experience from the profile
@@ -808,14 +800,7 @@ class DisplayTagTestCase(TestCase):
 
         self.assertEqual(template_params['curex_link_button'], '')
         self.assertEqual(template_params['edit_link_button'], '')
-        self.assertEqual(
-            template_params['duplicate_link_button'],
-            '/admissions/general-education/{proposition_uuid}/update/curriculum/non_educational/{experience_uuid}'
-            '/duplicate?next=mypath&next_hash_url=parcours_anterieur__{experience_uuid}'.format(
-                proposition_uuid=proposition_uuid,
-                experience_uuid=kwargs['experience'].uuid,
-            ),
-        )
+        self.assertEqual(template_params['duplicate_link_button'], '')
         self.assertEqual(template_params['delete_link_button'], '')
 
         # Without the right to update the experience
@@ -889,13 +874,11 @@ class DisplayTagTestCase(TestCase):
 
         template_params = experience_details_template(**kwargs)
 
-        self.assertEqual(template_params['curex_link_button'], '')
+        self.assertEqual(template_params['edit_link_button'], '')
         self.assertEqual(
-            template_params['edit_link_button'],
-            '/osis_profile/{noma}/parcours_externe/edit/etudes_secondaires'
-            '?next=mypath&next_hash_url=parcours_anterieur__{experience_uuid}'.format(
+            template_params['curex_link_button'],
+            '/osis_profile/{noma}/parcours_externe/edit/etudes_secondaires'.format(
                 noma='0123456',
-                experience_uuid=kwargs['experience'].uuid,
             ),
         )
         self.assertEqual(template_params['duplicate_link_button'], '')
@@ -1076,8 +1059,8 @@ class DisplayTagTestCase(TestCase):
 
         self.assertEqual(context['edit_link_button_in_new_tab'], True)
         self.assertEqual(
-            context['update_url'],
-            f'/osis_profile/0123456/parcours_externe/edit/experience_non_academique/{experience.uuid}{next_url_suffix}',
+            context['curex_url'],
+            f'/osis_profile/0123456/parcours_externe/edit/experience_non_academique/{experience.uuid}',
         )
         self.assertEqual(context['delete_url'], '')
 
@@ -1136,8 +1119,8 @@ class DisplayTagTestCase(TestCase):
 
         self.assertEqual(context['edit_link_button_in_new_tab'], True)
         self.assertEqual(
-            context['update_url'],
-            f'/osis_profile/0123456/parcours_externe/edit/etudes_secondaires{next_url_suffix}',
+            context['curex_url'],
+            f'/osis_profile/0123456/parcours_externe/edit/etudes_secondaires',
         )
 
     def test_checklist_experience_action_links_context_with_an_internal_experience(self):

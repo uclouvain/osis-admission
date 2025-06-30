@@ -202,7 +202,7 @@
 {% block script %}
   {# Add either form scripts or osis-documents for detail #}
   {{ block.super }}
-  <script src="{% static 'admission/popover.js' %}"></script>
+  <script src="{% static 'osis_profile/js/popover.js' %}"></script>
   <script>
     $(function () {
       initializePopover();
@@ -229,6 +229,7 @@
 {% endblock %}
 
 {% block style %}
+  <link href="{% static "osis_profile/css/popover.css" %}" rel="stylesheet"/>
   <link href="{% static "admission/admission.css" %}" rel="stylesheet"/>
   {# Add either form styles or osis-documents for detail #}
   {% if form %}

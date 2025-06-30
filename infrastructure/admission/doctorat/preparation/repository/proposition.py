@@ -764,6 +764,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 type=admission.doctorate.education_group_type.name,
                 campus_inscription=CampusDTO.from_model_object(admission.training.enrollment_campus),
                 credits=admission.training.credits,
+                grade_academique=admission.training_academic_grade,  # From annotation
             ),
             annee_calculee=admission.determined_academic_year and admission.determined_academic_year.year,
             type_demande=admission.type_demande,

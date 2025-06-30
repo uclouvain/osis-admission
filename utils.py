@@ -27,7 +27,7 @@ import os
 import uuid
 from collections import defaultdict
 from contextlib import suppress
-from typing import Dict, Iterable, List, Union, Optional
+from typing import Dict, Iterable, List, Optional, Union
 
 import weasyprint
 from django.conf import settings
@@ -85,6 +85,7 @@ from base.models.enums.education_group_types import TrainingType
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.person import Person
 from ddd.logic.formation_catalogue.commands import GetSigleFormationParenteQuery
+from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
@@ -439,7 +440,7 @@ def get_access_titles_names(
     # Sort the access titles by year and only keep the selected ones
     access_titles_list = sorted(
         (access_title for access_title in access_titles.values() if access_title.selectionne),
-        key=lambda title: title.annee,
+        key=lambda title: title.annee if title.annee else 0,
         reverse=True,
     )
 
@@ -486,6 +487,10 @@ def get_experience_urls(
             ),
             'admission.change_admission_secondary_studies': user.has_perm(
                 perm='admission.change_admission_secondary_studies',
+                obj=admission,
+            ),
+            'admission.change_admission_exam': user.has_perm(
+                perm='admission.change_admission_exam',
                 obj=admission,
             ),
             'admission.delete_admission_curriculum': user.has_perm(
@@ -555,25 +560,24 @@ def get_experience_urls(
         if not computed_permissions['admission.change_admission_curriculum']:
             return res_context
 
-        res_context['duplicate_url'] = resolve_url(
-            f'{base_namespace}:update:curriculum:non_educational_duplicate',
-            uuid=admission.uuid,
-            experience_uuid=experience.uuid,
-        )
-
         if experience.epc_experience:
             if candidate_noma:
                 if computed_permissions['profil.can_edit_parcours_externe']:
-                    res_context['edit_url'] = resolve_url(
+                    res_context['curex_url'] = resolve_url(
                         'edit-experience-non-academique-view',
                         noma=candidate_noma,
                         experience_uuid=experience.uuid,
                     )
-                    res_context['edit_new_link_tab'] = True
 
         else:
             res_context['edit_url'] = resolve_url(
                 f'{base_namespace}:update:curriculum:non_educational',
+                uuid=admission.uuid,
+                experience_uuid=experience.uuid,
+            )
+
+            res_context['duplicate_url'] = resolve_url(
+                f'{base_namespace}:update:curriculum:non_educational_duplicate',
                 uuid=admission.uuid,
                 experience_uuid=experience.uuid,
             )
@@ -597,7 +601,7 @@ def get_experience_urls(
         if experience.epc_experience:
             if candidate_noma:
                 if computed_permissions['profil.can_edit_parcours_externe']:
-                    res_context['edit_url'] = resolve_url(
+                    res_context['curex_url'] = resolve_url(
                         'edit-etudes-secondaires-view',
                         noma=candidate_noma,
                     )
@@ -608,6 +612,20 @@ def get_experience_urls(
                 f'{base_namespace}:update:education',
                 uuid=admission.uuid,
             )
+
+    elif isinstance(experience, ExamenDTO):
+        res_context['details_url'] = resolve_url(
+            f'{base_namespace}:exam',
+            uuid=admission.uuid,
+        )
+
+        if not computed_permissions['admission.change_admission_exam']:
+            return res_context
+
+        res_context['edit_url'] = resolve_url(
+            f'{base_namespace}:update:exam',
+            uuid=admission.uuid,
+        )
 
     return res_context
 

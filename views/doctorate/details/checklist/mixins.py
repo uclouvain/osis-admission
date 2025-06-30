@@ -125,7 +125,9 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
         return {
             str(experience.uuid)
             for experience in self.proposition_resume.resume.curriculum.experiences_academiques
-            if experience.champs_credits_bloc_1_et_complements_non_remplis
+            if experience.champs_credits_bloc_1_et_complements_non_remplis(
+                self.proposition_resume.resume.proposition.formation.grade_academique,
+            )
         }
 
     @cached_property

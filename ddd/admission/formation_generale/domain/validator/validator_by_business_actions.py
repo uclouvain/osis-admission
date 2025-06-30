@@ -53,6 +53,9 @@ from admission.ddd.admission.domain.validator import (
     ShouldIBANCarteBancaireRemboursementEtreCompletee,
     ShouldTypeCompteBancaireRemboursementEtreComplete,
 )
+from admission.ddd.admission.domain.validator._should_curriculum_etre_complete import (
+    ShouldExperiencesNonAcademiquesAvoirUnCertificat,
+)
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model._comptabilite import (
@@ -95,6 +98,9 @@ from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldStatutsChecklistExperiencesEtreValidees,
     ShouldTitreAccesEtreSelectionne,
     ShouldVisaEtreComplete,
+)
+from admission.ddd.admission.formation_generale.domain.validator._should_examen_etre_completees import (
+    ShouldSpecifieExamenSiRequis,
 )
 from admission.ddd.admission.formation_generale.domain.validator._should_informations_checklist_etre_completees import (
     ShouldChecklistEtreDansEtatCorrectPourApprouverInscription,
@@ -158,6 +164,9 @@ class FormationGeneraleCurriculumValidatorList(TwoStepsMultipleBusinessException
             ShouldExperiencesAcademiquesEtreCompletees(
                 experiences_academiques_incompletes=self.experiences_academiques_incompletes,
             ),
+            ShouldExperiencesNonAcademiquesAvoirUnCertificat(
+                experiences_non_academiques=self.experiences_non_academiques,
+            ),
             ShouldEquivalenceEtreSpecifiee(
                 equivalence=self.equivalence_diplome,
                 type_formation=self.type_formation,
@@ -175,6 +184,7 @@ class FormationGeneraleCurriculumPostSoumissionValidatorList(TwoStepsMultipleBus
     experiences_academiques: List[ExperienceAcademiqueDTO]
     experiences_parcours_interne: List[ExperienceParcoursInterneDTO]
     verification_experiences_completees: bool
+    grade_academique_formation_proposition: str
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -198,6 +208,7 @@ class FormationGeneraleCurriculumPostSoumissionValidatorList(TwoStepsMultipleBus
             invariants.append(
                 ShouldExperiencesAcademiquesEtreCompleteesApresSoumission(
                     experiences_academiques=self.experiences_academiques,
+                    grade_academique_formation_proposition=self.grade_academique_formation_proposition,
                 )
             )
 
@@ -207,6 +218,7 @@ class FormationGeneraleCurriculumPostSoumissionValidatorList(TwoStepsMultipleBus
 @attr.dataclass(frozen=True, slots=True)
 class FormationGeneraleExperienceAcademiquePostSoumissionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     experience_academique: ExperienceAcademiqueDTO
+    grade_academique_formation_proposition: str
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -214,7 +226,8 @@ class FormationGeneraleExperienceAcademiquePostSoumissionValidatorList(TwoStepsM
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
             ShouldExperiencesAcademiquesEtreCompleteesApresSoumission(
-                experiences_academiques=[self.experience_academique]
+                experiences_academiques=[self.experience_academique],
+                grade_academique_formation_proposition=self.grade_academique_formation_proposition,
             ),
         ]
 
@@ -283,6 +296,25 @@ class EtudesSecondairesValidatorList(TwoStepsMultipleBusinessExceptionListValida
             ShouldSpecifieSiDiplomeEtudesSecondaires(
                 diplome_etudes_secondaires=self.diplome_etudes_secondaires,
                 annee_diplome_etudes_secondaires=self.annee_diplome_etudes_secondaires,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ExamenValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    requis: bool
+    attestation: list[str]
+    annee: Optional[int]
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldSpecifieExamenSiRequis(
+                requis=self.requis,
+                attestation=self.attestation,
+                annee=self.annee,
             ),
         ]
 

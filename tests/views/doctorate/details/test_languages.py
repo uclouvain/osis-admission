@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,7 +31,9 @@ from unittest.mock import patch
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
+    ENTITY_CDE,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeAdmission,
     ChoixTypeContratTravail,
@@ -41,8 +43,9 @@ from admission.ddd.admission.doctorat.preparation.dtos import ConnaissanceLangue
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.language import LanguageKnowledgeFactory
 from admission.tests.factories.roles import (
-    ProgramManagerRoleFactory,
     CentralManagerRoleFactory,
+    DoctorateCommitteeMemberRoleFactory,
+    ProgramManagerRoleFactory,
 )
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityFactory
@@ -76,6 +79,9 @@ class DoctorateAdmissionLanguagesDetailViewTestCase(TestCase):
         cls.sic_user = CentralManagerRoleFactory(entity=first_doctoral_commission).person.user
         cls.program_manager = ProgramManagerRoleFactory(
             education_group=cls.admission.training.education_group
+        ).person.user
+        cls.doctorate_committee_member = DoctorateCommitteeMemberRoleFactory(
+            education_group=cls.admission.training.education_group,
         ).person.user
 
         cls.url = reverse('admission:doctorate:languages', args=[cls.admission.uuid])
@@ -119,6 +125,11 @@ class DoctorateAdmissionLanguagesDetailViewTestCase(TestCase):
 
         # Program manager
         self.client.force_login(user=self.program_manager)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+        # Doctorate reader
+        self.client.force_login(user=self.doctorate_committee_member)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
 

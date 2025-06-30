@@ -53,16 +53,19 @@ class DoctoratInMemoryTranslator(IDoctoratTranslator):
             code_secteur='SSH',
             intitule='Doctorat en sciences économiques et de gestion',
             intitule_secteur='Secteur des sciences humaines',
+            grade_academique='1',
         ),
         DoctoratCLSMFactory(
             entity_id__sigle='ECGM3DP',
             entity_id__annee=2020,
             campus='Mons',
+            grade_academique='1',
         ),
         DoctoratCDSCFactory(
             entity_id__sigle='AGRO3DP',
             entity_id__annee=2020,
             campus='Louvain-la-Neuve',
+            grade_academique='1',
         ),
         DoctoratCDSCFactory(
             entity_id__sigle='SC3DP',
@@ -72,6 +75,7 @@ class DoctoratInMemoryTranslator(IDoctoratTranslator):
             code_secteur='SST',
             intitule='Doctorat en sciences',
             intitule_secteur='Secteur des sciences et technologies',
+            grade_academique='1',
         ),
         DoctoratCDSCFactory(
             entity_id__sigle='SC3DP',
@@ -81,6 +85,7 @@ class DoctoratInMemoryTranslator(IDoctoratTranslator):
             code_secteur='SST',
             intitule='Doctorat en sciences',
             intitule_secteur='Secteur des sciences et technologies',
+            grade_academique='1',
         ),
         DoctoratCDSSDPFactory(
             entity_id__sigle='ESP3DP',
@@ -90,11 +95,13 @@ class DoctoratInMemoryTranslator(IDoctoratTranslator):
             code_secteur='SSS',
             intitule='Doctorat en sciences de la santé publique',
             intitule_secteur='Secteur des sciences de la santé',
+            grade_academique='1',
         ),
         DoctoratCDSSDPFactory(
             entity_id__sigle='AGRO3DP',
             entity_id__annee=2022,
             campus='Charleroi',
+            grade_academique='1',
         ),
     ]
     sector_doctorates_mapping = {
@@ -134,6 +141,7 @@ class DoctoratInMemoryTranslator(IDoctoratTranslator):
             campus=CampusFactory(nom=doctorate.campus),
             type=doctorate.type,
             campus_inscription=CampusFactory(nom=doctorate.campus_inscription),
+            grade_academique=doctorate.grade_academique,
         )
 
     @classmethod

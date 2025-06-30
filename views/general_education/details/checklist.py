@@ -80,6 +80,7 @@ from admission.ddd.admission.enums import Onglets, TypeItemFormulaire
 from admission.ddd.admission.enums.emplacement_document import (
     DocumentsAssimilation,
     DocumentsEtudesSecondaires,
+    DocumentsExamens,
     OngletsDemande,
     StatutReclamationEmplacementDocument,
 )
@@ -241,6 +242,7 @@ from base.utils.utils import format_academic_year
 from ddd.logic.shared_kernel.profil.commands import (
     RecupererExperiencesParcoursInterneQuery,
 )
+from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
@@ -251,7 +253,8 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
 from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
-from osis_profile.models import EducationalExperience
+from osis_profile.models import EducationalExperience, EducationGroupYearExam, Exam
+from osis_profile.models.enums.exam import ExamTypes
 from osis_profile.utils.curriculum import groupe_curriculum_par_annee_decroissante
 from osis_role.templatetags.osis_role import has_perm
 from parcours_interne import etudiants_PCE_avant_2015
@@ -382,7 +385,9 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
         return {
             str(experience.uuid)
             for experience in self.proposition_resume.resume.curriculum.experiences_academiques
-            if experience.champs_credits_bloc_1_et_complements_non_remplis
+            if experience.champs_credits_bloc_1_et_complements_non_remplis(
+                self.proposition_resume.resume.proposition.formation.grade_academique,
+            )
         }
 
     def get_context_data(self, **kwargs):
@@ -3048,6 +3053,7 @@ class ChecklistView(
                 'DIPLOME_EQUIVALENCE',
                 'CURRICULUM',
                 'ADDITIONAL_DOCUMENTS',
+                'ATTESTATION_DE_REUSSITE_CONCOURS_D_ENTREE_OU_D_ADMISSION',
                 *secondary_studies_attachments,
             },
             'donnees_personnelles': assimilation_documents,
@@ -3449,6 +3455,7 @@ class ChecklistView(
             experiences_academiques=resume.curriculum.experiences_academiques,
             experiences_professionnelles=resume.curriculum.experiences_non_academiques,
             etudes_secondaires=resume.etudes_secondaires,
+            examens=resume.examens,
             experiences_parcours_interne=self.internal_experiences,
             additional_messages=self.curriculum_additional_messages(),
         )

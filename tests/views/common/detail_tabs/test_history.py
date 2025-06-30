@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,20 +26,32 @@
 from django.shortcuts import resolve_url
 from django.test import TestCase
 
-from admission.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
+    ENTITY_CDE,
+)
+from admission.models import (
+    ContinuingEducationAdmission,
+    DoctorateAdmission,
+    GeneralEducationAdmission,
+)
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from admission.tests.factories.continuing_education import (
+    ContinuingEducationAdmissionFactory,
+)
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.history import HistoryEntryFactory
-from admission.tests.factories.roles import CentralManagerRoleFactory, SicManagementRoleFactory
+from admission.tests.factories.roles import (
+    CentralManagerRoleFactory,
+    DoctorateCommitteeMemberRoleFactory,
+    SicManagementRoleFactory,
+)
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from reference.tests.factories.country import CountryFactory
 
 
-class CoordonneesDetailViewTestCase(TestCase):
+class HistoryAPIViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
@@ -96,6 +108,10 @@ class CoordonneesDetailViewTestCase(TestCase):
             candidate__phone_mobile='0123456789',
         )
 
+        cls.doctorate_committee_member = DoctorateCommitteeMemberRoleFactory(
+            education_group=cls.doctorate_admission.training.education_group
+        ).person.user
+
         cls.doctorate_url = resolve_url('admission:doctorate:history-api', uuid=cls.doctorate_admission.uuid)
 
         cls.doctorate_historic_entry = HistoryEntryFactory(
@@ -150,3 +166,8 @@ class CoordonneesDetailViewTestCase(TestCase):
         self.assertEqual(historic_entries[0]['author'], 'John Doe')
         self.assertEqual(historic_entries[0]['tags'], ['doctorate-education'])
         self.assertEqual(historic_entries[0]['message'], 'Historique de formation doctorale')
+
+    def test_historic_api_with_sic_manager_and_doctorate_committee_member(self):
+        self.client.force_login(user=self.doctorate_committee_member)
+        response = self.client.get(self.doctorate_url)
+        self.assertEqual(response.status_code, 200)

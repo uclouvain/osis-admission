@@ -549,15 +549,6 @@ class RecupererResumeEtEmplacementsDocumentsPropositionQuery(interface.QueryRequ
 
 
 @attr.dataclass(frozen=True, slots=True)
-class ModifierStatutChecklistExperienceParcoursAnterieurCommand(interface.CommandRequest):
-    uuid_proposition: str
-    uuid_experience: str
-    gestionnaire: str
-    statut: str
-    statut_authentification: Optional[bool]
-
-
-@attr.dataclass(frozen=True, slots=True)
 class EnvoyerPropositionACddLorsDeLaDecisionCddCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str

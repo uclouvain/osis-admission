@@ -31,6 +31,7 @@ from osis_comment.models import CommentEntry
 
 from admission.auth.roles.admission_reader import AdmissionReader
 from admission.auth.roles.central_manager import CentralManager
+from admission.auth.roles.doctorate_committee_member import DoctorateCommitteeMember
 from admission.auth.roles.program_manager import (
     ProgramManager as ProgramManagerAdmission,
 )
@@ -153,7 +154,7 @@ class AdmissionCommentApiView(CommentEntryAPIMixin):
     }
     roles = {
         'sic-comments': {SicManagement, CentralManager},
-        'fac-comments': {ProgramManagerAdmission, AdmissionReader, ProgramManager},
+        'fac-comments': {ProgramManagerAdmission, AdmissionReader, ProgramManager, DoctorateCommitteeMember},
     }
 
     def dispatch(self, request, *args, **kwargs):

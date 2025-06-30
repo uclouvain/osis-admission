@@ -32,6 +32,9 @@ from admission.ddd.admission.doctorat.preparation.commands import (
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
     PropositionIdentity,
 )
+from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import (
+    IDoctoratTranslator,
+)
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
     IPropositionRepository,
 )
@@ -44,9 +47,12 @@ def modifier_statut_checklist_experience_parcours_anterieur(
     cmd: 'ModifierStatutChecklistExperienceParcoursAnterieurCommand',
     proposition_repository: 'IPropositionRepository',
     profil_candidat_translator: 'IProfilCandidatTranslator',
+    doctorat_translator: 'IDoctoratTranslator',
 ) -> 'PropositionIdentity':
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition = proposition_repository.get(entity_id=proposition_id)
+
+    formation = doctorat_translator.get(sigle=proposition.formation_id.sigle, annee=proposition.formation_id.annee)
 
     proposition.specifier_statut_checklist_experience_parcours_anterieur(
         statut_checklist_cible=cmd.statut,
@@ -55,6 +61,7 @@ def modifier_statut_checklist_experience_parcours_anterieur(
         auteur_modification=cmd.gestionnaire,
         type_experience=cmd.type_experience,
         profil_candidat_translator=profil_candidat_translator,
+        grade_academique_formation_proposition=formation.grade_academique,
     )
 
     proposition_repository.save(proposition)

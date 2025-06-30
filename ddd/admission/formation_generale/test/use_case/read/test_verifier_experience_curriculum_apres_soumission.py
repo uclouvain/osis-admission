@@ -132,6 +132,7 @@ class TestVerifierExperienceCVApresSoumissionService(TestCase):
             type_institut='',
             nom_formation_equivalente_communaute_fr='',
             cycle_formation='',
+            grade_academique_formation='1',
         )
 
     def setUp(self) -> None:
@@ -263,6 +264,30 @@ class TestVerifierExperienceCVApresSoumissionService(TestCase):
             avec_complements=False,
             credits_inscrits_complements=None,
             credits_acquis_complements=None,
+        ):
+            proposition_id = self.message_bus.invoke(self.cmd)
+            self.assertEqual(proposition_id, self.proposition.entity_id)
+
+        with mock.patch.multiple(
+            self.experience_academiques_complete,
+            communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
+            cycle_formation=Cycle.SECOND_CYCLE.name,
+            avec_complements=None,
+            credits_inscrits_complements=None,
+            credits_acquis_complements=None,
+            grade_academique_formation='2',
+        ):
+            proposition_id = self.message_bus.invoke(self.cmd)
+            self.assertEqual(proposition_id, self.proposition.entity_id)
+
+        with mock.patch.multiple(
+            self.experience_academiques_complete,
+            communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
+            cycle_formation=Cycle.SECOND_CYCLE.name,
+            avec_complements=None,
+            credits_inscrits_complements=None,
+            credits_acquis_complements=None,
+            grade_academique_formation='',
         ):
             proposition_id = self.message_bus.invoke(self.cmd)
             self.assertEqual(proposition_id, self.proposition.entity_id)

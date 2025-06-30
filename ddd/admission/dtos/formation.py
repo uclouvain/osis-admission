@@ -51,6 +51,7 @@ class FormationDTO(interface.DTO):
     campus_inscription: Optional[CampusDTO]
     sigle_entite_gestion: str
     credits: Optional[int]
+    grade_academique: str
 
     def __str__(self):
         return f'{self.sigle} - {self.intitule or self.intitule_fr} ({self.campus})'

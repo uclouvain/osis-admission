@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,13 +27,18 @@
 import attr
 import factory.fuzzy
 
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import DoctoratFormation
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
+    DoctoratFormation,
+)
 
 # FIXME import this factory from shared kernel when available
 from admission.ddd.admission.doctorat.preparation.dtos import DoctoratFormationDTO
 from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.repository.i_proposition import CAMPUS_LETTRE_DOSSIER
-from admission.ddd.admission.test.factory.formation import FormationIdentityFactory, CampusFactory
+from admission.ddd.admission.test.factory.formation import (
+    CampusFactory,
+    FormationIdentityFactory,
+)
 from base.models.enums.education_group_types import TrainingType
 from ddd.logic.learning_unit.tests.factory.ucl_entity import UclEntityIdentityFactory
 
@@ -55,6 +60,7 @@ class DoctoratFormationEtendu(DoctoratFormation):
     campus_inscription: str
     code_secteur: str
     intitule_secteur: str
+    grade_academique: str
 
 
 class _DoctoratFactory(factory.Factory):
@@ -73,6 +79,7 @@ class _DoctoratFactory(factory.Factory):
     sigle = factory.Faker('word')
     code_secteur = factory.Faker('word')
     type = TrainingType.PHD
+    grade_academique = '1'
 
 
 class _DoctoratDTOFactory(factory.Factory):
@@ -89,6 +96,7 @@ class _DoctoratDTOFactory(factory.Factory):
     date_debut = factory.Faker('date')
     type = TrainingType.PHD.name
     credits = 180
+    grade_academique = '1'
 
 
 class DoctoratCDEFactory(_DoctoratFactory):

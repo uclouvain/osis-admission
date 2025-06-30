@@ -234,7 +234,7 @@
         </div>
       {% endif %}
     {% if checklist_display %}
-      {% if experience.est_formation_bachelier_fwb %}
+      {% if experience.est_formation_bachelier_fwb or experience.est_formation_bachelier_belge %}
         <div class="row">
           <div class="col-md-6">
             {% field_data _('Acquired bloc 1 credits total number') experience.credits_acquis_bloc_1 %}

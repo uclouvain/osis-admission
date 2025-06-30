@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -48,6 +48,7 @@ class DoctoratFormation(interface.Entity):
     type: 'TrainingType'
     intitule_fr: str
     intitule_en: str
+    grade_academique: str
 
     def est_entite_CDE(self):
         return self.entite_ucl_id.code == ENTITY_CDE

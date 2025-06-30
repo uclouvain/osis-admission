@@ -69,6 +69,7 @@ from admission.tests.factories import DoctorateAdmissionFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
+from base.tests.factories.hops import HopsFactory
 from base.tests.factories.learning_unit_year import LearningUnitYearFactory
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.student import StudentFactory
@@ -147,6 +148,10 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
             student_visa_d=self.files_uuids['student_visa_d'],
             signed_enrollment_authorization=self.files_uuids['signed_enrollment_authorization'],
         )
+        self.hops = HopsFactory(
+            education_group_year=self.admission.training,
+            ares_graca=15,
+        )
 
         patcher = patch("osis_document.api.utils.get_remote_token", return_value="foobar")
         patcher.start()
@@ -189,6 +194,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
                 intitule_entite_gestion='School entity',
                 credits=self.admission.training.credits,
                 date_debut=self.admission.training.academic_year.start_date,
+                grade_academique='15',
             ),
         )
         self.assertEqual(result.reference, f'M-SCH22-{self.admission}')

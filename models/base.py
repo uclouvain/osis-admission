@@ -49,6 +49,7 @@ from django.db.models import (
 )
 from django.db.models.fields.json import KeyTextTransform, KeyTransform
 from django.db.models.functions import (
+    Cast,
     Coalesce,
     Concat,
     JSONObject,
@@ -196,6 +197,11 @@ class BaseAdmissionQuerySet(models.QuerySet):
                     end_date__gte=today,
                 ).values('end_date')[:1],
             ),
+        )
+
+    def annotate_training_academic_grade(self):
+        return self.annotate(
+            training_academic_grade=Coalesce(Cast('training__hops__ares_graca', output_field=CharField()), Value(''))
         )
 
     def annotate_training_management_entity(self):
@@ -562,6 +568,11 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         blank=True,
         null=True,
         verbose_name=_('Are the secondary studies the access title for this admission?'),
+    )
+    is_exam_access_title = models.BooleanField(
+        blank=True,
+        null=True,
+        verbose_name=_('Is the exam the access title for this admission?'),
     )
     confirmation_elements = models.JSONField(
         blank=True,

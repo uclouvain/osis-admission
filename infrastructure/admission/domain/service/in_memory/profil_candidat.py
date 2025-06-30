@@ -26,7 +26,7 @@
 
 import datetime
 from dataclasses import dataclass
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import attr
 
@@ -36,6 +36,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 from admission.ddd.admission.doctorat.preparation.dtos import (
     ConditionsComptabiliteDTO,
     ConnaissanceLangueDTO,
+    DoctoratFormationDTO,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     CurriculumAdmissionDTO,
@@ -54,6 +55,7 @@ from admission.ddd.admission.dtos import (
 from admission.ddd.admission.dtos.etudes_secondaires import (
     EtudesSecondairesAdmissionDTO,
 )
+from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
 from admission.ddd.admission.enums.valorisation_experience import (
@@ -69,6 +71,7 @@ from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     DiplomeBelgeEtudesSecondairesDTO,
     ValorisationEtudesSecondairesDTO,
 )
+from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     AnneeExperienceAcademiqueDTO,
     CurriculumAExperiencesDTO,
@@ -200,6 +203,7 @@ class ExperienceAcademique:
     type_enseignement: str
     type_institut: str
     cycle_formation: str
+    grade_academique_formation: str
     nom_formation_equivalente_communaute_fr: str
     identifiant_externe: Optional[str] = None
     credits_acquis_bloc_1 = None
@@ -560,6 +564,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 type_institut=EstablishmentTypeEnum.UNIVERSITY.name,
                 cycle_formation=Cycle.FIRST_CYCLE.name,
                 nom_formation_equivalente_communaute_fr='Formation B',
+                grade_academique_formation='1',
             ),
             ExperienceAcademique(
                 uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
@@ -602,6 +607,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 type_institut=EstablishmentTypeEnum.UNIVERSITY.name,
                 cycle_formation=Cycle.FIRST_CYCLE.name,
                 nom_formation_equivalente_communaute_fr='Formation B',
+                grade_academique_formation='1',
             ),
             ExperienceAcademique(
                 uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee3',
@@ -707,6 +713,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 type_institut=EstablishmentTypeEnum.UNIVERSITY.name,
                 cycle_formation=Cycle.FIRST_CYCLE.name,
                 nom_formation_equivalente_communaute_fr='Formation B',
+                grade_academique_formation='1',
             ),
             ExperienceAcademique(
                 uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee4',
@@ -749,6 +756,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 type_institut=EstablishmentTypeEnum.UNIVERSITY.name,
                 cycle_formation=Cycle.FIRST_CYCLE.name,
                 nom_formation_equivalente_communaute_fr='Formation B',
+                grade_academique_formation='1',
             ),
             ExperienceAcademique(
                 uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee5',
@@ -827,6 +835,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 type_institut=EstablishmentTypeEnum.UNIVERSITY.name,
                 cycle_formation=Cycle.FIRST_CYCLE.name,
                 nom_formation_equivalente_communaute_fr='Formation B',
+                grade_academique_formation='1',
             ),
         ]
 
@@ -1047,6 +1056,16 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         )
 
     @classmethod
+    def get_examen(cls, matricule: str, formation_sigle: str, formation_annee: int) -> 'ExamenDTO':
+        return ExamenDTO(
+            uuid='',
+            requis=False,
+            titre='',
+            attestation=[],
+            annee=None,
+        )
+
+    @classmethod
     def get_curriculum(
         cls,
         matricule: str,
@@ -1109,6 +1128,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                             avec_complements=experience.avec_complements,
                             credits_inscrits_complements=experience.credits_inscrits_complements,
                             credits_acquis_complements=experience.credits_acquis_complements,
+                            grade_academique_formation=experience.grade_academique_formation,
                         ),
                     )
 
@@ -1199,6 +1219,10 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         )
 
     @classmethod
+    def examen_est_valorise(cls, matricule: str, formation_sigle: str, formation_annee: int) -> bool:
+        return False
+
+    @classmethod
     def get_connaissances_langues(cls, matricule: str) -> List[ConnaissanceLangueDTO]:
         return [
             ConnaissanceLangueDTO(
@@ -1218,7 +1242,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
     def recuperer_toutes_informations_candidat(
         cls,
         matricule: str,
-        formation: str,
+        formation: Union['DoctoratFormationDTO', 'FormationDTO'],
         annee_courante: int,
         uuid_proposition: str,
         experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
@@ -1229,6 +1253,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             curriculum=cls.get_curriculum(matricule, annee_courante, uuid_proposition),
             etudes_secondaires=cls.get_etudes_secondaires(matricule),
             connaissances_langues=cls.get_connaissances_langues(matricule),
+            examens=cls.get_examen(matricule, formation.sigle, formation.annee),
         )
 
     @classmethod

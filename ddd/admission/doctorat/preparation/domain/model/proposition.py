@@ -735,6 +735,7 @@ class Proposition(interface.RootEntity):
         auteur_modification: str,
         type_experience: str,
         profil_candidat_translator: IProfilCandidatTranslator,
+        grade_academique_formation_proposition: str,
     ):
         if statut_checklist_cible == ChoixStatutChecklist.GEST_REUSSITE.name:
             # Une expérience académique ne peut passer à l'état "Validé" que si elle est complète
@@ -743,6 +744,7 @@ class Proposition(interface.RootEntity):
                 uuid_experience=uuid_experience,
                 type_experience=type_experience,
                 profil_candidat_translator=profil_candidat_translator,
+                grade_academique_formation_proposition=grade_academique_formation_proposition,
             )
         try:
             experience = self.checklist_actuelle.recuperer_enfant(
@@ -1026,6 +1028,7 @@ class Proposition(interface.RootEntity):
         academic_year_repository: IAcademicYearRepository,
         profil_candidat_translator: IProfilCandidatTranslator,
         experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
+        grade_academique_formation_proposition: str,
     ):
         if self.type_demande == TypeDemande.INSCRIPTION:
             ApprouverInscriptionParSicValidatorList(
@@ -1052,6 +1055,7 @@ class Proposition(interface.RootEntity):
                 profil_candidat_translator=profil_candidat_translator,
                 experience_parcours_interne_translator=experience_parcours_interne_translator,
                 verification_experiences_completees=False,
+                grade_academique_formation_proposition=grade_academique_formation_proposition,
             )
         except MultipleBusinessExceptions:
             raise MultipleBusinessExceptions(exceptions=[CurriculumNonCompletePourAcceptationException()])
