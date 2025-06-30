@@ -275,6 +275,7 @@ class ProfilCandidat(interface.DomainService):
         profil_candidat_translator: 'IProfilCandidatTranslator',
         experience_parcours_interne_translator: 'IExperienceParcoursInterneTranslator',
         verification_experiences_completees: bool,
+        grade_academique_formation_proposition: str,
         curriculum_dto: Optional[CurriculumAdmissionDTO] = None,
     ) -> None:
         date_soumission = proposition.soumise_le.date()
@@ -307,6 +308,7 @@ class ProfilCandidat(interface.DomainService):
             experiences_non_academiques=curriculum.experiences_non_academiques,
             experiences_parcours_interne=experiences_parcours_interne,
             verification_experiences_completees=verification_experiences_completees,
+            grade_academique_formation_proposition=grade_academique_formation_proposition,
         ).validate()
 
     @classmethod
@@ -316,6 +318,7 @@ class ProfilCandidat(interface.DomainService):
         uuid_experience: str,
         type_experience: str,
         profil_candidat_translator: 'IProfilCandidatTranslator',
+        grade_academique_formation_proposition: str,
     ) -> None:
         if type_experience == TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name:
             experience = profil_candidat_translator.get_experience_academique(
@@ -326,6 +329,7 @@ class ProfilCandidat(interface.DomainService):
 
             FormationGeneraleExperienceAcademiquePostSoumissionValidatorList(
                 experience_academique=experience,
+                grade_academique_formation_proposition=grade_academique_formation_proposition,
             ).validate()
 
     @classmethod
@@ -335,6 +339,7 @@ class ProfilCandidat(interface.DomainService):
         uuid_experience: str,
         type_experience: str,
         profil_candidat_translator: 'IProfilCandidatTranslator',
+        grade_academique_formation_proposition: str,
     ) -> None:
         if type_experience == TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name:
             experience = profil_candidat_translator.get_experience_academique(
@@ -345,6 +350,7 @@ class ProfilCandidat(interface.DomainService):
 
             ExperienceAcademiquePostSoumissionValidatorList(
                 experience_academique=experience,
+                grade_academique_formation_proposition=grade_academique_formation_proposition,
             ).validate()
 
     @classmethod
@@ -355,6 +361,7 @@ class ProfilCandidat(interface.DomainService):
         profil_candidat_translator: 'IProfilCandidatTranslator',
         experience_parcours_interne_translator: 'IExperienceParcoursInterneTranslator',
         verification_experiences_completees: bool,
+        grade_academique_formation_proposition: str,
         curriculum_dto: Optional[CurriculumAdmissionDTO] = None,
     ) -> None:
         # Le CV est soumis lors de l'envoi de la demande des signatures
@@ -388,6 +395,7 @@ class ProfilCandidat(interface.DomainService):
             experiences_non_academiques=curriculum.experiences_non_academiques,
             experiences_parcours_interne=experiences_parcours_interne,
             verification_experiences_completees=verification_experiences_completees,
+            grade_academique_formation_proposition=grade_academique_formation_proposition,
         ).validate()
 
     @classmethod

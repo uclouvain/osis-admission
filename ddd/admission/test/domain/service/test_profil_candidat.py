@@ -82,6 +82,7 @@ class ProfilCandidatTestCase(TestCase):
             'avec_complements': None,
             'credits_inscrits_complements': None,
             'credits_acquis_complements': None,
+            'grade_academique_formation': '1',
         }
 
     def test_recuperer_derniers_etablissements_superieurs_communaute_fr_frequentes_sans_etablissement(self):

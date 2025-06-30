@@ -74,6 +74,7 @@ from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.campus import CampusFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
+from base.tests.factories.hops import HopsFactory
 from base.tests.factories.organization import OrganizationFactory
 from osis_profile.models import EducationalExperience, EducationalExperienceYear
 from osis_profile.models.enums.curriculum import (
@@ -121,6 +122,11 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
 
+        cls.hop = HopsFactory(
+            education_group_year=cls.general_admission.training,
+            ares_graca=1,
+        )
+
         # Create users
         cls.sic_manager_user = SicManagementRoleFactory(entity=first_doctoral_commission).person.user
         cls.program_manager_user = ProgramManagerRoleFactory(
@@ -129,9 +135,8 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
         cls.first_cycle_diploma = DiplomaTitleFactory(
             cycle=Cycle.FIRST_CYCLE.name,
         )
-        cls.second_cycle_diploma = DiplomaTitleFactory(
-            cycle=Cycle.SECOND_CYCLE.name,
-        )
+        cls.second_cycle_diploma = DiplomaTitleFactory(cycle=Cycle.SECOND_CYCLE.name, code_grade_acad='1')
+        cls.other_second_cycle_diploma = DiplomaTitleFactory(cycle=Cycle.SECOND_CYCLE.name, code_grade_acad='2')
         cls.first_institute = OrganizationFactory(
             community=CommunityEnum.FRENCH_SPEAKING.name,
             establishment_type=EstablishmentTypeEnum.UNIVERSITY.name,
@@ -1560,6 +1565,176 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
                 'base_form-program': self.first_cycle_diploma.pk,
                 'base_form-other_program': True,
                 'base_form-fwb_equivalent_program': self.second_cycle_diploma.pk,
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        base_form = response.context['base_form']
+        self.assertEqual(base_form.cleaned_data['block_1_acquired_credit_number'], None)
+        self.assertEqual(base_form.cleaned_data['with_complement'], True)
+        self.assertEqual(base_form.cleaned_data['complement_registered_credit_number'], 10)
+        self.assertEqual(base_form.cleaned_data['complement_acquired_credit_number'], 9)
+
+        year_formset = response.context['year_formset']
+        first_form = year_formset.forms[0]
+
+        self.assertEqual(first_form.cleaned_data['is_102_change_of_course'], None)
+
+    def test_submit_fwb_master_data_when_admission_training_and_experience_trainings_are_different(self):
+        self.client.force_login(self.sic_manager_user)
+
+        default_data = {
+            'base_form-start': 2020,
+            'base_form-end': 2020,
+            'base_form-obtained_diploma': False,
+            'base_form-country': 'BE',
+            'base_form-institute': self.experience.institute.pk,
+            'base_form-program': self.other_second_cycle_diploma.pk,
+            'base_form-fwb_equivalent_program': self.other_second_cycle_diploma.pk,
+            'base_form-block_1_acquired_credit_number': 50,
+            'base_form-with_complement': True,
+            'base_form-complement_registered_credit_number': 10,
+            'base_form-complement_acquired_credit_number': 9,
+            'year_formset-TOTAL_FORMS': 1,
+            'year_formset-INITIAL_FORMS': 1,
+            'year_formset-2020-academic_year': 2020,
+            'year_formset-2020-is_enrolled': True,
+            'year_formset-2020-is_102_change_of_course': True,
+        }
+
+        # No chosen program -> no fwb data
+        response = self.client.post(
+            self.form_url,
+            data={
+                **default_data,
+                'base_form-program': '',
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        base_form = response.context['base_form']
+        self.assertEqual(base_form.cleaned_data['block_1_acquired_credit_number'], None)
+        self.assertEqual(base_form.cleaned_data['with_complement'], None)
+        self.assertEqual(base_form.cleaned_data['complement_registered_credit_number'], None)
+        self.assertEqual(base_form.cleaned_data['complement_acquired_credit_number'], None)
+
+        year_formset = response.context['year_formset']
+        first_form = year_formset.forms[0]
+
+        self.assertEqual(first_form.cleaned_data['is_102_change_of_course'], None)
+
+        # No chosen institute -> no fwb data
+        response = self.client.post(
+            self.form_url,
+            data={
+                **default_data,
+                'base_form-institute': '',
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        base_form = response.context['base_form']
+        self.assertEqual(base_form.cleaned_data['block_1_acquired_credit_number'], None)
+        self.assertEqual(base_form.cleaned_data['with_complement'], None)
+        self.assertEqual(base_form.cleaned_data['complement_registered_credit_number'], None)
+        self.assertEqual(base_form.cleaned_data['complement_acquired_credit_number'], None)
+
+        year_formset = response.context['year_formset']
+        first_form = year_formset.forms[0]
+
+        self.assertEqual(first_form.cleaned_data['is_102_change_of_course'], None)
+
+        # Obtained diploma -> no fwb data
+        response = self.client.post(
+            self.form_url,
+            data={
+                **default_data,
+                'base_form-obtained_diploma': True,
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        base_form = response.context['base_form']
+        self.assertEqual(base_form.cleaned_data['block_1_acquired_credit_number'], None)
+        self.assertEqual(base_form.cleaned_data['with_complement'], None)
+        self.assertEqual(base_form.cleaned_data['complement_registered_credit_number'], None)
+        self.assertEqual(base_form.cleaned_data['complement_acquired_credit_number'], None)
+
+        year_formset = response.context['year_formset']
+        first_form = year_formset.forms[0]
+
+        self.assertEqual(first_form.cleaned_data['is_102_change_of_course'], None)
+
+        # No specified value for the with complement field -> clean data
+        response = self.client.post(
+            self.form_url,
+            data={
+                **default_data,
+                'base_form-with_complement': '',
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        base_form = response.context['base_form']
+        self.assertNotIn(FIELD_REQUIRED_MESSAGE, base_form.errors.get('with_complement', []))
+
+        self.assertEqual(base_form.cleaned_data['block_1_acquired_credit_number'], None)
+        self.assertEqual(base_form.cleaned_data['with_complement'], None)
+        self.assertEqual(base_form.cleaned_data['complement_registered_credit_number'], None)
+        self.assertEqual(base_form.cleaned_data['complement_acquired_credit_number'], None)
+
+        # No complement -> clean data
+        response = self.client.post(
+            self.form_url,
+            data={
+                **default_data,
+                'base_form-with_complement': False,
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        base_form = response.context['base_form']
+        self.assertEqual(base_form.cleaned_data['block_1_acquired_credit_number'], None)
+        self.assertEqual(base_form.cleaned_data['with_complement'], False)
+        self.assertEqual(base_form.cleaned_data['complement_registered_credit_number'], None)
+        self.assertEqual(base_form.cleaned_data['complement_acquired_credit_number'], None)
+
+        year_formset = response.context['year_formset']
+        first_form = year_formset.forms[0]
+
+        self.assertEqual(first_form.cleaned_data['is_102_change_of_course'], None)
+
+        # With complement -> update data
+        response = self.client.post(
+            self.form_url,
+            data=default_data,
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        base_form = response.context['base_form']
+        self.assertEqual(base_form.cleaned_data['block_1_acquired_credit_number'], None)
+        self.assertEqual(base_form.cleaned_data['with_complement'], True)
+        self.assertEqual(base_form.cleaned_data['complement_registered_credit_number'], 10)
+        self.assertEqual(base_form.cleaned_data['complement_acquired_credit_number'], 9)
+
+        year_formset = response.context['year_formset']
+        first_form = year_formset.forms[0]
+        self.assertEqual(first_form.cleaned_data['is_102_change_of_course'], None)
+
+        # With second cycle equivalent program -> keep initial data
+        response = self.client.post(
+            self.form_url,
+            data={
+                **default_data,
+                'base_form-program': self.first_cycle_diploma.pk,
+                'base_form-other_program': True,
+                'base_form-fwb_equivalent_program': self.other_second_cycle_diploma.pk,
             },
         )
 

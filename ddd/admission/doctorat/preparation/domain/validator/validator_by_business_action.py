@@ -377,6 +377,7 @@ class CurriculumPostSoumissionValidatorList(TwoStepsMultipleBusinessExceptionLis
     experiences_academiques: List[ExperienceAcademiqueDTO]
     experiences_parcours_interne: List[ExperienceParcoursInterneDTO]
     verification_experiences_completees: bool
+    grade_academique_formation_proposition: str
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -399,6 +400,7 @@ class CurriculumPostSoumissionValidatorList(TwoStepsMultipleBusinessExceptionLis
             invariants.append(
                 ShouldExperiencesAcademiquesEtreCompleteesApresSoumission(
                     experiences_academiques=self.experiences_academiques,
+                    grade_academique_formation_proposition=self.grade_academique_formation_proposition,
                 )
             )
 
@@ -408,6 +410,7 @@ class CurriculumPostSoumissionValidatorList(TwoStepsMultipleBusinessExceptionLis
 @attr.dataclass(frozen=True, slots=True)
 class ExperienceAcademiquePostSoumissionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     experience_academique: ExperienceAcademiqueDTO
+    grade_academique_formation_proposition: str
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -415,7 +418,8 @@ class ExperienceAcademiquePostSoumissionValidatorList(TwoStepsMultipleBusinessEx
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
             ShouldExperiencesAcademiquesEtreCompleteesApresSoumission(
-                experiences_academiques=[self.experience_academique]
+                experiences_academiques=[self.experience_academique],
+                grade_academique_formation_proposition=self.grade_academique_formation_proposition,
             ),
         ]
 

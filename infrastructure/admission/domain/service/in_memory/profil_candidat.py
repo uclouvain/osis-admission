@@ -203,6 +203,7 @@ class ExperienceAcademique:
     type_enseignement: str
     type_institut: str
     cycle_formation: str
+    grade_academique_formation: str
     nom_formation_equivalente_communaute_fr: str
     identifiant_externe: Optional[str] = None
     credits_acquis_bloc_1 = None
@@ -563,6 +564,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 type_institut=EstablishmentTypeEnum.UNIVERSITY.name,
                 cycle_formation=Cycle.FIRST_CYCLE.name,
                 nom_formation_equivalente_communaute_fr='Formation B',
+                grade_academique_formation='1',
             ),
             ExperienceAcademique(
                 uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
@@ -605,6 +607,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 type_institut=EstablishmentTypeEnum.UNIVERSITY.name,
                 cycle_formation=Cycle.FIRST_CYCLE.name,
                 nom_formation_equivalente_communaute_fr='Formation B',
+                grade_academique_formation='1',
             ),
             ExperienceAcademique(
                 uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee3',
@@ -710,6 +713,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 type_institut=EstablishmentTypeEnum.UNIVERSITY.name,
                 cycle_formation=Cycle.FIRST_CYCLE.name,
                 nom_formation_equivalente_communaute_fr='Formation B',
+                grade_academique_formation='1',
             ),
             ExperienceAcademique(
                 uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee4',
@@ -752,6 +756,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 type_institut=EstablishmentTypeEnum.UNIVERSITY.name,
                 cycle_formation=Cycle.FIRST_CYCLE.name,
                 nom_formation_equivalente_communaute_fr='Formation B',
+                grade_academique_formation='1',
             ),
             ExperienceAcademique(
                 uuid='9cbdf4db-2454-4cbf-9e48-55d2a9881ee5',
@@ -830,6 +835,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 type_institut=EstablishmentTypeEnum.UNIVERSITY.name,
                 cycle_formation=Cycle.FIRST_CYCLE.name,
                 nom_formation_equivalente_communaute_fr='Formation B',
+                grade_academique_formation='1',
             ),
         ]
 
@@ -1122,6 +1128,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                             avec_complements=experience.avec_complements,
                             credits_inscrits_complements=experience.credits_inscrits_complements,
                             credits_acquis_complements=experience.credits_acquis_complements,
+                            grade_academique_formation=experience.grade_academique_formation,
                         ),
                     )
 

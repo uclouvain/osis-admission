@@ -238,12 +238,13 @@ class ShouldExperiencesNonAcademiquesAvoirUnCertificat(BusinessValidator):
 @attr.dataclass(frozen=True, slots=True)
 class ShouldExperiencesAcademiquesEtreCompleteesApresSoumission(BusinessValidator):
     experiences_academiques: List[ExperienceAcademiqueDTO]
+    grade_academique_formation_proposition: str
 
     def validate(self, *args, **kwargs):
         exceptions = {
             ExperiencesAcademiquesNonCompleteesException(reference=experience.uuid, name=str(experience))
             for experience in self.experiences_academiques
-            if experience.champs_credits_bloc_1_et_complements_non_remplis
+            if experience.champs_credits_bloc_1_et_complements_non_remplis(self.grade_academique_formation_proposition)
         }
 
         if exceptions:

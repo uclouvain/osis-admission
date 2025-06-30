@@ -179,6 +179,7 @@ class DoctoratDTOSerializer(DTOSerializer):
     intitule_fr = None
     intitule_en = None
     credits = None
+    grade_academique = None
 
     class Meta:
         source = DoctoratFormationDTO
@@ -188,6 +189,7 @@ class FormationGeneraleDTOSerializer(DTOSerializer):
     campus = serializers.CharField(source='campus.nom', default='')
     campus_uuid = serializers.CharField(source='campus.uuid', default='')
     campus_inscription = serializers.CharField(source='campus_inscription.nom', default='')
+    grade_academique = None
 
     class Meta:
         source = FormationDTO
@@ -197,6 +199,7 @@ class FormationContinueDTOSerializer(DTOSerializer):
     campus = serializers.CharField(source='campus.nom', default='')
     campus_uuid = serializers.CharField(source='campus.uuid', default='')
     campus_inscription = serializers.CharField(source='campus_inscription.nom', default='')
+    grade_academique = None
 
     class Meta:
         source = FormationDTO
@@ -754,6 +757,7 @@ class DoctoratSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer):
     intitule_fr = None
     intitule_en = None
     credits = None
+    grade_academique = None
 
     class Meta:
         source = DoctoratFormationDTO
