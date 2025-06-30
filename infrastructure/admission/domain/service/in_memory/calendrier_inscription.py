@@ -104,11 +104,10 @@ class CalendrierInscriptionInMemory(ICalendrierInscription):
     def est_ue_plus_5(
         cls,
         identification: 'IdentificationDTO',
-        situation_assimilation: TypeSituationAssimilation = None,
     ) -> bool:
         return identification.pays_nationalite in (
             ProfilCandidatInMemoryTranslator.pays_union_europeenne | PLUS_5_ISO_CODES
-        ) or (situation_assimilation and situation_assimilation != TypeSituationAssimilation.AUCUNE_ASSIMILATION)
+        )
 
     @classmethod
     def recuperer_periode_inscription_specifique_medecine_dentisterie(cls) -> Optional[PeriodeDTO]:
