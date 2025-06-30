@@ -31,7 +31,7 @@ from django.conf import settings
 from django.shortcuts import resolve_url
 from django.template.defaultfilters import truncatechars
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, pgettext_lazy
 from django.views.generic import FormView, TemplateView
 from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
@@ -77,6 +77,7 @@ from admission.templatetags.admission import (
     authentication_css_class,
     bg_class_by_checklist_experience,
 )
+from admission.utils import get_salutation_prefix
 from admission.views.common.detail_tabs.checklist import PropositionFromResumeMixin
 from admission.views.common.detail_tabs.comments import (
     COMMENT_TAG_CDD_FOR_SIC,
@@ -337,15 +338,25 @@ class ChecklistView(
                 .get('enfants', [])
             )
 
+            extra_tokens = {
+                'sender_name': self.current_user_name,
+                'management_entity_acronym': self.proposition.doctorat.sigle_entite_gestion,
+                'management_entity_name': self.proposition.doctorat.intitule_entite_gestion,
+                'program_managers_names': self.admission_program_managers_names,
+                'salutation': get_salutation_prefix(self.admission.candidate),
+            }
+
             context['check_authentication_mail_to_checkers'] = get_email(
                 template_identifier=ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS_DOCTORATE,
                 language=settings.LANGUAGE_CODE_FR,
                 proposition_dto=self.proposition,
+                extra_tokens=extra_tokens,
             )
             context['check_authentication_mail_to_candidate'] = get_email(
                 template_identifier=ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CANDIDATE_DOCTORATE,
                 language=self.proposition.langue_contact_candidat,
                 proposition_dto=self.proposition,
+                extra_tokens=extra_tokens,
             )
 
             all_experience_authentication_history_entries = HistoryEntry.objects.filter(

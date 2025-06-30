@@ -327,6 +327,8 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
                     'doctoral_commission': self.proposition.doctorat.intitule_entite_gestion,
                     'sender_name': f'{self.request.user.person.first_name} {self.request.user.person.last_name}',
                     'document_link': EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN,
+                    'management_entity_acronym': self.proposition.doctorat.sigle_entite_gestion,
+                    'program_managers_names': self.admission_program_managers_names,
                 },
             )
 
@@ -367,6 +369,10 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             'admission_link_back': get_backoffice_admission_url('doctorate', self.admission_uuid),
             'training_campus': self.proposition.formation.campus.nom,
             'training_acronym': self.proposition.formation.sigle,
+            'management_entity_name': self.proposition.formation.intitule_entite_gestion,
+            'management_entity_acronym': self.proposition.formation.sigle_entite_gestion,
+            'program_managers_names': self.admission_program_managers_names,
+            'sender_name': self.current_user_name,
         }
 
         if self.proposition.type == TypeDemande.ADMISSION.name:
@@ -755,11 +761,21 @@ class SicDecisionDispensationView(
         return super().form_valid(form)
 
 
-class SicDecisionChangeStatusView(HtmxPermissionRequiredMixin, SicDecisionMixin, TemplateView):
+class SicDecisionChangeStatusView(
+    PropositionFromResumeMixin,
+    HtmxPermissionRequiredMixin,
+    SicDecisionMixin,
+    TemplateView,
+):
     urlpatterns = {'sic-decision-change-status': 'sic-decision-change-checklist-status/<str:status>'}
     template_name = 'admission/general_education/includes/checklist/sic_decision.html'
     permission_required = 'admission.checklist_change_sic_decision'
     http_method_names = ['post']
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['requested_documents_dtos'] = self.sic_decision_approval_form_requestable_documents
+        return context
 
     def post(self, request, *args, **kwargs):
         admission = self.get_permission_object()

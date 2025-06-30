@@ -25,11 +25,12 @@
 # ##############################################################################
 import datetime
 from abc import abstractmethod
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 from admission.ddd.admission.doctorat.preparation.dtos import (
     ConditionsComptabiliteDTO,
     ConnaissanceLangueDTO,
+    DoctoratFormationDTO,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.comptabilite import (
     DerniersEtablissementsSuperieursCommunauteFrancaiseFrequentesDTO,
@@ -41,6 +42,7 @@ from admission.ddd.admission.dtos import CoordonneesDTO, IdentificationDTO
 from admission.ddd.admission.dtos.etudes_secondaires import (
     EtudesSecondairesAdmissionDTO,
 )
+from admission.ddd.admission.dtos.formation import FormationDTO
 from admission.ddd.admission.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
 from admission.ddd.admission.enums.valorisation_experience import (
@@ -51,6 +53,7 @@ from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     ValorisationEtudesSecondairesDTO,
 )
+from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     CurriculumAExperiencesDTO,
     ExperienceAcademiqueDTO,
@@ -87,6 +90,11 @@ class IProfilCandidatTranslator(interface.DomainService):
     @classmethod
     @abstractmethod
     def get_etudes_secondaires(cls, matricule: str) -> 'EtudesSecondairesAdmissionDTO':
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def get_examen(cls, matricule: str, formation_sigle: str, formation_annee: int) -> 'ExamenDTO':
         raise NotImplementedError
 
     @classmethod
@@ -193,10 +201,15 @@ class IProfilCandidatTranslator(interface.DomainService):
         raise NotImplementedError
 
     @classmethod
+    def examen_est_valorise(cls, matricule: str, formation_sigle: str, formation_annee: int) -> bool:
+        """Retourne les données de valorisation des études secondaires."""
+        raise NotImplementedError
+
+    @classmethod
     def recuperer_toutes_informations_candidat(
         cls,
         matricule: str,
-        formation: str,
+        formation: Union['DoctoratFormationDTO', 'FormationDTO'],
         annee_courante: int,
         uuid_proposition: str,
         experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,

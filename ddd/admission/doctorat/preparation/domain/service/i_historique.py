@@ -187,7 +187,7 @@ class IHistorique(interface.DomainService):
     def historiser_modification_authentification_experience_parcours(
         cls,
         proposition: Proposition,
-        gestionnaire: str,
+        gestionnaire: PersonneConnueUclDTO,
         etat_authentification: str,
         message: Optional[EmailMessage],
         uuid_experience: str,
@@ -213,7 +213,7 @@ class IHistorique(interface.DomainService):
     def historiser_demande_verification_titre_acces(
         cls,
         proposition: Proposition,
-        gestionnaire: str,
+        gestionnaire: PersonneConnueUclDTO,
         message: EmailMessage,
         uuid_experience: str,
     ):
@@ -223,7 +223,7 @@ class IHistorique(interface.DomainService):
     def historiser_information_candidat_verification_parcours_en_cours(
         cls,
         proposition: Proposition,
-        gestionnaire: str,
+        gestionnaire: PersonneConnueUclDTO,
         message: EmailMessage,
         uuid_experience: str,
     ):

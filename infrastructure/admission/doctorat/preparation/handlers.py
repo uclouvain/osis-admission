@@ -309,6 +309,7 @@ COMMAND_HANDLERS = {
         titres_acces=TitresAcces(),
         profil_candidat_translator=ProfilCandidatTranslator(),
         calendrier_inscription=CalendrierInscription(),
+        doctorat_translator=DoctoratTranslator(),
     ),
     RecupererElementsConfirmationQuery: lambda msg_bus, cmd: recuperer_elements_confirmation(
         cmd,
@@ -585,6 +586,7 @@ COMMAND_HANDLERS = {
             cmd,
             proposition_repository=PropositionRepository(),
             profil_candidat_translator=ProfilCandidatTranslator(),
+            doctorat_translator=DoctoratTranslator(),
         )
     ),
     SpecifierInformationsAcceptationPropositionParSicCommand: (
@@ -607,6 +609,7 @@ COMMAND_HANDLERS = {
             proposition_repository=PropositionRepository(),
             notification=Notification(),
             historique=Historique(),
+            personne_connue_ucl_translator=PersonneConnueUclTranslator(),
         )
     ),
     SpecifierMotifsRefusPropositionParSicCommand: (
@@ -708,6 +711,7 @@ COMMAND_HANDLERS = {
             profil_candidat_translator=ProfilCandidatTranslator(),
             academic_year_repository=AcademicYearRepository(),
             experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
+            doctorat_translator=DoctoratTranslator(),
         )
     ),
     VerifierExperienceCurriculumApresSoumissionQuery: (
@@ -715,6 +719,7 @@ COMMAND_HANDLERS = {
             cmd,
             proposition_repository=PropositionRepository(),
             profil_candidat_translator=ProfilCandidatTranslator(),
+            doctorat_translator=DoctoratTranslator(),
         )
     ),
     ModifierChecklistChoixFormationCommand: lambda msg_bus, cmd: modifier_checklist_choix_formation(

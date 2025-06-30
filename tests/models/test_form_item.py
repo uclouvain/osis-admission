@@ -27,12 +27,6 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils.translation import gettext as _
 
-from admission.models import AdmissionFormItemInstantiation
-from admission.models.form_item import (
-    is_valid_translated_json_field,
-    TRANSLATION_LANGUAGES,
-    AdmissionFormItem,
-)
 from admission.ddd.admission.enums.question_specifique import (
     CleConfigurationItemFormulaire,
     TypeItemFormulaire,
@@ -41,6 +35,12 @@ from admission.ddd.admission.enums.question_specifique import (
     CritereItemFormulaireVIP,
     Onglets,
     CritereItemFormulaireFormation,
+)
+from admission.models import AdmissionFormItemInstantiation
+from admission.models.form_item import (
+    is_valid_translated_json_field,
+    TRANSLATION_LANGUAGES,
+    AdmissionFormItem,
 )
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.tests.factories.academic_year import AcademicYearFactory

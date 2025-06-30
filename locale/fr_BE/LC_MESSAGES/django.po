@@ -944,17 +944,6 @@ msgstr ""
 "L'adresse mail du destinataire facultaire n'étant pas définie, aucun e-mail "
 "ne sera envoyé. Voulez-vous malgré tout envoyer le dossier en faculté ?"
 
-msgid ""
-"As you are applying for a limited course as a non-resident (as defined by "
-"government decree) candidate, applications for the 2024-2025 academic year "
-"must be submitted via this <a href=\"https://fishe.uclouvain.be/portail/"
-"inscription/\" target=\"_blank\">specific platform</a>."
-msgstr ""
-"Comme vous postulez pour des études contingentées en tant que candidat·es "
-"non-résident·es, les inscriptions pour l'année académique 2024-2025 sont à "
-"introduire via cette <a href=\"https://fishe.uclouvain.be/portail/"
-"inscription/\" target=\"_blank\">plateforme spécifique</a>."
-
 msgid "Ask candidate to modify supervision committee"
 msgstr "Demander au candidat de modifier le comité d’accompagnement"
 
@@ -2870,6 +2859,12 @@ msgstr "Système d'évaluation"
 msgid "Every education"
 msgstr "Toutes les formations"
 
+msgid "Exam must be completed for this training."
+msgstr "L'examen est nécessaire pour cette formation."
+
+msgid "Exams"
+msgstr "Examens"
+
 msgid "Excel export of admission"
 msgstr "Export excel à partir d'admission"
 
@@ -3436,6 +3431,9 @@ msgstr "Année d'obtention"
 
 msgid "Greetings depending on the gender of the candidate"
 msgstr "Salutations en fonction du genre du candidat"
+
+msgid "Greetings depending on the gender of the recipient"
+msgstr "Salutations en fonction du genre du destinataire"
 
 msgid "Grounds for denied"
 msgstr "Motif de refus"
@@ -4191,6 +4189,10 @@ msgstr "S'agit-il d'une institution de la Fédération Wallonie-Bruxelles ?"
 msgid "Is non-resident (as defined in decree)"
 msgstr "Est non-résident (au sens du décret)"
 
+msgid "Is the exam the access title for this admission?"
+msgstr ""
+"L'examen est-il le titre d'accès de cette proposition ?"
+
 msgid ""
 "Is your admission request linked with a FNRS, FRIA, FRESH or CSC application?"
 msgstr ""
@@ -4730,6 +4732,9 @@ msgstr "Auteur modif."
 msgid "Modification date"
 msgstr "Date modif."
 
+msgid "Modification of the exams"
+msgstr "Modification des examens"
+
 msgid "Modification of the secondary studies"
 msgstr "Modification des études secondaires"
 
@@ -4839,7 +4844,7 @@ msgid "Name of the management entity"
 msgstr "Nom de l'entité de gestion"
 
 msgid "Name of the manager sending the email"
-msgstr "Nom du gestionnaire qui envois l'email"
+msgstr "Nom du gestionnaire qui envoie l'email"
 
 msgid "Name of the working list"
 msgstr "Nom de la liste de travail"
@@ -5629,6 +5634,18 @@ msgstr "Adresse e-mail professionnelle"
 msgid "Professional experiences"
 msgstr "Expériences professionnelles"
 
+msgctxt "female gender"
+msgid "Professor"
+msgstr "Professeure"
+
+msgctxt "male gender"
+msgid "Professor"
+msgstr "Professeur"
+
+msgctxt "other gender"
+msgid "Professor"
+msgstr "Professeur·e"
+
 msgid "Program proposition"
 msgstr "Proposition de programme"
 
@@ -5655,6 +5672,9 @@ msgstr "Promotion"
 
 msgid "Proof of equivalency request"
 msgstr "Preuve de la demande d'équivalence"
+
+msgid "Proof of passing the exam"
+msgstr "Attestation de réussite de l'examen"
 
 msgid "Proof of receipt of unemployment benefit, pension or compensation"
 msgstr ""
@@ -6129,11 +6149,11 @@ msgstr "Rôle: Membre du comité"
 msgid "Role: Committee members"
 msgstr "Rôle: Membres du comité"
 
-msgid "Role: Doctorate reader"
-msgstr "Rôle: Lecteur doctorat"
+msgid "Role: Doctorate committee member"
+msgstr "Rôle: Membre de la commission doctorale"
 
-msgid "Role: Doctorate readers"
-msgstr "Rôle: Lecteurs doctorat"
+msgid "Role: Doctorate committee members"
+msgstr "Rôle: Membres de la commission doctorale"
 
 msgid "Role: Program manager"
 msgstr "Rôle: Gestionnaire d'admission d'un programme"
@@ -7201,6 +7221,10 @@ msgstr ""
 "La personne dont les études secondaires ont été valorisées par cette "
 "admission"
 
+msgid "The professional experience is missing a certificate."
+msgstr ""
+"L'expérience professionnelle n'a pas de certificat."
+
 msgid ""
 "The professional experiences that have been valuated from this admission."
 msgstr ""
@@ -7235,13 +7259,12 @@ msgstr "La proposition doit être en brouillon pour réaliser cette action."
 
 msgid "The proposition must be in the 'In the process of re-signing' status."
 msgstr ""
-"La proposition doit être en cours de resignature du CA pour réaliser "
-"cette action."
+"La proposition doit être en cours de resignature du CA pour réaliser cette "
+"action."
 
 msgid "The proposition must be in the 'In the process of signing' status."
 msgstr ""
-"La proposition doit être en cours de signature pour réaliser "
-"cette action."
+"La proposition doit être en cours de signature pour réaliser cette action."
 
 msgid "The proposition must be in the 'draft' or 'processed by fac' status."
 msgstr ""
@@ -7319,6 +7342,12 @@ msgstr ""
 "L'élément de la checklist \"finançabilité\" doit être à l'état \"non-"
 "concerné\" ou \"finançable\" ou \"dérogation accordée\""
 
+msgid ""
+"The status of the checklist for the personal data must be \"Validated\"."
+msgstr ""
+"L'élément de la checklist \"Données personnelles\" doit être à l'état "
+"\"Validé\"."
+
 #, python-brace-format
 msgid ""
 "The status of the request is currently \"{current_status}\". Only the "
@@ -7389,6 +7418,9 @@ msgstr ""
 "fichiers et seul le premier est affiché dans la visionneuse. Vous pouvez "
 "consulter les autres fichiers soit dans les onglets répliqués du candidat "
 "soit en vous mettant en mode modification."
+
+msgid "There is no required exam for this training."
+msgstr "Il n'y a pas d'examen requis pour cette formation."
 
 msgid "Thesis field"
 msgstr "Domaine de la thèse"
@@ -7542,12 +7574,10 @@ msgstr ""
 #, python-format
 msgid ""
 "This experience has been added by the applicant in <a "
-"href=\"%(admission_url)s\" target=\"_blank\">another application</a>. You "
-"have the option to integrate it in the current application."
+"href=\"%(admission_url)s\" target=\"_blank\">another application</a>."
 msgstr ""
 "Cette expérience a été ajoutée par le·la candidat·e dans une <a "
-"href=\"%(admission_url)s\" target=\"_blank\">autre demande</a>. Vous avez la "
-"possibilité de l'intégrer dans la demande actuelle."
+"href=\"%(admission_url)s\" target=\"_blank\">autre demande</a>."
 
 msgid "This field is required if the first name is missing."
 msgstr "Ce champ est obligatoire si le prénom est manquant."
@@ -8130,6 +8160,9 @@ msgstr "Année"
 msgid "Year of birth"
 msgstr "Année de naissance"
 
+msgid "Year of obtaining this proof"
+msgstr "Année d’obtention de cette attestation"
+
 msgid "Year of the training"
 msgstr "Année de la formation"
 
@@ -8307,6 +8340,23 @@ msgstr ""
 "Vous ne pouvez pas demander la modification et la réorientation en même "
 "temps."
 
+#, python-format
+msgid ""
+"You cannot continue your application. The registration procedure for the "
+"<em>%(training_name)s</em> for non-resident students is managed on another "
+"registration platform. We invite you to consult the complete registration "
+"procedure on the following page: <a href=\"https://www.uclouvain.be/en/"
+"enrolment/limited-enrolment-courses\" target=\"_blank\">https://www."
+"uclouvain.be/en/enrolment/limited-enrolment-courses</a>"
+msgstr ""
+"Vous ne pouvez pas poursuivre votre demande. La procédure d’inscription au "
+"programme de <em>%(training_name)s</em> pour les étudiants non-résidents est "
+"gérée sur une autre plateforme d’inscription. Nous vous invitons à prendre "
+"connaissance de la procédure d’inscription complète sur la page suivante : "
+"<a href=\"https://www.uclouvain.be/fr/inscriptions/etudes-contingentees\" "
+"target=\"_blank\">https://www.uclouvain.be/fr/inscriptions/etudes-"
+"contingentees</a>"
+
 msgid "You cannot enter a language more than once, please correct the form."
 msgstr ""
 "Vous ne pouvez pas définir une langue plusieurs fois, merci de corriger le "
@@ -8369,6 +8419,9 @@ msgid ""
 msgstr ""
 "Vous n'avez pas indiqué si vous postulez en tant que résident ou non-"
 "résident (au sens du Décret)."
+
+msgid "You have the option to integrate it in the current application."
+msgstr "Vous avez la possibilité de l'intégrer dans la demande actuelle."
 
 msgid ""
 "You haven't answered to the question about your bank account in the "

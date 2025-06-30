@@ -123,6 +123,7 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
             sigle_entite_gestion=dto.management_entity_acronym or '',
             code=dto.code,
             credits=dto.credits,
+            grade_academique=str(dto.ares_graca) if dto.ares_graca is not None else '',
         )
 
     @classmethod
@@ -175,6 +176,9 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
                     if campus is not None
                     else None
                 ),
+                intitule_fr=dto.title_fr,
+                intitule_en=dto.title_en,
+                grade_academique=str(dto.ares_graca) if dto.ares_graca is not None else '',
             )
 
         except TrainingNotFoundException:

@@ -220,6 +220,7 @@ class TestVerifierPropositionService(TestCase):
             type_institut='',
             nom_formation_equivalente_communaute_fr='',
             cycle_formation='',
+            grade_academique_formation='1',
         )
 
         cls.params_defaut_experience_non_academique = {
@@ -440,6 +441,7 @@ class TestVerifierPropositionService(TestCase):
                 type_institut='',
                 nom_formation_equivalente_communaute_fr='',
                 cycle_formation='',
+                grade_academique_formation='1',
             ),
         )
         with mock.patch.multiple(self.aggregation_proposition, equivalence_diplome=[]):
@@ -1319,7 +1321,10 @@ class TestVerifierPropositionService(TestCase):
     def test_should_etre_ok_si_alternative_etudes_secondaires_complet_pour_bachelier(self):
         self.etudes_secondaires[self.bachelier_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.NO.name,
-            alternative_secondaires=AlternativeSecondairesDTO(examen_admission_premier_cycle=['examen.pdf']),
+            alternative_secondaires=AlternativeSecondairesDTO(
+                examen_admission_premier_cycle=['examen.pdf'],
+                examen_admission_premier_cycle_annee=2025,
+            ),
         )
         id_proposition = self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
         self.assertEqual(id_proposition, self.bachelier_proposition.entity_id)

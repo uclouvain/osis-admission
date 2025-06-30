@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -30,19 +30,25 @@ import factory
 from admission.ddd.admission.domain.enums import TypeFormation
 from admission.ddd.admission.domain.model.formation import Formation, FormationIdentity
 from admission.ddd.admission.dtos.formation import FormationDTO
-from admission.ddd.admission.formation_continue.domain.service.i_formation import IFormationContinueTranslator
-from admission.ddd.admission.formation_continue.domain.validator.exceptions import FormationNonTrouveeException
+from admission.ddd.admission.formation_continue.domain.service.i_formation import (
+    IFormationContinueTranslator,
+)
+from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
+    FormationNonTrouveeException,
+)
 from admission.ddd.admission.test.factory.formation import FormationFactory
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.state_iufc import StateIUFC
 from ddd.logic.formation_catalogue.formation_continue.domain.model.informations_specifiques import (
-    InformationsSpecifiques,
     FormationContinueIdentite,
+    InformationsSpecifiques,
 )
 from ddd.logic.formation_catalogue.formation_continue.domain.validator.exceptions import (
     InformationsSpecifiquesNonTrouveesException,
 )
-from ddd.logic.formation_catalogue.formation_continue.dtos.informations_specifiques import InformationsSpecifiquesDTO
+from ddd.logic.formation_catalogue.formation_continue.dtos.informations_specifiques import (
+    InformationsSpecifiquesDTO,
+)
 from infrastructure.formation_catalogue.formation_continue.repository.in_memory.informations_specifiques import (
     InformationsSpecifiquesInMemoryRepository,
 )
@@ -216,6 +222,7 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
             campus_inscription=entity.campus_inscription,
             code=entity.code,
             credits=entity.credits,
+            grade_academique='1',
         )
 
     @classmethod
@@ -252,6 +259,9 @@ class FormationContinueInMemoryTranslator(IFormationContinueTranslator):
                 type=training.type,
                 code_domaine=training.code_domaine,
                 campus=training.campus or '',
+                intitule_en=training.intitule_en,
+                intitule_fr=training.intitule_fr,
+                grade_academique='1',
             )
 
         raise FormationNonTrouveeException

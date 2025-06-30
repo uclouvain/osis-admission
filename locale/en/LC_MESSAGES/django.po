@@ -846,13 +846,6 @@ msgid ""
 "be sent. Do you still want to send the application to the faculty?"
 msgstr ""
 
-msgid ""
-"As you are applying for a limited course as a non-resident (as defined by "
-"government decree) candidate, applications for the 2024-2025 academic year "
-"must be submitted via this <a href=\"https://fishe.uclouvain.be/portail/"
-"inscription/\" target=\"_blank\">specific platform</a>."
-msgstr ""
-
 msgid "Ask candidate to modify supervision committee"
 msgstr ""
 
@@ -2621,6 +2614,12 @@ msgstr ""
 msgid "Every education"
 msgstr ""
 
+msgid "Exam must be completed for this training."
+msgstr ""
+
+msgid "Exams"
+msgstr ""
+
 msgid "Excel export of admission"
 msgstr ""
 
@@ -3136,6 +3135,9 @@ msgid "Graduation year"
 msgstr ""
 
 msgid "Greetings depending on the gender of the candidate"
+msgstr ""
+
+msgid "Greetings depending on the gender of the recipient"
 msgstr ""
 
 msgid "Grounds for denied"
@@ -3754,6 +3756,9 @@ msgstr ""
 msgid "Is non-resident (as defined in decree)"
 msgstr ""
 
+msgid "Is the exam the access title for this admission?"
+msgstr ""
+
 msgid ""
 "Is your admission request linked with a FNRS, FRIA, FRESH or CSC application?"
 msgstr ""
@@ -4227,6 +4232,9 @@ msgid "Modification author"
 msgstr ""
 
 msgid "Modification date"
+msgstr ""
+
+msgid "Modification of the exams"
 msgstr ""
 
 msgid "Modification of the secondary studies"
@@ -5067,6 +5075,18 @@ msgstr ""
 msgid "Professional experiences"
 msgstr ""
 
+msgctxt "female gender"
+msgid "Professor"
+msgstr ""
+
+msgctxt "male gender"
+msgid "Professor"
+msgstr ""
+
+msgctxt "other gender"
+msgid "Professor"
+msgstr ""
+
 msgid "Program proposition"
 msgstr ""
 
@@ -5092,6 +5112,9 @@ msgid "Promotion"
 msgstr ""
 
 msgid "Proof of equivalency request"
+msgstr ""
+
+msgid "Proof of passing the exam"
 msgstr ""
 
 msgid "Proof of receipt of unemployment benefit, pension or compensation"
@@ -5545,10 +5568,10 @@ msgstr ""
 msgid "Role: Committee members"
 msgstr ""
 
-msgid "Role: Doctorate reader"
+msgid "Role: Doctorate committee member"
 msgstr ""
 
-msgid "Role: Doctorate readers"
+msgid "Role: Doctorate committee members"
 msgstr ""
 
 msgid "Role: Program manager"
@@ -6490,6 +6513,9 @@ msgid ""
 "The person whose the secondary studies have been valuated by this admission"
 msgstr ""
 
+msgid "The professional experience is missing a certificate."
+msgstr ""
+
 msgid ""
 "The professional experiences that have been valuated from this admission."
 msgstr ""
@@ -6592,6 +6618,10 @@ msgid ""
 "or \"Financable\" or \"Dispensation granted\"."
 msgstr ""
 
+msgid ""
+"The status of the checklist for the personal data must be \"Validated\"."
+msgstr ""
+
 #, python-brace-format
 msgid ""
 "The status of the request is currently \"{current_status}\". Only the "
@@ -6646,6 +6676,9 @@ msgid ""
 "several files and only the first one is displayed in the viewer. You can "
 "view the other files either in the candidate's replicated tabs or by "
 "switching to edit mode."
+msgstr ""
+
+msgid "There is no required exam for this training."
 msgstr ""
 
 msgid "Thesis field"
@@ -6767,8 +6800,7 @@ msgstr ""
 #, python-format
 msgid ""
 "This experience has been added by the applicant in <a "
-"href=\"%(admission_url)s\" target=\"_blank\">another application</a>. You "
-"have the option to integrate it in the current application."
+"href=\"%(admission_url)s\" target=\"_blank\">another application</a>."
 msgstr ""
 
 msgid "This field is required if the first name is missing."
@@ -7286,6 +7318,9 @@ msgstr ""
 msgid "Year of birth"
 msgstr ""
 
+msgid "Year of obtaining this proof"
+msgstr ""
+
 msgid "Year of the training"
 msgstr ""
 
@@ -7433,6 +7468,16 @@ msgid ""
 "You cannot ask for both modification and reorientation at the same time."
 msgstr ""
 
+#, python-format
+msgid ""
+"You cannot continue your application. The registration procedure for the "
+"<em>%(training_name)s</em> for non-resident students is managed on another "
+"registration platform. We invite you to consult the complete registration "
+"procedure on the following page: <a href=\"https://www.uclouvain.be/en/"
+"enrolment/limited-enrolment-courses\" target=\"_blank\">https://www."
+"uclouvain.be/en/enrolment/limited-enrolment-courses</a>"
+msgstr ""
+
 msgid "You cannot enter a language more than once, please correct the form."
 msgstr ""
 
@@ -7477,6 +7522,9 @@ msgstr ""
 msgid ""
 "You do not specify if you are applying as resident or non-resident (as "
 "defined by government decree)."
+msgstr ""
+
+msgid "You have the option to integrate it in the current application."
 msgstr ""
 
 msgid ""

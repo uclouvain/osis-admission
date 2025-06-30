@@ -93,7 +93,7 @@ class GeneralSecondaryStudiesView(GeneralEducationPersonRelatedMixin, BaseSecond
 
     def get_serializer_context(self):
         serializer_context = super().get_serializer_context()
-        if self.request:
+        if self.kwargs.get('uuid'):
             serializer_context['training_type'] = self.get_permission_object().training.education_group_type.name
         return serializer_context
 

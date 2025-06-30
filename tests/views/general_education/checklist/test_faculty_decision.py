@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -37,24 +37,25 @@ import freezegun
 from django.conf import settings
 from django.db.models import QuerySet
 from django.shortcuts import resolve_url
-from django.test import TestCase
-from django.test import override_settings
+from django.test import TestCase, override_settings
 from django.utils.translation import gettext
 from osis_history.models import HistoryEntry
 from osis_notification.models import EmailNotification
 
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
+    ENTITY_CDE,
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
+    ChoixStatutPropositionGenerale,
     DecisionFacultaireEnum,
     PoursuiteDeCycle,
 )
 from admission.models import GeneralEducationAdmission
 from admission.models.checklist import (
     AdditionalApprovalCondition,
-    RefusalReasonCategory,
     FreeAdditionalApprovalCondition,
+    RefusalReasonCategory,
 )
 from admission.tests.factories.comment import CommentEntryFactory
 from admission.tests.factories.curriculum import (
@@ -62,17 +63,20 @@ from admission.tests.factories.curriculum import (
     AdmissionProfessionalValuatedExperiencesFactory,
 )
 from admission.tests.factories.faculty_decision import (
-    RefusalReasonFactory,
     AdditionalApprovalConditionFactory,
     FreeAdditionalApprovalConditionFactory,
+    RefusalReasonFactory,
 )
 from admission.tests.factories.general_education import (
-    GeneralEducationTrainingFactory,
     GeneralEducationAdmissionFactory,
+    GeneralEducationTrainingFactory,
 )
 from admission.tests.factories.history import HistoryEntryFactory
 from admission.tests.factories.person import CompletePersonFactory
-from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
+from admission.tests.factories.roles import (
+    ProgramManagerRoleFactory,
+    SicManagementRoleFactory,
+)
 from admission.tests.factories.secondary_studies import (
     ForeignHighSchoolDiplomaFactory,
     HighSchoolDiplomaAlternativeFactory,
@@ -88,19 +92,25 @@ from base.tests.factories.student import StudentFactory
 from epc.models.enums.condition_acces import ConditionAcces
 from epc.models.enums.decision_resultat_cycle import DecisionResultatCycle
 from epc.models.enums.etat_inscription import EtatInscriptionFormation
-from epc.models.enums.statut_inscription_programme_annuel import StatutInscriptionProgrammAnnuel
+from epc.models.enums.statut_inscription_programme_annuel import (
+    StatutInscriptionProgrammAnnuel,
+)
 from epc.models.enums.type_duree import TypeDuree
 from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
 from epc.tests.factories.email_fonction_programme import EmailFonctionProgrammeFactory
-from epc.tests.factories.inscription_programme_annuel import InscriptionProgrammeAnnuelFactory
-from epc.tests.factories.inscription_programme_cycle import InscriptionProgrammeCycleFactory
-from osis_profile.models import (
-    EducationalExperience,
-    ProfessionalExperience,
-    BelgianHighSchoolDiploma,
-    ForeignHighSchoolDiploma,
-    HighSchoolDiplomaAlternative,
+from epc.tests.factories.inscription_programme_annuel import (
+    InscriptionProgrammeAnnuelFactory,
 )
+from epc.tests.factories.inscription_programme_cycle import (
+    InscriptionProgrammeCycleFactory,
+)
+from osis_profile.models import (
+    BelgianHighSchoolDiploma,
+    EducationalExperience,
+    ForeignHighSchoolDiploma,
+    ProfessionalExperience, Exam,
+)
+from osis_profile.models.enums.exam import ExamTypes
 
 
 class FacultyDecisionViewTestCase(TestCase):
@@ -784,8 +794,8 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         self,
         confirm_multiple_upload,
     ):
-        confirm_multiple_upload.side_effect = (
-            lambda _, value, __: ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
+        confirm_multiple_upload.side_effect = lambda _, value, __: (
+            ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
         )
         self.client.force_login(user=self.fac_manager_user)
 
@@ -845,7 +855,7 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         # > High school diploma alternative
         BelgianHighSchoolDiploma.objects.filter(person=candidate).delete()
         ForeignHighSchoolDiploma.objects.filter(person=candidate).delete()
-        HighSchoolDiplomaAlternative.objects.filter(person=candidate).delete()
+        Exam.objects.filter(person=candidate, type=ExamTypes.PREMIER_CYCLE.name).delete()
         diploma_alternative = HighSchoolDiplomaAlternativeFactory(person=candidate)
 
         candidate.graduated_from_high_school = GotDiploma.NO.name
@@ -861,7 +871,7 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         self.general_admission.refresh_from_db()
         self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name)
 
-        diploma_alternative.first_cycle_admission_exam = ['token.pdf']
+        diploma_alternative.certificate = ['token.pdf']
         diploma_alternative.save()
 
         self.get_pdf_from_template_patcher.reset_mock()

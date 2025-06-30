@@ -47,6 +47,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             entity_id__annee=2022,
             type=TrainingType.BACHELOR,
             campus__nom='Mons',
+            grade_academique='1',
         ),
         FormationFactory(
             intitule='Bachelier en sciences économiques et de gestion',
@@ -54,6 +55,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             entity_id__annee=2021,
             type=TrainingType.BACHELOR,
             campus__nom='Mons',
+            grade_academique='1',
         ),
         FormationFactory(
             intitule='Bachelier en sciences économiques et de gestion',
@@ -61,6 +63,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             entity_id__annee=2020,
             type=TrainingType.BACHELOR,
             campus__nom='Louvain-la-Neuve',
+            grade_academique='1',
         ),
         FormationFactory(
             intitule='Bachelier en sciences économiques et de gestion',
@@ -68,6 +71,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             entity_id__annee=2020,
             type=TrainingType.BACHELOR,
             campus__nom='Mons',
+            grade_academique='1',
         ),
         FormationFactory(
             intitule='Bachelier vétérinaire',
@@ -76,6 +80,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             type=TrainingType.BACHELOR,
             campus__nom='Mons',
             code_domaine='11A',
+            grade_academique='1',
         ),
         FormationFactory(
             intitule='Master en sciences',
@@ -83,6 +88,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             entity_id__annee=2022,
             type=TrainingType.MASTER_M1,
             campus__nom='Louvain-la-Neuve',
+            grade_academique='1',
         ),
         FormationFactory(
             intitule='Bachelier en sciences économiques et de gestion',
@@ -90,6 +96,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             entity_id__annee=2022,
             type=TrainingType.BACHELOR,
             campus__nom='Charleroi',
+            grade_academique='1',
         ),
         FormationFactory(
             intitule='Formation SC3DP',
@@ -97,6 +104,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             entity_id__annee=2022,
             type=TrainingType.CERTIFICATE,
             campus__nom='Louvain-la-Neuve',
+            grade_academique='1',
         ),
         FormationFactory(
             intitule='Formation ESP3DP',
@@ -104,6 +112,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             entity_id__annee=2022,
             type=TrainingType.MASTER_M1,
             campus__nom='Charleroi',
+            grade_academique='1',
         ),
         FormationFactory(
             intitule='Formation continue ESP3DP',
@@ -111,6 +120,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             entity_id__annee=2022,
             type=TrainingType.UNIVERSITY_FIRST_CYCLE_CERTIFICATE,
             campus__nom='Charleroi',
+            grade_academique='1',
         ),
         FormationFactory(
             intitule='Master en sciences',
@@ -118,6 +128,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             entity_id__annee=2021,
             type=TrainingType.MASTER_M1,
             campus__nom='Louvain-la-Neuve',
+            grade_academique='1',
         ),
         FormationFactory(
             intitule='Master en sciences',
@@ -125,6 +136,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             entity_id__annee=2021,
             type=TrainingType.MASTER_M1,
             campus__nom='Unknown campus',
+            grade_academique='1',
         ),
         FormationFactory(
             intitule='Master en sciences',
@@ -132,6 +144,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             entity_id__annee=2020,
             type=TrainingType.MASTER_M1,
             campus__nom='Louvain-la-Neuve',
+            grade_academique='1',
         ),
         FormationFactory(
             intitule='Master en sciences',
@@ -139,6 +152,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             entity_id__annee=2021,
             type=TrainingType.MASTER_M1,
             campus__nom='Louvain-la-Neuve',
+            grade_academique='1',
         ),
         FormationFactory(
             intitule='Master MC',
@@ -146,6 +160,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             entity_id__annee=2020,
             type=TrainingType.MASTER_MC,
             campus__nom='Louvain-la-Neuve',
+            grade_academique='1',
         ),
         FormationFactory(
             intitule='Master M4',
@@ -153,6 +168,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             entity_id__annee=2020,
             type=TrainingType.MASTER_M4,
             campus__nom='Louvain-la-Neuve',
+            grade_academique='1',
         ),
         FormationFactory(
             intitule='Master M5',
@@ -160,6 +176,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             entity_id__annee=2020,
             type=TrainingType.MASTER_M5,
             campus__nom='Louvain-la-Neuve',
+            grade_academique='1',
         ),
         FormationFactory(
             intitule='Aggrégation en économie',
@@ -167,6 +184,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             entity_id__annee=2020,
             type=TrainingType.AGGREGATION,
             campus__nom='Charleroi',
+            grade_academique='1',
         ),
         FormationFactory(
             intitule='CAPAES en économie',
@@ -174,6 +192,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             entity_id__annee=2020,
             type=TrainingType.CAPAES,
             campus__nom='Charleroi',
+            grade_academique='1',
         ),
         FormationFactory(
             intitule='Bachelier vétérinaire',
@@ -182,6 +201,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             type=TrainingType.BACHELOR,
             campus__nom='Mons',
             code_domaine='11A',
+            grade_academique='1',
         ),
         FormationFactory(
             intitule='Aggrégation en économie',
@@ -189,6 +209,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             entity_id__annee=2021,
             type=TrainingType.AGGREGATION,
             campus__nom='Charleroi',
+            grade_academique='1',
         ),
         FormationFactory(
             intitule='CAPAES en économie',
@@ -196,6 +217,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             entity_id__annee=2021,
             type=TrainingType.CAPAES,
             campus__nom='Charleroi',
+            grade_academique='1',
         ),
         FormationFactory(
             intitule='Certificate in business',
@@ -203,6 +225,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             entity_id__annee=2021,
             type=TrainingType.CERTIFICATE,
             campus__nom='Charleroi',
+            grade_academique='1',
         ),
         FormationFactory(
             intitule='Master en sciences',
@@ -210,6 +233,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             entity_id__annee=2024,
             type=TrainingType.MASTER_M1,
             campus__nom='Louvain-la-Neuve',
+            grade_academique='1',
         ),
         FormationFactory(
             intitule='Bachelier en sciences',
@@ -217,6 +241,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             entity_id__annee=2024,
             type=TrainingType.BACHELOR,
             campus__nom='Louvain-la-Neuve',
+            grade_academique='1',
         ),
     ]
 
@@ -236,6 +261,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             campus_inscription=entity.campus_inscription,
             sigle_entite_gestion=entity.sigle_entite_gestion,
             credits=entity.credits,
+            grade_academique='1',
         )
 
     @classmethod
@@ -269,6 +295,9 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
                 type=training.type,
                 code_domaine=training.code_domaine,
                 campus=training.campus or '',
+                intitule_en=training.intitule_en,
+                intitule_fr=training.intitule_fr,
+                grade_academique='1',
             )
 
         raise FormationNonTrouveeException

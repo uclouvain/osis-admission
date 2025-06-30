@@ -65,7 +65,6 @@ from osis_profile import BE_ISO_CODE
 from osis_profile.models import (
     BelgianHighSchoolDiploma,
     ForeignHighSchoolDiploma,
-    HighSchoolDiplomaAlternative,
 )
 from osis_profile.models.enums.education import Equivalence, ForeignDiplomaTypes
 from reference.tests.factories.country import CountryFactory
@@ -296,7 +295,7 @@ class AdmissionEducationDetailViewForContinuingEducationTestCase(TestCase):
     def test_get_secondary_studies_with_diploma_alternative(self):
         diploma: HighSchoolDiplomaAlternative = HighSchoolDiplomaAlternativeFactory(
             person=self.continuing_admission.candidate,
-            first_cycle_admission_exam=[uuid.uuid4()],
+            certificate=[uuid.uuid4()],
         )
 
         self.continuing_admission.candidate.graduated_from_high_school = GotDiploma.NO.name
@@ -314,9 +313,7 @@ class AdmissionEducationDetailViewForContinuingEducationTestCase(TestCase):
         self.assertEqual(secondary_studies.diplome_etranger, None)
         self.assertEqual(
             secondary_studies.alternative_secondaires,
-            AlternativeSecondairesDTO(
-                uuid=diploma.uuid, examen_admission_premier_cycle=diploma.first_cycle_admission_exam
-            ),
+            AlternativeSecondairesDTO(uuid=diploma.uuid, examen_admission_premier_cycle=diploma.certificate),
         )
         self.assertEqual(secondary_studies.diplome_etudes_secondaires, GotDiploma.NO.name)
         self.assertEqual(secondary_studies.annee_diplome_etudes_secondaires, None)

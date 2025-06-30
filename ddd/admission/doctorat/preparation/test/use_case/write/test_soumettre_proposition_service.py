@@ -59,7 +59,11 @@ from admission.infrastructure.message_bus_in_memory import (
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from ddd.logic.financabilite.domain.model.catalogue import Formation
-from ddd.logic.financabilite.domain.model.parcours import Parcours, ParcoursAcademiqueExterne, ParcoursAcademiqueInterne
+from ddd.logic.financabilite.domain.model.parcours import (
+    Parcours,
+    ParcoursAcademiqueExterne,
+    ParcoursAcademiqueInterne,
+)
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
     AcademicYear,
     AcademicYearIdentity,
@@ -92,7 +96,7 @@ class TestVerifierPropositionServiceCommun(TestCase):
                 sigle='SC3DP',
                 annee=2020,
                 type=TrainingType.PHD.name,
-                grade_academique='',
+                grade_academique='1',
                 credits=0,
                 cycle=3,
             )
@@ -184,7 +188,7 @@ class TestVerifierPropositionServiceCommun(TestCase):
 
         self.assertEqual(
             updated_proposition.checklist_initiale.financabilite.statut,
-            ChoixStatutChecklist.INITIAL_NON_CONCERNE,
+            ChoixStatutChecklist.INITIAL_CANDIDAT,
         )
         self.assertEqual(
             updated_proposition.checklist_initiale.choix_formation.statut,

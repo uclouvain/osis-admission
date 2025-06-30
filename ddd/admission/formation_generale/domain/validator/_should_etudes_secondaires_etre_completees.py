@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -35,11 +35,11 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
     EtudesSecondairesNonCompleteesPourDiplomeEtrangerException,
 )
 from base.ddd.utils.business_validator import BusinessValidator
-from base.models.enums.got_diploma import GotDiploma, CHOIX_DIPLOME_OBTENU
+from base.models.enums.got_diploma import CHOIX_DIPLOME_OBTENU, GotDiploma
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
+    AlternativeSecondairesDTO,
     DiplomeBelgeEtudesSecondairesDTO,
     DiplomeEtrangerEtudesSecondairesDTO,
-    AlternativeSecondairesDTO,
 )
 from osis_profile import REGIMES_LINGUISTIQUES_SANS_TRADUCTION
 from osis_profile.models.enums.education import Equivalence, ForeignDiplomaTypes
@@ -146,5 +146,8 @@ class ShouldAlternativeSecondairesEtreCompletee(BusinessValidator):
         if not self.alternative_secondaires or self.est_potentiel_vae:
             return
 
-        if not self.alternative_secondaires.examen_admission_premier_cycle:
+        if (
+            not self.alternative_secondaires.examen_admission_premier_cycle
+            or not self.alternative_secondaires.examen_admission_premier_cycle_annee
+        ):
             raise EtudesSecondairesNonCompleteesPourAlternativeException

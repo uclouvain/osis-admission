@@ -27,9 +27,9 @@ from io import BytesIO
 from typing import Dict, List, Optional
 
 import img2pdf
-from PIL.Image import DecompressionBombError
 from django.utils.translation import override
 from osis_document.api.utils import get_raw_content_remotely
+from PIL.Image import DecompressionBombError
 
 from admission.constants import IMAGE_MIME_TYPES, SUPPORTED_MIME_TYPES
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
@@ -51,6 +51,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     DocumentsCotutelle,
     DocumentsCurriculum,
     DocumentsEtudesSecondaires,
+    DocumentsExamens,
     DocumentsIdentification,
     DocumentsProjetRecherche,
     DocumentsQuestionsSpecifiques,
@@ -295,6 +296,18 @@ def get_secondary_studies_attachments(
     attachments.extend(get_dynamic_questions_attachments(specific_questions))
 
     return attachments
+
+
+def get_exams_attachments(context: ResumePropositionDTO) -> List[Attachment]:
+    return [
+        Attachment(
+            identifier='ATTESTATION_DE_REUSSITE_CONCOURS_D_ENTREE_OU_D_ADMISSION',
+            label=context.examens.titre,
+            uuids=context.examens.attestation,
+            required=context.examens.requis,
+            candidate_language=context.identification.langue_contact,
+        )
+    ]
 
 
 def get_languages_attachments(context: ResumePropositionDTO) -> List[Attachment]:
