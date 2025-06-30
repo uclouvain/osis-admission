@@ -6411,6 +6411,9 @@ msgid ""
 "%(sender)s."
 msgstr ""
 
+msgid "The first name must be less than 20 characters long."
+msgstr ""
+
 msgid "The first name of the candidate"
 msgstr ""
 
@@ -6515,6 +6518,9 @@ msgstr ""
 msgid ""
 "The option {index} must have an identifier and a translation for each "
 "required language."
+msgstr ""
+
+msgid "The other given names must be less than 40 characters long."
 msgstr ""
 
 msgid "The payment has already been made."
