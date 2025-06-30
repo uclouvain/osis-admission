@@ -560,25 +560,24 @@ def get_experience_urls(
         if not computed_permissions['admission.change_admission_curriculum']:
             return res_context
 
-        res_context['duplicate_url'] = resolve_url(
-            f'{base_namespace}:update:curriculum:non_educational_duplicate',
-            uuid=admission.uuid,
-            experience_uuid=experience.uuid,
-        )
-
         if experience.epc_experience:
             if candidate_noma:
                 if computed_permissions['profil.can_edit_parcours_externe']:
-                    res_context['edit_url'] = resolve_url(
+                    res_context['curex_url'] = resolve_url(
                         'edit-experience-non-academique-view',
                         noma=candidate_noma,
                         experience_uuid=experience.uuid,
                     )
-                    res_context['edit_new_link_tab'] = True
 
         else:
             res_context['edit_url'] = resolve_url(
                 f'{base_namespace}:update:curriculum:non_educational',
+                uuid=admission.uuid,
+                experience_uuid=experience.uuid,
+            )
+
+            res_context['duplicate_url'] = resolve_url(
+                f'{base_namespace}:update:curriculum:non_educational_duplicate',
                 uuid=admission.uuid,
                 experience_uuid=experience.uuid,
             )
@@ -602,7 +601,7 @@ def get_experience_urls(
         if experience.epc_experience:
             if candidate_noma:
                 if computed_permissions['profil.can_edit_parcours_externe']:
-                    res_context['edit_url'] = resolve_url(
+                    res_context['curex_url'] = resolve_url(
                         'edit-etudes-secondaires-view',
                         noma=candidate_noma,
                     )
