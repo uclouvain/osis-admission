@@ -663,6 +663,15 @@ class MembreNonExterneException(BusinessException):
         super().__init__(message, **kwargs)
 
 
+class ExperiencesNonAcademiquesCertificatManquantException(BusinessException):
+    status_code = "PROPOSITION-70"
+
+    def __init__(self, reference, **kwargs):
+        self.reference = reference
+        message = _("The professional experience is missing a certificate.")
+        super().__init__(message, **kwargs)
+
+
 class AbsenceDeDetteNonCompleteeDoctoratException(BusinessException):
     status_code = "DOCTORAT-1"
 
