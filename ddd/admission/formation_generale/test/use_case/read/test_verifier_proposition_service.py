@@ -227,7 +227,7 @@ class TestVerifierPropositionService(TestCase):
             'uuid': str(uuid.uuid4()),
             'employeur': 'UCL',
             'type': ActivityType.WORK.name,
-            'certificat': [],
+            'certificat': ['test.pdf'],
             'fonction': 'Bibliothécaire',
             'secteur': ActivitySector.PUBLIC.name,
             'autre_activite': '',
