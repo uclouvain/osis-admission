@@ -859,7 +859,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 uuid='0cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
                 employeur='',
                 type=ActivityType.OTHER.name,
-                certificat=[],
+                certificat=['uuid-certificate'],
                 fonction='',
                 secteur='',
                 autre_activite='Other',
