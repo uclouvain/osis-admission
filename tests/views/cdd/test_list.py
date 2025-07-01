@@ -53,7 +53,9 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeContratTravail,
     ChoixTypeFinancement,
 )
-from admission.ddd.admission.doctorat.preparation.read_view.domain.enums.tableau_bord import IndicateurTableauBordEnum
+from admission.ddd.admission.doctorat.preparation.read_view.domain.enums.tableau_bord import (
+    IndicateurTableauBordEnum,
+)
 from admission.ddd.admission.doctorat.validation.domain.model.enums import (
     ChoixStatutCDD,
     ChoixStatutSIC,
@@ -326,7 +328,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         form = response.context['form']
 
-        self.assertEqual(form['annee_academique'].value(), 2022)
+        self.assertEqual(form['annee_academique'].value(), 2021)
         self.assertEqual(
             form.fields['annee_academique'].choices,
             [
