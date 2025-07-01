@@ -4196,8 +4196,7 @@ msgid "Is non-resident (as defined in decree)"
 msgstr "Est non-résident (au sens du décret)"
 
 msgid "Is the exam the access title for this admission?"
-msgstr ""
-"L'examen est-il le titre d'accès de cette proposition ?"
+msgstr "L'examen est-il le titre d'accès de cette proposition ?"
 
 msgid ""
 "Is your admission request linked with a FNRS, FRIA, FRESH or CSC application?"
@@ -7072,6 +7071,9 @@ msgstr ""
 "Le mail de la décision fac a été envoyé au candidat le %(date)s par "
 "%(sender)s."
 
+msgid "The first name must be less than 20 characters long."
+msgstr "Le prénom ne doit pas faire plus de 20 caractères."
+
 msgid "The first name of the candidate"
 msgstr "Le prénom du candidat"
 
@@ -7203,6 +7205,9 @@ msgstr ""
 "L'option {index} doit avoir un identifiant et une traduction pour chaque "
 "langue requise."
 
+msgid "The other given names must be less than 40 characters long."
+msgstr "Les autres prénoms ne doivent pas faire plus de 40 caractères."
+
 msgid "The payment has already been made."
 msgstr "Le paiement a déjà été réalisé."
 
@@ -7222,8 +7227,7 @@ msgstr ""
 "admission"
 
 msgid "The professional experience is missing a certificate."
-msgstr ""
-"L'expérience professionnelle n'a pas de certificat."
+msgstr "L'expérience professionnelle n'a pas de certificat."
 
 msgid ""
 "The professional experiences that have been valuated from this admission."

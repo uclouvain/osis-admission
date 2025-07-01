@@ -672,6 +672,22 @@ class ExperiencesNonAcademiquesCertificatManquantException(BusinessException):
         super().__init__(message, **kwargs)
 
 
+class PrenomTropLongException(BusinessException):
+    status_code = "PROPOSITION-71"
+
+    def __init__(self, **kwargs):
+        message = _("The first name must be less than 20 characters long.")
+        super().__init__(message, **kwargs)
+
+
+class AutresPrenomsTropLongException(BusinessException):
+    status_code = "PROPOSITION-72"
+
+    def __init__(self, **kwargs):
+        message = _("The other given names must be less than 40 characters long.")
+        super().__init__(message, **kwargs)
+
+
 class AbsenceDeDetteNonCompleteeDoctoratException(BusinessException):
     status_code = "DOCTORAT-1"
 
