@@ -579,11 +579,10 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
             professionalexperience=non_educational_experience,
         )
 
-        self.outline_root.reset_mock()
-
+        nb_calls = len(self.outline_root.append.call_args_list)
         admission_pdf_recap(admission, settings.LANGUAGE_CODE)
 
-        tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list]
+        tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list[nb_calls:]]
 
         self.assertEqual(len(tabs_titles), 7)
 
@@ -599,11 +598,11 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
             professionalexperience=non_educational_experience,
         )
 
-        self.outline_root.reset_mock()
+        nb_calls = len(self.outline_root.append.call_args_list)
 
         admission_pdf_recap(admission, settings.LANGUAGE_CODE)
 
-        tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list]
+        tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list[nb_calls:]]
 
         self.assertEqual(len(tabs_titles), 9)
 
@@ -704,11 +703,11 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
             professionalexperience=non_educational_experience,
         )
 
-        self.outline_root.reset_mock()
+        nb_calls = len(self.outline_root.append.call_args_list)
 
         admission_pdf_recap(admission, settings.LANGUAGE_CODE)
 
-        tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list]
+        tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list[nb_calls:]]
 
         self.assertEqual(len(tabs_titles), 9)
 
@@ -724,11 +723,11 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
             professionalexperience=non_educational_experience,
         )
 
-        self.outline_root.reset_mock()
+        nb_calls = len(self.outline_root.append.call_args_list)
 
         admission_pdf_recap(admission, settings.LANGUAGE_CODE)
 
-        tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list]
+        tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list[nb_calls:]]
 
         self.assertEqual(len(tabs_titles), 11)
 
@@ -827,11 +826,11 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
             professionalexperience=non_educational_experience,
         )
 
-        self.outline_root.reset_mock()
+        nb_calls = len(self.outline_root.append.call_args_list)
 
         admission_pdf_recap(admission, settings.LANGUAGE_CODE)
 
-        tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list]
+        tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list[nb_calls:]]
 
         self.assertEqual(len(tabs_titles), 11)
 
@@ -848,11 +847,11 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
             professionalexperience=non_educational_experience,
         )
 
-        self.outline_root.reset_mock()
+        nb_calls = len(self.outline_root.append.call_args_list)
 
         admission_pdf_recap(admission, settings.LANGUAGE_CODE)
 
-        tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list]
+        tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list[nb_calls:]]
 
         self.assertEqual(len(tabs_titles), 13)
 
