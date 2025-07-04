@@ -101,6 +101,10 @@ class ListerDemandesService(IListerDemandesService):
             .annotate(
                 scholarship=Coalesce('international_scholarship__short_name', 'other_international_scholarship'),
             )
+            .prefetch_related(
+                'candidate__student_set',
+                'candidate__personmergeproposal',
+            )
         )
 
         # Add filters
@@ -329,12 +333,23 @@ class ListerDemandesService(IListerDemandesService):
                     if tab_status:
                         status_by_tab[tab] = tab_status.libelle
 
+        if (
+            hasattr(admission.candidate, 'personmergeproposal')
+            and admission.candidate.personmergeproposal.registration_id_sent_to_digit
+        ):
+            candidate_noma = admission.candidate.personmergeproposal.registration_id_sent_to_digit
+        elif admission.candidate.student_set.exists():
+            candidate_noma = admission.candidate.student_set.first().registration_id
+        else:
+            candidate_noma = ''
+
         return DemandeRechercheDTO(
             uuid=admission.uuid,
             numero_demande=admission.formatted_reference,  # From annotation
             etat_demande=admission.status,
             nom_candidat=admission.candidate.last_name,
             prenom_candidat=admission.candidate.first_name,
+            noma_candidat=candidate_noma,
             sigle_formation=admission.training.acronym,
             code_formation=admission.training.partial_acronym,
             intitule_formation=getattr(admission.training, training_title),
