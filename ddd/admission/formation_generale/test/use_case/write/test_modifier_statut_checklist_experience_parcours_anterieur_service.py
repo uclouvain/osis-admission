@@ -183,7 +183,6 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
         )
 
     def test_should_verifier_experience_academique_complete_pour_passage_a_valide(self):
-
         with mock.patch.multiple(
             self.experience,
             a_obtenu_diplome=False,
@@ -212,7 +211,7 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
             self.experience,
             a_obtenu_diplome=False,
             communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
-            cycle_formation=Cycle.FIRST_CYCLE.name,
+            cycle_formation=Cycle.SECOND_CYCLE.name,
             avec_complements=True,
             credits_inscrits_complements=None,
             credits_acquis_complements=10,
@@ -238,7 +237,7 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
             self.experience,
             a_obtenu_diplome=False,
             communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
-            cycle_formation=Cycle.FIRST_CYCLE.name,
+            cycle_formation=Cycle.SECOND_CYCLE.name,
             avec_complements=True,
             credits_inscrits_complements=10,
             credits_acquis_complements=None,

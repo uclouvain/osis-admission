@@ -180,7 +180,7 @@ class TestVerifierExperienceCVApresSoumissionService(TestCase):
             proposition_id = self.message_bus.invoke(self.cmd)
             self.assertEqual(proposition_id, self.proposition.entity_id)
 
-    def test_should_lever_exception_si_experience_pour_bachelier_fwb_incomplete(self):
+    def test_should_pas_lever_exception_si_experience_pour_bachelier_fwb_complete(self):
         self.experiences_academiques.append(self.experience_academiques_complete)
 
         with mock.patch.multiple(
@@ -189,10 +189,8 @@ class TestVerifierExperienceCVApresSoumissionService(TestCase):
             cycle_formation=Cycle.FIRST_CYCLE.name,
             credits_acquis_bloc_1=None,
         ):
-            with self.assertRaises(MultipleBusinessExceptions) as context:
-                self.message_bus.invoke(self.cmd)
-
-            self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
+            proposition_id = self.message_bus.invoke(self.cmd)
+            self.assertEqual(proposition_id, self.proposition.entity_id)
 
         with mock.patch.multiple(
             self.experience_academiques_complete,
