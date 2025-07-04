@@ -1552,7 +1552,7 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
         self.assertEqual(len(header), len(row_data))
 
         self.assertStrEqual(row_data[0], result.numero_demande)
-        self.assertStrEqual(row_data[1], f'{result.nom_candidat}, {result.prenom_candidat}')
+        self.assertStrEqual(row_data[1], f'{result.nom_candidat}, {result.prenom_candidat} ({result.noma_candidat})')
         self.assertStrEqual(row_data[2], result.nom_pays_nationalite_candidat)
         self.assertStrEqual(row_data[3], result.code_bourse)
         self.assertStrEqual(row_data[4], f'{result.sigle_formation} - {result.intitule_formation}')
