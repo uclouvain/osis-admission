@@ -109,11 +109,6 @@ class DoctorateAdmissionAddActorFormView(LoadDossierViewMixin, BusinessException
             data = {**data, **{f: '' for f in EXTERNAL_FIELDS}}
         else:
             matricule = ''
-        pays = data.get('pays')
-        if pays:
-            data['pays'] = Country.objects.filter(pk=pays).values('iso_code').first()
-            if data['pays'] is not None:
-                data['pays'] = data['pays']['iso_code']
         return {
             'matricule_auteur': self.request.user.person.global_id,
             'type': data['type'],

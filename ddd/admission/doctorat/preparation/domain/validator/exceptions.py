@@ -664,7 +664,7 @@ class MembreNonExterneException(BusinessException):
 
 
 class ExperiencesNonAcademiquesCertificatManquantException(BusinessException):
-    status_code = "PROPOSITION-70"
+    status_code = "PROPOSITION-73"
 
     def __init__(self, reference, **kwargs):
         self.reference = reference
