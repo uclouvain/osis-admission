@@ -336,7 +336,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         form = response.context['form']
 
-        self.assertEqual(form['annee_academique'].value(), 2022)
+        self.assertEqual(form['annee_academique'].value(), 2021)
         self.assertEqual(
             form.fields['annee_academique'].choices,
             [

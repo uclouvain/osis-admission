@@ -67,7 +67,7 @@ from admission.infrastructure.admission.domain.service.annee_inscription_formati
     AnneeInscriptionFormationTranslator,
 )
 from admission.models import EntityProxy, SupervisionActor
-from base.forms.utils import autocomplete, EMPTY_CHOICE, FIELD_REQUIRED_MESSAGE
+from base.forms.utils import EMPTY_CHOICE, FIELD_REQUIRED_MESSAGE, autocomplete
 from base.forms.utils.datefield import DatePickerInput
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
@@ -304,7 +304,7 @@ class DoctorateListFilterForm(BaseAdmissionFilterForm):
         self.fields['annee_academique'].required = False
 
         if current_academic_year:
-            self.fields['annee_academique'].initial = current_academic_year + 1
+            self.fields['annee_academique'].initial = current_academic_year
 
         # Change the label of the candidate field
         self.fields['matricule_candidat'].label = _('Last name / First name / Email / NOMA')
