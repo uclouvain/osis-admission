@@ -51,6 +51,6 @@
 {% endblock style %}
 
 {% block script %}
-    {{ form.media.js }}
+    {{ block.super }}
     <script src="{% static 'osis_profile/js/experience_academique.js' %}"></script>
 {% endblock script %}
