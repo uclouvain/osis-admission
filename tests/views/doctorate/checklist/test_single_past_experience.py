@@ -216,8 +216,10 @@ class SinglePastExperienceChangeStatusViewTestCase(SicPatchMixin, TestCase):
         experience = EducationalExperienceFactory(
             person=self.candidate,
             country=self.experiences[0].country,
-            with_fwb_bachelor_fields=True,
-            block_1_acquired_credit_number=None,
+            with_fwb_master_fields=True,
+            with_complement=True,
+            complement_registered_credit_number=None,
+            complement_acquired_credit_number=None,
         )
         EducationalExperienceYearFactory(
             educational_experience=experience,
@@ -254,7 +256,8 @@ class SinglePastExperienceChangeStatusViewTestCase(SicPatchMixin, TestCase):
 
         self.assertEqual(len(experiences_checklists), 1)
 
-        experience.block_1_acquired_credit_number = 10
+        experience.complement_registered_credit_number = 10
+        experience.complement_acquired_credit_number = 10
         experience.save()
 
         response = self.client.post(
