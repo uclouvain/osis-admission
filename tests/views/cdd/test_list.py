@@ -53,7 +53,9 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeContratTravail,
     ChoixTypeFinancement,
 )
-from admission.ddd.admission.doctorat.preparation.read_view.domain.enums.tableau_bord import IndicateurTableauBordEnum
+from admission.ddd.admission.doctorat.preparation.read_view.domain.enums.tableau_bord import (
+    IndicateurTableauBordEnum,
+)
 from admission.ddd.admission.doctorat.validation.domain.model.enums import (
     ChoixStatutCDD,
     ChoixStatutSIC,
@@ -64,7 +66,7 @@ from admission.models import DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.roles import (
     CandidateFactory,
-    DoctorateReaderRoleFactory,
+    DoctorateCommitteeMemberRoleFactory,
     ProgramManagerRoleFactory,
     SicManagementRoleFactory,
 )
@@ -92,12 +94,11 @@ from reference.tests.factories.scholarship import (
 class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
     admissions = []
     NB_MAX_QUERIES_WITHOUT_SEARCH = 27
-    NB_MAX_QUERIES_WITH_SEARCH = 30
+    NB_MAX_QUERIES_WITH_SEARCH = 31
 
     @classmethod
     def setUpTestData(cls):
         cls.factory = RequestFactory()
-        cls.doctorate_reader_user = DoctorateReaderRoleFactory().person.user
 
         # Create some academic years
         academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
@@ -289,6 +290,9 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             person=program_manager_person,
         )
         cls.program_manager_user = program_manager_person.user
+        cls.doctorate_committee_member = DoctorateCommitteeMemberRoleFactory(
+            education_group=cls.admissions[0].training.education_group,
+        ).person.user
 
         # User with several cdds
         person_with_several_cdds = SicManagementRoleFactory(entity=first_doctoral_commission).person
@@ -318,6 +322,12 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['object_list'], [])
 
+    def test_form_initialization_for_a_doctorate_committee_member(self):
+        self.client.force_login(user=self.doctorate_committee_member)
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
     def test_form_initialization_for_a_program_manager(self):
         self.client.force_login(user=self.program_manager_user)
 
@@ -326,7 +336,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         form = response.context['form']
 
-        self.assertEqual(form['annee_academique'].value(), 2022)
+        self.assertEqual(form['annee_academique'].value(), 2021)
         self.assertEqual(
             form.fields['annee_academique'].choices,
             [

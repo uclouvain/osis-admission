@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -29,11 +29,11 @@ from unittest.mock import patch
 from django.test import TestCase, override_settings
 
 from admission.tests.factories.curriculum import (
-    ProfessionalExperienceFactory,
+    AdmissionEducationalValuatedExperiencesFactory,
     AdmissionProfessionalValuatedExperiencesFactory,
     EducationalExperienceFactory,
     EducationalExperienceYearFactory,
-    AdmissionEducationalValuatedExperiencesFactory,
+    ProfessionalExperienceFactory,
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.utils import get_missing_curriculum_periods
@@ -44,8 +44,12 @@ from base.tests.factories.student import StudentFactory
 from epc.models.enums.decision_resultat_cycle import DecisionResultatCycle
 from epc.models.enums.etat_inscription import EtatInscriptionFormation
 from epc.models.enums.type_duree import TypeDuree
-from epc.tests.factories.inscription_programme_annuel import InscriptionProgrammeAnnuelFactory
-from epc.tests.factories.inscription_programme_cycle import InscriptionProgrammeCycleFactory
+from epc.tests.factories.inscription_programme_annuel import (
+    InscriptionProgrammeAnnuelFactory,
+)
+from epc.tests.factories.inscription_programme_cycle import (
+    InscriptionProgrammeCycleFactory,
+)
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
@@ -220,7 +224,7 @@ class GetMissingCurriculumPeriodsTestCase(TestCase):
             ],
         )
 
-        # Valuation of the non-academic experience
+        # Valuation of the academic experience
         valuation = AdmissionEducationalValuatedExperiencesFactory(
             baseadmission=self.admission,
             educationalexperience=academic_experience,
@@ -239,7 +243,7 @@ class GetMissingCurriculumPeriodsTestCase(TestCase):
         academic_experience.transcript = []
         academic_experience.save()
 
-        # No changes as the experience is incomplete
+        # No changes even if the experience is incomplete
         result = get_missing_curriculum_periods(proposition_uuid=self.admission.uuid)
 
         self.assertCountEqual(

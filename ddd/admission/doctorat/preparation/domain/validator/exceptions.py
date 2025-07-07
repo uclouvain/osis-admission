@@ -647,11 +647,28 @@ class StatutChecklistDecisionCddDoitEtreDifferentClotureException(BusinessExcept
         super().__init__(message, **kwargs)
 
 
+class EtatChecklistDonneesPersonnellesNonValidePourApprouverDemande(BusinessException):
+    status_code = "PROPOSITION-72"
+
+    def __init__(self, **kwargs):
+        message = _('The status of the checklist for the personal data must be "Validated".')
+        super().__init__(message, **kwargs)
+
+
 class MembreNonExterneException(BusinessException):
     status_code = "PROPOSITION-14"
 
     def __init__(self, **kwargs):
         message = _("The member is not external.")
+        super().__init__(message, **kwargs)
+
+
+class ExperiencesNonAcademiquesCertificatManquantException(BusinessException):
+    status_code = "PROPOSITION-73"
+
+    def __init__(self, reference, **kwargs):
+        self.reference = reference
+        message = _("The professional experience is missing a certificate.")
         super().__init__(message, **kwargs)
 
 

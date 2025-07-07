@@ -38,7 +38,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     TypeEmplacementDocument,
 )
 from admission.exports.admission_recap.attachments import Attachment
-from admission.exports.admission_recap.section import Section, get_sections
+from admission.exports.admission_recap.section import Section
 from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import (
     IPersonneConnueUclTranslator,
 )
@@ -50,6 +50,16 @@ class IEmplacementsDocumentsPropositionTranslator(interface.DomainService):
     @classmethod
     @abc.abstractmethod
     def recuperer_metadonnees_par_uuid_document(cls, uuids_documents: List[str]) -> dict:
+        raise NotImplementedError
+
+    @classmethod
+    @abc.abstractmethod
+    def get_sections(
+        cls,
+        resume_dto: ResumePropositionDTO,
+        questions_specifiques: List[QuestionSpecifiqueDTO],
+        avec_documents_libres: bool,
+    ) -> dict:
         raise NotImplementedError
 
     @classmethod
@@ -77,10 +87,10 @@ class IEmplacementsDocumentsPropositionTranslator(interface.DomainService):
         avec_documents_libres=True,
     ) -> List[EmplacementDocumentDTO]:
         # Get the requested documents by tab
-        sections = get_sections(
-            context=resume_dto,
-            specific_questions=questions_specifiques,
-            with_free_requestable_documents=avec_documents_libres,
+        sections = cls.get_sections(
+            resume_dto=resume_dto,
+            questions_specifiques=questions_specifiques,
+            avec_documents_libres=avec_documents_libres,
         )
 
         # Get a read token and metadata of all documents
@@ -336,10 +346,10 @@ class IEmplacementsDocumentsPropositionTranslator(interface.DomainService):
         questions_specifiques: List[QuestionSpecifiqueDTO],
     ) -> List[EmplacementDocumentDTO]:
         # Get the requested documents by tab
-        sections = get_sections(
-            context=resume_dto,
-            specific_questions=questions_specifiques,
-            with_free_requestable_documents=True,
+        sections = cls.get_sections(
+            resume_dto=resume_dto,
+            questions_specifiques=questions_specifiques,
+            avec_documents_libres=True,
         )
 
         # Get a read token and metadata of all documents
@@ -383,10 +393,10 @@ class IEmplacementsDocumentsPropositionTranslator(interface.DomainService):
         questions_specifiques: List[QuestionSpecifiqueDTO],
     ) -> List[EmplacementDocumentDTO]:
         # Get the requested documents by tab
-        sections = get_sections(
-            context=resume_dto,
-            specific_questions=questions_specifiques,
-            with_free_requestable_documents=False,
+        sections = cls.get_sections(
+            resume_dto=resume_dto,
+            questions_specifiques=questions_specifiques,
+            avec_documents_libres=False,
         )
 
         # Get a read token and metadata of all documents

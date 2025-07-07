@@ -113,6 +113,7 @@ class EducationalExperienceFactory(factory.django.DjangoModelFactory):
                 DiplomaTitleFactory,
                 title='Computer science',
                 cycle=Cycle.SECOND_CYCLE.name,
+                code_grade_acad='1',
             ),
             institute=factory.SubFactory(
                 OrganizationFactory,
@@ -132,6 +133,7 @@ class ProfessionalExperienceFactory(factory.django.DjangoModelFactory):
         lambda experience: experience.start_date + relativedelta(months=2) - relativedelta(days=1)
     )
     type = ActivityType.WORK.name
+    certificate = factory.LazyFunction(lambda: [uuid.uuid4()])
 
 
 class AdmissionEducationalValuatedExperiencesFactory(factory.django.DjangoModelFactory):

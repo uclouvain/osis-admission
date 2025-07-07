@@ -60,6 +60,7 @@ from admission.ddd.admission.doctorat.preparation import commands as doctorate_c
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AnneesCurriculumNonSpecifieesException,
     ExperiencesAcademiquesNonCompleteesException,
+    ExperiencesNonAcademiquesCertificatManquantException,
 )
 from admission.ddd.admission.formation_continue import commands as continuing_commands
 from admission.ddd.admission.formation_generale import commands as general_commands
@@ -153,6 +154,7 @@ class BaseCurriculumView(APIPermissionRequiredMixin, RetrieveAPIView):
 
         incomplete_periods = []
         incomplete_experiences = defaultdict(list)
+        incomplete_professional_experiences = defaultdict(list)
         if self.check_command_class:
             try:
                 message_bus_instance.invoke(self.check_command_class(uuid_proposition=self.kwargs.get('uuid')))
@@ -163,6 +165,8 @@ class BaseCurriculumView(APIPermissionRequiredMixin, RetrieveAPIView):
                         incomplete_experiences[exception.reference].append(exception.message)
                     elif isinstance(exception, AnneesCurriculumNonSpecifieesException):
                         missing_year_exceptions.append(exception)
+                    elif isinstance(exception, ExperiencesNonAcademiquesCertificatManquantException):
+                        incomplete_professional_experiences[exception.reference].append(exception.message)
                 incomplete_periods = [
                     e.message
                     for e in sorted(missing_year_exceptions, key=lambda exception: exception.periode[0], reverse=True)
@@ -175,6 +179,7 @@ class BaseCurriculumView(APIPermissionRequiredMixin, RetrieveAPIView):
                 'file': current_person,
                 'incomplete_periods': incomplete_periods,
                 'incomplete_experiences': incomplete_experiences,
+                'incomplete_professional_experiences': incomplete_professional_experiences,
             },
             context={
                 'related_person': current_person,
@@ -290,7 +295,7 @@ class ExperienceViewSet(
                     filter=Q(valuated_from_admission__isnull=False),
                 ),
             )
-            if self.request
+            if self.kwargs.get('uuid')
             else self.model.objects.none()
         )
 
@@ -304,7 +309,7 @@ class ExperienceViewSet(
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        if self.request:
+        if self.kwargs.get('uuid'):
             context['candidate'] = self.candidate
         return context
 
@@ -346,6 +351,20 @@ class ExperienceViewSet(
 class BaseProfessionalExperienceViewSet(ExperienceViewSet):
     model = ProfessionalExperience
     serializer_class = ProfessionalExperienceSerializer
+
+    def _check_perms_update(self):
+        if (
+            any(
+                training_type in AnneeInscriptionFormationTranslator.DOCTORATE_EDUCATION_TYPES
+                for training_type in self.experience.valuated_from_trainings
+            )
+            or any(
+                training_type in AnneeInscriptionFormationTranslator.GENERAL_EDUCATION_TYPES
+                for training_type in self.experience.valuated_from_trainings
+            )
+            or self.experience.external_id
+        ):
+            raise PermissionDenied(_("This experience cannot be updated as it has already been valuated."))
 
 
 @extend_schema_view(

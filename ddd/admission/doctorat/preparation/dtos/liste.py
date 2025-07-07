@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -39,6 +39,7 @@ class DemandeRechercheDTO(interface.DTO):
 
     nom_candidat: str
     prenom_candidat: str
+    noma_candidat: str
     sigle_formation: str
     code_formation: str
     intitule_formation: str
@@ -67,7 +68,8 @@ class DemandeRechercheDTO(interface.DTO):
 
     @property
     def candidat(self) -> str:
-        return f'{self.nom_candidat}, {self.prenom_candidat}'
+        noma = f' ({self.noma_candidat})' if self.noma_candidat else ''
+        return f'{self.nom_candidat}, {self.prenom_candidat}{noma}'
 
     @property
     def derniere_modification_par(self) -> str:

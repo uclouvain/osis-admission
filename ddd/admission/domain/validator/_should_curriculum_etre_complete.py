@@ -32,6 +32,7 @@ from dateutil.rrule import MONTHLY, rrule, rruleset
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AnneesCurriculumNonSpecifieesException,
     ExperiencesAcademiquesNonCompleteesException,
+    ExperiencesNonAcademiquesCertificatManquantException,
 )
 from admission.ddd.admission.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
@@ -215,14 +216,35 @@ class ShouldExperiencesAcademiquesEtreCompletees(BusinessValidator):
 
 
 @attr.dataclass(frozen=True, slots=True)
+class ShouldExperiencesNonAcademiquesAvoirUnCertificat(BusinessValidator):
+    experiences_non_academiques: List[ExperienceNonAcademiqueDTO]
+
+    def validate(self, *args, **kwargs):
+        experiences_incompletes = [
+            experience for experience in self.experiences_non_academiques if not experience.certificat
+        ]
+
+        if experiences_incompletes:
+            raise MultipleBusinessExceptions(
+                exceptions=set(
+                    ExperiencesNonAcademiquesCertificatManquantException(
+                        reference=experience.uuid,
+                    )
+                    for experience in experiences_incompletes
+                )
+            )
+
+
+@attr.dataclass(frozen=True, slots=True)
 class ShouldExperiencesAcademiquesEtreCompleteesApresSoumission(BusinessValidator):
     experiences_academiques: List[ExperienceAcademiqueDTO]
+    grade_academique_formation_proposition: str
 
     def validate(self, *args, **kwargs):
         exceptions = {
             ExperiencesAcademiquesNonCompleteesException(reference=experience.uuid, name=str(experience))
             for experience in self.experiences_academiques
-            if experience.champs_credits_bloc_1_et_complements_non_remplis
+            if experience.champs_credits_bloc_1_et_complements_non_remplis(self.grade_academique_formation_proposition)
         }
 
         if exceptions:

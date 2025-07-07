@@ -63,9 +63,8 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
         self.proposition_repository = PropositionInMemoryRepository()
         self.addCleanup(self.proposition_repository.reset)
         self.message_bus = message_bus_in_memory_instance
-        self.proposition_repository.initialiser_checklist_proposition(
-            PropositionIdentity(uuid='uuid-SC3DP-confirmee'),
-        )
+        self.proposition_entity_id = PropositionIdentity(uuid='uuid-SC3DP-confirmee')
+        self.proposition_repository.initialiser_checklist_proposition(self.proposition_entity_id)
         self.experience_uuid = '9cbdf4db-2454-4cbf-9e48-55d2a9881ee1'
         self.candidat_translator = ProfilCandidatInMemoryTranslator()
         self.experiences_academiques = self.candidat_translator.experiences_academiques
@@ -195,30 +194,6 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
             self.experience,
             a_obtenu_diplome=False,
             communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
-            cycle_formation=Cycle.FIRST_CYCLE.name,
-            credits_acquis_bloc_1=None,
-        ):
-            with self.assertRaises(MultipleBusinessExceptions) as context:
-                self.message_bus.invoke(
-                    ModifierStatutChecklistExperienceParcoursAnterieurCommand(
-                        uuid_proposition='uuid-SC3DP-confirmee',
-                        uuid_experience=self.experience_uuid,
-                        type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
-                        statut=ChoixStatutChecklist.GEST_REUSSITE.name,
-                        statut_authentification=False,
-                        gestionnaire='0123456789',
-                    )
-                )
-
-            self.assertIsInstance(
-                context.exception.exceptions.pop(),
-                ExperiencesAcademiquesNonCompleteesException,
-            )
-
-        with mock.patch.multiple(
-            self.experience,
-            a_obtenu_diplome=False,
-            communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
             cycle_formation=Cycle.SECOND_CYCLE.name,
             avec_complements=None,
         ):
@@ -243,7 +218,27 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
             self.experience,
             a_obtenu_diplome=False,
             communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
-            cycle_formation=Cycle.FIRST_CYCLE.name,
+            cycle_formation=Cycle.SECOND_CYCLE.name,
+            avec_complements=None,
+            grade_academique_formation='2',
+        ):
+            proposition_id = self.message_bus.invoke(
+                ModifierStatutChecklistExperienceParcoursAnterieurCommand(
+                    uuid_proposition='uuid-SC3DP-confirmee',
+                    uuid_experience=self.experience_uuid,
+                    type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
+                    statut=ChoixStatutChecklist.GEST_REUSSITE.name,
+                    statut_authentification=False,
+                    gestionnaire='0123456789',
+                )
+            )
+            self.assertEqual(proposition_id, self.proposition_entity_id)
+
+        with mock.patch.multiple(
+            self.experience,
+            a_obtenu_diplome=False,
+            communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
+            cycle_formation=Cycle.SECOND_CYCLE.name,
             avec_complements=True,
             credits_inscrits_complements=None,
             credits_acquis_complements=10,
@@ -269,7 +264,7 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
             self.experience,
             a_obtenu_diplome=False,
             communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
-            cycle_formation=Cycle.FIRST_CYCLE.name,
+            cycle_formation=Cycle.SECOND_CYCLE.name,
             avec_complements=True,
             credits_inscrits_complements=10,
             credits_acquis_complements=None,

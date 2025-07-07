@@ -130,6 +130,7 @@
 
   {{ block.super }}
 
+  <link rel="stylesheet" href="{% static "osis_profile/css/popover.css" %}" type='text/css'/>
   <link rel="stylesheet" href="{% static 'admission/admission.css' %}" type='text/css'>
   <link rel="stylesheet" href="{% static 'css/bootstrap-datepicker3.min.css' %}" type='text/css'>
   <style>
@@ -199,7 +200,7 @@
   {{ filter_form.media }}
 
   <script src="{% static 'admission/mask.js' %}"></script>
-  <script src="{% static 'admission/popover.js' %}"></script>
+  <script src="{% static 'osis_profile/js/popover.js' %}"></script>
 
   <script>
     {# Prevent to save the DOM in cache when using htmx requests #}

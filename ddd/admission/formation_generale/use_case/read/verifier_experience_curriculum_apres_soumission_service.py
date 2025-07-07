@@ -37,6 +37,9 @@ from admission.ddd.admission.formation_generale.domain.builder.proposition_ident
 from admission.ddd.admission.formation_generale.domain.model.proposition import (
     PropositionIdentity,
 )
+from admission.ddd.admission.formation_generale.domain.service.i_formation import (
+    IFormationGeneraleTranslator,
+)
 from admission.ddd.admission.formation_generale.repository.i_proposition import (
     IPropositionRepository,
 )
@@ -46,10 +49,13 @@ def verifier_experience_curriculum_apres_soumission(
     cmd: 'VerifierExperienceCurriculumApresSoumissionQuery',
     proposition_repository: 'IPropositionRepository',
     profil_candidat_translator: 'IProfilCandidatTranslator',
+    formation_translator: 'IFormationGeneraleTranslator',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition = proposition_repository.get(entity_id=proposition_id)
+
+    formation = formation_translator.get(entity_id=proposition.formation_id)
 
     # WHEN
     ProfilCandidat.verifier_experience_curriculum_formation_generale_apres_soumission(
@@ -57,6 +63,7 @@ def verifier_experience_curriculum_apres_soumission(
         profil_candidat_translator=profil_candidat_translator,
         uuid_experience=cmd.uuid_experience,
         type_experience=cmd.type_experience,
+        grade_academique_formation_proposition=formation.grade_academique,
     )
 
     # THEN

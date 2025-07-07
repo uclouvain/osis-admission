@@ -112,6 +112,7 @@ class DoctoratTranslator(IDoctoratTranslator):
             campus=CampusDTO.from_uclouvain_campus_dto(campus),
             type=dto.type,
             credits=dto.credits,
+            grade_academique=str(dto.ares_graca) if dto.ares_graca is not None else '',
         )
 
     @classmethod
@@ -170,6 +171,7 @@ class DoctoratTranslator(IDoctoratTranslator):
                 type=TrainingType[dto.type],
                 intitule_fr=dto.title_fr,
                 intitule_en=dto.title_en,
+                grade_academique=str(dto.ares_graca) if dto.ares_graca is not None else '',
             )
         except TrainingNotFoundException:
             raise DoctoratNonTrouveException

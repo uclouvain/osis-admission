@@ -358,3 +358,19 @@ class DateLimitePaiementDepasseeException(BusinessException):
             anac=display_as_academic_year(annee_formation),
         )
         super().__init__(message, **kwargs)
+
+
+class ExamenNonCompletesException(BusinessException):
+    status_code = "FORMATION-GENERALE-39"
+
+    def __init__(self, **kwargs):
+        message = _("Exam must be completed for this training.")
+        super().__init__(message, **kwargs)
+
+
+class EtatChecklistDonneesPersonnellesNonValidePourApprouverDemande(BusinessException):
+    status_code = "FORMATION-GENERALE-40"
+
+    def __init__(self, **kwargs):
+        message = _('The status of the checklist for the personal data must be "Validated".')
+        super().__init__(message, **kwargs)

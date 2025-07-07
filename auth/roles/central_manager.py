@@ -119,7 +119,14 @@ class CentralManager(EntityRoleModel):
             'admission.view_admission_languages': is_entity_manager,
             'admission.change_admission_languages': is_entity_manager & doctorate.in_sic_status & ~is_sent_to_epc,
             'admission.view_admission_secondary_studies': is_entity_manager,
+            'admission.view_admission_exam': is_entity_manager,
             'admission.change_admission_secondary_studies': is_entity_manager
+            & (
+                general.in_sic_status
+                | (continuing.in_manager_status & ~candidate_has_other_doctorate_or_general_admissions)
+            )
+            & ~is_sent_to_epc,
+            'admission.change_admission_exam': is_entity_manager
             & (
                 general.in_sic_status
                 | (continuing.in_manager_status & ~candidate_has_other_doctorate_or_general_admissions)
@@ -143,6 +150,12 @@ class CentralManager(EntityRoleModel):
             )
             & ~is_sent_to_epc,
             'admission.view_admission_project': is_entity_manager,
+            'admission.change_admission_project': is_entity_manager
+            & doctorate.signing_in_progress_before_submition
+            & ~is_sent_to_epc,
+            'admission.send_back_to_candidate': is_entity_manager
+            & doctorate.signing_in_progress_before_submition
+            & ~is_sent_to_epc,
             'admission.view_admission_cotutelle': doctorate.is_admission & is_entity_manager,
             'admission.view_admission_supervision': is_entity_manager,
             'admission.view_admission_accounting': is_entity_manager,
@@ -219,7 +232,8 @@ class CentralManager(EntityRoleModel):
             'profil.can_edit_parcours_externe': rules.always_allow,
             'admission.can_inject_to_epc': ~is_sent_to_epc,
             # Fusion
-            'admission.merge_candidate_with_known_person':
-                has_scope(Scope.GENERAL) & is_entity_manager & ~is_sent_to_epc,
+            'admission.merge_candidate_with_known_person': has_scope(Scope.GENERAL)
+            & is_entity_manager
+            & ~is_sent_to_epc,
         }
         return RuleSet(ruleset)

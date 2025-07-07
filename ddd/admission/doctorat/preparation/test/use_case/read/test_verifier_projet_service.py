@@ -450,7 +450,7 @@ class TestVerifierPropositionServicePourAnneesCurriculum(AdmissionTestMixin, Tes
             'uuid': str(uuid.uuid4()),
             'employeur': 'UCL',
             'type': ActivityType.WORK.name,
-            'certificat': [],
+            'certificat': ['test.pdf'],
             'fonction': 'Bibliothécaire',
             'secteur': ActivitySector.PUBLIC.name,
             'autre_activite': '',
@@ -583,6 +583,7 @@ class TestVerifierPropositionServicePourAnneesCurriculum(AdmissionTestMixin, Tes
             nom_regime_linguistique='',
             type_institut=EstablishmentTypeEnum.UNIVERSITY.name,
             cycle_formation=Cycle.FIRST_CYCLE.name,
+            grade_academique_formation='1',
             nom_formation_equivalente_communaute_fr='Formation B',
         )
 

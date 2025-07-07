@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@
 
 {% block tab_content %}
    {% include 'osis_profile/forms/base_edit_experience_academique.html' %}
+   {{ base_form.admission_training_academic_grade|json_script:"admission_training_academic_grade" }}
 {% endblock %}
 
 {% block extra_content %}
@@ -51,6 +52,5 @@
 
 {% block script %}
     {{ block.super }}
-    {{ form.media.js }}
     <script src="{% static 'osis_profile/js/experience_academique.js' %}"></script>
 {% endblock script %}

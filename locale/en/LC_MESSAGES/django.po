@@ -2154,6 +2154,12 @@ msgstr ""
 msgid "Doctoral commissions"
 msgstr ""
 
+msgid "Doctoral research project"
+msgstr ""
+
+msgid "Doctoral training proposal"
+msgstr ""
+
 msgid "Doctorate Ethics Regulations"
 msgstr ""
 
@@ -2612,6 +2618,12 @@ msgid "Evaluation system"
 msgstr ""
 
 msgid "Every education"
+msgstr ""
+
+msgid "Exam must be completed for this training."
+msgstr ""
+
+msgid "Exams"
 msgstr ""
 
 msgid "Excel export of admission"
@@ -3750,6 +3762,9 @@ msgstr ""
 msgid "Is non-resident (as defined in decree)"
 msgstr ""
 
+msgid "Is the exam the access title for this admission?"
+msgstr ""
+
 msgid ""
 "Is your admission request linked with a FNRS, FRIA, FRESH or CSC application?"
 msgstr ""
@@ -4223,6 +4238,9 @@ msgid "Modification author"
 msgstr ""
 
 msgid "Modification date"
+msgstr ""
+
+msgid "Modification of the exams"
 msgstr ""
 
 msgid "Modification of the secondary studies"
@@ -4844,13 +4862,7 @@ msgstr ""
 msgid "PhD already done"
 msgstr ""
 
-msgid "PhD proposal"
-msgstr ""
-
 msgid "PhD research experience"
-msgstr ""
-
-msgid "PhD research project"
 msgstr ""
 
 msgid "Place of birth"
@@ -5100,6 +5112,9 @@ msgid "Promotion"
 msgstr ""
 
 msgid "Proof of equivalency request"
+msgstr ""
+
+msgid "Proof of passing the exam"
 msgstr ""
 
 msgid "Proof of receipt of unemployment benefit, pension or compensation"
@@ -5553,10 +5568,10 @@ msgstr ""
 msgid "Role: Committee members"
 msgstr ""
 
-msgid "Role: Doctorate reader"
+msgid "Role: Doctorate committee member"
 msgstr ""
 
-msgid "Role: Doctorate readers"
+msgid "Role: Doctorate committee members"
 msgstr ""
 
 msgid "Role: Program manager"
@@ -6498,6 +6513,9 @@ msgid ""
 "The person whose the secondary studies have been valuated by this admission"
 msgstr ""
 
+msgid "The professional experience is missing a certificate."
+msgstr ""
+
 msgid ""
 "The professional experiences that have been valuated from this admission."
 msgstr ""
@@ -6600,6 +6618,10 @@ msgid ""
 "or \"Financable\" or \"Dispensation granted\"."
 msgstr ""
 
+msgid ""
+"The status of the checklist for the personal data must be \"Validated\"."
+msgstr ""
+
 #, python-brace-format
 msgid ""
 "The status of the request is currently \"{current_status}\". Only the "
@@ -6654,6 +6676,9 @@ msgid ""
 "several files and only the first one is displayed in the viewer. You can "
 "view the other files either in the candidate's replicated tabs or by "
 "switching to edit mode."
+msgstr ""
+
+msgid "There is no required exam for this training."
 msgstr ""
 
 msgid "Thesis field"
@@ -6775,8 +6800,7 @@ msgstr ""
 #, python-format
 msgid ""
 "This experience has been added by the applicant in <a "
-"href=\"%(admission_url)s\" target=\"_blank\">another application</a>. You "
-"have the option to integrate it in the current application."
+"href=\"%(admission_url)s\" target=\"_blank\">another application</a>."
 msgstr ""
 
 msgid "This field is required if the first name is missing."
@@ -7294,6 +7318,9 @@ msgstr ""
 msgid "Year of birth"
 msgstr ""
 
+msgid "Year of obtaining this proof"
+msgstr ""
+
 msgid "Year of the training"
 msgstr ""
 
@@ -7495,6 +7522,9 @@ msgstr ""
 msgid ""
 "You do not specify if you are applying as resident or non-resident (as "
 "defined by government decree)."
+msgstr ""
+
+msgid "You have the option to integrate it in the current application."
 msgstr ""
 
 msgid ""

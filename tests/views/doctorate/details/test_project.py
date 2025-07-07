@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -30,8 +30,10 @@ from unittest.mock import patch
 from django.test import TestCase
 from django.urls import reverse
 
-from admission.models import AdmissionViewer, DoctorateAdmission
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE, ENTITY_CDSS
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
+    ENTITY_CDE,
+    ENTITY_CDSS,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     BourseRecherche,
     ChoixStatutPropositionDoctorale,
@@ -39,10 +41,15 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeContratTravail,
     ChoixTypeFinancement,
 )
-from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC
+from admission.ddd.admission.doctorat.validation.domain.model.enums import (
+    ChoixStatutCDD,
+    ChoixStatutSIC,
+)
+from admission.models import AdmissionViewer, DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.roles import (
     CandidateFactory,
+    DoctorateCommitteeMemberRoleFactory,
     ProgramManagerRoleFactory,
     SicManagementRoleFactory,
 )
@@ -123,6 +130,9 @@ class DoctorateAdmissionProjectDetailViewTestCase(TestCase):
 
         cls.sic_user = SicManagementRoleFactory(entity=first_doctoral_commission).person.user
         cls.manager = ProgramManagerRoleFactory(education_group=admission.training.education_group).person.user
+        cls.doctorate_committee_member = DoctorateCommitteeMemberRoleFactory(
+            education_group=admission.training.education_group
+        ).person.user
 
     def setUp(self):
         # Mock documents
@@ -147,6 +157,15 @@ class DoctorateAdmissionProjectDetailViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIsNotNone(response.context.get('admission'))
         self.assertIsNone(response.context.get('folder'))
+
+    def test_project_detail_doctorate_committee_member(self):
+        self.client.force_login(user=self.doctorate_committee_member)
+
+        url = reverse('admission:doctorate:project', args=[self.admissions[0].uuid])
+
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
 
     def test_project_detail_manager_folder(self):
         self.client.force_login(user=self.manager)

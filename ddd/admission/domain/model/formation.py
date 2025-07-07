@@ -59,6 +59,7 @@ class Formation(interface.Entity):
     campus: Campus
     intitule_fr: str
     intitule_en: str
+    grade_academique: str
 
     @property
     def type_formation(self) -> TypeFormation:

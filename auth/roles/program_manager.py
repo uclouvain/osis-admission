@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -28,15 +28,15 @@ import rules
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from admission.auth.predicates import general, continuing, doctorate
+from admission.auth.predicates import continuing, doctorate, general
 from admission.auth.predicates.common import (
-    has_education_group_of_types,
-    is_part_of_education_group,
-    is_debug,
-    is_sent_to_epc,
-    workflow_injection_signaletique_en_cours,
-    past_experiences_checklist_tab_is_not_sufficient,
     candidate_has_other_doctorate_or_general_admissions,
+    has_education_group_of_types,
+    is_debug,
+    is_part_of_education_group,
+    is_sent_to_epc,
+    past_experiences_checklist_tab_is_not_sufficient,
+    workflow_injection_signaletique_en_cours,
 )
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
@@ -97,7 +97,12 @@ class ProgramManager(EducationGroupRoleModel):
             & ~is_sent_to_epc
             & ~workflow_injection_signaletique_en_cours,
             'admission.view_admission_secondary_studies': is_part_of_education_group,
+            'admission.view_admission_exam': is_part_of_education_group,
             'admission.change_admission_secondary_studies': is_part_of_education_group
+            & continuing.in_manager_status
+            & ~is_sent_to_epc
+            & ~candidate_has_other_doctorate_or_general_admissions,
+            'admission.change_admission_exam': is_part_of_education_group
             & continuing.in_manager_status
             & ~is_sent_to_epc
             & ~candidate_has_other_doctorate_or_general_admissions,
@@ -121,10 +126,16 @@ class ProgramManager(EducationGroupRoleModel):
             & ~candidate_has_other_doctorate_or_general_admissions,
             # Project
             'admission.view_admission_project': is_part_of_education_group,
-            'admission.change_admission_project': is_part_of_education_group & ~is_sent_to_epc,
+            'admission.send_back_to_candidate': is_part_of_education_group
+            & doctorate.signing_in_progress_before_submition
+            & ~is_sent_to_epc,
+            'admission.change_admission_project': is_part_of_education_group
+            & doctorate.is_submitted
+            & ~is_sent_to_epc,
             'admission.view_admission_cotutelle': doctorate.is_admission & is_part_of_education_group,
             'admission.change_admission_cotutelle': doctorate.is_admission
             & is_part_of_education_group
+            & doctorate.is_submitted
             & ~is_sent_to_epc,
             'admission.view_admission_training_choice': is_part_of_education_group,
             'admission.change_admission_training_choice': is_part_of_education_group
@@ -138,12 +149,20 @@ class ProgramManager(EducationGroupRoleModel):
             & ~is_sent_to_epc,
             # Supervision
             'admission.view_admission_supervision': is_part_of_education_group,
-            'admission.change_admission_supervision': is_part_of_education_group & ~is_sent_to_epc,
-            'admission.add_supervision_member': is_part_of_education_group & ~is_sent_to_epc,
-            'admission.remove_supervision_member': is_part_of_education_group & ~is_sent_to_epc,
-            'admission.edit_external_supervision_member': is_part_of_education_group & ~is_sent_to_epc,
-            'admission.approve_proposition_by_pdf': is_part_of_education_group,
-            'admission.request_signatures': is_part_of_education_group,
+            'admission.change_admission_supervision': is_part_of_education_group
+            & doctorate.is_submitted
+            & ~is_sent_to_epc,
+            'admission.add_supervision_member': is_part_of_education_group
+            & doctorate.is_submitted
+            & ~is_sent_to_epc,
+            'admission.remove_supervision_member': is_part_of_education_group
+            & doctorate.is_submitted
+            & ~is_sent_to_epc,
+            'admission.edit_external_supervision_member': is_part_of_education_group
+            & doctorate.is_submitted
+            & ~is_sent_to_epc,
+            'admission.approve_proposition_by_pdf': is_part_of_education_group & doctorate.is_submitted,
+            'admission.request_signatures': is_part_of_education_group & doctorate.is_submitted,
             'admission.view_historyentry': is_part_of_education_group,
             # Management
             'admission.add_internalnote': is_part_of_education_group & ~is_sent_to_epc,

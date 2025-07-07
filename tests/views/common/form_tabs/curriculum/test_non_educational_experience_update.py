@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -35,43 +35,52 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
-from admission.models import (
-    EPCInjection as AdmissionEPCInjection,
-    ContinuingEducationAdmission,
-    DoctorateAdmission,
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
 )
-from admission.models.base import (
-    AdmissionProfessionalValuatedExperiences,
+from admission.ddd.admission.domain.model.enums.authentification import (
+    EtatAuthentificationParcours,
 )
-from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
-from admission.models.general_education import GeneralEducationAdmission
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
-from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.enums.emplacement_document import OngletsDemande
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
     ChoixStatutPropositionGenerale,
 )
+from admission.models import ContinuingEducationAdmission, DoctorateAdmission
+from admission.models import EPCInjection as AdmissionEPCInjection
+from admission.models.base import AdmissionProfessionalValuatedExperiences
+from admission.models.epc_injection import (
+    EPCInjectionStatus as AdmissionEPCInjectionStatus,
+)
+from admission.models.epc_injection import EPCInjectionType
+from admission.models.general_education import GeneralEducationAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from admission.tests.factories.continuing_education import (
+    ContinuingEducationAdmissionFactory,
+)
 from admission.tests.factories.curriculum import (
-    ProfessionalExperienceFactory,
     AdmissionProfessionalValuatedExperiencesFactory,
+    ProfessionalExperienceFactory,
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
-from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
+from admission.tests.factories.roles import (
+    ProgramManagerRoleFactory,
+    SicManagementRoleFactory,
+)
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from osis_profile.models import ProfessionalExperience
-from osis_profile.models.enums.curriculum import ActivityType, ActivitySector
+from osis_profile.models.enums.curriculum import ActivitySector, ActivityType
+from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection
 from osis_profile.models.epc_injection import (
-    EPCInjection as CurriculumEPCInjection,
-    ExperienceType,
     EPCInjectionStatus as CurriculumEPCInjectionStatus,
 )
+from osis_profile.models.epc_injection import ExperienceType
 from reference.tests.factories.country import CountryFactory
 
 
@@ -400,6 +409,7 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
                 'sector': ActivitySector.PRIVATE.name,
                 'institute_name': 'Institute',
                 'activity': 'Activity',
+                'certificate_0': [self.file_uuid],
             },
         )
 
@@ -442,6 +452,7 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
                 'sector': ActivitySector.PRIVATE.name,
                 'institute_name': 'Institute',
                 'activity': 'Activity',
+                'certificate_0': [self.file_uuid],
             },
         )
 
@@ -472,6 +483,7 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
                 'sector': ActivitySector.PRIVATE.name,
                 'institute_name': 'Institute',
                 'activity': 'Activity',
+                'certificate_0': [self.file_uuid],
             },
         )
 
@@ -603,6 +615,7 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
         experience = ProfessionalExperienceFactory(
             person=self.other_continuing_admission.candidate,
         )
+        experience_certificate = experience.certificate
 
         url = resolve_url(
             'admission:continuing-education:update:curriculum:non_educational',
@@ -638,7 +651,7 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
         self.assertEqual(experience.sector, '')
         self.assertEqual(experience.institute_name, '')
         self.assertEqual(experience.activity, '')
-        self.assertEqual(experience.certificate, [])
+        self.assertEqual(experience.certificate, experience_certificate)
 
         # Check the admission
         self.other_continuing_admission.refresh_from_db()
@@ -684,6 +697,7 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
                 'sector': ActivitySector.PRIVATE.name,
                 'institute_name': 'Institute',
                 'activity': 'Activity',
+                'certificate_0': [self.file_uuid],
             },
         )
 
@@ -699,7 +713,7 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
         self.assertEqual(self.experience.sector, '')
         self.assertEqual(self.experience.institute_name, '')
         self.assertEqual(self.experience.activity, '')
-        self.assertEqual(self.experience.certificate, [])
+        self.assertEqual(self.experience.certificate, [self.file_uuid])
 
         # Check the admission
         self.doctorate_admission.refresh_from_db()

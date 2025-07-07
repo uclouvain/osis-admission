@@ -958,9 +958,9 @@ class DoctorateAdmissionListExcelExportView(BaseAdmissionExcelExportView):
 
         dashboard_indicator = formatted_filters.get('indicateur_tableau_bord')
         if dashboard_indicator:
-            mapping_filter_key_value[
-                'indicateur_tableau_bord'
-            ] = ITableauBordRepositoryAdmissionMixin.libelles_indicateurs_admission.get(dashboard_indicator)
+            mapping_filter_key_value['indicateur_tableau_bord'] = (
+                ITableauBordRepositoryAdmissionMixin.libelles_indicateurs_admission.get(dashboard_indicator)
+            )
 
         # Format boolean values
         # > "Yes" / "No" / ""
@@ -1001,8 +1001,8 @@ class DoctorateAdmissionListExcelExportView(BaseAdmissionExcelExportView):
             row.code_bourse,
             row.formation,
             str(ChoixStatutPropositionDoctorale.get_value(row.etat_demande)),
-            row.decision_fac,
-            row.decision_sic,
+            str(row.decision_fac),
+            str(row.decision_sic),
             row.date_confirmation.strftime(SHORT_DATE_FORMAT) if row.date_confirmation else '',
             row.derniere_modification_le.strftime(SHORT_DATE_FORMAT),
             row.derniere_modification_par,

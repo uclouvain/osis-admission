@@ -66,9 +66,11 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 )
 from admission.models import DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
+from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
+from base.tests.factories.hops import HopsFactory
 from base.tests.factories.learning_unit_year import LearningUnitYearFactory
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.student import StudentFactory
@@ -147,6 +149,10 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
             student_visa_d=self.files_uuids['student_visa_d'],
             signed_enrollment_authorization=self.files_uuids['signed_enrollment_authorization'],
         )
+        self.hops = HopsFactory(
+            education_group_year=self.admission.training,
+            ares_graca=15,
+        )
 
         patcher = patch("osis_document.api.utils.get_remote_token", return_value="foobar")
         patcher.start()
@@ -189,6 +195,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
                 intitule_entite_gestion='School entity',
                 credits=self.admission.training.credits,
                 date_debut=self.admission.training.academic_year.start_date,
+                grade_academique='15',
             ),
         )
         self.assertEqual(result.reference, f'M-SCH22-{self.admission}')
@@ -290,6 +297,31 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         self.assertEqual(result.financabilite_etabli_par, '')
         self.assertEqual(result.financabilite_derogation_premiere_notification_par, '')
         self.assertEqual(result.financabilite_derogation_derniere_notification_par, '')
+
+    def test_get_proposition_with_noma(self):
+        student = StudentFactory(person=self.admissions[2].candidate)
+
+        result = self._get_command_result()
+
+        self.assertEqual(result.noma_candidat, student.registration_id)
+
+        merge_proposal_person = PersonMergeProposal.objects.create(
+            status=PersonMergeStatus.NO_MATCH.name,
+            original_person=student.person,
+            last_similarity_result_update=datetime.datetime.now(),
+            registration_id_sent_to_digit='',
+        )
+
+        result = self._get_command_result()
+
+        self.assertEqual(result.noma_candidat, student.registration_id)
+
+        merge_proposal_person.registration_id_sent_to_digit = '012345678'
+        merge_proposal_person.save()
+
+        result = self._get_command_result()
+
+        self.assertEqual(result.noma_candidat, merge_proposal_person.registration_id_sent_to_digit)
 
     def test_get_proposition_with_country_of_citizenship(self):
         self.admission.candidate.country_of_citizenship = CountryFactory()

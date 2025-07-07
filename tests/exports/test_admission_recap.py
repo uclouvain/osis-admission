@@ -98,6 +98,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     DocumentsCotutelle,
     DocumentsCurriculum,
     DocumentsEtudesSecondaires,
+    DocumentsExamens,
     DocumentsIdentification,
     DocumentsProjetRecherche,
     DocumentsQuestionsSpecifiques,
@@ -132,6 +133,7 @@ from admission.exports.admission_recap.section import (
     get_curriculum_section,
     get_dynamic_questions_by_tab,
     get_educational_experience_section,
+    get_exams_section,
     get_identification_section,
     get_languages_section,
     get_non_educational_experience_section,
@@ -184,6 +186,7 @@ from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     DiplomeEtrangerEtudesSecondairesDTO,
     ValorisationEtudesSecondairesDTO,
 )
+from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     AnneeExperienceAcademiqueDTO,
     ExperienceAcademiqueDTO,
@@ -217,6 +220,11 @@ class _IdentificationDTO(UnfrozenDTO, IdentificationDTO):
 
 @attr.dataclass
 class _EtudesSecondairesDTO(UnfrozenDTO, EtudesSecondairesAdmissionDTO):
+    pass
+
+
+@attr.dataclass
+class _ExamenDTO(UnfrozenDTO, ExamenDTO):
     pass
 
 
@@ -571,11 +579,10 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
             professionalexperience=non_educational_experience,
         )
 
-        self.outline_root.reset_mock()
-
+        nb_calls = len(self.outline_root.append.call_args_list)
         admission_pdf_recap(admission, settings.LANGUAGE_CODE)
 
-        tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list]
+        tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list[nb_calls:]]
 
         self.assertEqual(len(tabs_titles), 7)
 
@@ -591,11 +598,11 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
             professionalexperience=non_educational_experience,
         )
 
-        self.outline_root.reset_mock()
+        nb_calls = len(self.outline_root.append.call_args_list)
 
         admission_pdf_recap(admission, settings.LANGUAGE_CODE)
 
-        tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list]
+        tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list[nb_calls:]]
 
         self.assertEqual(len(tabs_titles), 9)
 
@@ -632,6 +639,7 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
                     'curriculum_academic_experience',
                     'curriculum_non_academic_experience',
                     'curriculum',
+                    'exams',
                     'specific_question',
                     'accounting',
                     'confirmation',
@@ -653,6 +661,7 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
             'Curriculum > Travail 01/2021-03/2021',
         )
         self.assertEqual(call_args_by_tab['curriculum'].title, 'Curriculum')
+        self.assertEqual(call_args_by_tab['exams'].title, 'Examens')
         self.assertEqual(call_args_by_tab['specific_question'].title, 'Informations complémentaires')
         self.assertEqual(call_args_by_tab['accounting'].title, 'Comptabilité')
         self.assertEqual(call_args_by_tab['confirmation'].title, 'Finalisation')
@@ -678,7 +687,7 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
 
         tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list]
 
-        self.assertEqual(len(tabs_titles), 8)
+        self.assertEqual(len(tabs_titles), 9)
 
         self.assertNotIn('Curriculum > Computer science 2021-2022', tabs_titles)
         self.assertNotIn('Curriculum > Travail 01/2021-03/2021', tabs_titles)
@@ -694,13 +703,13 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
             professionalexperience=non_educational_experience,
         )
 
-        self.outline_root.reset_mock()
+        nb_calls = len(self.outline_root.append.call_args_list)
 
         admission_pdf_recap(admission, settings.LANGUAGE_CODE)
 
-        tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list]
+        tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list[nb_calls:]]
 
-        self.assertEqual(len(tabs_titles), 8)
+        self.assertEqual(len(tabs_titles), 9)
 
         self.assertNotIn('Curriculum > Computer science 2021-2022', tabs_titles)
         self.assertNotIn('Curriculum > Travail 01/2021-03/2021', tabs_titles)
@@ -714,13 +723,13 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
             professionalexperience=non_educational_experience,
         )
 
-        self.outline_root.reset_mock()
+        nb_calls = len(self.outline_root.append.call_args_list)
 
         admission_pdf_recap(admission, settings.LANGUAGE_CODE)
 
-        tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list]
+        tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list[nb_calls:]]
 
-        self.assertEqual(len(tabs_titles), 10)
+        self.assertEqual(len(tabs_titles), 11)
 
         self.assertIn('Curriculum > Computer science 2021-2022', tabs_titles)
         self.assertIn('Curriculum > Travail 01/2021-03/2021', tabs_titles)
@@ -817,11 +826,11 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
             professionalexperience=non_educational_experience,
         )
 
-        self.outline_root.reset_mock()
+        nb_calls = len(self.outline_root.append.call_args_list)
 
         admission_pdf_recap(admission, settings.LANGUAGE_CODE)
 
-        tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list]
+        tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list[nb_calls:]]
 
         self.assertEqual(len(tabs_titles), 11)
 
@@ -838,11 +847,11 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
             professionalexperience=non_educational_experience,
         )
 
-        self.outline_root.reset_mock()
+        nb_calls = len(self.outline_root.append.call_args_list)
 
         admission_pdf_recap(admission, settings.LANGUAGE_CODE)
 
-        tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list]
+        tabs_titles = [tab[0][0].title for tab in self.outline_root.append.call_args_list[nb_calls:]]
 
         self.assertEqual(len(tabs_titles), 13)
 
@@ -862,7 +871,7 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
 
         self.assertEqual(len(admission.pdf_recap), 0)
 
-        with self.assertNumQueriesLessThan(14):
+        with self.assertNumQueriesLessThan(16):
             from admission.exports.admission_recap.admission_async_recap import (
                 continuing_education_admission_pdf_recap_from_task,
             )
@@ -887,7 +896,7 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
 
         self.assertEqual(len(admission.pdf_recap), 0)
 
-        with self.assertNumQueriesLessThan(15):
+        with self.assertNumQueriesLessThan(18):
             from admission.exports.admission_recap.admission_async_recap import (
                 general_education_admission_pdf_recap_from_task,
             )
@@ -1132,6 +1141,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             nom_formation='Computer science',
             type_enseignement=TeachingTypeEnum.FULL_TIME.name,
             cycle_formation=Cycle.FIRST_CYCLE.name,
+            grade_academique_formation='1',
             type_institut=EstablishmentTypeEnum.UNIVERSITY.name,
             nom_formation_equivalente_communaute_fr='',
             est_autre_formation=False,
@@ -1180,6 +1190,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             nom_formation='Computer science',
             type_enseignement=TeachingTypeEnum.FULL_TIME.name,
             cycle_formation=Cycle.FIRST_CYCLE.name,
+            grade_academique_formation='1',
             type_institut=EstablishmentTypeEnum.UNIVERSITY.name,
             nom_formation_equivalente_communaute_fr='',
             est_autre_formation=False,
@@ -1222,6 +1233,13 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 types_formations_admissions_valorisees=[],
             ),
         )
+        examens_dto = _ExamenDTO(
+            uuid='',
+            titre='Exam titre',
+            requis=False,
+            attestation=[],
+            annee=None,
+        )
         bachelor_secondary_studies_dto = _EtudesSecondairesDTO(
             diplome_belge=_DiplomeBelgeEtudesSecondairesDTO(
                 diplome=['uuid-diplome'],
@@ -1251,6 +1269,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             ),
             alternative_secondaires=AlternativeSecondairesDTO(
                 examen_admission_premier_cycle=['uuid-examen-admission-premier-cycle'],
+                examen_admission_premier_cycle_annee=2024,
             ),
             diplome_etudes_secondaires=GotDiploma.YES.name,
             annee_diplome_etudes_secondaires=2015,
@@ -1359,6 +1378,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 sigle_entite_gestion='FFC',
                 code='FC1',
                 credits=180,
+                grade_academique='1',
             ),
             reference='0123',
             annee_calculee=2023,
@@ -1467,6 +1487,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 sigle_entite_gestion='FFG',
                 code='FG1',
                 credits=180,
+                grade_academique='1',
             ),
             reference='0123',
             annee_calculee=2023,
@@ -1548,6 +1569,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 code='CFD1',
                 credits=180,
                 date_debut=datetime.date(2023, 1, 1),
+                grade_academique='1',
             ),
             reference='1234',
             annee_calculee=2023,
@@ -1639,6 +1661,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             proposition=continuing_proposition_dto,
             comptabilite=None,
             groupe_supervision=None,
+            examens=examens_dto,
         )
         cls.general_bachelor_context = _ResumePropositionDTO(
             identification=identification_dto,
@@ -1649,6 +1672,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             proposition=bachelor_proposition_dto,
             comptabilite=accounting_dto,
             groupe_supervision=None,
+            examens=examens_dto,
         )
         cls.doctorate_context = _ResumePropositionDTO(
             identification=identification_dto,
@@ -1728,6 +1752,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                     autre_institution_adresse='',
                 ),
             ),
+            examens=examens_dto,
         )
 
     @classmethod
@@ -3036,6 +3061,62 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             self.assertEqual(attachments[0].label, CURRICULUM_ACTIVITY_LABEL.get(ActivityType.LANGUAGE_TRAVEL.name))
             self.assertEqual(attachments[0].uuids, experience.certificat)
             self.assertFalse(attachments[0].required)
+
+    def test_exam_not_required(self):
+        with mock.patch.multiple(
+            self.general_bachelor_context.examens,
+            requis=False,
+            attestation=['attestation-examen'],
+            annee=2022,
+        ):
+            section = get_exams_section(
+                self.general_bachelor_context,
+                None,
+                False,
+            )
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 1)
+
+            self.assertEqual(attachments[0].identifier, 'ATTESTATION_DE_REUSSITE_CONCOURS_D_ENTREE_OU_D_ADMISSION')
+            self.assertEqual(
+                attachments[0].label,
+                'Exam titre',
+            )
+            self.assertEqual(
+                attachments[0].uuids,
+                ['attestation-examen'],
+            )
+            # Required because it is not a VAE access
+            self.assertFalse(attachments[0].required)
+
+    def test_exam_required(self):
+        with mock.patch.multiple(
+            self.general_bachelor_context.examens,
+            requis=True,
+            attestation=[],
+            annee=None,
+        ):
+            section = get_exams_section(
+                self.general_bachelor_context,
+                None,
+                False,
+            )
+            attachments = section.attachments
+
+            self.assertEqual(len(attachments), 1)
+
+            self.assertEqual(attachments[0].identifier, 'ATTESTATION_DE_REUSSITE_CONCOURS_D_ENTREE_OU_D_ADMISSION')
+            self.assertEqual(
+                attachments[0].label,
+                'Exam titre',
+            )
+            self.assertEqual(
+                attachments[0].uuids,
+                [],
+            )
+            # Required because it is not a VAE access
+            self.assertTrue(attachments[0].required)
 
     def test_specific_questions_attachments_with_continuing_proposition(self):
         with mock.patch.multiple(
