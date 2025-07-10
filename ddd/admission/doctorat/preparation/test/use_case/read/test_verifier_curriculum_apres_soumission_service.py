@@ -43,6 +43,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 from admission.ddd.admission.dtos.etudes_secondaires import (
     EtudesSecondairesAdmissionDTO,
 )
+from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
@@ -235,6 +236,7 @@ class TestVerifierCurriculumApresSoumissionService(TestCase):
         self.proposition_doctorale.derniere_demande_signature_avant_soumission_le = (
             self.proposition_doctorale.soumise_le
         )
+        self.proposition_doctorale.formation_id = FormationIdentityFactory(annee=2015, sigle='SC3DP')
 
         self.etudes_secondaires = self.candidat_translator.etudes_secondaires
         self.etudes_secondaires[self.proposition_doctorale.matricule_candidat] = EtudesSecondairesAdmissionDTO(
@@ -286,6 +288,23 @@ class TestVerifierCurriculumApresSoumissionService(TestCase):
             [
                 'De Septembre 2013 à Février 2014',
                 'De Septembre 2014 à Octobre 2014',
+            ],
+        )
+
+    def test_should_retourner_erreur_en_fonction_annee_formation(self):
+        self.proposition_doctorale.formation_id = FormationIdentityFactory(annee=2012, sigle='SC3DP')
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+        self.assertAnneesCurriculum(
+            context.exception.exceptions,
+            [
+                'De Septembre 2007 à Février 2008',
+                'De Septembre 2008 à Février 2009',
+                'De Septembre 2009 à Février 2010',
+                'De Septembre 2010 à Février 2011',
+                'De Septembre 2011 à Février 2012',
             ],
         )
 

@@ -91,7 +91,6 @@ def approuver_inscription_par_sic(
         auteur_modification=cmd.auteur,
         documents_dto=documents_dto,
         curriculum_dto=resume_dto.curriculum,
-        academic_year_repository=academic_year_repository,
         profil_candidat_translator=profil_candidat_translator,
         experience_parcours_interne_translator=experience_parcours_interne_translator,
         grade_academique_formation_proposition=proposition_dto.formation.grade_academique,

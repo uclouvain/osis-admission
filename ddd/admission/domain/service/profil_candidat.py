@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 from typing import List, Optional
 
 from admission.ddd.admission.doctorat.preparation.domain.service.verifier_curriculum import (
@@ -271,7 +272,6 @@ class ProfilCandidat(interface.DomainService):
     def verifier_curriculum_formation_generale_apres_soumission(
         cls,
         proposition,
-        academic_year_repository: 'IAcademicYearRepository',
         profil_candidat_translator: 'IProfilCandidatTranslator',
         experience_parcours_interne_translator: 'IExperienceParcoursInterneTranslator',
         verification_experiences_completees: bool,
@@ -279,10 +279,7 @@ class ProfilCandidat(interface.DomainService):
         curriculum_dto: Optional[CurriculumAdmissionDTO] = None,
     ) -> None:
         date_soumission = proposition.soumise_le.date()
-
-        annee_soumission = (
-            GetCurrentAcademicYear().get_starting_academic_year(date_soumission, academic_year_repository).year
-        )
+        annee_precedent_formation = proposition.formation_id.annee - 1
 
         experiences_parcours_interne = experience_parcours_interne_translator.recuperer(
             matricule=proposition.matricule_candidat,
@@ -292,7 +289,7 @@ class ProfilCandidat(interface.DomainService):
         curriculum = (
             profil_candidat_translator.get_curriculum(
                 matricule=proposition.matricule_candidat,
-                annee_courante=annee_soumission,
+                annee_courante=annee_precedent_formation,
                 uuid_proposition=proposition.entity_id.uuid,
                 experiences_cv_recuperees=ExperiencesCVRecuperees.SEULEMENT_VALORISEES,
             )
@@ -302,7 +299,7 @@ class ProfilCandidat(interface.DomainService):
 
         FormationGeneraleCurriculumPostSoumissionValidatorList(
             date_soumission=date_soumission,
-            annee_soumission=annee_soumission,
+            annee_precedent_formation=annee_precedent_formation,
             experiences_academiques=curriculum.experiences_academiques,
             annee_diplome_etudes_secondaires=curriculum.annee_diplome_etudes_secondaires,
             experiences_non_academiques=curriculum.experiences_non_academiques,
@@ -357,7 +354,6 @@ class ProfilCandidat(interface.DomainService):
     def verifier_curriculum_formation_doctorale_apres_soumission(
         cls,
         proposition,
-        academic_year_repository: 'IAcademicYearRepository',
         profil_candidat_translator: 'IProfilCandidatTranslator',
         experience_parcours_interne_translator: 'IExperienceParcoursInterneTranslator',
         verification_experiences_completees: bool,
@@ -367,9 +363,7 @@ class ProfilCandidat(interface.DomainService):
         # Le CV est soumis lors de l'envoi de la demande des signatures
         date_soumission = proposition.derniere_demande_signature_avant_soumission_le.date()
 
-        annee_soumission = (
-            GetCurrentAcademicYear().get_starting_academic_year(date_soumission, academic_year_repository).year
-        )
+        annee_precedent_formation = proposition.formation_id.annee - 1
 
         experiences_parcours_interne = experience_parcours_interne_translator.recuperer(
             matricule=proposition.matricule_candidat,
@@ -379,7 +373,7 @@ class ProfilCandidat(interface.DomainService):
         curriculum = (
             profil_candidat_translator.get_curriculum(
                 matricule=proposition.matricule_candidat,
-                annee_courante=annee_soumission,
+                annee_courante=annee_precedent_formation,
                 uuid_proposition=proposition.entity_id.uuid,
                 experiences_cv_recuperees=ExperiencesCVRecuperees.SEULEMENT_VALORISEES,
             )
@@ -389,7 +383,7 @@ class ProfilCandidat(interface.DomainService):
 
         CurriculumPostSoumissionValidatorList(
             date_soumission=date_soumission,
-            annee_soumission=annee_soumission,
+            annee_precedent_formation=annee_precedent_formation,
             experiences_academiques=curriculum.experiences_academiques,
             annee_diplome_etudes_secondaires=curriculum.annee_diplome_etudes_secondaires,
             experiences_non_academiques=curriculum.experiences_non_academiques,
