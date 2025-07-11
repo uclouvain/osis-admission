@@ -6,7 +6,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -67,7 +67,7 @@
         </button>
       </form>
     {% endif %}
-  
+
     {% has_perm 'admission.edit_external_supervision_member' as can_edit_external_supervision_member %}
     {% if can_edit_external_supervision_member and member.est_externe and admission.statut != "EN_ATTENTE_DE_SIGNATURE" %}
       <button
@@ -80,7 +80,7 @@
         {% trans "Edit" %}
       </button>
     {% endif %}
-  
+
     {% has_perm 'admission.remove_supervision_member' as can_remove_supervision_member %}
     {% if can_remove_supervision_member and admission.statut != "EN_ATTENTE_DE_SIGNATURE" %}
       <a href="{{ remove_url }}" class="btn btn-danger pull-right">
@@ -88,7 +88,7 @@
         {% trans "Remove" context "admission" %}
       </a>
     {% endif %}
-  
+
     {# Action buttons #}
     {% has_perm 'admission.approve_proposition_by_pdf' as can_approve_proposition_by_pdf %}
     {% if can_approve_proposition_by_pdf and signature.statut == 'INVITED' %}
@@ -103,8 +103,8 @@
         </button>
       {% endif %}
     {% endif %}
-  
-    {% if can_approve_proposition_by_pdf and signature.statut == 'INVITED' and not member.matricule and admission.statut == "EN_BROUILLON" %}
+
+    {% if can_approve_proposition_by_pdf and signature.statut == 'INVITED' and admission.statut == "EN_BROUILLON" %}
       <button
         class="btn btn-default pull-right"
         data-toggle="collapse"
@@ -114,7 +114,7 @@
         {% trans "Resend invitation" %}
       </button>
     {% endif %}
-  
+
     {# Action buttons #}
     <div class="panel-group" style="flex-basis: 100%;">
       {% if can_approve_proposition_by_pdf and signature.statut == 'INVITED' %}
@@ -133,8 +133,8 @@
           {% endpanel %}
         {% endif %}
       {% endif %}
-  
-      {% if can_approve_proposition_by_pdf and signature.statut == 'INVITED' and not member.matricule and admission.statut == "EN_BROUILLON" %}
+
+      {% if can_approve_proposition_by_pdf and signature.statut == 'INVITED' and admission.statut == "EN_BROUILLON" %}
         {% panel _("Resend invitation") id="resend-invite-"|add:member.uuid additional_class="collapse" %}
           <form action="{% url 'admission:doctorate:update:resend-invite' uuid=admission.uuid uuid_membre=member.uuid %}" method="post">
             {% csrf_token %}
@@ -145,7 +145,7 @@
           </form>
         {% endpanel %}
       {% endif %}
-  
+
       {% if can_edit_external_supervision_member and member.est_externe and admission.statut != "EN_ATTENTE_DE_SIGNATURE" %}
         {% url 'admission:doctorate:update:edit-external-member' uuid=admission.uuid uuid_membre=member.uuid as edit_external_member_url %}
         <form method="post" action="{{ edit_external_member_url }}" id="edit_external_member_form-{{ member.uuid }}" class="collapse">
@@ -184,12 +184,12 @@
         <blockquote><strong>{% trans "Grounds for denied" %}</strong>
           {{ signature.motif_refus|linebreaks }}</blockquote>
       {% endif %}
-  
+
       {% if signature.commentaire_externe %}
         <blockquote><strong>{% trans "Comment to the candidate:" %}</strong>
           {{ signature.commentaire_externe|linebreaks }}</blockquote>
       {% endif %}
-  
+
       {% if member.matricule == user.person.global_id and signature.commentaire_interne %}
         <blockquote><strong>{% trans "Internal comment:" %}</strong>
           {{ signature.commentaire_interne|linebreaks }}</blockquote>

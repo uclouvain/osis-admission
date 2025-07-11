@@ -161,7 +161,7 @@ COMMAND_HANDLERS = {
         profil_candidat_translator=ProfilCandidatTranslator(),
         raccrocher_experiences_curriculum=RaccrocherExperiencesCurriculum(),
     ),
-    RenvoyerInvitationSignatureExterneCommand: lambda msg_bus, cmd: renvoyer_invitation_signature_externe(
+    RenvoyerInvitationSignatureCommand: lambda msg_bus, cmd: renvoyer_invitation_signature(
         cmd,
         proposition_repository=PropositionRepository(),
         groupe_supervision_repository=GroupeDeSupervisionRepository(),

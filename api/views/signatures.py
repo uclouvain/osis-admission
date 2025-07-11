@@ -31,7 +31,7 @@ from rest_framework.views import APIView
 from admission.api import serializers
 from admission.ddd.admission.doctorat.preparation.commands import (
     DemanderSignaturesCommand,
-    RenvoyerInvitationSignatureExterneCommand,
+    RenvoyerInvitationSignatureCommand,
 )
 from admission.utils import get_cached_admission_perm_obj
 from infrastructure.messages_bus import message_bus_instance
@@ -51,16 +51,16 @@ class RequestSignaturesAPIView(APIPermissionRequiredMixin, APIView):
         return get_cached_admission_perm_obj(self.kwargs['uuid'])
 
     @extend_schema(
-        request=serializers.RenvoyerInvitationSignatureExterneSerializer,
+        request=serializers.RenvoyerInvitationSignatureSerializer,
         responses=serializers.PropositionIdentityDTOSerializer,
         operation_id='update_signatures',
     )
     def put(self, request, *args, **kwargs):
         """Resend an invitation for and external member."""
-        serializer = serializers.RenvoyerInvitationSignatureExterneSerializer(data=request.data)
+        serializer = serializers.RenvoyerInvitationSignatureSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         result = message_bus_instance.invoke(
-            RenvoyerInvitationSignatureExterneCommand(uuid_proposition=str(kwargs["uuid"]), **serializer.data)
+            RenvoyerInvitationSignatureCommand(uuid_proposition=str(kwargs["uuid"]), **serializer.data)
         )
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)

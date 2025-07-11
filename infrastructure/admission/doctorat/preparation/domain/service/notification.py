@@ -30,8 +30,9 @@ from django.conf import settings
 from django.shortcuts import resolve_url
 from django.utils import translation
 from django.utils.functional import lazy
-from django.utils.translation import get_language, gettext, pgettext_lazy
+from django.utils.translation import get_language, gettext
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext_lazy
 from osis_async.models import AsyncTask
 from osis_document.api.utils import get_remote_token, get_remote_tokens
 from osis_document.utils import get_file_url
@@ -46,7 +47,9 @@ from osis_signature.enums import SignatureState
 from osis_signature.models import Actor
 from osis_signature.utils import get_signing_token
 
-from admission.admission_utils.admission_program_managers_names import get_admission_program_managers_names
+from admission.admission_utils.admission_program_managers_names import (
+    get_admission_program_managers_names,
+)
 from admission.ddd import MAIL_INSCRIPTION_DEFAUT, MAIL_VERIFICATEUR_CURSUS
 from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import (
     PromoteurIdentity,
@@ -105,9 +108,9 @@ from admission.models.enums.actor_type import ActorType
 from admission.utils import (
     get_admission_cdd_managers,
     get_backoffice_admission_url,
+    get_ca_member_salutation_prefix,
     get_portal_admission_url,
     get_salutation_prefix,
-    get_ca_member_salutation_prefix,
 )
 from base.models.person import Person
 from base.utils.utils import format_academic_year
@@ -431,7 +434,6 @@ class Notification(INotification):
         # Charger le membre et vérifier qu'il est externe et déjà invité
         actor = SupervisionActor.objects.filter(
             uuid=membre.uuid,
-            person_id=None,
             last_state=SignatureState.INVITED.name,
         ).first()
         if not actor:
@@ -785,6 +787,14 @@ class Notification(INotification):
         )
 
         candidate_email_message = EmailNotificationHandler.build(email_notification)
+
+        actors = SupervisionActor.objects.filter(process=admission.supervision_group).select_related('person')
+        cc_list = []
+        for promoter in actors.filter(type=ActorType.PROMOTER.name):
+            cc_list.append(cls._format_email(promoter))
+        if cc_list:
+            candidate_email_message['Cc'] = ','.join(cc_list)
+
         EmailNotificationHandler.create(candidate_email_message, person=admission.candidate)
 
         return candidate_email_message
