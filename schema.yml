@@ -3934,7 +3934,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RenvoyerInvitationSignatureExterne'
+              $ref: '#/components/schemas/RenvoyerInvitationSignature'
         required: true
       security:
       - tokenAuth: []
@@ -10221,7 +10221,7 @@ components:
       required:
       - motif_refus
       - uuid_membre
-    RenvoyerInvitationSignatureExterne:
+    RenvoyerInvitationSignature:
       type: object
       description: |-
         A `DTOSerializer` is just a regular `Serializer`, except that:

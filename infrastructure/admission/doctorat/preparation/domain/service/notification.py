@@ -457,7 +457,6 @@ class Notification(INotification):
         # Charger le membre et vérifier qu'il est externe et déjà invité
         actor = SupervisionActor.objects.filter(
             uuid=membre.uuid,
-            person_id=None,
             last_state=SignatureState.INVITED.name,
         ).first()
         if not actor:
@@ -834,6 +833,14 @@ class Notification(INotification):
         )
 
         candidate_email_message = EmailNotificationHandler.build(email_notification)
+
+        actors = SupervisionActor.objects.filter(process=admission.supervision_group).select_related('person')
+        cc_list = []
+        for promoter in actors.filter(type=ActorType.PROMOTER.name):
+            cc_list.append(cls._format_email(promoter))
+        if cc_list:
+            candidate_email_message['Cc'] = ','.join(cc_list)
+
         EmailNotificationHandler.create(candidate_email_message, person=admission.candidate)
 
         return candidate_email_message
