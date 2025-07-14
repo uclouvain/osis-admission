@@ -152,10 +152,10 @@ from admission.infrastructure.admission.formation_generale.repository.emplacemen
 from admission.infrastructure.admission.formation_generale.repository.proposition import (
     PropositionRepository,
 )
-from admission.infrastructure.admission.repository.digit import DigitRepository
 from admission.infrastructure.admission.repository.titre_acces_selectionnable import (
     TitreAccesSelectionnableRepository,
 )
+from admission.infrastructure.admission.shared_kernel.domain.service.matricule_etudiant import MatriculeEtudiantService
 from admission.infrastructure.admission.shared_kernel.email_destinataire.repository.email_destinataire import (
     EmailDestinataireRepository,
 )
@@ -698,7 +698,7 @@ COMMAND_HANDLERS = {
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
             experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
-            digit_repository=DigitRepository(),
+            matricule_etudiant_service=MatriculeEtudiantService(),
         )
     ),
     ApprouverInscriptionParSicCommand: (
@@ -718,10 +718,11 @@ COMMAND_HANDLERS = {
     ),
     EnvoyerEmailApprobationInscriptionAuCandidatCommand: (
         lambda msg_bus, cmd: envoyer_email_approbation_inscription_au_candidat(
+            message_bus=msg_bus,
             cmd=cmd,
             notification=Notification(),
             historique=HistoriqueFormationGenerale(),
-            digit_repository=DigitRepository(),
+            matricule_etudiant_service=MatriculeEtudiantService(),
         )
     ),
     RecupererPdfTemporaireDecisionSicQuery: (

@@ -41,17 +41,11 @@ from admission.ddd.admission.doctorat.preparation.domain.service.i_comptabilite 
 from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import (
     IHistorique,
 )
-from admission.ddd.admission.doctorat.preparation.domain.service.i_membre_CA import (
-    IMembreCATranslator,
-)
 from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import (
     INotification,
 )
 from admission.ddd.admission.doctorat.preparation.domain.service.i_pdf_generation import (
     IPDFGeneration,
-)
-from admission.ddd.admission.doctorat.preparation.domain.service.i_promoteur import (
-    IPromoteurTranslator,
 )
 from admission.ddd.admission.doctorat.preparation.domain.service.i_question_specifique import (
     IQuestionSpecifiqueTranslator,
@@ -70,7 +64,6 @@ from admission.ddd.admission.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
 from admission.ddd.admission.domain.service.resume_proposition import ResumeProposition
-from admission.ddd.admission.repository.i_digit import IDigitRepository
 from admission.ddd.admission.repository.i_emplacement_document import (
     IEmplacementDocumentRepository,
 )
