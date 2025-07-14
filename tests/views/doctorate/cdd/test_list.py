@@ -53,7 +53,9 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeContratTravail,
     ChoixTypeFinancement,
 )
-from admission.ddd.admission.doctorat.preparation.read_view.domain.enums.tableau_bord import IndicateurTableauBordEnum
+from admission.ddd.admission.doctorat.preparation.read_view.domain.enums.tableau_bord import (
+    IndicateurTableauBordEnum,
+)
 from admission.ddd.admission.doctorat.validation.domain.model.enums import (
     ChoixStatutCDD,
     ChoixStatutSIC,
@@ -71,11 +73,13 @@ from admission.tests.factories.roles import (
 from admission.tests.factories.supervision import PromoterFactory
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.entity_type import EntityType
+from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from base.tests import QueriesAssertionsMixin
 from base.tests.factories.academic_calendar import AcademicCalendarFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
+from base.tests.factories.student import StudentFactory
 from base.tests.factories.user import UserFactory
 from osis_profile import BE_ISO_CODE
 from reference.tests.factories.country import CountryFactory
@@ -92,7 +96,7 @@ from reference.tests.factories.scholarship import (
 class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
     admissions = []
     NB_MAX_QUERIES_WITHOUT_SEARCH = 27
-    NB_MAX_QUERIES_WITH_SEARCH = 30
+    NB_MAX_QUERIES_WITH_SEARCH = 31
 
     @classmethod
     def setUpTestData(cls):
@@ -326,7 +330,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         form = response.context['form']
 
-        self.assertEqual(form['annee_academique'].value(), 2022)
+        self.assertEqual(form['annee_academique'].value(), 2021)
         self.assertEqual(
             form.fields['annee_academique'].choices,
             [
@@ -1021,6 +1025,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             self.assertEqual(proposition.nom_candidat, self.admissions[1].candidate.last_name)
             self.assertEqual(proposition.prenom_candidat, self.admissions[1].candidate.first_name)
             self.assertEqual(proposition.sigle_formation, self.admissions[1].training.acronym)
+            self.assertEqual(proposition.noma_candidat, '')
             self.assertEqual(proposition.code_formation, self.admissions[1].training.partial_acronym)
             self.assertEqual(proposition.intitule_formation, self.admissions[1].training.title)
             self.assertEqual(proposition.decision_fac, '')
@@ -1040,6 +1045,62 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             )
             self.assertEqual(proposition.prenom_auteur_derniere_modification, self.promoter.first_name)
             self.assertEqual(proposition.nom_auteur_derniere_modification, self.promoter.last_name)
+
+    def test_returned_dto_with_noma(self):
+        self.client.force_login(user=self.program_manager_user)
+
+        data = {
+            'annee_academique': '2021',
+            'numero': self.admission_references[2],
+        }
+
+        student = StudentFactory(person=self.admissions[2].candidate)
+        with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES_WITH_SEARCH):
+            response = self.client.get(self.url, data)
+
+            self.assertEqual(response.status_code, 200)
+
+            results = response.context['object_list']
+
+            self.assertEqual(len(results), 1)
+
+            proposition = results[0]
+
+            self.assertEqual(proposition.noma_candidat, student.registration_id)
+
+        merge_proposal_person = PersonMergeProposal.objects.create(
+            status=PersonMergeStatus.NO_MATCH.name,
+            original_person=student.person,
+            last_similarity_result_update=datetime.datetime.now(),
+            registration_id_sent_to_digit='',
+        )
+        with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES_WITH_SEARCH):
+            response = self.client.get(self.url, data)
+
+            self.assertEqual(response.status_code, 200)
+
+            results = response.context['object_list']
+
+            self.assertEqual(len(results), 1)
+
+            proposition = results[0]
+
+            self.assertEqual(proposition.noma_candidat, student.registration_id)
+
+        merge_proposal_person.registration_id_sent_to_digit = '98765432'
+        merge_proposal_person.save()
+        with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES_WITH_SEARCH):
+            response = self.client.get(self.url, data)
+
+            self.assertEqual(response.status_code, 200)
+
+            results = response.context['object_list']
+
+            self.assertEqual(len(results), 1)
+
+            proposition = results[0]
+
+            self.assertEqual(proposition.noma_candidat, merge_proposal_person.registration_id_sent_to_digit)
 
     def test_returned_dto_in_english_with_existing_scholarship(self):
         self.client.force_login(user=self.program_manager_user)

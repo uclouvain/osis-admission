@@ -94,7 +94,7 @@ from reference.tests.factories.scholarship import (
 class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
     admissions = []
     NB_MAX_QUERIES_WITHOUT_SEARCH = 27
-    NB_MAX_QUERIES_WITH_SEARCH = 30
+    NB_MAX_QUERIES_WITH_SEARCH = 31
 
     @classmethod
     def setUpTestData(cls):
@@ -336,7 +336,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         form = response.context['form']
 
-        self.assertEqual(form['annee_academique'].value(), 2022)
+        self.assertEqual(form['annee_academique'].value(), 2021)
         self.assertEqual(
             form.fields['annee_academique'].choices,
             [

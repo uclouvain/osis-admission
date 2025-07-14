@@ -916,7 +916,7 @@ class ProfessionalExperienceTestCase(APITestCase):
                 'start_date': '2020-01-01',
                 'end_date': '2021-01-01',
                 'type': ActivityType.WORK.name,
-                'certificate': [],
+                'certificate': [str(self.professional_experience.certificate[0])],
                 'role': 'Librarian',
                 'sector': ActivitySector.PUBLIC.name,
                 'activity': 'Work - activity',

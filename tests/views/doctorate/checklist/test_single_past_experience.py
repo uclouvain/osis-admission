@@ -65,6 +65,7 @@ from base.models.enums.community import CommunityEnum
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
+from base.tests.factories.hops import HopsFactory
 from base.tests.factories.organization import OrganizationFactory
 from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
 from osis_profile.models.enums.curriculum import EvaluationSystem, Result
@@ -84,6 +85,11 @@ class SinglePastExperienceChangeStatusViewTestCase(SicPatchMixin, TestCase):
         cls.training = DoctorateFactory(
             management_entity=cls.commission,
             academic_year=cls.academic_years[0],
+        )
+
+        cls.hops = HopsFactory(
+            education_group_year=cls.training,
+            ares_graca=1,
         )
 
         cls.candidate = CompletePersonFactory(language=settings.LANGUAGE_CODE_FR)
@@ -215,9 +221,13 @@ class SinglePastExperienceChangeStatusViewTestCase(SicPatchMixin, TestCase):
         # Add an incomplete experience
         experience = EducationalExperienceFactory(
             person=self.candidate,
+            obtained_diploma=False,
             country=self.experiences[0].country,
-            with_fwb_bachelor_fields=True,
-            block_1_acquired_credit_number=None,
+            evaluation_type='',
+            with_fwb_master_fields=True,
+            with_complement=True,
+            complement_registered_credit_number=None,
+            complement_acquired_credit_number=None,
         )
         EducationalExperienceYearFactory(
             educational_experience=experience,
@@ -254,7 +264,8 @@ class SinglePastExperienceChangeStatusViewTestCase(SicPatchMixin, TestCase):
 
         self.assertEqual(len(experiences_checklists), 1)
 
-        experience.block_1_acquired_credit_number = 10
+        experience.complement_registered_credit_number = 10
+        experience.complement_acquired_credit_number = 10
         experience.save()
 
         response = self.client.post(

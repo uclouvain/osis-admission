@@ -627,6 +627,7 @@ class CalendrierInscriptionTestCase(TestCase):
 
     @freezegun.freeze_time('22/10/2022')
     def test_hors_ue5_assimile(self):
+        # Le critère d'assimilation d'un candidat à un candidat UE n'est pas pris en compte dans le calcul du pot
         proposition = PropositionFactory(
             comptabilite__type_situation_assimilation=TypeSituationAssimilation.PRIS_EN_CHARGE_OU_DESIGNE_CPAS
         )
@@ -647,7 +648,7 @@ class CalendrierInscriptionTestCase(TestCase):
             formation=MagicMock(type=TrainingType.BACHELOR),
             profil_candidat_translator=self.profil_candidat_translator,
         )
-        self.assertEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_UE5_NON_BELGIAN)
+        self.assertNotEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_UE5_NON_BELGIAN)
 
     @freezegun.freeze_time('22/10/2022')
     def test_hors_ue5_residence_belge(self):

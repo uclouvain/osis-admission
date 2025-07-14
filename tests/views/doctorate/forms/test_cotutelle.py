@@ -58,6 +58,7 @@ class CotutelleTestCase(TestCase):
         cls.admission = DoctorateAdmissionFactory(
             training__management_entity=first_doctoral_commission,
             training__academic_year=academic_years[0],
+            submitted=True,
         )
 
         # Users

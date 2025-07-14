@@ -56,6 +56,7 @@ from admission.tests.factories.roles import (
     DoctorateCommitteeMemberRoleFactory,
     ProgramManagerRoleFactory,
 )
+from admission.tests.factories.person import InternalPersonFactory
 from admission.tests.factories.supervision import (
     CaMemberFactory,
     ExternalPromoterFactory,
@@ -65,7 +66,7 @@ from admission.tests.factories.supervision import (
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
-from base.tests.factories.person import PersonFactory
+from base.tests.factories.person import ExternalPersonFactory
 from base.tests.factories.tutor import TutorFactory
 from reference.tests.factories.country import CountryFactory
 
@@ -87,6 +88,7 @@ class SupervisionTestCase(TestCase):
             training__academic_year=academic_years[0],
             proximity_commission=ChoixCommissionProximiteCDEouCLSM.ECONOMY.name,
             supervision_group=_ProcessFactory(),
+            submitted=True,
         )
 
         # Users
@@ -104,8 +106,10 @@ class SupervisionTestCase(TestCase):
 
         cls.country = CountryFactory()
 
-        cls.person = PersonFactory()
+        cls.person = InternalPersonFactory()
         TutorFactory(person=cls.person)
+
+        cls.external_person = ExternalPersonFactory()
 
         # Urls
         cls.update_url = reverse('admission:doctorate:update:supervision', args=[cls.admission.uuid])
@@ -156,6 +160,32 @@ class SupervisionTestCase(TestCase):
     def test_should_add_supervision_member_error(self):
         self.client.force_login(user=self.program_manager_user)
         response = self.client.post(self.update_url, {'type': ActorType.CA_MEMBER.name})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('__all__', response.context['add_form'].errors)
+
+    def test_should_not_add_promoter_with_an_external_account(self):
+        self.client.force_login(user=self.program_manager_user)
+
+        data = {
+            'type': ActorType.PROMOTER.name,
+            'internal_external': "INTERNAL",
+            'person': self.external_person.global_id,
+            'email': "test@test.fr",
+        }
+        response = self.client.post(self.update_url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('__all__', response.context['add_form'].errors)
+
+    def test_should_not_add_ca_member_with_an_external_account(self):
+        self.client.force_login(user=self.program_manager_user)
+
+        data = {
+            'type': ActorType.CA_MEMBER.name,
+            'internal_external': "INTERNAL",
+            'person': self.external_person.global_id,
+            'email': "test@test.fr",
+        }
+        response = self.client.post(self.update_url, data)
         self.assertEqual(response.status_code, 200)
         self.assertIn('__all__', response.context['add_form'].errors)
 
