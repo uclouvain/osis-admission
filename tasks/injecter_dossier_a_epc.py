@@ -47,7 +47,7 @@ def run():  # pragma: no cover
     from infrastructure.messages_bus import message_bus_instance
     periodes_actives = message_bus_instance.invoke(
         GetPeriodeActiveSoumissionTicketQuery()
-    ) # type: List[PeriodeSoumissionTicketDigitDTO]
+    )  # type: List[PeriodeSoumissionTicketDigitDTO]
     annee_ouverte = periodes_actives[0].annee
 
     # TODO: compatibilite avec doctorat et iufc
