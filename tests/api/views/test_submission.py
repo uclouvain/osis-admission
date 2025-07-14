@@ -558,7 +558,14 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         current_admission.status = ChoixStatutPropositionGenerale.EN_BROUILLON.name
         current_admission.save(update_fields=['status'])
 
-        response = self.client.post(current_url, self.data_ok)
+        response = self.client.post(
+            current_url,
+            {
+                **self.data_ok,
+                # The pool computation does not consider a candidate with assimilation as a UE candidate
+                'pool': AcademicCalendarTypes.ADMISSION_POOL_HUE_UCL_PATHWAY_CHANGE.name,
+            },
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         current_admission.refresh_from_db()
