@@ -29,12 +29,10 @@ from math import ceil, floor
 import factory
 
 from admission.calendar.admission_calendar import *
-from admission.calendar.admission_digit_ticket_submission import (
-    AdmissionDigitTicketSubmissionCalendar,
-)
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.tests.factories.academic_calendar import AcademicCalendarFactory
 from base.tests.factories.academic_year import AcademicYearFactory, get_current_year
+from gestion_des_comptes.calendar.admission_digit_ticket_submission import AdmissionDigitTicketSubmissionCalendar
 
 
 class AdmissionAcademicCalendarFactory(AcademicCalendarFactory):

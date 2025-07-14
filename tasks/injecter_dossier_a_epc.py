@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,17 +24,19 @@
 #
 # ##############################################################################
 import logging
+from typing import List
 
 from django.conf import settings
 from django.db.models import Q, Exists, OuterRef, When, Case, Value
 
-from admission.calendar.admission_digit_ticket_submission import AdmissionDigitTicketSubmissionCalendar
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.models.base import BaseAdmission
 from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus, EPCInjection
 from backoffice.celery import app as celery_app
 from base.models.person_merge_proposal import PersonMergeStatus
+from ddd.logic.gestion_des_comptes.dto.periode_soumission_ticket import PeriodeSoumissionTicketDigitDTO
+from ddd.logic.gestion_des_comptes.queries import GetPeriodeActiveSoumissionTicketQuery
 
 logger = logging.getLogger(settings.CELERY_EXCEPTION_LOGGER)
 
@@ -42,7 +44,12 @@ logger = logging.getLogger(settings.CELERY_EXCEPTION_LOGGER)
 @celery_app.task
 def run():  # pragma: no cover
     logger.info(f"[TASK - INJECTION EPC] Lancement de la tache")
-    annee_ouverte = AdmissionDigitTicketSubmissionCalendar().get_target_years_opened()[0]
+    from infrastructure.messages_bus import message_bus_instance
+    periodes_actives = message_bus_instance.invoke(
+        GetPeriodeActiveSoumissionTicketQuery()
+    ) # type: List[PeriodeSoumissionTicketDigitDTO]
+    annee_ouverte = periodes_actives[0].annee
+
     # TODO: compatibilite avec doctorat et iufc
     admissions = BaseAdmission.objects.select_related(
         'generaleducationadmission',
