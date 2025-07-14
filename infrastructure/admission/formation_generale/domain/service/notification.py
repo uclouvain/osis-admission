@@ -25,16 +25,12 @@
 # ##############################################################################
 import datetime
 from email.message import EmailMessage
-from typing import List, Dict, Optional
+from typing import List, Optional
 
 from django.conf import settings
 from django.utils import translation, formats
 from django.utils.translation import gettext as _
 from osis_async.models import AsyncTask
-
-from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.ddd.admission.repository.i_digit import IDigitRepository
-from admission.infrastructure.utils import get_requested_documents_html_lists
 from osis_document.api.utils import get_remote_token, get_remote_tokens
 from osis_document.utils import get_file_url
 from osis_mail_template import generate_email
@@ -42,12 +38,11 @@ from osis_mail_template.utils import transform_html_to_text
 from osis_notification.contrib.handlers import EmailNotificationHandler
 from osis_notification.contrib.notification import EmailNotification
 
-from admission.models import AdmissionTask, GeneralEducationAdmission
-from admission.models.base import BaseAdmission
 from admission.ddd import MAIL_INSCRIPTION_DEFAUT, MAIL_VERIFICATEUR_CURSUS
 from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument
+from admission.ddd.admission.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
@@ -55,6 +50,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
+from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import IMatriculeEtudiantService
 from admission.ddd.admission.shared_kernel.email_destinataire.domain.validator.exceptions import (
     InformationsDestinatairePasTrouvee,
 )
@@ -62,6 +58,7 @@ from admission.ddd.admission.shared_kernel.email_destinataire.repository.i_email
     IEmailDestinataireRepository,
 )
 from admission.infrastructure.admission.formation_generale.domain.service.formation import FormationGeneraleTranslator
+from admission.infrastructure.utils import get_requested_documents_html_lists
 from admission.mail_templates import (
     ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL,
     ADMISSION_EMAIL_SEND_TO_FAC_AT_FAC_DECISION_GENERAL,
@@ -76,6 +73,8 @@ from admission.mail_templates.checklist import (
     EMAIL_TEMPLATE_VISA_APPLICATION_DOCUMENT_URL_TOKEN,
 )
 from admission.mail_templates.submission import ADMISSION_EMAIL_CONFIRM_SUBMISSION_GENERAL
+from admission.models import AdmissionTask, GeneralEducationAdmission
+from admission.models.base import BaseAdmission
 from admission.utils import (
     get_portal_admission_url,
     get_backoffice_admission_url,
@@ -395,10 +394,11 @@ class Notification(INotification):
     @classmethod
     def accepter_proposition_par_sic(
         cls,
+        message_bus,
         proposition_uuid: str,
         objet_message: str,
         corps_message: str,
-        digit_repository: 'IDigitRepository',
+        matricule_etudiant_service: 'IMatriculeEtudiantService',
     ) -> EmailMessage:
         admission = (
             GeneralEducationAdmission.objects.filter(uuid=proposition_uuid)
@@ -448,11 +448,17 @@ class Notification(INotification):
         )
 
         if EMAIL_TEMPLATE_ENROLLMENT_GENERATED_NOMA_TOKEN in corps_message:
-            noma_genere = digit_repository.get_registration_id_sent_to_digit(global_id=admission.candidate.global_id)
+            try:
+                noma_genere = matricule_etudiant_service.recuperer(
+                    msg_bus=message_bus,
+                    matricule_personne=admission.candidate.global_id
+                )
+            except MatriculeEtudiantIntrouvableException:
+                noma_genere = gettext('NOMA not found')
 
             corps_message = corps_message.replace(
                 EMAIL_TEMPLATE_ENROLLMENT_GENERATED_NOMA_TOKEN,
-                noma_genere or _('NOMA not found'),
+                noma_genere,
             )
 
         email_notification = EmailNotification(

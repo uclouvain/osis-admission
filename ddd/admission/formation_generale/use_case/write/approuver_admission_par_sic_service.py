@@ -54,6 +54,7 @@ from admission.ddd.admission.formation_generale.repository.i_proposition import 
 from admission.ddd.admission.repository.i_emplacement_document import (
     IEmplacementDocumentRepository,
 )
+from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import IMatriculeEtudiantService
 from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
     IExperienceParcoursInterneTranslator,
 )
@@ -74,7 +75,7 @@ def approuver_admission_par_sic(
     academic_year_repository: 'IAcademicYearRepository',
     personne_connue_translator: 'IPersonneConnueUclTranslator',
     experience_parcours_interne_translator: 'IExperienceParcoursInterneTranslator',
-    digit_repository: 'IDigitRepository',
+    matricule_etudiant_service: 'IMatriculeEtudiantService',
 ) -> PropositionIdentity:
     # GIVEN
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
@@ -133,10 +134,11 @@ def approuver_admission_par_sic(
         auteur=cmd.auteur,
     )
     message = notification.accepter_proposition_par_sic(
+        message_bus=message_bus,
         proposition_uuid=proposition.entity_id.uuid,
         objet_message=cmd.objet_message,
         corps_message=cmd.corps_message,
-        digit_repository=digit_repository,
+        matricule_etudiant_service=matricule_etudiant_service,
     )
     historique.historiser_acceptation_sic(
         proposition=proposition,

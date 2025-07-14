@@ -32,6 +32,7 @@ from admission.ddd.admission.formation_generale.domain.model.proposition import 
 from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
 from admission.ddd.admission.repository.i_digit import IDigitRepository
+from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import IMatriculeEtudiantService
 from admission.ddd.admission.shared_kernel.email_destinataire.repository.i_email_destinataire import (
     IEmailDestinataireRepository,
 )
@@ -79,10 +80,11 @@ class NotificationInMemory(INotification):
     @classmethod
     def accepter_proposition_par_sic(
         cls,
+        message_bus,
         proposition_uuid: str,
         objet_message: str,
         corps_message: str,
-        digit_repository: 'IDigitRepository',
+        matricule_etudiant_service: 'IMatriculeEtudiantService',
     ) -> EmailMessage:
         pass
 
