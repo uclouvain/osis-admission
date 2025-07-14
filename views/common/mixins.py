@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 import json
-from typing import Dict, List, Optional, Union
+from typing import Dict, Optional, Union, List
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -39,9 +39,6 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic.base import ContextMixin
 
 from admission.auth.roles.program_manager import ProgramManager
-from admission.calendar.admission_digit_ticket_submission import (
-    AdmissionDigitTicketSubmissionCalendar,
-)
 from admission.constants import (
     COMMENT_TAG_FAC,
     COMMENT_TAG_GLOBAL,
@@ -122,7 +119,8 @@ from admission.utils import (
 from admission.views.list import BaseAdmissionList
 from base.models.person_merge_proposal import PersonMergeStatus
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
-from ddd.logic.gestion_des_comptes.queries import GetPropositionFusionQuery
+from ddd.logic.gestion_des_comptes.dto.periode_soumission_ticket import PeriodeSoumissionTicketDigitDTO
+from ddd.logic.gestion_des_comptes.queries import GetPropositionFusionQuery, GetPeriodeActiveSoumissionTicketQuery
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import PermissionRequiredMixin
 
@@ -290,7 +288,10 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         # Leave this test first so we are sure the other information are available.
         if self.admission.status != ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name:
             return False, "Le dossier doit être en 'Inscription autorisée'"
-        annees_ouvertes = AdmissionDigitTicketSubmissionCalendar().get_target_years_opened()
+        periodes_actives = message_bus_instance.invoke(
+            GetPeriodeActiveSoumissionTicketQuery()
+        )  # type: List[PeriodeSoumissionTicketDigitDTO]
+        annees_ouvertes = [p.annee for p in periodes_actives]
         if annees_ouvertes and self.admission.determined_academic_year.year not in annees_ouvertes:
             return False, f"Seules les inscriptions en {annees_ouvertes} sont autorisées"
         contexte = self.admission.get_admission_context()
