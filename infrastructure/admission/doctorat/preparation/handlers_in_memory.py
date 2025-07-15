@@ -79,7 +79,23 @@ from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_
 from infrastructure.shared_kernel.profil.domain.service.in_memory.parcours_interne import (
     ExperienceParcoursInterneInMemoryTranslator,
 )
-
+from .domain.service.in_memory.comptabilite import ComptabiliteInMemoryTranslator
+from .domain.service.in_memory.doctorat import DoctoratInMemoryTranslator
+from .domain.service.in_memory.historique import HistoriqueInMemory
+from .domain.service.in_memory.lister_demandes import ListerDemandesInMemoryService
+from .domain.service.in_memory.membre_CA import MembreCAInMemoryTranslator
+from .domain.service.in_memory.notification import NotificationInMemory
+from .domain.service.in_memory.pdf_generation import PDFGenerationInMemory
+from .domain.service.in_memory.promoteur import PromoteurInMemoryTranslator
+from .domain.service.in_memory.question_specifique import (
+    QuestionSpecifiqueInMemoryTranslator,
+)
+from .repository.doctorat import DoctoratRepository
+from .repository.in_memory.groupe_de_supervision import (
+    GroupeDeSupervisionInMemoryRepository,
+)
+from .repository.in_memory.proposition import PropositionInMemoryRepository
+from ..validation.repository.in_memory.demande import DemandeInMemoryRepository
 from ...domain.service.in_memory.calendrier_inscription import (
     CalendrierInscriptionInMemory,
 )
@@ -102,33 +118,16 @@ from ...domain.service.in_memory.titres_acces import TitresAccesInMemory
 from ...domain.service.in_memory.unites_enseignement_translator import (
     UnitesEnseignementInMemoryTranslator,
 )
-from ...repository.in_memory.digit import DigitInMemoryRepository
 from ...repository.in_memory.emplacement_document import (
     emplacement_document_in_memory_repository,
 )
 from ...repository.in_memory.titre_acces_selectionnable import (
     TitreAccesSelectionnableInMemoryRepositoryFactory,
 )
+from ...shared_kernel.domain.service.matricule_etudiant import MatriculeEtudiantService
 from ...shared_kernel.email_destinataire.repository.in_memory import (
     EmailDestinataireInMemoryRepository,
 )
-from ..validation.repository.in_memory.demande import DemandeInMemoryRepository
-from .domain.service.in_memory.comptabilite import ComptabiliteInMemoryTranslator
-from .domain.service.in_memory.doctorat import DoctoratInMemoryTranslator
-from .domain.service.in_memory.historique import HistoriqueInMemory
-from .domain.service.in_memory.lister_demandes import ListerDemandesInMemoryService
-from .domain.service.in_memory.membre_CA import MembreCAInMemoryTranslator
-from .domain.service.in_memory.notification import NotificationInMemory
-from .domain.service.in_memory.pdf_generation import PDFGenerationInMemory
-from .domain.service.in_memory.promoteur import PromoteurInMemoryTranslator
-from .domain.service.in_memory.question_specifique import (
-    QuestionSpecifiqueInMemoryTranslator,
-)
-from .repository.doctorat import DoctoratRepository
-from .repository.in_memory.groupe_de_supervision import (
-    GroupeDeSupervisionInMemoryRepository,
-)
-from .repository.in_memory.proposition import PropositionInMemoryRepository
 
 _proposition_repository = PropositionInMemoryRepository()
 _groupe_supervision_repository = GroupeDeSupervisionInMemoryRepository()
@@ -158,7 +157,7 @@ _email_destinataire_repository = EmailDestinataireInMemoryRepository()
 _personne_connue_ucl_translator = PersonneConnueUclInMemoryTranslator()
 _titre_acces_selectionnable_repository = TitreAccesSelectionnableInMemoryRepositoryFactory()
 _experience_parcours_interne_translator = ExperienceParcoursInterneInMemoryTranslator()
-_digit_repository = DigitInMemoryRepository()
+_matricule_etudiant_service = MatriculeEtudiantService()
 _financabilite_fetcher = FinancabiliteInMemoryFetcher()
 _raccrocher_experiences_curriculum = RaccrocherExperiencesCurriculumInMemory()
 
@@ -691,7 +690,7 @@ COMMAND_HANDLERS = {
             academic_year_repository=_academic_year_repository,
             personne_connue_translator=_personne_connue_ucl_translator,
             experience_parcours_interne_translator=_experience_parcours_interne_translator,
-            digit_repository=_digit_repository,
+            matricule_etudiant_service=_matricule_etudiant_service,
             groupe_supervision_repository=_groupe_supervision_repository,
         )
     ),
@@ -722,10 +721,11 @@ COMMAND_HANDLERS = {
     ),
     EnvoyerEmailApprobationInscriptionAuCandidatCommand: (
         lambda msg_bus, cmd: envoyer_email_approbation_inscription_au_candidat(
+            message_bus=msg_bus,
             cmd=cmd,
             notification=_notification,
             historique=_historique,
-            digit_repository=_digit_repository,
+            matricule_etudiant_service=_matricule_etudiant_service,
         )
     ),
     SpecifierInformationsAcceptationInscriptionParSicCommand: (

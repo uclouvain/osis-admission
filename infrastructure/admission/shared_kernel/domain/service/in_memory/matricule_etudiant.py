@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,10 +23,14 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional
+from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import IMatriculeEtudiantService
 
 
-class IDigitRepository:
+class MatriculeEtudiantInMemoryService(IMatriculeEtudiantService):
     @classmethod
-    def get_registration_id_sent_to_digit(cls, global_id: str) -> Optional[str]:
-        raise NotImplementedError
+    def recuperer(
+        cls,
+        msg_bus,
+        matricule_personne: str,
+    ) -> str:
+        return "12345678"
