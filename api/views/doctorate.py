@@ -46,7 +46,7 @@ class DoctorateAPIView(
     pagination_class = None
     filter_backends = []
     permission_mapping = {
-        'GET': 'admission.view_doctorateadmission',
+        'GET': 'admission.api_view_doctorateadmission',
     }
 
     def get_permission_object(self):

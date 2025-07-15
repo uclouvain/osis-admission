@@ -54,24 +54,24 @@ class CommitteeMember(RoleModel):
     @classmethod
     def rule_set(cls):
         ruleset = {
-            'admission.approve_jury': is_part_of_committee,
+            'admission.api_approve_jury': is_part_of_committee,
             # A ca member can view as long as he belongs to the committee and the registration is ongoing
-            'admission.view_admission_person': is_part_of_committee & is_being_enrolled,
-            'admission.view_admission_coordinates': is_part_of_committee & is_being_enrolled,
-            'admission.view_admission_secondary_studies': is_part_of_committee & is_being_enrolled,
-            'admission.view_admission_exam': is_part_of_committee & is_being_enrolled,
-            'admission.view_admission_languages': is_part_of_committee & is_being_enrolled,
-            'admission.view_admission_curriculum': is_part_of_committee & is_being_enrolled,
-            'admission.view_admission_accounting': is_part_of_committee & is_being_enrolled,
+            'admission.api_view_admission_person': is_part_of_committee & is_being_enrolled,
+            'admission.api_view_admission_coordinates': is_part_of_committee & is_being_enrolled,
+            'admission.api_view_admission_secondary_studies': is_part_of_committee & is_being_enrolled,
+            'admission.api_view_admission_exam': is_part_of_committee & is_being_enrolled,
+            'admission.api_view_admission_languages': is_part_of_committee & is_being_enrolled,
+            'admission.api_view_admission_curriculum': is_part_of_committee & is_being_enrolled,
+            'admission.api_view_admission_accounting': is_part_of_committee & is_being_enrolled,
             # A ca member can view as long as he belongs to the committee
-            'admission.view_doctorateadmission': is_part_of_committee,
-            'admission.view_admission_training_choice': is_part_of_committee,
-            'admission.view_admission_project': is_part_of_committee,
-            'admission.view_admission_cotutelle': is_admission & is_part_of_committee,
-            'admission.view_admission_supervision': is_part_of_committee,
+            'admission.api_view_doctorateadmission': is_part_of_committee,
+            'admission.api_view_admission_training_choice': is_part_of_committee,
+            'admission.api_view_admission_project': is_part_of_committee,
+            'admission.api_view_admission_cotutelle': is_admission & is_part_of_committee,
+            'admission.api_view_admission_supervision': is_part_of_committee,
             # A ca member can approve as long as he is invited to the committee
-            'admission.approve_proposition': is_part_of_committee_and_invited,
+            'admission.api_approve_proposition': is_part_of_committee_and_invited,
             # Once the candidate is enrolling, a ca member can
-            'admission.view_admission_confirmation': is_part_of_committee & is_enrolled,
+            'admission.api_view_admission_confirmation': is_part_of_committee & is_enrolled,
         }
         return RuleSet(ruleset)

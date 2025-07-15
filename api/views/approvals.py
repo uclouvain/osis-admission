@@ -107,8 +107,8 @@ class ApprovePropositionMixin:
 class ApprovePropositionAPIView(ApprovePropositionMixin, APIPermissionRequiredMixin, APIView):
     name = "approvals"
     permission_mapping = {
-        'POST': 'admission.approve_proposition',
-        'PUT': 'admission.approve_proposition',
+        'POST': 'admission.api_approve_proposition',
+        'PUT': 'admission.api_approve_proposition',
     }
 
 
@@ -167,7 +167,7 @@ class ExternalApprovalPropositionAPIView(ApprovePropositionMixin, APIView):
 class ApproveByPdfPropositionAPIView(APIPermissionRequiredMixin, APIView):
     name = "approve-by-pdf"
     permission_mapping = {
-        'POST': 'admission.approve_proposition_by_pdf',
+        'POST': 'admission.api_approve_proposition_by_pdf',
     }
 
     def get_permission_object(self):

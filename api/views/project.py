@@ -205,8 +205,8 @@ class ProjectViewSet(
     pagination_class = None
     filter_backends = []
     permission_mapping = {
-        'GET': 'admission.view_admission_project',
-        'PUT': 'admission.change_admission_project',
+        'GET': 'admission.api_view_admission_project',
+        'PUT': 'admission.api_change_admission_project',
     }
 
     def get_permission_object(self):
