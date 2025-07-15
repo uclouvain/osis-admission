@@ -75,7 +75,7 @@ from osis_profile.views.edit_experience_academique import EditExperienceAcademiq
 from osis_profile.views.edit_experience_non_academique import (
     EditExperienceNonAcademiqueView,
 )
-from osis_profile.views.parcours_externe_mixins import DeleteEducationalExperienceMixin
+from osis_profile.views.mixins.parcours_externe import DeleteEducationalExperienceMixin
 
 __all__ = [
     'CurriculumEducationalExperienceFormView',
