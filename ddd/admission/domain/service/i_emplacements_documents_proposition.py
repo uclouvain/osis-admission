@@ -24,9 +24,10 @@
 #
 # ##############################################################################
 import abc
-from typing import Dict, List
+import datetime
+from typing import Dict, List, Optional
 
-from django.utils.dateparse import parse_date, parse_datetime
+from django.utils.dateparse import parse_datetime
 
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
@@ -154,6 +155,7 @@ class IEmplacementsDocumentsPropositionTranslator(interface.DomainService):
                 section=section,
                 metadonnees=metadonnees,
                 documents_demandes=resume_dto.proposition.documents_demandes,
+                echeance_demande_documents=resume_dto.proposition.echeance_demande_documents,
                 acteurs=acteurs,
             )
             for section in sections
@@ -200,6 +202,7 @@ class IEmplacementsDocumentsPropositionTranslator(interface.DomainService):
         section: Section,
         metadonnees: dict,
         documents_demandes: dict,
+        echeance_demande_documents: Optional[datetime.date],
         acteurs: Dict[str, PersonneConnueUclDTO],
     ) -> EmplacementDocumentDTO:
         document_id = f'{section.identifier}.{document.identifier}'
@@ -235,7 +238,11 @@ class IEmplacementsDocumentsPropositionTranslator(interface.DomainService):
             derniere_action_le=(
                 parse_datetime(document_demande['last_action_at']) if document_demande.get('last_action_at') else None
             ),
-            a_echeance_le=parse_date(document_demande['deadline_at']) if document_demande.get('deadline_at') else None,
+            a_echeance_le=(
+                echeance_demande_documents
+                if document_demande.get('status') == StatutEmplacementDocument.RECLAME.name
+                else None
+            ),
             onglet=section.identifier,
             nom_onglet=section.label,
             nom_onglet_langue_candidat=section.candidate_language_label,
@@ -378,6 +385,7 @@ class IEmplacementsDocumentsPropositionTranslator(interface.DomainService):
                     section=section,
                     metadonnees=metadonnees,
                     documents_demandes=resume_dto.proposition.documents_demandes,
+                    echeance_demande_documents=resume_dto.proposition.echeance_demande_documents,
                     acteurs=acteurs,
                 )
                 if document.statut == StatutEmplacementDocument.RECLAME.name:
@@ -426,6 +434,7 @@ class IEmplacementsDocumentsPropositionTranslator(interface.DomainService):
                         section=section,
                         metadonnees=metadonnees,
                         documents_demandes=resume_dto.proposition.documents_demandes,
+                        echeance_demande_documents=resume_dto.proposition.echeance_demande_documents,
                         acteurs=acteurs,
                     )
                 )

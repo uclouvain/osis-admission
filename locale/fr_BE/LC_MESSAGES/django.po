@@ -2047,6 +2047,12 @@ msgctxt "dashboard-indicator pre-admission"
 msgid "Deadline 3 months"
 msgstr "Échéance 3 mois"
 
+msgid "Deadline exceeded"
+msgstr "Délai dépassé"
+
+msgid "Deadline for complements"
+msgstr "Délai compléments"
+
 msgid "Deadline for documents to be requested immediately"
 msgstr "Échéance pour les documents à fournir immédiatement"
 
@@ -6049,6 +6055,9 @@ msgstr "Réclamé"
 
 msgid "Requested documents"
 msgstr "Documents réclamés"
+
+msgid "Requested documents deadline"
+msgstr "Échéance des documents réclamés"
 
 msgid "Requested documents list"
 msgstr "Liste des documents réclamés"

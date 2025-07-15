@@ -110,7 +110,6 @@ class SicDecisionPdfPreviewViewTestCase(SicPatchMixin, TestCase):
             'automatically_required': False,
             'last_action_at': '2023-01-01T00:00:00',
             'last_actor': '0123456',
-            'deadline_at': '',
             'reason': 'My reason',
             'requested_at': '',
             'status': 'A_RECLAMER',

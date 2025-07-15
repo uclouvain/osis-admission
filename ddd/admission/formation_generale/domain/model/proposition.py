@@ -213,6 +213,7 @@ class Proposition(interface.RootEntity):
     documents_additionnels: List[str] = attr.Factory(list)
 
     documents_demandes: Dict = attr.Factory(dict)
+    echeance_demande_documents: Optional[datetime.date] = None
 
     poursuite_de_cycle_a_specifier: bool = False
     poursuite_de_cycle: PoursuiteDeCycle = PoursuiteDeCycle.TO_BE_DETERMINED
@@ -376,13 +377,15 @@ class Proposition(interface.RootEntity):
             statut=ChoixStatutChecklist.SYST_REUSSITE,
         )
 
-    def reclamer_documents_par_sic(self, auteur_modification: str):
+    def reclamer_documents_par_sic(self, auteur_modification: str, a_echeance_le: datetime.date):
         self.statut = ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC
         self.auteur_derniere_modification = auteur_modification
+        self.echeance_demande_documents = a_echeance_le
 
-    def reclamer_documents_par_fac(self, auteur_modification: str):
+    def reclamer_documents_par_fac(self, auteur_modification: str, a_echeance_le: datetime.date):
         self.statut = ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC
         self.auteur_derniere_modification = auteur_modification
+        self.echeance_demande_documents = a_echeance_le
 
     def specifier_refus_par_fac(self):
         self.checklist_actuelle.decision_facultaire = StatutChecklist(
@@ -585,6 +588,7 @@ class Proposition(interface.RootEntity):
             ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC: ChoixStatutPropositionGenerale.COMPLETEE_POUR_FAC,
         }.get(self.statut)
         self.auteur_derniere_modification = self.matricule_candidat
+        self.echeance_demande_documents = None
 
     def completer_curriculum(
         self,
@@ -1237,6 +1241,7 @@ class Proposition(interface.RootEntity):
             ChoixStatutPropositionGenerale.TRAITEMENT_FAC if par_fac else ChoixStatutPropositionGenerale.CONFIRMEE
         )
         self.auteur_derniere_modification = auteur_modification
+        self.echeance_demande_documents = None
 
     def nettoyer_reponses_questions_specifiques(self, questions_specifiques: List[QuestionSpecifique]):
         self.reponses_questions_specifiques = ISuperQuestionSpecifiqueTranslator.clean_specific_question_answers(

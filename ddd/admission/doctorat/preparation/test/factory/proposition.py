@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 import string
 import uuid
 
@@ -262,6 +263,7 @@ class _PropositionFactory(factory.Factory):
         '06de0c3d-3c06-4c93-8eb4-c8648f04f142': 'My response 2',
         '06de0c3d-3c06-4c93-8eb4-c8648f04f143': 'My response 3',
     }
+    echeance_demande_documents = datetime.date(2023, 1, 19)
     curriculum = ['file_token.pdf']
     documents_demandes = factory.lazy_attribute(
         lambda _: {
@@ -272,7 +274,6 @@ class _PropositionFactory(factory.Factory):
                 'last_action_at': '2023-01-02T00:00:00',
                 'status': StatutEmplacementDocument.RECLAME.name,
                 'requested_at': '2023-01-02T00:00:00',
-                'deadline_at': '2023-01-19',
                 'automatically_required': False,
                 'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_NON_BLOQUANT.name,
             },
@@ -283,7 +284,6 @@ class _PropositionFactory(factory.Factory):
                 'last_action_at': '2023-01-03T00:00:00',
                 'status': StatutEmplacementDocument.RECLAME.name,
                 'requested_at': '2023-01-03T00:00:00',
-                'deadline_at': '2023-01-19',
                 'automatically_required': False,
                 'request_status': StatutReclamationEmplacementDocument.ULTERIEUREMENT_BLOQUANT.name,
             },

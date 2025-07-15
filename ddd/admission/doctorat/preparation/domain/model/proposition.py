@@ -214,6 +214,7 @@ class Proposition(interface.RootEntity):
 
     elements_confirmation: Dict[str, str] = attr.Factory(dict)
     documents_demandes: Dict = attr.Factory(dict)
+    echeance_demande_documents: Optional[datetime.date] = None
 
     # Checklist
     checklist_initiale: Optional[StatutsChecklistDoctorale] = None
@@ -687,12 +688,13 @@ class Proposition(interface.RootEntity):
         self.reponses_questions_specifiques = reponses_questions_specifiques
         self.auteur_derniere_modification = auteur
 
-    def reclamer_documents(self, auteur_modification: str, type_gestionnaire: str):
+    def reclamer_documents(self, auteur_modification: str, type_gestionnaire: str, a_echeance_le: datetime.date):
         self.statut = {
             TypeGestionnaire.FAC.name: ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_FAC,
             TypeGestionnaire.SIC.name: ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_SIC,
         }[type_gestionnaire]
         self.auteur_derniere_modification = auteur_modification
+        self.echeance_demande_documents = a_echeance_le
 
     def annuler_reclamation_documents(self, auteur_modification: str, type_gestionnaire: str):
         self.statut = {
@@ -700,6 +702,7 @@ class Proposition(interface.RootEntity):
             TypeGestionnaire.SIC.name: ChoixStatutPropositionDoctorale.CONFIRMEE,
         }[type_gestionnaire]
         self.auteur_derniere_modification = auteur_modification
+        self.echeance_demande_documents = None
 
     def completer_documents_par_candidat(self):
         self.statut = {
@@ -707,6 +710,7 @@ class Proposition(interface.RootEntity):
             ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_FAC: ChoixStatutPropositionDoctorale.COMPLETEE_POUR_FAC,
         }.get(self.statut)
         self.auteur_derniere_modification = self.matricule_candidat
+        self.echeance_demande_documents = None
 
     def specifier_statut_checklist_parcours_anterieur(
         self,
