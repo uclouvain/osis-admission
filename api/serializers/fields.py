@@ -101,6 +101,10 @@ ACTION_LINKS = {
         'path_name': 'admission_api_v1:person',
         'method': 'PUT',
     },
+    'update_person_last_enrolment': {
+        'path_name': 'admission_api_v1:person_last_enrolment',
+        'method': 'PUT',
+    },
     'update_coordinates': {
         'path_name': 'admission_api_v1:coordonnees',
         'method': 'PUT',
@@ -121,6 +125,11 @@ DOCTORATE_ACTION_LINKS = {
     },
     'update_person': {
         'path_name': 'admission_api_v1:doctorate_person',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
+    'update_person_last_enrolment': {
+        'path_name': 'admission_api_v1:doctorate_person_last_enrolment',
         'method': 'PUT',
         'params': ['uuid'],
     },
@@ -311,6 +320,11 @@ GENERAL_EDUCATION_ACTION_LINKS = {
         'method': 'PUT',
         'params': ['uuid'],
     },
+    'update_person_last_enrolment': {
+        'path_name': 'admission_api_v1:general_person_last_enrolment',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
     'retrieve_coordinates': {
         'path_name': 'admission_api_v1:general_coordinates',
         'method': 'GET',
@@ -434,6 +448,11 @@ CONTINUING_EDUCATION_ACTION_LINKS = {
     },
     'update_person': {
         'path_name': 'admission_api_v1:continuing_person',
+        'method': 'PUT',
+        'params': ['uuid'],
+    },
+    'update_person_last_enrolment': {
+        'path_name': 'admission_api_v1:continuing_person_last_enrolment',
         'method': 'PUT',
         'params': ['uuid'],
     },
