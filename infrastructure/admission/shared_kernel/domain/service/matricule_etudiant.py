@@ -24,6 +24,8 @@
 #
 # ##############################################################################
 from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import IMatriculeEtudiantService
+from ddd.logic.gestion_des_comptes.domain.validator.exceptions import \
+    ImpossibleDeRecupererMatriculeEtudiantDepuisESBException, MatriculeEtudiantIntrouvableException
 from ddd.logic.gestion_des_comptes.queries import RecupererMatriculeEtudiantAssigneQuery
 
 
@@ -37,4 +39,8 @@ class MatriculeEtudiantService(IMatriculeEtudiantService):
         query = RecupererMatriculeEtudiantAssigneQuery(
             matricule=matricule_personne,
         )
-        return msg_bus.invoke(query)
+
+        try:
+            return msg_bus.invoke(query)
+        except ImpossibleDeRecupererMatriculeEtudiantDepuisESBException:
+            raise MatriculeEtudiantIntrouvableException

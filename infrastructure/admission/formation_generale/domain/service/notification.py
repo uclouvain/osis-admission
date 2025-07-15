@@ -29,7 +29,7 @@ from typing import List, Optional
 
 from django.conf import settings
 from django.utils import translation, formats
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext as _, gettext
 from osis_async.models import AsyncTask
 from osis_document.api.utils import get_remote_token, get_remote_tokens
 from osis_document.utils import get_file_url
@@ -83,6 +83,7 @@ from admission.utils import (
 )
 from base.models.person import Person
 from base.utils.utils import format_academic_year
+from ddd.logic.gestion_des_comptes.domain.validator.exceptions import MatriculeEtudiantIntrouvableException
 
 ONE_YEAR_SECONDS = 366 * 24 * 60 * 60
 MOIS_DEBUT_TRAITEMENT_INSCRIPTION = 7
