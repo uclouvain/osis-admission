@@ -250,8 +250,8 @@ class ContinuingRequestedDocumentListView(RequestedDocumentListView):
 class DoctorateRequestedDocumentListView(RequestedDocumentListView):
     name = "doctorate_documents"
     permission_mapping = {
-        'GET': 'admission.view_admission_documents',
-        'POST': 'admission.change_admission_documents',
+        'GET': 'admission.api_view_admission_documents',
+        'POST': 'admission.api_change_admission_documents',
     }
 
     get_documents_command = doctorate_education_commands.RecupererDocumentsReclamesPropositionQuery

@@ -78,7 +78,7 @@ class ContinuingPDFRecapView(BasePDFRecapView):
 class DoctoratePDFRecapView(BasePDFRecapView):
     name = "doctorate_pdf_recap"
     permission_mapping = {
-        'GET': 'admission.download_doctorateadmission_pdf_recap',
+        'GET': 'admission.api_download_doctorateadmission_pdf_recap',
     }
 
     def get_permission_object(self):
