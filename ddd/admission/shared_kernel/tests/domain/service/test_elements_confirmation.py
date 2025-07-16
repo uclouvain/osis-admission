@@ -34,19 +34,33 @@ from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererElementsConfirmationQuery as RecupererElementsConfirmationDoctoratQuery,
 )
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import ElementsConfirmationNonConcordants
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    PropositionIdentity as PropositionDoctoraleIdentity,
+)
 from admission.ddd.admission.formation_continue.commands import (
     RecupererElementsConfirmationQuery as RecupererElementsConfirmationContinueQuery,
     SoumettrePropositionCommand as SoumettrePropositionContinueCommand,
+)
+from admission.ddd.admission.formation_continue.domain.model.proposition import (
+    PropositionIdentity as PropositionContinueIdentity,
 )
 from admission.ddd.admission.formation_generale.commands import (
     RecupererElementsConfirmationQuery as RecupererElementsConfirmationGeneraleQuery,
     SoumettrePropositionCommand as SoumettrePropositionGeneraleCommand,
 )
 from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationFactory
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    PropositionIdentity as PropositionGeneraleIdentity,
+)
+from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
+    PropositionInMemoryRepository as PropositionDoctoraleRepository,
+)
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.elements_confirmation import (
     ElementsConfirmationInMemory,
 )
-from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
+    ProfilCandidatInMemoryTranslator,
+)
 from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
     PropositionInMemoryRepository as PropositionContinueRepository,
 )
@@ -95,13 +109,30 @@ class ElementsConfirmationTestCase(TestCase):
         ]
         self.assertListEqual([e.nom for e in elements], expected)
 
+    def test_recuperer_elements_confirmation_doctorat_hors_delai(self):
+        proposition = PropositionDoctoraleRepository.get(PropositionDoctoraleIdentity(uuid='uuid-SC3DP'))
+        with patch.object(proposition, 'annee_calculee', 2021):
+            elements = message_bus_in_memory_instance.invoke(
+                RecupererElementsConfirmationDoctoratQuery(uuid_proposition="uuid-SC3DP")
+            )
+            expected = [
+                'hors_delai',
+                'reglement_doctorat',
+                'reglement_doctorat_deontologie',
+                'protection_donnees',
+                'professions_reglementees',
+                'justificatifs',
+                'declaration_sur_lhonneur',
+            ]
+            self.assertListEqual([e.nom for e in elements], expected)
+
     def test_recuperer_elements_confirmation_formation_continue_hors_delai(self):
-        with patch.object(PropositionContinueRepository.entities[0], 'annee_calculee', 2021):
+        proposition = PropositionContinueRepository.get(entity_id=PropositionContinueIdentity(uuid='uuid-USCC4'))
+        with patch.object(proposition, 'annee_calculee', 2021):
             elements = message_bus_in_memory_instance.invoke(
                 RecupererElementsConfirmationContinueQuery(uuid_proposition="uuid-USCC4")
             )
             expected = [
-                'hors_delai',
                 'reglement_general',
                 'protection_donnees',
                 'professions_reglementees',
@@ -151,6 +182,22 @@ class ElementsConfirmationTestCase(TestCase):
             'declaration_sur_lhonneur',
         ]
         self.assertListEqual([e.nom for e in elements], expected)
+
+    def test_recuperer_elements_confirmation_master_mc_hors_delai(self):
+        proposition = PropositionGeneraleRepository.get(PropositionGeneraleIdentity(uuid='uuid-MASTER-MC'))
+        with patch.object(proposition, 'annee_calculee', 2021):
+            elements = message_bus_in_memory_instance.invoke(
+                RecupererElementsConfirmationGeneraleQuery(uuid_proposition='uuid-MASTER-MC')
+            )
+            expected = [
+                'hors_delai',
+                'reglement_general',
+                'protection_donnees',
+                'professions_reglementees',
+                'justificatifs',
+                'declaration_sur_lhonneur',
+            ]
+            self.assertListEqual([e.nom for e in elements], expected)
 
     def test_recuperer_elements_confirmation_master_m4(self):
         with patch.object(ProfilCandidatInMemoryTranslator.profil_candidats[1], 'pays_nationalite', 'AR'):
@@ -333,13 +380,15 @@ class ElementsConfirmationTestCase(TestCase):
 
     @freezegun.freeze_time('2024-10-15')
     def test_soumettre_elements_confirmation_differents_radio(self):
-        FinancabiliteInMemoryFetcher.save(Parcours(
-            matricule_fgs='0000000001',
-            parcours_academique_interne=ParcoursAcademiqueInterne(programmes_cycles=[]),
-            parcours_academique_externe=ParcoursAcademiqueExterne(experiences=[]),
-            annee_diplome_etudes_secondaires=2015,
-            nombre_tentative_de_passer_concours_pass_et_las=0,
-        ))
+        FinancabiliteInMemoryFetcher.save(
+            Parcours(
+                matricule_fgs='0000000001',
+                parcours_academique_interne=ParcoursAcademiqueInterne(programmes_cycles=[]),
+                parcours_academique_externe=ParcoursAcademiqueExterne(experiences=[]),
+                annee_diplome_etudes_secondaires=2015,
+                nombre_tentative_de_passer_concours_pass_et_las=0,
+            )
+        )
         with patch.object(
             ElementsConfirmationInMemory,
             'est_candidat_avec_etudes_secondaires_belges_francophones',
