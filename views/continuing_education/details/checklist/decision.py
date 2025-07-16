@@ -204,7 +204,7 @@ class CancelFormView(CheckListDefaultContextMixin, AdmissionFormMixin, HtmxPermi
     urlpatterns = 'decision-cancel'
     template_name = 'admission/continuing_education/includes/checklist/decision_cancel_form.html'
     htmx_template_name = 'admission/continuing_education/includes/checklist/decision_cancel_form.html'
-    permission_required = 'admission.change_checklist'
+    permission_required = 'admission.cancel_admission_iufc'
     form_class = DecisionCancelForm
 
     def get_form(self, form_class=None):
