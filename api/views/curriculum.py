@@ -354,13 +354,16 @@ class BaseProfessionalExperienceViewSet(ExperienceViewSet):
 
     def _check_perms_update(self):
         if (
-            any(
-                training_type in AnneeInscriptionFormationTranslator.DOCTORATE_EDUCATION_TYPES
-                for training_type in self.experience.valuated_from_trainings
-            )
-            or any(
-                training_type in AnneeInscriptionFormationTranslator.GENERAL_EDUCATION_TYPES
-                for training_type in self.experience.valuated_from_trainings
+            self.experience.certificate
+            and (
+                any(
+                    training_type in AnneeInscriptionFormationTranslator.DOCTORATE_EDUCATION_TYPES
+                    for training_type in self.experience.valuated_from_trainings
+                )
+                or any(
+                    training_type in AnneeInscriptionFormationTranslator.GENERAL_EDUCATION_TYPES
+                    for training_type in self.experience.valuated_from_trainings
+                )
             )
             or self.experience.external_id
         ):
