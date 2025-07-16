@@ -353,16 +353,19 @@ class BaseProfessionalExperienceViewSet(ExperienceViewSet):
     serializer_class = ProfessionalExperienceSerializer
 
     def _check_perms_update(self):
+        is_valuated_in_doctorates = any(
+            training_type in AnneeInscriptionFormationTranslator.DOCTORATE_EDUCATION_TYPES
+            for training_type in self.experience.valuated_from_trainings
+        )
+        is_valuated_in_general_educations = any(
+            training_type in AnneeInscriptionFormationTranslator.GENERAL_EDUCATION_TYPES
+            for training_type in self.experience.valuated_from_trainings
+        )
+        is_certificate_missing = not self.experience.certificate
+
         if (
-            any(
-                training_type in AnneeInscriptionFormationTranslator.DOCTORATE_EDUCATION_TYPES
-                for training_type in self.experience.valuated_from_trainings
-            )
-            or any(
-                training_type in AnneeInscriptionFormationTranslator.GENERAL_EDUCATION_TYPES
-                for training_type in self.experience.valuated_from_trainings
-            )
-            or self.experience.external_id
+            self.experience.certificate and (is_valuated_in_doctorates or is_valuated_in_general_educations)
+            or (self.experience.external_id and not is_certificate_missing)
         ):
             raise PermissionDenied(_("This experience cannot be updated as it has already been valuated."))
 
