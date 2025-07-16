@@ -107,11 +107,11 @@ CONTINUING_EDUCATION_PERMISSIONS_MAPPING = {
 }
 
 DOCTORATE_PERMISSIONS_MAPPING = {
-    'GET': 'admission.view_admission_curriculum',
-    'POST': 'admission.change_admission_curriculum',
-    'PUT': 'admission.change_admission_curriculum',
-    'PATCH': 'admission.change_admission_curriculum',
-    'DELETE': 'admission.change_admission_curriculum',
+    'GET': 'admission.api_view_admission_curriculum',
+    'POST': 'admission.api_change_admission_curriculum',
+    'PUT': 'admission.api_change_admission_curriculum',
+    'PATCH': 'admission.api_change_admission_curriculum',
+    'DELETE': 'admission.api_change_admission_curriculum',
 }
 
 

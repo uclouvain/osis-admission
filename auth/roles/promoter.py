@@ -56,27 +56,27 @@ class Promoter(RoleModel):
     @classmethod
     def rule_set(cls):
         rules = {
-            'admission.view_doctorateadmission': is_admission_request_promoter,
-            'admission.download_pdf_confirmation': is_admission_request_promoter,
-            'admission.approve_confirmation_paper': is_admission_request_promoter,
-            'admission.validate_doctoral_training': is_admission_request_promoter,
-            'admission.fill_thesis': is_admission_request_promoter,
-            'admission.check_publication_authorisation': is_admission_request_promoter,
+            'admission.api_view_doctorateadmission': is_admission_request_promoter,
+            'admission.api_download_pdf_confirmation': is_admission_request_promoter,
+            'admission.api_approve_confirmation_paper': is_admission_request_promoter,
+            'admission.api_validate_doctoral_training': is_admission_request_promoter,
+            'admission.api_fill_thesis': is_admission_request_promoter,
+            'admission.api_check_publication_authorisation': is_admission_request_promoter,
             # A promoter can view as long as he is one of the admission promoters and the registration is ongoing
-            'admission.view_admission_person': is_admission_request_promoter & is_being_enrolled,
-            'admission.view_admission_coordinates': is_admission_request_promoter & is_being_enrolled,
-            'admission.view_admission_secondary_studies': is_admission_request_promoter & is_being_enrolled,
-            'admission.view_admission_exam': is_admission_request_promoter & is_being_enrolled,
-            'admission.view_admission_languages': is_admission_request_promoter & is_being_enrolled,
-            'admission.view_admission_curriculum': is_admission_request_promoter & is_being_enrolled,
-            'admission.view_admission_accounting': is_admission_request_promoter & is_being_enrolled,
+            'admission.api_view_admission_person': is_admission_request_promoter & is_being_enrolled,
+            'admission.api_view_admission_coordinates': is_admission_request_promoter & is_being_enrolled,
+            'admission.api_view_admission_secondary_studies': is_admission_request_promoter & is_being_enrolled,
+            'admission.api_view_admission_exam': is_admission_request_promoter & is_being_enrolled,
+            'admission.api_view_admission_languages': is_admission_request_promoter & is_being_enrolled,
+            'admission.api_view_admission_curriculum': is_admission_request_promoter & is_being_enrolled,
+            'admission.api_view_admission_accounting': is_admission_request_promoter & is_being_enrolled,
             # A promoter can view as long as he is one of the admission promoters
-            'admission.view_admission_project': is_admission_request_promoter,
-            'admission.view_admission_training_choice': is_admission_request_promoter,
-            'admission.view_admission_cotutelle': is_admission & is_admission_request_promoter,
-            'admission.view_admission_supervision': is_admission_request_promoter,
-            'admission.view_admission_jury': is_admission_request_promoter,
+            'admission.api_view_admission_project': is_admission_request_promoter,
+            'admission.api_view_admission_training_choice': is_admission_request_promoter,
+            'admission.api_view_admission_cotutelle': is_admission & is_admission_request_promoter,
+            'admission.api_view_admission_supervision': is_admission_request_promoter,
+            'admission.api_view_admission_jury': is_admission_request_promoter,
             # A promoter can approve as long as he is invited to the admission committee
-            'admission.approve_proposition': is_part_of_committee_and_invited,
+            'admission.api_approve_proposition': is_part_of_committee_and_invited,
         }
         return RuleSet(rules)

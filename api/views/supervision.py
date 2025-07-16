@@ -62,10 +62,10 @@ class SupervisionAPIView(
     pagination_class = None
     filter_backends = []
     permission_mapping = {
-        'GET': 'admission.view_admission_supervision',
-        'PUT': 'admission.add_supervision_member',
-        'POST': 'admission.remove_supervision_member',
-        'PATCH': 'admission.edit_external_supervision_member',
+        'GET': 'admission.api_view_admission_supervision',
+        'PUT': 'admission.api_add_supervision_member',
+        'POST': 'admission.api_remove_supervision_member',
+        'PATCH': 'admission.api_edit_external_supervision_member',
     }
 
     def get_permission_object(self):
@@ -158,7 +158,7 @@ class SupervisionSetReferencePromoterAPIView(APIPermissionRequiredMixin, Generic
     pagination_class = None
     filter_backends = []
     permission_mapping = {
-        'PUT': 'admission.set_reference_promoter',
+        'PUT': 'admission.api_set_reference_promoter',
     }
 
     def get_permission_object(self):
@@ -188,7 +188,7 @@ class SupervisionSubmitCaAPIView(APIPermissionRequiredMixin, GenericAPIView):
     pagination_class = None
     filter_backends = []
     permission_mapping = {
-        'POST': 'admission.submit_ca',
+        'POST': 'admission.api_submit_ca',
     }
 
     def get_permission_object(self):
