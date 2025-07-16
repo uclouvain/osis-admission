@@ -31,8 +31,8 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _, ngettext
 from localflavor.generic.forms import BICFormField, IBAN_MIN_LENGTH
 
-from admission.ddd.admission.domain.validator._should_comptabilite_etre_completee import DEPENDANCES_CHAMPS_ASSIMILATION
-from admission.ddd.admission.enums import (
+from admission.ddd.admission.shared_kernel.domain.validator._should_comptabilite_etre_completee import DEPENDANCES_CHAMPS_ASSIMILATION
+from admission.ddd.admission.shared_kernel.enums import (
     TypeSituationAssimilation,
     ChoixAssimilation1,
     ChoixAssimilation2,

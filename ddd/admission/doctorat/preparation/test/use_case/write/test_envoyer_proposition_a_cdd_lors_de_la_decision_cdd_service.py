@@ -34,7 +34,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.proposition impor
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     SituationPropositionNonSICException,
 )
-from admission.ddd.admission.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )

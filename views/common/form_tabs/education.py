@@ -31,7 +31,7 @@ from django.utils.functional import cached_property
 
 from admission.models import EPCInjection as AdmissionEPCInjection
 from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
-from admission.ddd.admission.enums import Onglets
+from admission.ddd.admission.shared_kernel.enums import Onglets
 from admission.forms.admission.education import AdmissionBachelorEducationForeignDiplomaForm
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin

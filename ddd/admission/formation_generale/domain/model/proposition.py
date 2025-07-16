@@ -35,45 +35,45 @@ from django.utils.translation import gettext_noop as __
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     CurriculumAdmissionDTO,
 )
-from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
-from admission.ddd.admission.domain.model.complement_formation import (
+from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import ProfilCandidat
+from admission.ddd.admission.shared_kernel.domain.model.complement_formation import (
     ComplementFormationIdentity,
 )
-from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
+from admission.ddd.admission.shared_kernel.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
     ConditionComplementaireLibreApprobation,
 )
-from admission.ddd.admission.domain.model.enums.equivalence import (
+from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import (
     EtatEquivalenceTitreAcces,
     StatutEquivalenceTitreAcces,
     TypeEquivalenceTitreAcces,
 )
-from admission.ddd.admission.domain.model.formation import FormationIdentity
-from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
-from admission.ddd.admission.domain.model.poste_diplomatique import (
+from admission.ddd.admission.shared_kernel.domain.model.formation import FormationIdentity
+from admission.ddd.admission.shared_kernel.domain.model.motif_refus import MotifRefusIdentity
+from admission.ddd.admission.shared_kernel.domain.model.poste_diplomatique import (
     PosteDiplomatiqueIdentity,
 )
-from admission.ddd.admission.domain.model.question_specifique import QuestionSpecifique
-from admission.ddd.admission.domain.model.titre_acces_selectionnable import (
+from admission.ddd.admission.shared_kernel.domain.model.question_specifique import QuestionSpecifique
+from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import (
     TitreAccesSelectionnable,
 )
-from admission.ddd.admission.domain.repository.i_titre_acces_selectionnable import (
+from admission.ddd.admission.shared_kernel.domain.repository.i_titre_acces_selectionnable import (
     ITitreAccesSelectionnableRepository,
 )
-from admission.ddd.admission.domain.service.i_profil_candidat import (
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
-from admission.ddd.admission.domain.service.i_question_specifique import (
+from admission.ddd.admission.shared_kernel.domain.service.i_question_specifique import (
     ISuperQuestionSpecifiqueTranslator,
 )
-from admission.ddd.admission.domain.service.profil_candidat import (
+from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import (
     ProfilCandidat as ProfilCandidatService,
 )
-from admission.ddd.admission.domain.validator.exceptions import (
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     ExperienceNonTrouveeException,
 )
-from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
-from admission.ddd.admission.enums import (
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.shared_kernel.enums import (
     ChoixAffiliationSport,
     ChoixAssimilation1,
     ChoixAssimilation2,
@@ -84,7 +84,7 @@ from admission.ddd.admission.enums import (
     LienParente,
     TypeSituationAssimilation,
 )
-from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model._comptabilite import (
     Comptabilite,
     comptabilite_non_remplie,
@@ -124,7 +124,7 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
     SpecifierInformationsApprobationInscriptionValidatorList,
     SpecifierNouvellesInformationsDecisionFacultaireValidatorList,
 )
-from admission.ddd.admission.utils import initialiser_checklist_experience
+from admission.ddd.admission.shared_kernel.utils import initialiser_checklist_experience
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
@@ -133,9 +133,6 @@ from ddd.logic.financabilite.domain.model.enums.situation import (
     SituationFinancabilite,
 )
 from ddd.logic.reference.domain.model.bourse import BourseIdentity
-from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import (
-    IAcademicYearRepository,
-)
 from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
     IExperienceParcoursInterneTranslator,
 )

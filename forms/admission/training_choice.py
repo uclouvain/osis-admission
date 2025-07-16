@@ -48,7 +48,7 @@ from admission.ddd.admission.doctorat.preparation.dtos import DoctoratFormationD
 from admission.ddd.admission.doctorat.preparation.dtos.proposition import (
     PropositionGestionnaireDTO as PropositionDoctoraleDTO,
 )
-from admission.ddd.admission.domain.enums import TypeFormation
+from admission.ddd.admission.shared_kernel.domain.enums import TypeFormation
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixMoyensDecouverteFormation,
 )

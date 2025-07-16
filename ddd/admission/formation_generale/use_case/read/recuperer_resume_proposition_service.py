@@ -24,12 +24,12 @@
 #
 ##############################################################################
 
-from admission.ddd.admission.domain.service.i_profil_candidat import (
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
-from admission.ddd.admission.domain.service.resume_proposition import ResumeProposition
-from admission.ddd.admission.dtos.resume import ResumePropositionDTO
-from admission.ddd.admission.enums.valorisation_experience import (
+from admission.ddd.admission.shared_kernel.domain.service.resume_proposition import ResumeProposition
+from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
     ExperiencesCVRecuperees,
 )
 from admission.ddd.admission.formation_generale.commands import (

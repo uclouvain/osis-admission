@@ -28,8 +28,8 @@ from typing import List, Optional
 
 import factory
 
-from admission.ddd.admission.dtos import AdressePersonnelleDTO
-from admission.ddd.admission.enums.emplacement_document import (
+from admission.ddd.admission.shared_kernel.dtos import AdressePersonnelleDTO
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     StatutEmplacementDocument,
     StatutReclamationEmplacementDocument,
     TypeEmplacementDocument,
@@ -49,8 +49,8 @@ from admission.ddd.admission.formation_continue.test.factory.proposition import 
     PropositionFactory,
     _PropositionIdentityFactory,
 )
-from admission.ddd.admission.repository.i_proposition import formater_reference
-from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
+from admission.ddd.admission.shared_kernel.repository.i_proposition import formater_reference
+from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationIdentityFactory
 from admission.infrastructure.admission.formation_continue.domain.service.in_memory.formation import (
     FormationContinueInMemoryTranslator,
 )

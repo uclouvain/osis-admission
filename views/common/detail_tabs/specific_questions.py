@@ -31,7 +31,7 @@ from admission.calendar.admission_calendar import (
     AdmissionPoolExternalReorientationCalendar,
     AdmissionPoolExternalEnrollmentChangeCalendar,
 )
-from admission.ddd.admission.enums import Onglets
+from admission.ddd.admission.shared_kernel.enums import Onglets
 from admission.infrastructure.admission.domain.service.calendrier_inscription import CalendrierInscription
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin

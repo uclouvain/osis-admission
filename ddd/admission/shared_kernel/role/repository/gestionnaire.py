@@ -26,7 +26,7 @@
 from abc import abstractmethod
 from typing import List, Optional
 
-from admission.ddd.admission.dtos.formation import BaseFormationDTO
+from admission.ddd.admission.shared_kernel.dtos.formation import BaseFormationDTO
 from osis_common.ddd import interface
 from osis_common.ddd.interface import EntityIdentity, RootEntity
 

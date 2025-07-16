@@ -30,7 +30,7 @@ from django.shortcuts import resolve_url
 from django.test import TestCase, Client
 
 from admission.models import AdmissionFormItem, AdmissionFormItemInstantiation
-from admission.ddd.admission.enums import (
+from admission.ddd.admission.shared_kernel.enums import (
     CritereItemFormulaireNationaliteCandidat,
     CritereItemFormulaireNationaliteDiplome,
     CritereItemFormulaireLangueEtudes,

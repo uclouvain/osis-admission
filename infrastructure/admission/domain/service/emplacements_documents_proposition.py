@@ -25,11 +25,11 @@
 # ##############################################################################
 from typing import List, Dict
 
-from admission.ddd.admission.domain.service.i_emplacements_documents_proposition import (
+from admission.ddd.admission.shared_kernel.domain.service.i_emplacements_documents_proposition import (
     IEmplacementsDocumentsPropositionTranslator,
 )
-from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
-from admission.ddd.admission.dtos.resume import ResumePropositionDTO
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
+from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
 from admission.exports.admission_recap.section import get_sections
 from osis_profile.models import EducationGroupYearExam
 

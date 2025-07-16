@@ -25,7 +25,7 @@
 # ##############################################################################
 from typing import List, Tuple, Union
 
-from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
 from ddd.logic.learning_unit.commands import LearningUnitAndPartimSearchCommand
 from ddd.logic.learning_unit.dtos import LearningUnitSearchDTO
 from ddd.logic.learning_unit.dtos import PartimSearchDTO

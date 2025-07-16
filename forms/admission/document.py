@@ -40,8 +40,8 @@ from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_G
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     OngletsChecklist as OngletsChecklistDoctorat,
 )
-from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
-from admission.ddd.admission.enums.emplacement_document import (
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION,
     StatutReclamationEmplacementDocument,
 )

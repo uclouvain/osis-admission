@@ -29,10 +29,10 @@ import uuid
 from django.test import TestCase
 
 from admission.constants import UUID_REGEX
-from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument, EmplacementDocumentIdentity
-from admission.ddd.admission.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.domain.validator.exceptions import EmplacementDocumentNonTrouveException
-from admission.ddd.admission.enums.emplacement_document import (
+from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import EmplacementDocument, EmplacementDocumentIdentity
+from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import EmplacementDocumentNonTrouveException
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     TypeEmplacementDocument,
     StatutEmplacementDocument,
     IdentifiantBaseEmplacementDocument,

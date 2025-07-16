@@ -54,7 +54,7 @@ from osis_mail_template.models import MailTemplate
 
 from admission.constants import COMMENT_TAG_FAC, COMMENT_TAG_SIC
 from admission.ddd import MAIL_VERIFICATEUR_CURSUS, MONTANT_FRAIS_DOSSIER
-from admission.ddd.admission.commands import (
+from admission.ddd.admission.shared_kernel.commands import (
     ListerToutesDemandesQuery,
     RechercherParcoursAnterieurQuery,
 )
@@ -66,30 +66,30 @@ from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     message_candidat_avec_pae_avant_2015,
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
-from admission.ddd.admission.domain.validator.exceptions import (
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     ExperienceNonTrouveeException,
 )
-from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
-from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
-from admission.ddd.admission.dtos.resume import (
+from admission.ddd.admission.shared_kernel.dtos.liste import DemandeRechercheDTO
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
+from admission.ddd.admission.shared_kernel.dtos.resume import (
     ResumeCandidatDTO,
     ResumeEtEmplacementsDocumentsPropositionDTO,
     ResumePropositionDTO,
 )
-from admission.ddd.admission.enums import Onglets, TypeItemFormulaire
-from admission.ddd.admission.enums.emplacement_document import (
+from admission.ddd.admission.shared_kernel.enums import Onglets, TypeItemFormulaire
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     DocumentsAssimilation,
     DocumentsEtudesSecondaires,
     DocumentsExamens,
     OngletsDemande,
     StatutReclamationEmplacementDocument,
 )
-from admission.ddd.admission.enums.statut import (
+from admission.ddd.admission.shared_kernel.enums.statut import (
     STATUTS_TOUTE_PROPOSITION_AUTORISEE,
     STATUTS_TOUTE_PROPOSITION_SOUMISE,
     STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER_OU_ANNULEE,
 )
-from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.commands import (
     ApprouverAdmissionParSicCommand,
     ApprouverInscriptionParSicCommand,

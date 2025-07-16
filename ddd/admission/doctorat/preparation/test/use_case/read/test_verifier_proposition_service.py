@@ -57,10 +57,10 @@ from admission.ddd.admission.doctorat.preparation.test.factory.proposition impor
     PropositionAdmissionSC3DPConfirmeeFactory,
     _ComptabiliteFactory,
 )
-from admission.ddd.admission.domain.validator.exceptions import (
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     NombrePropositionsSoumisesDepasseException,
 )
-from admission.ddd.admission.enums import (
+from admission.ddd.admission.shared_kernel.enums import (
     ChoixAssimilation1,
     ChoixAssimilation2,
     ChoixAssimilation3,

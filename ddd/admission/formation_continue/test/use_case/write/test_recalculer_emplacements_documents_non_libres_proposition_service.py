@@ -29,9 +29,9 @@ from unittest import mock
 import freezegun
 from django.test import SimpleTestCase
 
-from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocumentIdentity, EmplacementDocument
-from admission.ddd.admission.domain.validator.exceptions import EmplacementDocumentNonTrouveException
-from admission.ddd.admission.enums.emplacement_document import (
+from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import EmplacementDocumentIdentity, EmplacementDocument
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import EmplacementDocumentNonTrouveException
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     TypeEmplacementDocument,
     StatutEmplacementDocument,
 )

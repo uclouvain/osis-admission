@@ -30,11 +30,11 @@ from typing import Dict, List, Optional
 from django.conf import settings
 from django.utils.translation import get_language
 
-from admission.ddd.admission.domain.enums import TypeFormation
-from admission.ddd.admission.domain.model._campus import Campus
-from admission.ddd.admission.domain.model.formation import Formation, FormationIdentity
-from admission.ddd.admission.dtos.campus import CampusDTO
-from admission.ddd.admission.dtos.formation import FormationDTO
+from admission.ddd.admission.shared_kernel.domain.enums import TypeFormation
+from admission.ddd.admission.shared_kernel.domain.model._campus import Campus
+from admission.ddd.admission.shared_kernel.domain.model.formation import Formation, FormationIdentity
+from admission.ddd.admission.shared_kernel.dtos.campus import CampusDTO
+from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from admission.ddd.admission.formation_continue.domain.service.i_formation import (
     IFormationContinueTranslator,
 )

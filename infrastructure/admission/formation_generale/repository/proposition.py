@@ -38,37 +38,37 @@ from django.utils.translation import get_language, pgettext
 from osis_history.models import HistoryEntry
 
 from admission.auth.roles.candidate import Candidate
-from admission.ddd.admission.domain.builder.formation_identity import (
+from admission.ddd.admission.shared_kernel.domain.builder.formation_identity import (
     FormationIdentityBuilder,
 )
-from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
-from admission.ddd.admission.domain.model.complement_formation import (
+from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import ProfilCandidat
+from admission.ddd.admission.shared_kernel.domain.model.complement_formation import (
     ComplementFormationIdentity,
 )
-from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
+from admission.ddd.admission.shared_kernel.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
     ConditionComplementaireLibreApprobation,
 )
-from admission.ddd.admission.domain.model.enums.equivalence import (
+from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import (
     EtatEquivalenceTitreAcces,
     StatutEquivalenceTitreAcces,
     TypeEquivalenceTitreAcces,
 )
-from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
-from admission.ddd.admission.domain.model.poste_diplomatique import (
+from admission.ddd.admission.shared_kernel.domain.model.motif_refus import MotifRefusIdentity
+from admission.ddd.admission.shared_kernel.domain.model.poste_diplomatique import (
     PosteDiplomatiqueIdentity,
 )
-from admission.ddd.admission.domain.service.i_unites_enseignement_translator import (
+from admission.ddd.admission.shared_kernel.domain.service.i_unites_enseignement_translator import (
     IUnitesEnseignementTranslator,
 )
-from admission.ddd.admission.dtos.formation import (
+from admission.ddd.admission.shared_kernel.dtos.formation import (
     BaseFormationDTO,
     CampusDTO,
     FormationDTO,
 )
-from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
-from admission.ddd.admission.enums import TypeSituationAssimilation
-from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.shared_kernel.dtos.profil_candidat import ProfilCandidatDTO
+from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )

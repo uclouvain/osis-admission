@@ -27,7 +27,7 @@ import datetime
 from datetime import timedelta, date
 from typing import Optional
 
-from admission.ddd.admission.domain.service.i_annee_inscription_formation import (
+from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import (
     IAnneeInscriptionFormationTranslator,
     CalendrierAcademique,
     Date,

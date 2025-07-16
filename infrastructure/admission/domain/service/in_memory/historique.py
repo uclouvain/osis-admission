@@ -26,7 +26,7 @@
 from email.message import EmailMessage
 
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
-from admission.ddd.admission.domain.service.i_historique import IHistorique, PropositionAdmission
+from admission.ddd.admission.shared_kernel.domain.service.i_historique import IHistorique, PropositionAdmission
 
 
 class HistoriqueInMemory(IHistorique):

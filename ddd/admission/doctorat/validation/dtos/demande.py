@@ -29,7 +29,7 @@ from typing import Optional
 import attr
 
 from osis_common.ddd import interface
-from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
+from admission.ddd.admission.shared_kernel.dtos.profil_candidat import ProfilCandidatDTO
 
 
 @attr.dataclass(frozen=True, slots=True)

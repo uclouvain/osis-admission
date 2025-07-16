@@ -26,8 +26,8 @@
 
 from django.test import SimpleTestCase
 
-from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
-from admission.ddd.admission.domain.validator.exceptions import ExperienceNonTrouveeException
+from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import EtatAuthentificationParcours
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import ExperienceNonTrouveeException
 from admission.ddd.admission.formation_generale.commands import (
     ModifierAuthentificationExperienceParcoursAnterieurCommand,
 )

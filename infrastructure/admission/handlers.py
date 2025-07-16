@@ -25,11 +25,11 @@
 ##############################################################################
 from django.conf import settings
 
-from admission.ddd.admission.commands import *
+from admission.ddd.admission.shared_kernel.commands import *
 from admission.ddd.admission.shared_kernel.email_destinataire.queries import RecupererInformationsDestinataireQuery
 from admission.ddd.admission.shared_kernel.email_destinataire.use_case.read import *
-from admission.ddd.admission.use_case.read import *
-from admission.ddd.admission.use_case.write import specifier_experience_en_tant_que_titre_acces
+from admission.ddd.admission.shared_kernel.use_case.read import *
+from admission.ddd.admission.shared_kernel.use_case.write import specifier_experience_en_tant_que_titre_acces
 from admission.infrastructure.admission.domain.service.lister_toutes_demandes import ListerToutesDemandes
 from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.infrastructure.admission.repository.titre_acces_selectionnable import TitreAccesSelectionnableRepository

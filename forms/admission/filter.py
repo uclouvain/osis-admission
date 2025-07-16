@@ -31,10 +31,10 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.translation import ngettext, pgettext_lazy
 
 from admission.constants import DEFAULT_PAGINATOR_SIZE
-from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
-from admission.ddd.admission.enums.liste import TardiveModificationReorientationFiltre
-from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
-from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
+from admission.ddd.admission.shared_kernel.enums.liste import TardiveModificationReorientationFiltre
+from admission.ddd.admission.shared_kernel.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixEdition,
     ChoixStatutPropositionContinue,

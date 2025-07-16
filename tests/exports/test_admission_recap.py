@@ -67,19 +67,19 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     CurriculumAdmissionDTO,
 )
-from admission.ddd.admission.dtos import (
+from admission.ddd.admission.shared_kernel.dtos import (
     AdressePersonnelleDTO,
     CoordonneesDTO,
     IdentificationDTO,
 )
-from admission.ddd.admission.dtos.campus import CampusDTO
-from admission.ddd.admission.dtos.etudes_secondaires import (
+from admission.ddd.admission.shared_kernel.dtos.campus import CampusDTO
+from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import (
     EtudesSecondairesAdmissionDTO,
 )
-from admission.ddd.admission.dtos.formation import FormationDTO
-from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
-from admission.ddd.admission.dtos.resume import ResumePropositionDTO
-from admission.ddd.admission.enums import (
+from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
+from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
+from admission.ddd.admission.shared_kernel.enums import (
     ChoixAffiliationSport,
     ChoixAssimilation1,
     ChoixAssimilation2,
@@ -92,7 +92,7 @@ from admission.ddd.admission.enums import (
     TypeItemFormulaire,
     TypeSituationAssimilation,
 )
-from admission.ddd.admission.enums.emplacement_document import (
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     DocumentsComptabilite,
     DocumentsConnaissancesLangues,
     DocumentsCotutelle,
@@ -106,7 +106,7 @@ from admission.ddd.admission.enums.emplacement_document import (
     DocumentsSupervision,
     IdentifiantBaseEmplacementDocument,
 )
-from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_continue.commands import (
     RecupererQuestionsSpecifiquesQuery,
 )

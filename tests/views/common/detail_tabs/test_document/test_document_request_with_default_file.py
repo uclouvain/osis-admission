@@ -37,12 +37,12 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     OngletsChecklist as OngletsChecklistDoctorale,
 )
-from admission.ddd.admission.enums import (
+from admission.ddd.admission.shared_kernel.enums import (
     CritereItemFormulaireFormation,
     Onglets,
     TypeItemFormulaire,
 )
-from admission.ddd.admission.enums.emplacement_document import (
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     IdentifiantBaseEmplacementDocument,
     StatutEmplacementDocument,
     StatutReclamationEmplacementDocument,

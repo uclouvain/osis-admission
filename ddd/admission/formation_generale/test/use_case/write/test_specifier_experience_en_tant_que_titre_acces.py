@@ -26,7 +26,7 @@
 
 from django.test import SimpleTestCase
 
-from admission.ddd.admission.domain.model.enums.condition_acces import TypeTitreAccesSelectionnable
+from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import TypeTitreAccesSelectionnable
 
 from admission.ddd.admission.formation_generale.commands import (
     SpecifierExperienceEnTantQueTitreAccesCommand,

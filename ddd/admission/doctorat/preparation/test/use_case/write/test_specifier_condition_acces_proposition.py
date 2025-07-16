@@ -44,7 +44,7 @@ from admission.ddd.admission.doctorat.preparation.test.factory.proposition impor
 from admission.ddd.admission.formation_generale.test.factory.titre_acces import (
     TitreAccesSelectionnableFactory,
 )
-from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
+from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationIdentityFactory
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )

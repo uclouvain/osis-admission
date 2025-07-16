@@ -32,7 +32,7 @@ from admission.models import (
     DoctorateAdmission,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
-from admission.ddd.admission.enums.emplacement_document import TypeEmplacementDocument
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import TypeEmplacementDocument
 from admission.ddd.admission.formation_continue import commands as continuing_commands
 from admission.ddd.admission.doctorat.preparation import commands as doctorate_commands
 from admission.ddd.admission.formation_generale import commands as general_commands

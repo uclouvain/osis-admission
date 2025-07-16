@@ -33,7 +33,7 @@ from django.utils.translation import get_language
 
 from admission.auth.roles.program_manager import ProgramManager
 from admission.models.base import training_campus_subquery
-from admission.ddd.admission.dtos.formation import BaseFormationDTO
+from admission.ddd.admission.shared_kernel.dtos.formation import BaseFormationDTO
 from admission.ddd.admission.shared_kernel.role.repository.gestionnaire import IGestionnaireRepository
 from base.models.education_group_year import EducationGroupYear
 

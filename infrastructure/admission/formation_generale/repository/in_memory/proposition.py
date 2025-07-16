@@ -31,13 +31,13 @@ import factory
 
 from admission.constants import ADMISSION_POOL_ACADEMIC_CALENDAR_TYPES
 from admission.ddd import CODE_BACHELIER_VETERINAIRE
-from admission.ddd.admission.domain.service.i_unites_enseignement_translator import (
+from admission.ddd.admission.shared_kernel.domain.service.i_unites_enseignement_translator import (
     IUnitesEnseignementTranslator,
 )
-from admission.ddd.admission.dtos.formation import BaseFormationDTO
-from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
-from admission.ddd.admission.enums import TypeSituationAssimilation
-from admission.ddd.admission.enums.emplacement_document import (
+from admission.ddd.admission.shared_kernel.dtos.formation import BaseFormationDTO
+from admission.ddd.admission.shared_kernel.dtos.profil_candidat import ProfilCandidatDTO
+from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     StatutEmplacementDocument,
     StatutReclamationEmplacementDocument,
     TypeEmplacementDocument,
@@ -68,8 +68,8 @@ from admission.ddd.admission.formation_generale.test.factory.proposition import 
     PropositionFactory,
     _PropositionIdentityFactory,
 )
-from admission.ddd.admission.repository.i_proposition import formater_reference
-from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
+from admission.ddd.admission.shared_kernel.repository.i_proposition import formater_reference
+from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationIdentityFactory
 from admission.infrastructure.admission.domain.service.in_memory.poste_diplomatique import (
     PosteDiplomatiqueInMemoryTranslator,
 )

@@ -26,11 +26,11 @@
 from typing import Optional
 
 from admission.models import DiplomaticPost
-from admission.ddd.admission.domain.model.poste_diplomatique import PosteDiplomatiqueIdentity
+from admission.ddd.admission.shared_kernel.domain.model.poste_diplomatique import PosteDiplomatiqueIdentity
 
-from admission.ddd.admission.domain.service.i_poste_diplomatique import IPosteDiplomatiqueTranslator
-from admission.ddd.admission.domain.validator.exceptions import PosteDiplomatiqueNonTrouveException
-from admission.ddd.admission.dtos.poste_diplomatique import PosteDiplomatiqueDTO
+from admission.ddd.admission.shared_kernel.domain.service.i_poste_diplomatique import IPosteDiplomatiqueTranslator
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import PosteDiplomatiqueNonTrouveException
+from admission.ddd.admission.shared_kernel.dtos.poste_diplomatique import PosteDiplomatiqueDTO
 
 
 class PosteDiplomatiqueTranslator(IPosteDiplomatiqueTranslator):

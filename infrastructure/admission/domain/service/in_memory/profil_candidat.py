@@ -41,24 +41,24 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     CurriculumAdmissionDTO,
 )
-from admission.ddd.admission.domain.service.i_profil_candidat import (
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
-from admission.ddd.admission.domain.validator.exceptions import (
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     ExperienceNonTrouveeException,
 )
-from admission.ddd.admission.dtos import (
+from admission.ddd.admission.shared_kernel.dtos import (
     AdressePersonnelleDTO,
     CoordonneesDTO,
     IdentificationDTO,
 )
-from admission.ddd.admission.dtos.etudes_secondaires import (
+from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import (
     EtudesSecondairesAdmissionDTO,
 )
-from admission.ddd.admission.dtos.formation import FormationDTO
-from admission.ddd.admission.dtos.merge_proposal import MergeProposalDTO
-from admission.ddd.admission.dtos.resume import ResumeCandidatDTO
-from admission.ddd.admission.enums.valorisation_experience import (
+from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
+from admission.ddd.admission.shared_kernel.dtos.merge_proposal import MergeProposalDTO
+from admission.ddd.admission.shared_kernel.dtos.resume import ResumeCandidatDTO
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
     ExperiencesCVRecuperees,
 )
 from base.models.enums.civil_state import CivilState

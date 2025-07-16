@@ -26,7 +26,7 @@
 import datetime
 from unittest import TestCase, mock
 
-from admission.ddd.admission.dtos.periode import PeriodeDTO
+from admission.ddd.admission.shared_kernel.dtos.periode import PeriodeDTO
 from admission.ddd.admission.formation_generale.commands import (
     RecupererPeriodeInscriptionSpecifiqueBachelierMedecineDentisterieQuery,
 )

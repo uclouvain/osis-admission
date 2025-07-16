@@ -60,19 +60,19 @@ from admission.ddd.admission.doctorat.preparation.dtos.proposition import (
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
     IPropositionRepository,
 )
-from admission.ddd.admission.domain.model.titre_acces_selectionnable import (
+from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import (
     TitreAccesSelectionnable,
 )
-from admission.ddd.admission.domain.service.i_profil_candidat import (
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
-from admission.ddd.admission.domain.service.i_unites_enseignement_translator import (
+from admission.ddd.admission.shared_kernel.domain.service.i_unites_enseignement_translator import (
     IUnitesEnseignementTranslator,
 )
-from admission.ddd.admission.dtos.resume import (
+from admission.ddd.admission.shared_kernel.dtos.resume import (
     ResumeEtEmplacementsDocumentsPropositionDTO,
 )
-from admission.ddd.admission.enums.emplacement_document import OngletsDemande
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from admission.exports.utils import admission_generate_pdf
 from admission.infrastructure.admission.domain.service.unites_enseignement_translator import (
     UnitesEnseignementTranslator,

@@ -34,7 +34,7 @@ from django.views.generic import ListView
 from django.views.generic.edit import FormMixin
 
 from admission.constants import DEFAULT_PAGINATOR_SIZE
-from admission.ddd.admission.commands import ListerToutesDemandesQuery
+from admission.ddd.admission.shared_kernel.commands import ListerToutesDemandesQuery
 from admission.forms.admission.filter import AllAdmissionsFilterForm
 from admission.models.working_list import UNCHANGED_KEY
 from admission.utils import add_messages_into_htmx_response

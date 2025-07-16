@@ -41,7 +41,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     ChoixStatutChecklist,
 )
-from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.models import DoctorateAdmission
 from admission.models.checklist import AdditionalApprovalCondition
 from admission.tests.factories import DoctorateAdmissionFactory

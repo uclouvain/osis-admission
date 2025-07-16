@@ -33,7 +33,7 @@ from admission.ddd.admission.doctorat.preparation.commands import (
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     PropositionNonTrouveeException,
 )
-from admission.ddd.admission.domain.model.enums.equivalence import (
+from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import (
     TypeEquivalenceTitreAcces,
     StatutEquivalenceTitreAcces,
     EtatEquivalenceTitreAcces,

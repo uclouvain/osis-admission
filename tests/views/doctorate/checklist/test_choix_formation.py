@@ -44,7 +44,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixSousDomaineSciences,
     ChoixStatutPropositionDoctorale,
 )
-from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.models import DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.doctorate import DoctorateFactory

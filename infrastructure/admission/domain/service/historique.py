@@ -31,8 +31,8 @@ from django.utils.translation import gettext_lazy
 from osis_history.utilities import add_history_entry
 
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
-from admission.ddd.admission.domain.model.enums.type_gestionnaire import TypeGestionnaire
-from admission.ddd.admission.domain.service.i_historique import IHistorique, PropositionAdmission
+from admission.ddd.admission.shared_kernel.domain.model.enums.type_gestionnaire import TypeGestionnaire
+from admission.ddd.admission.shared_kernel.domain.service.i_historique import IHistorique, PropositionAdmission
 from admission.infrastructure.utils import get_message_to_historize
 from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
 

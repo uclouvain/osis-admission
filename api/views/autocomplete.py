@@ -46,7 +46,7 @@ from admission.api.serializers import PersonSerializer
 from admission.ddd.admission.doctorat.preparation.commands import (
     RechercherDoctoratQuery,
 )
-from admission.ddd.admission.domain.enums import LISTE_TYPES_FORMATION_GENERALE
+from admission.ddd.admission.shared_kernel.domain.enums import LISTE_TYPES_FORMATION_GENERALE
 from admission.ddd.admission.formation_continue.commands import (
     RechercherFormationContinueQuery,
 )

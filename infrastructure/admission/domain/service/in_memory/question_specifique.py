@@ -28,12 +28,12 @@ from typing import List, Optional, Union
 
 import attr
 
-from admission.ddd.admission.domain.model.formation import FormationIdentity
-from admission.ddd.admission.domain.model.question_specifique import QuestionSpecifique, QuestionSpecifiqueIdentity
-from admission.ddd.admission.domain.service.i_question_specifique import ISuperQuestionSpecifiqueTranslator
-from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
-from admission.ddd.admission.enums import CleConfigurationItemFormulaire
-from admission.ddd.admission.enums.question_specifique import (
+from admission.ddd.admission.shared_kernel.domain.model.formation import FormationIdentity
+from admission.ddd.admission.shared_kernel.domain.model.question_specifique import QuestionSpecifique, QuestionSpecifiqueIdentity
+from admission.ddd.admission.shared_kernel.domain.service.i_question_specifique import ISuperQuestionSpecifiqueTranslator
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
+from admission.ddd.admission.shared_kernel.enums import CleConfigurationItemFormulaire
+from admission.ddd.admission.shared_kernel.enums.question_specifique import (
     Onglets,
     TypeItemFormulaire,
 )

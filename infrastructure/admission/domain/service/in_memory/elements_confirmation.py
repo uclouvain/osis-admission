@@ -26,7 +26,7 @@
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
     PropositionAdmissionSC3DPMinimaleFactory,
 )
-from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
+from admission.ddd.admission.shared_kernel.domain.service.i_elements_confirmation import IElementsConfirmation
 from admission.infrastructure.admission.doctorat.preparation.domain.service.in_memory.doctorat import (
     DoctoratInMemoryTranslator,
 )

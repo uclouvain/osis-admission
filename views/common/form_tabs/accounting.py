@@ -27,7 +27,7 @@ from django.urls import reverse
 from django.views.generic import FormView
 
 from admission.constants import CONTEXT_GENERAL, CONTEXT_DOCTORATE
-from admission.ddd.admission.enums import FORMATTED_RELATIONSHIPS, LienParente
+from admission.ddd.admission.shared_kernel.enums import FORMATTED_RELATIONSHIPS, LienParente
 from admission.ddd.admission.formation_generale.commands import (
     CompleterComptabilitePropositionCommand as CompleterComptabilitePropositionGeneraleCommand,
 )

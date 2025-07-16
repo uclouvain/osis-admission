@@ -2,8 +2,8 @@
 from django.conf import settings
 from django.db import migrations
 
-from admission.ddd.admission.domain.enums import TypeFormation
-from admission.ddd.admission.enums import (
+from admission.ddd.admission.shared_kernel.domain.enums import TypeFormation
+from admission.ddd.admission.shared_kernel.enums import (
     CleConfigurationItemFormulaire,
     CritereItemFormulaireFormation,
     Onglets,

@@ -28,7 +28,7 @@ from typing import Union
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
     Proposition as PropositionDoctorale,
 )
-from admission.ddd.admission.domain.service.i_raccrocher_experiences_curriculum import (
+from admission.ddd.admission.shared_kernel.domain.service.i_raccrocher_experiences_curriculum import (
     IRaccrocherExperiencesCurriculum,
 )
 from admission.ddd.admission.formation_continue.domain.model.proposition import (

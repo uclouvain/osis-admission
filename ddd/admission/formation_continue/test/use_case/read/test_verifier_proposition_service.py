@@ -28,14 +28,14 @@ from unittest import mock
 import freezegun
 from django.test import TestCase
 
-from admission.ddd.admission.domain.validator.exceptions import (
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     NombrePropositionsSoumisesDepasseException,
     QuestionsSpecifiquesCurriculumNonCompleteesException,
     QuestionsSpecifiquesEtudesSecondairesNonCompleteesException,
     QuestionsSpecifiquesInformationsComplementairesNonCompleteesException,
     QuestionsSpecifiquesChoixFormationNonCompleteesException,
 )
-from admission.ddd.admission.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
+from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.formation_continue.commands import VerifierPropositionQuery
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,

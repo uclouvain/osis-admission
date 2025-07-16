@@ -30,22 +30,22 @@ from django.conf import settings
 from django.db.models import F, Max, Prefetch, Q, QuerySet
 from django.utils.translation import get_language, gettext
 
-from admission.ddd.admission.domain.model.enums.condition_acces import (
+from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import (
     TypeTitreAccesSelectionnable,
 )
-from admission.ddd.admission.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.domain.model.titre_acces_selectionnable import (
+from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import (
     TitreAccesSelectionnable,
     TitreAccesSelectionnableIdentity,
 )
-from admission.ddd.admission.domain.repository.i_titre_acces_selectionnable import (
+from admission.ddd.admission.shared_kernel.domain.repository.i_titre_acces_selectionnable import (
     ITitreAccesSelectionnableRepository,
 )
-from admission.ddd.admission.domain.validator.exceptions import (
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     ExperienceNonTrouveeException,
     PropositionNonTrouveeException,
 )
-from admission.ddd.admission.enums.emplacement_document import OngletsDemande
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from admission.models.base import (
     AdmissionEducationalValuatedExperiences,
     AdmissionProfessionalValuatedExperiences,

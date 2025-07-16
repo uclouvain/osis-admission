@@ -27,7 +27,7 @@ from typing import Dict
 
 from django.test import SimpleTestCase
 
-from admission.ddd.admission.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
+from admission.ddd.admission.shared_kernel.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
 from admission.ddd.admission.formation_generale.commands import (
     RecupererTitresAccesSelectionnablesPropositionQuery,
 )

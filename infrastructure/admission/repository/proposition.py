@@ -28,7 +28,7 @@ from abc import ABCMeta
 from django.db import connection
 
 from admission.models.base import REFERENCE_SEQ_NAME
-from admission.ddd.admission.repository.i_proposition import IGlobalPropositionRepository
+from admission.ddd.admission.shared_kernel.repository.i_proposition import IGlobalPropositionRepository
 
 
 class GlobalPropositionRepository(IGlobalPropositionRepository, metaclass=ABCMeta):

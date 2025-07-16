@@ -30,19 +30,19 @@ from typing import Dict, List, Optional
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AdresseDomicileLegalNonCompleteeException,
 )
-from admission.ddd.admission.domain.enums import TypeFormation
-from admission.ddd.admission.domain.service.i_annee_inscription_formation import (
+from admission.ddd.admission.shared_kernel.domain.enums import TypeFormation
+from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import (
     Date,
     IAnneeInscriptionFormationTranslator,
 )
-from admission.ddd.admission.domain.service.i_profil_candidat import (
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
-from admission.ddd.admission.domain.service.i_titres_acces import (
+from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import (
     ConditionAccess,
     ITitresAcces,
 )
-from admission.ddd.admission.dtos import AdressePersonnelleDTO
+from admission.ddd.admission.shared_kernel.dtos import AdressePersonnelleDTO
 from admission.ddd.admission.formation_generale.domain.model.proposition import (
     Proposition as PropositionGenerale,
 )

@@ -28,8 +28,8 @@ from typing import List
 
 from django.db import models
 
-from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
-from admission.ddd.admission.dtos.conditions import AdmissionConditionsDTO
+from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import ITitresAcces
+from admission.ddd.admission.shared_kernel.dtos.conditions import AdmissionConditionsDTO
 from base.models.enums.got_diploma import GotDiploma
 from base.models.person import Person
 from osis_profile.models import (

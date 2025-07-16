@@ -26,8 +26,8 @@
 
 from typing import List
 
-from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
-from admission.ddd.admission.dtos.conditions import AdmissionConditionsDTO
+from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import ITitresAcces
+from admission.ddd.admission.shared_kernel.dtos.conditions import AdmissionConditionsDTO
 from admission.tests.factories.conditions import AdmissionConditionsDTOFactory
 
 

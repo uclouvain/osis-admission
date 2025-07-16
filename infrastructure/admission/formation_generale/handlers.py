@@ -26,7 +26,7 @@
 
 import waffle
 
-from admission.ddd.admission.commands import RechercherParcoursAnterieurQuery
+from admission.ddd.admission.shared_kernel.commands import RechercherParcoursAnterieurQuery
 from admission.ddd.admission.formation_generale.commands import *
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     OngletsChecklist,
@@ -72,13 +72,13 @@ from admission.ddd.admission.formation_generale.use_case.write.specifier_financa
 from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_resultat_calcul_service import (
     specifier_financabilite_resultat_calcul,
 )
-from admission.ddd.admission.use_case.read import (
+from admission.ddd.admission.shared_kernel.use_case.read import (
     recuperer_questions_specifiques_proposition,
 )
-from admission.ddd.admission.use_case.read.rechercher_parcours_anterieur import (
+from admission.ddd.admission.shared_kernel.use_case.read.rechercher_parcours_anterieur import (
     rechercher_parcours_anterieur,
 )
-from admission.ddd.admission.use_case.write import (
+from admission.ddd.admission.shared_kernel.use_case.write import (
     annuler_reclamation_emplacement_document,
     initialiser_emplacement_document_a_reclamer,
     initialiser_emplacement_document_libre_a_reclamer,

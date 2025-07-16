@@ -24,20 +24,20 @@
 #
 # ##############################################################################
 
-from admission.ddd.admission.domain.service.i_emplacements_documents_proposition import (
+from admission.ddd.admission.shared_kernel.domain.service.i_emplacements_documents_proposition import (
     IEmplacementsDocumentsPropositionTranslator,
 )
-from admission.ddd.admission.domain.service.i_profil_candidat import (
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
-from admission.ddd.admission.domain.service.i_unites_enseignement_translator import (
+from admission.ddd.admission.shared_kernel.domain.service.i_unites_enseignement_translator import (
     IUnitesEnseignementTranslator,
 )
-from admission.ddd.admission.domain.service.resume_proposition import ResumeProposition
-from admission.ddd.admission.dtos.resume import (
+from admission.ddd.admission.shared_kernel.domain.service.resume_proposition import ResumeProposition
+from admission.ddd.admission.shared_kernel.dtos.resume import (
     ResumeEtEmplacementsDocumentsPropositionDTO,
 )
-from admission.ddd.admission.enums import TypeItemFormulaire
+from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire
 from admission.ddd.admission.formation_generale.commands import (
     RecupererResumeEtEmplacementsDocumentsPropositionQuery,
 )

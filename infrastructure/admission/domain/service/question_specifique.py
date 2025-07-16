@@ -29,12 +29,12 @@ from django.utils.translation import get_language
 
 from admission.models import AdmissionFormItemInstantiation
 from admission.models.base import BaseAdmission
-from admission.ddd.admission.domain.model.question_specifique import QuestionSpecifique, QuestionSpecifiqueIdentity
-from admission.ddd.admission.domain.service.i_question_specifique import ISuperQuestionSpecifiqueTranslator
-from admission.ddd.admission.domain.validator.exceptions import PropositionNonTrouveeException
-from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
-from admission.ddd.admission.enums import TYPES_ITEMS_LECTURE_SEULE
-from admission.ddd.admission.enums.question_specifique import (
+from admission.ddd.admission.shared_kernel.domain.model.question_specifique import QuestionSpecifique, QuestionSpecifiqueIdentity
+from admission.ddd.admission.shared_kernel.domain.service.i_question_specifique import ISuperQuestionSpecifiqueTranslator
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import PropositionNonTrouveeException
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
+from admission.ddd.admission.shared_kernel.enums import TYPES_ITEMS_LECTURE_SEULE
+from admission.ddd.admission.shared_kernel.enums.question_specifique import (
     Onglets,
     TypeItemFormulaire,
 )

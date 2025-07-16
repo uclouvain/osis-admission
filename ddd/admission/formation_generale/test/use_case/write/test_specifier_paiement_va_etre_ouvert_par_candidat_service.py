@@ -31,7 +31,7 @@ import freezegun
 from django.test import SimpleTestCase
 
 from admission.constants import ADMISSION_POOL_ACADEMIC_CALENDAR_TYPES
-from admission.ddd.admission.domain.model.periode import Periode
+from admission.ddd.admission.shared_kernel.domain.model.periode import Periode
 from admission.ddd.admission.formation_generale.commands import (
     SpecifierPaiementVaEtreOuvertParCandidatCommand,
 )

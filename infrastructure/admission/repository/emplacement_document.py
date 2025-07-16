@@ -37,21 +37,21 @@ from django.utils.dateparse import parse_date, parse_datetime
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     OngletsChecklist as OngletsChecklistDoctorat,
 )
-from admission.ddd.admission.domain.model.emplacement_document import (
+from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import (
     EmplacementDocument,
     EmplacementDocumentIdentity,
 )
-from admission.ddd.admission.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.domain.validator.exceptions import (
+from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     EmplacementDocumentNonTrouveException,
     PropositionNonTrouveeException,
 )
-from admission.ddd.admission.enums import (
+from admission.ddd.admission.shared_kernel.enums import (
     CritereItemFormulaireFormation,
     Onglets,
     TypeItemFormulaire,
 )
-from admission.ddd.admission.enums.emplacement_document import (
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     EMPLACEMENTS_DOCUMENTS_LIBRES_NON_RECLAMABLES,
     EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES,
     EMPLACEMENTS_DOCUMENTS_RECLAMABLES,
@@ -66,7 +66,7 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     OngletsChecklist as OngletsChecklistGenerale,
 )
-from admission.ddd.admission.repository.i_emplacement_document import (
+from admission.ddd.admission.shared_kernel.repository.i_emplacement_document import (
     IEmplacementDocumentRepository,
 )
 from admission.infrastructure.utils import (

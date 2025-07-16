@@ -25,14 +25,14 @@
 # ##############################################################################
 import datetime
 
-from admission.ddd.admission.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.domain.repository.i_titre_acces_selectionnable import (
+from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.shared_kernel.domain.repository.i_titre_acces_selectionnable import (
     ITitreAccesSelectionnableRepository,
 )
-from admission.ddd.admission.domain.service.i_profil_candidat import (
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
-from admission.ddd.admission.domain.service.i_unites_enseignement_translator import (
+from admission.ddd.admission.shared_kernel.domain.service.i_unites_enseignement_translator import (
     IUnitesEnseignementTranslator,
 )
 from admission.ddd.admission.formation_generale.commands import (

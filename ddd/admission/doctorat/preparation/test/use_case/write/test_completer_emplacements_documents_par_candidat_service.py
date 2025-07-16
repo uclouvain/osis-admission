@@ -44,18 +44,18 @@ from admission.ddd.admission.doctorat.preparation.domain.model.proposition impor
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     PropositionNonTrouveeException,
 )
-from admission.ddd.admission.domain.model.emplacement_document import (
+from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import (
     EmplacementDocument,
     EmplacementDocumentIdentity,
 )
-from admission.ddd.admission.domain.model.enums.type_gestionnaire import (
+from admission.ddd.admission.shared_kernel.domain.model.enums.type_gestionnaire import (
     TypeGestionnaire,
 )
-from admission.ddd.admission.domain.validator.exceptions import (
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     DocumentsCompletesDifferentsDesReclamesException,
     DocumentsReclamesImmediatementNonCompletesException,
 )
-from admission.ddd.admission.enums.emplacement_document import (
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     StatutEmplacementDocument,
     StatutReclamationEmplacementDocument,
     TypeEmplacementDocument,

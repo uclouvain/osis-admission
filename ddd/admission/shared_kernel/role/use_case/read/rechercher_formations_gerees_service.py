@@ -26,7 +26,7 @@
 
 from typing import List
 
-from admission.ddd.admission.dtos.formation import BaseFormationDTO
+from admission.ddd.admission.shared_kernel.dtos.formation import BaseFormationDTO
 from admission.ddd.admission.shared_kernel.role.commands import RechercherFormationsGereesQuery
 from admission.ddd.admission.shared_kernel.role.repository.gestionnaire import IGestionnaireRepository
 

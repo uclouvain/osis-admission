@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.commands import EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique

@@ -51,7 +51,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_POUR_LISTING,
 )
-from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
+from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
 from admission.forms import (
     ALL_EMPTY_CHOICE,
     ALL_FEMININE_EMPTY_CHOICE,

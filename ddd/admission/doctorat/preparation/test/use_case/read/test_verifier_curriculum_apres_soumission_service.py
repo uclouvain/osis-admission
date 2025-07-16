@@ -40,10 +40,10 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     AnneesCurriculumNonSpecifieesException,
     ExperiencesAcademiquesNonCompleteesException,
 )
-from admission.ddd.admission.dtos.etudes_secondaires import (
+from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import (
     EtudesSecondairesAdmissionDTO,
 )
-from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
+from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationIdentityFactory
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )

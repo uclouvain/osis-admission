@@ -27,21 +27,21 @@ import datetime
 import uuid
 from typing import List, Optional, Set
 
-from admission.ddd.admission.domain.model.emplacement_document import (
+from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import (
     EmplacementDocument,
     EmplacementDocumentIdentity,
 )
-from admission.ddd.admission.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.domain.validator.exceptions import (
+from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     EmplacementDocumentNonTrouveException,
 )
-from admission.ddd.admission.enums.emplacement_document import (
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     OngletsDemande,
     StatutEmplacementDocument,
     StatutReclamationEmplacementDocument,
     TypeEmplacementDocument,
 )
-from admission.ddd.admission.repository.i_emplacement_document import (
+from admission.ddd.admission.shared_kernel.repository.i_emplacement_document import (
     IEmplacementDocumentRepository,
 )
 from osis_common.ddd.interface import ApplicationService, EntityIdentity

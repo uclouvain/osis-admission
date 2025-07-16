@@ -25,7 +25,7 @@
 # ##############################################################################
 from django.test import TestCase
 
-from admission.ddd.admission.domain.validator.exceptions import PosteDiplomatiqueNonTrouveException
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import PosteDiplomatiqueNonTrouveException
 from admission.ddd.admission.formation_generale.commands import (
     CompleterQuestionsSpecifiquesCommand,
 )

@@ -30,15 +30,15 @@ from typing import Dict
 import freezegun
 from django.test import SimpleTestCase
 
-from admission.ddd.admission.domain.model.emplacement_document import (
+from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import (
     EmplacementDocument,
     EmplacementDocumentIdentity,
 )
-from admission.ddd.admission.domain.validator.exceptions import (
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     DocumentsCompletesDifferentsDesReclamesException,
     DocumentsReclamesImmediatementNonCompletesException,
 )
-from admission.ddd.admission.enums.emplacement_document import (
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     StatutEmplacementDocument,
     StatutReclamationEmplacementDocument,
     TypeEmplacementDocument,

@@ -28,13 +28,13 @@ from datetime import date, timedelta
 from typing import List, Optional, Tuple
 
 from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
-from admission.ddd.admission.domain.model.periode import Periode
-from admission.ddd.admission.domain.service.i_calendrier_inscription import (
+from admission.ddd.admission.shared_kernel.domain.model.periode import Periode
+from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription import (
     ICalendrierInscription,
 )
-from admission.ddd.admission.dtos import IdentificationDTO
-from admission.ddd.admission.dtos.periode import PeriodeDTO
-from admission.ddd.admission.enums import TypeSituationAssimilation
+from admission.ddd.admission.shared_kernel.dtos import IdentificationDTO
+from admission.ddd.admission.shared_kernel.dtos.periode import PeriodeDTO
+from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation
 from admission.infrastructure.admission.domain.service.in_memory.annee_inscription_formation import (
     AnneeInscriptionFormationInMemoryTranslator,
 )

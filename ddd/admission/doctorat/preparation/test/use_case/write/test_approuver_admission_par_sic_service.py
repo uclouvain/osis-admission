@@ -51,18 +51,18 @@ from admission.ddd.admission.doctorat.preparation.test.factory.proposition impor
     PropositionAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
     _PropositionIdentityFactory,
 )
-from admission.ddd.admission.domain.model.emplacement_document import (
+from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import (
     EmplacementDocumentIdentity,
 )
-from admission.ddd.admission.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.domain.validator.exceptions import EnQuarantaineException
-from admission.ddd.admission.dtos.merge_proposal import MergeProposalDTO
-from admission.ddd.admission.enums.emplacement_document import (
+from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import EnQuarantaineException
+from admission.ddd.admission.shared_kernel.dtos.merge_proposal import MergeProposalDTO
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     OngletsDemande,
     StatutEmplacementDocument,
     StatutReclamationEmplacementDocument,
 )
-from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
+from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationIdentityFactory
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.groupe_de_supervision import (
     GroupeDeSupervisionInMemoryRepository,
 )

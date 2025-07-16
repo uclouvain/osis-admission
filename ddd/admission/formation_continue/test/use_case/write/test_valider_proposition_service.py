@@ -28,8 +28,8 @@ from unittest.mock import patch
 import mock
 from django.test import SimpleTestCase
 
-from admission.ddd.admission.domain.validator.exceptions import EnQuarantaineException
-from admission.ddd.admission.dtos.merge_proposal import MergeProposalDTO
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import EnQuarantaineException
+from admission.ddd.admission.shared_kernel.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.formation_continue.commands import (
     AnnulerPropositionCommand,
     ValiderPropositionCommand,

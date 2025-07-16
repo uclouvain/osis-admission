@@ -25,8 +25,8 @@
 # ##############################################################################
 from abc import ABCMeta
 
-from admission.ddd.admission.repository.i_proposition import IGlobalPropositionRepository
-from admission.ddd.admission.test.factory.reference import REFERENCE_MEMORY_ITERATOR
+from admission.ddd.admission.shared_kernel.repository.i_proposition import IGlobalPropositionRepository
+from admission.ddd.admission.shared_kernel.tests.factory.reference import REFERENCE_MEMORY_ITERATOR
 
 
 class GlobalPropositionInMemoryRepository(IGlobalPropositionRepository, metaclass=ABCMeta):

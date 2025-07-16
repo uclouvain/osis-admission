@@ -42,7 +42,7 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
 from admission.ddd.admission.formation_generale.test.factory.proposition import (
     PropositionFactory,
 )
-from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
+from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationIdentityFactory
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
 )

@@ -28,7 +28,7 @@ import uuid
 import factory
 
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import _PropositionIdentityFactory
-from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
+from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.doctorat.validation.domain.model.demande import Demande, DemandeIdentity
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC
 

@@ -38,15 +38,15 @@ from osis_mail_template.exceptions import EmptyMailTemplateContent
 from osis_mail_template.models import MailTemplate
 
 from admission.auth.roles.program_manager import ProgramManager
-from admission.ddd.admission.commands import ListerToutesDemandesQuery
-from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
-from admission.ddd.admission.dtos.resume import (
+from admission.ddd.admission.shared_kernel.commands import ListerToutesDemandesQuery
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
+from admission.ddd.admission.shared_kernel.dtos.resume import (
     ResumeEtEmplacementsDocumentsPropositionDTO,
 )
 from admission.ddd.admission.formation_continue.commands import (
     RecupererResumeEtEmplacementsDocumentsPropositionQuery,
 )
-from admission.ddd.admission.enums.statut import (
+from admission.ddd.admission.shared_kernel.enums.statut import (
     STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER_OU_ANNULEE,
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import (

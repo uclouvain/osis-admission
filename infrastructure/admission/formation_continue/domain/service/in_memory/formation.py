@@ -27,16 +27,16 @@ from typing import List, Optional
 
 import factory
 
-from admission.ddd.admission.domain.enums import TypeFormation
-from admission.ddd.admission.domain.model.formation import Formation, FormationIdentity
-from admission.ddd.admission.dtos.formation import FormationDTO
+from admission.ddd.admission.shared_kernel.domain.enums import TypeFormation
+from admission.ddd.admission.shared_kernel.domain.model.formation import Formation, FormationIdentity
+from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from admission.ddd.admission.formation_continue.domain.service.i_formation import (
     IFormationContinueTranslator,
 )
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
     FormationNonTrouveeException,
 )
-from admission.ddd.admission.test.factory.formation import FormationFactory
+from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationFactory
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.state_iufc import StateIUFC
 from ddd.logic.formation_catalogue.formation_continue.domain.model.informations_specifiques import (

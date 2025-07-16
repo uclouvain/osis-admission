@@ -69,11 +69,11 @@ from admission.ddd.admission.doctorat.preparation.test.factory.proposition impor
     PropositionPreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
     PropositionPreAdmissionSC3DPMinimaleFactory,
 )
-from admission.ddd.admission.domain.service.i_unites_enseignement_translator import (
+from admission.ddd.admission.shared_kernel.domain.service.i_unites_enseignement_translator import (
     IUnitesEnseignementTranslator,
 )
-from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.ddd.admission.repository.i_proposition import formater_reference
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
+from admission.ddd.admission.shared_kernel.repository.i_proposition import formater_reference
 from admission.infrastructure.admission.doctorat.preparation.domain.service.in_memory.doctorat import (
     DoctoratInMemoryTranslator,
 )

@@ -42,8 +42,8 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 from admission.ddd.admission.doctorat.preparation.test.factory.person import (
     PersonneConnueUclDTOFactory,
 )
-from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
-from admission.ddd.admission.enums.emplacement_document import (
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     DocumentsCurriculum,
     DocumentsIdentification,
     DocumentsSysteme,
