@@ -94,9 +94,7 @@ from .reclamer_documents_au_candidat_service import reclamer_documents_au_candid
 from .refuser_proposition_par_faculte_service import refuser_proposition_par_cdd
 from .refuser_proposition_par_sic_service import refuser_proposition_par_sic
 from .refuser_proposition_service import refuser_proposition
-from .renvoyer_invitation_signature_externe_service import (
-    renvoyer_invitation_signature_externe,
-)
+from .renvoyer_invitation_signature_service import renvoyer_invitation_signature
 from .retyper_document_service import retyper_document
 from .soumettre_proposition_service import soumettre_proposition
 from .specifier_besoin_de_derogation_service import specifier_besoin_de_derogation
