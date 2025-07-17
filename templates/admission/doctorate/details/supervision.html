@@ -29,7 +29,7 @@
 {% endblock %}
 
 {% block tab_content %}
-  {% panel _("Promoters") %}
+  {% panel _("Supervisors") %}
     {% for signature in groupe_supervision.signatures_promoteurs %}
       {% include "admission/doctorate/details/includes/supervision_member_entry.html" with type='PROMOTER' member=signature.promoteur supervision=groupe_supervision %}
     {% empty %}
@@ -50,7 +50,7 @@
     <form class="osis-form" method="post" action="">
       {% csrf_token %}
       {% bootstrap_form_errors add_form %}
-      {% panel _("Add a promoter or a CA member") %}
+      {% panel _("Add a supervisor or a supervision committee member") %}
         <div class="row">
           <div class="col-md-12">
             {% bootstrap_field add_form.type %}
@@ -71,7 +71,7 @@
                 {% bootstrap_field add_form.institution form_group_class="form-group required_field" %}
                 {% bootstrap_field add_form.ville form_group_class="form-group required_field" %}
                 {% bootstrap_field add_form.pays form_group_class="form-group required_field" %}
-                {% bootstrap_field add_form.langue form_group_class="form-group required_field" %}
+                {% bootstrap_field_with_tooltip add_form.langue classes="required_field" %}
               </div>
             </div>
           </div>

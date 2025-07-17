@@ -37,7 +37,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='doctorateadmission',
             name='work_start_date',
-            field=models.DateField(blank=True, null=True, verbose_name='Work start date'),
+            field=models.DateField(blank=True, null=True, verbose_name='Research start date'),
         ),
         migrations.AddField(
             model_name='doctorateadmission',

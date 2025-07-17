@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -29,21 +29,21 @@ from osis_signature.enums import SignatureState
 from rules import predicate
 
 from admission.auth.predicates import not_in_doctorate_statuses_predicate_message
-from admission.models import DoctorateAdmission
-from admission.models.enums.actor_type import ActorType
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixStatutPropositionDoctorale,
-    STATUTS_PROPOSITION_AVANT_SOUMISSION,
-    ChoixTypeAdmission,
     STATUTS_PROPOSITION_AVANT_INSCRIPTION,
+    STATUTS_PROPOSITION_AVANT_SOUMISSION,
+    STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_CDD_POUR_DECISION,
     STATUTS_PROPOSITION_DOCTORALE_SOUMISE,
+    STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CANDIDAT,
     STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD,
     STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD_ETENDUS,
     STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_SIC,
     STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_SIC_ETENDUS,
-    STATUTS_PROPOSITION_DOCTORALE_ENVOYABLE_EN_CDD_POUR_DECISION,
-    STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CANDIDAT,
+    ChoixStatutPropositionDoctorale,
+    ChoixTypeAdmission,
 )
+from admission.models import DoctorateAdmission
+from admission.models.enums.actor_type import ActorType
 from osis_role.cache import predicate_cache
 from osis_role.errors import predicate_failed_msg
 
@@ -106,7 +106,7 @@ def is_being_enrolled(self, user: User, obj: DoctorateAdmission):
 
 
 @predicate(bind=True)
-@predicate_failed_msg(message=_("You must be the request promoter to access this admission"))
+@predicate_failed_msg(message=_("You must be the request supervisor to access this admission"))
 def is_admission_request_promoter(self, user: User, obj: DoctorateAdmission):
     return obj.supervision_group and user.person.pk in [
         actor.person_id
@@ -116,7 +116,7 @@ def is_admission_request_promoter(self, user: User, obj: DoctorateAdmission):
 
 
 @predicate(bind=True)
-@predicate_failed_msg(message=_("You must be the reference promoter to access this admission"))
+@predicate_failed_msg(message=_("You must be the contact supervisor to access this admission"))
 def is_admission_reference_promoter(self, user: User, obj: DoctorateAdmission):
     return obj.supervision_group and user.person.pk in [
         actor.person_id

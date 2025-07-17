@@ -37,7 +37,7 @@ class CddDoctorateSendMailForm(forms.Form):
         disabled=True,
     )
     cc_promoteurs = forms.BooleanField(
-        label=_("Carbon-copy the promoters"),
+        label=_("Carbon-copy the supervisors"),
         required=False,
     )
     cc_membres_ca = forms.BooleanField(
