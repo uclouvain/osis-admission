@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Admission API
-  version: 1.1.2dev1438
+  version: 1.1.2dev1540
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -9196,6 +9196,11 @@ components:
           title: Fin
         type:
           $ref: '#/components/schemas/TypeEnum'
+        certificate:
+          type: array
+          items:
+            type: string
+          title: Attestation
         valuated_from_trainings:
           type: array
           items:
