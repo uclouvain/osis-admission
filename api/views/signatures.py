@@ -43,8 +43,8 @@ class RequestSignaturesAPIView(APIPermissionRequiredMixin, APIView):
     pagination_class = None
     filter_backends = []
     permission_mapping = {
-        'PUT': 'admission.resend_external_invitation',
-        'POST': 'admission.request_signatures',
+        'PUT': 'admission.api_resend_external_invitation',
+        'POST': 'admission.api_request_signatures',
     }
 
     def get_permission_object(self):

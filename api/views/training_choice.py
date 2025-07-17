@@ -197,8 +197,8 @@ class DoctorateUpdateAdmissionTypeAPIView(
 ):
     name = "doctorate_admission_type_update"
     permission_mapping = {
-        'GET': 'admission.view_admission_training_choice',
-        'PUT': 'admission.change_admission_training_choice',
+        'GET': 'admission.api_view_admission_training_choice',
+        'PUT': 'admission.api_change_admission_training_choice',
     }
     pagination_class = None
     filter_backends = []

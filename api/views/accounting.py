@@ -88,8 +88,8 @@ class BaseAccountingView(
 class DoctorateAccountingView(BaseAccountingView):
     name = 'doctorate_accounting'
     permission_mapping = {
-        'GET': 'admission.view_admission_accounting',
-        'PUT': 'admission.change_admission_accounting',
+        'GET': 'admission.api_view_admission_accounting',
+        'PUT': 'admission.api_change_admission_accounting',
     }
     get_serializer_class = serializers.DoctorateEducationAccountingDTOSerializer
     put_serializer_class = serializers.CompleterComptabilitePropositionDoctoraleCommandSerializer
