@@ -42,7 +42,7 @@ from admission.ddd.admission.formation_generale import (
 from admission.ddd.admission.formation_generale.dtos import (
     ComptabiliteDTO as GeneralAccountingDTO,
 )
-from admission.infrastructure.admission.domain.service.profil_candidat import (
+from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import (
     ProfilCandidatTranslator,
 )
 from admission.utils import takewhile_return_attribute_values

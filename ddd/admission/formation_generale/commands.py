@@ -29,8 +29,8 @@ from typing import Dict, List, Optional
 
 import attr
 
-from admission.ddd.admission import commands
-from admission.ddd.admission.enums.valorisation_experience import (
+from admission.ddd.admission.shared_kernel import commands
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
     ExperiencesCVRecuperees,
 )
 from osis_common.ddd import interface

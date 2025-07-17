@@ -28,7 +28,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model._comptabilite imp
     Comptabilite,
     comptabilite_non_remplie,
 )
-from admission.ddd.admission.enums import (
+from admission.ddd.admission.shared_kernel.enums import (
     ChoixAssimilation1,
     ChoixAssimilation2,
     ChoixAssimilation3,

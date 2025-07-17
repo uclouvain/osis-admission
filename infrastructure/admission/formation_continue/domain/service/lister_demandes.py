@@ -32,7 +32,7 @@ from django.db.models.fields import CharField
 from django.db.models.functions import Coalesce, Concat
 from django.utils.translation import get_language, gettext
 
-from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
+from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixEdition,
     ChoixStatutPropositionContinue,

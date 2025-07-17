@@ -42,10 +42,10 @@ from admission.ddd.admission.formation_generale.domain.model.proposition import 
 from admission.ddd.admission.formation_generale.test.factory.proposition import (
     PropositionFactory,
 )
-from admission.infrastructure.admission.domain.service.in_memory.elements_confirmation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.elements_confirmation import (
     ElementsConfirmationInMemory,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
 )
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.formation import (

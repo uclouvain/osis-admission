@@ -35,7 +35,7 @@ from admission.calendar.admission_calendar import (
     DoctorateAdmissionCalendar,
     GeneralEducationAdmissionCalendar,
 )
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
 from base.models.academic_calendar import AcademicCalendar

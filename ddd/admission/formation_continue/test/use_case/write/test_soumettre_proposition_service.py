@@ -37,7 +37,7 @@ from admission.ddd.admission.formation_continue.domain.builder.proposition_ident
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
 )
-from admission.infrastructure.admission.domain.service.in_memory.elements_confirmation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.elements_confirmation import (
     ElementsConfirmationInMemory,
 )
 from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (

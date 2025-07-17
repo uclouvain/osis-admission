@@ -26,7 +26,7 @@
 import abc
 from typing import List, Optional
 
-from admission.ddd.admission.domain.service.i_unites_enseignement_translator import (
+from admission.ddd.admission.shared_kernel.domain.service.i_unites_enseignement_translator import (
     IUnitesEnseignementTranslator,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import (
@@ -37,7 +37,7 @@ from admission.ddd.admission.formation_generale.dtos import PropositionDTO
 from admission.ddd.admission.formation_generale.dtos.proposition import (
     PropositionGestionnaireDTO,
 )
-from admission.ddd.admission.repository.i_proposition import (
+from admission.ddd.admission.shared_kernel.repository.i_proposition import (
     IGlobalPropositionRepository,
 )
 from osis_common.ddd.interface import ApplicationService

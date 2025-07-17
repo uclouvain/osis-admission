@@ -35,9 +35,9 @@ from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist 
     StatutsChecklistDoctorale,
     StatutChecklist,
 )
-from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.enums import TypeSituationAssimilation
+from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import EtatAuthentificationParcours
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from osis_common.ddd import interface
 

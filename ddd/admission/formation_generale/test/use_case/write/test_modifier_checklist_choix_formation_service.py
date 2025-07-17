@@ -28,7 +28,7 @@ from unittest import mock
 import attr
 from django.test import SimpleTestCase
 
-from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.commands import (
     ModifierChecklistChoixFormationCommand,
 )

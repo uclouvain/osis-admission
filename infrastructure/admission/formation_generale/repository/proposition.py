@@ -24,57 +24,55 @@
 #
 # ##############################################################################
 
-from contextlib import suppress
 from enum import Enum
 from typing import List, Optional, Union
 
 import attrs
 from django.conf import settings
 from django.db import transaction
-from django.db.models import Case, IntegerField, OuterRef, Prefetch, Subquery, When
+from django.db.models import OuterRef, Prefetch, Subquery
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language, pgettext
 from osis_history.models import HistoryEntry
 
 from admission.auth.roles.candidate import Candidate
-from admission.ddd.admission.domain.builder.formation_identity import (
+from admission.ddd.admission.shared_kernel.domain.builder.formation_identity import (
     FormationIdentityBuilder,
 )
-from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
-from admission.ddd.admission.domain.model.complement_formation import (
+from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import ProfilCandidat
+from admission.ddd.admission.shared_kernel.domain.model.complement_formation import (
     ComplementFormationIdentity,
 )
-from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
+from admission.ddd.admission.shared_kernel.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
     ConditionComplementaireLibreApprobation,
 )
-from admission.ddd.admission.domain.model.enums.equivalence import (
+from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import (
     EtatEquivalenceTitreAcces,
     StatutEquivalenceTitreAcces,
     TypeEquivalenceTitreAcces,
 )
-from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
-from admission.ddd.admission.domain.model.poste_diplomatique import (
+from admission.ddd.admission.shared_kernel.domain.model.motif_refus import MotifRefusIdentity
+from admission.ddd.admission.shared_kernel.domain.model.poste_diplomatique import (
     PosteDiplomatiqueIdentity,
 )
-from admission.ddd.admission.domain.service.i_unites_enseignement_translator import (
+from admission.ddd.admission.shared_kernel.domain.service.i_unites_enseignement_translator import (
     IUnitesEnseignementTranslator,
 )
-from admission.ddd.admission.dtos.formation import (
+from admission.ddd.admission.shared_kernel.dtos.formation import (
     BaseFormationDTO,
     CampusDTO,
     FormationDTO,
 )
-from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
-from admission.ddd.admission.enums import TypeSituationAssimilation
-from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.shared_kernel.dtos.profil_candidat import ProfilCandidatDTO
+from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     DROITS_INSCRIPTION_MONTANT_VALEURS,
-    STATUTS_PROPOSITION_GENERALE_SOUMISE,
     BesoinDeDerogation,
     BesoinDeDerogationDelegueVrae,
     ChoixStatutPropositionGenerale,
@@ -90,7 +88,6 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
     StatutsChecklistGenerale,
 )
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
-    PremierePropositionSoumisesNonTrouveeException,
     PropositionNonTrouveeException,
 )
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
@@ -104,13 +101,13 @@ from admission.ddd.admission.formation_generale.dtos.proposition import (
 from admission.ddd.admission.formation_generale.repository.i_proposition import (
     IPropositionRepository,
 )
-from admission.infrastructure.admission.domain.service.poste_diplomatique import (
+from admission.infrastructure.admission.shared_kernel.domain.service.poste_diplomatique import (
     PosteDiplomatiqueTranslator,
 )
 from admission.infrastructure.admission.formation_generale.repository._comptabilite import (
     get_accounting_from_admission,
 )
-from admission.infrastructure.admission.repository.proposition import (
+from admission.infrastructure.admission.shared_kernel.repository.proposition import (
     GlobalPropositionRepository,
 )
 from admission.infrastructure.utils import dto_to_dict

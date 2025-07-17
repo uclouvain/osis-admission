@@ -42,14 +42,14 @@ from admission.ddd.admission.doctorat.preparation.domain.model.proposition impor
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     PropositionNonTrouveeException,
 )
-from admission.ddd.admission.domain.model.emplacement_document import (
+from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import (
     EmplacementDocument,
     EmplacementDocumentIdentity,
 )
-from admission.ddd.admission.domain.model.enums.type_gestionnaire import (
+from admission.ddd.admission.shared_kernel.domain.model.enums.type_gestionnaire import (
     TypeGestionnaire,
 )
-from admission.ddd.admission.enums.emplacement_document import (
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     StatutEmplacementDocument,
     StatutReclamationEmplacementDocument,
     TypeEmplacementDocument,
@@ -57,7 +57,7 @@ from admission.ddd.admission.enums.emplacement_document import (
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
+from admission.infrastructure.admission.shared_kernel.repository.in_memory.emplacement_document import (
     emplacement_document_in_memory_repository,
 )
 from admission.infrastructure.message_bus_in_memory import (

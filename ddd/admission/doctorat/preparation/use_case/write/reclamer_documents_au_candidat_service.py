@@ -35,11 +35,11 @@ from admission.ddd.admission.doctorat.preparation.domain.service.i_notification 
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
     IPropositionRepository,
 )
-from admission.ddd.admission.domain.builder.emplacement_document_identity_builder import (
+from admission.ddd.admission.shared_kernel.domain.builder.emplacement_document_identity_builder import (
     EmplacementDocumentIdentityBuilder,
 )
-from admission.ddd.admission.domain.service.i_historique import IHistorique
-from admission.ddd.admission.repository.i_emplacement_document import (
+from admission.ddd.admission.shared_kernel.domain.service.i_historique import IHistorique
+from admission.ddd.admission.shared_kernel.repository.i_emplacement_document import (
     IEmplacementDocumentRepository,
 )
 

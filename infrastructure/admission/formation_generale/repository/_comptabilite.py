@@ -28,7 +28,7 @@ from admission.ddd.admission.formation_generale.domain.model._comptabilite impor
     Comptabilite,
     comptabilite_non_remplie,
 )
-from admission.ddd.admission.enums import (
+from admission.ddd.admission.shared_kernel.enums import (
     ChoixAffiliationSport,
     ChoixAssimilation1,
     ChoixAssimilation2,

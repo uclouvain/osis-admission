@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 from admission.models import GeneralEducationAdmission
-from admission.infrastructure.admission.repository.emplacement_document import BaseEmplacementDocumentRepository
+from admission.infrastructure.admission.shared_kernel.repository.emplacement_document import BaseEmplacementDocumentRepository
 
 
 class EmplacementDocumentRepository(BaseEmplacementDocumentRepository):

@@ -27,7 +27,7 @@ from typing import List, Optional
 
 import attr
 
-from admission.ddd.admission.enums import (
+from admission.ddd.admission.shared_kernel.enums import (
     ChoixAssimilation1,
     ChoixAssimilation2,
     ChoixAssimilation3,
@@ -36,7 +36,7 @@ from admission.ddd.admission.enums import (
     LienParente,
     TypeSituationAssimilation,
 )
-from admission.ddd.admission.enums.comptabilite import ChoixTypeCompteBancaire
+from admission.ddd.admission.shared_kernel.enums.comptabilite import ChoixTypeCompteBancaire
 
 from osis_common.ddd import interface
 

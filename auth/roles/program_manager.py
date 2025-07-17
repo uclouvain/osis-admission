@@ -38,7 +38,7 @@ from admission.auth.predicates.common import (
     past_experiences_checklist_tab_is_not_sufficient,
     workflow_injection_signaletique_en_cours,
 )
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
 from base.models.education_group import EducationGroup

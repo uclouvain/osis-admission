@@ -39,10 +39,10 @@ from osis_notification.contrib.handlers import EmailNotificationHandler
 from osis_notification.contrib.notification import EmailNotification
 
 from admission.ddd import MAIL_INSCRIPTION_DEFAUT, MAIL_VERIFICATEUR_CURSUS
-from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
-from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
-from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument
-from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import EmplacementDocument
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import StatutEmplacementDocument
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
@@ -51,10 +51,8 @@ from admission.ddd.admission.formation_generale.domain.model.proposition import 
 from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
 from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import IMatriculeEtudiantService
-from admission.ddd.admission.shared_kernel.email_destinataire.domain.validator.exceptions import (
-    InformationsDestinatairePasTrouvee,
-)
-from admission.ddd.admission.shared_kernel.email_destinataire.repository.i_email_destinataire import (
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import InformationsDestinatairePasTrouvee
+from admission.ddd.admission.shared_kernel.repository.i_email_destinataire import (
     IEmailDestinataireRepository,
 )
 from admission.infrastructure.admission.formation_generale.domain.service.formation import FormationGeneraleTranslator

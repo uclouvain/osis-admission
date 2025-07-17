@@ -28,7 +28,7 @@ from typing import Optional
 
 import attr
 
-from admission.ddd.admission.dtos.campus import CampusDTO
+from admission.ddd.admission.shared_kernel.dtos.campus import CampusDTO
 from osis_common.ddd import interface
 
 

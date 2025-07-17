@@ -26,9 +26,9 @@
 from abc import abstractmethod
 from typing import List, Optional
 
-from admission.ddd.admission.domain.model.formation import Formation, FormationIdentity
-from admission.ddd.admission.domain.service.i_formation_translator import IFormationTranslator
-from admission.ddd.admission.dtos.formation import FormationDTO
+from admission.ddd.admission.shared_kernel.domain.model.formation import Formation, FormationIdentity
+from admission.ddd.admission.shared_kernel.domain.service.i_formation_translator import IFormationTranslator
+from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 
 
 class IFormationGeneraleTranslator(IFormationTranslator):

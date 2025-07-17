@@ -27,7 +27,7 @@ from abc import abstractmethod
 from email.message import EmailMessage
 from typing import Optional
 
-from admission.ddd.admission.domain.model.enums.authentification import (
+from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
     EtatAuthentificationParcours,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (

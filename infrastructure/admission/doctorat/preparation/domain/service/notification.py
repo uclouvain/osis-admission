@@ -68,12 +68,12 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     SignataireNonTrouveException,
 )
 from admission.ddd.admission.doctorat.preparation.dtos import AvisDTO, PropositionDTO
-from admission.ddd.admission.domain.model.emplacement_document import (
+from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import (
     EmplacementDocument,
 )
-from admission.ddd.admission.domain.model.formation import FormationIdentity
-from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
-from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument
+from admission.ddd.admission.shared_kernel.domain.model.formation import FormationIdentity
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import StatutEmplacementDocument
 from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import IMatriculeEtudiantService
 from admission.infrastructure.admission.doctorat.preparation.domain.service.doctorat import (
     DoctoratTranslator,

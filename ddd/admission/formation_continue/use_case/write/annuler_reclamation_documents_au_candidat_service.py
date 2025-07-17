@@ -24,25 +24,25 @@
 #
 # ##############################################################################
 
-from admission.ddd.admission.domain.builder.emplacement_document_identity_builder import (
+from admission.ddd.admission.shared_kernel.domain.builder.emplacement_document_identity_builder import (
     EmplacementDocumentIdentityBuilder,
 )
-from admission.ddd.admission.domain.service.i_emplacements_documents_proposition import (
+from admission.ddd.admission.shared_kernel.domain.service.i_emplacements_documents_proposition import (
     IEmplacementsDocumentsPropositionTranslator,
 )
-from admission.ddd.admission.domain.service.i_historique import IHistorique
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.domain.service.resume_proposition import ResumeProposition
-from admission.ddd.admission.enums import TypeItemFormulaire
-from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument
-from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
+from admission.ddd.admission.shared_kernel.domain.service.i_historique import IHistorique
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.shared_kernel.domain.service.resume_proposition import ResumeProposition
+from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import StatutEmplacementDocument
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.formation_continue.commands import AnnulerReclamationDocumentsAuCandidatCommand
 from admission.ddd.admission.formation_continue.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_continue.domain.service.i_question_specifique import (
     IQuestionSpecifiqueTranslator,
 )
 from admission.ddd.admission.formation_continue.repository.i_proposition import IPropositionRepository
-from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
+from admission.ddd.admission.shared_kernel.repository.i_emplacement_document import IEmplacementDocumentRepository
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
 

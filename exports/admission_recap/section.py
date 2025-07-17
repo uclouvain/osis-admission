@@ -32,22 +32,19 @@ from admission.calendar.admission_calendar import (
     AdmissionPoolExternalEnrollmentChangeCalendar,
     AdmissionPoolExternalReorientationCalendar,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixTypeAdmission,
-)
-from admission.ddd.admission.domain.model.formation import (
+from admission.ddd.admission.shared_kernel.domain.model.formation import (
     est_formation_medecine_ou_dentisterie,
 )
-from admission.ddd.admission.domain.service.i_elements_confirmation import (
+from admission.ddd.admission.shared_kernel.domain.service.i_elements_confirmation import (
     IElementsConfirmation,
 )
-from admission.ddd.admission.domain.service.i_profil_candidat import (
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
-from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
-from admission.ddd.admission.dtos.resume import ResumePropositionDTO
-from admission.ddd.admission.enums import CHOIX_AFFILIATION_SPORT_SELON_SITE, Onglets
-from admission.ddd.admission.enums.emplacement_document import (
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
+from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
+from admission.ddd.admission.shared_kernel.enums import CHOIX_AFFILIATION_SPORT_SELON_SITE, Onglets
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     IdentifiantBaseEmplacementDocument,
     OngletsDemande,
 )
@@ -77,7 +74,7 @@ from admission.exports.admission_recap.constants import (
     FORMATTED_RELATIONSHIPS,
     TRAINING_TYPES_WITH_EQUIVALENCE,
 )
-from admission.infrastructure.admission.domain.service.calendrier_inscription import (
+from admission.infrastructure.admission.shared_kernel.domain.service.calendrier_inscription import (
     CalendrierInscription,
 )
 from admission.utils import WeasyprintStylesheets

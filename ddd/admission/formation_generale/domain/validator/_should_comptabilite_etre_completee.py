@@ -31,8 +31,8 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     AffiliationsNonCompleteesException,
     ReductionDesDroitsInscriptionNonCompleteeException,
 )
-from admission.ddd.admission.domain.model.formation import Formation
-from admission.ddd.admission.enums import ChoixAffiliationSport, CHOIX_AFFILIATION_SPORT_SELON_SITE
+from admission.ddd.admission.shared_kernel.domain.model.formation import Formation
+from admission.ddd.admission.shared_kernel.enums import ChoixAffiliationSport, CHOIX_AFFILIATION_SPORT_SELON_SITE
 from base.ddd.utils.business_validator import BusinessValidator
 
 

@@ -25,8 +25,8 @@
 # ##############################################################################
 from typing import List
 
-from admission.ddd.admission.domain.service.i_annee_inscription_formation import IAnneeInscriptionFormationTranslator
-from admission.ddd.admission.dtos.formation import FormationDTO
+from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import IAnneeInscriptionFormationTranslator
+from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from admission.ddd.admission.formation_continue.commands import RechercherFormationContinueQuery
 from admission.ddd.admission.formation_continue.domain.service.i_formation import IFormationContinueTranslator
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes

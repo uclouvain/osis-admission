@@ -41,7 +41,7 @@ from admission.ddd.admission.doctorat.preparation.commands import (
     SoumettrePropositionCommand as SoumettrePropositionDoctoratCommand,
 )
 from admission.ddd.admission.doctorat.preparation.commands import VerifierProjetQuery
-from admission.ddd.admission.domain.validator.exceptions import (
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     ConditionsAccessNonRempliesException,
     PoolNonResidentContingenteNonOuvertException,
 )

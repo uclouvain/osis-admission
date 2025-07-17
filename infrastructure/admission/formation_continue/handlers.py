@@ -30,10 +30,10 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
 )
 from admission.ddd.admission.formation_continue.use_case.read import *
 from admission.ddd.admission.formation_continue.use_case.write import *
-from admission.ddd.admission.use_case.read import (
+from admission.ddd.admission.shared_kernel.use_case.read import (
     recuperer_questions_specifiques_proposition,
 )
-from admission.ddd.admission.use_case.write import (
+from admission.ddd.admission.shared_kernel.use_case.write import (
     annuler_reclamation_emplacement_document,
     initialiser_emplacement_document_a_reclamer,
     initialiser_emplacement_document_libre_a_reclamer,
@@ -43,31 +43,31 @@ from admission.ddd.admission.use_case.write import (
     remplir_emplacement_document_par_gestionnaire,
     supprimer_emplacement_document,
 )
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
-from admission.infrastructure.admission.domain.service.calendrier_inscription import (
+from admission.infrastructure.admission.shared_kernel.domain.service.calendrier_inscription import (
     CalendrierInscription,
 )
-from admission.infrastructure.admission.domain.service.elements_confirmation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.elements_confirmation import (
     ElementsConfirmation,
 )
-from admission.infrastructure.admission.domain.service.emplacements_documents_proposition import (
+from admission.infrastructure.admission.shared_kernel.domain.service.emplacements_documents_proposition import (
     EmplacementsDocumentsPropositionTranslator,
 )
-from admission.infrastructure.admission.domain.service.historique import (
+from admission.infrastructure.admission.shared_kernel.domain.service.historique import (
     Historique as HistoriqueGlobal,
 )
-from admission.infrastructure.admission.domain.service.maximum_propositions import (
+from admission.infrastructure.admission.shared_kernel.domain.service.maximum_propositions import (
     MaximumPropositionsAutorisees,
 )
-from admission.infrastructure.admission.domain.service.profil_candidat import (
+from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import (
     ProfilCandidatTranslator,
 )
-from admission.infrastructure.admission.domain.service.raccrocher_experiences_curriculum import (
+from admission.infrastructure.admission.shared_kernel.domain.service.raccrocher_experiences_curriculum import (
     RaccrocherExperiencesCurriculum,
 )
-from admission.infrastructure.admission.domain.service.titres_acces import TitresAcces
+from admission.infrastructure.admission.shared_kernel.domain.service.titres_acces import TitresAcces
 from admission.infrastructure.admission.formation_continue.domain.service.formation import (
     FormationContinueTranslator,
 )

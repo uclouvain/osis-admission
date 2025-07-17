@@ -48,15 +48,15 @@ from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervi
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
     IPropositionRepository,
 )
-from admission.ddd.admission.domain.service.i_profil_candidat import (
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
-from admission.ddd.admission.domain.service.reinitialiser_emplacements_documents_non_libres_proposition import (
+from admission.ddd.admission.shared_kernel.domain.service.reinitialiser_emplacements_documents_non_libres_proposition import (
     ReinitialiserEmplacementsDocumentsNonLibresPropositionService,
 )
-from admission.ddd.admission.domain.service.resume_proposition import ResumeProposition
-from admission.ddd.admission.enums import TypeItemFormulaire
-from admission.ddd.admission.repository.i_emplacement_document import (
+from admission.ddd.admission.shared_kernel.domain.service.resume_proposition import ResumeProposition
+from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire
+from admission.ddd.admission.shared_kernel.repository.i_emplacement_document import (
     IEmplacementDocumentRepository,
 )
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import (

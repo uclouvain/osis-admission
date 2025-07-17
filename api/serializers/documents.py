@@ -27,9 +27,9 @@ from django.conf import settings
 from rest_framework import serializers
 
 from admission.constants import SUPPORTED_MIME_TYPES
-from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
-from admission.ddd.admission.enums import TypeItemFormulaire, CleConfigurationItemFormulaire
-from admission.ddd.admission.enums.emplacement_document import StatutReclamationEmplacementDocument
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire, CleConfigurationItemFormulaire
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import StatutReclamationEmplacementDocument
 from admission.ddd.admission.formation_generale.commands import CompleterEmplacementsDocumentsParCandidatCommand
 from admission.infrastructure.utils import get_document_from_identifier
 from base.utils.serializers import DTOSerializer

@@ -32,13 +32,13 @@ import freezegun
 from django.test import TestCase
 from django.utils.translation import gettext
 
-from admission.ddd.admission.domain.model.enums.condition_acces import (
+from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import (
     TypeTitreAccesSelectionnable,
 )
-from admission.ddd.admission.dtos.titre_acces_selectionnable import (
+from admission.ddd.admission.shared_kernel.dtos.titre_acces_selectionnable import (
     TitreAccesSelectionnableDTO,
 )
-from admission.ddd.admission.enums.emplacement_document import OngletsDemande
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_generale.commands import (
     RecupererTitresAccesSelectionnablesPropositionQuery,
 )

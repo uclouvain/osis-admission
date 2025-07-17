@@ -23,11 +23,11 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from admission.ddd.admission.domain.builder.formation_identity import (
+from admission.ddd.admission.shared_kernel.domain.builder.formation_identity import (
     FormationIdentityBuilder,
 )
-from admission.ddd.admission.domain.service.i_historique import IHistorique
-from admission.ddd.admission.domain.service.i_maximum_propositions import (
+from admission.ddd.admission.shared_kernel.domain.service.i_historique import IHistorique
+from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions import (
     IMaximumPropositionsAutorisees,
 )
 from admission.ddd.admission.formation_generale.commands import (

@@ -26,8 +26,8 @@
 
 from typing import List
 
-from admission.ddd.admission.domain.service.i_elements_confirmation import ElementConfirmation, IElementsConfirmation
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_elements_confirmation import ElementConfirmation, IElementsConfirmation
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.formation_generale.commands import RecupererElementsConfirmationQuery
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,

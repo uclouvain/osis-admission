@@ -27,7 +27,7 @@ import datetime
 
 from django.test import TestCase
 
-from admission.infrastructure.admission.domain.service.titres_acces import TitresAcces
+from admission.infrastructure.admission.shared_kernel.domain.service.titres_acces import TitresAcces
 from admission.tests.factories.curriculum import (
     ProfessionalExperienceFactory,
     EducationalExperienceFactory,

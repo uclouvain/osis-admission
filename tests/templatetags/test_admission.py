@@ -49,11 +49,11 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     message_candidat_avec_pae_avant_2015,
 )
-from admission.ddd.admission.domain.enums import TypeFormation
-from admission.ddd.admission.domain.model.enums.authentification import (
+from admission.ddd.admission.shared_kernel.domain.enums import TypeFormation
+from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
     EtatAuthentificationParcours,
 )
-from admission.ddd.admission.enums import Onglets, TypeItemFormulaire
+from admission.ddd.admission.shared_kernel.enums import Onglets, TypeItemFormulaire
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixMoyensDecouverteFormation,
     ChoixStatutPropositionContinue,
@@ -61,17 +61,17 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
-from admission.ddd.admission.test.factory.profil import (
+from admission.ddd.admission.shared_kernel.tests.factory.profil import (
     AnneeExperienceAcademiqueDTOFactory,
     EtudesSecondairesDTOFactory,
     ExperienceAcademiqueDTOFactory,
     ExperienceNonAcademiqueDTOFactory,
 )
-from admission.ddd.admission.test.factory.question_specifique import (
+from admission.ddd.admission.shared_kernel.tests.factory.question_specifique import (
     QuestionSpecifiqueDTOFactory,
 )
 from admission.models import ContinuingEducationAdmissionProxy, DoctorateAdmission
-from admission.ddd.admission.test.factory.question_specifique import QuestionSpecifiqueDTOFactory
+from admission.ddd.admission.shared_kernel.tests.factory.question_specifique import QuestionSpecifiqueDTOFactory
 from admission.models import ContinuingEducationAdmissionProxy, DoctorateAdmission
 from admission.templatetags.admission import (
     TAB_TREES,

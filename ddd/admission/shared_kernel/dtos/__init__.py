@@ -1,0 +1,3 @@
+from admission.ddd.admission.shared_kernel.dtos.coordonnees import CoordonneesDTO, AdressePersonnelleDTO
+from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
+from admission.ddd.admission.shared_kernel.dtos.identification import IdentificationDTO

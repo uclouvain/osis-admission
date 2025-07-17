@@ -31,31 +31,28 @@ from django.conf import settings
 from django.shortcuts import resolve_url
 from django.template.defaultfilters import truncatechars
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _, pgettext_lazy
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, TemplateView
 from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
 
-from admission.ddd.admission.commands import RechercherParcoursAnterieurQuery
-from admission.ddd.admission.doctorat.preparation.commands import (
-    GetGroupeDeSupervisionCommand,
-)
+from admission.ddd.admission.shared_kernel.commands import RechercherParcoursAnterieurQuery
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     OngletsChecklist,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     message_candidat_avec_pae_avant_2015,
 )
-from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
-from admission.ddd.admission.dtos.resume import ResumeCandidatDTO, ResumePropositionDTO
-from admission.ddd.admission.enums import Onglets, TypeItemFormulaire
-from admission.ddd.admission.enums.emplacement_document import (
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
+from admission.ddd.admission.shared_kernel.dtos.resume import ResumeCandidatDTO, ResumePropositionDTO
+from admission.ddd.admission.shared_kernel.enums import Onglets, TypeItemFormulaire
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     DocumentsAssimilation,
     DocumentsCotutelle,
     DocumentsProjetRecherche,
     OngletsDemande,
 )
-from admission.ddd.admission.utils import initialiser_checklist_experience
+from admission.ddd.admission.shared_kernel.utils import initialiser_checklist_experience
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
 from admission.forms import disable_unavailable_forms
 from admission.forms.admission.checklist import (

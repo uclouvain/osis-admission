@@ -44,8 +44,8 @@ from admission.ddd.admission.formation_continue.domain.model.statut_checklist im
     StatutChecklist,
     StatutsChecklistContinue,
 )
-from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
-from admission.ddd.admission.test.factory.reference import REFERENCE_MEMORY_ITERATOR
+from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationIdentityFactory
+from admission.ddd.admission.shared_kernel.tests.factory.reference import REFERENCE_MEMORY_ITERATOR
 
 
 class _PropositionIdentityFactory(factory.Factory):

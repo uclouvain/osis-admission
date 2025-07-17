@@ -25,7 +25,7 @@
 # ##############################################################################
 from django.test import TestCase
 
-from admission.infrastructure.admission.domain.service.profil_candidat import (
+from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import (
     ProfilCandidatTranslator,
 )
 from admission.tests.factories.curriculum import (

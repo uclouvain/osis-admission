@@ -27,7 +27,7 @@ import datetime
 
 from django.test import TestCase
 
-from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import StatutEmplacementDocument
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )

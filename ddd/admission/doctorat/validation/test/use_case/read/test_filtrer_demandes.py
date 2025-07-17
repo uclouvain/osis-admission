@@ -41,7 +41,7 @@ from admission.ddd.admission.doctorat.validation.test.factory.demande import (
     DemandeAdmissionSC3DPMinimaleFactory,
     DemandePreAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesAccepteeFactory,
 )
-from admission.ddd.admission.test.factory.reference import REFERENCE_MEMORY_ITERATOR
+from admission.ddd.admission.shared_kernel.tests.factory.reference import REFERENCE_MEMORY_ITERATOR
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )

@@ -48,7 +48,7 @@ from osis_export.contrib.export_mixins import ExcelFileExportMixin, ExportMixin
 from osis_export.models import Export
 from osis_export.models.enums.types import ExportTypes
 
-from admission.ddd.admission.commands import ListerToutesDemandesQuery
+from admission.ddd.admission.shared_kernel.commands import ListerToutesDemandesQuery
 from admission.ddd.admission.doctorat.preparation.commands import (
     ListerDemandesQuery as ListerDemandesDoctoralesQuery,
 )
@@ -69,15 +69,15 @@ from admission.ddd.admission.doctorat.preparation.read_view.repository.i_tableau
     ITableauBordRepositoryAdmissionMixin,
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
-from admission.ddd.admission.dtos.liste import (
+from admission.ddd.admission.shared_kernel.dtos.liste import (
     DemandeRechercheDTO as TouteDemandeRechercheDTO,
 )
-from admission.ddd.admission.dtos.resume import ResumePropositionDTO
-from admission.ddd.admission.enums import TypeItemFormulaire
-from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
-from admission.ddd.admission.enums.liste import TardiveModificationReorientationFiltre
-from admission.ddd.admission.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION_DICT
-from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
+from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire
+from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
+from admission.ddd.admission.shared_kernel.enums.liste import TardiveModificationReorientationFiltre
+from admission.ddd.admission.shared_kernel.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION_DICT
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_continue.commands import (
     ListerDemandesQuery as ListerDemandesContinuesQuery,
 )

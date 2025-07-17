@@ -29,7 +29,7 @@ from typing import List, Optional
 import attr
 
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
+from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC
 from admission.ddd.admission.doctorat.validation.domain.validator.validator_by_business_action import (
     ApprouverDemandeCDDValidatorList,

@@ -39,21 +39,21 @@ from osis_notification.models import EmailNotification
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.ddd.admission.domain.service.i_elements_confirmation import (
+from admission.ddd.admission.shared_kernel.domain.service.i_elements_confirmation import (
     IElementsConfirmation,
 )
-from admission.ddd.admission.domain.validator.exceptions import (
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     HorsPeriodeSpecifiqueInscription,
     NombrePropositionsSoumisesDepasseException,
     QuestionsSpecifiquesInformationsComplementairesNonCompleteesException,
     ResidenceAuSensDuDecretNonDisponiblePourInscriptionException,
 )
-from admission.ddd.admission.enums import (
+from admission.ddd.admission.shared_kernel.enums import (
     CritereItemFormulaireFormation,
     Onglets,
     TypeSituationAssimilation,
 )
-from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
 )
@@ -275,7 +275,7 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         )
 
     @mock.patch(
-        'admission.ddd.admission.domain.service.i_calendrier_inscription.ICalendrierInscription.'
+        'admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription.ICalendrierInscription.'
         'INTERDIRE_INSCRIPTION_ETUDES_CONTINGENTES_POUR_NON_RESIDENT',
         new_callable=PropertyMock,
         return_value=False,

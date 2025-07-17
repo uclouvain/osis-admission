@@ -27,10 +27,10 @@ import uuid
 
 from django.test import TestCase
 
-from admission.ddd.admission.domain.model.enums.condition_acces import (
+from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import (
     TypeTitreAccesSelectionnable,
 )
-from admission.ddd.admission.dtos.titre_acces_selectionnable import (
+from admission.ddd.admission.shared_kernel.dtos.titre_acces_selectionnable import (
     TitreAccesSelectionnableDTO,
 )
 from admission.utils import access_title_country

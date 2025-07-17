@@ -33,7 +33,7 @@ from admission.ddd.admission.doctorat.preparation.commands import (
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import DerogationFinancement
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )

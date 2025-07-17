@@ -33,7 +33,7 @@ from django.views.generic import TemplateView
 from admission.ddd.admission.doctorat.preparation.commands import (
     DeterminerAnneeAcademiqueEtPotQuery as DoctorateCmd,
 )
-from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
+from admission.ddd.admission.shared_kernel.dtos.conditions import InfosDetermineesDTO
 from admission.ddd.admission.formation_continue.commands import (
     DeterminerAnneeAcademiqueEtPotQuery as ContinuingCmd,
 )
@@ -56,7 +56,7 @@ class DebugView(LoadDossierViewMixin, TemplateView):
         data = super().get_context_data(**kwargs)
 
         # Install a temporary handler for the logging info
-        logger = logging.getLogger('admission.ddd.admission.domain.service.i_calendrier_inscription')
+        logger = logging.getLogger('admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription')
         logger.setLevel(logging.DEBUG)
         with StringIO() as buffer, freezegun.freeze_time(self.request.GET.get("date-soumission")):
             handler = logging.StreamHandler(buffer)

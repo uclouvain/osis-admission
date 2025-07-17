@@ -36,15 +36,15 @@ from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
 from admission.auth.scope import Scope
-from admission.ddd.admission.domain.model.enums.authentification import (
+from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
     EtatAuthentificationParcours,
 )
-from admission.ddd.admission.dtos.liste import (
+from admission.ddd.admission.shared_kernel.dtos.liste import (
     DemandeRechercheDTO,
     VisualiseurAdmissionDTO,
 )
-from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
-from admission.ddd.admission.enums.liste import TardiveModificationReorientationFiltre
+from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
+from admission.ddd.admission.shared_kernel.enums.liste import TardiveModificationReorientationFiltre
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     BesoinDeDerogation,
     ChoixStatutChecklist,

@@ -26,7 +26,7 @@
 import freezegun
 from django.test import SimpleTestCase
 
-from admission.ddd.admission.domain.enums import TypeFormation
+from admission.ddd.admission.shared_kernel.domain.enums import TypeFormation
 from admission.ddd.admission.formation_generale.commands import RechercherFormationGeneraleQuery
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 

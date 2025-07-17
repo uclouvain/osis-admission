@@ -25,14 +25,14 @@
 # ##############################################################################
 from typing import List, Optional
 
-from admission.ddd.admission.domain.model.emplacement_document import (
+from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import (
     EmplacementDocumentIdentity,
 )
 from admission.ddd.admission.formation_generale.commands import RetyperDocumentCommand
 from admission.ddd.admission.formation_generale.domain.model.proposition import (
     PropositionIdentity,
 )
-from admission.ddd.admission.repository.i_emplacement_document import (
+from admission.ddd.admission.shared_kernel.repository.i_emplacement_document import (
     IEmplacementDocumentRepository,
 )
 

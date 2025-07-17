@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 
-from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
+from admission.ddd.admission.shared_kernel.domain.builder.formation_identity import FormationIdentityBuilder
 from admission.ddd.admission.formation_continue.commands import ModifierChoixFormationParGestionnaireCommand
 from admission.ddd.admission.formation_continue.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,

@@ -30,7 +30,7 @@ from django.utils.functional import cached_property
 from django.views.generic import TemplateView
 
 from admission.api.serializers.accounting import get_last_french_community_high_education_institutes
-from admission.ddd.admission.enums import FORMATTED_RELATIONSHIPS, CHOIX_AFFILIATION_SPORT_SELON_SITE
+from admission.ddd.admission.shared_kernel.enums import FORMATTED_RELATIONSHIPS, CHOIX_AFFILIATION_SPORT_SELON_SITE
 from admission.ddd.admission.formation_generale.commands import GetComptabiliteQuery
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from infrastructure.messages_bus import message_bus_instance

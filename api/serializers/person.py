@@ -26,7 +26,7 @@
 from django.db import models
 from rest_framework import serializers
 
-from admission.ddd.admission.dtos import IdentificationDTO
+from admission.ddd.admission.shared_kernel.dtos import IdentificationDTO
 from base.api.serializers.academic_year import RelatedAcademicYearField
 from base.models.person import Person
 from base.utils.serializers import DTOSerializer

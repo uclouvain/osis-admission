@@ -37,7 +37,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
     DerogationFinancement,
     OngletsChecklist,
 )
-from admission.ddd.admission.domain.model.enums.authentification import (
+from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
     EtatAuthentificationParcours,
 )
 from osis_common.ddd import interface

@@ -23,10 +23,10 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.domain.builder.emplacement_document_identity_builder import (
+from admission.ddd.admission.shared_kernel.domain.builder.emplacement_document_identity_builder import (
     EmplacementDocumentIdentityBuilder,
 )
-from admission.ddd.admission.domain.service.i_historique import IHistorique
+from admission.ddd.admission.shared_kernel.domain.service.i_historique import IHistorique
 from admission.ddd.admission.formation_generale.commands import (
     ReclamerDocumentsAuCandidatParFACCommand,
 )
@@ -39,7 +39,7 @@ from admission.ddd.admission.formation_generale.domain.service.i_notification im
 from admission.ddd.admission.formation_generale.repository.i_proposition import (
     IPropositionRepository,
 )
-from admission.ddd.admission.repository.i_emplacement_document import (
+from admission.ddd.admission.shared_kernel.repository.i_emplacement_document import (
     IEmplacementDocumentRepository,
 )
 

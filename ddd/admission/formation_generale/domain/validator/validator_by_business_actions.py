@@ -28,22 +28,22 @@ from typing import Dict, List, Optional
 
 import attr
 
-from admission.ddd.admission.domain.model.complement_formation import (
+from admission.ddd.admission.shared_kernel.domain.model.complement_formation import (
     ComplementFormationIdentity,
 )
-from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
+from admission.ddd.admission.shared_kernel.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
     ConditionComplementaireLibreApprobation,
 )
-from admission.ddd.admission.domain.model.formation import Formation
-from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
-from admission.ddd.admission.domain.model.poste_diplomatique import (
+from admission.ddd.admission.shared_kernel.domain.model.formation import Formation
+from admission.ddd.admission.shared_kernel.domain.model.motif_refus import MotifRefusIdentity
+from admission.ddd.admission.shared_kernel.domain.model.poste_diplomatique import (
     PosteDiplomatiqueIdentity,
 )
-from admission.ddd.admission.domain.model.titre_acces_selectionnable import (
+from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import (
     TitreAccesSelectionnable,
 )
-from admission.ddd.admission.domain.validator import (
+from admission.ddd.admission.shared_kernel.domain.validator import (
     ShouldAbsenceDeDetteEtreCompletee,
     ShouldAnneesCVRequisesCompletees,
     ShouldAssimilationEtreCompletee,
@@ -53,11 +53,11 @@ from admission.ddd.admission.domain.validator import (
     ShouldIBANCarteBancaireRemboursementEtreCompletee,
     ShouldTypeCompteBancaireRemboursementEtreComplete,
 )
-from admission.ddd.admission.domain.validator._should_curriculum_etre_complete import (
+from admission.ddd.admission.shared_kernel.domain.validator._should_curriculum_etre_complete import (
     ShouldExperiencesNonAcademiquesAvoirUnCertificat,
 )
-from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
-from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model._comptabilite import (
     Comptabilite,
 )

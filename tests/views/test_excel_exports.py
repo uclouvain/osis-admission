@@ -60,13 +60,13 @@ from admission.ddd.admission.doctorat.preparation.read_view.domain.enums.tableau
     IndicateurTableauBordEnum,
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
-from admission.ddd.admission.dtos.liste import (
+from admission.ddd.admission.shared_kernel.dtos.liste import (
     DemandeRechercheDTO,
     VisualiseurAdmissionDTO,
 )
-from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
-from admission.ddd.admission.enums.liste import TardiveModificationReorientationFiltre
-from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
+from admission.ddd.admission.shared_kernel.enums.liste import TardiveModificationReorientationFiltre
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixEdition,
     ChoixInscriptionATitre,
@@ -83,7 +83,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     OngletsChecklist as OngletsChecklistGenerale,
 )
-from admission.ddd.admission.test.factory.profil import (
+from admission.ddd.admission.shared_kernel.tests.factory.profil import (
     AnneeExperienceAcademiqueDTOFactory,
     ExperienceAcademiqueDTOFactory,
     ExperienceNonAcademiqueDTOFactory,

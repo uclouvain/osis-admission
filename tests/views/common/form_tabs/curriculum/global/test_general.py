@@ -31,7 +31,7 @@ from rest_framework import status
 
 from admission.models.general_education import GeneralEducationAdmission
 from admission.ddd import FR_ISO_CODE
-from admission.ddd.admission.enums import Onglets
+from admission.ddd.admission.shared_kernel.enums import Onglets
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.forms import REQUIRED_FIELD_CLASS
 from admission.tests.factories.curriculum import (

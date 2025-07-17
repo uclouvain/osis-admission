@@ -28,7 +28,7 @@ __all__ = [
     'generate_proposition_reference',
 ]
 
-from admission.infrastructure.admission.repository.proposition import GlobalPropositionRepository
+from admission.infrastructure.admission.shared_kernel.repository.proposition import GlobalPropositionRepository
 
 
 def generate_proposition_reference(obj):

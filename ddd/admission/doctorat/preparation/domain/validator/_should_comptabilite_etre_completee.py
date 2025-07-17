@@ -37,8 +37,8 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     AssimilationNonCompleteeDoctoratException,
     AffiliationsNonCompleteesDoctoratException,
 )
-from admission.ddd.admission.dtos.resume import AdmissionComptabiliteDTO
-from admission.ddd.admission.enums import (
+from admission.ddd.admission.shared_kernel.dtos.resume import AdmissionComptabiliteDTO
+from admission.ddd.admission.shared_kernel.enums import (
     ChoixTypeCompteBancaire,
     ChoixAssimilation1,
     ChoixAssimilation2,

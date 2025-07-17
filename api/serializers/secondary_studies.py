@@ -31,7 +31,7 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from admission.api.serializers.fields import AnswerToSpecificQuestionField
-from admission.infrastructure.admission.domain.service.profil_candidat import (
+from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import (
     ProfilCandidatTranslator,
 )
 from base.api.serializers.academic_year import RelatedAcademicYearField

@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 
-from admission.ddd.admission.dtos.formation import FormationDTO
+from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from admission.ddd.admission.formation_continue.commands import RecupererFormationContinueQuery
 from admission.ddd.admission.formation_continue.domain.service.i_formation import IFormationContinueTranslator
 

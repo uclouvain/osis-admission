@@ -25,7 +25,7 @@
 # ##############################################################################
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.service.i_reference import IReferenceTranslator
-from admission.ddd.admission.repository.i_proposition import formater_reference
+from admission.ddd.admission.shared_kernel.repository.i_proposition import formater_reference
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.formation import (
     FormationGeneraleInMemoryTranslator,
 )

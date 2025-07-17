@@ -32,8 +32,8 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, TemplateView
 from osis_comment.models import CommentEntry
 
-from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
-from admission.ddd.admission.dtos.resume import (
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
+from admission.ddd.admission.shared_kernel.dtos.resume import (
     ResumeEtEmplacementsDocumentsPropositionDTO,
 )
 from admission.ddd.admission.formation_continue.commands import (

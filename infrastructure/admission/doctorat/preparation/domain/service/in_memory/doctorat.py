@@ -40,7 +40,7 @@ from admission.ddd.admission.doctorat.preparation.test.factory.doctorat import (
     DoctoratFormationEtendu,
     _DoctoratDTOFactory,
 )
-from admission.ddd.admission.test.factory.formation import CampusFactory
+from admission.ddd.admission.shared_kernel.tests.factory.formation import CampusFactory
 
 
 class DoctoratInMemoryTranslator(IDoctoratTranslator):

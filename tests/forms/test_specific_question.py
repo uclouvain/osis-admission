@@ -33,8 +33,8 @@ from django.test import TestCase
 from django.test.utils import override_settings
 from osis_document.contrib import FileUploadField
 
-from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
-from admission.ddd.admission.enums import (
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
+from admission.ddd.admission.shared_kernel.enums import (
     Onglets,
     TypeItemFormulaire,
     CleConfigurationItemFormulaire,

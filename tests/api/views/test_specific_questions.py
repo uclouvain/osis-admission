@@ -35,11 +35,11 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.ddd import EN_ISO_CODE, FR_ISO_CODE
-from admission.ddd.admission.domain.validator.exceptions import (
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     PosteDiplomatiqueNonTrouveException,
 )
-from admission.ddd.admission.enums import CritereItemFormulaireNationaliteDiplome
-from admission.ddd.admission.enums.question_specifique import (
+from admission.ddd.admission.shared_kernel.enums import CritereItemFormulaireNationaliteDiplome
+from admission.ddd.admission.shared_kernel.enums.question_specifique import (
     CritereItemFormulaireFormation,
     CritereItemFormulaireLangueEtudes,
     CritereItemFormulaireNationaliteCandidat,

@@ -28,7 +28,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from osis_document.contrib import FileField
 
-from admission.ddd.admission.enums import (
+from admission.ddd.admission.shared_kernel.enums import (
     ChoixAffiliationSport,
     ChoixAssimilation1,
     ChoixAssimilation2,

@@ -26,7 +26,7 @@
 
 from django.views.generic import TemplateView
 
-from admission.ddd.admission.commands import RecupererConnaissancesLanguesQuery
+from admission.ddd.admission.shared_kernel.commands import RecupererConnaissancesLanguesQuery
 from admission.views.common.mixins import LoadDossierViewMixin
 from infrastructure.messages_bus import message_bus_instance
 

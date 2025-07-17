@@ -33,7 +33,7 @@ from osis_comment.models import CommentEntry
 from osis_mail_template.models import MailTemplate
 
 from admission.ddd import MAIL_VERIFICATEUR_CURSUS
-from admission.ddd.admission.commands import ListerToutesDemandesQuery
+from admission.ddd.admission.shared_kernel.commands import ListerToutesDemandesQuery
 from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererResumeEtEmplacementsDocumentsPropositionQuery,
     VerifierCurriculumApresSoumissionQuery,
@@ -47,11 +47,11 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     ExperiencesAcademiquesNonCompleteesException,
 )
 from admission.ddd.admission.doctorat.preparation.dtos import PropositionGestionnaireDTO
-from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
-from admission.ddd.admission.dtos.resume import (
+from admission.ddd.admission.shared_kernel.dtos.liste import DemandeRechercheDTO
+from admission.ddd.admission.shared_kernel.dtos.resume import (
     ResumeEtEmplacementsDocumentsPropositionDTO,
 )
-from admission.ddd.admission.enums.statut import (
+from admission.ddd.admission.shared_kernel.enums.statut import (
     STATUTS_TOUTE_PROPOSITION_AUTORISEE,
     STATUTS_TOUTE_PROPOSITION_SOUMISE,
     STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER_OU_ANNULEE,

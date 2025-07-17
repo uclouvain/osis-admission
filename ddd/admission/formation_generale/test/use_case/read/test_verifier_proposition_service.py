@@ -42,8 +42,8 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     ReductionDesDroitsInscriptionNonCompleteeException,
     TypeCompteBancaireRemboursementNonCompleteException,
 )
-from admission.ddd.admission.domain.model.formation import FormationIdentity
-from admission.ddd.admission.domain.validator.exceptions import (
+from admission.ddd.admission.shared_kernel.domain.model.formation import FormationIdentity
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     ConditionsAccessNonRempliesException,
     HorsPeriodeSpecifiqueInscription,
     NombrePropositionsSoumisesDepasseException,
@@ -52,11 +52,11 @@ from admission.ddd.admission.domain.validator.exceptions import (
     QuestionsSpecifiquesEtudesSecondairesNonCompleteesException,
     QuestionsSpecifiquesInformationsComplementairesNonCompleteesException,
 )
-from admission.ddd.admission.dtos.etudes_secondaires import (
+from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import (
     EtudesSecondairesAdmissionDTO,
 )
-from admission.ddd.admission.dtos.periode import PeriodeDTO
-from admission.ddd.admission.enums import (
+from admission.ddd.admission.shared_kernel.dtos.periode import PeriodeDTO
+from admission.ddd.admission.shared_kernel.enums import (
     ChoixAssimilation1,
     ChoixAssimilation2,
     ChoixAssimilation3,
@@ -86,10 +86,10 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
 from admission.ddd.admission.formation_generale.test.factory.proposition import (
     _ComptabiliteFactory,
 )
-from admission.infrastructure.admission.domain.service.in_memory.calendrier_inscription import (
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.calendrier_inscription import (
     CalendrierInscriptionInMemory,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
     AnneeExperienceAcademique,
     ExperienceAcademique,
     ExperienceNonAcademique,

@@ -42,8 +42,8 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
     ChoixTypeAdmission,
 )
-from admission.ddd.admission.domain.enums import TypeFormation
-from admission.ddd.admission.enums import Onglets
+from admission.ddd.admission.shared_kernel.domain.enums import TypeFormation
+from admission.ddd.admission.shared_kernel.enums import Onglets
 from admission.models import DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.form_item import (

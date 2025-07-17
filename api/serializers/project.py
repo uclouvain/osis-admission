@@ -52,8 +52,8 @@ from admission.ddd.admission.doctorat.preparation.dtos import DoctoratFormationD
 from admission.ddd.admission.doctorat.preparation.dtos import (
     PropositionDTO as DoctoratPropositionDTO,
 )
-from admission.ddd.admission.dtos.campus import CampusDTO
-from admission.ddd.admission.dtos.formation import FormationDTO
+from admission.ddd.admission.shared_kernel.dtos.campus import CampusDTO
+from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
 )

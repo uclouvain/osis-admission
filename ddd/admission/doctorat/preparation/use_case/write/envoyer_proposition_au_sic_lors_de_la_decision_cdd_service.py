@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 
-from admission.ddd.admission.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.commands import (
     EnvoyerPropositionAuSicLorsDeLaDecisionCddCommand,
 )

@@ -25,7 +25,7 @@
 ##############################################################################
 from typing import Dict
 
-from admission.ddd.admission.domain.model.formation import FormationIdentity
+from admission.ddd.admission.shared_kernel.domain.model.formation import FormationIdentity
 from admission.ddd.admission.formation_generale.commands import (
     InitierPropositionCommand,
 )

@@ -28,7 +28,7 @@ from django.test import SimpleTestCase
 
 from admission.ddd.admission.formation_generale.commands import GetComptabiliteQuery
 from admission.ddd.admission.formation_generale.dtos import ComptabiliteDTO
-from admission.ddd.admission.enums import (
+from admission.ddd.admission.shared_kernel.enums import (
     ChoixTypeCompteBancaire,
     TypeSituationAssimilation,
     ChoixAffiliationSport,

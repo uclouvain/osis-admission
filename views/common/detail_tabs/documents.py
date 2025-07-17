@@ -41,18 +41,18 @@ from admission.ddd.admission.doctorat.preparation import (
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     STATUTS_PROPOSITION_AVANT_SOUMISSION,
 )
-from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
-from admission.ddd.admission.dtos.resume import (
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.shared_kernel.dtos.resume import (
     ResumeEtEmplacementsDocumentsPropositionDTO,
 )
-from admission.ddd.admission.enums.emplacement_document import (
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     EMPLACEMENTS_DOCUMENTS_INTERNES,
     EMPLACEMENTS_DOCUMENTS_RECLAMABLES,
     EMPLACEMENTS_FAC,
     EMPLACEMENTS_SIC,
     STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
 )
-from admission.ddd.admission.enums.valorisation_experience import (
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
     ExperiencesCVRecuperees,
 )
 from admission.ddd.admission.formation_continue import (

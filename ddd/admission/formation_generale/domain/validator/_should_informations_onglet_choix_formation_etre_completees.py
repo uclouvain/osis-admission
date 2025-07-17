@@ -26,7 +26,7 @@
 
 import attr
 
-from admission.ddd.admission.domain.model.formation import Formation
+from admission.ddd.admission.shared_kernel.domain.model.formation import Formation
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     BoursesEtudesNonRenseignees,
 )

@@ -28,10 +28,10 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from admission.ddd.admission.domain.service.i_calendrier_inscription import (
+from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription import (
     ICalendrierInscription,
 )
-from admission.ddd.admission.domain.validator.exceptions import (
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     ResidenceAuSensDuDecretNonDisponiblePourInscriptionException,
 )
 from admission.models import GeneralEducationAdmission

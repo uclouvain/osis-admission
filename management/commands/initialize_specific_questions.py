@@ -30,8 +30,8 @@ from django.conf import settings
 from django.core.management import BaseCommand
 from django.utils.translation import ngettext
 
-from admission.ddd.admission.domain.enums import TypeFormation
-from admission.ddd.admission.enums import (
+from admission.ddd.admission.shared_kernel.domain.enums import TypeFormation
+from admission.ddd.admission.shared_kernel.enums import (
     CleConfigurationItemFormulaire,
     CritereItemFormulaireFormation,
     CritereItemFormulaireLangueEtudes,
@@ -43,7 +43,7 @@ from admission.ddd.admission.enums import (
     TypeChampTexteFormulaire,
     TypeItemFormulaire,
 )
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
 from admission.models import AdmissionFormItem, AdmissionFormItemInstantiation

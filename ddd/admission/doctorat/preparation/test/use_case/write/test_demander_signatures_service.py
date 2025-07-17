@@ -62,7 +62,7 @@ from admission.ddd.admission.doctorat.preparation.test.factory.person import (
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
     PropositionPreAdmissionSC3DPMinimaleFactory,
 )
-from admission.ddd.admission.test.mixins import AdmissionTestMixin
+from admission.ddd.admission.shared_kernel.tests.mixins import AdmissionTestMixin
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.groupe_de_supervision import (
     GroupeDeSupervisionInMemoryRepository,
 )

@@ -35,7 +35,7 @@ from admission.ddd.admission.doctorat.preparation.domain.service.i_historique im
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
     IPropositionRepository,
 )
-from admission.ddd.admission.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
 
 
 def specifier_motifs_refus_proposition_par_sic(

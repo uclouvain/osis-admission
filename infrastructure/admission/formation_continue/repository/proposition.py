@@ -33,14 +33,14 @@ from django.utils.translation import get_language
 
 from admission.auth.roles.candidate import Candidate
 from admission.auth.roles.program_manager import ProgramManager
-from admission.ddd.admission.domain.builder.formation_identity import (
+from admission.ddd.admission.shared_kernel.domain.builder.formation_identity import (
     FormationIdentityBuilder,
 )
-from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
-from admission.ddd.admission.dtos import AdressePersonnelleDTO
-from admission.ddd.admission.dtos.campus import CampusDTO
-from admission.ddd.admission.dtos.formation import FormationDTO
-from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
+from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import ProfilCandidat
+from admission.ddd.admission.shared_kernel.dtos import AdressePersonnelleDTO
+from admission.ddd.admission.shared_kernel.dtos.campus import CampusDTO
+from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
+from admission.ddd.admission.shared_kernel.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.formation_continue.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
@@ -69,7 +69,7 @@ from admission.ddd.admission.formation_continue.dtos import PropositionDTO
 from admission.ddd.admission.formation_continue.repository.i_proposition import (
     IPropositionRepository,
 )
-from admission.infrastructure.admission.repository.proposition import (
+from admission.infrastructure.admission.shared_kernel.repository.proposition import (
     GlobalPropositionRepository,
 )
 from admission.models import ContinuingEducationAdmissionProxy

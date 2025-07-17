@@ -24,10 +24,10 @@
 #
 # ##############################################################################
 
-from admission.ddd.admission.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.domain.service.resume_proposition import ResumeProposition
-from admission.ddd.admission.enums import TypeItemFormulaire
-from admission.ddd.admission.enums.valorisation_experience import (
+from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.shared_kernel.domain.service.resume_proposition import ResumeProposition
+from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
     ExperiencesCVRecuperees,
 )
 from admission.ddd.admission.formation_generale.commands import (
@@ -51,7 +51,7 @@ from admission.ddd.admission.formation_generale.events import (
 from admission.ddd.admission.formation_generale.repository.i_proposition import (
     IPropositionRepository,
 )
-from admission.ddd.admission.repository.i_emplacement_document import (
+from admission.ddd.admission.shared_kernel.repository.i_emplacement_document import (
     IEmplacementDocumentRepository,
 )
 from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import IMatriculeEtudiantService

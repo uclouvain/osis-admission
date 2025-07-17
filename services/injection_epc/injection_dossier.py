@@ -44,7 +44,7 @@ from admission.ddd.admission.doctorat.preparation.commands import (
     RecalculerEmplacementsDocumentsNonLibresPropositionCommand
     as RecalculerEmplacementsDocumentsNonLibresDoctoratCommand,
 )
-from admission.ddd.admission.enums import TypeItemFormulaire, TypeSituationAssimilation, ChoixAffiliationSport
+from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire, TypeSituationAssimilation, ChoixAffiliationSport
 from admission.ddd.admission.formation_continue.commands import (
     RecalculerEmplacementsDocumentsNonLibresPropositionCommand as RecalculerEmplacementsDocumentsNonLibresIUFCCommand,
 )

@@ -27,7 +27,7 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils.translation import gettext as _
 
-from admission.ddd.admission.enums.question_specifique import (
+from admission.ddd.admission.shared_kernel.enums.question_specifique import (
     CleConfigurationItemFormulaire,
     TypeItemFormulaire,
     CritereItemFormulaireNationaliteCandidat,

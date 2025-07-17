@@ -31,7 +31,7 @@ from django.shortcuts import resolve_url
 from django.test import override_settings
 from rest_framework.test import APITestCase
 
-from admission.ddd.admission.domain.enums import TypeFormation
+from admission.ddd.admission.shared_kernel.domain.enums import TypeFormation
 from admission.tests import TESTING_CACHE_SETTING
 from base.models.campus import Campus
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
@@ -86,7 +86,9 @@ class TrainingDateMockTestCase(APITestCase):
         cls.today_date = datetime.date(2020, 11, 15)
 
     def setUp(self):
-        patcher = mock.patch('admission.infrastructure.admission.domain.service.annee_inscription_formation.datetime')
+        patcher = mock.patch(
+            'admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation.datetime'
+        )
         self.addCleanup(patcher.stop)
         self.mock_date = patcher.start()
         self.mock_date.date.today.return_value = self.today_date

@@ -25,7 +25,7 @@
 # ##############################################################################
 from django.test import TestCase
 
-from admission.ddd.admission.enums import (
+from admission.ddd.admission.shared_kernel.enums import (
     ChoixAffiliationSport,
     ChoixAssimilation1,
     ChoixAssimilation2,

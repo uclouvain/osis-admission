@@ -27,7 +27,7 @@ from typing import Optional
 
 import attr
 
-from admission.ddd.admission.domain.model.poste_diplomatique import PosteDiplomatiqueIdentity
+from admission.ddd.admission.shared_kernel.domain.model.poste_diplomatique import PosteDiplomatiqueIdentity
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     InformationsVisaNonCompleteesException,
 )

@@ -25,10 +25,10 @@
 # ##############################################################################
 from rest_framework import serializers
 
-from admission.ddd.admission.domain.service.i_calendrier_inscription import (
+from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription import (
     ICalendrierInscription,
 )
-from admission.ddd.admission.domain.service.i_elements_confirmation import (
+from admission.ddd.admission.shared_kernel.domain.service.i_elements_confirmation import (
     ElementConfirmation,
 )
 from base.utils.serializers import DTOSerializer

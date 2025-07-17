@@ -27,11 +27,11 @@ from django.http import Http404
 from django.utils.translation import gettext as _
 from django.views.generic import TemplateView
 
-from admission.ddd.admission.commands import (
+from admission.ddd.admission.shared_kernel.commands import (
     RecupererExperienceAcademiqueQuery,
     RecupererExperienceNonAcademiqueQuery,
 )
-from admission.ddd.admission.domain.validator.exceptions import (
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     ExperienceNonTrouveeException,
 )
 from admission.utils import get_experience_urls

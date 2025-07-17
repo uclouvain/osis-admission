@@ -28,7 +28,7 @@ from typing import List, Optional
 
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import DoctoratFormation
 from admission.ddd.admission.doctorat.preparation.dtos import DoctoratFormationDTO
-from admission.ddd.admission.domain.service.i_formation_translator import IFormationTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_formation_translator import IFormationTranslator
 
 
 class IDoctoratTranslator(IFormationTranslator):

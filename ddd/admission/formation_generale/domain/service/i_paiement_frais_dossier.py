@@ -27,7 +27,7 @@ import datetime
 from datetime import timedelta
 from typing import Dict, List
 
-from admission.ddd.admission.domain.model.periode import Periode
+from admission.ddd.admission.shared_kernel.domain.model.periode import Periode
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,

@@ -30,7 +30,7 @@ from admission.ddd.admission.formation_continue.domain.service.i_question_specif
     IQuestionSpecifiqueTranslator,
 )
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import PropositionNonTrouveeException
-from admission.infrastructure.admission.domain.service.in_memory.question_specifique import (
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.question_specifique import (
     SuperQuestionSpecifiqueInMemoryTranslator,
     QuestionSpecifiqueEtendue,
 )

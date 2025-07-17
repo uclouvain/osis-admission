@@ -38,7 +38,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.proposition impor
     PropositionIdentity,
 )
 from admission.ddd.admission.doctorat.preparation.dtos import AvisDTO
-from admission.ddd.admission.domain.model.enums.authentification import (
+from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
     EtatAuthentificationParcours,
 )
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO

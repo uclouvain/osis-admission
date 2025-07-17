@@ -30,13 +30,13 @@ import factory
 import freezegun
 from django.test import TestCase
 
-from admission.ddd.admission.domain.model.emplacement_document import (
+from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import (
     EmplacementDocumentIdentity,
 )
-from admission.ddd.admission.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.domain.validator.exceptions import EnQuarantaineException
-from admission.ddd.admission.dtos.merge_proposal import MergeProposalDTO
-from admission.ddd.admission.enums.emplacement_document import (
+from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import EnQuarantaineException
+from admission.ddd.admission.shared_kernel.dtos.merge_proposal import MergeProposalDTO
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     OngletsDemande,
     StatutEmplacementDocument,
     StatutReclamationEmplacementDocument,
@@ -58,14 +58,14 @@ from admission.ddd.admission.formation_generale.test.factory.proposition import 
     PropositionFactory,
     _PropositionIdentityFactory,
 )
-from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationIdentityFactory
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
 )
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
+from admission.infrastructure.admission.shared_kernel.repository.in_memory.emplacement_document import (
     emplacement_document_in_memory_repository,
 )
 from admission.infrastructure.message_bus_in_memory import (

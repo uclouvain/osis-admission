@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.domain.service.i_poste_diplomatique import (
+from admission.ddd.admission.shared_kernel.domain.service.i_poste_diplomatique import (
     IPosteDiplomatiqueTranslator,
 )
 from admission.ddd.admission.formation_generale.commands import (

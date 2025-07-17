@@ -29,9 +29,9 @@ from typing import Dict, List, Optional, Union
 
 import attr
 
-from admission.ddd.admission.dtos import AdressePersonnelleDTO
-from admission.ddd.admission.dtos.formation import FormationDTO
-from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
+from admission.ddd.admission.shared_kernel.dtos import AdressePersonnelleDTO
+from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
+from admission.ddd.admission.shared_kernel.dtos.profil_candidat import ProfilCandidatDTO
 from osis_common.ddd import interface
 
 

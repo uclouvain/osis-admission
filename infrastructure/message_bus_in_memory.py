@@ -29,7 +29,6 @@ from .admission.doctorat.preparation import handlers_in_memory as preparation_ha
 from .admission.doctorat.validation import handlers_in_memory as validation_handlers
 from .admission.formation_continue import handlers_in_memory as formation_continue_handlers
 from .admission.formation_generale import handlers_in_memory as formation_generale_handlers
-from .admission.shared_kernel.role import handlers_in_memory as role_handlers
 
 
 class MessageBusInMemoryCommands(AbstractMessageBusCommands):
@@ -39,7 +38,6 @@ class MessageBusInMemoryCommands(AbstractMessageBusCommands):
         **formation_continue_handlers.COMMAND_HANDLERS,
         **formation_generale_handlers.COMMAND_HANDLERS,
         **admission_handlers.COMMAND_HANDLERS,
-        **role_handlers.COMMAND_HANDLERS,
     }
 
 
