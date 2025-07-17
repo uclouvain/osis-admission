@@ -894,7 +894,7 @@ def checklist_state_button(context, **kwargs):
         ]
     }
 
-    if context.get('can_update_checklist_tab') is False:
+    if context.get('can_update_checklist_tab') is False and not kwargs.pop('force_enabled', False):
         expected_attrs['disabled'] = True
 
     return {

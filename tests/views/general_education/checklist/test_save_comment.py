@@ -23,6 +23,8 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
+
 import freezegun
 from django.shortcuts import resolve_url
 from django.test import TestCase
@@ -30,6 +32,7 @@ from osis_comment.models import CommentEntry
 
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.models import GeneralEducationAdmission
 from admission.tests.factories.general_education import (
     GeneralEducationTrainingFactory,
     GeneralEducationAdmissionFactory,
@@ -62,11 +65,13 @@ class SaveCommentViewTestCase(TestCase):
 
         cls.default_headers = {'HTTP_HX-Request': 'true'}
 
+    @freezegun.freeze_time('2021-12-1')
     def setUp(self) -> None:
         super().setUp()
-        self.general_admission = GeneralEducationAdmissionFactory(
+        self.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             training=self.training,
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+            last_update_author=self.fac_manager_user.person,
         )
 
     @freezegun.freeze_time('2021-12-31T08:15')
@@ -96,6 +101,11 @@ class SaveCommentViewTestCase(TestCase):
 
         self.assertIsNotNone(comment_entry)
         self.assertEqual(comment_entry.content, 'Test comment')
+
+        # Check that the last modification information of the admission have not been updated
+        self.general_admission.refresh_from_db()
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime(2021, 12, 1))
+        self.assertEqual(self.general_admission.last_update_author, self.fac_manager_user.person)
 
     def test_submit_an_updated_comment(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -138,3 +148,8 @@ class SaveCommentViewTestCase(TestCase):
 
             self.assertIsNotNone(comment_entry)
             self.assertEqual(comment_entry.content, 'Test comment 2')
+
+            # Check that the last modification information of the admission have not been updated
+            self.general_admission.refresh_from_db()
+            self.assertEqual(self.general_admission.modified_at, datetime.datetime(2021, 12, 1))
+            self.assertEqual(self.general_admission.last_update_author, self.fac_manager_user.person)
