@@ -28,11 +28,9 @@ from typing import Optional, List
 
 from django.db.models import F
 
-from admission.ddd.admission.shared_kernel.email_destinataire.domain.validator.exceptions import \
-    InformationsDestinatairePasTrouvee
-from admission.ddd.admission.shared_kernel.email_destinataire.dtos.destinataire import InformationsDestinataireDTO
-from admission.ddd.admission.shared_kernel.email_destinataire.repository.i_email_destinataire import \
-    IEmailDestinataireRepository
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import InformationsDestinatairePasTrouvee
+from admission.ddd.admission.shared_kernel.dtos.destinataire import InformationsDestinataireDTO
+from admission.ddd.admission.shared_kernel.repository.i_email_destinataire import IEmailDestinataireRepository
 from epc.models.email_fonction_programme import EmailFonctionProgramme
 from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
 

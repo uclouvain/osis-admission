@@ -34,7 +34,7 @@ from django.utils.functional import cached_property
 from django.utils.translation import get_language
 
 from admission.ddd.admission.shared_kernel.dtos.formation import BaseFormationDTO
-from admission.ddd.admission.shared_kernel.role.commands import RechercherFormationsGereesQuery
+from admission.ddd.admission.shared_kernel.commands import RechercherFormationsGereesQuery
 from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )

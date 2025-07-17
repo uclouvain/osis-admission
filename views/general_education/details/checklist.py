@@ -56,7 +56,7 @@ from admission.constants import COMMENT_TAG_FAC, COMMENT_TAG_SIC
 from admission.ddd import MAIL_VERIFICATEUR_CURSUS, MONTANT_FRAIS_DOSSIER
 from admission.ddd.admission.shared_kernel.commands import (
     ListerToutesDemandesQuery,
-    RechercherParcoursAnterieurQuery,
+    RechercherParcoursAnterieurQuery, RecupererInformationsDestinataireQuery,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AnneesCurriculumNonSpecifieesException,
@@ -67,7 +67,7 @@ from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
-    ExperienceNonTrouveeException,
+    ExperienceNonTrouveeException, InformationsDestinatairePasTrouvee,
 )
 from admission.ddd.admission.shared_kernel.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
@@ -155,12 +155,6 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
 )
 from admission.ddd.admission.formation_generale.dtos.proposition import (
     PropositionGestionnaireDTO,
-)
-from admission.ddd.admission.shared_kernel.email_destinataire.domain.validator.exceptions import (
-    InformationsDestinatairePasTrouvee,
-)
-from admission.ddd.admission.shared_kernel.email_destinataire.queries import (
-    RecupererInformationsDestinataireQuery,
 )
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
 from admission.forms import disable_unavailable_forms

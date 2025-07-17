@@ -27,7 +27,7 @@ from typing import List
 
 from admission.ddd import CODE_BACHELIER_VETERINAIRE
 from admission.ddd.admission.shared_kernel.dtos.formation import BaseFormationDTO
-from admission.ddd.admission.shared_kernel.role.repository.gestionnaire import IGestionnaireRepository
+from admission.ddd.admission.shared_kernel.repository.gestionnaire import IGestionnaireRepository
 from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationFactory
 from base.models.enums.education_group_types import TrainingType
 

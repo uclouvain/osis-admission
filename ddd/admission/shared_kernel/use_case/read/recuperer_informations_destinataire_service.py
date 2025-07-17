@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,19 +24,18 @@
 #
 # ##############################################################################
 
-from typing import List
+from admission.ddd.admission.shared_kernel.dtos.destinataire import InformationsDestinataireDTO
+from admission.ddd.admission.shared_kernel.commands import RecupererInformationsDestinataireQuery
+from admission.ddd.admission.shared_kernel.repository.i_email_destinataire import \
+    IEmailDestinataireRepository
 
-from admission.ddd.admission.shared_kernel.dtos.formation import BaseFormationDTO
-from admission.ddd.admission.shared_kernel.role.commands import RechercherFormationsGereesQuery
-from admission.ddd.admission.shared_kernel.role.repository.gestionnaire import IGestionnaireRepository
 
-
-def rechercher_formations_gerees(
-    cmd: 'RechercherFormationsGereesQuery',
-    repository: 'IGestionnaireRepository',
-) -> List[BaseFormationDTO]:
-    return repository.rechercher_formations_gerees(
-        matriculaire_gestionnaire=cmd.matricule_gestionnaire,
-        annee=cmd.annee,
-        terme_recherche=cmd.terme_recherche,
+def recuperer_informations_destinataire(
+    query: 'RecupererInformationsDestinataireQuery',
+    email_destinataire_repository: 'IEmailDestinataireRepository',
+) -> 'InformationsDestinataireDTO':
+    return email_destinataire_repository.get_informations_destinataire_dto(
+        sigle_programme=query.sigle_formation,
+        annee=query.annee,
+        pour_premiere_annee=query.est_premiere_annee,
     )

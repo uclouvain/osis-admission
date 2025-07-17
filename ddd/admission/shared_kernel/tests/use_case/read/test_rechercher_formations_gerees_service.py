@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,12 +23,30 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.utils.translation import gettext_lazy as _
+from django.test import TestCase
 
-from osis_common.ddd.interface import BusinessException
+from admission.ddd.admission.shared_kernel.commands import RechercherFormationsGereesQuery
+from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
 
-class InformationsDestinatairePasTrouvee(BusinessException):
-    def __init__(self, **kwargs):
-        message = _("Ressource not found.")
-        super().__init__(message, **kwargs)
+class TestRechercherFormationGereesService(TestCase):
+    def setUp(self) -> None:
+        self.message_bus = message_bus_in_memory_instance
+
+    def test_should_rechercher_par_intitule_formation_et_annee(self):
+        results = self.message_bus.invoke(
+            RechercherFormationsGereesQuery(
+                terme_recherche='Bachelier en sciences économiques',
+                matricule_gestionnaire='0123456789',
+                annee=2021,
+            )
+        )
+        self.assertEqual(len(results), 1)
+        results = self.message_bus.invoke(
+            RechercherFormationsGereesQuery(
+                terme_recherche='Bachelier en sciences économiques',
+                matricule_gestionnaire='0123456789',
+                annee=2020,
+            )
+        )
+        self.assertEqual(len(results), 2)

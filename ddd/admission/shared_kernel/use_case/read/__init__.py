@@ -24,10 +24,12 @@
 #
 # ##############################################################################
 from .lister_demandes_service import lister_demandes
+from .rechercher_formations_gerees_service import rechercher_formations_gerees
 from .recuperer_connaissances_langues_service import recuperer_connaissances_langues
 from .recuperer_etudes_secondaires_service import recuperer_etudes_secondaires
 from .recuperer_experience_academique_service import recuperer_experience_academique
 from .recuperer_experience_non_academique_service import recuperer_experience_non_academique
+from .recuperer_informations_destinataire_service import recuperer_informations_destinataire
 from .recuperer_questions_specifiques_proposition_service import recuperer_questions_specifiques_proposition
 from .recuperer_titres_acces_selectionnables_proposition_service import (
     recuperer_titres_acces_selectionnables_proposition,

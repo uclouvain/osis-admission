@@ -251,3 +251,9 @@ class HorsPeriodeSpecifiqueInscription(BusinessException):
 
     def __init__(self, message, **kwargs):
         super().__init__(message, **kwargs)
+
+
+class InformationsDestinatairePasTrouvee(BusinessException):
+    def __init__(self, **kwargs):
+        message = _("Ressource not found.")
+        super().__init__(message, **kwargs)

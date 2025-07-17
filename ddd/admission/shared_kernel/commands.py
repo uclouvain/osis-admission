@@ -33,6 +33,7 @@ from admission.ddd.admission.shared_kernel.enums.valorisation_experience import 
 )
 from admission.ddd.admission.shared_kernel.interface import SortedQueryRequest
 from osis_common.ddd import interface
+from osis_common.ddd.interface import QueryRequest
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -180,3 +181,17 @@ class SpecifierExperienceEnTantQueTitreAccesCommand(interface.CommandRequest):
     uuid_experience: str
     type_experience: str
     selectionne: bool
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RechercherFormationsGereesQuery(interface.QueryRequest):
+    matricule_gestionnaire: str
+    annee: Optional[int] = None
+    terme_recherche: str = ''
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererInformationsDestinataireQuery(QueryRequest):
+    annee: int
+    sigle_formation: str
+    est_premiere_annee: bool

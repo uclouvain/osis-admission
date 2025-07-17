@@ -32,7 +32,7 @@ from admission.ddd.admission.formation_generale.domain.model.proposition import 
 from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
 from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import IMatriculeEtudiantService
-from admission.ddd.admission.shared_kernel.email_destinataire.repository.i_email_destinataire import (
+from admission.ddd.admission.shared_kernel.repository.i_email_destinataire import (
     IEmailDestinataireRepository,
 )
 

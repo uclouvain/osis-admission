@@ -156,7 +156,7 @@ from admission.infrastructure.admission.repository.in_memory.titre_acces_selecti
 )
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.matricule_etudiant import \
     MatriculeEtudiantInMemoryService
-from admission.infrastructure.admission.shared_kernel.email_destinataire.repository.in_memory.email_destinataire import (
+from admission.infrastructure.admission.shared_kernel.repository.in_memory.email_destinataire import (
     EmailDestinataireInMemoryRepository,
 )
 from infrastructure.financabilite.domain.service.in_memory.financabilite import (

@@ -156,7 +156,7 @@ from admission.infrastructure.admission.repository.titre_acces_selectionnable im
     TitreAccesSelectionnableRepository,
 )
 from admission.infrastructure.admission.shared_kernel.domain.service.matricule_etudiant import MatriculeEtudiantService
-from admission.infrastructure.admission.shared_kernel.email_destinataire.repository.email_destinataire import (
+from admission.infrastructure.admission.shared_kernel.repository.email_destinataire import (
     EmailDestinataireRepository,
 )
 from infrastructure.financabilite.domain.service.financabilite import (

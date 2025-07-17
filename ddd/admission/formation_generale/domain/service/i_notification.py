@@ -33,7 +33,7 @@ from admission.ddd.admission.shared_kernel.dtos.emplacement_document import Empl
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
 from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import IMatriculeEtudiantService
-from admission.ddd.admission.shared_kernel.email_destinataire.repository.i_email_destinataire import (
+from admission.ddd.admission.shared_kernel.repository.i_email_destinataire import (
     IEmailDestinataireRepository,
 )
 from osis_common.ddd import interface

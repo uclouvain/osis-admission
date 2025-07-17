@@ -26,11 +26,9 @@
 
 from typing import List
 
-from admission.ddd.admission.shared_kernel.email_destinataire.domain.validator.exceptions import \
-    InformationsDestinatairePasTrouvee
-from admission.ddd.admission.shared_kernel.email_destinataire.dtos.destinataire import InformationsDestinataireDTO
-from admission.ddd.admission.shared_kernel.email_destinataire.repository.i_email_destinataire import \
-    IEmailDestinataireRepository
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import InformationsDestinatairePasTrouvee
+from admission.ddd.admission.shared_kernel.dtos.destinataire import InformationsDestinataireDTO
+from admission.ddd.admission.shared_kernel.repository.i_email_destinataire import IEmailDestinataireRepository
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 
 
