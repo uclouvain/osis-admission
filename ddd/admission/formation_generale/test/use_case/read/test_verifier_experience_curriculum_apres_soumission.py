@@ -36,7 +36,7 @@ from admission.ddd.admission.formation_generale.commands import (
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
     AnneeExperienceAcademique,
     ExperienceAcademique,
     ProfilCandidatInMemoryTranslator,

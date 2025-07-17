@@ -70,7 +70,7 @@ from admission.ddd.admission.formation_generale.repository.i_proposition import 
     IPropositionRepository,
 )
 from admission.exports.utils import admission_generate_pdf
-from admission.infrastructure.admission.domain.service.unites_enseignement_translator import (
+from admission.infrastructure.admission.shared_kernel.domain.service.unites_enseignement_translator import (
     UnitesEnseignementTranslator,
 )
 from admission.infrastructure.utils import CHAMPS_DOCUMENTS_EXPERIENCES_CURRICULUM

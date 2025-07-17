@@ -27,18 +27,18 @@ from admission.ddd.admission.shared_kernel.commands import *
 from admission.ddd.admission.shared_kernel.commands import RecupererInformationsDestinataireQuery
 from admission.ddd.admission.shared_kernel.use_case.read import *
 from admission.ddd.admission.shared_kernel.use_case.write import specifier_experience_en_tant_que_titre_acces
-from admission.infrastructure.admission.domain.service.in_memory.lister_toutes_demandes import (
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.lister_toutes_demandes import (
     ListerToutesDemandesInMemory,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 
-from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
+from admission.infrastructure.admission.shared_kernel.repository.in_memory.emplacement_document import (
     emplacement_document_in_memory_repository,
 )
-from admission.infrastructure.admission.repository.in_memory.titre_acces_selectionnable import (
+from admission.infrastructure.admission.shared_kernel.repository.in_memory.titre_acces_selectionnable import (
     TitreAccesSelectionnableInMemoryRepository,
 )
-from admission.infrastructure.admission.repository.in_memory.gestionnaire import (
+from admission.infrastructure.admission.shared_kernel.repository.in_memory.gestionnaire import (
     GestionnaireInMemoryRepository,
 )
 from admission.infrastructure.admission.shared_kernel.repository.in_memory.email_destinataire import (

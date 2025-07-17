@@ -28,7 +28,7 @@ import attr
 from admission.ddd import PREFIXES_DOMAINES_FORMATIONS_DENT_MED
 from admission.ddd.admission.shared_kernel.domain.enums import TypeFormation
 from admission.ddd.admission.shared_kernel.domain.model._campus import Campus
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
 from base.ddd.utils.converters import to_upper_case_converter

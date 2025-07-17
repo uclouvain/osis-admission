@@ -70,16 +70,16 @@ from admission.ddd.admission.formation_generale.test.factory.proposition import 
 )
 from admission.ddd.admission.shared_kernel.repository.i_proposition import formater_reference
 from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationIdentityFactory
-from admission.infrastructure.admission.domain.service.in_memory.poste_diplomatique import (
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.poste_diplomatique import (
     PosteDiplomatiqueInMemoryTranslator,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
 )
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.formation import (
     FormationGeneraleInMemoryTranslator,
 )
-from admission.infrastructure.admission.repository.in_memory.proposition import (
+from admission.infrastructure.admission.shared_kernel.repository.in_memory.proposition import (
     GlobalPropositionInMemoryRepository,
 )
 from admission.infrastructure.utils import dto_to_dict

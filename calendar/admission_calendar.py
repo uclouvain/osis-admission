@@ -46,7 +46,7 @@ from admission.ddd.admission.shared_kernel.dtos import AdressePersonnelleDTO
 from admission.ddd.admission.formation_generale.domain.model.proposition import (
     Proposition as PropositionGenerale,
 )
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
 from base.business.academic_calendar import AcademicEventSessionCalendarHelper

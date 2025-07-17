@@ -43,7 +43,7 @@ from admission.ddd.admission.formation_generale.commands import (
     InitialiserEmplacementDocumentLibreAReclamerCommand,
     AnnulerReclamationEmplacementDocumentCommand,
 )
-from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
+from admission.infrastructure.admission.shared_kernel.repository.in_memory.emplacement_document import (
     EmplacementDocumentInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance

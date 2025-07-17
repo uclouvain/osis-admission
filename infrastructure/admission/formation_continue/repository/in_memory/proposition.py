@@ -54,7 +54,7 @@ from admission.ddd.admission.shared_kernel.tests.factory.formation import Format
 from admission.infrastructure.admission.formation_continue.domain.service.in_memory.formation import (
     FormationContinueInMemoryTranslator,
 )
-from admission.infrastructure.admission.repository.in_memory.proposition import (
+from admission.infrastructure.admission.shared_kernel.repository.in_memory.proposition import (
     GlobalPropositionInMemoryRepository,
 )
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository

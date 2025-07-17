@@ -65,7 +65,7 @@ from admission.ddd.admission.shared_kernel.dtos.titre_acces_selectionnable impor
 from admission.ddd.admission.formation_generale.commands import (
     VerifierCurriculumApresSoumissionQuery as VerifierCurriculumApresSoumissionGeneraleQuery,
 )
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
 )
 from admission.models import (

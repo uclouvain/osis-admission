@@ -43,10 +43,10 @@ from admission.ddd.admission.formation_generale.commands import (
     SoumettrePropositionCommand as SoumettrePropositionGeneraleCommand,
 )
 from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationFactory
-from admission.infrastructure.admission.domain.service.in_memory.elements_confirmation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.elements_confirmation import (
     ElementsConfirmationInMemory,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
     PropositionInMemoryRepository as PropositionContinueRepository,
 )

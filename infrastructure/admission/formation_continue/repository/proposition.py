@@ -69,7 +69,7 @@ from admission.ddd.admission.formation_continue.dtos import PropositionDTO
 from admission.ddd.admission.formation_continue.repository.i_proposition import (
     IPropositionRepository,
 )
-from admission.infrastructure.admission.repository.proposition import (
+from admission.infrastructure.admission.shared_kernel.repository.proposition import (
     GlobalPropositionRepository,
 )
 from admission.models import ContinuingEducationAdmissionProxy

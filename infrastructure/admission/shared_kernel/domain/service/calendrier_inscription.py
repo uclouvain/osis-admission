@@ -34,8 +34,7 @@ from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscripti
 )
 from admission.ddd.admission.shared_kernel.dtos import IdentificationDTO
 from admission.ddd.admission.shared_kernel.dtos.periode import PeriodeDTO
-from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
 from base.models.academic_calendar import AcademicCalendar

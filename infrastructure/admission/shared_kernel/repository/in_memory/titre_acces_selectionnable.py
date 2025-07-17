@@ -29,7 +29,7 @@ from admission.ddd.admission.shared_kernel.domain.model.proposition import Propo
 from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import (
     TitreAccesSelectionnable,
 )
-from admission.ddd.admission.shared_kernel.domain.repository.i_titre_acces_selectionnable import ITitreAccesSelectionnableRepository
+from admission.ddd.admission.shared_kernel.repository.i_titre_acces_selectionnable import ITitreAccesSelectionnableRepository
 from admission.ddd.admission.formation_generale.test.factory.titre_acces import TitreAccesSelectionnableFactory
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator

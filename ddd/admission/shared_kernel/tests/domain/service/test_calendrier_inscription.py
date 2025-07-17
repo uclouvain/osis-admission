@@ -57,10 +57,10 @@ from admission.ddd.admission.shared_kernel.tests.factory.formation import (
     FormationIdentityFactory,
 )
 from admission.ddd.admission.shared_kernel.tests.factory.profil import ProfilCandidatFactory
-from admission.infrastructure.admission.domain.service.in_memory.calendrier_inscription import (
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.calendrier_inscription import (
     CalendrierInscriptionInMemory,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
 )
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.formation import (

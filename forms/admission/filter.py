@@ -52,7 +52,7 @@ from admission.forms import (
     get_academic_year_choices,
 )
 from admission.forms.checklist_state_filter import ChecklistStateFilterField
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
 from admission.models.working_list import ContinuingWorkingList, WorkingList

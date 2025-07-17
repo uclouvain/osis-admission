@@ -86,7 +86,9 @@ class TrainingDateMockTestCase(APITestCase):
         cls.today_date = datetime.date(2020, 11, 15)
 
     def setUp(self):
-        patcher = mock.patch('admission.infrastructure.admission.domain.service.annee_inscription_formation.datetime')
+        patcher = mock.patch(
+            'admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation.datetime'
+        )
         self.addCleanup(patcher.stop)
         self.mock_date = patcher.start()
         self.mock_date.date.today.return_value = self.today_date

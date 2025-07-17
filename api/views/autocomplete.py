@@ -53,7 +53,7 @@ from admission.ddd.admission.formation_continue.commands import (
 from admission.ddd.admission.formation_generale.commands import (
     RechercherFormationGeneraleQuery,
 )
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
 from admission.models import DiplomaticPost, EntityProxy

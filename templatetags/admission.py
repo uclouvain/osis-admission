@@ -116,7 +116,7 @@ from admission.exports.admission_recap.section import (
 from admission.forms.admission.doctorate.supervision import (
     DoctorateAdmissionMemberSupervisionForm,
 )
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
     AnneeInscriptionFormationTranslator,
 )

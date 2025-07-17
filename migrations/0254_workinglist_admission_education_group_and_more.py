@@ -4,7 +4,7 @@ import django.contrib.postgres.fields
 from django.db import migrations, models
 from django.db.models import Case, F, Value, When
 
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
 from admission.models.working_list import UNCHANGED_KEY

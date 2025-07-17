@@ -36,7 +36,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.proposition impor
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
     IPropositionRepository,
 )
-from admission.ddd.admission.shared_kernel.domain.repository.i_titre_acces_selectionnable import (
+from admission.ddd.admission.shared_kernel.repository.i_titre_acces_selectionnable import (
     ITitreAccesSelectionnableRepository,
 )
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (

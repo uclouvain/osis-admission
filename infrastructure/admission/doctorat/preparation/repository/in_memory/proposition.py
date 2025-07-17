@@ -80,10 +80,10 @@ from admission.infrastructure.admission.doctorat.preparation.domain.service.in_m
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.groupe_de_supervision import (
     GroupeDeSupervisionInMemoryRepository,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
 )
-from admission.infrastructure.admission.repository.in_memory.proposition import (
+from admission.infrastructure.admission.shared_kernel.repository.in_memory.proposition import (
     GlobalPropositionInMemoryRepository,
 )
 from admission.infrastructure.utils import dto_to_dict

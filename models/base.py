@@ -87,7 +87,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_NON_SOUMISE_OU_FRAIS_DOSSIER_EN_ATTENTE,
 )
 from admission.ddd.admission.shared_kernel.repository.i_proposition import CAMPUS_LETTRE_DOSSIER
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     ADMISSION_CONTEXT_BY_ALL_OSIS_EDUCATION_TYPE,
     AnneeInscriptionFormationTranslator,
 )

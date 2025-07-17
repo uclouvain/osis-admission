@@ -44,7 +44,7 @@ from admission.ddd.admission.formation_generale.domain.builder.proposition_ident
     PropositionIdentityBuilder,
 )
 from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationIdentityFactory
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
     AnneeExperienceAcademique,
     ExperienceAcademique,
     ExperienceNonAcademique,

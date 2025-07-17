@@ -64,7 +64,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 )
 from admission.ddd.admission.formation_continue import commands as continuing_commands
 from admission.ddd.admission.formation_generale import commands as general_commands
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
 from base.ddd.utils.business_validator import MultipleBusinessExceptions

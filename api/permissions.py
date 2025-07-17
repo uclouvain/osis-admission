@@ -28,7 +28,7 @@ from rest_framework.permissions import BasePermission, SAFE_METHODS
 from admission.models import SupervisionActor
 from admission.models.base import BaseAdmission
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import MaximumPropositionsAtteintException
-from admission.infrastructure.admission.domain.service.maximum_propositions import MaximumPropositionsAutorisees
+from admission.infrastructure.admission.shared_kernel.domain.service.maximum_propositions import MaximumPropositionsAutorisees
 
 
 class DoesNotHaveSubmittedPropositions(BasePermission):

@@ -55,10 +55,10 @@ from admission.ddd.admission.shared_kernel.use_case.write import (
     remplir_emplacement_document_par_gestionnaire,
     supprimer_emplacement_document,
 )
-from admission.infrastructure.admission.domain.service.in_memory.annee_inscription_formation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.annee_inscription_formation import (
     AnneeInscriptionFormationInMemoryTranslator,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
 )
 from infrastructure.financabilite.domain.service.in_memory.financabilite import (
@@ -96,38 +96,37 @@ from .repository.in_memory.groupe_de_supervision import (
 )
 from .repository.in_memory.proposition import PropositionInMemoryRepository
 from ..validation.repository.in_memory.demande import DemandeInMemoryRepository
-from ...domain.service.in_memory.calendrier_inscription import (
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.calendrier_inscription import (
     CalendrierInscriptionInMemory,
 )
-from ...domain.service.in_memory.elements_confirmation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.elements_confirmation import (
     ElementsConfirmationInMemory,
 )
-from ...domain.service.in_memory.historique import (
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.historique import (
     HistoriqueInMemory as HistoriqueGlobalInMemory,
 )
-from ...domain.service.in_memory.maximum_propositions import (
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.maximum_propositions import (
     MaximumPropositionsAutoriseesInMemory,
 )
-from ...domain.service.in_memory.raccrocher_experiences_curriculum import (
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.raccrocher_experiences_curriculum import (
     RaccrocherExperiencesCurriculumInMemory,
 )
-from ...domain.service.in_memory.recuperer_documents_proposition import (
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.recuperer_documents_proposition import (
     EmplacementsDocumentsPropositionInMemoryTranslator,
 )
-from ...domain.service.in_memory.titres_acces import TitresAccesInMemory
-from ...domain.service.in_memory.unites_enseignement_translator import (
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.titres_acces import TitresAccesInMemory
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.unites_enseignement_translator import (
     UnitesEnseignementInMemoryTranslator,
 )
-from ...repository.in_memory.emplacement_document import (
+from admission.infrastructure.admission.shared_kernel.repository.in_memory.email_destinataire import \
+    EmailDestinataireInMemoryRepository
+from admission.infrastructure.admission.shared_kernel.repository.in_memory.emplacement_document import (
     emplacement_document_in_memory_repository,
 )
-from ...repository.in_memory.titre_acces_selectionnable import (
+from admission.infrastructure.admission.shared_kernel.repository.in_memory.titre_acces_selectionnable import (
     TitreAccesSelectionnableInMemoryRepositoryFactory,
 )
 from ...shared_kernel.domain.service.matricule_etudiant import MatriculeEtudiantService
-from ...shared_kernel.email_destinataire.repository.in_memory import (
-    EmailDestinataireInMemoryRepository,
-)
 
 _proposition_repository = PropositionInMemoryRepository()
 _groupe_supervision_repository = GroupeDeSupervisionInMemoryRepository()

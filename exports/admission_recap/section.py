@@ -32,9 +32,6 @@ from admission.calendar.admission_calendar import (
     AdmissionPoolExternalEnrollmentChangeCalendar,
     AdmissionPoolExternalReorientationCalendar,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixTypeAdmission,
-)
 from admission.ddd.admission.shared_kernel.domain.model.formation import (
     est_formation_medecine_ou_dentisterie,
 )
@@ -77,7 +74,7 @@ from admission.exports.admission_recap.constants import (
     FORMATTED_RELATIONSHIPS,
     TRAINING_TYPES_WITH_EQUIVALENCE,
 )
-from admission.infrastructure.admission.domain.service.calendrier_inscription import (
+from admission.infrastructure.admission.shared_kernel.domain.service.calendrier_inscription import (
     CalendrierInscription,
 )
 from admission.utils import WeasyprintStylesheets

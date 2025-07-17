@@ -11,7 +11,7 @@ from admission.ddd.admission.shared_kernel.enums import (
     TypeChampTexteFormulaire,
     TypeItemFormulaire,
 )
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
 from admission.management.commands.initialize_specific_questions import (

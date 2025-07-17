@@ -36,7 +36,7 @@ from admission.ddd.admission.shared_kernel.domain.model.emplacement_document imp
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     EmplacementDocumentNonTrouveException,
 )
-from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
+from admission.infrastructure.admission.shared_kernel.repository.in_memory.emplacement_document import (
     emplacement_document_in_memory_repository,
 )
 from admission.infrastructure.message_bus_in_memory import (

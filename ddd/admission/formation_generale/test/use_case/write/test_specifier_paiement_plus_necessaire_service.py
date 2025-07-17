@@ -43,7 +43,7 @@ from admission.ddd.admission.formation_generale.test.factory.proposition import 
     PropositionFactory,
 )
 from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationIdentityFactory
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
 )
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (

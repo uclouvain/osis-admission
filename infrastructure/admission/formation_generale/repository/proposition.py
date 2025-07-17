@@ -24,14 +24,13 @@
 #
 # ##############################################################################
 
-from contextlib import suppress
 from enum import Enum
 from typing import List, Optional, Union
 
 import attrs
 from django.conf import settings
 from django.db import transaction
-from django.db.models import Case, IntegerField, OuterRef, Prefetch, Subquery, When
+from django.db.models import OuterRef, Prefetch, Subquery
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language, pgettext
@@ -74,7 +73,6 @@ from admission.ddd.admission.formation_generale.domain.builder.proposition_ident
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     DROITS_INSCRIPTION_MONTANT_VALEURS,
-    STATUTS_PROPOSITION_GENERALE_SOUMISE,
     BesoinDeDerogation,
     BesoinDeDerogationDelegueVrae,
     ChoixStatutPropositionGenerale,
@@ -90,7 +88,6 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
     StatutsChecklistGenerale,
 )
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
-    PremierePropositionSoumisesNonTrouveeException,
     PropositionNonTrouveeException,
 )
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
@@ -104,13 +101,13 @@ from admission.ddd.admission.formation_generale.dtos.proposition import (
 from admission.ddd.admission.formation_generale.repository.i_proposition import (
     IPropositionRepository,
 )
-from admission.infrastructure.admission.domain.service.poste_diplomatique import (
+from admission.infrastructure.admission.shared_kernel.domain.service.poste_diplomatique import (
     PosteDiplomatiqueTranslator,
 )
 from admission.infrastructure.admission.formation_generale.repository._comptabilite import (
     get_accounting_from_admission,
 )
-from admission.infrastructure.admission.repository.proposition import (
+from admission.infrastructure.admission.shared_kernel.repository.proposition import (
     GlobalPropositionRepository,
 )
 from admission.infrastructure.utils import dto_to_dict

@@ -35,10 +35,10 @@ from admission.api.serializers.mixins import GetDefaultContextParam
 from admission.ddd.admission.doctorat.preparation import commands as doctorate_commands
 from admission.ddd.admission.formation_continue import commands as continuing_commands
 from admission.ddd.admission.formation_generale import commands as general_commands
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
-from admission.infrastructure.admission.domain.service.profil_candidat import (
+from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import (
     ProfilCandidatTranslator,
 )
 from base.api.serializers.academic_year import RelatedAcademicYearField

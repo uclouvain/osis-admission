@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 
-from admission.ddd.admission.shared_kernel.domain.repository.i_titre_acces_selectionnable import ITitreAccesSelectionnableRepository
+from admission.ddd.admission.shared_kernel.repository.i_titre_acces_selectionnable import ITitreAccesSelectionnableRepository
 from admission.ddd.admission.formation_generale.commands import SpecifierConditionAccesPropositionCommand
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,

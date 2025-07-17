@@ -30,7 +30,6 @@ import uuid
 import factory
 from factory.fuzzy import FuzzyText
 
-from admission.ddd import DUREE_MAXIMALE_PROGRAMME, DUREE_MINIMALE_PROGRAMME
 from admission.ddd.admission.doctorat.preparation.domain.model._comptabilite import (
     Comptabilite,
 )
@@ -92,7 +91,7 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
 )
 from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationIdentityFactory
 from admission.ddd.admission.shared_kernel.tests.factory.reference import REFERENCE_MEMORY_ITERATOR
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
 )
 

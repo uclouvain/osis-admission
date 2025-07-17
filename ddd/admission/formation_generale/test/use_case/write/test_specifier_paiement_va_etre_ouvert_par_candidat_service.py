@@ -48,7 +48,7 @@ from admission.ddd.admission.formation_generale.test.factory.paiement import Pai
 from admission.ddd.admission.formation_generale.test.factory.repository.paiement_frais_dossier import (
     PaiementFraisDossierInMemoryRepositoryFactory,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
@@ -143,7 +143,7 @@ class TestSpecifierPaiementVaEtreOuvertParCandidat(SimpleTestCase):
             with self.assertRaises(PaiementDejaRealiseException):
                 self.message_bus.invoke(self.command)
 
-    @mock.patch('admission.infrastructure.admission.domain.service.in_memory.calendrier_inscription.'
+    @mock.patch('admission.infrastructure.admission.shared_kernel.domain.service.in_memory.calendrier_inscription.'
                 'CalendrierInscriptionInMemory.recuperer_periode_du_pot')
     def test_should_lever_exception_si_date_limite_depassee(self, mock_calendar):
         date_debut = datetime.date.today() - datetime.timedelta(days=15)

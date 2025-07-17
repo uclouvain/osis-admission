@@ -26,7 +26,7 @@
 from django.db.models import Value
 
 from admission.ddd.admission.shared_kernel.domain.enums import TypeFormation
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
 

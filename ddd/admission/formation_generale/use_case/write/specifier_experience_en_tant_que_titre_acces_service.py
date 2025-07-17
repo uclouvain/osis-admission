@@ -25,7 +25,7 @@
 # ##############################################################################
 from admission.ddd.admission.shared_kernel.domain.builder.titre_acces_selectionnable_builder import TitreAccesSelectionnableBuilder
 from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import TitreAccesSelectionnableIdentity
-from admission.ddd.admission.shared_kernel.domain.repository.i_titre_acces_selectionnable import ITitreAccesSelectionnableRepository
+from admission.ddd.admission.shared_kernel.repository.i_titre_acces_selectionnable import ITitreAccesSelectionnableRepository
 from admission.ddd.admission.formation_generale.commands import SpecifierExperienceEnTantQueTitreAccesCommand
 
 

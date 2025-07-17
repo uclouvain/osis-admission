@@ -29,13 +29,13 @@ from admission.ddd.admission.shared_kernel.commands import *
 from admission.ddd.admission.shared_kernel.commands import RecupererInformationsDestinataireQuery
 from admission.ddd.admission.shared_kernel.use_case.read import *
 from admission.ddd.admission.shared_kernel.use_case.write import specifier_experience_en_tant_que_titre_acces
-from admission.infrastructure.admission.domain.service.lister_toutes_demandes import ListerToutesDemandes
-from admission.infrastructure.admission.domain.service.profil_candidat import ProfilCandidatTranslator
-from admission.infrastructure.admission.repository.titre_acces_selectionnable import TitreAccesSelectionnableRepository
+from admission.infrastructure.admission.shared_kernel.domain.service.lister_toutes_demandes import ListerToutesDemandes
+from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidatTranslator
+from admission.infrastructure.admission.shared_kernel.repository.titre_acces_selectionnable import TitreAccesSelectionnableRepository
 from admission.infrastructure.admission.shared_kernel.repository.email_destinataire import (
     EmailDestinataireRepository,
 )
-from admission.infrastructure.admission.repository.gestionnaire import GestionnaireRepository
+from admission.infrastructure.admission.shared_kernel.repository.gestionnaire import GestionnaireRepository
 from infrastructure.shared_kernel.profil.domain.service.parcours_interne import ExperienceParcoursInterneTranslator
 
 COMMAND_HANDLERS = {

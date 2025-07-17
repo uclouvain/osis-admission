@@ -40,7 +40,7 @@ from admission.ddd.admission.formation_generale.domain.service.i_formation impor
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     FormationNonTrouveeException,
 )
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
 from base.models.enums.active_status import ActiveStatusEnum

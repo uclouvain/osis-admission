@@ -23,7 +23,6 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import rules
 from rules import RuleSet
 
 from admission.auth.predicates import continuing, doctorate, general
@@ -31,7 +30,7 @@ from admission.auth.predicates.common import (
     has_education_group_of_types,
     is_part_of_education_group,
 )
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
 from parcours_interne.auth.roles.parcours_viewer import ParcoursViewer

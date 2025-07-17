@@ -23,10 +23,9 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
 
 from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.shared_kernel.domain.repository.i_titre_acces_selectionnable import (
+from admission.ddd.admission.shared_kernel.repository.i_titre_acces_selectionnable import (
     ITitreAccesSelectionnableRepository,
 )
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
@@ -49,12 +48,6 @@ from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation 
 )
 from admission.ddd.admission.formation_generale.repository.i_proposition import (
     IPropositionRepository,
-)
-from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import (
-    GetCurrentAcademicYear,
-)
-from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import (
-    IAcademicYearRepository,
 )
 from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import (
     IPersonneConnueUclTranslator,

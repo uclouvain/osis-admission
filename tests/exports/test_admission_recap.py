@@ -98,7 +98,6 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     DocumentsCotutelle,
     DocumentsCurriculum,
     DocumentsEtudesSecondaires,
-    DocumentsExamens,
     DocumentsIdentification,
     DocumentsProjetRecherche,
     DocumentsQuestionsSpecifiques,
@@ -144,7 +143,7 @@ from admission.exports.admission_recap.section import (
     get_supervision_section,
     get_training_choice_section,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
     UnfrozenDTO,
 )
 from admission.models import AdmissionTask

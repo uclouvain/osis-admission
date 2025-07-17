@@ -30,7 +30,6 @@ from django.conf import settings
 from django.utils import timezone, translation
 from django.utils.translation import override
 from osis_comment.models import CommentEntry
-from osis_history.models import HistoryEntry
 
 from admission.constants import ORDERED_CAMPUSES_UUIDS
 from admission.ddd.admission.doctorat.preparation.commands import (
@@ -41,7 +40,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     OngletsChecklist,
-    TypeDeRefus,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
     Proposition,
@@ -74,7 +72,7 @@ from admission.ddd.admission.shared_kernel.dtos.resume import (
 )
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from admission.exports.utils import admission_generate_pdf
-from admission.infrastructure.admission.domain.service.unites_enseignement_translator import (
+from admission.infrastructure.admission.shared_kernel.domain.service.unites_enseignement_translator import (
     UnitesEnseignementTranslator,
 )
 from admission.infrastructure.utils import CHAMPS_DOCUMENTS_EXPERIENCES_CURRICULUM

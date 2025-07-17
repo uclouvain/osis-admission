@@ -31,7 +31,6 @@ from django.test import SimpleTestCase
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import EnQuarantaineException
 from admission.ddd.admission.shared_kernel.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.formation_continue.commands import (
-    AnnulerPropositionCommand,
     ValiderPropositionCommand,
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import (
@@ -45,7 +44,7 @@ from admission.ddd.admission.formation_continue.domain.model.proposition import 
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
     ApprouverPropositionTransitionStatutException,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
 )
 from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (

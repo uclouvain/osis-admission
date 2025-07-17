@@ -37,17 +37,11 @@ from admission.ddd.admission.doctorat.preparation.domain.service.groupe_de_super
 from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import (
     IHistorique,
 )
-from admission.ddd.admission.doctorat.preparation.domain.service.i_membre_CA import (
-    IMembreCATranslator,
-)
 from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import (
     INotification,
 )
 from admission.ddd.admission.doctorat.preparation.domain.service.i_pdf_generation import (
     IPDFGeneration,
-)
-from admission.ddd.admission.doctorat.preparation.domain.service.i_promoteur import (
-    IPromoteurTranslator,
 )
 from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
     IGroupeDeSupervisionRepository,
@@ -56,7 +50,7 @@ from admission.ddd.admission.doctorat.preparation.repository.i_proposition impor
     IPropositionRepository,
 )
 from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.shared_kernel.domain.repository.i_titre_acces_selectionnable import (
+from admission.ddd.admission.shared_kernel.repository.i_titre_acces_selectionnable import (
     ITitreAccesSelectionnableRepository,
 )
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (

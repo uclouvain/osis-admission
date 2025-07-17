@@ -489,7 +489,6 @@ class CurriculumEducationalExperienceFormViewForDoctorateTestCase(TestCase):
             },
         )
 
-        breakpoint()
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
 
         new_experience = EducationalExperience.objects.filter(

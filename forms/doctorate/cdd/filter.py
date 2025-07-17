@@ -58,12 +58,12 @@ from admission.forms import (
     DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
     SelectWithDisabledOptions,
 )
-from admission.forms.admission.filter import BaseAdmissionFilterForm, WorkingListField
+from admission.forms.admission.filter import BaseAdmissionFilterForm
 from admission.forms.checklist_state_filter import ChecklistStateFilterField
 from admission.infrastructure.admission.doctorat.preparation.read_view.repository.tableau_bord import (
     TableauBordRepositoryAdmissionMixin,
 )
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
 from admission.models import EntityProxy, SupervisionActor

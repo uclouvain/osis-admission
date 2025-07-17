@@ -41,7 +41,7 @@ from admission.ddd.admission.formation_continue.domain.service.i_formation impor
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
     FormationNonTrouveeException,
 )
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
 from base.models.campus import Campus as CampusDBModel

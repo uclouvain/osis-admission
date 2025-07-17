@@ -64,7 +64,7 @@ from admission.forms import (
     get_scholarship_choices,
 )
 from admission.forms.specific_question import ConfigurableFormMixin
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
 from admission.views.autocomplete.trainings import (
