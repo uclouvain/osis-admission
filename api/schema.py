@@ -25,7 +25,11 @@
 # ##############################################################################
 from drf_spectacular.generators import SchemaGenerator
 
+<<<<<<< HEAD
 ADMISSION_SDK_VERSION = "1.1.7"
+=======
+ADMISSION_SDK_VERSION = "1.1.6"
+>>>>>>> 7404f725f ([OS-1547] Doctorate > Fix the max length of the project title)
 
 
 class AdmissionSchemaGenerator(SchemaGenerator):

@@ -1,7 +1,11 @@
 openapi: 3.0.3
 info:
   title: Admission API
+<<<<<<< HEAD
   version: 1.1.7
+=======
+  version: 1.1.6
+>>>>>>> 7404f725f ([OS-1547] Doctorate > Fix the max length of the project title)
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
