@@ -146,7 +146,7 @@ class Historique(IHistorique):
                 signataire=signataire,
                 action="refused" if avis.motif_refus else "approved",
                 via_pdf="via PDF " if avis.pdf else "",
-                role="promoter" if isinstance(signataire_id, PromoteurIdentity) else "supervisory panel member",
+                role="supervisor" if isinstance(signataire_id, PromoteurIdentity) else "supervision committee member",
             )
             details = []
             if avis.motif_refus:
@@ -187,7 +187,7 @@ class Historique(IHistorique):
                 membre=signataire,
             ),
             "{membre.prenom} {membre.nom} has been added as {}.".format(
-                "promoter" if isinstance(signataire_id, PromoteurIdentity) else "CA member",
+                "supervisor" if isinstance(signataire_id, PromoteurIdentity) else "supervision committee member",
                 membre=signataire,
             ),
             "{auteur.prenom} {auteur.nom}".format(auteur=auteur),
@@ -211,7 +211,7 @@ class Historique(IHistorique):
                 membre=signataire,
             ),
             "{membre.prenom} {membre.nom} has been removed from {}.".format(
-                "promoters" if isinstance(signataire_id, PromoteurIdentity) else "CA members",
+                "supervisors" if isinstance(signataire_id, PromoteurIdentity) else "supervision committee members",
                 membre=signataire,
             ),
             "{auteur.prenom} {auteur.nom}".format(auteur=auteur),
@@ -246,8 +246,8 @@ class Historique(IHistorique):
         signataire = cls.get_signataire(signataire_id)
         add_history_entry(
             proposition.entity_id.uuid,
-            "{membre.prenom} {membre.nom} a été désigné comme promoteur de référence.".format(membre=signataire),
-            "{membre.prenom} {membre.nom} has been designated as lead supervisor.".format(membre=signataire),
+            "{membre.prenom} {membre.nom} a été désigné·e comme promoteur·trice de contact.".format(membre=signataire),
+            "{membre.prenom} {membre.nom} has been designated as contact supervisor.".format(membre=signataire),
             "{auteur.prenom} {auteur.nom}".format(auteur=auteur),
             tags=["proposition", "supervision"],
         )

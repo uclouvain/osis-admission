@@ -80,7 +80,7 @@ msgctxt "admission"
 msgid "(Expected) date of graduation"
 msgstr ""
 
-msgid "(Expected) graduation date (signed diploma)"
+msgid "(Expected) graduation date"
 msgstr ""
 
 msgid ", on"
@@ -407,9 +407,6 @@ msgstr ""
 msgid "Add a paper/presentation for this seminar"
 msgstr ""
 
-msgid "Add a promoter or a CA member"
-msgstr ""
-
 msgid "Add a publication"
 msgstr ""
 
@@ -423,6 +420,9 @@ msgid "Add a seminar"
 msgstr ""
 
 msgid "Add a service"
+msgstr ""
+
+msgid "Add a supervisor or a supervision committee member"
 msgstr ""
 
 msgctxt "admission"
@@ -1054,10 +1054,10 @@ msgid "CA"
 msgstr ""
 
 msgid "CA Member"
-msgstr "Supervisory panel member"
+msgstr "Supervision committee member"
 
 msgid "CA members"
-msgstr ""
+msgstr "Supervision committee members"
 
 msgid "CANDIDAT_NOTIFIE"
 msgstr "Candidate notified"
@@ -1269,9 +1269,9 @@ msgid "Cannot delete the experience because it is used in another context."
 msgstr ""
 
 msgid "Carbon-copy the CA members"
-msgstr ""
+msgstr "Carbon-copy the supervision committee members"
 
-msgid "Carbon-copy the promoters"
+msgid "Carbon-copy the supervisors"
 msgstr ""
 
 msgid "Category"
@@ -1553,6 +1553,9 @@ msgid "Contact person for the design of the annual program"
 msgstr ""
 
 msgid "Contact person for the design of the annual program (PAE)"
+msgstr ""
+
+msgid "Contact supervisor"
 msgstr ""
 
 msgid "Context"
@@ -2013,7 +2016,7 @@ msgstr ""
 msgid "Description of your communication"
 msgstr ""
 
-msgid "Designate as lead supervisor"
+msgid "Designate as contact supervisor"
 msgstr ""
 
 msgid "Detailed curriculum vitae, dated and signed"
@@ -3500,8 +3503,8 @@ msgid ""
 msgstr ""
 
 msgid ""
-"If known, indicate the name of the laboratory, clinical department or "
-"research centre where the thesis will be carried out at UCLouvain"
+"If known, indicate the name of the laboratory, clinical department, research "
+"centre, ... where the thesis will be carried out at UCLouvain"
 msgstr ""
 
 msgid ""
@@ -3804,6 +3807,9 @@ msgstr ""
 msgid "Language"
 msgstr ""
 
+msgid "Language in which the domain doctoral committee can contact this person"
+msgstr ""
+
 msgid "Language regime"
 msgstr ""
 
@@ -3869,9 +3875,6 @@ msgid "Later > non-blocking"
 msgstr ""
 
 msgid "Launch"
-msgstr ""
-
-msgid "Lead supervisor"
 msgstr ""
 
 msgid "Leave page?"
@@ -3997,7 +4000,7 @@ msgstr ""
 msgid "Mail sent to each actor of the supervision group to request a signature"
 msgstr ""
 
-msgid "Mail sent to promoters when a member of the supervision panel refuses"
+msgid "Mail sent to supervisors when a member of the supervision panel refuses"
 msgstr ""
 
 msgid ""
@@ -5094,19 +5097,16 @@ msgstr ""
 msgid "Project"
 msgstr ""
 
-msgid "Project resume"
+msgid "Project abstract"
 msgstr ""
 
-msgid "Project resume (max. 2000 characters)"
+msgid "Project abstract (max. 2000 characters)"
 msgstr ""
 
 msgid "Project title"
 msgstr ""
 
 msgid "Project title (max. 100 characters)"
-msgstr ""
-
-msgid "Promoters"
 msgstr ""
 
 msgid "Promotion"
@@ -5504,6 +5504,9 @@ msgstr ""
 msgid "Research scholarship"
 msgstr ""
 
+msgid "Research start date"
+msgstr ""
+
 msgid "Resend invitation"
 msgstr ""
 
@@ -5584,12 +5587,6 @@ msgstr ""
 msgid "Role: Program managers"
 msgstr ""
 
-msgid "Role: Promoter"
-msgstr ""
-
-msgid "Role: Promoters"
-msgstr ""
-
 msgid "Role: SCEB"
 msgstr ""
 
@@ -5597,6 +5594,12 @@ msgid "Role: SCEBs"
 msgstr ""
 
 msgid "Role: SIC management"
+msgstr ""
+
+msgid "Role: Supervisor"
+msgstr ""
+
+msgid "Role: Supervisors"
 msgstr ""
 
 msgid "SEARCH_SCHOLARSHIP"
@@ -6036,6 +6039,9 @@ msgstr ""
 msgid "Supervisor not found."
 msgstr ""
 
+msgid "Supervisors"
+msgstr ""
+
 msgid "Supervisory panel"
 msgstr ""
 
@@ -6301,6 +6307,9 @@ msgid "The configuration is not valid for a text: "
 msgstr ""
 
 msgid "The contact address I provided"
+msgstr ""
+
+msgid "The contact supervisor must be internal UCLouvain"
 msgstr ""
 
 msgid "The css class must be a string."
@@ -6670,9 +6679,9 @@ msgstr ""
 
 msgid "There can be no more CA members in the supervision group."
 msgstr ""
-"There can be no more supervisory panel members in the supervision group."
+"There can be no more supervision committee members in the supervision group."
 
-msgid "There can be no more promoters in the supervision group."
+msgid "There can be no more supervisors in the supervision group."
 msgstr ""
 
 msgid ""
@@ -7231,9 +7240,6 @@ msgstr ""
 msgid "Work contract type"
 msgstr ""
 
-msgid "Work start date"
-msgstr ""
-
 msgid "Working contract type"
 msgstr ""
 
@@ -7307,7 +7313,7 @@ msgid ""
 msgstr ""
 
 msgid ""
-"Write your resume in the language decided with your accompanying committee."
+"Write your abstract in the language decided with your accompanying committee."
 msgstr ""
 
 msgid "Writing ability"
@@ -7557,7 +7563,7 @@ msgstr ""
 
 msgid "You must add at least two CA members in order to request signatures."
 msgstr ""
-"You must add at least two supervisory panel members in order to request "
+"You must add at least two supervision committee members in order to request "
 "signatures."
 
 msgid "You must answer the question about external enrollment change."
@@ -7589,13 +7595,13 @@ msgid ""
 "your application."
 msgstr ""
 
-msgid "You must be the reference promoter to access this admission"
+msgid "You must be the contact supervisor to access this admission"
 msgstr ""
 
 msgid "You must be the request author to access this admission"
 msgstr ""
 
-msgid "You must be the request promoter to access this admission"
+msgid "You must be the request supervisor to access this admission"
 msgstr ""
 
 msgid ""
@@ -7621,7 +7627,7 @@ msgstr ""
 msgid "You must reference a person in UCLouvain."
 msgstr ""
 
-msgid "You must set a lead supervisor."
+msgid "You must set a contact supervisor."
 msgstr ""
 
 msgid "You need to create the message before sending it."

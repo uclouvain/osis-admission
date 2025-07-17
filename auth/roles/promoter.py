@@ -46,8 +46,8 @@ class Promoter(RoleModel):
     """
 
     class Meta:
-        verbose_name = _("Role: Promoter")
-        verbose_name_plural = _("Role: Promoters")
+        verbose_name = _("Role: Supervisor")
+        verbose_name_plural = _("Role: Supervisors")
         group_name = "promoters"
         constraints = [
             UniqueConstraint(fields=['person'], name='admission_unique_promoter_by_person'),
