@@ -339,6 +339,9 @@ msgstr "Formations académiques"
 msgid "Academic experience"
 msgstr "Expérience académique"
 
+msgid "Academic record"
+msgstr "Parcours académique"
+
 msgid "Academic year"
 msgstr "Année académique"
 
@@ -6680,6 +6683,9 @@ msgstr "Suffisant"
 
 msgid "Supervision"
 msgstr "Supervision"
+
+msgid "Supervision committee"
+msgstr "Comité d'accompagnement"
 
 msgid "Supervision committee modification by candidate"
 msgstr "Modification du comité d’accompagnement par le candidat"

@@ -512,6 +512,8 @@ class ListerDemandesQuery(SortedQueryRequest):
     demandeur: Optional[str] = ''
     fnrs_fria_fresh: Optional[bool] = None
     indicateur_tableau_bord: Optional[str] = ''
+    avec_experiences_academiques_reussies: bool = False
+    avec_acteurs_groupe_supervision: bool = False
 
 
 @attr.dataclass(frozen=True, slots=True)
