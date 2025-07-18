@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,13 +24,15 @@
 #
 # ##############################################################################
 from django.utils.translation import gettext_lazy as _
-
-from .tokens import DOCTORATE_ADMISSION_TAG, admission_common_tokens
 from osis_mail_template import Token, templates
 
+from .tokens import DOCTORATE_ADMISSION_TAG, admission_common_tokens
+
 __all__ = [
-    "ADMISSION_EMAIL_SIGNATURE_CANDIDATE",
+    "ADMISSION_EMAIL_SIGNATURE_CANDIDATE_REFUSAL",
+    "ADMISSION_EMAIL_SIGNATURE_CANDIDATE_APPROVAL",
     "ADMISSION_EMAIL_SIGNATURE_REFUSAL",
+    "ADMISSION_EMAIL_SIGNATURE_REQUESTS_PROMOTER",
     "ADMISSION_EMAIL_SIGNATURE_REQUESTS_ACTOR",
     "ADMISSION_EMAIL_SIGNATURE_REQUESTS_CANDIDATE",
 ]
@@ -120,6 +122,14 @@ signataire_tokens = [
     ),
 ]
 
+ADMISSION_EMAIL_SIGNATURE_REQUESTS_PROMOTER = 'osis-admission-signature-requests-promoter'
+templates.register(
+    ADMISSION_EMAIL_SIGNATURE_REQUESTS_PROMOTER,
+    description=_("Mail sent to each promoter of the supervision group to request a signature"),
+    tokens=admission_common_tokens + signataire_tokens,
+    tag=DOCTORATE_ADMISSION_TAG,
+)
+
 ADMISSION_EMAIL_SIGNATURE_REQUESTS_ACTOR = 'osis-admission-signature-requests-actor'
 templates.register(
     ADMISSION_EMAIL_SIGNATURE_REQUESTS_ACTOR,
@@ -128,19 +138,14 @@ templates.register(
     tag=DOCTORATE_ADMISSION_TAG,
 )
 
-ADMISSION_EMAIL_SIGNATURE_CANDIDATE = 'osis-admission-signature-candidate'
+ADMISSION_EMAIL_SIGNATURE_CANDIDATE_REFUSAL = 'osis-admission-signature-candidate-refusal'
 templates.register(
-    ADMISSION_EMAIL_SIGNATURE_CANDIDATE,
-    description=_("Mail sent to the applicant following approval or rejection by a member of the supervisory group"),
+    ADMISSION_EMAIL_SIGNATURE_CANDIDATE_REFUSAL,
+    description=_("Mail sent to the applicant following rejection by a member of the supervisory group"),
     tokens=(
         admission_common_tokens
         + signataire_tokens
         + [
-            Token(
-                name='decision',
-                description=_("The decision of the signing actor"),
-                example="Approved",
-            ),
             Token(
                 name='comment',
                 description=_("The public comment about the approval/refusal"),
@@ -150,6 +155,24 @@ templates.register(
                 name='reason',
                 description=_("The reason for refusal"),
                 example="I do not handle this kind of doctorates",
+            ),
+        ]
+    ),
+    tag=DOCTORATE_ADMISSION_TAG,
+)
+
+ADMISSION_EMAIL_SIGNATURE_CANDIDATE_APPROVAL = 'osis-admission-signature-candidate-approval'
+templates.register(
+    ADMISSION_EMAIL_SIGNATURE_CANDIDATE_APPROVAL,
+    description=_("Mail sent to the applicant following approval by a member of the supervisory group"),
+    tokens=(
+        admission_common_tokens
+        + signataire_tokens
+        + [
+            Token(
+                name='comment',
+                description=_("The public comment about the approval"),
+                example="I would be glad to supervise you",
             ),
         ]
     ),
@@ -171,7 +194,7 @@ templates.register(
             ),
             Token(
                 name='comment',
-                description=_("The public comment about the approval/refusal"),
+                description=_("The public comment about the refusal"),
                 example="I would be glad to supervise you",
             ),
             Token(
