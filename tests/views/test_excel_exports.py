@@ -117,7 +117,12 @@ from admission.tests.factories.roles import (
     DoctorateCommitteeMemberRoleFactory,
     SicManagementRoleFactory,
 )
-from admission.tests.factories.supervision import PromoterFactory
+from admission.tests.factories.supervision import (
+    CaMemberFactory,
+    ExternalCaMemberFactory,
+    ExternalPromoterFactory,
+    PromoterFactory,
+)
 from admission.views.excel_exports import (
     SPECIFIC_QUESTION_SEPARATOR,
     SPECIFIC_QUESTION_SEPARATOR_REPLACEMENT,
@@ -137,6 +142,10 @@ from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.student import StudentFactory
+from epc.models.enums.decision_resultat_cycle import DecisionResultatCycle
+from epc.tests.factories.inscription_programme_annuel import (
+    InscriptionProgrammeAnnuelFactory,
+)
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile.models import EducationalExperience, ProfessionalExperience
 from osis_profile.models.enums.curriculum import ActivitySector, ActivityType
@@ -1560,10 +1569,53 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
                     'decision_cdd': {'statut': 'GEST_EN_COURS'},
                 },
             },
+            project_title='P3',
+            with_thesis_institute=True,
         )
 
+        # Add academic experiences
+        educational_experience = EducationalExperienceFactory(
+            obtained_diploma=True,
+            person=admission.candidate,
+            expected_graduation_date=datetime.date(2022, 6, 30),
+        )
+
+        educational_experience_year_1 = EducationalExperienceYearFactory(
+            educational_experience=educational_experience,
+            acquired_credit_number=15,
+            academic_year__year=2020,
+        )
+
+        educational_experience_year_2 = EducationalExperienceYearFactory(
+            educational_experience=educational_experience,
+            acquired_credit_number=12,
+            academic_year__year=2021,
+        )
+
+        valuation = AdmissionEducationalValuatedExperiencesFactory(
+            baseadmission=admission,
+            educationalexperience=educational_experience,
+        )
+
+        internal_experience = InscriptionProgrammeAnnuelFactory(
+            programme_cycle__etudiant__person=admission.candidate,
+            programme_cycle__decision=DecisionResultatCycle.GRANDE_DISTINCTION.name,
+            programme_cycle__date_decision=datetime.date(2023, 6, 30),
+            programme__offer__title='Biology',
+        )
+
+        # Add members of the supervision group
+        supervisor = ExternalPromoterFactory(is_reference_promoter=True)
+        ca_member = CaMemberFactory(process=supervisor.process)
+        admission.supervision_group = supervisor.process
+        admission.save()
+
         results: List[DemandeDoctoraleRechercheDTO] = message_bus_instance.invoke(
-            ListerDemandesDoctoralesQuery(numero=admission.reference)
+            ListerDemandesDoctoralesQuery(
+                numero=admission.reference,
+                avec_experiences_academiques_reussies=True,
+                avec_acteurs_groupe_supervision=True,
+            )
         )
 
         self.assertEqual(len(results), 1)
@@ -1579,17 +1631,36 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
         self.assertStrEqual(row_data[2], result.nom_pays_nationalite_candidat)
         self.assertStrEqual(row_data[3], result.code_bourse)
         self.assertStrEqual(row_data[4], f'{result.sigle_formation} - {result.intitule_formation}')
-        self.assertStrEqual(row_data[5], str(ChoixStatutPropositionDoctorale.CONFIRMEE.value))
-        self.assertStrEqual(row_data[6], _('Taken in charge'))
-        self.assertStrEqual(row_data[7], _('To be processed'))
-        self.assertStrEqual(row_data[8], '2023/01/01')
-        self.assertStrEqual(row_data[9], '2023/01/03')
+        # Academic record
         self.assertStrEqual(
-            row_data[10],
+            row_data[5],
+            'Computer science - Institute - 2022-06-30 - 27.0 ECTS - Grande distinction (80-89%)\n'
+            'Biology - UCLouvain - 2023-06-30 - 0 ECTS - Grande distinction',
+        )
+        # Supervisors
+        self.assertStrEqual(
+            row_data[6],
+            f'{supervisor.last_name} {supervisor.first_name} ({supervisor.institute}, {supervisor.country.name})',
+        )
+        # Supervision committee members
+        self.assertStrEqual(
+            row_data[7],
+            f'{ca_member.person.last_name} {ca_member.person.first_name} '
+            f'(UCLouvain, {ca_member.person.country_of_citizenship.name})',
+        )
+        self.assertStrEqual(row_data[8], f'{admission.thesis_institute.title} ({admission.thesis_institute.acronym})')
+        self.assertStrEqual(row_data[9], 'non')
+        self.assertStrEqual(row_data[10], '')
+        self.assertStrEqual(row_data[11], 'P3')
+        self.assertStrEqual(row_data[12], str(ChoixStatutPropositionDoctorale.CONFIRMEE.value))
+        self.assertStrEqual(row_data[13], _('Taken in charge'))
+        self.assertStrEqual(row_data[14], _('To be processed'))
+        self.assertStrEqual(row_data[15], '2023/01/01')
+        self.assertStrEqual(row_data[16], '2023/01/03')
+        self.assertStrEqual(
+            row_data[17],
             f'{result.nom_auteur_derniere_modification}, {result.prenom_auteur_derniere_modification[:1]}',
         )
-        self.assertStrEqual(row_data[11], 'non')
-        self.assertStrEqual(row_data[12], '')
 
         # Check specific values
         admission.submitted_at = None
@@ -1609,9 +1680,9 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
 
         self.assertEqual(len(header), len(row_data))
 
-        self.assertStrEqual(row_data[8], '')
-        self.assertStrEqual(row_data[11], 'oui')
-        self.assertStrEqual(row_data[12], 'oui')
+        self.assertStrEqual(row_data[9], 'oui')
+        self.assertStrEqual(row_data[10], 'oui')
+        self.assertStrEqual(row_data[15], '')
 
         admission.cotutelle = False
         admission.save(update_fields=['cotutelle'])
@@ -1628,7 +1699,7 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
 
         self.assertEqual(len(header), len(row_data))
 
-        self.assertStrEqual(row_data[12], 'non')
+        self.assertStrEqual(row_data[10], 'non')
 
     def test_export_configuration(self):
         country = CountryFactory()
