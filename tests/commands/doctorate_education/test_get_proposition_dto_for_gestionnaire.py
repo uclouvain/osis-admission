@@ -473,6 +473,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         self.admission.annual_program_contact_person_name = 'John Doe'
         self.admission.annual_program_contact_person_email = 'john.doe@example.com'
         self.admission.join_program_fac_comment = 'My comment about the join program'
+        self.admission.communication_to_the_candidate = 'Communication to the candidate'
 
         self.admission.save()
 
@@ -492,3 +493,4 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
             self.admission.annual_program_contact_person_email,
         )
         self.assertEqual(result.commentaire_programme_conjoint, self.admission.join_program_fac_comment)
+        self.assertEqual(result.communication_au_candidat, self.admission.communication_to_the_candidate)

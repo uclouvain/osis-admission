@@ -293,6 +293,7 @@ class PropositionFactory(factory.Factory):
             nom_personne_contact_programme_annuel_annuel=factory.Faker('last_name'),
             email_personne_contact_programme_annuel_annuel=factory.Faker('email'),
             commentaire_programme_conjoint=factory.fuzzy.FuzzyText(),
+            communication_au_candidat=factory.fuzzy.FuzzyText(),
         )
         est_approuvee_par_sic = factory.Trait(
             avec_conditions_complementaires=True,
