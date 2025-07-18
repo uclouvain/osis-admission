@@ -30,8 +30,9 @@ from django.conf import settings
 from django.shortcuts import resolve_url
 from django.utils import translation
 from django.utils.functional import lazy
-from django.utils.translation import get_language, gettext, pgettext_lazy
+from django.utils.translation import get_language, gettext
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext_lazy
 from osis_async.models import AsyncTask
 from osis_document.api.utils import get_remote_token, get_remote_tokens
 from osis_document.utils import get_file_url
@@ -46,7 +47,9 @@ from osis_signature.enums import SignatureState
 from osis_signature.models import Actor
 from osis_signature.utils import get_signing_token
 
-from admission.admission_utils.admission_program_managers_names import get_admission_program_managers_names
+from admission.admission_utils.admission_program_managers_names import (
+    get_admission_program_managers_names,
+)
 from admission.ddd import MAIL_INSCRIPTION_DEFAUT, MAIL_VERIFICATEUR_CURSUS
 from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import (
     PromoteurIdentity,
@@ -87,10 +90,12 @@ from admission.mail_templates import (
     ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS_DOCTORATE,
     ADMISSION_EMAIL_CONFIRM_SUBMISSION_DOCTORATE,
     ADMISSION_EMAIL_MEMBER_REMOVED,
-    ADMISSION_EMAIL_SIGNATURE_CANDIDATE,
+    ADMISSION_EMAIL_SIGNATURE_CANDIDATE_APPROVAL,
+    ADMISSION_EMAIL_SIGNATURE_CANDIDATE_REFUSAL,
     ADMISSION_EMAIL_SIGNATURE_REFUSAL,
     ADMISSION_EMAIL_SIGNATURE_REQUESTS_ACTOR,
     ADMISSION_EMAIL_SIGNATURE_REQUESTS_CANDIDATE,
+    ADMISSION_EMAIL_SIGNATURE_REQUESTS_PROMOTER,
     ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_DOCTORATE,
     ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_DOCTORATE,
     EMAIL_TEMPLATE_CDD_ANNEX_DOCUMENT_URL_DOCTORATE_TOKEN,
@@ -105,9 +110,9 @@ from admission.models.enums.actor_type import ActorType
 from admission.utils import (
     get_admission_cdd_managers,
     get_backoffice_admission_url,
+    get_ca_member_salutation_prefix,
     get_portal_admission_url,
     get_salutation_prefix,
-    get_ca_member_salutation_prefix,
 )
 from base.models.person import Person
 from base.utils.utils import format_academic_year
@@ -240,12 +245,20 @@ class Notification(INotification):
             }
             if actor.is_external:
                 tokens["admission_link_front"] = cls._lien_invitation_externe(proposition, actor)
-            email_message = generate_email(
-                ADMISSION_EMAIL_SIGNATURE_REQUESTS_ACTOR,
-                actor.language,
-                tokens,
-                recipients=[actor.email],
-            )
+            if actor.type == ActorType.PROMOTER.name:
+                email_message = generate_email(
+                    ADMISSION_EMAIL_SIGNATURE_REQUESTS_PROMOTER,
+                    actor.language,
+                    tokens,
+                    recipients=[actor.email],
+                )
+            else:
+                email_message = generate_email(
+                    ADMISSION_EMAIL_SIGNATURE_REQUESTS_ACTOR,
+                    actor.language,
+                    tokens,
+                    recipients=[actor.email],
+                )
             EmailNotificationHandler.create(email_message, person=actor.person_id and actor.person)
 
     @classmethod
@@ -286,18 +299,29 @@ class Notification(INotification):
             'management_entity_acronym': admission.sigle_entite_gestion,
             'program_managers_names': get_admission_program_managers_names(admission.training.education_group_id),
         }
-        email_message = generate_email(
-            ADMISSION_EMAIL_SIGNATURE_CANDIDATE,
-            candidat.language,
-            {
-                **common_tokens,
-                "comment": avis.commentaire_externe,
-                "decision": ChoixEtatSignature.get_value(avis.etat),
-                "reason": avis.motif_refus,
-                "salutation": get_salutation_prefix(admission.candidate),
-            },
-            recipients=[candidat.private_email],
-        )
+        if avis.etat == ChoixEtatSignature.DECLINED.name:
+            email_message = generate_email(
+                ADMISSION_EMAIL_SIGNATURE_CANDIDATE_REFUSAL,
+                candidat.language,
+                {
+                    **common_tokens,
+                    "comment": avis.commentaire_externe,
+                    "reason": avis.motif_refus,
+                    "salutation": get_salutation_prefix(admission.candidate),
+                },
+                recipients=[candidat.private_email],
+            )
+        else:
+            email_message = generate_email(
+                ADMISSION_EMAIL_SIGNATURE_CANDIDATE_APPROVAL,
+                candidat.language,
+                {
+                    **common_tokens,
+                    "comment": avis.commentaire_externe,
+                    "salutation": get_salutation_prefix(admission.candidate),
+                },
+                recipients=[candidat.private_email],
+            )
         EmailNotificationHandler.create(email_message, person=candidat)
 
         # Notifier les autres promoteurs en cas de refus
@@ -464,12 +488,20 @@ class Notification(INotification):
             "signataire_role": actor.get_type_display(),
             "admission_link_front": cls._lien_invitation_externe(proposition, actor),
         }
-        email_message = generate_email(
-            ADMISSION_EMAIL_SIGNATURE_REQUESTS_ACTOR,
-            actor.language,
-            tokens,
-            recipients=[actor.email],
-        )
+        if actor.type == ActorType.PROMOTER.name:
+            email_message = generate_email(
+                ADMISSION_EMAIL_SIGNATURE_REQUESTS_PROMOTER,
+                actor.language,
+                tokens,
+                recipients=[actor.email],
+            )
+        else:
+            email_message = generate_email(
+                ADMISSION_EMAIL_SIGNATURE_REQUESTS_ACTOR,
+                actor.language,
+                tokens,
+                recipients=[actor.email],
+            )
         EmailNotificationHandler.create(email_message)
 
     @classmethod
