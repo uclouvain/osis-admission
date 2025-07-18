@@ -213,6 +213,7 @@ class BaseCurriculumTestCase:
                     'type': ActivityType.WORK.name,
                     'valuated_from_trainings': [],
                     'external_id': professional_experiences[0].external_id,
+                    'certificate': professional_experiences[0].certificate,
                 },
                 {
                     'uuid': str(professional_experiences[1].uuid),
@@ -222,6 +223,7 @@ class BaseCurriculumTestCase:
                     'type': ActivityType.WORK.name,
                     'valuated_from_trainings': [],
                     'external_id': professional_experiences[1].external_id,
+                    'certificate': professional_experiences[1].certificate,
                 },
             ],
         )

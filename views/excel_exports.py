@@ -26,8 +26,9 @@
 
 import ast
 import datetime
+import itertools
 import uuid
-from typing import Dict
+from typing import Dict, List
 
 from django.conf import settings
 from django.contrib import messages
@@ -64,7 +65,10 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
 from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_DOCTORALE_PAR_STATUT,
 )
-from admission.ddd.admission.doctorat.preparation.dtos.liste import DemandeRechercheDTO
+from admission.ddd.admission.doctorat.preparation.dtos.liste import (
+    DemandeRechercheDTO,
+    ExperienceAcademiqueDTO,
+)
 from admission.ddd.admission.doctorat.preparation.read_view.repository.i_tableau_bord import (
     ITableauBordRepositoryAdmissionMixin,
 )
@@ -122,8 +126,11 @@ from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import GotDiploma
 from base.models.person import Person
 from base.utils.utils import format_academic_year
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
-    ExperienceNonAcademiqueDTO,
+from ddd.logic.shared_kernel.profil.commands import (
+    RecupererExperiencesParcoursInterneQuery,
+)
+from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
+    ExperienceParcoursInterneDTO,
 )
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile.models.enums.curriculum import ActivitySector, ActivityType
@@ -857,6 +864,10 @@ class DoctorateAdmissionListExcelExportView(BaseAdmissionExcelExportView):
         'date_soumission_fin',
     ]
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.internal_experiences: Dict[str, List[ExperienceParcoursInterneDTO]] = {}
+
     @cached_property
     def current_language(self):
         return get_language()
@@ -983,31 +994,70 @@ class DoctorateAdmissionListExcelExportView(BaseAdmissionExcelExportView):
             _('Nationality'),
             _('Scholarship'),
             pgettext('admission', 'Course'),
+            _('Academic record'),
+            _('Supervisors'),
+            _('Supervision committee'),
+            _('Thesis institute'),
+            _('Pre-admission'),
+            _('Cotutelle'),
+            _('Thesis title'),
             _('Dossier status'),
             _('CDD decision'),
             _('SIC decision'),
             _('Submission date'),
             _('Last modification'),
             _('Modification author'),
-            _('Pre-admission'),
-            _('Cotutelle'),
         ]
 
     def get_row_data(self, row: DemandeRechercheDTO):
+        if row.matricule_candidat not in self.internal_experiences:
+            self.internal_experiences[row.matricule_candidat] = message_bus_instance.invoke(
+                RecupererExperiencesParcoursInterneQuery(
+                    matricule=row.matricule_candidat,
+                    avec_credits=True,
+                )
+        )
+        internal_experiences = self.internal_experiences[row.matricule_candidat]
+        external_experiences = row.experiences_academiques_reussies or []
+
+        sorted_experiences = sorted(
+            itertools.chain(internal_experiences, external_experiences),
+            key=lambda experience: (
+                experience.date_prevue_delivrance_diplome
+                if isinstance(experience, ExperienceAcademiqueDTO)
+                else experience.date_decision
+            )
+            or datetime.date.min,
+        )
+        academic_record = '\n'.join(str(experience) for experience in sorted_experiences if experience.est_diplome)
+
+        supervisors = ''
+        if row.promoteurs:
+            supervisors = '\n'.join(str(actor) for actor in row.promoteurs)
+
+        supervision_committee_members = ''
+        if row.membres_ca:
+            supervision_committee_members = '\n'.join(str(actor) for actor in row.membres_ca)
+
         return [
             row.numero_demande,
             row.candidat,
             row.nom_pays_nationalite_candidat,
             row.code_bourse,
             row.formation,
+            academic_record,
+            supervisors,
+            supervision_committee_members,
+            row.institut_these,
+            yesno(row.type_admission == ChoixTypeAdmission.PRE_ADMISSION.name),
+            yesno(row.cotutelle, _('yes,no,')),
+            row.titre_projet,
             str(ChoixStatutPropositionDoctorale.get_value(row.etat_demande)),
             str(row.decision_fac),
             str(row.decision_sic),
             row.date_confirmation.strftime(SHORT_DATE_FORMAT) if row.date_confirmation else '',
             row.derniere_modification_le.strftime(SHORT_DATE_FORMAT),
             row.derniere_modification_par,
-            yesno(row.type_admission == ChoixTypeAdmission.PRE_ADMISSION.name),
-            yesno(row.cotutelle, _('yes,no,')),
         ]
 
     def get_filters(self):
@@ -1024,6 +1074,10 @@ class DoctorateAdmissionListExcelExportView(BaseAdmissionExcelExportView):
                 filters['champ_tri'] = ordering_field.lstrip('-')
 
             filters['demandeur'] = str(self.request.user.person.uuid)
+
+            # Get additional data needed for the export
+            filters['avec_experiences_academiques_reussies'] = True
+            filters['avec_acteurs_groupe_supervision'] = True
 
             # Convert the dates to strings
             for date_field in self.DATE_FIELDS:

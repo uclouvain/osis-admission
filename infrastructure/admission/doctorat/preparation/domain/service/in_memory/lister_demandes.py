@@ -61,5 +61,7 @@ class ListerDemandesInMemoryService(IListerDemandesService):
         champ_tri: Optional[str] = None,
         page: Optional[int] = None,
         taille_page: Optional[int] = None,
+        avec_experiences_academiques_reussies=False,
+        avec_acteurs_groupe_supervision=False,
     ) -> PaginatedList[DemandeRechercheDTO]:
         return PaginatedList(id_attribute='uuid')
