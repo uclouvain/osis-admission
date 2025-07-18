@@ -87,6 +87,7 @@ class LiteProfessionalExperienceSerializer(ProfessionalExperienceSerializer):
             'start_date',
             'end_date',
             'type',
+            'certificate',
             'valuated_from_trainings',
             'external_id',
         ]
