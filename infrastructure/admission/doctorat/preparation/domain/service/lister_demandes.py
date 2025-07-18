@@ -32,7 +32,10 @@ from django.conf import settings
 from django.contrib.postgres.search import SearchVector
 from django.db.models import F, Q, When
 from django.db.models.functions import Coalesce, Concat
+from django.db.models import Prefetch, Q, Sum, F, Q, When
+from django.db.models.functions import Coalesce, Concat
 from django.utils.translation import get_language
+from osis_signature.models import Actor
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     BourseRecherche,
@@ -50,14 +53,20 @@ from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist 
 from admission.ddd.admission.doctorat.preparation.domain.service.i_lister_demandes import (
     IListerDemandesService,
 )
-from admission.ddd.admission.doctorat.preparation.dtos.liste import DemandeRechercheDTO
+from admission.ddd.admission.doctorat.preparation.dtos.liste import (
+    ActeurDTO,
+    DemandeRechercheDTO,
+    ExperienceAcademiqueDTO,
+)
 from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
 from admission.infrastructure.admission.doctorat.preparation.read_view.repository.tableau_bord import (
     TableauBordRepositoryAdmissionMixin,
 )
 from admission.infrastructure.utils import get_entities_with_descendants_ids
 from admission.models import DoctorateAdmission
+from admission.models.enums.actor_type import ActorType
 from admission.views import PaginatedList
+from osis_profile.models import EducationalExperience
 
 
 class ListerDemandesService(IListerDemandesService):
@@ -88,6 +97,8 @@ class ListerDemandesService(IListerDemandesService):
         champ_tri: Optional[str] = None,
         page: Optional[int] = None,
         taille_page: Optional[int] = None,
+        avec_experiences_academiques_reussies=False,
+        avec_acteurs_groupe_supervision=False,
     ) -> PaginatedList[DemandeRechercheDTO]:
         current_language = get_language() or settings.LANGUAGE_CODE
 
@@ -99,6 +110,7 @@ class ListerDemandesService(IListerDemandesService):
                 "candidate__country_of_citizenship",
                 "determined_academic_year",
                 "last_update_author",
+                "thesis_institute",
             )
             .annotate_training_management_entity()
             .annotate_with_reference(with_management_faculty=False)
@@ -110,6 +122,33 @@ class ListerDemandesService(IListerDemandesService):
                 'candidate__personmergeproposal',
             )
         )
+
+        if avec_experiences_academiques_reussies:
+            qs = qs.prefetch_related(
+                Prefetch(
+                    'educational_valuated_experiences',
+                    EducationalExperience.objects.filter(
+                        obtained_diploma=True,
+                    ).annotate(
+                        formatted_program_name=Coalesce('program__title', 'education_name'),
+                        formatted_institute_name=Coalesce('institute__name', 'institute_name'),
+                        acquired_credits=Sum('educationalexperienceyear__acquired_credit_number'),
+                    ),
+                    to_attr='graduated_educational_experiences',
+                )
+            )
+
+        if avec_acteurs_groupe_supervision:
+            qs = qs.select_related('supervision_group').prefetch_related(
+                Prefetch(
+                    'supervision_group__actors',
+                    Actor.objects.select_related(
+                        'supervisionactor',
+                        'country',
+                        'person__country_of_citizenship',
+                    ),
+                ),
+            )
 
         # Add filters
         if annee_academique:
@@ -293,12 +332,25 @@ class ListerDemandesService(IListerDemandesService):
             result = PaginatedList(id_attribute='uuid')
 
         for admission in qs:
-            result.append(cls.load_dto_from_model(admission, current_language))
+            result.append(
+                cls.load_dto_from_model(
+                    admission=admission,
+                    current_language=current_language,
+                    avec_acteurs_groupe_supervision=avec_acteurs_groupe_supervision,
+                    avec_experiences_academiques_reussies=avec_experiences_academiques_reussies,
+                )
+            )
 
         return result
 
     @classmethod
-    def load_dto_from_model(cls, admission: DoctorateAdmission, current_language: str) -> 'DemandeRechercheDTO':
+    def load_dto_from_model(
+        cls,
+        admission: DoctorateAdmission,
+        current_language: str,
+        avec_acteurs_groupe_supervision: bool,
+        avec_experiences_academiques_reussies: bool,
+    ) -> 'DemandeRechercheDTO':
         country_title = {
             settings.LANGUAGE_CODE_FR: 'name',
             settings.LANGUAGE_CODE_EN: 'name_en',
@@ -359,12 +411,44 @@ class ListerDemandesService(IListerDemandesService):
         else:
             candidate_noma = ''
 
+        supervisors: Optional[List[ActeurDTO]] = None
+        supervision_committee_members: Optional[List[ActeurDTO]] = None
+        if avec_acteurs_groupe_supervision:
+            supervisors = []
+            supervision_committee_members = []
+            for actor in admission.supervision_group.actors.all():
+                actor_dto = ActeurDTO(
+                    nom_acteur=actor.last_name,
+                    prenom_acteur=actor.first_name,
+                    institut=actor.institute if actor.is_external else 'UCLouvain',
+                    pays=getattr(actor.country, country_title) if actor.country else '',
+                )
+                if actor.supervisionactor.type == ActorType.PROMOTER.name:
+                    supervisors.append(actor_dto)
+                else:
+                    supervision_committee_members.append(actor_dto)
+
+        experiences_academiques_reussies = None
+        if avec_experiences_academiques_reussies:
+            experiences_academiques_reussies = [
+                ExperienceAcademiqueDTO(
+                    nom_institut=experience.formatted_institute_name,
+                    grade_obtenu=experience.obtained_grade,
+                    nom_formation=experience.formatted_program_name,
+                    credits_acquis=experience.acquired_credits,
+                    date_prevue_delivrance_diplome=experience.expected_graduation_date,
+                    est_diplome=True,
+                )
+                for experience in admission.graduated_educational_experiences  # From annotation
+            ]
+
         return DemandeRechercheDTO(
             uuid=admission.uuid,
             numero_demande=admission.formatted_reference,  # From annotation
             etat_demande=admission.status,
             nom_candidat=admission.candidate.last_name,
             prenom_candidat=admission.candidate.first_name,
+            matricule_candidat=admission.candidate.global_id,
             noma_candidat=candidate_noma,
             sigle_formation=admission.training.acronym,
             code_formation=admission.training.partial_acronym,
@@ -376,6 +460,12 @@ class ListerDemandesService(IListerDemandesService):
             type_admission=admission.type,
             cotutelle=admission.cotutelle,
             code_bourse=admission.scholarship if admission.scholarship else '',  # From annotation
+            nom_institut_these=admission.thesis_institute.title if admission.thesis_institute else '',
+            sigle_institut_these=admission.thesis_institute.acronym if admission.thesis_institute else '',
+            titre_projet=admission.project_title,
+            promoteurs=supervisors,
+            membres_ca=supervision_committee_members,
+            experiences_academiques_reussies=experiences_academiques_reussies,
             **country_data,
             **last_author_data,
         )

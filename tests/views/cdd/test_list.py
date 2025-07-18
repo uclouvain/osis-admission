@@ -27,6 +27,7 @@ import datetime
 import json
 import uuid
 from typing import List
+from unittest import mock
 
 import freezegun
 from django.conf import settings
@@ -35,6 +36,7 @@ from django.core.exceptions import NON_FIELD_ERRORS
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 from django.utils.translation import gettext, gettext_lazy
+from osis_signature.contrib.fields import SignatureProcessField
 
 from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
@@ -54,6 +56,10 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixTypeContratTravail,
     ChoixTypeFinancement,
 )
+from admission.ddd.admission.doctorat.preparation.dtos.liste import (
+    ActeurDTO,
+    DemandeRechercheDTO,
+)
 from admission.ddd.admission.doctorat.preparation.read_view.domain.enums.tableau_bord import (
     IndicateurTableauBordEnum,
 )
@@ -65,13 +71,23 @@ from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageCh
 from admission.forms import ALL_EMPTY_CHOICE, ALL_FEMININE_EMPTY_CHOICE
 from admission.models import DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
+from admission.tests.factories.curriculum import (
+    AdmissionEducationalValuatedExperiencesFactory,
+    EducationalExperienceFactory,
+    EducationalExperienceYearFactory,
+)
 from admission.tests.factories.roles import (
     CandidateFactory,
     DoctorateCommitteeMemberRoleFactory,
     ProgramManagerRoleFactory,
     SicManagementRoleFactory,
 )
-from admission.tests.factories.supervision import PromoterFactory
+from admission.tests.factories.supervision import (
+    CaMemberFactory,
+    ExternalCaMemberFactory,
+    ExternalPromoterFactory,
+    PromoterFactory,
+)
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.entity_type import EntityType
 from base.tests import QueriesAssertionsMixin
@@ -79,9 +95,12 @@ from base.tests.factories.academic_calendar import AcademicCalendarFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
+from base.tests.factories.organization import OrganizationFactory
 from base.tests.factories.user import UserFactory
 from osis_profile import BE_ISO_CODE
+from osis_profile.models.enums.curriculum import Grade
 from reference.tests.factories.country import CountryFactory
+from reference.tests.factories.diploma_title import DiplomaTitleFactory
 from reference.tests.factories.scholarship import (
     DoctorateScholarshipFactory,
     DoubleDegreeScholarshipFactory,
@@ -180,6 +199,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             last_update_author__first_name='Joe',
             last_update_author__last_name='Cole',
             is_fnrs_fria_fresh_csc_linked=True,
+            project_title='P1',
         )
         cls.admissions: List[DoctorateAdmission] = [
             admission,
@@ -201,6 +221,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 proximity_commission=ChoixCommissionProximiteCDEouCLSM.ECONOMY.name,
                 last_update_author=cls.promoter.person,
                 is_fnrs_fria_fresh_csc_linked=False,
+                project_title='P2',
                 submitted_profile={
                     "coordinates": {
                         "city": "Louvain-La-Neuves",
@@ -246,6 +267,8 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 modified_at=datetime.datetime(2021, 1, 2),
                 last_update_author=None,
                 is_fnrs_fria_fresh_csc_linked=None,
+                project_title='P3',
+                with_thesis_institute=True,
             ),
             DoctorateAdmissionFactory(
                 training__management_entity=third_doctoral_commission,
@@ -258,6 +281,8 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 determined_academic_year=academic_years[1],
                 candidate__country_of_citizenship=None,
                 last_update_author=None,
+                thesis_institute=None,
+                project_title='P4',
             ),
         ]
 
@@ -1061,8 +1086,13 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             )
             self.assertEqual(proposition.prenom_auteur_derniere_modification, self.promoter.first_name)
             self.assertEqual(proposition.nom_auteur_derniere_modification, self.promoter.last_name)
+            self.assertEqual(proposition.matricule_candidat, self.admissions[1].candidate.global_id)
+            self.assertEqual(proposition.titre_projet, self.admissions[1].project_title)
+            self.assertEqual(proposition.nom_institut_these, '')
+            self.assertEqual(proposition.sigle_institut_these, '')
+            self.assertEqual(proposition.institut_these, '')
 
-    def test_returned_dto_in_english_with_existing_scholarship(self):
+    def test_returned_dto_in_english_with_existing_scholarship_and_institute_thesis(self):
         self.client.force_login(user=self.program_manager_user)
 
         data = {
@@ -1091,6 +1121,220 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             # Existing scholarship
             self.assertEqual(proposition.code_bourse, self.admissions[2].international_scholarship.short_name)
 
+            # Existing thesis institute
+            self.assertEqual(proposition.nom_institut_these, self.admissions[2].thesis_institute.title)
+            self.assertEqual(proposition.sigle_institut_these, self.admissions[2].thesis_institute.acronym)
+            self.assertEqual(
+                proposition.institut_these,
+                f'{self.admissions[2].thesis_institute.title} ({self.admissions[2].thesis_institute.acronym})',
+            )
+
+    @mock.patch('admission.views.doctorate.cdd.list.DoctorateAdmissionList.additional_command_kwargs')
+    def test_returned_dto_with_graduated_academic_experiences(self, mock_additional_command_kwargs):
+        self.client.force_login(user=self.user_with_several_cdds)
+
+        admission = self.admissions[1]
+
+        mock_additional_command_kwargs.return_value = {
+            'demandeur': self.user_with_several_cdds.person.uuid,
+            'avec_experiences_academiques_reussies': True,
+        }
+
+        data = {
+            'annee_academique': '2021',
+            'numero': self.admission_references[1],
+        }
+
+        # No experience
+        with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES_WITH_SEARCH + 1):
+            response = self.client.get(self.url, data)
+
+            self.assertEqual(response.status_code, 200)
+
+            results = response.context['object_list']
+
+            self.assertEqual(len(results), 1)
+
+            self.assertEqual(results[0].experiences_academiques_reussies, [])
+
+        educational_experience = EducationalExperienceFactory(
+            obtained_diploma=True,
+            person=admission.candidate,
+            expected_graduation_date=datetime.date(2022, 6, 30),
+        )
+
+        educational_experience_year_1 = EducationalExperienceYearFactory(
+            educational_experience=educational_experience,
+            acquired_credit_number=15,
+            academic_year__year=2020,
+        )
+
+        educational_experience_year_2 = EducationalExperienceYearFactory(
+            educational_experience=educational_experience,
+            acquired_credit_number=12,
+            academic_year__year=2021,
+        )
+
+        # No valuated experience
+        with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES_WITH_SEARCH + 1):
+            response = self.client.get(self.url, data)
+
+            self.assertEqual(response.status_code, 200)
+
+            results = response.context['object_list']
+
+            self.assertEqual(len(results), 1)
+
+            self.assertEqual(results[0].experiences_academiques_reussies, [])
+
+        valuation = AdmissionEducationalValuatedExperiencesFactory(
+            baseadmission=admission,
+            educationalexperience=educational_experience,
+        )
+
+        educational_experience.obtained_diploma = False
+        educational_experience.save()
+
+        # No graduated experience
+        with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES_WITH_SEARCH + 1):
+            response = self.client.get(self.url, data)
+
+            self.assertEqual(response.status_code, 200)
+
+            results = response.context['object_list']
+
+            self.assertEqual(len(results), 1)
+
+            self.assertEqual(results[0].experiences_academiques_reussies, [])
+
+        educational_experience.obtained_diploma = True
+        educational_experience.save()
+
+        # Graduated experience with unknown program and institute
+        with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES_WITH_SEARCH + 1):
+            response = self.client.get(self.url, data)
+
+            self.assertEqual(response.status_code, 200)
+
+            results = response.context['object_list']
+
+            self.assertEqual(len(results), 1)
+
+            academic_experiences = results[0].experiences_academiques_reussies
+            self.assertEqual(len(academic_experiences), 1)
+
+            self.assertEqual(academic_experiences[0].nom_institut, 'Institute')
+            self.assertEqual(academic_experiences[0].grade_obtenu, Grade.GREAT_DISTINCTION.name)
+            self.assertEqual(academic_experiences[0].nom_formation, 'Computer science')
+            self.assertEqual(academic_experiences[0].credits_acquis, 27)
+            self.assertEqual(
+                academic_experiences[0].date_prevue_delivrance_diplome, educational_experience.expected_graduation_date
+            )
+            self.assertEqual(academic_experiences[0].est_diplome, True)
+
+        # Graduated experience with known program and institute
+        educational_experience.institute_name = ''
+        educational_experience.education_name = ''
+        educational_experience.program = DiplomaTitleFactory()
+        educational_experience.institute = OrganizationFactory()
+        educational_experience.save()
+
+        with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES_WITH_SEARCH + 1):
+            response = self.client.get(self.url, data)
+
+            self.assertEqual(response.status_code, 200)
+
+            results = response.context['object_list']
+
+            self.assertEqual(len(results), 1)
+
+            academic_experiences = results[0].experiences_academiques_reussies
+            self.assertEqual(len(academic_experiences), 1)
+
+            self.assertEqual(academic_experiences[0].nom_institut, educational_experience.institute.name)
+            self.assertEqual(academic_experiences[0].grade_obtenu, Grade.GREAT_DISTINCTION.name)
+            self.assertEqual(academic_experiences[0].nom_formation, educational_experience.program.title)
+            self.assertEqual(academic_experiences[0].credits_acquis, 27)
+            self.assertEqual(
+                academic_experiences[0].date_prevue_delivrance_diplome,
+                educational_experience.expected_graduation_date,
+            )
+            self.assertEqual(academic_experiences[0].est_diplome, True)
+
+    @mock.patch('admission.views.doctorate.cdd.list.DoctorateAdmissionList.additional_command_kwargs')
+    def test_returned_dto_with_supervision_group_members(self, mock_additional_command_kwargs):
+        self.client.force_login(user=self.user_with_several_cdds)
+
+        admission = self.admissions[1]
+
+        mock_additional_command_kwargs.return_value = {
+            'demandeur': self.user_with_several_cdds.person.uuid,
+            'avec_acteurs_groupe_supervision': True,
+        }
+
+        data = {
+            'annee_academique': '2021',
+            'numero': self.admission_references[1],
+        }
+
+        supervisor_1 = PromoterFactory(is_reference_promoter=True)
+        supervisor_2 = ExternalPromoterFactory(process=supervisor_1.process)
+
+        ca_member_1 = CaMemberFactory(process=supervisor_1.process)
+        ca_member_2 = ExternalCaMemberFactory(process=supervisor_1.process)
+
+        admission.supervision_group = supervisor_1.process
+        admission.save()
+
+        with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES_WITH_SEARCH + 1):
+            response = self.client.get(self.url, data)
+
+            self.assertEqual(response.status_code, 200)
+
+            results = response.context['object_list']
+
+            self.assertEqual(len(results), 1)
+
+            supervisors = results[0].promoteurs
+            self.assertEqual(len(supervisors), 2)
+            self.assertCountEqual(
+                supervisors,
+                [
+                    ActeurDTO(
+                        nom_acteur=supervisor_1.person.last_name,
+                        prenom_acteur=supervisor_1.person.first_name,
+                        institut='UCLouvain',
+                        pays=supervisor_1.person.country_of_citizenship.name,
+                    ),
+                    ActeurDTO(
+                        nom_acteur=supervisor_2.last_name,
+                        prenom_acteur=supervisor_2.first_name,
+                        institut=supervisor_2.institute,
+                        pays=supervisor_2.country.name,
+                    ),
+                ],
+            )
+
+            ca_members = results[0].membres_ca
+            self.assertEqual(len(ca_members), 2)
+            self.assertCountEqual(
+                ca_members,
+                [
+                    ActeurDTO(
+                        nom_acteur=ca_member_1.person.last_name,
+                        prenom_acteur=ca_member_1.person.first_name,
+                        institut='UCLouvain',
+                        pays=ca_member_1.person.country_of_citizenship.name,
+                    ),
+                    ActeurDTO(
+                        nom_acteur=ca_member_2.last_name,
+                        prenom_acteur=ca_member_2.first_name,
+                        institut=ca_member_2.institute,
+                        pays=ca_member_2.country.name,
+                    ),
+                ],
+            )
+
     def test_returned_dto_with_missing_data(self):
         self.client.force_login(user=self.user_with_several_cdds)
 
@@ -1114,6 +1358,9 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             self.assertEqual(proposition.nom_auteur_derniere_modification, '')
             self.assertEqual(proposition.code_pays_nationalite_candidat, '')
             self.assertEqual(proposition.nom_pays_nationalite_candidat, '')
+            self.assertEqual(proposition.nom_institut_these, '')
+            self.assertEqual(proposition.sigle_institut_these, '')
+            self.assertEqual(proposition.institut_these, '')
 
     def test_htmx_form_errors(self):
         self.client.force_login(user=self.user_with_several_cdds)
