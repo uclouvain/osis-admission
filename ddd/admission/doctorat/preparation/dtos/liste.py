@@ -24,11 +24,42 @@
 #
 # ##############################################################################
 import datetime
-from typing import Optional
+from typing import List, Optional
 
 import attr
 
 from osis_common.ddd import interface
+from osis_profile.models.enums.curriculum import Grade
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ActeurDTO(interface.DTO):
+    nom_acteur: str
+    prenom_acteur: str
+    institut: str
+    pays: str
+
+    def __str__(self):
+        return f'{self.nom_acteur} {self.prenom_acteur} ({self.institut}{", " + self.pays if self.pays else ""})'
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ExperienceAcademiqueDTO(interface.DTO):
+    nom_institut: str
+    grade_obtenu: str
+    nom_formation: str
+    credits_acquis: int
+    est_diplome: bool
+    date_prevue_delivrance_diplome: Optional[datetime.date]
+
+    def __str__(self):
+        return (
+            f'{self.nom_formation} - '
+            f'{self.nom_institut} - '
+            f'{self.date_prevue_delivrance_diplome.isoformat() if self.date_prevue_delivrance_diplome else ""} - '
+            f'{self.credits_acquis} ECTS - '
+            f'{Grade.get_value(self.grade_obtenu)}'
+        )
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -40,6 +71,7 @@ class DemandeRechercheDTO(interface.DTO):
     nom_candidat: str
     prenom_candidat: str
     noma_candidat: str
+    matricule_candidat: str
     sigle_formation: str
     code_formation: str
     intitule_formation: str
@@ -64,6 +96,15 @@ class DemandeRechercheDTO(interface.DTO):
     prenom_auteur_derniere_modification: str = ''
     nom_auteur_derniere_modification: str = ''
 
+    nom_institut_these: str = ''
+    sigle_institut_these: str = ''
+    titre_projet: str = ''
+
+    # Les attributs suivants sont à None s'ils ne sont pas récupérés
+    promoteurs: Optional[List[ActeurDTO]] = None
+    membres_ca: Optional[List[ActeurDTO]] = None
+    experiences_academiques_reussies: Optional[List[ExperienceAcademiqueDTO]] = None
+
     @property
     def formation(self) -> str:
         return f'{self.sigle_formation} - {self.intitule_formation}'
@@ -76,3 +117,15 @@ class DemandeRechercheDTO(interface.DTO):
     @property
     def derniere_modification_par(self) -> str:
         return f'{self.nom_auteur_derniere_modification}, {self.prenom_auteur_derniere_modification[:1]}'
+
+    @property
+    def institut_these(self) -> str:
+        institut_these = ''
+
+        if self.nom_institut_these:
+            institut_these += self.nom_institut_these
+
+        if self.sigle_institut_these:
+            institut_these += f' ({self.sigle_institut_these})'
+
+        return institut_these
