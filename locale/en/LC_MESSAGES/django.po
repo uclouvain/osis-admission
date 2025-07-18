@@ -4013,12 +4013,21 @@ msgstr ""
 msgid "Mail sent to each actor of the supervision group to request a signature"
 msgstr ""
 
+msgid ""
+"Mail sent to each promoter of the supervision group to request a signature"
+msgstr ""
+
 msgid "Mail sent to supervisors when a member of the supervision panel refuses"
 msgstr ""
 
 msgid ""
-"Mail sent to the applicant following approval or rejection by a member of "
-"the supervisory group"
+"Mail sent to the applicant following approval by a member of the supervisory "
+"group"
+msgstr ""
+
+msgid ""
+"Mail sent to the applicant following rejection by a member of the "
+"supervisory group"
 msgstr ""
 
 #, python-format
@@ -6625,7 +6634,13 @@ msgstr ""
 msgid "The proposition must not be concerned by the payment."
 msgstr ""
 
+msgid "The public comment about the approval"
+msgstr ""
+
 msgid "The public comment about the approval/refusal"
+msgstr ""
+
+msgid "The public comment about the refusal"
 msgstr ""
 
 msgid "The reason for refusal"
