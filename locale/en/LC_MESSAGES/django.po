@@ -279,6 +279,9 @@ msgstr ""
 msgid "Academic experience"
 msgstr ""
 
+msgid "Academic record"
+msgstr ""
+
 msgid "Academic year"
 msgstr ""
 
@@ -6032,6 +6035,9 @@ msgstr ""
 msgid "Supervision"
 msgstr ""
 
+msgid "Supervision committee"
+msgstr ""
+
 msgid "Supervision committee modification by candidate"
 msgstr ""
 
@@ -6046,6 +6052,9 @@ msgid "Supervisor"
 msgstr ""
 
 msgid "Supervisor not found."
+msgstr ""
+
+msgid "Supervisors"
 msgstr ""
 
 msgid "Supervisory panel"
