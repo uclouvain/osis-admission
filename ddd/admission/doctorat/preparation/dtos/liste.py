@@ -24,10 +24,13 @@
 #
 # ##############################################################################
 import datetime
+from decimal import Decimal
 from typing import List, Optional
 
 import attr
+from typing_extensions import Union
 
+from epc.models.enums.decision_resultat_cycle import DecisionResultatCycle
 from osis_common.ddd import interface
 from osis_profile.models.enums.curriculum import Grade
 
@@ -46,19 +49,19 @@ class ActeurDTO(interface.DTO):
 @attr.dataclass(frozen=True, slots=True)
 class ExperienceAcademiqueDTO(interface.DTO):
     nom_institut: str
-    grade_obtenu: str
+    grade_obtenu: Optional[Union[Grade, DecisionResultatCycle]]
     nom_formation: str
-    credits_acquis: int
+    credits_acquis: Optional[Decimal]
     est_diplome: bool
-    date_prevue_delivrance_diplome: Optional[datetime.date]
+    date_diplome: Optional[datetime.date]
 
     def __str__(self):
         return (
             f'{self.nom_formation} - '
             f'{self.nom_institut} - '
-            f'{self.date_prevue_delivrance_diplome.isoformat() if self.date_prevue_delivrance_diplome else ""} - '
-            f'{self.credits_acquis} ECTS - '
-            f'{Grade.get_value(self.grade_obtenu)}'
+            f'{self.date_diplome.isoformat() if self.date_diplome else ""} - '
+            f'{self.credits_acquis if self.credits_acquis is not None else "X"} ECTS - '
+            f'{self.grade_obtenu.value if self.grade_obtenu else ""}'
         )
 
 

@@ -118,7 +118,6 @@ from admission.tests.factories.roles import (
 )
 from admission.tests.factories.supervision import (
     CaMemberFactory,
-    ExternalCaMemberFactory,
     ExternalPromoterFactory,
     PromoterFactory,
 )
@@ -1586,7 +1585,7 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
 
         educational_experience_year_2 = EducationalExperienceYearFactory(
             educational_experience=educational_experience,
-            acquired_credit_number=12,
+            acquired_credit_number=12.5,
             academic_year__year=2021,
         )
 
@@ -1599,6 +1598,7 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
             programme_cycle__etudiant__person=admission.candidate,
             programme_cycle__decision=DecisionResultatCycle.GRANDE_DISTINCTION.name,
             programme_cycle__date_decision=datetime.date(2023, 6, 30),
+            programme_cycle__credits_acquis_de_charge=29.2,
             programme__offer__title='Biology',
         )
 
@@ -1632,8 +1632,8 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
         # Academic record
         self.assertStrEqual(
             row_data[5],
-            'Computer science - Institute - 2022-06-30 - 27.0 ECTS - Grande distinction (80-89%)\n'
-            'Biology - UCLouvain - 2023-06-30 - 0 ECTS - Grande distinction',
+            'Computer science - Institute - 2022-06-30 - 27.5 ECTS - Grande distinction (80-89%)\n'
+            'Biology - UCLouvain - 2023-06-30 - 29.2 ECTS - Grande distinction',
         )
         # Supervisors
         self.assertStrEqual(
