@@ -29,7 +29,7 @@ import datetime
 import itertools
 import json
 import uuid
-from typing import Dict, List
+from typing import Dict
 
 from django.conf import settings
 from django.contrib import messages
@@ -66,10 +66,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
 from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_DOCTORALE_PAR_STATUT,
 )
-from admission.ddd.admission.doctorat.preparation.dtos.liste import (
-    DemandeRechercheDTO,
-    ExperienceAcademiqueDTO,
-)
+from admission.ddd.admission.doctorat.preparation.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.doctorat.preparation.read_view.repository.i_tableau_bord import (
     ITableauBordRepositoryAdmissionMixin,
 )
@@ -131,12 +128,6 @@ from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import GotDiploma
 from base.models.person import Person
 from base.utils.utils import format_academic_year
-from ddd.logic.shared_kernel.profil.commands import (
-    RecupererExperiencesParcoursInterneQuery,
-)
-from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
-    ExperienceParcoursInterneDTO,
-)
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile.models.enums.curriculum import ActivitySector, ActivityType
 from osis_profile.models.enums.person import ChoixGenre
@@ -875,10 +866,6 @@ class DoctorateAdmissionListExcelExportView(BaseAdmissionExcelExportView):
         'date_soumission_fin',
     ]
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.internal_experiences: Dict[str, List[ExperienceParcoursInterneDTO]] = {}
-
     @cached_property
     def current_language(self):
         return get_language()
@@ -1021,34 +1008,13 @@ class DoctorateAdmissionListExcelExportView(BaseAdmissionExcelExportView):
         ]
 
     def get_row_data(self, row: DemandeRechercheDTO):
-        if row.matricule_candidat not in self.internal_experiences:
-            self.internal_experiences[row.matricule_candidat] = message_bus_instance.invoke(
-                RecupererExperiencesParcoursInterneQuery(
-                    matricule=row.matricule_candidat,
-                    avec_credits=True,
-                )
+        academic_record = (
+            '\n'.join(str(experience) for experience in row.experiences_academiques_reussies)
+            if row.experiences_academiques_reussies
+            else ''
         )
-        internal_experiences = self.internal_experiences[row.matricule_candidat]
-        external_experiences = row.experiences_academiques_reussies or []
-
-        sorted_experiences = sorted(
-            itertools.chain(internal_experiences, external_experiences),
-            key=lambda experience: (
-                experience.date_prevue_delivrance_diplome
-                if isinstance(experience, ExperienceAcademiqueDTO)
-                else experience.date_decision
-            )
-            or datetime.date.min,
-        )
-        academic_record = '\n'.join(str(experience) for experience in sorted_experiences if experience.est_diplome)
-
-        supervisors = ''
-        if row.promoteurs:
-            supervisors = '\n'.join(str(actor) for actor in row.promoteurs)
-
-        supervision_committee_members = ''
-        if row.membres_ca:
-            supervision_committee_members = '\n'.join(str(actor) for actor in row.membres_ca)
+        supervisors = '\n'.join(str(actor) for actor in row.promoteurs) if row.promoteurs else ''
+        supervision_committee_members = '\n'.join(str(actor) for actor in row.membres_ca) if row.membres_ca else ''
 
         return [
             row.numero_demande,
