@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,12 +23,16 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from rest_framework.permissions import BasePermission, SAFE_METHODS
+from rest_framework.permissions import SAFE_METHODS, BasePermission
 
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    MaximumPropositionsAtteintException,
+)
+from admission.infrastructure.admission.domain.service.maximum_propositions import (
+    MaximumPropositionsAutorisees,
+)
 from admission.models import SupervisionActor
 from admission.models.base import BaseAdmission
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import MaximumPropositionsAtteintException
-from admission.infrastructure.admission.domain.service.maximum_propositions import MaximumPropositionsAutorisees
 
 
 class DoesNotHaveSubmittedPropositions(BasePermission):
@@ -50,9 +54,9 @@ class IsSelfPersonTabOrTabPermission(BasePermission):
 
     def has_object_permission(self, request, view, obj):
         if request.method in SAFE_METHODS:
-            permission = 'admission.view_admission_{}'.format(self.permission_suffix)
+            permission = 'admission.api_view_admission_{}'.format(self.permission_suffix)
         else:
-            permission = 'admission.change_admission_{}'.format(self.permission_suffix)
+            permission = 'admission.api_change_admission_{}'.format(self.permission_suffix)
         return request.user.has_perm(permission, obj)
 
 
