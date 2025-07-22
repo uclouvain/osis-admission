@@ -334,7 +334,7 @@
           });
 
           {# The document viewer is resizable so we apply the previous custom height if there is one #}
-          $(document).on('htmx:afterSettle', '#document-details', function(){
+          $(document).on('htmx:after-settle', '#document-details', function(){
               const documentEditorContainer = $('#document-editor-container');
               documentEditorContainer.css(
                   'height',
@@ -387,7 +387,7 @@
           {# Manage HTMX requests #}
           let previousSelectedButton;
 
-          $('#tabs-content').on('htmx:beforeRequest', function(event) {
+          $('#tabs-content').on('htmx:before-request', function(event) {
               let elt = event.originalEvent.detail.elt;
 
               if (elt.dataset.checklistButton) {
@@ -422,7 +422,7 @@
               }
           });
 
-          $('#tabs-content').on('htmx:afterRequest', function(event) {
+          $('#tabs-content').on('htmx:after-request', function(event) {
               // Do not remove spinner if we are going to refresh the page
               if (event.originalEvent.detail.xhr.getResponseHeader('hx-refresh') === 'true') {
                   return ;
@@ -497,7 +497,7 @@
           };
 
           {# When an error is encountered #}
-          documentContent.on('htmx:responseError', function(event) {
+          documentContent.on('htmx:response-error', function(event) {
               $('#document-content .modal').modal('hide');
               $('#document-content .collapse').collapse('hide');
 

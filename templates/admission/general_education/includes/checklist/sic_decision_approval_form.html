@@ -233,7 +233,7 @@
             $(this).data('previous', $(this).val());
         })
 
-        selectsContainer.on('htmx:beforeRequest', 'select', function (event) {
+        selectsContainer.on('htmx:before-request', 'select', function (event) {
             const value = $(this).val();
 
             const elementIsConfirmed = confirmEvents.delete(this.id);
@@ -247,7 +247,7 @@
             }
         });
 
-        selectsContainer.on('htmx:afterRequest', 'select', function (event) {
+        selectsContainer.on('htmx:after-request', 'select', function (event) {
             inProgressEvents.delete(this.id);
             updateConfirmButtonDisabled();
         });
