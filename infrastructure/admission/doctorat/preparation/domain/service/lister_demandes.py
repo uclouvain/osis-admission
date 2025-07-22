@@ -25,10 +25,12 @@
 # ##############################################################################
 import datetime
 from collections import defaultdict
+from decimal import Decimal
 from typing import Dict, List, Optional
 
 from django.conf import settings
-from django.db.models import Prefetch, Q, Sum
+from django.db.models import OuterRef, Prefetch, Q, Subquery, Sum
+from django.db.models.fields import CharField
 from django.db.models.functions import Coalesce
 from django.utils.translation import get_language
 from osis_signature.models import Actor
@@ -62,7 +64,12 @@ from admission.infrastructure.utils import get_entities_with_descendants_ids
 from admission.models import DoctorateAdmission
 from admission.models.enums.actor_type import ActorType
 from admission.views import PaginatedList
+from epc.models.enums.decision_resultat_cycle import DecisionResultatCycle
+from epc.models.enums.etat_inscription import EtatInscriptionFormation
+from epc.models.inscription_programme_annuel import InscriptionProgrammeAnnuel
+from epc.models.inscription_programme_cycle import InscriptionProgrammeCycle
 from osis_profile.models import EducationalExperience
+from osis_profile.models.enums.curriculum import Grade
 
 
 class ListerDemandesService(IListerDemandesService):
@@ -128,8 +135,23 @@ class ListerDemandesService(IListerDemandesService):
                         formatted_institute_name=Coalesce('institute__name', 'institute_name'),
                         acquired_credits=Sum('educationalexperienceyear__acquired_credit_number'),
                     ),
-                    to_attr='graduated_educational_experiences',
-                )
+                    to_attr='graduated_external_educational_experiences',
+                ),
+                Prefetch(
+                    'candidate__student_set__inscriptionprogrammecycle_set',
+                    InscriptionProgrammeCycle.objects.exclude(decision__in=['', DecisionResultatCycle.DIPLOMABLE.name])
+                    .annotate(
+                        program_name=Subquery(
+                            InscriptionProgrammeAnnuel.objects.filter(programme_cycle_id=OuterRef('pk'))
+                            .exclude(etat_inscription=EtatInscriptionFormation.VALISE_CREDITS_OBTENUS_HORS_UCL.name)
+                            .order_by('-programme__offer__academic_year__year')
+                            .values('programme__offer__title')[:1],
+                            output_field=CharField(),
+                        )
+                    )
+                    .filter(program_name__isnull=False),
+                    to_attr='graduated_internal_educational_experiences',
+                ),
             )
 
         if avec_acteurs_groupe_supervision:
@@ -410,19 +432,40 @@ class ListerDemandesService(IListerDemandesService):
                 else:
                     supervision_committee_members.append(actor_dto)
 
-        experiences_academiques_reussies = None
+        experiences_academiques_reussies: Optional[List[ExperienceAcademiqueDTO]] = None
         if avec_experiences_academiques_reussies:
-            experiences_academiques_reussies = [
-                ExperienceAcademiqueDTO(
-                    nom_institut=experience.formatted_institute_name,
-                    grade_obtenu=experience.obtained_grade,
-                    nom_formation=experience.formatted_program_name,
-                    credits_acquis=experience.acquired_credits,
-                    date_prevue_delivrance_diplome=experience.expected_graduation_date,
-                    est_diplome=True,
+            experiences_academiques_reussies = []
+
+            for experience in admission.graduated_external_educational_experiences:
+                experiences_academiques_reussies.append(
+                    ExperienceAcademiqueDTO(
+                        nom_institut=experience.formatted_institute_name,
+                        grade_obtenu=Grade[experience.obtained_grade] if experience.obtained_grade else None,
+                        nom_formation=experience.formatted_program_name,
+                        credits_acquis=(
+                            Decimal.from_float(experience.acquired_credits)
+                            if experience.acquired_credits is not None
+                            else None
+                        ),
+                        date_diplome=experience.expected_graduation_date,
+                        est_diplome=True,
+                    )
                 )
-                for experience in admission.graduated_educational_experiences  # From annotation
-            ]
+
+            for student in admission.candidate.student_set.all():
+                for experience in student.graduated_internal_educational_experiences:
+                    experiences_academiques_reussies.append(
+                        ExperienceAcademiqueDTO(
+                            nom_institut='UCLouvain',
+                            grade_obtenu=DecisionResultatCycle[experience.decision],
+                            nom_formation=experience.program_name,
+                            credits_acquis=experience.credits_acquis_de_charge,
+                            date_diplome=experience.date_decision,
+                            est_diplome=True,
+                        )
+                    )
+
+            experiences_academiques_reussies.sort(key=lambda current_exp: current_exp.date_diplome or datetime.date.min)
 
         return DemandeRechercheDTO(
             uuid=admission.uuid,
