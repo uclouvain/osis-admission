@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import datetime
+import json
 import uuid
 from typing import List
 
@@ -93,7 +94,7 @@ from reference.tests.factories.scholarship import (
 @freezegun.freeze_time('2022-01-01')
 class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
     admissions = []
-    NB_MAX_QUERIES_WITHOUT_SEARCH = 27
+    NB_MAX_QUERIES_WITHOUT_SEARCH = 26
     NB_MAX_QUERIES_WITH_SEARCH = 31
 
     @classmethod
@@ -303,6 +304,14 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             manager_factory.person = person_with_several_cdds
             manager_factory.save()
 
+        cls.promoter_data = json.dumps(
+            {
+                'global_id': cls.promoter.person.global_id,
+                'last_name': cls.promoter.person.last_name,
+                'first_name': cls.promoter.person.first_name,
+            }
+        )
+
         # Targeted url
         cls.url = reverse('admission:doctorate:cdd:list')
 
@@ -384,7 +393,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         self.assertEqual(form.fields['cdds'].choices, [(ENTITY_CDE, ENTITY_CDE), (ENTITY_CDSS, ENTITY_CDSS)])
 
-        self.assertEqual(form['uuid_promoteur'].value(), None)
+        self.assertEqual(form['id_promoteur'].value(), None)
 
         self.assertEqual(form['sigles_formations'].value(), None)
         self.assertCountEqual(
@@ -479,7 +488,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         data = {
             'nationalite': self.country.iso_code,
             'matricule_candidat': self.admissions[0].candidate.global_id,
-            'uuid_promoteur': self.promoter.uuid,
+            'id_promoteur': self.promoter_data,
         }
         with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES_WITHOUT_SEARCH):
             response = self.client.get(self.url, data)
@@ -501,14 +510,19 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 ),
             )
             self.assertEqual(
-                form.fields['uuid_promoteur'].widget.choices,
-                ((str(self.promoter.uuid), self.promoter.complete_name),),
+                form.fields['id_promoteur'].widget.choices,
+                (
+                    (
+                        self.promoter_data,
+                        f'{self.promoter.person.last_name}, {self.promoter.person.first_name} '
+                        f'({self.promoter.person.global_id})',
+                    ),
+                ),
             )
 
         data = {
             'nationalite': 'UNKOWN',
             'matricule_candidat': '123456',
-            'uuid_promoteur': str(uuid.uuid4()),
         }
         with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES_WITHOUT_SEARCH):
             response = self.client.get(self.url, data)
@@ -518,7 +532,6 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             form = response.context['form']
             self.assertEqual(form.fields['nationalite'].widget.choices, [])
             self.assertEqual(form.fields['matricule_candidat'].widget.choices, [])
-            self.assertEqual(form.fields['uuid_promoteur'].widget.choices, [])
 
     def test_get_with_invalid_dates(self):
         self.client.force_login(user=self.sic_user)
@@ -776,12 +789,10 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         data = {
             'annee_academique': '2021',
-            'uuid_promoteur': self.promoter.uuid,
+            'id_promoteur': self.promoter_data,
         }
 
-        response = self.client.get(self.url, data)
-
-        with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES_WITH_SEARCH + 1):
+        with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES_WITH_SEARCH):
             response = self.client.get(self.url, data)
 
             self.assertPropositionList(
