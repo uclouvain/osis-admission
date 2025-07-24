@@ -31,6 +31,7 @@ from django.shortcuts import resolve_url
 from django.utils.translation import gettext as _
 from osis_async.models import AsyncTask
 from osis_document.api.utils import get_remote_token
+from osis_document.enums import PostProcessingWanted
 from osis_document.utils import get_file_url
 from osis_mail_template import generate_email
 from osis_mail_template.utils import transform_html_to_text
@@ -134,6 +135,7 @@ class Notification(INotification):
         read_token = get_remote_token(
             uuid=admission.pdf_recap[0],
             custom_ttl=60 * 60 * 24 * cls.DUREE_EN_JOURS_TOKEN_LECTURE_RECAPITULATIF_ADMISSION,
+            wanted_post_process=PostProcessingWanted.ORIGINAL.name,
         )
 
         # Create the async task to merge each document field of the proposition into one PDF
