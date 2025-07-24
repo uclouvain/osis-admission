@@ -34,6 +34,7 @@ from django.utils.translation import get_language, gettext, pgettext_lazy
 from django.utils.translation import gettext_lazy as _
 from osis_async.models import AsyncTask
 from osis_document.api.utils import get_remote_token, get_remote_tokens
+from osis_document.enums import PostProcessingWanted
 from osis_document.utils import get_file_url
 from osis_mail_template import generate_email
 from osis_mail_template.utils import transform_html_to_text
@@ -716,7 +717,11 @@ class Notification(INotification):
         document_uuid = (
             DoctorateAdmission.objects.filter(uuid=proposition.entity_id.uuid).values('sic_refusal_certificate')
         )[0]['sic_refusal_certificate'][0]
-        token = get_remote_token(document_uuid, custom_ttl=ONE_YEAR_SECONDS)
+        token = get_remote_token(
+            document_uuid,
+            custom_ttl=ONE_YEAR_SECONDS,
+            wanted_post_process=PostProcessingWanted.ORIGINAL.name,
+        )
         document_url = get_file_url(token)
         corps_message = corps_message.replace(EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN, document_url)
 
@@ -761,7 +766,11 @@ class Notification(INotification):
         document_urls = {field: '' for field in certificate_fields}
 
         if document_uuids_list:
-            document_tokens = get_remote_tokens(document_uuids_list, custom_ttl=ONE_YEAR_SECONDS)
+            document_tokens = get_remote_tokens(
+                document_uuids_list,
+                custom_ttl=ONE_YEAR_SECONDS,
+                wanted_post_process=PostProcessingWanted.ORIGINAL.name,
+            )
 
             if document_tokens:
                 for field in certificate_fields:
