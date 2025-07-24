@@ -531,7 +531,7 @@ class DoctoratePropositionDTOSerializer(IncludedFieldsMixin, DoctoratePropositio
         extra_kwargs = {
             'autre_bourse_recherche': {'max_length': 255},
             'lieu_these': {'max_length': 255},
-            'titre_projet': {'max_length': 255},
+            'titre_projet': {'max_length': 1023},
             'institution': {'max_length': 255},
             'domaine_these': {'max_length': 255},
             'raison_non_soutenue': {'max_length': 255},
