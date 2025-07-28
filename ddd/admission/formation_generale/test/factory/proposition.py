@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 import string
 import uuid
 from typing import Optional
@@ -230,6 +231,7 @@ class PropositionFactory(factory.Factory):
         code=1,
     )
     auteur_derniere_modification = ''
+    echeance_demande_documents = datetime.date(2023, 1, 19)
 
     class Params:
         est_bachelier_en_reorientation = factory.Trait(

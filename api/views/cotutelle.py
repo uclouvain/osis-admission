@@ -43,8 +43,8 @@ class CotutelleAPIView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, mi
     pagination_class = None
     filter_backends = []
     permission_mapping = {
-        'GET': 'admission.view_admission_cotutelle',
-        'PUT': 'admission.change_admission_cotutelle',
+        'GET': 'admission.api_view_admission_cotutelle',
+        'PUT': 'admission.api_change_admission_cotutelle',
     }
 
     def get_permission_object(self):

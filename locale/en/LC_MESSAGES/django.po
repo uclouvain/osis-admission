@@ -1868,6 +1868,12 @@ msgctxt "dashboard-indicator pre-admission"
 msgid "Deadline 3 months"
 msgstr ""
 
+msgid "Deadline exceeded"
+msgstr ""
+
+msgid "Deadline for complements"
+msgstr ""
+
 msgid "Deadline for documents to be requested immediately"
 msgstr ""
 
@@ -2691,12 +2697,13 @@ msgid ""
 "require a prior registration for the doctorate. [...] Pre-admission is valid "
 "for a maximum period of 12 months. Recourse to a pre-admission phase must be "
 "justified, the objectives to be achieved planned and the duration of the pre-"
-"admission period fixed in accordance with them. Unless exceptionally "
-"authorised by the domain doctoral committee, FRIA or FNRS scholarship "
-"holders and, in general, doctoral candidates engaged in a research project "
-"that has already been defined, are not authorised to take a pre-admission "
-"phase for a doctorate.\" <br /> Please also consult the special provisions "
-"of the field for all pre-admission conditions."
+"admission period fixed in accordance with them. <strong class=\"text-"
+"danger\">Unless exceptionally authorised by the domain doctoral committee, "
+"FRIA or FNRS scholarship holders and, in general, doctoral candidates "
+"engaged in a research project that has already been defined, are not "
+"authorised to take a pre-admission phase for a doctorate.</strong>\" <br /> "
+"Please also consult the special provisions of the field for all pre-"
+"admission conditions."
 msgstr ""
 
 msgid "FAC"
@@ -5474,6 +5481,9 @@ msgid "Requested"
 msgstr ""
 
 msgid "Requested documents"
+msgstr ""
+
+msgid "Requested documents deadline"
 msgstr ""
 
 msgid "Requested documents list"

@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+import datetime
 import uuid
 from email.message import EmailMessage
 from typing import Dict, List, Optional
@@ -31,7 +31,7 @@ from uuid import UUID
 
 import attr
 from django.conf import settings
-from django.db.models import Exists, F, Func, Model, OuterRef, Q
+from django.db.models import F, Func, Model, Q
 from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 
@@ -171,7 +171,7 @@ class AdmissionDocument:
     status: str
     reason: str
     requested_at: str
-    deadline_at: str
+    deadline_at: Optional[datetime.date]
     last_action_at: str
     last_actor: str
     automatically_required: Optional[bool]
@@ -465,7 +465,11 @@ def get_document_from_identifier(
             status=document_status,
             reason=requested_document.get('reason') or '',
             requested_at=requested_document.get('requested_at') or '',
-            deadline_at=requested_document.get('deadline_at') or '',
+            deadline_at=(
+                admission.requested_documents_deadline
+                if document_status == StatutEmplacementDocument.RECLAME.name
+                else None
+            ),
             last_action_at=requested_document.get('last_action_at') or '',
             last_actor=document_author,
             automatically_required=requested_document.get('automatically_required') or False,

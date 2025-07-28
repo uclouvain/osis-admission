@@ -211,6 +211,7 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
         fiche_archive_signatures_envoyees=admission.archived_record_signatures_sent,
         auteur_derniere_modification=admission.last_update_author.global_id if admission.last_update_author else '',
         documents_demandes=admission.requested_documents,
+        echeance_demande_documents=admission.requested_documents_deadline,
         profil_soumis_candidat=(
             ProfilCandidat.from_dict(admission.submitted_profile) if admission.submitted_profile else None
         ),
@@ -426,6 +427,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'candidate': candidate,
                 'submitted_at': entity.soumise_le,
                 'related_pre_admission_id': related_pre_admission_id,
+                'requested_documents_deadline': entity.echeance_demande_documents,
                 'proximity_commission': entity.commission_proximite and entity.commission_proximite.name or '',
                 'doctorate': doctorate,
                 'determined_academic_year': academic_years.get(entity.annee_calculee),
@@ -838,6 +840,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             soumise_le=admission.submitted_at,
             pdf_recapitulatif=admission.pdf_recap,
             documents_demandes=admission.requested_documents,
+            echeance_demande_documents=admission.requested_documents_deadline,
             documents_libres_fac_uclouvain=admission.uclouvain_fac_documents,
             documents_libres_sic_uclouvain=admission.uclouvain_sic_documents,
             financabilite_regle_calcule=admission.financability_computed_rule,

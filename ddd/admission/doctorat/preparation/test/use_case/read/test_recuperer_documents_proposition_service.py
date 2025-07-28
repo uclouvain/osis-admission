@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -33,19 +33,25 @@ from mock import ANY
 from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererDocumentsPropositionQuery,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PropositionNonTrouveeException
-from admission.ddd.admission.doctorat.preparation.test.factory.person import PersonneConnueUclDTOFactory
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    PropositionIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    PropositionNonTrouveeException,
+)
+from admission.ddd.admission.doctorat.preparation.test.factory.person import (
+    PersonneConnueUclDTOFactory,
+)
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.emplacement_document import (
     DocumentsCurriculum,
-    TypeEmplacementDocument,
-    StatutEmplacementDocument,
-    OngletsDemande,
     DocumentsIdentification,
-    IdentifiantBaseEmplacementDocument,
     DocumentsSysteme,
+    IdentifiantBaseEmplacementDocument,
+    OngletsDemande,
+    StatutEmplacementDocument,
     StatutReclamationEmplacementDocument,
+    TypeEmplacementDocument,
 )
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
@@ -53,10 +59,17 @@ from admission.infrastructure.admission.doctorat.preparation.repository.in_memor
 from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
     emplacement_document_in_memory_repository,
 )
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
-from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
+from admission.infrastructure.message_bus_in_memory import (
+    message_bus_in_memory_instance,
+)
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
+    AcademicYear,
+    AcademicYearIdentity,
+)
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
-from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import (
+    AcademicYearInMemoryRepository,
+)
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
     PersonneConnueUclInMemoryTranslator,
 )
@@ -70,6 +83,7 @@ class RecupererDocumentsPropositionTestCase(TestCase):
 
         proposition = PropositionInMemoryRepository.get(PropositionIdentity(uuid='uuid-SC3DP-promoteur-membre'))
         proposition.curriculum = ['file1.pdf']
+        proposition.echeance_demande_documents = datetime.date(2023, 1, 19)
 
         self.academic_year_repository = AcademicYearInMemoryRepository()
 

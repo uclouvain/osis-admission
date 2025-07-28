@@ -91,6 +91,22 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
             grade_academique='1',
         ),
         FormationFactory(
+            intitule='Master en sciences',
+            entity_id__sigle='MASTER-SCI',
+            entity_id__annee=2015,
+            type=TrainingType.MASTER_M1,
+            campus__nom='Louvain-la-Neuve',
+            grade_academique='1',
+        ),
+        FormationFactory(
+            intitule='Master en sciences',
+            entity_id__sigle='MASTER-SCI',
+            entity_id__annee=2012,
+            type=TrainingType.MASTER_M1,
+            campus__nom='Louvain-la-Neuve',
+            grade_academique='1',
+        ),
+        FormationFactory(
             intitule='Bachelier en sciences économiques et de gestion',
             entity_id__sigle='BACHELIER-ECO',
             entity_id__annee=2022,

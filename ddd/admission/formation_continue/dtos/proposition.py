@@ -86,6 +86,7 @@ class PropositionDTO(interface.DTO):
     autre_moyen_decouverte_formation: str
 
     documents_demandes: Dict
+    echeance_demande_documents: Optional[datetime.date]
     documents_libres_fac_uclouvain: List[str]
     documents_libres_sic_uclouvain: List[str]
 

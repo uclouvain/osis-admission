@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -52,9 +52,9 @@ from osis_role.contrib.views import APIPermissionRequiredMixin
 # Mock views
 class TestAPIDetailViewWithPermissions(APIPermissionRequiredMixin, APIView):
     permission_mapping = {
-        'GET': 'admission.view_doctorateadmission',
-        'DELETE': 'admission.delete_doctorateadmission',
-        'PUT': ('admission.change_doctorateadmission',),
+        'GET': 'admission.api_view_doctorateadmission',
+        'DELETE': 'admission.api_delete_doctorateadmission',
+        'PUT': ('admission.api_change_doctorateadmission',),
     }
 
     def get_permission_object(self):

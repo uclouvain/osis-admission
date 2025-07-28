@@ -323,6 +323,7 @@ class PropositionInMemoryRepository(
             pdf_recapitulatif=['recap.pdf'],
             soumise_le=None,
             documents_demandes=proposition.documents_demandes,
+            echeance_demande_documents=proposition.echeance_demande_documents,
             documents_libres_fac_uclouvain=cls.documents_libres_fac_uclouvain.get(proposition.entity_id.uuid, []),
             documents_libres_sic_uclouvain=cls.documents_libres_sic_uclouvain.get(proposition.entity_id.uuid, []),
             financabilite_regle_calcule=(

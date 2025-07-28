@@ -174,6 +174,15 @@ class SicApprovalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.mock_publish = patcher.start()
         self.addCleanup(patcher.stop)
 
+        # Mock recuperer_matricule_etudiant (used inside mail)
+        patcher_matricule_etudiant = mock.patch(
+            'ddd.logic.gestion_des_comptes.use_case.read.recuperer_matricule_etudiant_assigne_service',
+            return_value='12654879'
+        )
+        self.mock_recuperer_matricule_etudiant = patcher_matricule_etudiant.start()
+        self.addCleanup(patcher_matricule_etudiant.stop)
+
+
     def test_submit_approval_final_decision_is_forbidden_with_fac_user(self):
         self.client.force_login(user=self.fac_manager_user)
 

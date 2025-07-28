@@ -148,15 +148,14 @@ from admission.infrastructure.admission.formation_generale.domain.service.in_mem
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.infrastructure.admission.repository.in_memory.digit import (
-    DigitInMemoryRepository,
-)
 from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
     emplacement_document_in_memory_repository,
 )
 from admission.infrastructure.admission.repository.in_memory.titre_acces_selectionnable import (
     TitreAccesSelectionnableInMemoryRepositoryFactory,
 )
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.matricule_etudiant import \
+    MatriculeEtudiantInMemoryService
 from admission.infrastructure.admission.shared_kernel.email_destinataire.repository.in_memory.email_destinataire import (
     EmailDestinataireInMemoryRepository,
 )
@@ -207,7 +206,7 @@ _reference_translator = ReferenceInMemoryTranslator()
 _email_destinataire_repository = EmailDestinataireInMemoryRepository()
 _campus_repository = UclouvainCampusInMemoryRepository()
 _taches_techniques = TachesTechniquesInMemory()
-_digit_repository = DigitInMemoryRepository()
+_matricule_etudiant_service = MatriculeEtudiantInMemoryService()
 _compteur_noma = CompteurAnnuelPourNomaInMemoryRepository()
 _experience_parcours_interne_translator = ExperienceParcoursInterneInMemoryTranslator()
 _financabilite_fetcher = FinancabiliteInMemoryFetcher()
@@ -599,6 +598,7 @@ COMMAND_HANDLERS = {
         titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
         experience_parcours_interne_translator=_experience_parcours_interne_translator,
         profil_candidat_translator=_profil_candidat_translator,
+        formation_translator=_formation_generale_translator,
     ),
     SpecifierConditionAccesPropositionCommand: lambda msg_bus, cmd: specifier_condition_acces_proposition(
         cmd,
@@ -722,7 +722,7 @@ COMMAND_HANDLERS = {
             academic_year_repository=_academic_year_repository,
             personne_connue_translator=_personne_connue_ucl_translator,
             experience_parcours_interne_translator=_experience_parcours_interne_translator,
-            digit_repository=_digit_repository,
+            matricule_etudiant_service=_matricule_etudiant_service,
         )
     ),
     ApprouverInscriptionParSicCommand: (
@@ -742,10 +742,11 @@ COMMAND_HANDLERS = {
     ),
     EnvoyerEmailApprobationInscriptionAuCandidatCommand: (
         lambda msg_bus, cmd: envoyer_email_approbation_inscription_au_candidat(
+            message_bus=msg_bus,
             cmd=cmd,
             notification=_notification,
             historique=_historique_formation_generale,
-            digit_repository=_digit_repository,
+            matricule_etudiant_service=_matricule_etudiant_service,
         )
     ),
     RecupererPdfTemporaireDecisionSicQuery: (
@@ -796,7 +797,6 @@ COMMAND_HANDLERS = {
             cmd,
             proposition_repository=_proposition_repository,
             profil_candidat_translator=_profil_candidat_translator,
-            academic_year_repository=_academic_year_repository,
             experience_parcours_interne_translator=_experience_parcours_interne_translator,
             formation_translator=_formation_generale_translator,
         )

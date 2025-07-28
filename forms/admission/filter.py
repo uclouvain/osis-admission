@@ -304,6 +304,17 @@ class AllAdmissionsFilterForm(AdmissionFilterWithEntitiesAndTrainingTypesForm):
         required=False,
     )
 
+    delai_depasse_complements = forms.NullBooleanField(
+        widget=forms.Select(
+            choices=(
+                EMPTY_CHOICE[0],
+                ('true', _('Deadline exceeded')),
+            ),
+        ),
+        label=_('Deadline for complements'),
+        required=False,
+    )
+
     liste_travail = WorkingListField(
         label=_('Working list'),
         queryset=WorkingList.objects.all(),
