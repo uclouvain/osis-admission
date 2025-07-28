@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,11 +29,21 @@ from typing import Dict
 import freezegun
 from django.test import TestCase
 
-from admission.ddd.admission.doctorat.preparation.commands import ReclamerDocumentsAuCandidatCommand
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PropositionNonTrouveeException
-from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
-from admission.ddd.admission.domain.model.enums.type_gestionnaire import TypeGestionnaire
+from admission.ddd.admission.doctorat.preparation.commands import (
+    ReclamerDocumentsAuCandidatCommand,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    PropositionNonTrouveeException,
+)
+from admission.ddd.admission.domain.model.emplacement_document import (
+    EmplacementDocument,
+)
+from admission.ddd.admission.domain.model.enums.type_gestionnaire import (
+    TypeGestionnaire,
+)
 from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
@@ -41,7 +51,9 @@ from admission.infrastructure.admission.doctorat.preparation.repository.in_memor
 from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
     emplacement_document_in_memory_repository,
 )
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from admission.infrastructure.message_bus_in_memory import (
+    message_bus_in_memory_instance,
+)
 
 
 class ReclamerDocumentsAuCandidatParFacTestCase(TestCase):
@@ -87,10 +99,11 @@ class ReclamerDocumentsAuCandidatParFacTestCase(TestCase):
             self.assertEqual(emplacements_documents[identifiant].reclame_le, None)
             self.assertEqual(emplacements_documents[identifiant].statut, StatutEmplacementDocument.A_RECLAMER)
 
-        # Le statut de la proposition a changé
+        # Le statut de la proposition a changé et la date d'échéance de réclamation est initialisée
         proposition = self.proposition_repository.get(proposition_id)
         self.assertEqual(proposition_id, proposition.entity_id)
         self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_FAC)
+        self.assertEqual(proposition.echeance_demande_documents, datetime.date(2023, 1, 15))
 
     @freezegun.freeze_time("2023-01-03")
     def test_should_reclamer_emplacements_au_candidat_par_sic(self):
@@ -127,10 +140,11 @@ class ReclamerDocumentsAuCandidatParFacTestCase(TestCase):
             self.assertEqual(emplacements_documents[identifiant].reclame_le, None)
             self.assertEqual(emplacements_documents[identifiant].statut, StatutEmplacementDocument.A_RECLAMER)
 
-        # Le statut de la proposition a changé
+        # Le statut de la proposition a changé et la date d'échéance de réclamation est initialisée
         proposition = self.proposition_repository.get(proposition_id)
         self.assertEqual(proposition_id, proposition.entity_id)
         self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_SIC)
+        self.assertEqual(proposition.echeance_demande_documents, datetime.date(2023, 1, 15))
 
     def test_should_pas_reclames_si_proposition_non_trouvee(self):
         with self.assertRaises(PropositionNonTrouveeException):

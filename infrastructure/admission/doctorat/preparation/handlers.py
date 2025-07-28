@@ -76,7 +76,20 @@ from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import
 from infrastructure.shared_kernel.profil.domain.service.parcours_interne import (
     ExperienceParcoursInterneTranslator,
 )
-
+from .domain.service.comptabilite import ComptabiliteTranslator
+from .domain.service.doctorat import DoctoratTranslator
+from .domain.service.historique import Historique
+from .domain.service.lister_demandes import ListerDemandesService
+from .domain.service.membre_CA import MembreCATranslator
+from .domain.service.notification import Notification
+from .domain.service.pdf_generation import PDFGeneration
+from .domain.service.promoteur import PromoteurTranslator
+from .domain.service.question_specifique import QuestionSpecifiqueTranslator
+from .repository.doctorat import DoctoratRepository
+from .repository.emplacement_document import EmplacementDocumentRepository
+from .repository.groupe_de_supervision import GroupeDeSupervisionRepository
+from .repository.proposition import PropositionRepository
+from ..validation.repository.demande import DemandeRepository
 from ...domain.service.calendrier_inscription import CalendrierInscription
 from ...domain.service.elements_confirmation import ElementsConfirmation
 from ...domain.service.emplacements_documents_proposition import (
@@ -91,22 +104,8 @@ from ...domain.service.titres_acces import TitresAcces
 from ...domain.service.unites_enseignement_translator import (
     UnitesEnseignementTranslator,
 )
-from ...repository.digit import DigitRepository
 from ...repository.titre_acces_selectionnable import TitreAccesSelectionnableRepository
-from ..validation.repository.demande import DemandeRepository
-from .domain.service.comptabilite import ComptabiliteTranslator
-from .domain.service.doctorat import DoctoratTranslator
-from .domain.service.historique import Historique
-from .domain.service.lister_demandes import ListerDemandesService
-from .domain.service.membre_CA import MembreCATranslator
-from .domain.service.notification import Notification
-from .domain.service.pdf_generation import PDFGeneration
-from .domain.service.promoteur import PromoteurTranslator
-from .domain.service.question_specifique import QuestionSpecifiqueTranslator
-from .repository.doctorat import DoctoratRepository
-from .repository.emplacement_document import EmplacementDocumentRepository
-from .repository.groupe_de_supervision import GroupeDeSupervisionRepository
-from .repository.proposition import PropositionRepository
+from ...shared_kernel.domain.service.matricule_etudiant import MatriculeEtudiantService
 
 COMMAND_HANDLERS = {
     InitierPropositionCommand: lambda msg_bus, cmd: initier_proposition(
@@ -635,7 +634,7 @@ COMMAND_HANDLERS = {
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
             experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
-            digit_repository=DigitRepository(),
+            matricule_etudiant_service=MatriculeEtudiantService(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
         )
     ),
@@ -668,10 +667,11 @@ COMMAND_HANDLERS = {
     ),
     EnvoyerEmailApprobationInscriptionAuCandidatCommand: (
         lambda msg_bus, cmd: envoyer_email_approbation_inscription_au_candidat(
+            message_bus=msg_bus,
             cmd=cmd,
             notification=Notification(),
             historique=Historique(),
-            digit_repository=DigitRepository(),
+            matricule_etudiant_service=MatriculeEtudiantService(),
         )
     ),
     RecupererPdfTemporaireDecisionSicQuery: (
@@ -709,7 +709,6 @@ COMMAND_HANDLERS = {
             cmd,
             proposition_repository=PropositionRepository(),
             profil_candidat_translator=ProfilCandidatTranslator(),
-            academic_year_repository=AcademicYearRepository(),
             experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
             doctorat_translator=DoctoratTranslator(),
         )

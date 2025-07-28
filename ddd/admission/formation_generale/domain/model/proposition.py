@@ -127,6 +127,7 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
 from admission.ddd.admission.utils import initialiser_checklist_experience
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from base.models.enums.education_group_types import TrainingType
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import (
     SITUATION_FINANCABILITE_PAR_ETAT,
@@ -213,6 +214,7 @@ class Proposition(interface.RootEntity):
     documents_additionnels: List[str] = attr.Factory(list)
 
     documents_demandes: Dict = attr.Factory(dict)
+    echeance_demande_documents: Optional[datetime.date] = None
 
     poursuite_de_cycle_a_specifier: bool = False
     poursuite_de_cycle: PoursuiteDeCycle = PoursuiteDeCycle.TO_BE_DETERMINED
@@ -376,13 +378,15 @@ class Proposition(interface.RootEntity):
             statut=ChoixStatutChecklist.SYST_REUSSITE,
         )
 
-    def reclamer_documents_par_sic(self, auteur_modification: str):
+    def reclamer_documents_par_sic(self, auteur_modification: str, a_echeance_le: datetime.date):
         self.statut = ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC
         self.auteur_derniere_modification = auteur_modification
+        self.echeance_demande_documents = a_echeance_le
 
-    def reclamer_documents_par_fac(self, auteur_modification: str):
+    def reclamer_documents_par_fac(self, auteur_modification: str, a_echeance_le: datetime.date):
         self.statut = ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC
         self.auteur_derniere_modification = auteur_modification
+        self.echeance_demande_documents = a_echeance_le
 
     def specifier_refus_par_fac(self):
         self.checklist_actuelle.decision_facultaire = StatutChecklist(
@@ -585,6 +589,7 @@ class Proposition(interface.RootEntity):
             ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC: ChoixStatutPropositionGenerale.COMPLETEE_POUR_FAC,
         }.get(self.statut)
         self.auteur_derniere_modification = self.matricule_candidat
+        self.echeance_demande_documents = None
 
     def completer_curriculum(
         self,
@@ -726,6 +731,7 @@ class Proposition(interface.RootEntity):
         titres_acces_selectionnes: List[TitreAccesSelectionnable],
         auteur_modification: str,
         uuids_experiences_valorisees: set[str],
+        type_formation: TrainingType,
     ):
         ModifierStatutChecklistParcoursAnterieurValidatorList(
             checklist=self.checklist_actuelle,
@@ -734,6 +740,7 @@ class Proposition(interface.RootEntity):
             titres_acces_selectionnes=titres_acces_selectionnes,
             condition_acces=self.condition_acces,
             millesime_condition_acces=self.millesime_condition_acces,
+            type_formation=type_formation,
         ).validate()
 
         self.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist[statut_checklist_cible]
@@ -1178,7 +1185,6 @@ class Proposition(interface.RootEntity):
         auteur_modification: str,
         documents_dto: List[EmplacementDocumentDTO],
         curriculum_dto: CurriculumAdmissionDTO,
-        academic_year_repository: IAcademicYearRepository,
         profil_candidat_translator: IProfilCandidatTranslator,
         experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
         grade_academique_formation_proposition: str,
@@ -1211,7 +1217,6 @@ class Proposition(interface.RootEntity):
             ProfilCandidatService.verifier_curriculum_formation_generale_apres_soumission(
                 proposition=self,
                 curriculum_dto=curriculum_dto,
-                academic_year_repository=academic_year_repository,
                 profil_candidat_translator=profil_candidat_translator,
                 experience_parcours_interne_translator=experience_parcours_interne_translator,
                 verification_experiences_completees=False,
@@ -1237,6 +1242,7 @@ class Proposition(interface.RootEntity):
             ChoixStatutPropositionGenerale.TRAITEMENT_FAC if par_fac else ChoixStatutPropositionGenerale.CONFIRMEE
         )
         self.auteur_derniere_modification = auteur_modification
+        self.echeance_demande_documents = None
 
     def nettoyer_reponses_questions_specifiques(self, questions_specifiques: List[QuestionSpecifique]):
         self.reponses_questions_specifiques = ISuperQuestionSpecifiqueTranslator.clean_specific_question_answers(

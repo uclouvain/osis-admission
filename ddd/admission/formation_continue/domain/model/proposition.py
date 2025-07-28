@@ -114,6 +114,7 @@ class Proposition(interface.RootEntity):
     adresse_facturation: Optional[Adresse] = None
 
     documents_demandes: Dict = attr.Factory(dict)
+    echeance_demande_documents: Optional[datetime.date] = None
     documents_additionnels: List[str] = attr.Factory(list)
 
     motivations: Optional[str] = ''
@@ -437,17 +438,20 @@ class Proposition(interface.RootEntity):
         )
         self.auteur_derniere_modification = gestionnaire
 
-    def reclamer_documents(self, auteur_modification):
+    def reclamer_documents(self, auteur_modification, a_echeance_le: datetime.date):
         self.statut = ChoixStatutPropositionContinue.A_COMPLETER_POUR_FAC
         self.auteur_derniere_modification = auteur_modification
+        self.echeance_demande_documents = a_echeance_le
 
     def annuler_reclamation_documents(self, auteur_modification: str):
         self.statut = ChoixStatutPropositionContinue.CONFIRMEE
         self.auteur_derniere_modification = auteur_modification
+        self.echeance_demande_documents = None
 
     def completer_documents_par_candidat(self):
         self.statut = ChoixStatutPropositionContinue.COMPLETEE_POUR_FAC
         self.auteur_derniere_modification = self.matricule_candidat
+        self.echeance_demande_documents = None
 
     def nettoyer_reponses_questions_specifiques(self, questions_specifiques: List[QuestionSpecifique]):
         self.reponses_questions_specifiques = ISuperQuestionSpecifiqueTranslator.clean_specific_question_answers(

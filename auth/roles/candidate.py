@@ -58,6 +58,7 @@ _CANDIDATE_RULESET = {
     'api_change_admission_person': common.is_admission_request_author
     & doctorate.in_progress
     & common.does_not_have_a_submitted_admission,
+    'change_admission_person_last_enrolment': common.is_admission_request_author & doctorate.in_progress,
     'api_change_admission_coordinates': common.is_admission_request_author & doctorate.in_progress,
     'api_change_admission_curriculum': common.is_admission_request_author & doctorate.in_progress,
     'api_change_admission_secondary_studies': common.is_admission_request_author & doctorate.in_progress,
@@ -118,6 +119,7 @@ _CANDIDATE_RULESET = {
     'change_generaleducationadmission_person': common.is_admission_request_author
     & general.in_progress
     & common.does_not_have_a_submitted_admission,
+    'change_generaleducationadmission_person_last_enrolment': common.is_admission_request_author & general.in_progress,
     'change_generaleducationadmission_coordinates': common.is_admission_request_author & general.in_progress,
     'change_generaleducationadmission_curriculum': common.is_admission_request_author & general.in_progress,
     'change_generaleducationadmission_secondary_studies': common.is_admission_request_author & general.in_progress,
@@ -151,6 +153,8 @@ _CANDIDATE_RULESET = {
     'change_continuingeducationadmission_person': common.is_admission_request_author
     & continuing.in_progress
     & common.does_not_have_a_submitted_admission,
+    'change_continuingeducationadmission_person_last_enrolment': common.is_admission_request_author
+    & continuing.in_progress,
     'change_continuingeducationadmission_coordinates': common.is_admission_request_author & continuing.in_progress,
     'change_continuingeducationadmission_curriculum': common.is_admission_request_author & continuing.in_progress,
     'change_continuingeducationadmission_secondary_studies': common.is_admission_request_author

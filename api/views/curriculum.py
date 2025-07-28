@@ -364,7 +364,8 @@ class BaseProfessionalExperienceViewSet(ExperienceViewSet):
         is_certificate_missing = not self.experience.certificate
 
         if (
-            self.experience.certificate and (is_valuated_in_doctorates or is_valuated_in_general_educations)
+            self.experience.certificate
+            and (is_valuated_in_doctorates or is_valuated_in_general_educations)
             or (self.experience.external_id and not is_certificate_missing)
         ):
             raise PermissionDenied(_("This experience cannot be updated as it has already been valuated."))

@@ -43,6 +43,7 @@ from admission.ddd.admission.formation_generale.commands import (
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
+from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
 from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
     AnneeExperienceAcademique,
     ExperienceAcademique,
@@ -230,6 +231,7 @@ class TestVerifierCurriculumApresSoumissionService(TestCase):
             entity_id=PropositionIdentityBuilder.build_from_uuid(uuid='uuid-MASTER-SCI'),
         )
         self.master_proposition.soumise_le = datetime.datetime(2014, 11, 1)
+        self.master_proposition.formation_id = FormationIdentityFactory(annee=2015, sigle='MASTER-SCI')
 
         self.etudes_secondaires = self.candidat_translator.etudes_secondaires
         self.etudes_secondaires[self.master_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
@@ -281,6 +283,23 @@ class TestVerifierCurriculumApresSoumissionService(TestCase):
             [
                 'De Septembre 2013 à Février 2014',
                 'De Septembre 2014 à Octobre 2014',
+            ],
+        )
+
+    def test_should_retourner_erreur_en_fonction_annee_formation(self):
+        self.master_proposition.formation_id = FormationIdentityFactory(annee=2012, sigle='MASTER-SCI')
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+        self.assertAnneesCurriculum(
+            context.exception.exceptions,
+            [
+                'De Septembre 2007 à Février 2008',
+                'De Septembre 2008 à Février 2009',
+                'De Septembre 2009 à Février 2010',
+                'De Septembre 2010 à Février 2011',
+                'De Septembre 2011 à Février 2012',
             ],
         )
 

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -35,8 +35,8 @@ from admission.ddd.admission.enums.emplacement_document import (
 )
 from admission.models import GeneralEducationAdmission
 from admission.tests.factories.curriculum import (
-    EducationalExperienceFactory,
     AdmissionEducationalValuatedExperiencesFactory,
+    EducationalExperienceFactory,
     EducationalExperienceYearFactory,
 )
 from admission.tests.factories.general_education import (
@@ -58,7 +58,6 @@ class TestGeneralEducationAdmissionDocuments(TestCaseWithQueriesAssertions):
             'automatically_required': False,
             'last_action_at': '2023-01-01T00:00:00',
             'last_actor': '0123456',
-            'deadline_at': '',
             'reason': 'My reason',
             'requested_at': '',
             'status': 'A_RECLAMER',
@@ -146,9 +145,9 @@ class TestGeneralEducationAdmissionDocuments(TestCaseWithQueriesAssertions):
 
         # Known non-free documents -> must be kept
         self.general_admission.requested_documents['CURRICULUM.CURRICULUM'] = self.manuel_required_params
-        self.general_admission.requested_documents[
-            f'CURRICULUM.{experience.uuid}.RELEVE_NOTES'
-        ] = self.manuel_required_params
+        self.general_admission.requested_documents[f'CURRICULUM.{experience.uuid}.RELEVE_NOTES'] = (
+            self.manuel_required_params
+        )
 
         self.general_admission.save()
         self.general_admission.update_requested_documents()

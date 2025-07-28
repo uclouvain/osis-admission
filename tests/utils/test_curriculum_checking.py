@@ -94,6 +94,7 @@ class GetMissingCurriculumPeriodsTestCase(TestCase):
         self.addCleanup(patcher.stop)
         self.admission = GeneralEducationAdmissionFactory(
             submitted_at=datetime.datetime(2015, 1, 15),
+            training__academic_year__year=2015,
         )
 
     def test_no_cv_experience(self):
@@ -140,6 +141,33 @@ class GetMissingCurriculumPeriodsTestCase(TestCase):
                 'De Septembre 2011 à Février 2012',
                 'De Septembre 2012 à Février 2013',
                 'De Septembre 2013 à Février 2014',
+            ],
+        )
+
+    def test_minimal_year_depending_on_training_year(self):
+        self.admission.training.academic_year = self.academic_years[2017]
+        self.admission.training.save()
+
+        result = get_missing_curriculum_periods(proposition_uuid=self.admission.uuid)
+
+        self.assertCountEqual(
+            result,
+            [
+                'De Septembre 2012 à Février 2013',
+                'De Septembre 2013 à Février 2014',
+                'De Septembre 2014 à Décembre 2014',
+            ],
+        )
+
+        self.admission.training.academic_year = self.academic_years[2019]
+        self.admission.training.save()
+
+        result = get_missing_curriculum_periods(proposition_uuid=self.admission.uuid)
+
+        self.assertCountEqual(
+            result,
+            [
+                'De Septembre 2014 à Décembre 2014',
             ],
         )
 
