@@ -32,9 +32,9 @@ from django.test import TestCase, override_settings
 from django.utils.translation import pgettext
 from osis_history.models import HistoryEntry
 
-from admission.ddd.admission.dtos.campus import CampusDTO
-from admission.ddd.admission.dtos.formation import BaseFormationDTO, FormationDTO
-from admission.ddd.admission.enums import TypeSituationAssimilation
+from admission.ddd.admission.shared_kernel.dtos.campus import CampusDTO
+from admission.ddd.admission.shared_kernel.dtos.formation import BaseFormationDTO, FormationDTO
+from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
     PropositionNonTrouveeException,
 )

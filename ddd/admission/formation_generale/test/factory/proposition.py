@@ -32,14 +32,14 @@ import factory
 from factory.fuzzy import FuzzyText
 
 from admission.ddd import DUREE_MAXIMALE_PROGRAMME, DUREE_MINIMALE_PROGRAMME
-from admission.ddd.admission.domain.model.complement_formation import (
+from admission.ddd.admission.shared_kernel.domain.model.complement_formation import (
     ComplementFormationIdentity,
 )
-from admission.ddd.admission.domain.model.condition_complementaire_approbation import (
+from admission.ddd.admission.shared_kernel.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
 )
-from admission.ddd.admission.domain.model.motif_refus import MotifRefusIdentity
-from admission.ddd.admission.enums import (
+from admission.ddd.admission.shared_kernel.domain.model.motif_refus import MotifRefusIdentity
+from admission.ddd.admission.shared_kernel.enums import (
     ChoixAffiliationSport,
     ChoixAssimilation1,
     ChoixAssimilation2,
@@ -66,12 +66,12 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
     StatutChecklist,
     StatutsChecklistGenerale,
 )
-from admission.ddd.admission.test.factory.bourse import BourseIdentityFactory
-from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
-from admission.ddd.admission.test.factory.poste_diplomatique import (
+from admission.ddd.admission.shared_kernel.tests.factory.bourse import BourseIdentityFactory
+from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationIdentityFactory
+from admission.ddd.admission.shared_kernel.tests.factory.poste_diplomatique import (
     PosteDiplomatiqueIdentityFactory,
 )
-from admission.ddd.admission.test.factory.reference import REFERENCE_MEMORY_ITERATOR
+from admission.ddd.admission.shared_kernel.tests.factory.reference import REFERENCE_MEMORY_ITERATOR
 
 
 class StatutChecklistFactory(factory.Factory):

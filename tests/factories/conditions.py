@@ -26,7 +26,7 @@
 
 import factory
 
-from admission.ddd.admission.dtos.conditions import AdmissionConditionsDTO
+from admission.ddd.admission.shared_kernel.dtos.conditions import AdmissionConditionsDTO
 
 
 class AdmissionConditionsDTOFactory(factory.Factory):

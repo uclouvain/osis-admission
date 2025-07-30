@@ -26,16 +26,16 @@
 from typing import List, Optional
 
 from admission.ddd import CODE_BACHELIER_VETERINAIRE
-from admission.ddd.admission.domain.enums import TYPES_FORMATION_GENERALE
-from admission.ddd.admission.domain.model.formation import Formation, FormationIdentity
-from admission.ddd.admission.dtos.formation import FormationDTO
+from admission.ddd.admission.shared_kernel.domain.enums import TYPES_FORMATION_GENERALE
+from admission.ddd.admission.shared_kernel.domain.model.formation import Formation, FormationIdentity
+from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from admission.ddd.admission.formation_generale.domain.service.i_formation import (
     IFormationGeneraleTranslator,
 )
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     FormationNonTrouveeException,
 )
-from admission.ddd.admission.test.factory.formation import FormationFactory
+from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationFactory
 from base.models.enums.education_group_types import TrainingType
 
 

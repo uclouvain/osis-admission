@@ -42,9 +42,9 @@ from admission.models import (
 from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererDocumentsPropositionQuery as RecupererDocumentsPropositionDoctoraleQuery,
 )
-from admission.ddd.admission.domain.validator.exceptions import EmplacementDocumentNonTrouveException
-from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
-from admission.ddd.admission.enums.emplacement_document import DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import EmplacementDocumentNonTrouveException
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION
 from admission.ddd.admission.formation_continue.commands import (
     RecupererDocumentsPropositionQuery as RecupererDocumentsPropositionContinueQuery,
 )

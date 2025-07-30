@@ -25,13 +25,13 @@
 # ##############################################################################
 from django.test import TestCase
 
-from admission.ddd.admission.domain.validator.exceptions import PosteDiplomatiqueNonTrouveException
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import PosteDiplomatiqueNonTrouveException
 from admission.ddd.admission.formation_generale.commands import (
     CompleterQuestionsSpecifiquesCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
-from admission.infrastructure.admission.domain.service.in_memory.poste_diplomatique import (
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.poste_diplomatique import (
     PosteDiplomatiqueInMemoryFactory,
 )
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (

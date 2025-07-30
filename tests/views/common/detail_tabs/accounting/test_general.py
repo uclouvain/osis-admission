@@ -32,7 +32,7 @@ from rest_framework import status
 
 from admission.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
-from admission.ddd.admission.enums import TypeSituationAssimilation, ChoixAffiliationSport, ChoixTypeCompteBancaire
+from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation, ChoixAffiliationSport, ChoixTypeCompteBancaire
 from admission.tests.factories.curriculum import EducationalExperienceFactory, EducationalExperienceYearFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory, CandidateFactory

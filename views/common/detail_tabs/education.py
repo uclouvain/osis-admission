@@ -27,9 +27,9 @@
 from django.utils.functional import cached_property
 from django.views.generic import TemplateView
 
-from admission.ddd.admission.commands import RecupererEtudesSecondairesQuery
-from admission.ddd.admission.dtos import EtudesSecondairesAdmissionDTO
-from admission.ddd.admission.enums import Onglets
+from admission.ddd.admission.shared_kernel.commands import RecupererEtudesSecondairesQuery
+from admission.ddd.admission.shared_kernel.dtos import EtudesSecondairesAdmissionDTO
+from admission.ddd.admission.shared_kernel.enums import Onglets
 from admission.utils import get_experience_urls
 from admission.views.common.mixins import LoadDossierViewMixin
 from infrastructure.messages_bus import message_bus_instance

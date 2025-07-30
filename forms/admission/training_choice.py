@@ -48,7 +48,7 @@ from admission.ddd.admission.doctorat.preparation.dtos import DoctoratFormationD
 from admission.ddd.admission.doctorat.preparation.dtos.proposition import (
     PropositionGestionnaireDTO as PropositionDoctoraleDTO,
 )
-from admission.ddd.admission.domain.enums import TypeFormation
+from admission.ddd.admission.shared_kernel.domain.enums import TypeFormation
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixMoyensDecouverteFormation,
 )
@@ -64,7 +64,7 @@ from admission.forms import (
     get_scholarship_choices,
 )
 from admission.forms.specific_question import ConfigurableFormMixin
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
 from admission.views.autocomplete.trainings import (

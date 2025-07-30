@@ -33,7 +33,7 @@ from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
 from admission.auth.scope import Scope
-from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
+from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixEdition,
     ChoixStatutChecklist,

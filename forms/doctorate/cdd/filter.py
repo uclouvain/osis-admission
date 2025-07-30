@@ -51,19 +51,19 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_POUR_LISTING,
 )
-from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
+from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
 from admission.forms import (
     ALL_EMPTY_CHOICE,
     ALL_FEMININE_EMPTY_CHOICE,
     DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
     SelectWithDisabledOptions,
 )
-from admission.forms.admission.filter import BaseAdmissionFilterForm, WorkingListField
+from admission.forms.admission.filter import BaseAdmissionFilterForm
 from admission.forms.checklist_state_filter import ChecklistStateFilterField
 from admission.infrastructure.admission.doctorat.preparation.read_view.repository.tableau_bord import (
     TableauBordRepositoryAdmissionMixin,
 )
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
 from admission.models import EntityProxy, SupervisionActor

@@ -33,8 +33,8 @@ from django.test import TestCase, override_settings
 from django.utils import translation
 
 from admission.models import GeneralEducationAdmission
-from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
-from admission.ddd.admission.enums import CritereItemFormulaireFormation, Onglets, TypeItemFormulaire
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
+from admission.ddd.admission.shared_kernel.enums import CritereItemFormulaireFormation, Onglets, TypeItemFormulaire
 from admission.ddd.admission.formation_generale.commands import RecupererQuestionsSpecifiquesQuery
 from admission.tests.factories.form_item import (
     AdmissionFormItemInstantiationFactory,

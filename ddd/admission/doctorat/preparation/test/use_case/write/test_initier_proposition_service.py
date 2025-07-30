@@ -58,7 +58,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
     PropositionAdmissionSC3DPMinimaleAnnuleeFactory,
 )
-from admission.ddd.admission.domain.service.i_maximum_propositions import (
+from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions import (
     MAXIMUM_PROPOSITIONS_EN_COURS,
 )
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (

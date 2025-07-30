@@ -23,14 +23,14 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocumentIdentity
-from admission.ddd.admission.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.enums.emplacement_document import (
+from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import EmplacementDocumentIdentity
+from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     OngletsDemande,
     StatutReclamationEmplacementDocument,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
-from admission.ddd.admission.repository.i_emplacement_document import IEmplacementDocumentRepository
+from admission.ddd.admission.shared_kernel.repository.i_emplacement_document import IEmplacementDocumentRepository
 from osis_common.ddd import interface
 
 

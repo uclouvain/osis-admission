@@ -25,7 +25,7 @@
 # ##############################################################################
 import attr
 
-from admission.ddd.admission.domain.model.formation import FormationIdentity
+from admission.ddd.admission.shared_kernel.domain.model.formation import FormationIdentity
 from base.models.enums.education_group_types import TrainingType
 from ddd.logic.learning_unit.domain.model.responsible_entity import UCLEntityIdentity
 from osis_common.ddd import interface

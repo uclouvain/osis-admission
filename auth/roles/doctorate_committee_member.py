@@ -32,7 +32,7 @@ from admission.auth.predicates.common import (
     has_education_group_of_types,
     is_part_of_education_group,
 )
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
 from base.models.education_group import EducationGroup

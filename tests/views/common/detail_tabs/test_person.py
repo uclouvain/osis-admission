@@ -33,7 +33,7 @@ from admission.auth.scope import Scope
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
     ENTITY_CDE,
 )
-from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
+from admission.ddd.admission.shared_kernel.dtos.profil_candidat import ProfilCandidatDTO
 from admission.models import (
     ContinuingEducationAdmission,
     DoctorateAdmission,
