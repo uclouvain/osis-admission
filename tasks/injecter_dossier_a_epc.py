@@ -29,6 +29,7 @@ from typing import List
 from django.conf import settings
 from django.db.models import Q, Exists, OuterRef, When, Case, Value
 
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.models.base import BaseAdmission
@@ -50,14 +51,17 @@ def run():  # pragma: no cover
     )  # type: List[PeriodeSoumissionTicketDigitDTO]
     annee_ouverte = periodes_actives[0].annee
 
-    # TODO: compatibilite avec doctorat et iufc
     admissions = BaseAdmission.objects.select_related(
         'generaleducationadmission',
+        'continuingeducationadmission',
+        'doctorateadmission',
         'candidate__personmergeproposal',
+        'determined_academic_year',
     ).filter(
         # Dossier doit être en INSCRIPTION AUTORISEE
         Q(generaleducationadmission__status=ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name)
-        | Q(continuingeducationadmission__status=ChoixStatutPropositionContinue.INSCRIPTION_AUTORISEE.name),
+        | Q(continuingeducationadmission__status=ChoixStatutPropositionContinue.INSCRIPTION_AUTORISEE.name)
+        | Q(doctorateadmission__status=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name),
         # Dossier doit etre sur la bonne annee
         determined_academic_year__year=annee_ouverte,
         # Doit avoir un matricule fgs interne
@@ -98,7 +102,8 @@ def run():  # pragma: no cover
                     checklist__current__financabilite__status='GEST_REUSSITE',
                     generaleducationadmission__financability_established_by_id__isnull=True
                 ),
-                generaleducationadmission__isnull=False,
+                Q(generaleducationadmission__isnull=False)
+                | Q(doctorateadmission__isnull=False),
                 then=Value(False),
             ),
             default=Value(True),
@@ -120,7 +125,8 @@ def run():  # pragma: no cover
     ).annotate(
         ordre_priorite=Case(
             When(continuingeducationadmission__isnull=False, then=1),
-            When(generaleducationadmission__isnull=False, then=2)
+            When(generaleducationadmission__isnull=False, then=2),
+            When(doctorateadmission__isnull=False, then=3)
         )
     ).order_by('ordre_priorite')
     logger.info(f"[TASK - INJECTION EPC] {admissions.count()} dossiers a traiter")

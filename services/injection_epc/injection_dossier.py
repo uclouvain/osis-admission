@@ -29,7 +29,7 @@ import re
 import traceback
 import uuid
 from datetime import datetime
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, Union
 
 import pika
 from django.conf import settings
@@ -44,7 +44,6 @@ from admission.ddd.admission.doctorat.preparation.commands import (
     RecalculerEmplacementsDocumentsNonLibresPropositionCommand
     as RecalculerEmplacementsDocumentsNonLibresDoctoratCommand,
 )
-from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire, TypeSituationAssimilation, ChoixAffiliationSport
 from admission.ddd.admission.formation_continue.commands import (
     RecalculerEmplacementsDocumentsNonLibresPropositionCommand as RecalculerEmplacementsDocumentsNonLibresIUFCCommand,
 )
@@ -56,12 +55,16 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     DROITS_INSCRIPTION_MONTANT_VALEURS,
     PoursuiteDeCycle,
 )
+from admission.ddd.admission.shared_kernel.enums import (
+    TypeItemFormulaire, TypeSituationAssimilation,
+    ChoixAffiliationSport,
+)
 from admission.infrastructure.admission.formation_continue.domain.service.historique import TAGS_APPROBATION_PROPOSITION
 from admission.infrastructure.admission.formation_generale.domain.service.historique import TAGS_AUTORISATION_SIC
 from admission.infrastructure.utils import (
     CORRESPONDANCE_CHAMPS_CURRICULUM_EXPERIENCE_NON_ACADEMIQUE,
 )
-from admission.models import Accounting, EPCInjection, AdmissionFormItem
+from admission.models import Accounting, EPCInjection, AdmissionFormItem, DoctorateAdmission
 from admission.models import GeneralEducationAdmission
 from admission.models.base import (
     BaseAdmission,
@@ -84,7 +87,6 @@ from infrastructure.messages_bus import message_bus_instance
 from osis_common.queue.queue_sender import send_message, logger
 from osis_common.queue.queue_utils import get_pika_connexion_parameters
 from osis_profile.models import (
-    EducationalExperience,
     EducationalExperienceYear,
     ProfessionalExperience,
 )
@@ -216,7 +218,7 @@ SPORT_TOUT_CAMPUS = [
 class InjectionEPCAdmission:
     def injecter(self, admission: BaseAdmission):
         logger.info(f"[INJECTION EPC] Recuperation des donnees de l admission avec reference {str(admission)}")
-        e = ""
+        stacktrace = ""
         try:
             self._nettoyer_documents_reclames(admission)
             donnees = self.recuperer_donnees(admission=admission)
@@ -225,14 +227,13 @@ class InjectionEPCAdmission:
             transaction.on_commit(
                 lambda: self.envoyer_admission_dans_queue(
                     donnees=donnees,
-                    admission_uuid=admission.uuid,
+                    admission_uuid=str(admission.uuid),
                     admission_reference=str(admission),
                 )
             )
             statut = EPCInjectionStatus.PENDING.name
-        except Exception as exception:
-            e = exception
-            logger.exception("[INJECTION EPC] Erreur lors de l'injection")
+        except Exception as e:
+            logger.exception(f"[INJECTION EPC] Erreur lors de l'injection : {repr(e)}")
             donnees = {}
             statut = EPCInjectionStatus.OSIS_ERROR.name
             stacktrace = traceback.format_exc()
@@ -244,7 +245,7 @@ class InjectionEPCAdmission:
                 "payload": donnees,
                 "status": statut,
                 'last_attempt_date': datetime.now(),
-                "osis_stacktrace": stacktrace if e else ""
+                "osis_stacktrace": stacktrace
             },
         )
         return donnees
@@ -294,12 +295,15 @@ class InjectionEPCAdmission:
                 admission=admission,
                 comptabilite=comptabilite,
             ),
-            "inscription_offre": cls._get_inscription_offre(admission=admission, admission_generale=admission_generale),
+            "inscription_offre": cls._get_inscription_offre(
+                admission=admission,
+                admission_specifique=admission_generale or admission_doctorat,
+            ),
             "donnees_comptables": cls._get_donnees_comptables(
                 admission=admission,
                 comptabilite=comptabilite,
-                admission_generale=admission_generale
-            ) if admission_generale else None,
+                admission_specifique=admission_generale or admission_doctorat
+            ) if admission_generale or admission_doctorat else None,
             "adresses": cls._get_adresses(adresses=adresses),
             "documents": (
                 InjectionEPCCurriculum._recuperer_documents(admission_generale or admission_iufc or admission_doctorat)
@@ -312,7 +316,8 @@ class InjectionEPCAdmission:
     def _recuperer_documents_specifiques(cls, admission):
         documents_specifiques = []
         form_items = AdmissionFormItem.objects.filter(
-            uuid__in=admission.specific_question_answers.keys(), type=TypeItemFormulaire.DOCUMENT.name
+            uuid__in=admission.specific_question_answers.keys(),
+            type=TypeItemFormulaire.DOCUMENT.name,
         )
         for form_item in form_items:
             label = form_item.internal_label
@@ -537,7 +542,7 @@ class InjectionEPCAdmission:
             )
             .filter(valorisee_par_dossier=True)
             .select_related('institute', 'country', 'program')
-        )  # type: QuerySet[EducationalExperience]
+        )
         experiences = []
 
         for experience_educative in experiences_educatives:
@@ -545,7 +550,7 @@ class InjectionEPCAdmission:
                 experience_educative.educationalexperienceyear_set.all()
                 .select_related("academic_year")
                 .order_by("academic_year")
-            )  # type: QuerySet[EducationalExperienceYear]
+            )
             exp = []
             for experience_educative_annualisee in experiences_educatives_annualisees:
                 data_annuelle = InjectionEPCCurriculum._build_data_annuelle(
@@ -569,8 +574,7 @@ class InjectionEPCAdmission:
             )
             .filter(valorisee_par_dossier=True)
             .order_by('start_date')
-        )  # type: QuerySet[ProfessionalExperience]
-
+        )
         return [
             InjectionEPCCurriculum._build_curriculum_autre_activite(experience_pro)
             for experience_pro in experiences_professionnelles
@@ -580,13 +584,13 @@ class InjectionEPCAdmission:
     def _get_inscription_offre(
         cls,
         admission: BaseAdmission,
-        admission_generale: Optional[GeneralEducationAdmission],
+        admission_specifique: Optional[Union[GeneralEducationAdmission, DoctorateAdmission]],
     ) -> Dict:
-        num_offre, validite = cls.__get_validite_num_offre(admission, admission_generale)
+        num_offre, validite = cls.__get_validite_num_offre(admission, admission_specifique)
         groupe_de_supervision = getattr(admission, 'supervision_group', None)
-        double_diplome = getattr(admission_generale, 'double_degree_scholarship', None)
-        type_demande_bourse = getattr(admission_generale, 'international_scholarship', None)
-        type_erasmus = getattr(admission_generale, 'erasmus_mundus_scholarship', None)
+        double_diplome = getattr(admission_specifique, 'double_degree_scholarship', None)
+        type_demande_bourse = getattr(admission_specifique, 'international_scholarship', None)
+        type_erasmus = getattr(admission_specifique, 'erasmus_mundus_scholarship', None)
         financabilite_checklist = admission.checklist.get('current', {}).get('financabilite', {})
         etat_financabilite = {
             'INITIAL_NON_CONCERNE': EtatFinancabilite.NON_CONCERNE.name,
@@ -601,40 +605,50 @@ class InjectionEPCAdmission:
                 if groupe_de_supervision
                 else None
             ),
-            'condition_acces': admission_generale.admission_requirement if admission_generale else None,
-            'annee_condition_acces': admission_generale.admission_requirement_year.year if admission_generale else None,
+            'condition_acces': admission_specifique.admission_requirement if admission_specifique else None,
+            'annee_condition_acces': (
+                admission_specifique.admission_requirement_year.year if admission_specifique else None
+            ),
             'double_diplome': str(double_diplome.uuid) if double_diplome else None,
             'type_demande_bourse': str(type_demande_bourse.uuid) if type_demande_bourse else None,
             'type_erasmus': str(type_erasmus.uuid) if type_erasmus else None,
-            'complement_de_formation': admission_generale.with_prerequisite_courses if admission_generale else False,
+            'complement_de_formation': (
+                admission_specifique.with_prerequisite_courses if admission_specifique else False
+            ),
             'etat_financabilite': etat_financabilite,
-            'situation_financabilite': admission_generale.financability_rule if admission_generale else None,
+            'situation_financabilite': admission_specifique.financability_rule if admission_specifique else None,
             'utilisateur_financabilite': (
-                admission_generale.financability_established_by.full_name
-                if admission_generale and est_financable else None
+                admission_specifique.financability_established_by.full_name
+                if admission_specifique and est_financable else None
             ),
             'date_financabilite': (
-                admission_generale.financability_established_on.strftime("%d/%m/%Y")
-                if admission_generale and est_financable else None
+                admission_specifique.financability_established_on.strftime("%d/%m/%Y")
+                if admission_specifique and est_financable else None
             ),
             'derogation_financabilite': financabilite_checklist.get('extra', {}).get('reussite') == 'derogation',
-            'reorientation': bool(admission_generale) and admission_generale.is_external_reorientation,
-            'modification_programme': bool(admission_generale) and admission_generale.is_external_modification,
-            'inscription_tardive': bool(admission_generale) and admission_generale.late_enrollment,
+            'reorientation': (
+                bool(admission_specifique) and getattr(admission_specifique, 'is_external_reorientation', False)
+            ),
+            'modification_programme': (
+                bool(admission_specifique) and getattr(admission_specifique, 'is_external_modification', False)
+            ),
+            'inscription_tardive': (
+                bool(admission_specifique) and getattr(admission_specifique, 'late_enrollment', False)
+            ),
         }
 
     @staticmethod
     def __get_validite_num_offre(
         admission: BaseAdmission,
-        admission_generale: Optional[GeneralEducationAdmission],
+        admission_specifique: Optional[Union[GeneralEducationAdmission, DoctorateAdmission]],
     ) -> Tuple[str, str]:
         formation = admission.training  # type: EducationGroupYear
         est_en_bachelier = formation.education_group_type.name == TrainingType.BACHELOR.name
         est_en_premiere_annee_de_bachelier = (
-            est_en_bachelier and admission_generale.cycle_pursuit != PoursuiteDeCycle.YES.name
+            est_en_bachelier and admission_specifique.cycle_pursuit != PoursuiteDeCycle.YES.name
         )
         if est_en_premiere_annee_de_bachelier:
-            validite, num_offre = formation.cohortyear_set.get(name=CohortName.FIRST_YEAR.name,).external_id.split(
+            validite, num_offre = formation.cohortyear_set.get(name=CohortName.FIRST_YEAR.name, ).external_id.split(
                 '_'
             )[3:5]
         else:
@@ -645,16 +659,15 @@ class InjectionEPCAdmission:
     def _get_donnees_comptables(
         admission: BaseAdmission,
         comptabilite: Accounting,
-        admission_generale: Optional[GeneralEducationAdmission],
+        admission_specifique: Union[GeneralEducationAdmission, DoctorateAdmission],
     ) -> Dict:
-        autre_montant = getattr(admission_generale, 'tuition_fees_amount_other')
+        autre_montant = admission_specifique.tuition_fees_amount_other
         return {
             "annee_academique": admission.training.academic_year.year,
-            "droits_majores": admission_generale.tuition_fees_dispensation,
+            "droits_majores": admission_specifique.tuition_fees_dispensation,
             "montant_droits_majores": (
                 ((str(autre_montant) if autre_montant else None)
-                 or DROITS_INSCRIPTION_MONTANT_VALEURS.get(getattr(admission_generale, "tuition_fees_amount", None)))
-                if admission_generale else None
+                 or DROITS_INSCRIPTION_MONTANT_VALEURS.get(admission_specifique.tuition_fees_amount))
             ),
             "allocation_etudes": comptabilite.french_community_study_allowance_application if comptabilite else None,
         }
