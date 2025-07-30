@@ -94,10 +94,5 @@ class CalendrierInscription(ICalendrierInscription):
     def est_ue_plus_5(
         cls,
         identification: 'IdentificationDTO',
-        situation_assimilation: TypeSituationAssimilation = None,
     ) -> bool:
-        return (
-            identification.pays_nationalite_europeen
-            or (situation_assimilation and situation_assimilation != TypeSituationAssimilation.AUCUNE_ASSIMILATION)
-            or identification.pays_nationalite in PLUS_5_ISO_CODES
-        )
+        return identification.pays_nationalite_europeen or identification.pays_nationalite in PLUS_5_ISO_CODES

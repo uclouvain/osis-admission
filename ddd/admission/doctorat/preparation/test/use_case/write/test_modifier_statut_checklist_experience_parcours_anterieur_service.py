@@ -194,30 +194,6 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
             self.experience,
             a_obtenu_diplome=False,
             communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
-            cycle_formation=Cycle.FIRST_CYCLE.name,
-            credits_acquis_bloc_1=None,
-        ):
-            with self.assertRaises(MultipleBusinessExceptions) as context:
-                self.message_bus.invoke(
-                    ModifierStatutChecklistExperienceParcoursAnterieurCommand(
-                        uuid_proposition='uuid-SC3DP-confirmee',
-                        uuid_experience=self.experience_uuid,
-                        type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
-                        statut=ChoixStatutChecklist.GEST_REUSSITE.name,
-                        statut_authentification=False,
-                        gestionnaire='0123456789',
-                    )
-                )
-
-            self.assertIsInstance(
-                context.exception.exceptions.pop(),
-                ExperiencesAcademiquesNonCompleteesException,
-            )
-
-        with mock.patch.multiple(
-            self.experience,
-            a_obtenu_diplome=False,
-            communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
             cycle_formation=Cycle.SECOND_CYCLE.name,
             avec_complements=None,
         ):

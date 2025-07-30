@@ -214,6 +214,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'confirmation_elements': entity.elements_confirmation,
                 'additional_documents': entity.documents_additionnels,
                 'requested_documents': entity.documents_demandes,
+                'requested_documents_deadline': entity.echeance_demande_documents,
                 'registration_as': entity.inscription_a_titre.name if entity.inscription_a_titre else '',
                 'head_office_name': entity.nom_siege_social,
                 'unique_business_number': entity.numero_unique_entreprise,
@@ -318,6 +319,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             ),
             documents_additionnels=admission.additional_documents,
             documents_demandes=admission.requested_documents,
+            echeance_demande_documents=admission.requested_documents_deadline,
             motivations=admission.motivations,
             moyens_decouverte_formation=[
                 ChoixMoyensDecouverteFormation[way] for way in admission.ways_to_find_out_about_the_course
@@ -520,6 +522,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 else ''
             ),
             documents_demandes=admission.requested_documents,
+            echeance_demande_documents=admission.requested_documents_deadline,
             documents_libres_fac_uclouvain=admission.uclouvain_fac_documents,
             documents_libres_sic_uclouvain=admission.uclouvain_sic_documents,
             marque_d_interet=admission.interested_mark,

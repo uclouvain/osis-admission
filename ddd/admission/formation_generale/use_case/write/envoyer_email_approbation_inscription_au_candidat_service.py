@@ -29,20 +29,22 @@ from admission.ddd.admission.formation_generale.commands import (
 )
 from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
 from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
-from admission.ddd.admission.repository.i_digit import IDigitRepository
+from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import IMatriculeEtudiantService
 
 
 def envoyer_email_approbation_inscription_au_candidat(
+    message_bus,
     cmd: EnvoyerEmailApprobationInscriptionAuCandidatCommand,
     historique: 'IHistorique',
     notification: 'INotification',
-    digit_repository: 'IDigitRepository',
+    matricule_etudiant_service: 'IMatriculeEtudiantService',
 ):
     message = notification.accepter_proposition_par_sic(
+        message_bus=message_bus,
         proposition_uuid=cmd.uuid_proposition,
         objet_message=cmd.objet_message,
         corps_message=cmd.corps_message,
-        digit_repository=digit_repository,
+        matricule_etudiant_service=matricule_etudiant_service,
     )
     historique.historiser_mail_acceptation_inscription_sic(
         proposition_uuid=cmd.uuid_proposition,

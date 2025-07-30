@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,13 +26,16 @@
 from dal import autocomplete
 from django import forms
 from django.conf import settings
-from django.utils.translation import gettext_lazy as _, pgettext_lazy
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext_lazy
 from osis_document.contrib import FileUploadField
 
+from admission.forms import AdmissionModelCountryChoiceField
 from admission.models.enums.actor_type import ActorType
 from admission.utils import get_country_initial_choices
 from base.forms.utils import EMPTY_CHOICE
 from osis_profile import BE_ISO_CODE
+from reference.models.country import Country
 
 ACTOR_EXTERNAL = "EXTERNAL"
 
@@ -78,16 +81,12 @@ class DoctorateAdmissionMemberSupervisionForm(forms.Form):
         required=False,
         max_length=255,
     )
-    pays = forms.CharField(
+    pays = AdmissionModelCountryChoiceField(
         label=_("Country"),
         required=False,
-        widget=autocomplete.ListSelect2(
-            url="country-autocomplete",
-            attrs={
-                "data-html": True,
-            },
-        ),
+        to_field_name='iso_code',
         initial=BE_ISO_CODE,
+        queryset=Country.objects.all(),
     )
     langue = forms.ChoiceField(
         label=_("Contact language"),
@@ -113,6 +112,9 @@ class DoctorateAdmissionMemberSupervisionForm(forms.Form):
             for field in EXTERNAL_FIELDS:
                 if not data.get(field):
                     self.add_error(field, _("This field is required."))
+        pays = data.get('pays')
+        if pays:
+            data['pays'] = pays.iso_code
 
 
 class DoctorateAdmissionSupervisionForm(DoctorateAdmissionMemberSupervisionForm):

@@ -49,6 +49,7 @@
         {% bootstrap_field filter_form.bourse_double_diplomation form_group_class="form-group col-md-2" %}
         {% bootstrap_field filter_form.quarantaine form_group_class="form-group col-md-2" %}
         {% bootstrap_field filter_form.tardif_modif_reorientation form_group_class="form-group col-md-2" %}
+        {% bootstrap_field filter_form.delai_depasse_complements form_group_class="form-group col-md-2" %}
       </div>
     </details>
   </div>
@@ -192,6 +193,10 @@
       background-color: #ddd;
       border-color: #ddd;
       color: #337ab7;
+    }
+
+    #additional-filters {
+        box-sizing: border-box;
     }
   </style>
 {% endblock %}

@@ -404,6 +404,10 @@ class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
                 late_modification_reorientation
             )
 
+        deadline_for_complements = formatted_filters.get('delai_depasse_complements')
+        if deadline_for_complements:
+            mapping_filter_key_value['delai_depasse_complements'] = _('Deadline exceeded')
+
         trainings_types = formatted_filters.get('types_formation')
         if trainings_types:
             mapping_filter_key_value['types_formation'] = [TrainingType.get_value(t) for t in trainings_types]
@@ -958,9 +962,9 @@ class DoctorateAdmissionListExcelExportView(BaseAdmissionExcelExportView):
 
         dashboard_indicator = formatted_filters.get('indicateur_tableau_bord')
         if dashboard_indicator:
-            mapping_filter_key_value[
-                'indicateur_tableau_bord'
-            ] = ITableauBordRepositoryAdmissionMixin.libelles_indicateurs_admission.get(dashboard_indicator)
+            mapping_filter_key_value['indicateur_tableau_bord'] = (
+                ITableauBordRepositoryAdmissionMixin.libelles_indicateurs_admission.get(dashboard_indicator)
+            )
 
         # Format boolean values
         # > "Yes" / "No" / ""
@@ -1001,8 +1005,8 @@ class DoctorateAdmissionListExcelExportView(BaseAdmissionExcelExportView):
             row.code_bourse,
             row.formation,
             str(ChoixStatutPropositionDoctorale.get_value(row.etat_demande)),
-            row.decision_fac,
-            row.decision_sic,
+            str(row.decision_fac),
+            str(row.decision_sic),
             row.date_confirmation.strftime(SHORT_DATE_FORMAT) if row.date_confirmation else '',
             row.derniere_modification_le.strftime(SHORT_DATE_FORMAT),
             row.derniere_modification_par,

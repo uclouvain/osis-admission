@@ -694,18 +694,39 @@
               parent.find('.sub-item').show('active');
           });
 
-          // TODO find a way to genericly save extra and status
-
+          let configurationAdmissionCache = null;
           let configurationCache = null;
 
           const sidebars = $('#document-viewer-tab');
           const toggleDocumentsButton = $('#toggle-documents-button');
 
+          const updateDocumentViewerHeight = function() {
+              const documentEditorContainer = $('#document-editor-container');
+              const additionalMargin = 30;
+              const actionHeight = $('#document-actions').length === 0 ? 0 : $('#document-actions').outerHeight(true);
+              const divMargin = $('#document-details').outerHeight(true) - $('#document-details').height();
+              const height = $(window).height()
+                - $('header > nav').height()
+                - $('.documents-tab:visible').outerHeight(true)
+                - divMargin
+                - actionHeight
+                - additionalMargin + 'px';
+
+              documentEditorContainer.css(
+                  'height',
+                  documentEditorContainer.find('#no-document-container').length === 0 ? height : 'fit-content',
+              );
+          };
+
           $(document).ready(function () {
-              configurationCache = new BaseCache('admission_checklist_configuration_{{ original_admission.uuid }}');
+              configurationAdmissionCache = new BaseCache('admission_checklist_configuration_{{ original_admission.uuid }}');
+              configurationCache = new BaseCache('admission_checklist_configuration');
               sidebars.css('min-width', configurationCache.getItem('split_size', '20%'));
 
-              if(configurationCache.getItem('showDocuments', null) === false) {
+              updateDocumentViewerHeight();
+              $(window).on("resize", updateDocumentViewerHeight);
+
+              if(configurationAdmissionCache.getItem('showDocuments', null) === false) {
                   hideDocuments()
               }
 
@@ -729,13 +750,7 @@
 
           {# The document viewer is resizable so we apply the previous custom height if there is one #}
           $(document).on('htmx:afterSettle', '#document-details', function(){
-              const documentEditorContainer = $('#document-editor-container');
-              documentEditorContainer.css(
-                  'height',
-                  documentEditorContainer.find('#no-document-container').length === 0 ?
-                    configurationCache.getItem('document_size', '100%')
-                    : 'fit-content',
-              );
+              updateDocumentViewerHeight();
           });
 
           $(document).mouseup(function (event) {
@@ -746,15 +761,12 @@
                   $('.osis-document-editor .editor-container').each(function () {
                       this.dispatchEvent(new CustomEvent('setScale', { detail: 'auto' }));
                   });
-              } else if (event.target.id === 'document-editor-container') {
-                  {# The document viewer is resizable so we keep its height for future document reloads #}
-                  configurationCache.setItem('document_size', $('#document-editor-container').css('height'));
               }
           });
 
           // Shortcuts
           function showDocuments() {
-                configurationCache.setItem('showDocuments', true);
+                configurationAdmissionCache.setItem('showDocuments', true);
                 toggleDocumentsButton.addClass('active');
                 toggleDocumentsButton.prop('title', "{{ _('Hide the documents') }}");
                 sidebars.show();
@@ -764,7 +776,7 @@
           }
 
           function hideDocuments() {
-                configurationCache.setItem('showDocuments', false);
+                configurationAdmissionCache.setItem('showDocuments', false);
                 toggleDocumentsButton.removeClass('active');
                 toggleDocumentsButton.prop('title', "{{ _('Show the documents') }}");
                 sidebars.hide();
@@ -1252,7 +1264,6 @@
 
     #document-editor-container {
       overflow-y: scroll;
-      resize: vertical;
       height: 100%;
     }
 

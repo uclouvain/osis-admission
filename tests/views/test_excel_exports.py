@@ -166,6 +166,11 @@ class _DemandeRechercheDTO(UnfrozenDTO, DemandeRechercheDTO):
 @freezegun.freeze_time('2023-01-01')
 @override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
 class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
+    def assertStrEqual(self, first, second, msg=None):
+        self.assertIsInstance(first, str)
+        self.assertIsInstance(second, str)
+        super().assertEqual(first, second, msg)
+
     @classmethod
     def setUpTestData(cls):
         cls.factory = RequestFactory()
@@ -463,20 +468,20 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
         row_data = view.get_row_data(self.result)
         self.assertEqual(len(header), len(row_data))
 
-        self.assertEqual(row_data[0], self.result.numero_demande)
-        self.assertEqual(row_data[1], self.result.nom_candidat)
-        self.assertEqual(row_data[2], self.result.prenom_candidat)
-        self.assertEqual(row_data[3], self.result.noma_candidat)
-        self.assertEqual(row_data[4], 'non')
-        self.assertEqual(row_data[5], self.result.sigle_formation)
-        self.assertEqual(row_data[6], self.result.intitule_formation)
-        self.assertEqual(row_data[7], self.result.nationalite_candidat)
-        self.assertEqual(row_data[8], 'oui')
-        self.assertEqual(row_data[9], ChoixStatutPropositionGenerale.CONFIRMEE.value)
-        self.assertEqual(row_data[10], _('candidate'))
-        self.assertEqual(row_data[11], '2023/01/01, 00:00:00')
-        self.assertEqual(row_data[12], '2023/01/02, 00:00:00')
-        self.assertEqual(row_data[13], self.result.adresse_email_candidat)
+        self.assertStrEqual(row_data[0], self.result.numero_demande)
+        self.assertStrEqual(row_data[1], self.result.nom_candidat)
+        self.assertStrEqual(row_data[2], self.result.prenom_candidat)
+        self.assertStrEqual(row_data[3], self.result.noma_candidat)
+        self.assertStrEqual(row_data[4], 'non')
+        self.assertStrEqual(row_data[5], self.result.sigle_formation)
+        self.assertStrEqual(row_data[6], self.result.intitule_formation)
+        self.assertStrEqual(row_data[7], self.result.nationalite_candidat)
+        self.assertStrEqual(row_data[8], 'oui')
+        self.assertStrEqual(row_data[9], str(ChoixStatutPropositionGenerale.CONFIRMEE.value))
+        self.assertStrEqual(row_data[10], _('candidate'))
+        self.assertStrEqual(row_data[11], '2023/01/01, 00:00:00')
+        self.assertStrEqual(row_data[12], '2023/01/02, 00:00:00')
+        self.assertStrEqual(row_data[13], self.result.adresse_email_candidat)
         answers_to_specific_questions = row_data[14].split(SPECIFIC_QUESTION_SEPARATOR)
         self.assertCountEqual(
             answers_to_specific_questions,
@@ -485,11 +490,11 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
 
         with mock.patch.object(self.result, 'date_confirmation', None):
             row_data = view.get_row_data(self.result)
-            self.assertEqual(row_data[12], '')
+            self.assertStrEqual(row_data[12], '')
 
         with mock.patch.object(self.result, 'plusieurs_demandes', True):
             row_data = view.get_row_data(self.result)
-            self.assertEqual(row_data[4], 'oui')
+            self.assertStrEqual(row_data[4], 'oui')
 
     def test_export_content_with_invalid_specific_select_question_answer(self):
         view = AdmissionListExcelExportView()
@@ -540,6 +545,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
         international_scholarship = InternationalScholarshipFactory(short_name='ID1')
         double_degree_scholarship = DoubleDegreeScholarshipFactory(short_name="DD1")
         erasmus_mundus_scholarship = ErasmusMundusScholarshipFactory(short_name="EM1")
+        filters_nb = 21
         filters = {
             'annee_academique': 2022,
             'numero': 1,
@@ -562,6 +568,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
             },
             'quarantaine': 'True',
             'tardif_modif_reorientation': TardiveModificationReorientationFiltre.INSCRIPTION_TARDIVE.name,
+            'delai_depasse_complements': 'True',
         }
 
         view = AdmissionListExcelExportView()
@@ -575,50 +582,51 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
         )
 
         names, values = list(worksheet.iter_cols(values_only=True))
-        self.assertEqual(len(names), 20)
-        self.assertEqual(len(values), 20)
+        self.assertEqual(len(names), filters_nb)
+        self.assertEqual(len(values), filters_nb)
 
         # Check the names of the parameters
-        self.assertEqual(names[0], _('Creation date'))
-        self.assertEqual(names[1], pgettext('masculine', 'Created by'))
-        self.assertEqual(names[2], _('Description'))
-        self.assertEqual(names[3], _('Year'))
-        self.assertEqual(names[4], _('Application numero'))
-        self.assertEqual(names[5], _('Noma'))
-        self.assertEqual(names[6], _('Last name / First name / Email'))
-        self.assertEqual(names[7], _('Application status'))
-        self.assertEqual(names[8], _('Application type'))
-        self.assertEqual(names[9], _('Enrolment campus'))
-        self.assertEqual(names[10], pgettext('admission', 'Entities'))
-        self.assertEqual(names[11], _('Course type'))
-        self.assertEqual(names[12], pgettext('admission', 'Course'))
-        self.assertEqual(names[13], _('International scholarship'))
-        self.assertEqual(names[14], _('Erasmus Mundus'))
-        self.assertEqual(names[15], _('Dual degree scholarship'))
-        self.assertEqual(names[16], _('Include or exclude the checklist filters'))
-        self.assertEqual(names[17], _('Checklist filters'))
-        self.assertEqual(names[18], _('Quarantine'))
-        self.assertEqual(names[19], _('Late/Modif./Reor.'))
+        self.assertStrEqual(names[0], _('Creation date'))
+        self.assertStrEqual(names[1], pgettext('masculine', 'Created by'))
+        self.assertStrEqual(names[2], _('Description'))
+        self.assertStrEqual(names[3], _('Year'))
+        self.assertStrEqual(names[4], _('Application numero'))
+        self.assertStrEqual(names[5], _('Noma'))
+        self.assertStrEqual(names[6], _('Last name / First name / Email'))
+        self.assertStrEqual(names[7], _('Application status'))
+        self.assertStrEqual(names[8], _('Application type'))
+        self.assertStrEqual(names[9], _('Enrolment campus'))
+        self.assertStrEqual(names[10], pgettext('admission', 'Entities'))
+        self.assertStrEqual(names[11], _('Course type'))
+        self.assertStrEqual(names[12], pgettext('admission', 'Course'))
+        self.assertStrEqual(names[13], _('International scholarship'))
+        self.assertStrEqual(names[14], _('Erasmus Mundus'))
+        self.assertStrEqual(names[15], _('Dual degree scholarship'))
+        self.assertStrEqual(names[16], _('Include or exclude the checklist filters'))
+        self.assertStrEqual(names[17], _('Checklist filters'))
+        self.assertStrEqual(names[18], _('Quarantine'))
+        self.assertStrEqual(names[19], _('Late/Modif./Reor.'))
+        self.assertStrEqual(names[20], _('Deadline for complements'))
 
         # Check the values of the parameters
-        self.assertEqual(values[0], '1 Janvier 2023')
-        self.assertEqual(values[1], self.sic_management_user.person.full_name)
-        self.assertEqual(values[2], _('Export') + ' - Admissions')
-        self.assertEqual(values[3], '2022')
-        self.assertEqual(values[4], '1')
-        self.assertEqual(values[5], '00000001')
-        self.assertEqual(values[6], candidate.full_name)
-        self.assertEqual(values[7], f"['{ChoixStatutPropositionGenerale.CONFIRMEE.value}']")
-        self.assertEqual(values[8], TypeDemande.ADMISSION.value)
-        self.assertEqual(values[9], campus.name)
-        self.assertEqual(values[10], 'ENT')
-        self.assertEqual(values[11], f"['{TrainingType.BACHELOR.value}', '{TrainingType.PHD.value}']")
-        self.assertEqual(values[12], 'Informatique')
-        self.assertEqual(values[13], international_scholarship.short_name)
-        self.assertEqual(values[14], erasmus_mundus_scholarship.short_name)
-        self.assertEqual(values[15], double_degree_scholarship.short_name)
-        self.assertEqual(values[16], ModeFiltrageChecklist.INCLUSION.value)
-        self.assertEqual(
+        self.assertStrEqual(values[0], '1 Janvier 2023')
+        self.assertStrEqual(values[1], self.sic_management_user.person.full_name)
+        self.assertStrEqual(values[2], _('Export') + ' - Admissions')
+        self.assertStrEqual(values[3], '2022')
+        self.assertStrEqual(values[4], '1')
+        self.assertStrEqual(values[5], '00000001')
+        self.assertStrEqual(values[6], candidate.full_name)
+        self.assertStrEqual(values[7], f"['{ChoixStatutPropositionGenerale.CONFIRMEE.value}']")
+        self.assertStrEqual(values[8], str(TypeDemande.ADMISSION.value))
+        self.assertStrEqual(values[9], campus.name)
+        self.assertStrEqual(values[10], 'ENT')
+        self.assertStrEqual(values[11], f"['{TrainingType.BACHELOR.value}', '{TrainingType.PHD.value}']")
+        self.assertStrEqual(values[12], 'Informatique')
+        self.assertStrEqual(values[13], international_scholarship.short_name)
+        self.assertStrEqual(values[14], erasmus_mundus_scholarship.short_name)
+        self.assertStrEqual(values[15], double_degree_scholarship.short_name)
+        self.assertStrEqual(values[16], str(ModeFiltrageChecklist.INCLUSION.value))
+        self.assertStrEqual(
             values[17],
             str(
                 {
@@ -627,8 +635,9 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
                 }
             ),
         )
-        self.assertEqual(values[18], 'Oui')
-        self.assertEqual(values[19], 'Inscription tardive')
+        self.assertStrEqual(values[18], 'Oui')
+        self.assertStrEqual(values[19], 'Inscription tardive')
+        self.assertStrEqual(values[20], _('Deadline exceeded'))
 
         filters['quarantaine'] = False
 
@@ -641,10 +650,10 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
         )
 
         names, values = list(worksheet.iter_cols(values_only=True))
-        self.assertEqual(len(names), 20)
-        self.assertEqual(len(values), 20)
+        self.assertEqual(len(names), filters_nb)
+        self.assertEqual(len(values), filters_nb)
 
-        self.assertEqual(values[18], 'Non')
+        self.assertStrEqual(values[18], 'Non')
 
         filters['quarantaine'] = None
 
@@ -657,15 +666,36 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
         )
 
         names, values = list(worksheet.iter_cols(values_only=True))
-        self.assertEqual(len(names), 20)
-        self.assertEqual(len(values), 20)
+        self.assertEqual(len(names), filters_nb)
+        self.assertEqual(len(values), filters_nb)
 
-        self.assertEqual(values[18], 'Tous')
+        self.assertStrEqual(values[18], 'Tous')
+
+        filters['delai_depasse_complements'] = ''
+
+        worksheet: Worksheet = workbook.create_sheet()
+
+        view.customize_parameters_worksheet(
+            worksheet=worksheet,
+            person=self.sic_management_user.person,
+            filters=str(filters),
+        )
+
+        names, values = list(worksheet.iter_cols(values_only=True))
+        self.assertEqual(len(names), filters_nb)
+        self.assertEqual(len(values), filters_nb)
+
+        self.assertStrEqual(values[20], '')
 
 
 @freezegun.freeze_time('2023-01-03')
 @override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
 class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
+    def assertStrEqual(self, first, second, msg=None):
+        self.assertIsInstance(first, str)
+        self.assertIsInstance(second, str)
+        super().assertEqual(first, second, msg)
+
     @classmethod
     def setUpTestData(cls):
         cls.factory = RequestFactory()
@@ -954,41 +984,41 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
 
         self.assertEqual(len(header), len(row_data))
 
-        self.assertEqual(row_data[0], 'Doe')
-        self.assertEqual(row_data[1], 'John')
-        self.assertEqual(row_data[2], 'john.doe@example.private.be')
-        self.assertEqual(row_data[3], str(ChoixStatutPropositionContinue.CONFIRMEE.value))
-        self.assertEqual(row_data[4], str(ChoixGenre.H.value))
-        self.assertEqual(row_data[5], str(CivilState.LEGAL_COHABITANT.value))
-        self.assertEqual(row_data[6], 'B1')
-        self.assertEqual(row_data[7], '2020-01-01'),
-        self.assertEqual(row_data[8], 'Place 1')
-        self.assertEqual(row_data[9], 'B2')
-        self.assertEqual(row_data[10], 'N1')
-        self.assertEqual(row_data[11], 'N2')
-        self.assertEqual(row_data[12], 'N3')
-        self.assertEqual(row_data[13], 'oui')
-        self.assertEqual(row_data[14], '2015-2016')
-        self.assertEqual(row_data[15], 'NOMA1')
-        self.assertEqual(row_data[16], f'University street 1 - 1348 Louvain-la-Neuve - {self.address_country_name}')
-        self.assertEqual(row_data[17], f'University street 2 - 1348 Louvain-la-Neuve - {self.address_country_name}')
-        self.assertEqual(row_data[18], '010203')
-        self.assertEqual(row_data[19], '01020304')
-        self.assertEqual(row_data[20], str(GotDiploma.YES.value))
+        self.assertStrEqual(row_data[0], 'Doe')
+        self.assertStrEqual(row_data[1], 'John')
+        self.assertStrEqual(row_data[2], 'john.doe@example.private.be')
+        self.assertStrEqual(row_data[3], str(ChoixStatutPropositionContinue.CONFIRMEE.value))
+        self.assertStrEqual(row_data[4], str(ChoixGenre.H.value))
+        self.assertStrEqual(row_data[5], str(CivilState.LEGAL_COHABITANT.value))
+        self.assertStrEqual(row_data[6], 'B1')
+        self.assertStrEqual(row_data[7], '2020-01-01'),
+        self.assertStrEqual(row_data[8], 'Place 1')
+        self.assertStrEqual(row_data[9], 'B2')
+        self.assertStrEqual(row_data[10], 'N1')
+        self.assertStrEqual(row_data[11], 'N2')
+        self.assertStrEqual(row_data[12], 'N3')
+        self.assertStrEqual(row_data[13], 'oui')
+        self.assertStrEqual(row_data[14], '2015-2016')
+        self.assertStrEqual(row_data[15], 'NOMA1')
+        self.assertStrEqual(row_data[16], f'University street 1 - 1348 Louvain-la-Neuve - {self.address_country_name}')
+        self.assertStrEqual(row_data[17], f'University street 2 - 1348 Louvain-la-Neuve - {self.address_country_name}')
+        self.assertStrEqual(row_data[18], '010203')
+        self.assertStrEqual(row_data[19], '01020304')
+        self.assertStrEqual(row_data[20], str(GotDiploma.YES.value))
         self.assertEqual(row_data[21], 2015)
-        self.assertEqual(row_data[22], str(Cycle.FIRST_CYCLE.value))
-        self.assertEqual(row_data[23], 'I1')
+        self.assertStrEqual(row_data[22], str(Cycle.FIRST_CYCLE.value))
+        self.assertStrEqual(row_data[23], 'I1')
         self.assertEqual(row_data[24], 2023)
-        self.assertEqual(row_data[25], '')
-        self.assertEqual(row_data[26], 'R1')
-        self.assertEqual(row_data[27], 'IA1')
-        self.assertEqual(row_data[28], str(ActivitySector.ASSOCIATIVE.value))
-        self.assertEqual(row_data[29], f'01/2021-03/2021 : {ActivityType.INTERNSHIP.value}')
-        self.assertEqual(row_data[30], 'My motivations')
-        self.assertEqual(row_data[31], self.admission.training.acronym)
-        self.assertEqual(row_data[32], 'ABCDEF')
-        self.assertEqual(row_data[33], '')
-        self.assertEqual(
+        self.assertStrEqual(row_data[25], '')
+        self.assertStrEqual(row_data[26], 'R1')
+        self.assertStrEqual(row_data[27], 'IA1')
+        self.assertStrEqual(row_data[28], str(ActivitySector.ASSOCIATIVE.value))
+        self.assertStrEqual(row_data[29], f'01/2021-03/2021 : {ActivityType.INTERNSHIP.value}')
+        self.assertStrEqual(row_data[30], 'My motivations')
+        self.assertStrEqual(row_data[31], self.admission.training.acronym)
+        self.assertStrEqual(row_data[32], 'ABCDEF')
+        self.assertStrEqual(row_data[33], '')
+        self.assertStrEqual(
             row_data[34],
             '{}\n{}\n{}'.format(
                 ChoixMoyensDecouverteFormation.ANCIENS_ETUDIANTS.value,
@@ -996,26 +1026,26 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
                 'Other way',
             ),
         )
-        self.assertEqual(row_data[35], str(ChoixInscriptionATitre.PRIVE.value))
-        self.assertEqual(row_data[36], 'HO1')
-        self.assertEqual(row_data[37], 'U1')
-        self.assertEqual(row_data[38], 'VAT1')
-        self.assertEqual(row_data[39], 'School street 12 - 1000 Bruxelles - BE3')
-        self.assertEqual(row_data[40], 'Q2 : T1')
-        self.assertEqual(row_data[41], 'non')
-        self.assertEqual(row_data[42], 'oui')
-        self.assertEqual(row_data[43], 'non')
-        self.assertEqual(row_data[44], 'oui')
-        self.assertEqual(row_data[45], '')
-        self.assertEqual(row_data[46], 'non')
-        self.assertEqual(row_data[47], 'oui')
-        self.assertEqual(row_data[48], '')
-        self.assertEqual(row_data[49], 'non')
-        self.assertEqual(row_data[50], 'oui')
-        self.assertEqual(row_data[51], '')
-        self.assertEqual(row_data[52], 'TFF')
-        self.assertEqual(row_data[53], 'non')
-        self.assertEqual(row_data[54], 'TEST')
+        self.assertStrEqual(row_data[35], str(ChoixInscriptionATitre.PRIVE.value))
+        self.assertStrEqual(row_data[36], 'HO1')
+        self.assertStrEqual(row_data[37], 'U1')
+        self.assertStrEqual(row_data[38], 'VAT1')
+        self.assertStrEqual(row_data[39], 'School street 12 - 1000 Bruxelles - BE3')
+        self.assertStrEqual(row_data[40], 'Q2 : T1')
+        self.assertStrEqual(row_data[41], 'non')
+        self.assertStrEqual(row_data[42], 'oui')
+        self.assertStrEqual(row_data[43], 'non')
+        self.assertStrEqual(row_data[44], 'oui')
+        self.assertStrEqual(row_data[45], '')
+        self.assertStrEqual(row_data[46], 'non')
+        self.assertStrEqual(row_data[47], 'oui')
+        self.assertStrEqual(row_data[48], '')
+        self.assertStrEqual(row_data[49], 'non')
+        self.assertStrEqual(row_data[50], 'oui')
+        self.assertStrEqual(row_data[51], '')
+        self.assertStrEqual(row_data[52], 'TFF')
+        self.assertStrEqual(row_data[53], 'non')
+        self.assertStrEqual(row_data[54], 'TEST')
 
         self.admission.billing_address_type = ChoixTypeAdresseFacturation.CONTACT.name
         self.admission.save()
@@ -1047,18 +1077,18 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
         row_data = view.get_row_data(self.admission.uuid)
 
         # Last UCL registration
-        self.assertEqual(row_data[13], 'non')
-        self.assertEqual(row_data[14], '')
+        self.assertStrEqual(row_data[13], 'non')
+        self.assertStrEqual(row_data[14], '')
 
         # High school diploma
-        self.assertEqual(row_data[20], str(GotDiploma.NO.value))
-        self.assertEqual(row_data[21], '')
+        self.assertStrEqual(row_data[20], str(GotDiploma.NO.value))
+        self.assertStrEqual(row_data[21], '')
 
         # Academic experience
-        self.assertEqual(row_data[25], '2010-2011 : Computer science 2, Institute')
+        self.assertStrEqual(row_data[25], '2010-2011 : Computer science 2, Institute')
 
         # Billing address
-        self.assertEqual(row_data[39], f'University street 2 - 1348 Louvain-la-Neuve - {self.address_country_name}')
+        self.assertStrEqual(row_data[39], f'University street 2 - 1348 Louvain-la-Neuve - {self.address_country_name}')
 
     def test_last_experience_with_diploma(self):
         # No experience
@@ -1277,46 +1307,46 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
         self.assertEqual(len(values), 17)
 
         # Check the names of the parameters
-        self.assertEqual(names[0], _('Creation date'))
-        self.assertEqual(names[1], pgettext('masculine', 'Created by'))
-        self.assertEqual(names[2], _('Description'))
-        self.assertEqual(names[3], _('Year'))
-        self.assertEqual(names[4], _('Edition'))
-        self.assertEqual(names[5], _('Application numero'))
-        self.assertEqual(names[6], _('Last name / First name / Email / NOMA'))
-        self.assertEqual(names[7], _('Application status'))
-        self.assertEqual(names[8], _('Faculty'))
-        self.assertEqual(names[9], _('Course type'))
-        self.assertEqual(names[10], pgettext('admission', 'Course'))
-        self.assertEqual(names[11], _('Registration required'))
-        self.assertEqual(names[12], _('Injection in error'))
-        self.assertEqual(names[13], _('Paid'))
-        self.assertEqual(names[14], _('Interested mark'))
-        self.assertEqual(names[15], _('Include or exclude the checklist filters'))
-        self.assertEqual(names[16], _('Checklist filters'))
+        self.assertStrEqual(names[0], _('Creation date'))
+        self.assertStrEqual(names[1], pgettext('masculine', 'Created by'))
+        self.assertStrEqual(names[2], _('Description'))
+        self.assertStrEqual(names[3], _('Year'))
+        self.assertStrEqual(names[4], _('Edition'))
+        self.assertStrEqual(names[5], _('Application numero'))
+        self.assertStrEqual(names[6], _('Last name / First name / Email / NOMA'))
+        self.assertStrEqual(names[7], _('Application status'))
+        self.assertStrEqual(names[8], _('Faculty'))
+        self.assertStrEqual(names[9], _('Course type'))
+        self.assertStrEqual(names[10], pgettext('admission', 'Course'))
+        self.assertStrEqual(names[11], _('Registration required'))
+        self.assertStrEqual(names[12], _('Injection in error'))
+        self.assertStrEqual(names[13], _('Paid'))
+        self.assertStrEqual(names[14], _('Interested mark'))
+        self.assertStrEqual(names[15], _('Include or exclude the checklist filters'))
+        self.assertStrEqual(names[16], _('Checklist filters'))
 
         # Check the values of the parameters
-        self.assertEqual(values[0], '3 Janvier 2023')
-        self.assertEqual(values[1], self.sic_management_user.person.full_name)
-        self.assertEqual(values[2], _('Export') + ' - Admissions')
-        self.assertEqual(values[3], '2022')
-        self.assertEqual(values[4], "['2', '3']")
-        self.assertEqual(values[5], str(self.admission.reference))
-        self.assertEqual(values[6], self.admission.candidate.full_name)
-        self.assertEqual(values[7], f"['{ChoixStatutPropositionContinue.EN_BROUILLON.value}']")
-        self.assertEqual(values[8], 'ENT')
-        self.assertEqual(
+        self.assertStrEqual(values[0], '3 Janvier 2023')
+        self.assertStrEqual(values[1], self.sic_management_user.person.full_name)
+        self.assertStrEqual(values[2], _('Export') + ' - Admissions')
+        self.assertStrEqual(values[3], '2022')
+        self.assertStrEqual(values[4], "['2', '3']")
+        self.assertStrEqual(values[5], str(self.admission.reference))
+        self.assertStrEqual(values[6], self.admission.candidate.full_name)
+        self.assertStrEqual(values[7], f"['{ChoixStatutPropositionContinue.EN_BROUILLON.value}']")
+        self.assertStrEqual(values[8], 'ENT')
+        self.assertStrEqual(
             values[9],
             f"['{TrainingType.UNIVERSITY_SECOND_CYCLE_CERTIFICATE.value}', "
             f"'{TrainingType.UNIVERSITY_FIRST_CYCLE_CERTIFICATE.value}']",
         )
-        self.assertEqual(values[10], f"['{self.admission.training.acronym}']")
-        self.assertEqual(values[11], 'oui')
-        self.assertEqual(values[12], 'oui')
-        self.assertEqual(values[13], 'non')
-        self.assertEqual(values[14], 'oui')
-        self.assertEqual(values[15], ModeFiltrageChecklist.INCLUSION.value)
-        self.assertEqual(
+        self.assertStrEqual(values[10], f"['{self.admission.training.acronym}']")
+        self.assertStrEqual(values[11], 'oui')
+        self.assertStrEqual(values[12], 'oui')
+        self.assertStrEqual(values[13], 'non')
+        self.assertStrEqual(values[14], 'oui')
+        self.assertStrEqual(values[15], str(ModeFiltrageChecklist.INCLUSION.value))
+        self.assertStrEqual(
             values[16],
             str(
                 {
@@ -1332,6 +1362,11 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
 @freezegun.freeze_time('2023-01-03')
 @override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
 class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
+    def assertStrEqual(self, first, second, msg=None):
+        self.assertIsInstance(first, str)
+        self.assertIsInstance(second, str)
+        super().assertEqual(first, second, msg)
+
     @classmethod
     def setUpTestData(cls):
         cls.factory = RequestFactory()
@@ -1536,22 +1571,22 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
 
         self.assertEqual(len(header), len(row_data))
 
-        self.assertEqual(row_data[0], result.numero_demande)
-        self.assertEqual(row_data[1], f'{result.nom_candidat}, {result.prenom_candidat}')
-        self.assertEqual(row_data[2], result.nom_pays_nationalite_candidat)
-        self.assertEqual(row_data[3], result.code_bourse)
-        self.assertEqual(row_data[4], f'{result.sigle_formation} - {result.intitule_formation}')
-        self.assertEqual(row_data[5], ChoixStatutPropositionDoctorale.CONFIRMEE.value)
-        self.assertEqual(row_data[6], _('Taken in charge'))
-        self.assertEqual(row_data[7], _('To be processed'))
-        self.assertEqual(row_data[8], '2023/01/01')
-        self.assertEqual(row_data[9], '2023/01/03')
-        self.assertEqual(
+        self.assertStrEqual(row_data[0], result.numero_demande)
+        self.assertStrEqual(row_data[1], f'{result.nom_candidat}, {result.prenom_candidat} ({result.noma_candidat})')
+        self.assertStrEqual(row_data[2], result.nom_pays_nationalite_candidat)
+        self.assertStrEqual(row_data[3], result.code_bourse)
+        self.assertStrEqual(row_data[4], f'{result.sigle_formation} - {result.intitule_formation}')
+        self.assertStrEqual(row_data[5], str(ChoixStatutPropositionDoctorale.CONFIRMEE.value))
+        self.assertStrEqual(row_data[6], _('Taken in charge'))
+        self.assertStrEqual(row_data[7], _('To be processed'))
+        self.assertStrEqual(row_data[8], '2023/01/01')
+        self.assertStrEqual(row_data[9], '2023/01/03')
+        self.assertStrEqual(
             row_data[10],
             f'{result.nom_auteur_derniere_modification}, {result.prenom_auteur_derniere_modification[:1]}',
         )
-        self.assertEqual(row_data[11], 'non')
-        self.assertEqual(row_data[12], '')
+        self.assertStrEqual(row_data[11], 'non')
+        self.assertStrEqual(row_data[12], '')
 
         # Check specific values
         admission.submitted_at = None
@@ -1571,9 +1606,9 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
 
         self.assertEqual(len(header), len(row_data))
 
-        self.assertEqual(row_data[8], '')
-        self.assertEqual(row_data[11], 'oui')
-        self.assertEqual(row_data[12], 'oui')
+        self.assertStrEqual(row_data[8], '')
+        self.assertStrEqual(row_data[11], 'oui')
+        self.assertStrEqual(row_data[12], 'oui')
 
         admission.cotutelle = False
         admission.save(update_fields=['cotutelle'])
@@ -1590,7 +1625,7 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
 
         self.assertEqual(len(header), len(row_data))
 
-        self.assertEqual(row_data[12], 'non')
+        self.assertStrEqual(row_data[12], 'non')
 
     def test_export_configuration(self):
         country = CountryFactory()
@@ -1655,56 +1690,56 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
         self.assertEqual(len(values), 22)
 
         # Check the names of the parameters
-        self.assertEqual(names[0], _('Creation date'))
-        self.assertEqual(names[1], pgettext('masculine', 'Created by'))
-        self.assertEqual(names[2], _('Description'))
-        self.assertEqual(names[3], _('Year'))
-        self.assertEqual(names[4], _('Application numero'))
-        self.assertEqual(names[5], _('Last name / First name / Email / NOMA'))
-        self.assertEqual(names[6], _('Nationality'))
-        self.assertEqual(names[7], _('Application status'))
-        self.assertEqual(names[8], pgettext('doctorate-filter', 'Admission type'))
-        self.assertEqual(names[9], _('Doctoral commissions'))
-        self.assertEqual(names[10], _('Proximity commission'))
-        self.assertEqual(names[11], pgettext('admission', 'Courses'))
-        self.assertEqual(names[12], pgettext('gender', 'Supervisor'))
-        self.assertEqual(names[13], _('Funding type'))
-        self.assertEqual(names[14], _('Research scholarship'))
-        self.assertEqual(names[15], _('Cotutelle'))
-        self.assertEqual(names[16], _('FNRS, FRIA, FRESH'))
-        self.assertEqual(names[17], _('Submitted from'))
-        self.assertEqual(names[18], _('Submitted until'))
-        self.assertEqual(names[19], _('Include or exclude the checklist filters'))
-        self.assertEqual(names[20], _('Checklist filters'))
-        self.assertEqual(names[21], _('Dashboard indicator'))
+        self.assertStrEqual(names[0], _('Creation date'))
+        self.assertStrEqual(names[1], pgettext('masculine', 'Created by'))
+        self.assertStrEqual(names[2], _('Description'))
+        self.assertStrEqual(names[3], _('Year'))
+        self.assertStrEqual(names[4], _('Application numero'))
+        self.assertStrEqual(names[5], _('Last name / First name / Email / NOMA'))
+        self.assertStrEqual(names[6], _('Nationality'))
+        self.assertStrEqual(names[7], _('Application status'))
+        self.assertStrEqual(names[8], pgettext('doctorate-filter', 'Admission type'))
+        self.assertStrEqual(names[9], _('Doctoral commissions'))
+        self.assertStrEqual(names[10], _('Proximity commission'))
+        self.assertStrEqual(names[11], pgettext('admission', 'Courses'))
+        self.assertStrEqual(names[12], pgettext('gender', 'Supervisor'))
+        self.assertStrEqual(names[13], _('Funding type'))
+        self.assertStrEqual(names[14], _('Research scholarship'))
+        self.assertStrEqual(names[15], _('Cotutelle'))
+        self.assertStrEqual(names[16], _('FNRS, FRIA, FRESH'))
+        self.assertStrEqual(names[17], _('Submitted from'))
+        self.assertStrEqual(names[18], _('Submitted until'))
+        self.assertStrEqual(names[19], _('Include or exclude the checklist filters'))
+        self.assertStrEqual(names[20], _('Checklist filters'))
+        self.assertStrEqual(names[21], _('Dashboard indicator'))
 
         # Check the values of the parameters
-        self.assertEqual(values[0], '3 Janvier 2023')
-        self.assertEqual(values[1], self.sic_management_user.person.full_name)
-        self.assertEqual(values[2], _('Export') + ' - Admissions')
-        self.assertEqual(values[3], '2022')
-        self.assertEqual(values[4], str(admission.reference))
-        self.assertEqual(values[5], admission.candidate.full_name)
-        self.assertEqual(values[6], country.name)
-        self.assertEqual(
+        self.assertStrEqual(values[0], '3 Janvier 2023')
+        self.assertStrEqual(values[1], self.sic_management_user.person.full_name)
+        self.assertStrEqual(values[2], _('Export') + ' - Admissions')
+        self.assertStrEqual(values[3], '2022')
+        self.assertStrEqual(values[4], str(admission.reference))
+        self.assertStrEqual(values[5], admission.candidate.full_name)
+        self.assertStrEqual(values[6], country.name)
+        self.assertStrEqual(
             values[7],
             f"['{ChoixStatutPropositionDoctorale.EN_BROUILLON.value}', "
             f"'{ChoixStatutPropositionDoctorale.CONFIRMEE.value}']",
         )
-        self.assertEqual(values[8], ChoixTypeAdmission.ADMISSION.value)
-        self.assertEqual(values[9], 'GHIJK')
-        self.assertEqual(values[10], ChoixCommissionProximiteCDSS.BCGIM.value)
-        self.assertEqual(values[11], "['ZEBU0']")
-        self.assertEqual(values[12], promoter.complete_name)
-        self.assertEqual(values[13], ChoixTypeFinancement.SEARCH_SCHOLARSHIP.value)
-        self.assertEqual(values[14], scholarship.short_name)
-        self.assertEqual(values[15], 'oui')
-        self.assertEqual(values[16], 'oui')
-        self.assertEqual(values[17], '2020-01-01')
-        self.assertEqual(values[18], '2020-01-02')
-        self.assertEqual(values[19], ModeFiltrageChecklist.INCLUSION.value)
-        self.assertEqual(values[20], '{}')
-        self.assertEqual(
+        self.assertStrEqual(values[8], str(ChoixTypeAdmission.ADMISSION.value))
+        self.assertStrEqual(values[9], 'GHIJK')
+        self.assertStrEqual(values[10], str(ChoixCommissionProximiteCDSS.BCGIM.value))
+        self.assertStrEqual(values[11], "['ZEBU0']")
+        self.assertStrEqual(values[12], promoter.complete_name)
+        self.assertStrEqual(values[13], str(ChoixTypeFinancement.SEARCH_SCHOLARSHIP.value))
+        self.assertStrEqual(values[14], scholarship.short_name)
+        self.assertStrEqual(values[15], 'oui')
+        self.assertStrEqual(values[16], 'oui')
+        self.assertStrEqual(values[17], '2020-01-01')
+        self.assertStrEqual(values[18], '2020-01-02')
+        self.assertStrEqual(values[19], str(ModeFiltrageChecklist.INCLUSION.value))
+        self.assertStrEqual(values[20], '{}')
+        self.assertStrEqual(
             values[21],
             '{} - {}'.format(
                 pgettext_lazy('dashboard-category', 'Admission'),
@@ -1753,25 +1788,25 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
         self.assertEqual(len(values), 22)
 
         # Check the values of the parameters
-        self.assertEqual(values[0], '3 Janvier 2023')
-        self.assertEqual(values[1], self.sic_management_user.person.full_name)
-        self.assertEqual(values[2], _('Export') + ' - Admissions')
-        self.assertEqual(values[3], '2022')
-        self.assertEqual(values[4], '')
-        self.assertEqual(values[5], '')
-        self.assertEqual(values[6], '')
-        self.assertEqual(values[7], '[]')
-        self.assertEqual(values[8], '')
-        self.assertEqual(values[9], '')
-        self.assertEqual(values[10], '')
-        self.assertEqual(values[11], '[]')
-        self.assertEqual(values[12], '')
-        self.assertEqual(values[13], '')
-        self.assertEqual(values[14], '')
-        self.assertEqual(values[15], '')
-        self.assertEqual(values[16], '')
-        self.assertEqual(values[17], '')
-        self.assertEqual(values[18], '')
-        self.assertEqual(values[19], '')
-        self.assertEqual(values[20], '{}')
-        self.assertEqual(values[21], '')
+        self.assertStrEqual(values[0], '3 Janvier 2023')
+        self.assertStrEqual(values[1], self.sic_management_user.person.full_name)
+        self.assertStrEqual(values[2], _('Export') + ' - Admissions')
+        self.assertStrEqual(values[3], '2022')
+        self.assertStrEqual(values[4], '')
+        self.assertStrEqual(values[5], '')
+        self.assertStrEqual(values[6], '')
+        self.assertStrEqual(values[7], '[]')
+        self.assertStrEqual(values[8], '')
+        self.assertStrEqual(values[9], '')
+        self.assertStrEqual(values[10], '')
+        self.assertStrEqual(values[11], '[]')
+        self.assertStrEqual(values[12], '')
+        self.assertStrEqual(values[13], '')
+        self.assertStrEqual(values[14], '')
+        self.assertStrEqual(values[15], '')
+        self.assertStrEqual(values[16], '')
+        self.assertStrEqual(values[17], '')
+        self.assertStrEqual(values[18], '')
+        self.assertStrEqual(values[19], '')
+        self.assertStrEqual(values[20], '{}')
+        self.assertStrEqual(values[21], '')

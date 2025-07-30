@@ -3,8 +3,9 @@
 from django.db import migrations
 
 
+
 def create_academic_calendar(apps, schema_editor):
-    from admission.calendar.admission_digit_ticket_submission import AdmissionDigitTicketSubmissionCalendar
+    from gestion_des_comptes.calendar.admission_digit_ticket_submission import AdmissionDigitTicketSubmissionCalendar
     from django.utils import timezone
 
     AcademicYear = apps.get_model('base', 'AcademicYear')

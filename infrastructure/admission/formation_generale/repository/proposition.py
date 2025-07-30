@@ -367,6 +367,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'annual_program_contact_person_email': entity.email_personne_contact_programme_annuel_annuel,
                 'join_program_fac_comment': entity.commentaire_programme_conjoint,
                 'additional_documents': entity.documents_additionnels,
+                'requested_documents_deadline': entity.echeance_demande_documents,
                 'diplomatic_post_id': entity.poste_diplomatique.code if entity.poste_diplomatique else None,
                 'admission_requirement': entity.condition_acces.name if entity.condition_acces else '',
                 'admission_requirement_year': entity.millesime_condition_acces
@@ -577,6 +578,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 ProfilCandidat.from_dict(admission.submitted_profile) if admission.submitted_profile else None
             ),
             documents_demandes=admission.requested_documents,
+            echeance_demande_documents=admission.requested_documents_deadline,
             checklist_initiale=checklist_initiale and StatutsChecklistGenerale.from_dict(checklist_initiale),
             checklist_actuelle=checklist_actuelle and StatutsChecklistGenerale.from_dict(checklist_actuelle),
             type_de_refus=admission.refusal_type,
@@ -837,6 +839,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             formulaire_reorientation=admission.reorientation_form,
             pdf_recapitulatif=admission.pdf_recap,
             documents_demandes=admission.requested_documents,
+            echeance_demande_documents=admission.requested_documents_deadline,
             documents_libres_fac_uclouvain=admission.uclouvain_fac_documents,
             documents_libres_sic_uclouvain=admission.uclouvain_sic_documents,
             financabilite_regle_calcule=admission.financability_computed_rule,

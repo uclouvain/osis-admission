@@ -33,7 +33,9 @@ from django.utils.formats import date_format
 from django.utils.translation import gettext
 
 from admission.calendar.admission_calendar import *
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import DoctoratFormation
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
+    DoctoratFormation,
+)
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     IdentificationNonCompleteeException,
 )
@@ -116,12 +118,7 @@ class ICalendrierInscription(interface.DomainService):
         residential_address = profil_candidat_translator.get_coordonnees(matricule_candidat).domicile_legal
         if identification.pays_nationalite is None:
             raise IdentificationNonCompleteeException()
-        situation_assimilation = (
-            proposition
-            and getattr(proposition, 'comptabilite', None)
-            and getattr(proposition.comptabilite, 'type_situation_assimilation', None)
-        )
-        ue_plus_5 = cls.est_ue_plus_5(identification, situation_assimilation)
+        ue_plus_5 = cls.est_ue_plus_5(identification)
         annees_prioritaires, annees = cls.get_annees_academiques_pour_calcul(type_formation=type_formation)
         changements_etablissement = profil_candidat_translator.get_changements_etablissement(matricule_candidat, annees)
 
@@ -367,7 +364,6 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
     def est_ue_plus_5(
         cls,
         identification: 'IdentificationDTO',
-        situation_assimilation: TypeSituationAssimilation = None,
     ) -> bool:
         raise NotImplementedError
 
