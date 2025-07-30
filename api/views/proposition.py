@@ -135,8 +135,8 @@ class DoctoratePropositionView(
     pagination_class = None
     filter_backends = []
     permission_mapping = {
-        'GET': 'admission.view_doctorateadmission',
-        'DELETE': 'admission.delete_doctorateadmission',
+        'GET': 'admission.api_view_doctorateadmission',
+        'DELETE': 'admission.api_delete_doctorateadmission',
     }
 
     def get_permission_object(self):

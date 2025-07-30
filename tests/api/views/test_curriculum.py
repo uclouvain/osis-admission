@@ -93,6 +93,7 @@ def create_professional_experiences(person):
             role='Librarian',
             sector=ActivitySector.PUBLIC.name,
             activity='Work - activity',
+            certificate=[],
         ),
         ProfessionalExperienceFactory(
             person=person,
@@ -103,6 +104,7 @@ def create_professional_experiences(person):
             role='Librarian',
             sector=ActivitySector.PUBLIC.name,
             activity='Work - activity',
+            certificate=[],
         ),
     ]
 
@@ -213,6 +215,7 @@ class BaseCurriculumTestCase:
                     'type': ActivityType.WORK.name,
                     'valuated_from_trainings': [],
                     'external_id': professional_experiences[0].external_id,
+                    'certificate': [],
                 },
                 {
                     'uuid': str(professional_experiences[1].uuid),
@@ -222,6 +225,7 @@ class BaseCurriculumTestCase:
                     'type': ActivityType.WORK.name,
                     'valuated_from_trainings': [],
                     'external_id': professional_experiences[1].external_id,
+                    'certificate': [],
                 },
             ],
         )

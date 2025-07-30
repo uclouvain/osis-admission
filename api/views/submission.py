@@ -106,7 +106,7 @@ def valuate_experiences(instance: Union[GeneralEducationAdmission, ContinuingEdu
 class VerifyDoctoralProjectView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, GenericAPIView):
     name = "verify-project"
     permission_mapping = {
-        'GET': 'admission.change_admission_supervision',
+        'GET': 'admission.api_change_admission_supervision',
     }
     pagination_class = None
     filter_backends = []
@@ -163,8 +163,8 @@ class SubmitDoctoralPropositionView(
 ):
     name = "submit-doctoral-proposition"
     permission_mapping = {
-        'GET': 'admission.submit_doctorateadmission',
-        'POST': 'admission.submit_doctorateadmission',
+        'GET': 'admission.api_submit_doctorateadmission',
+        'POST': 'admission.api_submit_doctorateadmission',
     }
 
     def get_permission_object(self):

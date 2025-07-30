@@ -635,6 +635,8 @@ class ModifierStatutChecklistParcoursAnterieurValidatorList(TwoStepsMultipleBusi
     uuids_experiences_valorisees: set[str]
     checklist: StatutsChecklistGenerale
 
+    type_formation: TrainingType
+
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
@@ -653,6 +655,7 @@ class ModifierStatutChecklistParcoursAnterieurValidatorList(TwoStepsMultipleBusi
                 uuids_experiences_valorisees=self.uuids_experiences_valorisees,
                 checklist=self.checklist,
                 statut=self.statut,
+                type_formation=self.type_formation,
             ),
         ]
 
