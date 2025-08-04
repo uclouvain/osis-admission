@@ -109,6 +109,7 @@ class PropositionDTO(interface.DTO):
     financabilite_derogation_derniere_notification_par: str
 
     documents_demandes: Dict
+    echeance_demande_documents: Optional[datetime.date]
     documents_libres_fac_uclouvain: List[str]
     documents_libres_sic_uclouvain: List[str]
 

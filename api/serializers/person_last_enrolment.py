@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,10 +23,22 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional
+from rest_framework import serializers
+
+from base.api.serializers.academic_year import RelatedAcademicYearField
+from base.models.person import Person
+
+__all__ = [
+    "PersonLastEnrolmentSerializer",
+]
 
 
-class IDigitRepository:
-    @classmethod
-    def get_registration_id_sent_to_digit(cls, global_id: str) -> Optional[str]:
-        raise NotImplementedError
+class PersonLastEnrolmentSerializer(serializers.ModelSerializer):
+    last_registration_year = RelatedAcademicYearField(required=False)
+
+    class Meta:
+        model = Person
+        fields = [
+            'last_registration_year',
+            'last_registration_id',
+        ]

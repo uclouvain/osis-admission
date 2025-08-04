@@ -23,8 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
-from typing import Optional
 
 import attr
 

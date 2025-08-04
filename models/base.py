@@ -626,6 +626,11 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         encoder=DjangoJSONEncoder,
         verbose_name=_('Requested documents'),
     )
+    requested_documents_deadline = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name=_('Requested documents deadline'),
+    )
     uclouvain_sic_documents = FileField(
         blank=True,
         upload_to=admission_directory_path,

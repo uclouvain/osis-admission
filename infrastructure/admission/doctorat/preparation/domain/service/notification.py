@@ -74,7 +74,7 @@ from admission.ddd.admission.domain.model.emplacement_document import (
 from admission.ddd.admission.domain.model.formation import FormationIdentity
 from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.enums.emplacement_document import StatutEmplacementDocument
-from admission.ddd.admission.repository.i_digit import IDigitRepository
+from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import IMatriculeEtudiantService
 from admission.infrastructure.admission.doctorat.preparation.domain.service.doctorat import (
     DoctoratTranslator,
 )
@@ -111,6 +111,7 @@ from admission.utils import (
 )
 from base.models.person import Person
 from base.utils.utils import format_academic_year
+from ddd.logic.gestion_des_comptes.domain.validator.exceptions import MatriculeEtudiantIntrouvableException
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
 
 EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN = 'SERA_AUTOMATIQUEMENT_REMPLACE_PAR_LE_LIEN'
@@ -730,10 +731,11 @@ class Notification(INotification):
     @classmethod
     def accepter_proposition_par_sic(
         cls,
+        message_bus,
         proposition_uuid: str,
         objet_message: str,
         corps_message: str,
-        digit_repository: 'IDigitRepository',
+        matricule_etudiant_service: 'IMatriculeEtudiantService',
     ) -> EmailMessage:
         certificate_fields = {
             'cdd_approval_certificate': EMAIL_TEMPLATE_CDD_ANNEX_DOCUMENT_URL_DOCTORATE_TOKEN,
@@ -770,11 +772,17 @@ class Notification(INotification):
             corps_message = corps_message.replace(token, document_urls[field_name])
 
         if EMAIL_TEMPLATE_ENROLLMENT_GENERATED_NOMA_DOCTORATE_TOKEN in corps_message:
-            noma_genere = digit_repository.get_registration_id_sent_to_digit(global_id=admission.candidate.global_id)
+            try:
+                noma_genere = matricule_etudiant_service.recuperer(
+                    msg_bus=message_bus,
+                    matricule_personne=admission.candidate.global_id
+                )
+            except MatriculeEtudiantIntrouvableException:
+                noma_genere = gettext('NOMA not found')
 
             corps_message = corps_message.replace(
                 EMAIL_TEMPLATE_ENROLLMENT_GENERATED_NOMA_DOCTORATE_TOKEN,
-                noma_genere or gettext('NOMA not found'),
+                noma_genere,
             )
 
         email_notification = EmailNotification(

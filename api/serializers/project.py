@@ -216,6 +216,7 @@ class DoctoratePropositionSearchDTOSerializer(IncludedFieldsMixin, DoctorateProp
                     # Profile
                     'retrieve_person',
                     'update_person',
+                    'update_person_last_enrolment',
                     'retrieve_coordinates',
                     'update_coordinates',
                     'retrieve_secondary_studies',
@@ -284,6 +285,7 @@ class GeneralEducationPropositionSearchDTOSerializer(
                 # Profile
                 'retrieve_person',
                 'update_person',
+                'update_person_last_enrolment',
                 'retrieve_coordinates',
                 'update_coordinates',
                 'retrieve_secondary_studies',
@@ -348,6 +350,7 @@ class ContinuingEducationPropositionSearchDTOSerializer(
                 # Profile
                 'retrieve_person',
                 'update_person',
+                'update_person_last_enrolment',
                 'retrieve_coordinates',
                 'update_coordinates',
                 'retrieve_secondary_studies',
@@ -409,6 +412,7 @@ class PropositionCreatePermissionsSerializer(serializers.Serializer):
     links = ActionLinksField(
         actions={
             'create_person': ACTION_LINKS['update_person'],
+            'create_person_last_enrolment': ACTION_LINKS['update_person_last_enrolment'],
             'create_coordinates': ACTION_LINKS['update_coordinates'],
             'create_training_choice': ACTION_LINKS['create_training_choice'],
         }
@@ -422,6 +426,7 @@ class DoctoratePropositionDTOSerializer(IncludedFieldsMixin, DoctoratePropositio
             # Person
             'retrieve_person': DOCTORATE_ACTION_LINKS['retrieve_person'],
             'update_person': DOCTORATE_ACTION_LINKS['update_person'],
+            'update_person_last_enrolment': DOCTORATE_ACTION_LINKS['update_person_last_enrolment'],
             # Coordinates
             'retrieve_coordinates': DOCTORATE_ACTION_LINKS['retrieve_coordinates'],
             'update_coordinates': DOCTORATE_ACTION_LINKS['update_coordinates'],
@@ -550,6 +555,7 @@ class GeneralEducationPropositionDTOSerializer(
                 # Profile
                 'retrieve_person',
                 'update_person',
+                'update_person_last_enrolment',
                 'retrieve_coordinates',
                 'update_coordinates',
                 'retrieve_secondary_studies',
@@ -630,6 +636,7 @@ class ContinuingEducationPropositionDTOSerializer(
                 # Profile
                 'retrieve_person',
                 'update_person',
+                'update_person_last_enrolment',
                 'retrieve_coordinates',
                 'update_coordinates',
                 'retrieve_secondary_studies',

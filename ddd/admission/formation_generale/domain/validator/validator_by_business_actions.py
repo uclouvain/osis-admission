@@ -177,7 +177,7 @@ class FormationGeneraleCurriculumValidatorList(TwoStepsMultipleBusinessException
 
 @attr.dataclass(frozen=True, slots=True)
 class FormationGeneraleCurriculumPostSoumissionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
-    annee_soumission: int
+    annee_precedent_formation: int
     date_soumission: datetime.date
     annee_diplome_etudes_secondaires: Optional[int]
     experiences_non_academiques: List[ExperienceNonAcademiqueDTO]
@@ -192,7 +192,7 @@ class FormationGeneraleCurriculumPostSoumissionValidatorList(TwoStepsMultipleBus
     def get_invariants_validators(self) -> List[BusinessValidator]:
         invariants = [
             ShouldAnneesCVRequisesCompletees(
-                annee_courante=self.annee_soumission,
+                annee_courante=self.annee_precedent_formation,
                 experiences_academiques=self.experiences_academiques,
                 experiences_academiques_incompletes={},  # Une expérience incomplète justifie quand même une période
                 annee_derniere_inscription_ucl=None,
@@ -635,6 +635,8 @@ class ModifierStatutChecklistParcoursAnterieurValidatorList(TwoStepsMultipleBusi
     uuids_experiences_valorisees: set[str]
     checklist: StatutsChecklistGenerale
 
+    type_formation: TrainingType
+
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
@@ -653,6 +655,7 @@ class ModifierStatutChecklistParcoursAnterieurValidatorList(TwoStepsMultipleBusi
                 uuids_experiences_valorisees=self.uuids_experiences_valorisees,
                 checklist=self.checklist,
                 statut=self.statut,
+                type_formation=self.type_formation,
             ),
         ]
 

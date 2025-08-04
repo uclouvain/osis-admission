@@ -29,32 +29,34 @@ from unittest.mock import patch
 
 from django.conf import settings
 from django.test import override_settings
+from osis_document.enums import PostProcessingType
 from rest_framework.test import APITestCase
 
 from admission.constants import PNG_MIME_TYPE
-from admission.ddd.admission.enums import (
-    CleConfigurationItemFormulaire,
-    Onglets,
-)
+from admission.ddd.admission.enums import CleConfigurationItemFormulaire, Onglets
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
 from admission.exceptions import MergeDocumentsException
-from admission.tasks.merge_admission_documents import base_education_admission_document_merging
+from admission.tasks.merge_admission_documents import (
+    base_education_admission_document_merging,
+)
 from admission.tests.factories.curriculum import (
-    EducationalExperienceYearFactory,
-    EducationalExperienceFactory,
-    ProfessionalExperienceFactory,
     AdmissionEducationalValuatedExperiencesFactory,
     AdmissionProfessionalValuatedExperiencesFactory,
+    EducationalExperienceFactory,
+    EducationalExperienceYearFactory,
+    ProfessionalExperienceFactory,
 )
-from admission.tests.factories.form_item import DocumentAdmissionFormItemFactory, AdmissionFormItemInstantiationFactory
+from admission.tests.factories.form_item import (
+    AdmissionFormItemInstantiationFactory,
+    DocumentAdmissionFormItemFactory,
+)
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.person import CompletePersonFactory
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group_year import Master120TrainingFactory
-from osis_document.enums import PostProcessingType
 from osis_profile.models.enums.curriculum import TranscriptType
 
 
@@ -69,7 +71,6 @@ class MergeAdmissionDocumentsTestCase(APITestCase):
             'automatically_required': False,
             'last_action_at': '2023-01-01T00:00:00',
             'last_actor': '0123456',
-            'deadline_at': '2023-01-16',
             'reason': 'Ma raison',
             'requested_at': '2023-01-01T00:00:00',
             'status': 'RECLAME',
@@ -110,21 +111,25 @@ class MergeAdmissionDocumentsTestCase(APITestCase):
         output = {
             PostProcessingType.MERGE.name: {
                 'input': [],
-                'output': []
-                if PostProcessingType.MERGE.name not in post_processing_types
-                else {
-                    'upload_objects': [str(cls.PDF_MERGE_UUID)],
-                    'post_processing_objects': [str(uuid.uuid4())],
-                },
+                'output': (
+                    []
+                    if PostProcessingType.MERGE.name not in post_processing_types
+                    else {
+                        'upload_objects': [str(cls.PDF_MERGE_UUID)],
+                        'post_processing_objects': [str(uuid.uuid4())],
+                    }
+                ),
             },
             PostProcessingType.CONVERT.name: {
                 'input': [],
-                'output': []
-                if PostProcessingType.CONVERT.name not in post_processing_types
-                else {
-                    'upload_objects': [str(cls.PDF_CONVERT_UUID)],
-                    'post_processing_objects': [str(uuid.uuid4())],
-                },
+                'output': (
+                    []
+                    if PostProcessingType.CONVERT.name not in post_processing_types
+                    else {
+                        'upload_objects': [str(cls.PDF_CONVERT_UUID)],
+                        'post_processing_objects': [str(uuid.uuid4())],
+                    }
+                ),
             },
         }
         return output

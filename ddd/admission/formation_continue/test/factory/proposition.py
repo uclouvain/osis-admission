@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 import string
 import uuid
 
@@ -35,7 +36,10 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutChecklist,
     ChoixStatutPropositionContinue,
 )
-from admission.ddd.admission.formation_continue.domain.model.proposition import PropositionIdentity, Proposition
+from admission.ddd.admission.formation_continue.domain.model.proposition import (
+    Proposition,
+    PropositionIdentity,
+)
 from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
     StatutChecklist,
     StatutsChecklistContinue,
@@ -87,6 +91,7 @@ class PropositionFactory(factory.Factory):
     motivations = 'My motivations'
     moyens_decouverte_formation = [ChoixMoyensDecouverteFormation.BOUCHE_A_OREILLE]
     auteur_derniere_modification = FuzzyText(length=10, chars=string.digits)
+    echeance_demande_documents = datetime.date(2023, 1, 19)
 
     class Params:
         est_confirmee = factory.Trait(
