@@ -25,15 +25,14 @@
 # ##############################################################################
 
 import rules
-from django.utils.translation import gettext_lazy as _
 from rules import RuleSet
 
 from admission.auth.predicates.common import is_entity_manager, is_sent_to_epc
 from admission.auth.roles.central_manager import CentralManager
-from osis_role.contrib.models import EntityRoleModel
+from base.auth.roles.sic_management import SicManagement
 
 
-class SicManagement(EntityRoleModel):
+class AdmissionSicManagement(SicManagement):
     """
     Direction SIC
 
@@ -42,9 +41,8 @@ class SicManagement(EntityRoleModel):
     """
 
     class Meta:
-        verbose_name = _("Role: SIC management")
-        verbose_name_plural = _("Role: SIC management")
-        group_name = "admission_sic_management"
+        group_name = "sic_management"
+        proxy = True
 
     @classmethod
     def rule_set(cls):
