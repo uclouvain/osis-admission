@@ -32,7 +32,7 @@ from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.doctorate_committee_member import DoctorateCommitteeMember
 from admission.auth.roles.program_manager import ProgramManager
 from admission.auth.roles.promoter import Promoter
-from admission.auth.roles.sic_management import SicManagement, AdmissionSicManagement
+from admission.auth.roles.sic_management import AdmissionSicManagement
 from admission.auth.scope import Scope
 from osis_role.contrib.tests.factories import EducationGroupRoleModelFactory
 
