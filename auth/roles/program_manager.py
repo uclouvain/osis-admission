@@ -72,6 +72,11 @@ class ProgramManager(EducationGroupRoleModel):
     @classmethod
     def rule_set(cls):
         ruleset = {
+            # Reference app: consultation only
+            'reference.view_diplomatitle': rules.always_allow,
+            'reference.view_scholarship': rules.always_allow,
+            'reference.view_reference_choice': rules.always_allow,
+            'base.view_organization': rules.always_allow,
             # Listings
             'admission.view_enrolment_applications': has_education_group_of_types(
                 *AnneeInscriptionFormationTranslator.GENERAL_EDUCATION_TYPES,
