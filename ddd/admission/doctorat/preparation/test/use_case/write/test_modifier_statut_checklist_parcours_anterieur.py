@@ -50,10 +50,10 @@ from admission.ddd.admission.formation_generale.test.factory.titre_acces import 
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
 )
-from admission.infrastructure.admission.repository.in_memory.titre_acces_selectionnable import (
+from admission.infrastructure.admission.shared_kernel.repository.in_memory.titre_acces_selectionnable import (
     TitreAccesSelectionnableInMemoryRepositoryFactory,
 )
 from admission.infrastructure.message_bus_in_memory import (

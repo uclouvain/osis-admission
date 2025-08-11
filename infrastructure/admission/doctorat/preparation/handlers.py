@@ -42,10 +42,10 @@ from admission.ddd.admission.doctorat.preparation.use_case.write.redonner_la_mai
 from admission.ddd.admission.doctorat.preparation.use_case.write.soumettre_ca_service import (
     soumettre_ca,
 )
-from admission.ddd.admission.use_case.read import (
+from admission.ddd.admission.shared_kernel.use_case.read import (
     recuperer_questions_specifiques_proposition,
 )
-from admission.ddd.admission.use_case.write import (
+from admission.ddd.admission.shared_kernel.use_case.write import (
     annuler_reclamation_emplacement_document,
     initialiser_emplacement_document_a_reclamer,
     initialiser_emplacement_document_libre_a_reclamer,
@@ -55,10 +55,10 @@ from admission.ddd.admission.use_case.write import (
     remplir_emplacement_document_par_gestionnaire,
     supprimer_emplacement_document,
 )
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
-from admission.infrastructure.admission.domain.service.profil_candidat import (
+from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import (
     ProfilCandidatTranslator,
 )
 from infrastructure.financabilite.domain.service.financabilite import (
@@ -90,21 +90,21 @@ from .repository.emplacement_document import EmplacementDocumentRepository
 from .repository.groupe_de_supervision import GroupeDeSupervisionRepository
 from .repository.proposition import PropositionRepository
 from ..validation.repository.demande import DemandeRepository
-from ...domain.service.calendrier_inscription import CalendrierInscription
-from ...domain.service.elements_confirmation import ElementsConfirmation
-from ...domain.service.emplacements_documents_proposition import (
+from admission.infrastructure.admission.shared_kernel.domain.service.calendrier_inscription import CalendrierInscription
+from admission.infrastructure.admission.shared_kernel.domain.service.elements_confirmation import ElementsConfirmation
+from admission.infrastructure.admission.shared_kernel.domain.service.emplacements_documents_proposition import (
     EmplacementsDocumentsPropositionTranslator,
 )
-from ...domain.service.historique import Historique as HistoriqueGlobal
-from ...domain.service.maximum_propositions import MaximumPropositionsAutorisees
-from ...domain.service.raccrocher_experiences_curriculum import (
+from admission.infrastructure.admission.shared_kernel.domain.service.historique import Historique as HistoriqueGlobal
+from admission.infrastructure.admission.shared_kernel.domain.service.maximum_propositions import MaximumPropositionsAutorisees
+from admission.infrastructure.admission.shared_kernel.domain.service.raccrocher_experiences_curriculum import (
     RaccrocherExperiencesCurriculum,
 )
-from ...domain.service.titres_acces import TitresAcces
-from ...domain.service.unites_enseignement_translator import (
+from admission.infrastructure.admission.shared_kernel.domain.service.titres_acces import TitresAcces
+from admission.infrastructure.admission.shared_kernel.domain.service.unites_enseignement_translator import (
     UnitesEnseignementTranslator,
 )
-from ...repository.titre_acces_selectionnable import TitreAccesSelectionnableRepository
+from admission.infrastructure.admission.shared_kernel.repository.titre_acces_selectionnable import TitreAccesSelectionnableRepository
 from ...shared_kernel.domain.service.matricule_etudiant import MatriculeEtudiantService
 
 COMMAND_HANDLERS = {

@@ -39,10 +39,10 @@ from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat impo
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
     IPropositionRepository,
 )
-from admission.ddd.admission.domain.builder.formation_identity import (
+from admission.ddd.admission.shared_kernel.domain.builder.formation_identity import (
     FormationIdentityBuilder,
 )
-from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from infrastructure.utils import MessageBus
 
 

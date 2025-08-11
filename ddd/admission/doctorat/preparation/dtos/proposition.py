@@ -31,8 +31,8 @@ from uuid import UUID
 import attr
 
 from admission.ddd.admission.doctorat.preparation.dtos import CotutelleDTO
-from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
-from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.shared_kernel.dtos.profil_candidat import ProfilCandidatDTO
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from ddd.logic.learning_unit.dtos import LearningUnitSearchDTO, PartimSearchDTO
 from ddd.logic.reference.dtos.bourse import BourseDTO
 from osis_common.ddd import interface

@@ -31,7 +31,7 @@ from django.shortcuts import resolve_url
 from rest_framework.test import APITestCase
 
 from admission.calendar.admission_calendar import *
-from admission.ddd.admission.domain.validator.exceptions import (
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     ResidenceAuSensDuDecretNonDisponiblePourInscriptionException,
 )
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
@@ -49,7 +49,7 @@ class PoolQuestionApiTestCase(APITestCase):
 
     def setUp(self):
         self.mock_calendrier_inscription = patch(
-            'admission.ddd.admission.domain.service.i_calendrier_inscription.ICalendrierInscription.'
+            'admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription.ICalendrierInscription.'
             'INTERDIRE_INSCRIPTION_ETUDES_CONTINGENTES_POUR_NON_RESIDENT',
             new_callable=PropertyMock,
             return_value=False,
@@ -95,7 +95,7 @@ class PoolQuestionApiTestCase(APITestCase):
 
     @freezegun.freeze_time('2022-08-01')
     @patch(
-        'admission.ddd.admission.domain.service.i_calendrier_inscription.ICalendrierInscription.'
+        'admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription.ICalendrierInscription.'
         'INTERDIRE_INSCRIPTION_ETUDES_CONTINGENTES_POUR_NON_RESIDENT',
         new_callable=PropertyMock,
         return_value=True,

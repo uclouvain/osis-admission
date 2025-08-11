@@ -34,7 +34,7 @@ from pikepdf import OutlineItem, PasswordError, Pdf, PdfError
 from admission.ddd.admission.doctorat.preparation import (
     commands as doctorate_education_commands,
 )
-from admission.ddd.admission.dtos.resume import ResumePropositionDTO
+from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.formation_continue import (
     commands as continuing_education_commands,
 )

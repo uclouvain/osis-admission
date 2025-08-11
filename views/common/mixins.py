@@ -64,16 +64,16 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
 from admission.ddd.admission.doctorat.preparation.dtos.doctorat import DoctoratDTO
 from admission.ddd.admission.doctorat.validation.commands import RecupererDemandeQuery
 from admission.ddd.admission.doctorat.validation.dtos import DemandeDTO
-from admission.ddd.admission.domain.model.enums.type_gestionnaire import (
+from admission.ddd.admission.shared_kernel.domain.model.enums.type_gestionnaire import (
     TypeGestionnaire,
 )
-from admission.ddd.admission.dtos.proposition_fusion_personne import (
+from admission.ddd.admission.shared_kernel.dtos.proposition_fusion_personne import (
     PropositionFusionPersonneDTO,
 )
-from admission.ddd.admission.dtos.titre_acces_selectionnable import (
+from admission.ddd.admission.shared_kernel.dtos.titre_acces_selectionnable import (
     TitreAccesSelectionnableDTO,
 )
-from admission.ddd.admission.enums import Onglets
+from admission.ddd.admission.shared_kernel.enums import Onglets
 from admission.ddd.admission.formation_continue.commands import (
     RecupererPropositionQuery,
 )

@@ -24,14 +24,14 @@
 #
 # ##############################################################################
 
-from admission.ddd.admission.domain.service.i_calendrier_inscription import (
+from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription import (
     ICalendrierInscription,
 )
-from admission.ddd.admission.domain.service.i_profil_candidat import (
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
-from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
-from admission.ddd.admission.dtos.conditions import InfosDetermineesDTO
+from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import ITitresAcces
+from admission.ddd.admission.shared_kernel.dtos.conditions import InfosDetermineesDTO
 from admission.ddd.admission.formation_continue.commands import (
     DeterminerAnneeAcademiqueEtPotQuery,
 )

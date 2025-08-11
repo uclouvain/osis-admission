@@ -24,10 +24,10 @@
 #
 # ##############################################################################
 
-from admission.ddd.admission.domain.service.i_profil_candidat import (
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
-from admission.ddd.admission.domain.service.profil_candidat import ProfilCandidat
+from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidat
 from admission.ddd.admission.formation_generale.commands import (
     VerifierCurriculumApresSoumissionQuery,
 )

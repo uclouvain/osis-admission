@@ -45,11 +45,11 @@ from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervi
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
     IPropositionRepository,
 )
-from admission.ddd.admission.domain.service.i_profil_candidat import (
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
-from admission.ddd.admission.domain.service.resume_proposition import ResumeProposition
-from admission.ddd.admission.dtos.resume import ResumePropositionDTO
+from admission.ddd.admission.shared_kernel.domain.service.resume_proposition import ResumeProposition
+from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import (
     IAcademicYearRepository,
 )

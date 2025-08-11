@@ -24,10 +24,9 @@
 #
 # ##############################################################################
 
-from admission.ddd.admission.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.domain.repository.i_titre_acces_selectionnable import ITitreAccesSelectionnableRepository
+from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.shared_kernel.repository.i_titre_acces_selectionnable import ITitreAccesSelectionnableRepository
 from admission.ddd.admission.formation_generale.commands import (
-    ApprouverInscriptionTardiveParFaculteCommand,
     ApprouverReorientationExterneParFaculteCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity

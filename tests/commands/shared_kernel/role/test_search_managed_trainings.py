@@ -27,7 +27,7 @@ from django.conf import settings
 from django.test import TestCase
 from django.utils.translation import override
 
-from admission.ddd.admission.shared_kernel.role.commands import RechercherFormationsGereesQuery
+from admission.ddd.admission.shared_kernel.commands import RechercherFormationsGereesQuery
 from admission.tests.factories.general_education import GeneralEducationTrainingFactory
 from admission.tests.factories.roles import ProgramManagerRoleFactory
 from base.tests.factories.academic_year import AcademicYearFactory

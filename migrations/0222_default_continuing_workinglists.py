@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.db import migrations
 
-from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
+from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
     OngletsChecklist,

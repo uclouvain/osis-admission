@@ -32,8 +32,8 @@ from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_b
 from admission.ddd.admission.doctorat.preparation.commands import RecupererElementsConfirmationQuery
 from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
-from admission.ddd.admission.domain.service.i_elements_confirmation import ElementConfirmation, IElementsConfirmation
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_elements_confirmation import ElementConfirmation, IElementsConfirmation
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 
 
 def recuperer_elements_confirmation(

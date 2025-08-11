@@ -49,7 +49,7 @@ from admission.ddd.admission.doctorat.preparation.domain.service.i_lister_demand
     IListerDemandesService,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.liste import DemandeRechercheDTO
-from admission.ddd.admission.enums.checklist import ModeFiltrageChecklist
+from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
 from admission.infrastructure.admission.doctorat.preparation.read_view.repository.tableau_bord import (
     TableauBordRepositoryAdmissionMixin,
 )

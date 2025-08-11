@@ -25,7 +25,7 @@
 # ##############################################################################
 from django.test import SimpleTestCase
 
-from admission.ddd.admission.dtos.formation import FormationDTO
+from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from admission.ddd.admission.formation_continue.commands import RecupererFormationContinueQuery
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import FormationNonTrouveeException
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance

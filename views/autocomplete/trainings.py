@@ -28,14 +28,14 @@ from typing import List, Dict
 from dal_select2.views import Select2ListView, Select2QuerySetView
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Q, F, Value, Case, When, Exists, OuterRef
+from django.db.models import Q, F, Value, Case, When
 from django.db.models.functions import Concat
 from django.utils.functional import cached_property
 from django.utils.translation import get_language
 
-from admission.ddd.admission.dtos.formation import BaseFormationDTO
-from admission.ddd.admission.shared_kernel.role.commands import RechercherFormationsGereesQuery
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+from admission.ddd.admission.shared_kernel.dtos.formation import BaseFormationDTO
+from admission.ddd.admission.shared_kernel.commands import RechercherFormationsGereesQuery
+from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
 from base.models.education_group_year import EducationGroupYear

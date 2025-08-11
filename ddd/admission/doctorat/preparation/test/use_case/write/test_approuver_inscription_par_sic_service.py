@@ -57,21 +57,21 @@ from admission.ddd.admission.doctorat.preparation.test.factory.proposition impor
     PropositionAdmissionSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
     _PropositionIdentityFactory,
 )
-from admission.ddd.admission.domain.validator.exceptions import EnQuarantaineException
-from admission.ddd.admission.dtos.merge_proposal import MergeProposalDTO
-from admission.ddd.admission.enums.emplacement_document import (
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import EnQuarantaineException
+from admission.ddd.admission.shared_kernel.dtos.merge_proposal import MergeProposalDTO
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     StatutEmplacementDocument,
     StatutReclamationEmplacementDocument,
 )
-from admission.ddd.admission.enums.type_demande import TypeDemande
-from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
+from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationIdentityFactory
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.groupe_de_supervision import (
     GroupeDeSupervisionInMemoryRepository,
 )
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
 )
 from admission.infrastructure.message_bus_in_memory import (

@@ -29,7 +29,6 @@ from .admission.doctorat.preparation import handlers as preparation_handlers
 from .admission.doctorat.validation import handlers as validation_handlers
 from .admission.formation_continue import handlers as formation_continue_handlers
 from .admission.formation_generale import handlers as formation_generale_handlers
-from .admission.shared_kernel.role import handlers as role_handlers
 
 
 class MessageBusCommands(AbstractMessageBusCommands):
@@ -39,7 +38,6 @@ class MessageBusCommands(AbstractMessageBusCommands):
         **formation_continue_handlers.COMMAND_HANDLERS,
         **formation_generale_handlers.COMMAND_HANDLERS,
         **admission_handlers.COMMAND_HANDLERS,
-        **role_handlers.COMMAND_HANDLERS,
     }
     event_handlers = [
         admission_handlers.EVENT_HANDLERS

@@ -29,7 +29,7 @@ from admission.api.serializers.fields import AnswerToSpecificQuestionField
 from admission.ddd.admission.doctorat.preparation import (
     commands as doctorate_education_commands,
 )
-from admission.ddd.admission.dtos.periode import PeriodeDTO
+from admission.ddd.admission.shared_kernel.dtos.periode import PeriodeDTO
 from admission.ddd.admission.formation_continue import (
     commands as continuing_education_commands,
 )

@@ -32,7 +32,7 @@ from django.test import override_settings
 
 from admission.models import AdmissionFormItemInstantiation
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
-from admission.ddd.admission.enums.emplacement_document import (
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     TypeEmplacementDocument,
     IdentifiantBaseEmplacementDocument,
     StatutReclamationEmplacementDocument,

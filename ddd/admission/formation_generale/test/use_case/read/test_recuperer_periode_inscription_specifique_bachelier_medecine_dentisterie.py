@@ -26,11 +26,11 @@
 import datetime
 from unittest import TestCase, mock
 
-from admission.ddd.admission.dtos.periode import PeriodeDTO
+from admission.ddd.admission.shared_kernel.dtos.periode import PeriodeDTO
 from admission.ddd.admission.formation_generale.commands import (
     RecupererPeriodeInscriptionSpecifiqueBachelierMedecineDentisterieQuery,
 )
-from admission.infrastructure.admission.domain.service.in_memory.calendrier_inscription import (
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.calendrier_inscription import (
     CalendrierInscriptionInMemory,
 )
 from admission.infrastructure.message_bus_in_memory import (

@@ -44,12 +44,12 @@ from admission.ddd.admission.doctorat.preparation.domain.service.verifier_cotute
 from admission.ddd.admission.doctorat.preparation.domain.service.verifier_promoteur import (
     GroupeDeSupervisionPossedeUnPromoteurMinimum,
 )
-from admission.ddd.admission.domain.model.question_specifique import QuestionSpecifique
-from admission.ddd.admission.domain.service.i_profil_candidat import (
+from admission.ddd.admission.shared_kernel.domain.model.question_specifique import QuestionSpecifique
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
-from admission.ddd.admission.domain.service.profil_candidat import ProfilCandidat
-from admission.ddd.admission.domain.service.verifier_questions_specifiques import (
+from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidat
+from admission.ddd.admission.shared_kernel.domain.service.verifier_questions_specifiques import (
     VerifierQuestionsSpecifiques,
 )
 from base.ddd.utils.business_validator import execute_functions_and_aggregate_exceptions

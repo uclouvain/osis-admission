@@ -34,7 +34,7 @@ from django.views.generic import FormView, TemplateView
 from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
 
-from admission.ddd.admission.commands import (
+from admission.ddd.admission.shared_kernel.commands import (
     RecupererTitresAccesSelectionnablesPropositionQuery,
     SpecifierExperienceEnTantQueTitreAccesCommand,
 )
@@ -56,14 +56,14 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     ExperiencesAcademiquesNonCompleteesException,
     TitreAccesEtreSelectionneException,
 )
-from admission.ddd.admission.domain.model.enums.condition_acces import (
+from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import (
     TypeTitreAccesSelectionnable,
 )
-from admission.ddd.admission.domain.validator.exceptions import (
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     ExperienceNonTrouveeException,
 )
-from admission.ddd.admission.dtos.resume import ResumePropositionDTO
-from admission.ddd.admission.dtos.titre_acces_selectionnable import (
+from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
+from admission.ddd.admission.shared_kernel.dtos.titre_acces_selectionnable import (
     TitreAccesSelectionnableDTO,
 )
 from admission.forms.admission.checklist import (

@@ -56,7 +56,7 @@ from admission.ddd.admission.doctorat.preparation.dtos import DoctoratFormationD
 from admission.ddd.admission.doctorat.preparation.dtos.proposition import (
     PropositionGestionnaireDTO,
 )
-from admission.ddd.admission.domain.model.enums.equivalence import (
+from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import (
     EtatEquivalenceTitreAcces,
     StatutEquivalenceTitreAcces,
     TypeEquivalenceTitreAcces,

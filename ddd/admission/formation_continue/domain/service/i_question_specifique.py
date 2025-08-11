@@ -25,7 +25,7 @@
 ##############################################################################
 from abc import ABC
 
-from admission.ddd.admission.domain.service.i_question_specifique import ISuperQuestionSpecifiqueTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_question_specifique import ISuperQuestionSpecifiqueTranslator
 
 
 class IQuestionSpecifiqueTranslator(ISuperQuestionSpecifiqueTranslator, ABC):

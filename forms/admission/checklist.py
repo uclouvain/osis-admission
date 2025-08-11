@@ -48,20 +48,20 @@ from admission.constants import (
     CONTEXT_GENERAL,
 )
 from admission.ddd import DUREE_MAXIMALE_PROGRAMME, DUREE_MINIMALE_PROGRAMME
-from admission.ddd.admission.domain.model.enums.authentification import (
+from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
     EtatAuthentificationParcours,
 )
-from admission.ddd.admission.domain.model.enums.condition_acces import (
+from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import (
     recuperer_conditions_acces_par_formation,
 )
-from admission.ddd.admission.domain.model.enums.equivalence import (
+from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import (
     EtatEquivalenceTitreAcces,
     StatutEquivalenceTitreAcces,
     TypeEquivalenceTitreAcces,
 )
-from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
-from admission.ddd.admission.enums import TypeSituationAssimilation
-from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     BesoinDeDerogation,
     BesoinDeDerogationDelegueVrae,

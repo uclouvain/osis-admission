@@ -30,13 +30,13 @@ from admission.ddd.admission.doctorat.preparation.commands import RetyperDocumen
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
     PropositionIdentity,
 )
-from admission.ddd.admission.domain.model.emplacement_document import (
+from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import (
     EmplacementDocumentIdentity,
 )
-from admission.ddd.admission.domain.validator.exceptions import (
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     EmplacementDocumentNonTrouveException,
 )
-from admission.infrastructure.admission.repository.in_memory.emplacement_document import (
+from admission.infrastructure.admission.shared_kernel.repository.in_memory.emplacement_document import (
     emplacement_document_in_memory_repository,
 )
 from admission.infrastructure.message_bus_in_memory import (

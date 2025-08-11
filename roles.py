@@ -23,11 +23,6 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.auth.predicates.common import is_part_of_education_group
-from admission.auth.predicates.doctorate import (
-    is_enrolled,
-    is_pre_admission,
-)
 from admission.auth.roles.admission_reader import AdmissionReader
 from admission.auth.roles.ca_member import CommitteeMember
 from admission.auth.roles.candidate import Candidate
@@ -36,7 +31,7 @@ from admission.auth.roles.doctorate_committee_member import DoctorateCommitteeMe
 from admission.auth.roles.program_manager import ProgramManager
 from admission.auth.roles.promoter import Promoter
 from admission.auth.roles.sceb import Sceb
-from admission.auth.roles.sic_management import SicManagement
+from admission.auth.roles.sic_management import AdmissionSicManagement
 from osis_role import role
 
 role.role_manager.register(Candidate)
@@ -47,4 +42,4 @@ role.role_manager.register(Sceb)
 role.role_manager.register(ProgramManager)
 role.role_manager.register(CentralManager)
 role.role_manager.register(AdmissionReader)
-role.role_manager.register(SicManagement)
+role.role_manager.register(AdmissionSicManagement)

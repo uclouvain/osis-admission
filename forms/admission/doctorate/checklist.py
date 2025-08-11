@@ -41,8 +41,8 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
 )
-from admission.ddd.admission.dtos.formation import FormationDTO
-from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.forms import get_academic_year_choices
 from base.models.academic_year import AcademicYear
 

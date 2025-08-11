@@ -38,7 +38,7 @@ from admission.auth.scope import Scope
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
     ENTITY_CDE,
 )
-from admission.ddd.admission.enums.emplacement_document import (
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     StatutEmplacementDocument,
     StatutReclamationEmplacementDocument,
     TypeEmplacementDocument,

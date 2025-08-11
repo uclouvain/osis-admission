@@ -63,11 +63,11 @@ from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist 
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
     onglet_decision_sic,
 )
-from admission.ddd.admission.enums.emplacement_document import (
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     OngletsDemande,
     StatutReclamationEmplacementDocument,
 )
-from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.forms.admission.checklist import (
     CommentForm,
     DoctorateSicDecisionApprovalForm,

@@ -38,11 +38,11 @@ from admission.ddd.admission.formation_generale.test.factory.proposition import 
     _PropositionIdentityFactory,
 )
 from admission.ddd.admission.formation_generale.test.factory.titre_acces import TitreAccesSelectionnableFactory
-from admission.ddd.admission.test.factory.formation import FormationIdentityFactory
+from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationIdentityFactory
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.infrastructure.admission.repository.in_memory.titre_acces_selectionnable import (
+from admission.infrastructure.admission.shared_kernel.repository.in_memory.titre_acces_selectionnable import (
     TitreAccesSelectionnableInMemoryRepositoryFactory,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance

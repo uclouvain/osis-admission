@@ -33,7 +33,7 @@ from rest_framework import status
 
 from admission.models import ContinuingEducationAdmission
 from admission.ddd import FR_ISO_CODE
-from admission.ddd.admission.enums import Onglets
+from admission.ddd.admission.shared_kernel.enums import Onglets
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.forms import REQUIRED_FIELD_CLASS
 from admission.tests.factories import DoctorateAdmissionFactory

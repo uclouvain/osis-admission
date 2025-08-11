@@ -34,9 +34,9 @@ from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervi
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
 from admission.ddd.admission.doctorat.preparation.dtos import AvisDTO, PropositionDTO
-from admission.ddd.admission.domain.model.emplacement_document import EmplacementDocument
-from admission.ddd.admission.domain.model.enums.authentification import EtatAuthentificationParcours
-from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import EmplacementDocument
+from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import EtatAuthentificationParcours
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import IMatriculeEtudiantService
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
 from osis_common.ddd import interface

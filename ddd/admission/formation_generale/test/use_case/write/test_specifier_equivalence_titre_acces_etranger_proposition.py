@@ -27,7 +27,7 @@ import datetime
 
 from django.test import SimpleTestCase
 
-from admission.ddd.admission.domain.model.enums.equivalence import (
+from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import (
     TypeEquivalenceTitreAcces,
     StatutEquivalenceTitreAcces,
     EtatEquivalenceTitreAcces,

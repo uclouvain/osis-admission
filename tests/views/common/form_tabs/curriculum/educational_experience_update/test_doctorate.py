@@ -40,7 +40,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formatio
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
-from admission.ddd.admission.enums.emplacement_document import OngletsDemande
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from admission.models import DoctorateAdmission
 from admission.models.base import AdmissionEducationalValuatedExperiences
 from admission.tests.factories import DoctorateAdmissionFactory

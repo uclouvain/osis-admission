@@ -27,7 +27,7 @@
 import factory
 
 from admission.models import Accounting
-from admission.ddd.admission.enums import (
+from admission.ddd.admission.shared_kernel.enums import (
     ChoixAffiliationSport,
     ChoixTypeCompteBancaire,
     TypeSituationAssimilation,
