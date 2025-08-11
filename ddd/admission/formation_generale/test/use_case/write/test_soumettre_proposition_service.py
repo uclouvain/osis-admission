@@ -282,7 +282,7 @@ class TestSoumettrePropositionGenerale(TestCase):
                 sigle='MASTER-SCI',
                 annee=2021,
                 type=TrainingType.MASTER_MC.name,
-                grade_academique=TrainingType.MASTER_MC.name,
+                code_etude_ares=TrainingType.MASTER_MC.name,
                 credits=60,
                 cycle=2,
             ),
