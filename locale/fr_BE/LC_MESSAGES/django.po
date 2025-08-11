@@ -6777,8 +6777,7 @@ msgstr ""
 
 msgid "The 'Dispensation needed' status is reserved to enrolment application."
 msgstr ""
-"Le passage à l'état 'Dérogation accordée' est réservé aux demandes de type "
-"inscription."
+"Le passage à l'état ‘Besoin dérogation’ est réservé aux demandes de type inscription"
 
 msgid "The <strong>additional training</strong> has been completed: yes / no."
 msgstr ""
