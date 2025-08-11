@@ -26,10 +26,10 @@
 from django.utils.functional import cached_property
 from django.views.generic import TemplateView
 
-from admission.ddd.admission.commands import RechercherParcoursAnterieurQuery
+from admission.ddd.admission.shared_kernel.commands import RechercherParcoursAnterieurQuery
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
-from admission.ddd.admission.enums import Onglets
-from admission.ddd.admission.enums.valorisation_experience import ExperiencesCVRecuperees
+from admission.ddd.admission.shared_kernel.enums import Onglets
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.exports.admission_recap.constants import TRAINING_TYPES_WITH_EQUIVALENCE
 from admission.views.common.mixins import LoadDossierViewMixin
 from base.models.enums.education_group_types import TrainingType

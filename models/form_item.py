@@ -37,7 +37,7 @@ from django.utils.translation import gettext_lazy as _, ngettext_lazy, pgettext_
 from osis_document.utils import generate_filename, is_uuid
 
 from admission.ddd import FR_ISO_CODE, EN_ISO_CODE
-from admission.ddd.admission.enums.question_specifique import (
+from admission.ddd.admission.shared_kernel.enums.question_specifique import (
     TypeItemFormulaire,
     CleConfigurationItemFormulaire,
     TypeChampTexteFormulaire,

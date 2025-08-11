@@ -37,7 +37,7 @@ from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext_lazy
 
-from admission.ddd.admission.dtos.formation import FormationDTO
+from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from base.forms.utils import EMPTY_CHOICE, autocomplete
 from base.models.academic_year import AcademicYear
 from base.models.campus import Campus

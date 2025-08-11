@@ -29,10 +29,10 @@ from admission.ddd.admission.doctorat.preparation.commands import RetyperDocumen
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
     PropositionIdentity,
 )
-from admission.ddd.admission.domain.model.emplacement_document import (
+from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import (
     EmplacementDocumentIdentity,
 )
-from admission.ddd.admission.repository.i_emplacement_document import (
+from admission.ddd.admission.shared_kernel.repository.i_emplacement_document import (
     IEmplacementDocumentRepository,
 )
 

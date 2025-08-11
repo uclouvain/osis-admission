@@ -33,7 +33,7 @@ from admission.ddd.admission.formation_generale.commands import (
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import DerogationFinancement
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )

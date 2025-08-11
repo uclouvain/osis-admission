@@ -33,9 +33,9 @@ from django.test import TestCase, override_settings
 from django.utils.translation import override
 from osis_history.models import HistoryEntry
 
-from admission.ddd.admission.dtos import AdressePersonnelleDTO
-from admission.ddd.admission.dtos.campus import CampusDTO
-from admission.ddd.admission.dtos.formation import FormationDTO
+from admission.ddd.admission.shared_kernel.dtos import AdressePersonnelleDTO
+from admission.ddd.admission.shared_kernel.dtos.campus import CampusDTO
+from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from admission.ddd.admission.formation_continue.commands import (
     RecupererPropositionQuery,
 )

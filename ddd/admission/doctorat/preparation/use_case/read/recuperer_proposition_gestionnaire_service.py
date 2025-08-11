@@ -27,7 +27,7 @@ from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_b
 from admission.ddd.admission.doctorat.preparation.commands import RecupererPropositionGestionnaireQuery
 from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
-from admission.ddd.admission.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_unites_enseignement_translator import IUnitesEnseignementTranslator
 
 
 def recuperer_proposition_gestionnaire(

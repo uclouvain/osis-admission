@@ -28,7 +28,7 @@ from admission.ddd.admission.formation_generale.domain.service.i_question_specif
     IQuestionSpecifiqueTranslator,
 )
 
-from admission.infrastructure.admission.domain.service.question_specifique import SuperQuestionSpecifiqueTranslator
+from admission.infrastructure.admission.shared_kernel.domain.service.question_specifique import SuperQuestionSpecifiqueTranslator
 
 
 class QuestionSpecifiqueTranslator(IQuestionSpecifiqueTranslator, SuperQuestionSpecifiqueTranslator):

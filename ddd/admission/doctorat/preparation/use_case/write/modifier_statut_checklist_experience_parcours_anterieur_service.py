@@ -38,7 +38,7 @@ from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat impo
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
     IPropositionRepository,
 )
-from admission.ddd.admission.domain.service.i_profil_candidat import (
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
 

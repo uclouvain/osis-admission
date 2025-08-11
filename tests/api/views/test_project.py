@@ -56,15 +56,15 @@ from admission.ddd.admission.doctorat.validation.domain.model.enums import (
     ChoixStatutCDD,
     ChoixStatutSIC,
 )
-from admission.ddd.admission.domain.service.i_elements_confirmation import (
+from admission.ddd.admission.shared_kernel.domain.service.i_elements_confirmation import (
     IElementsConfirmation,
 )
-from admission.ddd.admission.domain.validator.exceptions import (
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     NombrePropositionsSoumisesDepasseException,
     QuestionsSpecifiquesChoixFormationNonCompleteesException,
     QuestionsSpecifiquesCurriculumNonCompleteesException,
 )
-from admission.ddd.admission.enums.question_specifique import Onglets
+from admission.ddd.admission.shared_kernel.enums.question_specifique import Onglets
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )

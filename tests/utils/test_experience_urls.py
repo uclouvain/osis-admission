@@ -27,7 +27,7 @@ from django.test import TestCase
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
-from admission.ddd.admission.test.factory.profil import (
+from admission.ddd.admission.shared_kernel.tests.factory.profil import (
     ExperienceAcademiqueDTOFactory,
     EtudesSecondairesDTOFactory,
     ExperienceNonAcademiqueDTOFactory,

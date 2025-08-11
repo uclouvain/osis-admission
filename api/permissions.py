@@ -25,12 +25,9 @@
 # ##############################################################################
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
-    MaximumPropositionsAtteintException,
-)
-from admission.infrastructure.admission.domain.service.maximum_propositions import (
-    MaximumPropositionsAutorisees,
-)
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import MaximumPropositionsAtteintException
+from admission.infrastructure.admission.shared_kernel.domain.service.maximum_propositions import \
+    MaximumPropositionsAutorisees
 from admission.models import SupervisionActor
 from admission.models.base import BaseAdmission
 

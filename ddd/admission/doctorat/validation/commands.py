@@ -28,7 +28,7 @@ from typing import List, Optional
 
 import attr
 
-from admission.ddd.interface import SortedQueryRequest
+from admission.ddd.admission.shared_kernel.interface import SortedQueryRequest
 from osis_common.ddd import interface
 
 

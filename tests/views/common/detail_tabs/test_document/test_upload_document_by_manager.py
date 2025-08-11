@@ -32,7 +32,7 @@ from django.shortcuts import resolve_url
 from django.test import override_settings
 
 from admission.constants import IMAGE_MIME_TYPES
-from admission.ddd.admission.enums.emplacement_document import (
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     IdentifiantBaseEmplacementDocument,
     OngletsDemande,
 )

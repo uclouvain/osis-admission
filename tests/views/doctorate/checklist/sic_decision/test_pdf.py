@@ -40,7 +40,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
     DispenseOuDroitsMajores,
     DroitsInscriptionMontant,
 )
-from admission.ddd.admission.enums.emplacement_document import (
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     DocumentsCurriculum,
     DocumentsIdentification,
     StatutReclamationEmplacementDocument,

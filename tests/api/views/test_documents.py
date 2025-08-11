@@ -43,17 +43,17 @@ from admission.constants import PNG_MIME_TYPE, SUPPORTED_MIME_TYPES
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
-from admission.ddd.admission.domain.validator.exceptions import (
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     DocumentsCompletesDifferentsDesReclamesException,
     DocumentsReclamesImmediatementNonCompletesException,
 )
-from admission.ddd.admission.enums import (
+from admission.ddd.admission.shared_kernel.enums import (
     CleConfigurationItemFormulaire,
     CritereItemFormulaireFormation,
     Onglets,
     TypeItemFormulaire,
 )
-from admission.ddd.admission.enums.emplacement_document import (
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     IdentifiantBaseEmplacementDocument,
     OngletsDemande,
     StatutEmplacementDocument,

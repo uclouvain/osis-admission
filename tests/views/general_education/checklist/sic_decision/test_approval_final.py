@@ -39,7 +39,7 @@ from admission.constants import ORDERED_CAMPUSES_UUIDS
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
     ENTITY_CDE,
 )
-from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.commands import (
     EnvoyerEmailApprobationInscriptionAuCandidatCommand,
 )

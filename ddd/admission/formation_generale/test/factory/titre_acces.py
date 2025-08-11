@@ -27,10 +27,10 @@ import uuid
 
 import factory
 
-from admission.ddd.admission.domain.model.enums.condition_acces import (
+from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import (
     TypeTitreAccesSelectionnable,
 )
-from admission.ddd.admission.domain.model.titre_acces_selectionnable import (
+from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import (
     TitreAccesSelectionnable,
     TitreAccesSelectionnableIdentity,
 )

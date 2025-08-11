@@ -25,7 +25,7 @@
 # ##############################################################################
 
 try:
-    from admission.ddd.admission.enums.type_demande import TypeDemande
+    from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 
     from .accounting import Accounting
     from .actor import SupervisionActor

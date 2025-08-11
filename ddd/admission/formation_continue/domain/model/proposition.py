@@ -31,16 +31,16 @@ import attr
 from django.utils.timezone import now
 from django.utils.translation import gettext_noop as __
 
-from admission.ddd.admission.domain.model._profil_candidat import ProfilCandidat
-from admission.ddd.admission.domain.model.formation import FormationIdentity
-from admission.ddd.admission.domain.model.question_specifique import QuestionSpecifique
-from admission.ddd.admission.domain.service.i_profil_candidat import (
+from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import ProfilCandidat
+from admission.ddd.admission.shared_kernel.domain.model.formation import FormationIdentity
+from admission.ddd.admission.shared_kernel.domain.model.question_specifique import QuestionSpecifique
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
-from admission.ddd.admission.domain.service.i_question_specifique import (
+from admission.ddd.admission.shared_kernel.domain.service.i_question_specifique import (
     ISuperQuestionSpecifiqueTranslator,
 )
-from admission.ddd.admission.domain.service.profil_candidat import (
+from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import (
     ProfilCandidat as ProfilCandidatService,
 )
 from admission.ddd.admission.formation_continue.domain.model._adresse import Adresse

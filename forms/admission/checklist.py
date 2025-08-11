@@ -34,36 +34,34 @@ from dal import forward
 from django import forms
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.db.models import F, Prefetch, Q, prefetch_related_objects
+from django.db.models import F, Q
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language, gettext
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import ngettext_lazy, override, pgettext, pgettext_lazy
-from osis_document.contrib import FileUploadField
 from osis_document.utils import is_uuid
 
 from admission.constants import (
     COMMENT_TAG_FAC,
-    COMMENT_TAG_GLOBAL,
     COMMENT_TAG_SIC,
     CONTEXT_DOCTORATE,
     CONTEXT_GENERAL,
 )
 from admission.ddd import DUREE_MAXIMALE_PROGRAMME, DUREE_MINIMALE_PROGRAMME
-from admission.ddd.admission.domain.model.enums.authentification import (
+from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
     EtatAuthentificationParcours,
 )
-from admission.ddd.admission.domain.model.enums.condition_acces import (
+from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import (
     recuperer_conditions_acces_par_formation,
 )
-from admission.ddd.admission.domain.model.enums.equivalence import (
+from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import (
     EtatEquivalenceTitreAcces,
     StatutEquivalenceTitreAcces,
     TypeEquivalenceTitreAcces,
 )
-from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
-from admission.ddd.admission.enums import TypeSituationAssimilation
-from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     BesoinDeDerogation,
     BesoinDeDerogationDelegueVrae,
@@ -1005,7 +1003,8 @@ class CommonSicDecisionApprovalForm(forms.ModelForm):
             self.fields['mobility_months_amount'].required = False
 
         if self.is_admission and candidate_nationality_is_no_ue_5:
-            self.initial['must_provide_student_visa_d'] = True
+            if self.instance.must_provide_student_visa_d is None:
+                self.initial['must_provide_student_visa_d'] = True
         else:
             del self.fields['must_provide_student_visa_d']
 

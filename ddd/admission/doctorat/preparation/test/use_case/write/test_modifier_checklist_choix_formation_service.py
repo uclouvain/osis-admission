@@ -38,7 +38,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     DoctoratNonTrouveException,
     PropositionNonTrouveeException,
 )
-from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )

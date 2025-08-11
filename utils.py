@@ -56,16 +56,16 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     AnneesCurriculumNonSpecifieesException,
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
-from admission.ddd.admission.dtos.etudes_secondaires import (
+from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import (
     EtudesSecondairesAdmissionDTO,
 )
-from admission.ddd.admission.dtos.titre_acces_selectionnable import (
+from admission.ddd.admission.shared_kernel.dtos.titre_acces_selectionnable import (
     TitreAccesSelectionnableDTO,
 )
 from admission.ddd.admission.formation_generale.commands import (
     VerifierCurriculumApresSoumissionQuery as VerifierCurriculumApresSoumissionGeneraleQuery,
 )
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
 )
 from admission.models import (

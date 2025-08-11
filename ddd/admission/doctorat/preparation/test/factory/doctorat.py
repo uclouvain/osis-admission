@@ -33,9 +33,9 @@ from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formatio
 
 # FIXME import this factory from shared kernel when available
 from admission.ddd.admission.doctorat.preparation.dtos import DoctoratFormationDTO
-from admission.ddd.admission.domain.model.formation import FormationIdentity
-from admission.ddd.admission.repository.i_proposition import CAMPUS_LETTRE_DOSSIER
-from admission.ddd.admission.test.factory.formation import (
+from admission.ddd.admission.shared_kernel.domain.model.formation import FormationIdentity
+from admission.ddd.admission.shared_kernel.repository.i_proposition import CAMPUS_LETTRE_DOSSIER
+from admission.ddd.admission.shared_kernel.tests.factory.formation import (
     CampusFactory,
     FormationIdentityFactory,
 )

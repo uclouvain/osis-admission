@@ -29,10 +29,10 @@ from django.test import SimpleTestCase
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     ExperiencesAcademiquesNonCompleteesException,
 )
-from admission.ddd.admission.domain.model.enums.authentification import (
+from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
     EtatAuthentificationParcours,
 )
-from admission.ddd.admission.enums.emplacement_document import OngletsDemande
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_generale.commands import (
     ModifierStatutChecklistExperienceParcoursAnterieurCommand,
 )
@@ -45,7 +45,7 @@ from admission.ddd.admission.formation_generale.domain.model.proposition import 
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     PropositionNonTrouveeException,
 )
-from admission.infrastructure.admission.domain.service.in_memory.profil_candidat import (
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
 )
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (

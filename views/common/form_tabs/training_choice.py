@@ -30,7 +30,7 @@ from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_G
 from admission.ddd.admission.doctorat.preparation.commands import (
     ModifierChoixFormationParGestionnaireCommand as ModifierChoixFormationDoctoraleParGestionnaireCommand,
 )
-from admission.ddd.admission.enums import Onglets
+from admission.ddd.admission.shared_kernel.enums import Onglets
 from admission.ddd.admission.formation_continue.commands import (
     ModifierChoixFormationParGestionnaireCommand as ModifierChoixFormationContinueParGestionnaireCommand,
 )

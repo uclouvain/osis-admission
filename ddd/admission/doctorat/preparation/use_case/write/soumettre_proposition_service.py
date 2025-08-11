@@ -43,16 +43,16 @@ from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervi
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.doctorat.validation.domain.service.demande import DemandeService
 from admission.ddd.admission.doctorat.validation.repository.i_demande import IDemandeRepository
-from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
-from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
-from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
-from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
-from admission.ddd.admission.domain.service.profil_soumis_candidat import (
+from admission.ddd.admission.shared_kernel.domain.builder.formation_identity import FormationIdentityBuilder
+from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription import ICalendrierInscription
+from admission.ddd.admission.shared_kernel.domain.service.i_elements_confirmation import IElementsConfirmation
+from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import ITitresAcces
+from admission.ddd.admission.shared_kernel.domain.service.profil_soumis_candidat import (
     ProfilSoumisCandidatTranslator,
 )
-from admission.ddd.admission.enums.question_specifique import Onglets
+from admission.ddd.admission.shared_kernel.enums.question_specifique import Onglets
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.service.financabilite import Financabilite

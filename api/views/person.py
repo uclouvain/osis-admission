@@ -40,7 +40,7 @@ from admission.api.views.mixins import (
     GeneralEducationPersonRelatedMixin,
     PersonRelatedMixin,
 )
-from admission.infrastructure.admission.domain.service.profil_candidat import (
+from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import (
     ProfilCandidatTranslator,
 )
 from backoffice.settings.rest_framework.common_views import (

@@ -39,7 +39,7 @@ from admission.ddd.admission.doctorat.preparation.domain.service.i_historique im
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
     IPropositionRepository,
 )
-from admission.ddd.admission.domain.service.i_raccrocher_experiences_curriculum import (
+from admission.ddd.admission.shared_kernel.domain.service.i_raccrocher_experiences_curriculum import (
     IRaccrocherExperiencesCurriculum,
 )
 

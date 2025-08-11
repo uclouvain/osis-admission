@@ -23,16 +23,16 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.domain.builder.formation_identity import FormationIdentityBuilder
-from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
-from admission.ddd.admission.domain.service.i_elements_confirmation import IElementsConfirmation
-from admission.ddd.admission.domain.service.i_historique import IHistorique
-from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.domain.service.i_raccrocher_experiences_curriculum import IRaccrocherExperiencesCurriculum
-from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
-from admission.ddd.admission.domain.service.profil_soumis_candidat import ProfilSoumisCandidatTranslator
-from admission.ddd.admission.enums import Onglets
+from admission.ddd.admission.shared_kernel.domain.builder.formation_identity import FormationIdentityBuilder
+from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription import ICalendrierInscription
+from admission.ddd.admission.shared_kernel.domain.service.i_elements_confirmation import IElementsConfirmation
+from admission.ddd.admission.shared_kernel.domain.service.i_historique import IHistorique
+from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_raccrocher_experiences_curriculum import IRaccrocherExperiencesCurriculum
+from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import ITitresAcces
+from admission.ddd.admission.shared_kernel.domain.service.profil_soumis_candidat import ProfilSoumisCandidatTranslator
+from admission.ddd.admission.shared_kernel.enums import Onglets
 from admission.ddd.admission.formation_continue.commands import SoumettrePropositionCommand
 from admission.ddd.admission.formation_continue.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
