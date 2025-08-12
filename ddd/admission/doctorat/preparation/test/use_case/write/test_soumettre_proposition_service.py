@@ -96,7 +96,7 @@ class TestVerifierPropositionServiceCommun(TestCase):
                 sigle='SC3DP',
                 annee=2020,
                 type=TrainingType.PHD.name,
-                grade_academique='1',
+                code_etude_ares='1',
                 credits=0,
                 cycle=3,
             )
