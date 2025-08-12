@@ -42,17 +42,17 @@ from admission.ddd.admission.formation_generale.domain.model.proposition import 
 from admission.ddd.admission.formation_generale.test.factory.proposition import (
     PropositionFactory,
 )
-from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.elements_confirmation import (
-    ElementsConfirmationInMemory,
-)
-from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
-    ProfilCandidatInMemoryTranslator,
-)
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.formation import (
     FormationGeneraleInMemoryTranslator,
 )
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.elements_confirmation import (
+    ElementsConfirmationInMemory,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
+    ProfilCandidatInMemoryTranslator,
 )
 from admission.infrastructure.message_bus_in_memory import (
     message_bus_in_memory_instance,
@@ -282,7 +282,7 @@ class TestSoumettrePropositionGenerale(TestCase):
                 sigle='MASTER-SCI',
                 annee=2021,
                 type=TrainingType.MASTER_MC.name,
-                grade_academique=TrainingType.MASTER_MC.name,
+                code_etude_ares=TrainingType.MASTER_MC.name,
                 credits=60,
                 cycle=2,
             ),
