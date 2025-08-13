@@ -309,7 +309,7 @@ class InjectionEPCAdmission:
                 admission=admission,
                 admission_generale=admission_generale,
                 etudes_secondaires=etudes_secondaires,
-            ) if admission_generale else None,
+            ) if admission_generale and admission_generale.foreign_access_title_equivalency_type else None,
             "documents": (
                 InjectionEPCCurriculum._recuperer_documents(admission_generale or admission_iufc or admission_doctorat)
                 + documents_specifiques
