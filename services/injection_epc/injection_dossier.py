@@ -305,11 +305,21 @@ class InjectionEPCAdmission:
                 admission_specifique=admission_generale or admission_doctorat
             ) if admission_generale or admission_doctorat else None,
             "adresses": cls._get_adresses(adresses=adresses),
+            "equivalence": cls._get_equivalence(admission_generale=admission_generale) if admission_generale else None,
             "documents": (
                 InjectionEPCCurriculum._recuperer_documents(admission_generale or admission_iufc or admission_doctorat)
                 + documents_specifiques
             ),
             "documents_manquants": cls._recuperer_documents_manquants(admission=admission),
+        }
+
+    @classmethod
+    def _get_equivalence(cls, admission_generale: GeneralEducationAdmission):
+        return {
+            "type": admission_generale.foreign_access_title_equivalency_type,
+            "statut": admission_generale.foreign_access_title_equivalency_status,
+            "date": admission_generale.foreign_access_title_equivalency_effective_date.strftime("%d/%m/%Y"),
+            "etat": admission_generale.foreign_access_title_equivalency_state,
         }
 
     @classmethod
