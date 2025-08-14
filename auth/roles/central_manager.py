@@ -235,5 +235,10 @@ class CentralManager(EntityRoleModel):
             'admission.merge_candidate_with_known_person': has_scope(Scope.GENERAL)
             & is_entity_manager
             & ~is_sent_to_epc,
+            # Tables de références
+            'reference.view_diplomatitle': rules.always_allow,
+            'reference.view_scholarship': rules.always_allow,
+            'reference.view_reference_choice': rules.always_allow,
+            'base.view_organization': rules.always_allow,
         }
         return RuleSet(ruleset)
