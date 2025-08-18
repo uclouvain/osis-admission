@@ -6591,6 +6591,9 @@ msgstr ""
 msgid "The proposition must be submitted to realize this action."
 msgstr ""
 
+msgid "The proposition must be validated to realize this action."
+msgstr ""
+
 msgid ""
 "The proposition must involve a change of course and must have a defined "
 "access condition."

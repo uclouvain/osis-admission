@@ -7311,6 +7311,9 @@ msgstr "La proposition doit être gérée par la CDD pour réaliser cette action
 msgid "The proposition must be submitted to realize this action."
 msgstr "La proposition doit être soumise pour réaliser cette action."
 
+msgid "The proposition must be validated to realize this action."
+msgstr "La proposition doit être validée pour réaliser cette action."
+
 msgid ""
 "The proposition must involve a change of course and must have a defined "
 "access condition."

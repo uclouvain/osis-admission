@@ -30,6 +30,7 @@
 
   {% has_perm 'admission.change_checklist_iufc' as is_iufc %}
   {% not_bool is_iufc as is_not_iufc %}
+  {% has_perm 'admission.cancel_admission_iufc' as can_cancel_admission_iufc %}
 
   {% if current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'fac_approval' %}
   <dl>
@@ -124,8 +125,8 @@
       {% checklist_state_button tab='decision' label=_("Fac approval") icon='circle-arrow-right' state='GEST_EN_COURS' en_cours="fac_approval" class='success' tooltip=validation_other_disabled_str|force_escape disabled=True %}
       {% checklist_state_button tab='decision' label=_("On hold") icon='circle-stop' state='GEST_EN_COURS' en_cours="on_hold" class='info' tooltip=validation_other_disabled_str|force_escape disabled=True %}
       {% checklist_state_button tab='decision' label=_("Denied") icon='circle-stop' state='GEST_BLOCAGE' blocage="denied" class='danger' tooltip=validation_other_disabled_str|force_escape disabled=True %}
-      {% if is_iufc %}
-        {% checklist_state_button tab='decision' label=_("Canceled") icon='circle-stop' state='GEST_BLOCAGE' blocage="canceled" class='danger' open_modal='#decision-cancel-modal' %}
+      {% if can_cancel_admission_iufc %}
+        {% checklist_state_button tab='decision' label=_("Canceled") icon='circle-stop' state='GEST_BLOCAGE' blocage="canceled" class='danger' open_modal='#decision-cancel-modal' force_enabled=True %}
       {% else %}
         {% checklist_state_button tab='decision' label=_("Canceled") icon='circle-stop' state='GEST_BLOCAGE' blocage="canceled" class='danger' tooltip=cancel_while_validated_label|force_escape disabled=True %}
       {% endif %}

@@ -200,6 +200,7 @@ class CentralManager(EntityRoleModel):
             & (general.in_sic_status | continuing.is_submitted | doctorate.in_sic_status)
             & ~is_sent_to_epc,
             'admission.change_checklist_iufc': is_entity_manager & continuing.is_submitted & ~is_sent_to_epc,
+            'admission.cancel_admission_iufc': is_entity_manager & continuing.is_submitted,
             'admission.change_payment': is_entity_manager & general.in_sic_status_or_application_fees & ~is_sent_to_epc,
             'admission.checklist_faculty_decision_transfer_to_fac': is_entity_manager
             & (general.can_send_to_fac_faculty_decision | doctorate.can_send_to_fac_faculty_decision)
