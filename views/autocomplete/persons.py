@@ -23,18 +23,24 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import json
+
 from dal import autocomplete
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import SearchVector
 from django.db.models import Exists, F, OuterRef, Q
 
+from admission.admission_utils.get_actor_option_text import get_actor_option_text
 from admission.auth.roles.candidate import Candidate
 from admission.ddd.admission.doctorat.preparation.commands import (
     RechercherPromoteursQuery,
 )
+from admission.ddd.admission.doctorat.preparation.dtos import PromoteurDTO
 from base.auth.roles.tutor import Tutor
 from base.models.person import Person
+from base.models.student import Student
+from infrastructure.messages_bus import message_bus_instance
 
 __all__ = [
     'CandidatesAutocomplete',
@@ -45,9 +51,6 @@ __all__ = [
 ]
 
 __namespace__ = False
-
-from base.models.student import Student
-from infrastructure.messages_bus import message_bus_instance
 
 
 class PersonsAutocomplete(LoginRequiredMixin):
@@ -173,20 +176,38 @@ class TutorAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetView):
         return qs
 
 
-class PromotersAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
+class PromotersAutocomplete(LoginRequiredMixin, autocomplete.Select2ListView):
     urlpatterns = 'promoters'
 
-    def get_results(self, context):
-        return [
-            {
-                'id': actor.uuid,
-                'text': ', '.join([actor.nom, actor.prenom]),
-            }
-            for actor in context['object_list']
-        ]
+    def autocomplete_results(self, results):
+        # The list is already filtered
+        return results
 
-    def get_queryset(self):
+    def results(self, results):
         if not self.q:
             return []
 
-        return message_bus_instance.invoke(RechercherPromoteursQuery(terme_recherche=self.q))
+        results_without_duplicates = []
+        already_added_actors: set[str] = set()
+
+        promoters: list[PromoteurDTO] = message_bus_instance.invoke(RechercherPromoteursQuery(terme_recherche=self.q))
+
+        for actor in promoters:
+            promoter_as_dict = {
+                'global_id': actor.matricule,
+                'first_name': actor.prenom,
+                'last_name': actor.nom,
+            }
+            identifier_str = json.dumps(promoter_as_dict)
+
+            # Create only one option for external members having the same name
+            if identifier_str not in already_added_actors:
+                already_added_actors.add(identifier_str)
+                results_without_duplicates.append(
+                    {
+                        'id': identifier_str,
+                        'text': get_actor_option_text(promoter_as_dict),
+                    }
+                )
+
+        return results_without_duplicates

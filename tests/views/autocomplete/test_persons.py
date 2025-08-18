@@ -23,6 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import json
+from gettext import gettext
 
 from django.contrib.auth.models import AnonymousUser, User
 from django.test import RequestFactory, TestCase
@@ -149,8 +151,18 @@ class PromotersAutocompleteTestCase(TestCase):
     @classmethod
     def _formatted_person_result(cls, supervision_actor: SupervisionActor):
         return {
-            'id': str(supervision_actor.uuid),
-            'text': '{}, {}'.format(supervision_actor.last_name, supervision_actor.first_name),
+            'id': json.dumps(
+                {
+                    'global_id': supervision_actor.person.global_id if supervision_actor.person else '',
+                    'first_name': supervision_actor.first_name,
+                    'last_name': supervision_actor.last_name,
+                }
+            ),
+            'text': '{}, {} ({})'.format(
+                supervision_actor.last_name,
+                supervision_actor.first_name,
+                supervision_actor.person.global_id if supervision_actor.person else gettext('external'),
+            ),
         }
 
     @classmethod
@@ -169,6 +181,10 @@ class PromotersAutocompleteTestCase(TestCase):
             actor_ptr__person__last_name='Poe',
         )
         cls.external_promoter = ExternalPromoterFactory(
+            first_name='John',
+            last_name='Doe',
+        )
+        cls.external_promoter_same_name = ExternalPromoterFactory(
             first_name='John',
             last_name='Doe',
         )
@@ -191,7 +207,6 @@ class PromotersAutocompleteTestCase(TestCase):
         self.assertJSONEqual(
             response.content,
             {
-                'pagination': {'more': False},
                 'results': [],
             },
         )
@@ -205,7 +220,6 @@ class PromotersAutocompleteTestCase(TestCase):
         self.assertJSONEqual(
             response.content,
             {
-                'pagination': {'more': False},
                 'results': [
                     self._formatted_person_result(self.promoter),
                 ],
@@ -221,7 +235,6 @@ class PromotersAutocompleteTestCase(TestCase):
         self.assertJSONEqual(
             response.content,
             {
-                'pagination': {'more': False},
                 'results': [
                     self._formatted_person_result(self.external_promoter),
                 ],
@@ -237,7 +250,6 @@ class PromotersAutocompleteTestCase(TestCase):
         self.assertJSONEqual(
             response.content,
             {
-                'pagination': {'more': False},
                 'results': [
                     self._formatted_person_result(self.promoter),
                 ],

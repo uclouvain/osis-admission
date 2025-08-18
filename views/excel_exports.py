@@ -26,6 +26,7 @@
 
 import ast
 import datetime
+import json
 import uuid
 from typing import Dict
 
@@ -48,6 +49,7 @@ from osis_export.contrib.export_mixins import ExcelFileExportMixin, ExportMixin
 from osis_export.models import Export
 from osis_export.models.enums.types import ExportTypes
 
+from admission.admission_utils.get_actor_option_text import get_actor_option_text
 from admission.ddd.admission.shared_kernel.commands import ListerToutesDemandesQuery
 from admission.ddd.admission.doctorat.preparation.commands import (
     ListerDemandesQuery as ListerDemandesDoctoralesQuery,
@@ -895,11 +897,11 @@ class DoctorateAdmissionListExcelExportView(BaseAdmissionExcelExportView):
             if candidate:
                 mapping_filter_key_value['matricule_candidat'] = candidate.full_name
 
-        promoter_uuid = formatted_filters.get('uuid_promoteur')
-        if promoter_uuid:
-            promoter = SupervisionActor.objects.filter(uuid=promoter_uuid).first()
-            if promoter:
-                mapping_filter_key_value['uuid_promoteur'] = promoter.complete_name
+        promoter_id = formatted_filters.get('id_promoteur')
+        if promoter_id:
+            promoter_as_dict = json.loads(promoter_id)
+            promoter_option = get_actor_option_text(promoter_as_dict)
+            mapping_filter_key_value['id_promoteur'] = promoter_option
 
         # Retrieve the nationality
         country_of_citizenship_iso_code = formatted_filters.get('nationalite')
