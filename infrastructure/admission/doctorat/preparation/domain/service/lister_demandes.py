@@ -24,12 +24,14 @@
 #
 # ##############################################################################
 import datetime
+import json
 from collections import defaultdict
 from typing import Dict, List, Optional
 
 from django.conf import settings
-from django.db.models import Q
-from django.db.models.functions import Coalesce
+from django.contrib.postgres.search import SearchVector
+from django.db.models import F, Q, When
+from django.db.models.functions import Coalesce, Concat
 from django.utils.translation import get_language
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
@@ -71,7 +73,7 @@ class ListerDemandesService(IListerDemandesService):
         cdds: Optional[List[str]] = None,
         commission_proximite: Optional[str] = '',
         sigles_formations: Optional[List[str]] = None,
-        uuid_promoteur: Optional[str] = '',
+        id_promoteur: Optional[str] = '',
         type_financement: Optional[str] = '',
         bourse_recherche: Optional[str] = '',
         cotutelle: Optional[bool] = None,
@@ -88,6 +90,8 @@ class ListerDemandesService(IListerDemandesService):
         taille_page: Optional[int] = None,
     ) -> PaginatedList[DemandeRechercheDTO]:
         current_language = get_language() or settings.LANGUAGE_CODE
+
+        with_distinct = False
 
         qs = (
             DoctorateAdmission.objects.select_related(
@@ -139,8 +143,17 @@ class ListerDemandesService(IListerDemandesService):
         if sigles_formations:
             qs = qs.filter(training__acronym__in=sigles_formations)
 
-        if uuid_promoteur:
-            qs = qs.filter(supervision_group__actors__uuid=uuid_promoteur)
+        if id_promoteur:
+            promoter = json.loads(id_promoteur)
+
+            if promoter.get('global_id'):
+                qs = qs.filter(supervision_group__actors__person__global_id=promoter.get('global_id'))
+            else:
+                qs = qs.filter(
+                    supervision_group__actors__last_name=promoter.get('last_name'),
+                    supervision_group__actors__first_name=promoter.get('first_name'),
+                )
+                with_distinct = True
 
         if type_financement:
             qs = qs.filter(financing_type=type_financement)
@@ -266,6 +279,9 @@ class ListerDemandesService(IListerDemandesService):
                 field_order = ['-' + field for field in field_order]
 
         qs = qs.order_by(*field_order, 'id')
+
+        if with_distinct:
+            qs = qs.distinct()
 
         # Paginate the queryset
         if page and taille_page:

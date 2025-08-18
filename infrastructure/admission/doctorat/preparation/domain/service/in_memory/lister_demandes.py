@@ -46,7 +46,7 @@ class ListerDemandesInMemoryService(IListerDemandesService):
         cdds: Optional[List[str]] = None,
         commission_proximite: Optional[str] = '',
         sigles_formations: Optional[List[str]] = None,
-        uuid_promoteur: Optional[str] = '',
+        id_promoteur: Optional[str] = '',
         type_financement: Optional[str] = '',
         bourse_recherche: Optional[str] = '',
         cotutelle: Optional[bool] = None,

@@ -8689,6 +8689,9 @@ msgctxt "payment"
 msgid "expired"
 msgstr "Expiré"
 
+msgid "external"
+msgstr "externe"
+
 msgctxt "payment"
 msgid "failed"
 msgstr "En échec"
