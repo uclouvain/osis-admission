@@ -66,7 +66,7 @@
 
     {% panel _("Doctoral research project") %}
         {% field_data _("Project title") admission.titre_projet %}
-        {% field_data _("Project resume") admission.resume_projet|linebreaks %}
+        {% field_data _("Project abstract") admission.resume_projet|linebreaks %}
         {% field_data _("Thesis language") admission.nom_langue_redaction_these %}
         {% if admission.institut_these %}
           {% display admission.nom_institut_these ' ' '(' admission.sigle_institut_these ')' as institut_these %}
@@ -85,7 +85,7 @@
       {% field_data _("Has your PhD project already started?") admission.projet_doctoral_deja_commence %}
       {% if admission.projet_doctoral_deja_commence %}
         {% field_data _("Institution") admission.projet_doctoral_institution %}
-        {% field_data _("Work start date") admission.projet_doctoral_date_debut %}
+        {% field_data _("Research start date") admission.projet_doctoral_date_debut %}
       {% endif %}
       {% field_data _("Have you previously enrolled for a PhD?") admission.doctorat_deja_realise|enum_display:'ChoixDoctoratDejaRealise' %}
         {% if admission.doctorat_deja_realise != "NO" %}
