@@ -84,17 +84,19 @@
       </div>
       {% bootstrap_field_with_tooltip form.bourse_preuve label_class=form.label_classes.bourse_preuve %}
     </div>
-    <div id="financing-details" class="row">
-      <div class="col-md-6">
-        {% bootstrap_field form.duree_prevue placeholder="" label_class=form.label_classes.duree_prevue %}
+    <div id="financing-details">
+      <div class="row">
+        <div class="col-md-6">
+          {% bootstrap_field form.duree_prevue placeholder="" label_class=form.label_classes.duree_prevue %}
+        </div>
+        <div class="col-md-6">
+          {% bootstrap_field form.temps_consacre placeholder="" label_class=form.label_classes.temps_consacre %}
+        </div>
       </div>
-      <div class="col-md-6">
-        {% bootstrap_field form.temps_consacre placeholder="" label_class=form.label_classes.temps_consacre %}
-      </div>
-      <div class="col-md-6">
+      <div>
         {% bootstrap_field_with_tooltip form.est_lie_fnrs_fria_fresh_csc label_class=form.label_classes.est_lie_fnrs_fria_fresh_csc %}
       </div>
-      <div class="col-md-6">
+      <div>
         {% bootstrap_field form.commentaire_financement label_class=form.label_classes.commentaire_financement %}
       </div>
     </div>
