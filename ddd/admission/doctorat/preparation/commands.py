@@ -161,7 +161,7 @@ class RedonnerLaMainAuCandidatCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class RenvoyerInvitationSignatureExterneCommand(interface.CommandRequest):
+class RenvoyerInvitationSignatureCommand(interface.CommandRequest):
     uuid_proposition: str
     uuid_membre: str
 
