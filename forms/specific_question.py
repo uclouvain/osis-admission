@@ -31,8 +31,8 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import get_language, gettext_lazy as _
 
 from admission.constants import DEFAULT_MIME_TYPES
-from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
-from admission.ddd.admission.enums import (
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
+from admission.ddd.admission.shared_kernel.enums import (
     TypeItemFormulaire,
     TypeChampSelectionFormulaire,
     CleConfigurationItemFormulaire,

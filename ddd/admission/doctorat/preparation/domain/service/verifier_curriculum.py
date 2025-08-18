@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.domain.service.verifier_curriculum import VerifierCurriculum
+from admission.ddd.admission.shared_kernel.domain.service.verifier_curriculum import VerifierCurriculum
 
 
 class VerifierCurriculumDoctorat(VerifierCurriculum):

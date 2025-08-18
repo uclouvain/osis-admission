@@ -37,7 +37,7 @@ from admission.auth.roles.program_manager import (
 )
 from admission.auth.roles.sic_management import SicManagement
 from admission.constants import COMMENT_TAG_FAC, COMMENT_TAG_GLOBAL, COMMENT_TAG_SIC
-from admission.ddd.admission.commands import (
+from admission.ddd.admission.shared_kernel.commands import (
     RechercherParcoursAnterieurQuery,
     RecupererEtudesSecondairesQuery,
 )
@@ -47,7 +47,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     CurriculumAdmissionDTO,
 )
-from admission.ddd.admission.enums.valorisation_experience import (
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
     ExperiencesCVRecuperees,
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import (

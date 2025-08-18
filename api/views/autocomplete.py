@@ -46,14 +46,14 @@ from admission.api.serializers import PersonSerializer
 from admission.ddd.admission.doctorat.preparation.commands import (
     RechercherDoctoratQuery,
 )
-from admission.ddd.admission.domain.enums import LISTE_TYPES_FORMATION_GENERALE
+from admission.ddd.admission.shared_kernel.domain.enums import LISTE_TYPES_FORMATION_GENERALE
 from admission.ddd.admission.formation_continue.commands import (
     RechercherFormationContinueQuery,
 )
 from admission.ddd.admission.formation_generale.commands import (
     RechercherFormationGeneraleQuery,
 )
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
 from admission.models import DiplomaticPost, EntityProxy

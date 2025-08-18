@@ -2,7 +2,7 @@
 
 from django.db import migrations, models
 
-from admission.ddd.admission.enums import ChoixAffiliationSport
+from admission.ddd.admission.shared_kernel.enums import ChoixAffiliationSport
 
 
 def update_saint_louis_sport_affiliation(apps, schema_editor):

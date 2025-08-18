@@ -31,7 +31,7 @@ from admission.ddd.admission.formation_continue.domain.model.proposition import 
     PropositionIdentity,
 )
 from admission.ddd.admission.formation_continue.dtos import PropositionDTO
-from admission.ddd.admission.repository.i_proposition import IGlobalPropositionRepository
+from admission.ddd.admission.shared_kernel.repository.i_proposition import IGlobalPropositionRepository
 from osis_common.ddd.interface import ApplicationService
 
 

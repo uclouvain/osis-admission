@@ -29,10 +29,10 @@ from typing import Dict, List, Optional, Union
 
 import attr
 
-from admission.ddd.admission.dtos.formation import BaseFormationDTO, FormationDTO
-from admission.ddd.admission.dtos.poste_diplomatique import PosteDiplomatiqueDTO
-from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
-from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.shared_kernel.dtos.formation import BaseFormationDTO, FormationDTO
+from admission.ddd.admission.shared_kernel.dtos.poste_diplomatique import PosteDiplomatiqueDTO
+from admission.ddd.admission.shared_kernel.dtos.profil_candidat import ProfilCandidatDTO
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_NON_SOUMISE,
     DroitsInscriptionMontant,

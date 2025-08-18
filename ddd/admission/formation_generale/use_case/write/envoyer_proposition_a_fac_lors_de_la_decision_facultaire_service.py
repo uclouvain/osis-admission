@@ -23,13 +23,13 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.commands import EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
 from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
-from admission.ddd.admission.shared_kernel.email_destinataire.repository.i_email_destinataire import \
+from admission.ddd.admission.shared_kernel.repository.i_email_destinataire import \
     IEmailDestinataireRepository
 
 

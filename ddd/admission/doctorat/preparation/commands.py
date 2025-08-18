@@ -28,15 +28,15 @@ from typing import Dict, List, Optional
 
 import attr
 
-from admission.ddd.admission import commands
+from admission.ddd.admission.shared_kernel import commands
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixDoctoratDejaRealise,
     ChoixLangueRedactionThese,
 )
-from admission.ddd.admission.enums.valorisation_experience import (
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
     ExperiencesCVRecuperees,
 )
-from admission.ddd.interface import SortedQueryRequest
+from admission.ddd.admission.shared_kernel.interface import SortedQueryRequest
 from osis_common.ddd import interface
 
 UUID = str

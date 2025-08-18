@@ -26,7 +26,7 @@
 
 import waffle
 
-from admission.ddd.admission.commands import RechercherParcoursAnterieurQuery
+from admission.ddd.admission.shared_kernel.commands import RechercherParcoursAnterieurQuery
 from admission.ddd.admission.formation_generale.commands import *
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     OngletsChecklist,
@@ -72,13 +72,13 @@ from admission.ddd.admission.formation_generale.use_case.write.specifier_financa
 from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_resultat_calcul_service import (
     specifier_financabilite_resultat_calcul,
 )
-from admission.ddd.admission.use_case.read import (
+from admission.ddd.admission.shared_kernel.use_case.read import (
     recuperer_questions_specifiques_proposition,
 )
-from admission.ddd.admission.use_case.read.rechercher_parcours_anterieur import (
+from admission.ddd.admission.shared_kernel.use_case.read.rechercher_parcours_anterieur import (
     rechercher_parcours_anterieur,
 )
-from admission.ddd.admission.use_case.write import (
+from admission.ddd.admission.shared_kernel.use_case.write import (
     annuler_reclamation_emplacement_document,
     initialiser_emplacement_document_a_reclamer,
     initialiser_emplacement_document_libre_a_reclamer,
@@ -88,32 +88,32 @@ from admission.ddd.admission.use_case.write import (
     remplir_emplacement_document_par_gestionnaire,
     supprimer_emplacement_document,
 )
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
-from admission.infrastructure.admission.domain.service.calendrier_inscription import (
+from admission.infrastructure.admission.shared_kernel.domain.service.calendrier_inscription import (
     CalendrierInscription,
 )
-from admission.infrastructure.admission.domain.service.elements_confirmation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.elements_confirmation import (
     ElementsConfirmation,
 )
-from admission.infrastructure.admission.domain.service.emplacements_documents_proposition import (
+from admission.infrastructure.admission.shared_kernel.domain.service.emplacements_documents_proposition import (
     EmplacementsDocumentsPropositionTranslator,
 )
-from admission.infrastructure.admission.domain.service.historique import (
+from admission.infrastructure.admission.shared_kernel.domain.service.historique import (
     Historique as HistoriqueGlobal,
 )
-from admission.infrastructure.admission.domain.service.maximum_propositions import (
+from admission.infrastructure.admission.shared_kernel.domain.service.maximum_propositions import (
     MaximumPropositionsAutorisees,
 )
-from admission.infrastructure.admission.domain.service.poste_diplomatique import (
+from admission.infrastructure.admission.shared_kernel.domain.service.poste_diplomatique import (
     PosteDiplomatiqueTranslator,
 )
-from admission.infrastructure.admission.domain.service.profil_candidat import (
+from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import (
     ProfilCandidatTranslator,
 )
-from admission.infrastructure.admission.domain.service.titres_acces import TitresAcces
-from admission.infrastructure.admission.domain.service.unites_enseignement_translator import (
+from admission.infrastructure.admission.shared_kernel.domain.service.titres_acces import TitresAcces
+from admission.infrastructure.admission.shared_kernel.domain.service.unites_enseignement_translator import (
     UnitesEnseignementTranslator,
 )
 from admission.infrastructure.admission.formation_generale.domain.service.comptabilite import (
@@ -152,11 +152,11 @@ from admission.infrastructure.admission.formation_generale.repository.emplacemen
 from admission.infrastructure.admission.formation_generale.repository.proposition import (
     PropositionRepository,
 )
-from admission.infrastructure.admission.repository.titre_acces_selectionnable import (
+from admission.infrastructure.admission.shared_kernel.repository.titre_acces_selectionnable import (
     TitreAccesSelectionnableRepository,
 )
 from admission.infrastructure.admission.shared_kernel.domain.service.matricule_etudiant import MatriculeEtudiantService
-from admission.infrastructure.admission.shared_kernel.email_destinataire.repository.email_destinataire import (
+from admission.infrastructure.admission.shared_kernel.repository.email_destinataire import (
     EmailDestinataireRepository,
 )
 from infrastructure.financabilite.domain.service.financabilite import (

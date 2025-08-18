@@ -53,7 +53,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
     DispenseOuDroitsMajores,
     DroitsInscriptionMontant,
 )
-from admission.ddd.admission.enums.type_demande import TypeDemande
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.infrastructure.admission.formation_generale.domain.service.pdf_generation import (
     ENTITY_SIC,
     ENTITY_SICB,

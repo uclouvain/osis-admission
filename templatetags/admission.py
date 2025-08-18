@@ -63,24 +63,24 @@ from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist 
     INDEX_ONGLETS_CHECKLIST as INDEX_ONGLETS_CHECKLIST_DOCTORALE,
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixSexe
-from admission.ddd.admission.domain.model.enums.authentification import (
+from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
     EtatAuthentificationParcours,
 )
-from admission.ddd.admission.dtos import (
+from admission.ddd.admission.shared_kernel.dtos import (
     CoordonneesDTO,
     EtudesSecondairesAdmissionDTO,
     IdentificationDTO,
 )
-from admission.ddd.admission.dtos.emplacement_document import EmplacementDocumentDTO
-from admission.ddd.admission.dtos.liste import DemandeRechercheDTO
-from admission.ddd.admission.dtos.profil_candidat import ProfilCandidatDTO
-from admission.ddd.admission.dtos.question_specifique import QuestionSpecifiqueDTO
-from admission.ddd.admission.dtos.resume import ResumePropositionDTO
-from admission.ddd.admission.dtos.titre_acces_selectionnable import (
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.shared_kernel.dtos.liste import DemandeRechercheDTO
+from admission.ddd.admission.shared_kernel.dtos.profil_candidat import ProfilCandidatDTO
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
+from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
+from admission.ddd.admission.shared_kernel.dtos.titre_acces_selectionnable import (
     TitreAccesSelectionnableDTO,
 )
-from admission.ddd.admission.enums import Onglets, TypeItemFormulaire
-from admission.ddd.admission.enums.emplacement_document import (
+from admission.ddd.admission.shared_kernel.enums import Onglets, TypeItemFormulaire
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     StatutReclamationEmplacementDocument,
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import (
@@ -107,7 +107,7 @@ from admission.ddd.admission.formation_generale.dtos.proposition import (
 from admission.ddd.admission.formation_generale.dtos.proposition import (
     PropositionGestionnaireDTO,
 )
-from admission.ddd.admission.repository.i_proposition import formater_reference
+from admission.ddd.admission.shared_kernel.repository.i_proposition import formater_reference
 from admission.exports.admission_recap.section import (
     get_educational_experience_context,
     get_non_educational_experience_context,
@@ -116,7 +116,7 @@ from admission.exports.admission_recap.section import (
 from admission.forms.admission.doctorate.supervision import (
     DoctorateAdmissionMemberSupervisionForm,
 )
-from admission.infrastructure.admission.domain.service.annee_inscription_formation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
     AnneeInscriptionFormationTranslator,
 )

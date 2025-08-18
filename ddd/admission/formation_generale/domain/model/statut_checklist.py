@@ -30,7 +30,7 @@ import attr
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext_lazy
 
-from admission.ddd.admission.domain.model.enums.authentification import (
+from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
     EtatAuthentificationParcours,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (

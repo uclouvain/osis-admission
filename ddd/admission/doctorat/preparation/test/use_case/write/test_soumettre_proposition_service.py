@@ -41,7 +41,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
     PropositionAdmissionSC3DPConfirmeeFactory,
 )
-from admission.ddd.admission.domain.model.enums.authentification import (
+from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
     EtatAuthentificationParcours,
 )
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.groupe_de_supervision import (
@@ -50,7 +50,7 @@ from admission.infrastructure.admission.doctorat.preparation.repository.in_memor
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.infrastructure.admission.domain.service.in_memory.elements_confirmation import (
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.elements_confirmation import (
     ElementsConfirmationInMemory,
 )
 from admission.infrastructure.message_bus_in_memory import (
@@ -96,7 +96,7 @@ class TestVerifierPropositionServiceCommun(TestCase):
                 sigle='SC3DP',
                 annee=2020,
                 type=TrainingType.PHD.name,
-                grade_academique='1',
+                code_etude_ares='1',
                 credits=0,
                 cycle=3,
             )
@@ -209,8 +209,8 @@ class TestVerifierPropositionServiceCommun(TestCase):
         self.assertEqual(updated_proposition.checklist_initiale, updated_proposition.checklist_actuelle)
 
     @mock.patch(
-        'admission.infrastructure.admission.domain.service.in_memory.profil_candidat.ProfilCandidatInMemoryTranslator.'
-        'get_identification'
+        'admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat.'
+        'ProfilCandidatInMemoryTranslator.get_identification'
     )
     def test_should_initialize_checklist_hue_candidate(self, mock_identification):
         mock_identification.return_value.pays_nationalite_europeen = False

@@ -31,7 +31,7 @@ from django.test import TestCase
 from django.urls import resolve, reverse
 from rest_framework import status
 
-from admission.ddd.admission.dtos import EtudesSecondairesAdmissionDTO
+from admission.ddd.admission.shared_kernel.dtos import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
 )

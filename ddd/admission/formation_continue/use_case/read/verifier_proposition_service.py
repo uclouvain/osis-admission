@@ -24,11 +24,11 @@
 #
 # ##############################################################################
 
-from admission.ddd.admission.domain.service.i_calendrier_inscription import ICalendrierInscription
-from admission.ddd.admission.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
-from admission.ddd.admission.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.domain.service.i_titres_acces import ITitresAcces
-from admission.ddd.admission.enums import Onglets
+from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription import ICalendrierInscription
+from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import ITitresAcces
+from admission.ddd.admission.shared_kernel.enums import Onglets
 from admission.ddd.admission.formation_continue.domain.service.i_question_specifique import (
     IQuestionSpecifiqueTranslator,
 )

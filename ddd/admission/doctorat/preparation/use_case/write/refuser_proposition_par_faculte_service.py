@@ -38,8 +38,8 @@ from admission.ddd.admission.doctorat.preparation.domain.service.i_pdf_generatio
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
     IPropositionRepository,
 )
-from admission.ddd.admission.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.domain.service.i_unites_enseignement_translator import (
+from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.shared_kernel.domain.service.i_unites_enseignement_translator import (
     IUnitesEnseignementTranslator,
 )
 from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import (
