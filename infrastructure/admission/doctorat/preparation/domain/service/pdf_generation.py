@@ -70,7 +70,9 @@ from admission.ddd.admission.shared_kernel.domain.service.i_unites_enseignement_
 from admission.ddd.admission.shared_kernel.dtos.resume import (
     ResumeEtEmplacementsDocumentsPropositionDTO,
 )
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    OngletsDemande,
+)
 from admission.exports.utils import admission_generate_pdf
 from admission.infrastructure.admission.shared_kernel.domain.service.unites_enseignement_translator import (
     UnitesEnseignementTranslator,
@@ -93,11 +95,6 @@ from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
-)
-from reference.services.mandates import (
-    MandateFunctionEnum,
-    MandatesException,
-    MandatesService,
 )
 
 ENTITY_SIC = 'SIC'
@@ -172,26 +169,17 @@ class PDFGeneration(IPDFGeneration):
         proposition_repository: IPropositionRepository,
         unites_enseignement_translator: IUnitesEnseignementTranslator,
         groupe_supervision_dto: GroupeDeSupervisionDTO,
+        gestionnaire_dto: PersonneConnueUclDTO,
     ):
         proposition_dto = proposition_repository.get_dto_for_gestionnaire(
             proposition_id,
             unites_enseignement_translator,
         )
 
-        cdd_president = []
-        if settings.ESB_API_URL:
-            try:
-                cdd_president = MandatesService.get(
-                    function=MandateFunctionEnum.PRESI,
-                    entity_acronym=proposition_dto.formation.sigle_entite_gestion,
-                )
-            except MandatesException:
-                pass
-
         return {
             'proposition': proposition_dto,
             'groupe_supervision': groupe_supervision_dto,
-            'cdd_president': cdd_president[0] if cdd_president else None,
+            'gestionnaire': gestionnaire_dto,
         }
 
     @classmethod
@@ -251,6 +239,7 @@ class PDFGeneration(IPDFGeneration):
             proposition_repository=proposition_repository,
             unites_enseignement_translator=unites_enseignement_translator,
             groupe_supervision_dto=groupe_supervision_dto,
+            gestionnaire_dto=gestionnaire,
         )
 
         if proposition.type_admission == ChoixTypeAdmission.ADMISSION:

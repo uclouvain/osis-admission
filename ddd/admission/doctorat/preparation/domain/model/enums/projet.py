@@ -37,10 +37,10 @@ class ChoixStatutPropositionDoctorale(ChoiceEnum):
     CONFIRMEE = _('Application confirmed')
     ANNULEE = _('Cancelled application')
 
-    TRAITEMENT_FAC = _('Processing by Fac')
-    A_COMPLETER_POUR_FAC = _('To be completed for Fac')
-    COMPLETEE_POUR_FAC = _('Completed for Fac')
-    RETOUR_DE_FAC = _('Feedback from Fac')
+    TRAITEMENT_FAC = _('Processing by Fac/CDD')
+    A_COMPLETER_POUR_FAC = _('To be completed for Fac/CDD')
+    COMPLETEE_POUR_FAC = _('Completed for Fac/CDD')
+    RETOUR_DE_FAC = _('Feedback from Fac/CDD')
 
     CA_A_COMPLETER = _('Support committee to be completed')
     CA_EN_ATTENTE_DE_SIGNATURE = _('In the process of re-signing')
