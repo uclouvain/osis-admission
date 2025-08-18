@@ -26,6 +26,7 @@
 
 import ast
 import datetime
+import json
 from typing import List
 from unittest import mock
 
@@ -1660,7 +1661,13 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
                 'cdds': 'GHIJK',
                 'commission_proximite': ChoixCommissionProximiteCDSS.BCGIM.name,
                 'sigles_formations': ['ZEBU0'],
-                'uuid_promoteur': str(promoter.uuid),
+                'id_promoteur': json.dumps(
+                    {
+                        'global_id': promoter.person.global_id,
+                        'last_name': promoter.person.last_name,
+                        'first_name': promoter.person.first_name,
+                    }
+                ),
                 'type_financement': ChoixTypeFinancement.SEARCH_SCHOLARSHIP.name,
                 'bourse_recherche': str(scholarship.uuid),
                 'cotutelle': True,
@@ -1730,7 +1737,7 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
         self.assertStrEqual(values[9], 'GHIJK')
         self.assertStrEqual(values[10], str(ChoixCommissionProximiteCDSS.BCGIM.value))
         self.assertStrEqual(values[11], "['ZEBU0']")
-        self.assertStrEqual(values[12], promoter.complete_name)
+        self.assertStrEqual(values[12], f'{promoter.last_name}, {promoter.first_name} ({promoter.person.global_id})')
         self.assertStrEqual(values[13], str(ChoixTypeFinancement.SEARCH_SCHOLARSHIP.value))
         self.assertStrEqual(values[14], scholarship.short_name)
         self.assertStrEqual(values[15], 'oui')
@@ -1758,7 +1765,7 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
                 'cdds': '',
                 'commission_proximite': '',
                 'sigles_formations': [],
-                'uuid_promoteur': '',
+                'id_promoteur': '',
                 'type_financement': '',
                 'bourse_recherche': '',
                 'cotutelle': None,

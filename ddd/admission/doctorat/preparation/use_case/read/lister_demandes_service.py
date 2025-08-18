@@ -46,7 +46,7 @@ def lister_demandes(
         cdds=cmd.cdds,
         commission_proximite=cmd.commission_proximite,
         sigles_formations=cmd.sigles_formations,
-        uuid_promoteur=cmd.uuid_promoteur,
+        id_promoteur=cmd.id_promoteur,
         type_financement=cmd.type_financement,
         bourse_recherche=cmd.bourse_recherche,
         cotutelle=cmd.cotutelle,
