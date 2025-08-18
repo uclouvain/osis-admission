@@ -82,6 +82,10 @@
 
     {% bootstrap_field cdd_decision_approval_form.join_program_fac_comment label=cdd_decision_approval_form.join_program_fac_comment.label|add:candidate_language_tag|safe %}
 
+    {% if cdd_decision_approval_form.communication_to_the_candidate %}
+      {% bootstrap_field cdd_decision_approval_form.communication_to_the_candidate label=cdd_decision_approval_form.communication_to_the_candidate.label|add:candidate_language_tag|label_with_user_icon %}
+    {% endif %}
+
     {% if original_admission.status == 'A_COMPLETER_POUR_FAC' %}
       <p>
         {% blocktranslate trimmed %}

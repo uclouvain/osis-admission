@@ -55,6 +55,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist 
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
 )
 from admission.ddd.admission.doctorat.preparation.dtos import PromoteurDTO
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.forms.admission.checklist import (
     DoctorateCddDecisionApprovalForm,
     DoctorateFacDecisionRefusalForm,
@@ -219,6 +220,7 @@ class CddDecisionMixin(CheckListDefaultContextMixin):
             initial=initial,
             data=self.request.POST if self.request.method == 'POST' else None,
             prefix='cdd-decision-approval',
+            is_admission=self.admission.type_demande == TypeDemande.ADMISSION.name,
         )
 
 
@@ -367,6 +369,7 @@ class CddApprovalDecisionView(
                     nom_personne_contact_programme_annuel=form.cleaned_data['annual_program_contact_person_name'],
                     email_personne_contact_programme_annuel=form.cleaned_data['annual_program_contact_person_email'],
                     commentaire_programme_conjoint=form.cleaned_data['join_program_fac_comment'],
+                    communication_au_candidat=form.cleaned_data.get('communication_to_the_candidate') or '',
                     gestionnaire=self.request.user.person.global_id,
                 )
             )

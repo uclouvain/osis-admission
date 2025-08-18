@@ -428,6 +428,7 @@ class Proposition(interface.RootEntity):
         nom_personne_contact_programme_annuel: str,
         email_personne_contact_programme_annuel: str,
         commentaire_programme_conjoint: str,
+        communication_au_candidat: str,
     ):
         SpecifierNouvellesInformationsDecisionFacultaireValidatorList(
             statut=self.statut,
@@ -476,6 +477,7 @@ class Proposition(interface.RootEntity):
         self.email_personne_contact_programme_annuel_annuel = email_personne_contact_programme_annuel
 
         self.commentaire_programme_conjoint = commentaire_programme_conjoint
+        self.communication_au_candidat = communication_au_candidat
 
     def refuser_par_fac(self, auteur_modification: str):
         RefuserParFacValidatorList(
