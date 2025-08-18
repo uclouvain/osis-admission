@@ -198,6 +198,7 @@ class SaveCommentView(AdmissionFormMixin, FormView):
                 'author': self.request.user.person,
             },
         )
+        self.update_admission_author = self.is_continuing
         return super().form_valid(CommentForm(comment=comment, **self.get_form_kwargs()))
 
 

@@ -56,12 +56,16 @@ from admission.forms.admission.continuing_education.checklist import (
     DecisionFacApprovalChoices,
     DecisionFacApprovalForm,
     DecisionHoldForm,
-    DecisionValidationForm,
 )
 from admission.infrastructure.admission.formation_continue.domain.service.historique import (
     TAGS_APPROBATION_PROPOSITION,
 )
 from admission.models import ContinuingEducationAdmission
+from admission.models.epc_injection import (
+    EPCInjection as AdmissionEPCInjection,
+    EPCInjectionType,
+    EPCInjectionStatus as AdmissionEPCInjectionStatus,
+)
 from admission.tests.factories.continuing_education import (
     ContinuingEducationAdmissionFactory,
     ContinuingEducationTrainingFactory,
@@ -89,13 +93,6 @@ class ChecklistViewTestCase(TestCase):
             academic_year=cls.academic_years[0],
             education_group_type__name=TrainingType.MASTER_MA_120.name,
         )
-        cls.continuing_admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
-            training=cls.training,
-            candidate=CompletePersonFactory(language=settings.LANGUAGE_CODE_FR),
-            submitted=True,
-        )
-        cls.candidate = cls.continuing_admission.candidate
-
         cls.iufc_manager_user = CentralManagerRoleFactory(
             entity=cls.first_doctoral_commission, scopes=[Scope.IUFC.name]
         ).person.user
@@ -140,7 +137,13 @@ class ChecklistViewTestCase(TestCase):
         patched.side_effect = lambda tokens: {token: self.file_metadata for token in tokens}
         self.addCleanup(patcher.stop)
 
-        self.continuing_admission.last_update_author = None
+        self.continuing_admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
+            training=self.training,
+            candidate=CompletePersonFactory(language=settings.LANGUAGE_CODE_FR),
+            submitted=True,
+        )
+        self.candidate = self.continuing_admission.candidate
+
 
     #### IUFC MANAGER
 
@@ -389,6 +392,27 @@ class ChecklistViewTestCase(TestCase):
 
         self.assertIsInstance(response.context['decision_cancel_form'], DecisionCancelForm)
 
+    def test_get_cancel_iufc_with_epc_injection_and_validated_status(self):
+        self.client.force_login(user=self.iufc_manager_user)
+
+        url = resolve_url(
+            'admission:continuing-education:decision-cancel',
+            uuid=self.continuing_admission.uuid,
+        )
+
+        self.continuing_admission.status = ChoixStatutPropositionContinue.INSCRIPTION_AUTORISEE.name
+        self.continuing_admission.checklist['current']['decision']['statut'] = ChoixStatutChecklist.GEST_REUSSITE.name
+        self.continuing_admission.save()
+
+        AdmissionEPCInjection.objects.create(
+            admission=self.continuing_admission,
+            type=EPCInjectionType.DEMANDE.name,
+            status=AdmissionEPCInjectionStatus.OK.name,
+        )
+        response = self.client.get(url, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+
     def test_post_cancel_iufc(self):
         self.client.force_login(user=self.iufc_manager_user)
 
@@ -438,6 +462,36 @@ class ChecklistViewTestCase(TestCase):
             [entry.tags for entry in historic_entries],
             [['proposition', 'decision', 'status-changed'], ['proposition', 'decision', 'message']],
         )
+
+    def test_post_cancel_iufc_with_epc_injection_and_validated_admission(self):
+        self.client.force_login(user=self.iufc_manager_user)
+
+        url = resolve_url(
+            'admission:continuing-education:decision-cancel',
+            uuid=self.continuing_admission.uuid,
+        )
+
+        self.continuing_admission.status = ChoixStatutPropositionContinue.INSCRIPTION_AUTORISEE.name
+        self.continuing_admission.checklist['current']['decision']['statut'] = ChoixStatutChecklist.GEST_REUSSITE.name
+        self.continuing_admission.save()
+
+        AdmissionEPCInjection.objects.create(
+            admission=self.continuing_admission,
+            type=EPCInjectionType.DEMANDE.name,
+            status=AdmissionEPCInjectionStatus.OK.name,
+        )
+
+        response = self.client.post(
+            url,
+            data={
+                'decision-cancel-reason': 'foobar',
+                'decision-cancel-subject': 'subject',
+                'decision-cancel-body': 'body',
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
 
     def test_get_validation_iufc(self):
         self.client.force_login(user=self.iufc_manager_user)
@@ -989,6 +1043,57 @@ class ChecklistViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
         self.assertIsInstance(response.context['decision_cancel_form'], DecisionCancelForm)
+
+    def test_get_cancel_fac_with_epc_injection_and_validated_status(self):
+        self.client.force_login(user=self.fac_manager_user)
+
+        url = resolve_url(
+            'admission:continuing-education:decision-cancel',
+            uuid=self.continuing_admission.uuid,
+        )
+
+        self.continuing_admission.status = ChoixStatutPropositionContinue.INSCRIPTION_AUTORISEE.name
+        self.continuing_admission.checklist['current']['decision']['statut'] = ChoixStatutChecklist.GEST_REUSSITE.name
+        self.continuing_admission.save()
+
+        AdmissionEPCInjection.objects.create(
+            admission=self.continuing_admission,
+            type=EPCInjectionType.DEMANDE.name,
+            status=AdmissionEPCInjectionStatus.OK.name,
+        )
+        response = self.client.get(url, **self.default_headers)
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_post_cancel_fac_with_epc_injection_and_validated_admission(self):
+        self.client.force_login(user=self.fac_manager_user)
+
+        url = resolve_url(
+            'admission:continuing-education:decision-cancel',
+            uuid=self.continuing_admission.uuid,
+        )
+
+        self.continuing_admission.status = ChoixStatutPropositionContinue.INSCRIPTION_AUTORISEE.name
+        self.continuing_admission.checklist['current']['decision']['statut'] = ChoixStatutChecklist.GEST_REUSSITE.name
+        self.continuing_admission.save()
+
+        AdmissionEPCInjection.objects.create(
+            admission=self.continuing_admission,
+            type=EPCInjectionType.DEMANDE.name,
+            status=AdmissionEPCInjectionStatus.OK.name,
+        )
+
+        response = self.client.post(
+            url,
+            data={
+                'decision-cancel-reason': 'foobar',
+                'decision-cancel-subject': 'subject',
+                'decision-cancel-body': 'body',
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 403)
 
     def test_post_cancel_fac(self):
         self.client.force_login(user=self.fac_manager_user)

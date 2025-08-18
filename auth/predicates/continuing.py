@@ -35,6 +35,7 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     STATUTS_PROPOSITION_CONTINUE_SOUMISE,
     STATUTS_PROPOSITION_CONTINUE_SOUMISE_POUR_GESTIONNAIRE,
     STATUTS_PROPOSITION_CONTINUE_SOUMISE_POUR_CANDIDAT,
+    ChoixStatutChecklist,
 )
 from osis_role.errors import predicate_failed_msg
 
@@ -59,6 +60,15 @@ def in_progress(self, user: User, obj: ContinuingEducationAdmission):
 @predicate_failed_msg(message=_("The proposition must be submitted to realize this action."))
 def is_submitted(self, user: User, obj: ContinuingEducationAdmission):
     return isinstance(obj, ContinuingEducationAdmission) and bool(obj.submitted_at)
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("The proposition must be validated to realize this action."))
+def is_validated(self, user: User, obj: ContinuingEducationAdmission):
+    checklist_is_validated = (
+        obj.checklist.get('current', {}).get('decision', {}).get('statut') == ChoixStatutChecklist.GEST_REUSSITE.name
+    )
+    return isinstance(obj, ContinuingEducationAdmission) and checklist_is_validated
 
 
 @predicate(bind=True)

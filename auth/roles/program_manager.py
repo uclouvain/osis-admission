@@ -196,6 +196,10 @@ class ProgramManager(EducationGroupRoleModel):
             & continuing.is_continuing
             & continuing.is_submitted
             & ~is_sent_to_epc,
+            'admission.cancel_admission_iufc': is_part_of_education_group
+            & continuing.is_submitted
+            & ~continuing.is_validated
+            & ~is_sent_to_epc,
             'admission.checklist_change_training_choice': is_part_of_education_group
             & doctorate.in_fac_status
             & ~is_sent_to_epc,
