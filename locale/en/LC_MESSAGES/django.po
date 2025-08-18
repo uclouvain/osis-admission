@@ -1494,6 +1494,9 @@ msgstr ""
 msgid "Completed for Fac"
 msgstr ""
 
+msgid "Completed for Fac/CDD"
+msgstr ""
+
 msgid "Completed for SIC"
 msgstr ""
 
@@ -2784,6 +2787,9 @@ msgid "False"
 msgstr ""
 
 msgid "Feedback from Fac"
+msgstr ""
+
+msgid "Feedback from Fac/CDD"
 msgstr ""
 
 msgctxt "admission gender"
@@ -5074,6 +5080,9 @@ msgstr ""
 msgid "Processing by Fac"
 msgstr ""
 
+msgid "Processing by Fac/CDD"
+msgstr ""
+
 msgid "Produce xls"
 msgstr ""
 
@@ -6901,6 +6910,9 @@ msgid "To be completed by SIC"
 msgstr ""
 
 msgid "To be completed for Fac"
+msgstr ""
+
+msgid "To be completed for Fac/CDD"
 msgstr ""
 
 msgid "To be completed for the Enrolment Office (SIC)"
