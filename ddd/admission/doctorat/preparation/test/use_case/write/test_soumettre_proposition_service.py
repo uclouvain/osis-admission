@@ -109,7 +109,7 @@ class TestVerifierPropositionServiceCommun(TestCase):
         )
         self.proposition_repository.save(self.proposition)
         self.groupe_supervision_repository = GroupeDeSupervisionInMemoryRepository()
-        self.addCleanup(self.proposition_repository.reset)
+        PropositionInMemoryRepository.entities = [self.proposition]
         self.message_bus = message_bus_in_memory_instance
 
         self.academic_year_repository = AcademicYearInMemoryRepository()

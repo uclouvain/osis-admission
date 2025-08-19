@@ -26,6 +26,7 @@
 from django.utils import formats
 from django.utils.text import capfirst
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import ngettext_lazy
 
 from osis_common.ddd.interface import BusinessException
 
@@ -785,4 +786,16 @@ class PropositionStatutIncorrectPourSoumissionCAException(BusinessException):
 
     def __init__(self, **kwargs):
         message = _("The proposition must be in the 'In the process of re-signing' status.")
+        super().__init__(message, **kwargs)
+
+
+class MaximumPropositionsDoctoralesAtteintException(BusinessException):
+    status_code = "DOCTORAT-12"
+
+    def __init__(self, maximum, **kwargs):
+        message = ngettext_lazy(
+            "You cannot have two applications for a doctorate education in progress at the same time.",
+            "You cannot have more than %(max)s applications for a doctorate education in progress at the same time.",
+            maximum,
+        ) % {'max': maximum}
         super().__init__(message, **kwargs)

@@ -53,16 +53,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator import (
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     DoctoratNonTrouveException,
-)
-from admission.ddd.admission.shared_kernel.enums import (
-    ChoixAssimilation1,
-    ChoixAssimilation2,
-    ChoixAssimilation3,
-    ChoixAssimilation5,
-    ChoixAssimilation6,
-    ChoixTypeCompteBancaire,
-    LienParente,
-    TypeSituationAssimilation,
+    MaximumPropositionsDoctoralesAtteintException,
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixMoyensDecouverteFormation,
@@ -76,6 +67,16 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 )
 from admission.ddd.admission.formation_generale.domain.validator import (
     exceptions as general_education_exceptions,
+)
+from admission.ddd.admission.shared_kernel.enums import (
+    ChoixAssimilation1,
+    ChoixAssimilation2,
+    ChoixAssimilation3,
+    ChoixAssimilation5,
+    ChoixAssimilation6,
+    ChoixTypeCompteBancaire,
+    LienParente,
+    TypeSituationAssimilation,
 )
 from admission.models import (
     ContinuingEducationAdmission,
@@ -102,10 +103,7 @@ from admission.tests.factories.form_item import (
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory
-from admission.tests.factories.supervision import (
-    CaMemberFactory,
-    PromoterFactory,
-)
+from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.enums.entity_type import EntityType
 from base.tests import QueriesAssertionsMixin
@@ -299,7 +297,9 @@ class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
 
         from parcours_doctoral.ddd.domain.model.enums import ChoixStatutParcoursDoctoral
         from parcours_doctoral.models import ParcoursDoctoral
-        from parcours_doctoral.tests.factories.parcours_doctoral import ParcoursDoctoralFactory
+        from parcours_doctoral.tests.factories.parcours_doctoral import (
+            ParcoursDoctoralFactory,
+        )
         from parcours_doctoral.tests.factories.supervision import (
             CaMemberFactory as DoctorateCaMemberFactory,
         )
@@ -800,6 +800,19 @@ class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
         create_default_propositions_in_progress(candidate=self.candidate)
         response = self.client.post(self.url, data=self.create_data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_admission_doctorate_creation_using_api_with_too_much_doctorate_propositions_in_parallel(self):
+        self.client.force_authenticate(user=self.candidate.user)
+        other_admission = DoctorateAdmissionFactory(
+            status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
+            candidate=self.candidate,
+        )
+        response = self.client.post(self.url, data=self.create_data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.json()['non_field_errors'][0]['status_code'],
+            MaximumPropositionsDoctoralesAtteintException.status_code,
+        )
 
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)

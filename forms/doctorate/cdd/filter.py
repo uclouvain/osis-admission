@@ -163,7 +163,7 @@ class DoctorateListFilterForm(BaseAdmissionFilterForm):
         required=False,
     )
     fnrs_fria_fresh = forms.BooleanField(
-        label=_("FNRS, FRIA, FRESH"),
+        label=_("FNRS, FRIA, FRESH, CSC"),
         required=False,
     )
     mode_filtres_etats_checklist = forms.ChoiceField(

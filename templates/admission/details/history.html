@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -48,7 +48,8 @@
       -webkit-line-clamp: unset;
     }
 
-    .history-viewer input:checked ~ label {
+    .history-viewer input:not(:checked) ~ label span.fa-square-caret-up,
+    .history-viewer input:checked ~ label span.fa-square-caret-down {
       display: none;
     }
   </style>
@@ -73,7 +74,8 @@
                 ${OsisHistory.filterXssAndFormat(entry.message)}
             </div>
             <label for="expanded-${timelineEntryCounter}" role="button" class="text-primary">
-                <span class="glyphicon glyphicon-collapse-down">
+                <span class="fa-regular fa-square-caret-down"></span>
+                <span class="fa-regular fa-square-caret-up"></span>
             </label>`;
       }
       return OsisHistory.filterXssAndFormat(entry.message);
@@ -85,10 +87,10 @@
     <div class="timeline-panel">
         <div class="timeline-heading">
             <h3 class="h4">
-                <span class="glyphicon glyphicon-time"></span>
+                <span class="fa-regular fa-clock"></span>
                 ${entry.created}
                 -
-                <span class="glyphicon glyphicon-user"></span>
+                <span class="fa fa-user"></span>
                 ${entry.author}
             </h3>
         </div>

@@ -28,16 +28,16 @@ from typing import Dict, List, Optional
 from admission.ddd.admission.doctorat.preparation.dtos import (
     PropositionDTO as PropositionDoctoraleDTO,
 )
-from admission.ddd.admission.shared_kernel.domain.service.i_filtrer_toutes_demandes import (
-    IListerToutesDemandes,
-)
-from admission.ddd.admission.shared_kernel.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.formation_continue.dtos import (
     PropositionDTO as PropositionContinueDTO,
 )
 from admission.ddd.admission.formation_generale.dtos import (
     PropositionDTO as PropositionGeneraleDTO,
 )
+from admission.ddd.admission.shared_kernel.domain.service.i_filtrer_toutes_demandes import (
+    IListerToutesDemandes,
+)
+from admission.ddd.admission.shared_kernel.dtos.liste import DemandeRechercheDTO
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository as PropositionDoctoraleInMemoryRepository,
 )
@@ -67,6 +67,7 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
         bourse_internationale: Optional[str] = '',
         bourse_erasmus_mundus: Optional[str] = '',
         bourse_double_diplomation: Optional[str] = '',
+        bourse_recherche: Optional[str] = '',
         quarantaine: Optional[bool] = None,
         demandeur: Optional[str] = '',
         tri_inverse: bool = False,

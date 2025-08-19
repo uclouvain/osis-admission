@@ -54,9 +54,13 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     DoctoratNonTrouveException,
     JustificationRequiseException,
     MaximumPropositionsAtteintException,
+    MaximumPropositionsDoctoralesAtteintException,
 )
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
     PropositionAdmissionSC3DPMinimaleAnnuleeFactory,
+)
+from admission.ddd.admission.formation_continue.commands import (
+    InitierPropositionCommand as InitierPropositionContinueCommand,
 )
 from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions import (
     MAXIMUM_PROPOSITIONS_EN_COURS,
@@ -220,10 +224,10 @@ class TestInitierPropositionService(TestCase):
             self.message_bus.invoke(cmd)
             self.assertIsInstance(context.exception.exceptions.pop(), CommissionProximiteInconsistantException)
 
-    def test_should_empecher_si_maximum_propositions_autorisees(self):
-        cmd = attr.evolve(self.cmd, matricule_candidat="0123456789")
-        with self.assertRaises(MaximumPropositionsAtteintException):
-            self.message_bus.invoke(cmd)
+    def test_should_empecher_si_maximum_propositions_doctorales_autorisees(self):
+        self.message_bus.invoke(self.cmd)
+        with self.assertRaises(MaximumPropositionsDoctoralesAtteintException):
+            self.message_bus.invoke(self.cmd)
 
     def test_should_initier_autre_proposition_si_premiere_annulee(self):
         # TODO This should be changed to the action that changes the status to cancelled
@@ -245,7 +249,19 @@ class TestInitierPropositionService(TestCase):
         self.assertIsInstance(e.exception.exceptions.pop(), JustificationRequiseException)
 
     def test_should_empecher_si_trop_demandes_en_parallele(self):
+        matricule_nouveau_candidat = '01234568'
+        cmd = attr.evolve(self.cmd, matricule_candidat=matricule_nouveau_candidat)
+
         for proposition_index in range(MAXIMUM_PROPOSITIONS_EN_COURS):
-            self.message_bus.invoke(self.cmd)
+            cmd_continue = InitierPropositionContinueCommand(
+                sigle_formation='USCC1',
+                annee_formation=2020,
+                matricule_candidat=matricule_nouveau_candidat,
+                motivations='',
+                moyens_decouverte_formation=[],
+                marque_d_interet=False,
+                autre_moyen_decouverte_formation='Autre moyen',
+            )
+            self.message_bus.invoke(cmd_continue)
         with self.assertRaises(MaximumPropositionsAtteintException):
-            self.message_bus.invoke(self.cmd)
+            self.message_bus.invoke(cmd)

@@ -129,6 +129,15 @@ STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CANDIDAT = {
 }
 
 
+# La demande est annulée ou la décision finale a été donnée
+STATUTS_PROPOSITION_DOCTORALE_TERMINEE = {
+    ChoixStatutPropositionDoctorale.ANNULEE.name,
+    ChoixStatutPropositionDoctorale.CLOTUREE.name,
+    ChoixStatutPropositionDoctorale.INSCRIPTION_REFUSEE.name,
+    ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
+}
+
+
 class ChoixCommissionProximiteCDEouCLSM(ChoiceEnum):
     ECONOMY = _('ECONOMY')
     MANAGEMENT = _('MANAGEMENT')
