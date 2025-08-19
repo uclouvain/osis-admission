@@ -59,10 +59,11 @@ from ddd.logic.financabilite.domain.service.financabilite import Financabilite
 from ddd.logic.financabilite.domain.service.i_financabilite import IFinancabiliteFetcher
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
+from infrastructure.utils import MessageBus
 
 
 def soumettre_proposition(
-    msg_bus: any,
+    msg_bus: 'MessageBus',
     cmd: 'SoumettrePropositionCommand',
     proposition_repository: 'IPropositionRepository',
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
