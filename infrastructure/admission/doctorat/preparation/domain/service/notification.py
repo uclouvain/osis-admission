@@ -112,6 +112,9 @@ from admission.mail_templates import (
     EMAIL_TEMPLATE_ENROLLMENT_GENERATED_NOMA_DOCTORATE_TOKEN,
     EMAIL_TEMPLATE_VISA_APPLICATION_DOCUMENT_URL_DOCTORATE_TOKEN,
 )
+from admission.mail_templates.submission import (
+    ADMISSION_EMAIL_CONFIRM_SUBMISSION_FOR_MANAGER_DOCTORATE,
+)
 from admission.models import AdmissionTask, DoctorateAdmission, SupervisionActor
 from admission.models.base import BaseAdmission
 from admission.models.doctorate import PropositionProxy
@@ -212,20 +215,6 @@ class Notification(INotification):
         common_tokens['program_managers_names'] = get_admission_program_managers_names(
             admission.training.education_group_id
         )
-
-        # Envoyer aux gestionnaires CDD
-        for manager in get_admission_cdd_managers(admission.training.education_group_id):
-            with translation.override(manager.language):
-                content = (
-                    _(
-                        '<a href="%(admission_link_back)s">%(reference)s</a> - '
-                        '%(candidate_first_name)s %(candidate_last_name)s requested '
-                        'signatures for %(training_title)s'
-                    )
-                    % common_tokens
-                )
-                web_notification = WebNotification(recipient=manager, content=str(content))
-            WebNotificationHandler.create(web_notification)
 
         # Envoyer au doctorant
         with translation.override(candidat.language):
@@ -435,17 +424,17 @@ class Notification(INotification):
 
         # Envoyer aux gestionnaires CDD
         for manager in get_admission_cdd_managers(admission.training.education_group_id):
-            with translation.override(manager.language):
-                content = (
-                    _(
-                        '<a href="%(admission_link_back)s">%(reference)s</a> - '
-                        '%(candidate_first_name)s %(candidate_last_name)s '
-                        'submitted request for %(training_title)s'
-                    )
-                    % common_tokens
-                )
-                web_notification = WebNotification(recipient=manager, content=str(content))
-            WebNotificationHandler.create(web_notification)
+            email_message = generate_email(
+                ADMISSION_EMAIL_CONFIRM_SUBMISSION_FOR_MANAGER_DOCTORATE,
+                manager.person.language,
+                {
+                    **common_tokens,
+                    'manager_first_name': manager.person.first_name,
+                    'manager_last_name': manager.person.last_name,
+                },
+                recipients=[manager.person.email],
+            )
+            EmailNotificationHandler.create(email_message, person=manager.person)
 
     @classmethod
     def notifier_suppression_membre(cls, proposition: Proposition, signataire_id: 'SignataireIdentity') -> None:
@@ -641,7 +630,7 @@ class Notification(INotification):
 
         # Envoyer une notification aux gestionnaires CDD
         for manager in get_admission_cdd_managers(admission.training.education_group_id):
-            with translation.override(manager.language):
+            with translation.override(manager.person.language):
                 content = (
                     _(
                         '<a href="%(admission_link_back)s">%(reference)s</a> - '
@@ -650,7 +639,7 @@ class Notification(INotification):
                     )
                     % web_notification_tokens
                 )
-                web_notification = WebNotification(recipient=manager, content=str(content))
+                web_notification = WebNotification(recipient=manager.person, content=str(content))
             WebNotificationHandler.create(web_notification)
 
         # Create the async task to create the folder analysis containing the submitted documents
