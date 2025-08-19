@@ -1382,7 +1382,7 @@ msgstr ""
 "autre contexte."
 
 msgid "Carbon-copy the CA members"
-msgstr "Mettre en copie les membres du groupe de supervision"
+msgstr "Mettre en copie les membres du comité d'accompagnement"
 
 msgid "Carbon-copy the supervisors"
 msgstr "Mettre en copie les promoteurs"
@@ -6816,7 +6816,7 @@ msgid "The CA is not currently to be completed"
 msgstr "Le comité d’accompagnement n'est pas en attente de complétion"
 
 msgid "The CA members"
-msgstr "Les membres du comité d’accompagnement"
+msgstr "Les membres du comité d'accompagnement"
 
 msgid "The CV does not yet contain any academic course."
 msgstr "Le CV ne contient pas encore de formation académique."
