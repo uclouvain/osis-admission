@@ -1156,7 +1156,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
             self.assertEqual(len(results), 1)
 
-            self.assertEqual(results[0].experiences_academiques_reussies, [])
+            self.assertEqual(results[0].experiences_academiques_reussies_externes, [])
 
         educational_experience = EducationalExperienceFactory(
             obtained_diploma=True,
@@ -1186,7 +1186,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
             self.assertEqual(len(results), 1)
 
-            self.assertEqual(results[0].experiences_academiques_reussies, [])
+            self.assertEqual(results[0].experiences_academiques_reussies_externes, [])
 
         valuation = AdmissionEducationalValuatedExperiencesFactory(
             baseadmission=admission,
@@ -1206,7 +1206,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
             self.assertEqual(len(results), 1)
 
-            self.assertEqual(results[0].experiences_academiques_reussies, [])
+            self.assertEqual(results[0].experiences_academiques_reussies_externes, [])
 
         educational_experience.obtained_diploma = True
         educational_experience.save()
@@ -1221,7 +1221,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
             self.assertEqual(len(results), 1)
 
-            academic_experiences = results[0].experiences_academiques_reussies
+            academic_experiences = results[0].experiences_academiques_reussies_externes
             self.assertEqual(len(academic_experiences), 1)
 
             self.assertEqual(academic_experiences[0].nom_institut, 'Institute')
@@ -1253,7 +1253,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
             self.assertEqual(len(results), 1)
 
-            academic_experiences = results[0].experiences_academiques_reussies
+            academic_experiences = results[0].experiences_academiques_reussies_externes
             self.assertEqual(len(academic_experiences), 1)
 
             self.assertEqual(academic_experiences[0].nom_institut, educational_experience.institute.name)
@@ -1289,7 +1289,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
             self.assertEqual(len(results), 1)
 
-            self.assertEqual(results[0].experiences_academiques_reussies, [])
+            self.assertEqual(results[0].experiences_academiques_reussies_internes, [])
 
         first_internal_experience_first_year = InscriptionProgrammeAnnuelFactory(
             etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
@@ -1318,7 +1318,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
             self.assertEqual(len(results), 1)
 
-            self.assertEqual(results[0].experiences_academiques_reussies, [])
+            self.assertEqual(results[0].experiences_academiques_reussies_internes, [])
 
         # Decision but not graduated
         first_internal_experience_first_year.programme_cycle.decision = DecisionResultatCycle.DIPLOMABLE.name
@@ -1333,7 +1333,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
             self.assertEqual(len(results), 1)
 
-            self.assertEqual(results[0].experiences_academiques_reussies, [])
+            self.assertEqual(results[0].experiences_academiques_reussies_internes, [])
 
         # Graduated
         first_internal_experience_first_year.programme_cycle.decision = DecisionResultatCycle.GRANDE_DISTINCTION.name
@@ -1348,7 +1348,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
             self.assertEqual(len(results), 1)
 
-            academic_experiences = results[0].experiences_academiques_reussies
+            academic_experiences = results[0].experiences_academiques_reussies_internes
             self.assertEqual(len(academic_experiences), 1)
 
             self.assertEqual(academic_experiences[0].nom_institut, 'UCLouvain')
@@ -1388,7 +1388,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
             self.assertEqual(len(results), 1)
 
-            academic_experiences = results[0].experiences_academiques_reussies
+            academic_experiences = results[0].experiences_academiques_reussies_internes
             self.assertEqual(len(academic_experiences), 2)
 
             self.assertEqual(academic_experiences[0].nom_institut, 'UCLouvain')

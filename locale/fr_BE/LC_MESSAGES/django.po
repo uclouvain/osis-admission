@@ -339,8 +339,11 @@ msgstr "Formations académiques"
 msgid "Academic experience"
 msgstr "Expérience académique"
 
-msgid "Academic record"
-msgstr "Parcours académique"
+msgid "Academic record retrieved"
+msgstr "Parcours académique récupéré"
+
+msgid "Academic record specified by the candidate"
+msgstr "Parcours académique spécifié par le candidat"
 
 msgid "Academic year"
 msgstr "Année académique"

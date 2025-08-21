@@ -25,10 +25,9 @@
 # ##############################################################################
 import datetime
 from decimal import Decimal
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import attr
-from typing_extensions import Union
 
 from epc.models.enums.decision_resultat_cycle import DecisionResultatCycle
 from osis_common.ddd import interface
@@ -104,7 +103,8 @@ class DemandeRechercheDTO(interface.DTO):
     # Les attributs suivants sont à None s'ils ne sont pas récupérés
     promoteurs: Optional[List[ActeurDTO]] = None
     membres_ca: Optional[List[ActeurDTO]] = None
-    experiences_academiques_reussies: Optional[List[ExperienceAcademiqueDTO]] = None
+    experiences_academiques_reussies_externes: Optional[List[ExperienceAcademiqueDTO]] = None
+    experiences_academiques_reussies_internes: Optional[List[ExperienceAcademiqueDTO]] = None
 
     @property
     def formation(self) -> str:

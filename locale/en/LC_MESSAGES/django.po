@@ -285,7 +285,10 @@ msgstr ""
 msgid "Academic experience"
 msgstr ""
 
-msgid "Academic record"
+msgid "Academic record retrieved"
+msgstr ""
+
+msgid "Academic record specified by the candidate"
 msgstr ""
 
 msgid "Academic year"
@@ -6562,6 +6565,12 @@ msgid ""
 msgstr ""
 
 msgid "The other given names must be less than 40 characters long."
+msgstr ""
+
+#, python-brace-format
+msgid ""
+"The option {index} must have an identifier and a translation for each "
+"required language."
 msgstr ""
 
 msgid "The payment has already been made."
