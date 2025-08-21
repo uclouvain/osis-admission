@@ -513,7 +513,7 @@ onglet_decision_sic = ConfigurationOngletChecklist(
         ),
         ConfigurationStatutChecklist(
             identifiant='BESOIN_DEROGATION',
-            libelle=_('Financeability dispensation needed'),
+            libelle=_('Non-progression dispensation needed'),
             statut=ChoixStatutChecklist.GEST_EN_COURS,
             extra={'en_cours': 'derogation'},
         ),
