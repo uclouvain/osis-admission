@@ -86,7 +86,7 @@ def run():  # pragma: no cover
         a_ete_injecte=True
     ).annotate(
         financabilite_completee=Case(
-            When(
+            When((
                 ~Q(checklist__current__financabilite__status__in=['INITIAL_NON_CONCERNE', 'GEST_REUSSITE'])
                 | Q(
                     checklist__current__financabilite__status='GEST_REUSSITE',
@@ -100,9 +100,9 @@ def run():  # pragma: no cover
                 | Q(
                     checklist__current__financabilite__status='GEST_REUSSITE',
                     generaleducationadmission__financability_established_by_id__isnull=True
-                ),
-                Q(generaleducationadmission__isnull=False)
-                | Q(doctorateadmission__isnull=False),
+                ))
+                & (Q(generaleducationadmission__isnull=False)
+                | Q(doctorateadmission__isnull=False)),
                 then=Value(False),
             ),
             default=Value(True),
