@@ -30,8 +30,7 @@ from decimal import Decimal
 from typing import Dict, List, Optional
 
 from django.conf import settings
-from django.db.models import Exists
-from django.db.models import OuterRef, Prefetch, Q, Subquery, Sum
+from django.db.models import Exists, OuterRef, Prefetch, Q, Subquery, Sum
 from django.db.models.fields import CharField
 from django.db.models.functions import Coalesce
 from django.utils.translation import get_language
@@ -139,7 +138,9 @@ class ListerDemandesService(IListerDemandesService):
             qs = qs.prefetch_related(
                 Prefetch(
                     'educational_valuated_experiences',
-                    EducationalExperience.objects.filter(obtained_diploma=True,).annotate(
+                    EducationalExperience.objects.filter(
+                        obtained_diploma=True,
+                    ).annotate(
                         formatted_program_name=Coalesce('program__title', 'education_name'),
                         formatted_institute_name=Coalesce('institute__name', 'institute_name'),
                         acquired_credits=Sum('educationalexperienceyear__acquired_credit_number'),
@@ -260,9 +261,9 @@ class ListerDemandesService(IListerDemandesService):
                 if not status_values:
                     continue
 
-                current_tab: Optional[
-                    Dict[str, Dict[str, ConfigurationStatutChecklist]]
-                ] = ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT.get(tab_name)
+                current_tab: Optional[Dict[str, Dict[str, ConfigurationStatutChecklist]]] = (
+                    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT.get(tab_name)
+                )
 
                 if not current_tab:
                     continue
@@ -370,6 +371,10 @@ class ListerDemandesService(IListerDemandesService):
         return result
 
     @classmethod
+    def _academic_experiences_sort_function(cls, experience: ExperienceAcademiqueDTO):
+        return experience.date_diplome or datetime.date.min
+
+    @classmethod
     def load_dto_from_model(
         cls,
         admission: DoctorateAdmission,
@@ -454,12 +459,14 @@ class ListerDemandesService(IListerDemandesService):
                 else:
                     supervision_committee_members.append(actor_dto)
 
-        experiences_academiques_reussies: Optional[List[ExperienceAcademiqueDTO]] = None
+        experiences_academiques_reussies_externes: Optional[List[ExperienceAcademiqueDTO]] = None
+        experiences_academiques_reussies_internes: Optional[List[ExperienceAcademiqueDTO]] = None
         if avec_experiences_academiques_reussies:
-            experiences_academiques_reussies = []
+            experiences_academiques_reussies_externes = []
+            experiences_academiques_reussies_internes = []
 
             for experience in admission.graduated_external_educational_experiences:
-                experiences_academiques_reussies.append(
+                experiences_academiques_reussies_externes.append(
                     ExperienceAcademiqueDTO(
                         nom_institut=experience.formatted_institute_name,
                         grade_obtenu=Grade[experience.obtained_grade] if experience.obtained_grade else None,
@@ -476,7 +483,7 @@ class ListerDemandesService(IListerDemandesService):
 
             for student in admission.candidate.student_set.all():
                 for experience in student.graduated_internal_educational_experiences:
-                    experiences_academiques_reussies.append(
+                    experiences_academiques_reussies_internes.append(
                         ExperienceAcademiqueDTO(
                             nom_institut='UCLouvain',
                             grade_obtenu=DecisionResultatCycle[experience.decision],
@@ -487,7 +494,8 @@ class ListerDemandesService(IListerDemandesService):
                         )
                     )
 
-            experiences_academiques_reussies.sort(key=lambda current_exp: current_exp.date_diplome or datetime.date.min)
+            experiences_academiques_reussies_externes.sort(key=cls._academic_experiences_sort_function)
+            experiences_academiques_reussies_internes.sort(key=cls._academic_experiences_sort_function)
 
         return DemandeRechercheDTO(
             uuid=admission.uuid,
@@ -513,7 +521,8 @@ class ListerDemandesService(IListerDemandesService):
             titre_projet=admission.project_title,
             promoteurs=supervisors,
             membres_ca=supervision_committee_members,
-            experiences_academiques_reussies=experiences_academiques_reussies,
+            experiences_academiques_reussies_externes=experiences_academiques_reussies_externes,
+            experiences_academiques_reussies_internes=experiences_academiques_reussies_internes,
             **country_data,
             **last_author_data,
         )
