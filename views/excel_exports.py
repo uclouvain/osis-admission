@@ -987,7 +987,8 @@ class DoctorateAdmissionListExcelExportView(BaseAdmissionExcelExportView):
             _('Nationality'),
             _('Scholarship'),
             pgettext('admission', 'Course'),
-            _('Academic record'),
+            _('Academic record specified by the candidate'),
+            _('Academic record retrieved'),
             _('Supervisors'),
             _('Supervision committee'),
             _('Thesis institute'),
@@ -1003,9 +1004,14 @@ class DoctorateAdmissionListExcelExportView(BaseAdmissionExcelExportView):
         ]
 
     def get_row_data(self, row: DemandeRechercheDTO):
-        academic_record = (
-            '\n'.join(str(experience) for experience in row.experiences_academiques_reussies)
-            if row.experiences_academiques_reussies
+        internal_academic_record = (
+            '\n'.join(str(experience) for experience in row.experiences_academiques_reussies_internes)
+            if row.experiences_academiques_reussies_internes
+            else ''
+        )
+        external_academic_record = (
+            '\n'.join(str(experience) for experience in row.experiences_academiques_reussies_externes)
+            if row.experiences_academiques_reussies_externes
             else ''
         )
         supervisors = '\n'.join(str(actor) for actor in row.promoteurs) if row.promoteurs else ''
@@ -1017,7 +1023,8 @@ class DoctorateAdmissionListExcelExportView(BaseAdmissionExcelExportView):
             row.nom_pays_nationalite_candidat,
             row.code_bourse,
             row.formation,
-            academic_record,
+            external_academic_record,
+            internal_academic_record,
             supervisors,
             supervision_committee_members,
             row.institut_these,
