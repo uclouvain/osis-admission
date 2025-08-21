@@ -67,6 +67,11 @@ from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageCh
 from admission.forms import ALL_EMPTY_CHOICE, ALL_FEMININE_EMPTY_CHOICE
 from admission.models import DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
+from admission.tests.factories.curriculum import (
+    AdmissionEducationalValuatedExperiencesFactory,
+    EducationalExperienceFactory,
+    EducationalExperienceYearFactory,
+)
 from admission.tests.factories.roles import (
     CandidateFactory,
     DoctorateCommitteeMemberRoleFactory,
@@ -74,8 +79,10 @@ from admission.tests.factories.roles import (
     SicManagementRoleFactory,
 )
 from admission.tests.factories.supervision import (
+    CaMemberFactory,
+    ExternalCaMemberFactory,
     ExternalPromoterFactory,
-    PromoterFactory, CaMemberFactory, ExternalCaMemberFactory,
+    PromoterFactory,
 )
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.entity_type import EntityType
@@ -85,10 +92,18 @@ from base.tests.factories.academic_calendar import AcademicCalendarFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
+from base.tests.factories.organization import OrganizationFactory
 from base.tests.factories.student import StudentFactory
 from base.tests.factories.user import UserFactory
+from epc.models.enums.decision_resultat_cycle import DecisionResultatCycle
+from epc.models.enums.etat_inscription import EtatInscriptionFormation
+from epc.tests.factories.inscription_programme_annuel import (
+    InscriptionProgrammeAnnuelFactory,
+)
 from osis_profile import BE_ISO_CODE, FR_ISO_CODE
+from osis_profile.models.enums.curriculum import Grade
 from reference.tests.factories.country import CountryFactory
+from reference.tests.factories.diploma_title import DiplomaTitleFactory
 from reference.tests.factories.scholarship import (
     DoctorateScholarshipFactory,
     DoubleDegreeScholarshipFactory,
@@ -198,6 +213,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             last_update_author__first_name='Joe',
             last_update_author__last_name='Cole',
             is_fnrs_fria_fresh_csc_linked=True,
+            project_title='P1',
         )
         cls.admissions: List[DoctorateAdmission] = [
             admission,
@@ -265,7 +281,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 modified_at=datetime.datetime(2021, 1, 2),
                 last_update_author=None,
                 is_fnrs_fria_fresh_csc_linked=None,
-                project_title='P2',
+                project_title='P3',
                 with_thesis_institute=True,
             ),
             DoctorateAdmissionFactory(
@@ -279,6 +295,8 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 determined_academic_year=cls.academic_years[1],
                 candidate__country_of_citizenship=None,
                 last_update_author=None,
+                thesis_institute=None,
+                project_title='P4',
             ),
         ]
 
@@ -1692,7 +1710,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             'nationalite': 'FR',
             'cdds': 'unknown_cdd',
         }
-        response = self.client.get(self.url, data, headers={"hx-request": 'true'})
+        response = self.client.get(self.url, data, HTTP_HX_REQUEST='true')
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(
