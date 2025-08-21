@@ -3932,6 +3932,9 @@ msgstr ""
 msgid "Link to the application on the portal"
 msgstr ""
 
+msgid "Link to the documents tab of the admission (front-office)"
+msgstr ""
+
 msgid ""
 "Link to the page of the faculty decision in the checklist of the admission "
 "(back-office)"

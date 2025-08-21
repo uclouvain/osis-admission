@@ -84,7 +84,7 @@ from base.tests.factories.entity import EntityWithVersionFactory
 class ChecklistViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
+        cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022, 2023]]
 
         cls.first_doctoral_commission = EntityWithVersionFactory(version__acronym=ENTITY_CDE)
 
