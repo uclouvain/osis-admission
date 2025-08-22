@@ -27,8 +27,8 @@ from typing import Optional
 
 import attr
 
-from admission.admission_utils.format_address import format_address
 from osis_common.ddd import interface
+from osis_profile.utils.utils import format_address
 
 
 @attr.dataclass(frozen=True, slots=True)

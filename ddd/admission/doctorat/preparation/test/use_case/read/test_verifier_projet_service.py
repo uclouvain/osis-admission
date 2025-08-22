@@ -31,7 +31,6 @@ import freezegun
 from django.test import TestCase
 from mock import mock
 
-from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.commands import VerifierProjetQuery
 from admission.ddd.admission.doctorat.preparation.domain.model._cotutelle import (
     Cotutelle,
@@ -108,7 +107,7 @@ from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_ye
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
     PersonneConnueUclInMemoryTranslator,
 )
-from osis_profile import BE_ISO_CODE
+from osis_profile import BE_ISO_CODE, FR_ISO_CODE
 from osis_profile.models.enums.curriculum import (
     ActivitySector,
     ActivityType,

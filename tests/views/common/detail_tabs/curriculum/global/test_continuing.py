@@ -30,7 +30,6 @@ import freezegun
 from django.shortcuts import resolve_url
 from django.test import TestCase
 
-from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     CurriculumAdmissionDTO,
 )
@@ -40,7 +39,6 @@ from admission.models.epc_injection import (
     EPCInjectionStatus as AdmissionEPCInjectionStatus,
 )
 from admission.models.epc_injection import EPCInjectionType
-from admission.services.injection_epc.injection_dossier import InjectionEPCAdmission
 from admission.tests.factories.continuing_education import (
     ContinuingEducationAdmissionFactory,
 )
@@ -57,7 +55,7 @@ from base.models.enums.education_group_types import TrainingType
 from base.models.enums.teaching_type import TeachingTypeEnum
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity_version import EntityVersionFactory
-from osis_profile import BE_ISO_CODE
+from osis_profile import BE_ISO_CODE, FR_ISO_CODE
 from osis_profile.models import (
     EducationalExperience,
     EducationalExperienceYear,

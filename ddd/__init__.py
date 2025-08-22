@@ -25,7 +25,6 @@
 # ##############################################################################
 from decimal import Decimal
 
-FR_ISO_CODE = "FR"
 EN_ISO_CODE = "EN"
 CODE_BACHELIER_VETERINAIRE = 'VETE1BA'
 PREFIXES_DOMAINES_FORMATIONS_DENT_MED = {'11', '13'}

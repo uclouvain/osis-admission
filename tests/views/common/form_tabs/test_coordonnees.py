@@ -24,21 +24,18 @@
 #
 # ##############################################################################
 import datetime
+from unittest.mock import patch
 
 import freezegun
 from django.shortcuts import resolve_url
 from django.test import TestCase
-from unittest.mock import patch
 
-
-from admission.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
-from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
-from admission.forms.admission.coordonnees import AdmissionAddressForm, AdmissionCoordonneesForm
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
+from admission.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
@@ -47,14 +44,13 @@ from admission.tests.factories.roles import (
     SicManagementRoleFactory,
     ProgramManagerRoleFactory,
 )
-from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_address import PersonAddress
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
-from base.tests.factories.person_address import PersonAddressFactory
-from osis_profile import BE_ISO_CODE
+from osis_profile import BE_ISO_CODE, FR_ISO_CODE
+from osis_profile.forms.coordonnees import AddressForm, CoordonneesForm
 from reference.models.country import Country
 from reference.tests.factories.country import CountryFactory
 
@@ -127,226 +123,6 @@ class CoordonneesFormTestCase(TestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
-    def test_form_initialization(self):
-        form = AdmissionCoordonneesForm(
-            show_contact=True,
-        )
-        self.assertTrue(form.fields['show_contact'].initial)
-
-        form = AdmissionCoordonneesForm(
-            show_contact=False,
-        )
-        self.assertFalse(form.fields['show_contact'].initial)
-
-    def test_form_submission_without_any_data(self):
-        form = AdmissionCoordonneesForm(
-            show_contact=True,
-            data={},
-        )
-        self.assertFalse(form.is_valid())
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('phone_mobile', []))
-
-    def test_country_field_initialization(self):
-        # Without country
-        form = AdmissionAddressForm(
-            instance=PersonAddressFactory(
-                country=None,
-            ),
-        )
-        self.assertEqual(len(form.fields['country'].queryset), 0)
-
-        # With country
-        form = AdmissionAddressForm(
-            instance=PersonAddressFactory(
-                country=self.belgium_country,
-            ),
-        )
-        self.assertIn(self.belgium_country, form.fields['country'].queryset)
-
-    def test_be_city_fields_initialization(self):
-        # Without country
-        form = AdmissionAddressForm(
-            instance=PersonAddressFactory(
-                country=None,
-                postal_code='1348',
-                city='Louvain-la-Neuve',
-            ),
-        )
-        self.assertEqual(form.initial.get('be_postal_code'), None)
-        self.assertEqual(form.initial.get('be_city'), None)
-
-        # With foreign country
-        form = AdmissionAddressForm(
-            instance=PersonAddressFactory(
-                country=self.france_country,
-                postal_code='1348',
-                city='Louvain-la-Neuve',
-            ),
-        )
-        self.assertEqual(form.initial.get('be_postal_code'), None)
-        self.assertEqual(form.initial.get('be_city'), None)
-
-        # With Belgium
-        form = AdmissionAddressForm(
-            instance=PersonAddressFactory(
-                country=self.belgium_country,
-                postal_code='1348',
-                city='Louvain-la-Neuve',
-            ),
-        )
-        self.assertEqual(form.initial.get('be_postal_code'), '1348')
-        self.assertEqual(form.initial.get('be_city'), 'Louvain-la-Neuve')
-        self.assertEqual(form.fields['be_city'].widget.choices, [('Louvain-la-Neuve', 'Louvain-la-Neuve')])
-
-    def form_submission_without_any_data(self):
-        # By default, the form can be empty
-        form = AdmissionAddressForm(
-            data={},
-        )
-        self.assertTrue(form.is_valid())
-        self.assertEqual(
-            form.cleaned_data,
-            {
-                'be_city': '',
-                'be_postal_code': '',
-                'city': '',
-                'country': None,
-                'postal_box': '',
-                'postal_code': '',
-                'street': '',
-                'street_number': '',
-            },
-        )
-        self.assertEqual(
-            form.address_data_to_save,
-            {
-                'city': '',
-                'country': None,
-                'postal_box': '',
-                'postal_code': '',
-                'street': '',
-                'street_number': '',
-            },
-        )
-
-        # Otherwise, some fields are required if the address cannot be empty
-        form = AdmissionAddressForm(
-            data={},
-        )
-        form.address_can_be_empty = False
-        self.assertFalse(form.is_valid())
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('street', []))
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('street_number', []))
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('postal_code', []))
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('city', []))
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('country', []))
-
-    def test_form_submission_with_foreign_country(self):
-        # Some fields are missing
-        form = AdmissionAddressForm(
-            data={
-                'country': self.france_country.iso_code,
-                'street': 'Art street',
-                'street_number': '123',
-            },
-        )
-        self.assertFalse(form.is_valid())
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('city', []))
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('postal_code', []))
-        self.assertEqual(form.address_data_to_save, None)
-
-        # All required fields are filled
-        form = AdmissionAddressForm(
-            data={
-                'country': self.france_country.iso_code,
-                'street': 'ART STREET',
-                'street_number': '123',
-                'city': 'PARIS',
-                'postal_code': '92000',
-                'be_city': 'Louvain-la-Neuve',
-                'be_postal_code': '1348',
-            },
-        )
-        self.assertTrue(form.is_valid())
-        cleaned_data = form.cleaned_data
-        self.assertEqual(
-            cleaned_data,
-            {
-                'country': self.france_country,
-                'city': 'Paris',
-                'postal_code': '92000',
-                'street': 'Art Street',
-                'postal_box': '',
-                'be_city': 'Louvain-la-Neuve',
-                'be_postal_code': '1348',
-                'street_number': '123',
-            },
-        )
-        self.assertEqual(
-            form.address_data_to_save,
-            {
-                'country': self.france_country,
-                'city': 'Paris',
-                'postal_code': '92000',
-                'street': 'Art Street',
-                'postal_box': '',
-                'street_number': '123',
-            },
-        )
-
-    def test_form_submission_with_belgium_country(self):
-        # Some fields are missing
-        form = AdmissionAddressForm(
-            data={
-                'country': self.belgium_country.iso_code,
-                'street': 'Art street',
-                'street_number': '123',
-            },
-        )
-        self.assertFalse(form.is_valid())
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('be_city', []))
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('be_postal_code', []))
-        self.assertEqual(form.address_data_to_save, None)
-
-        # All required fields are filled
-        form = AdmissionAddressForm(
-            data={
-                'country': self.belgium_country.iso_code,
-                'street': 'ART STREET',
-                'street_number': '123',
-                'city': 'PARIS',
-                'postal_code': '92000',
-                'be_city': 'Louvain-la-Neuve',
-                'be_postal_code': '1348',
-            },
-        )
-        self.assertTrue(form.is_valid())
-        cleaned_data = form.cleaned_data
-        self.assertEqual(
-            cleaned_data,
-            {
-                'country': self.belgium_country,
-                'city': 'Paris',
-                'postal_code': '92000',
-                'street': 'Art Street',
-                'postal_box': '',
-                'be_city': 'Louvain-la-Neuve',
-                'be_postal_code': '1348',
-                'street_number': '123',
-            },
-        )
-        self.assertEqual(
-            form.address_data_to_save,
-            {
-                'country': self.belgium_country,
-                'city': 'Louvain-la-Neuve',
-                'postal_code': '1348',
-                'street': 'Art Street',
-                'postal_box': '',
-                'street_number': '123',
-            },
-        )
-
     def test_general_coordinates_form_on_get_program_manager(self):
         self.client.force_login(user=self.general_manager_user)
         response = self.client.get(self.general_url)
@@ -371,9 +147,9 @@ class CoordonneesFormTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['BE_ISO_CODE'], self.belgium_country.iso_code)
-        self.assertIsInstance(response.context['main_form'], AdmissionCoordonneesForm)
-        self.assertIsInstance(response.context['residential'], AdmissionAddressForm)
-        self.assertIsInstance(response.context['contact'], AdmissionAddressForm)
+        self.assertIsInstance(response.context['main_form'], CoordonneesForm)
+        self.assertIsInstance(response.context['residential'], AddressForm)
+        self.assertIsInstance(response.context['contact'], AddressForm)
         self.assertTrue(response.context['force_form'])
 
     @freezegun.freeze_time('2023-01-01')
@@ -720,9 +496,9 @@ class CoordonneesFormTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['BE_ISO_CODE'], self.belgium_country.iso_code)
-        self.assertIsInstance(response.context['main_form'], AdmissionCoordonneesForm)
-        self.assertIsInstance(response.context['residential'], AdmissionAddressForm)
-        self.assertIsInstance(response.context['contact'], AdmissionAddressForm)
+        self.assertIsInstance(response.context['main_form'], CoordonneesForm)
+        self.assertIsInstance(response.context['residential'], AddressForm)
+        self.assertIsInstance(response.context['contact'], AddressForm)
         self.assertTrue(response.context['force_form'])
 
     def test_continuing_coordinates_form_post_main_form(self):
@@ -776,9 +552,9 @@ class CoordonneesFormTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['BE_ISO_CODE'], self.belgium_country.iso_code)
-        self.assertIsInstance(response.context['main_form'], AdmissionCoordonneesForm)
-        self.assertIsInstance(response.context['residential'], AdmissionAddressForm)
-        self.assertIsInstance(response.context['contact'], AdmissionAddressForm)
+        self.assertIsInstance(response.context['main_form'], CoordonneesForm)
+        self.assertIsInstance(response.context['residential'], AddressForm)
+        self.assertIsInstance(response.context['contact'], AddressForm)
         self.assertTrue(response.context['force_form'])
 
     def test_doctoral_coordinates_form_post_main_form(self):

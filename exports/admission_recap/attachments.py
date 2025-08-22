@@ -27,17 +27,20 @@ from io import BytesIO
 from typing import Dict, List, Optional
 
 import img2pdf
+from PIL.Image import DecompressionBombError
 from django.utils.translation import override
 from osis_document.api.utils import get_raw_content_remotely
-from PIL.Image import DecompressionBombError
 
-from admission.constants import IMAGE_MIME_TYPES, SUPPORTED_MIME_TYPES
+from admission.constants import SUPPORTED_MIME_TYPES
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixEtatSignature,
     ChoixTypeFinancement,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.comptabilite import (
     DerniersEtablissementsSuperieursCommunauteFrancaiseFrequentesDTO,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
 )
 from admission.ddd.admission.shared_kernel.domain.validator._should_comptabilite_etre_completee import (
     recuperer_champs_requis_dto,
@@ -51,7 +54,6 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     DocumentsCotutelle,
     DocumentsCurriculum,
     DocumentsEtudesSecondaires,
-    DocumentsExamens,
     DocumentsIdentification,
     DocumentsProjetRecherche,
     DocumentsQuestionsSpecifiques,
@@ -60,9 +62,6 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     IdentifiantBaseEmplacementDocument,
 )
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
-)
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import CHOIX_DIPLOME_OBTENU
 from base.utils.utils import format_academic_year
@@ -70,6 +69,7 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
 )
+from osis_profile.constants import IMAGE_MIME_TYPES
 from osis_profile.models.enums.curriculum import (
     CURRICULUM_ACTIVITY_LABEL,
     Result,
