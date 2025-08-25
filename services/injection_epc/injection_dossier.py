@@ -34,7 +34,7 @@ from typing import Dict, List, Tuple, Optional, Union
 import pika
 from django.conf import settings
 from django.db import transaction
-from django.db.models import QuerySet, Exists, OuterRef
+from django.db.models import QuerySet, Exists, OuterRef, Max
 from django.db.models.query_utils import Q
 from osis_history.models.history_entry import HistoryEntry
 from unidecode import unidecode
@@ -305,11 +305,46 @@ class InjectionEPCAdmission:
                 admission_specifique=admission_generale or admission_doctorat
             ) if admission_generale or admission_doctorat else None,
             "adresses": cls._get_adresses(adresses=adresses),
+            "equivalence": cls._get_equivalence(
+                admission=admission,
+                admission_generale=admission_generale,
+                etudes_secondaires=etudes_secondaires,
+            ) if admission_generale and admission_generale.foreign_access_title_equivalency_type else None,
             "documents": (
                 InjectionEPCCurriculum._recuperer_documents(admission_generale or admission_iufc or admission_doctorat)
                 + documents_specifiques
             ),
             "documents_manquants": cls._recuperer_documents_manquants(admission=admission),
+        }
+
+    @classmethod
+    def _get_equivalence(
+        cls,
+        admission: BaseAdmission,
+        admission_generale: GeneralEducationAdmission,
+        etudes_secondaires: Dict[str, str]
+    ):
+        if admission.are_secondary_studies_access_title:
+            condition_acces_uuid = etudes_secondaires['osis_uuid']
+        else:
+            experience_academique = admission.admissioneducationalvaluatedexperiences_set.filter(
+                is_access_title=True,
+            ).annotate(
+                annee_max=Max('educationalexperience__educationalexperienceyear__academic_year__year'),
+            ).order_by('-annee_max').first()
+            experience_annuelle = experience_academique.educationalexperienceyear_set.filter(
+                academic_year__year=experience_academique.annee_max
+            ).first() if experience_academique else None
+            condition_acces_uuid = experience_annuelle.uuid if experience_annuelle else None
+        return {
+            "type": admission_generale.foreign_access_title_equivalency_type,
+            "statut": admission_generale.foreign_access_title_equivalency_status,
+            "date": (
+                admission_generale.foreign_access_title_equivalency_effective_date.strftime("%d/%m/%Y")
+                if admission_generale.foreign_access_title_equivalency_effective_date else None
+            ),
+            "etat": admission_generale.foreign_access_title_equivalency_state,
+            "condition_acces_uuid": condition_acces_uuid,
         }
 
     @classmethod

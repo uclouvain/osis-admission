@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,9 +24,9 @@
 #
 # ##############################################################################
 from django.utils.translation import gettext_lazy as _
+from osis_mail_template import Token, templates
 
 from .tokens import DOCTORATE_ADMISSION_TAG, admission_common_tokens
-from osis_mail_template import Token, templates
 
 __all__ = [
     "ADMISSION_EMAIL_SIGNATURE_CANDIDATE",
@@ -159,7 +159,7 @@ templates.register(
 ADMISSION_EMAIL_SIGNATURE_REFUSAL = 'osis-admission-signature-refusal'
 templates.register(
     ADMISSION_EMAIL_SIGNATURE_REFUSAL,
-    description=_("Mail sent to promoters when a member of the supervision panel refuses"),
+    description=_("Mail sent to supervisors when a member of the supervision panel refuses"),
     tokens=(
         admission_common_tokens
         + signataire_tokens

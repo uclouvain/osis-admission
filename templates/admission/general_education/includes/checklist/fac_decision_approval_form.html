@@ -136,6 +136,10 @@
 
     {% bootstrap_field fac_decision_approval_form.join_program_fac_comment label=fac_decision_approval_form.join_program_fac_comment.label|add:candidate_language_tag|safe %}
 
+    {% if fac_decision_approval_form.communication_to_the_candidate %}
+      {% bootstrap_field fac_decision_approval_form.communication_to_the_candidate label=fac_decision_approval_form.communication_to_the_candidate.label|add:candidate_language_tag|label_with_user_icon %}
+    {% endif %}
+
     <p>
       {% if can_transfer_to_sic %}
         {% translate 'If you want, you can save these information and directly send the application to the SIC by selecting the appropriate button below.' %}

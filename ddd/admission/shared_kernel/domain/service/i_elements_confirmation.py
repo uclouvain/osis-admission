@@ -180,7 +180,11 @@ class IElementsConfirmation(interface.DomainService):
 
         # Confirmation de l'année académique concernée
         annee_a_prendre_en_compte = annee_soumise if annee_soumise is not None else proposition.annee_calculee
-        if annee_a_prendre_en_compte and annee_a_prendre_en_compte > proposition.formation_id.annee:
+        if (
+            isinstance(proposition, (PropositionDoctorale, PropositionGenerale))
+            and annee_a_prendre_en_compte
+            and annee_a_prendre_en_compte > proposition.formation_id.annee
+        ):
             elements.append(
                 ElementConfirmation(
                     nom='hors_delai',

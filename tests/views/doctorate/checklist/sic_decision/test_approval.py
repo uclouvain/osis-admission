@@ -155,6 +155,8 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.assertEqual(form.initial.get('must_provide_student_visa_d'), False)
 
         # By default, candidate who are not from UE+5 must provide a student visa
+        self.admission.must_provide_student_visa_d = None
+        self.admission.save()
         self.admission.candidate.country_of_citizenship = CountryFactory(european_union=False, iso_code='ZB')
         self.admission.candidate.save()
 
@@ -173,7 +175,7 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.assertEqual(response.status_code, 200)
 
         form = response.context['sic_decision_approval_form']
-        self.assertEqual(form.initial.get('must_provide_student_visa_d'), False)
+        self.assertEqual(form.initial.get('must_provide_student_visa_d'), None)
 
     def test_approval_decision_form_initialization_other_training(self):
         self.client.force_login(user=self.sic_manager_user)

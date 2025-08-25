@@ -501,7 +501,7 @@ class ListerDemandesQuery(SortedQueryRequest):
     cdds: Optional[List[str]] = None
     commission_proximite: Optional[str] = ''
     sigles_formations: Optional[List[str]] = None
-    uuid_promoteur: Optional[str] = ''
+    id_promoteur: Optional[str] = ''
     type_financement: Optional[str] = ''
     bourse_recherche: Optional[str] = ''
     cotutelle: Optional[bool] = None
@@ -611,6 +611,7 @@ class SpecifierInformationsAcceptationPropositionParCddCommand(interface.Command
     nom_personne_contact_programme_annuel: str = ''
     email_personne_contact_programme_annuel: str = ''
     commentaire_programme_conjoint: str = ''
+    communication_au_candidat: str = ''
 
 
 @attr.dataclass(frozen=True, slots=True)

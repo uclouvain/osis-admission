@@ -59,6 +59,9 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import (
     TypeTitreAccesSelectionnable,
 )
+from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
+    EtatAuthentificationParcours,
+)
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     ExperienceNonTrouveeException,
 )
@@ -75,11 +78,13 @@ from admission.forms.admission.checklist import (
     StatusForm,
     can_edit_experience_authentication,
 )
+from admission.templatetags.admission import authentication_css_class
 from admission.utils import (
     get_access_titles_names,
     get_missing_curriculum_periods,
     get_missing_curriculum_periods_for_doctorate,
 )
+from admission.views.common.detail_tabs.checklist import ChecklistTabIcon
 from admission.views.common.mixins import AdmissionFormMixin, AdmissionViewMixin
 from admission.views.doctorate.details.checklist.mixins import (
     CheckListDefaultContextMixin,
@@ -382,7 +387,8 @@ class SinglePastExperienceMixin(
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['current'] = self.experience
+        experience = self.experience
+        context['current'] = experience
         context['initial'] = self.experience or {}
         context['experience_type'] = self.experience_type
         authentication_comment_identifier = f'parcours_anterieur__{self.experience_uuid}__authentication'
@@ -413,6 +419,17 @@ class SinglePastExperienceMixin(
             .first()
         )
 
+        if experience:
+            tab_identifier = f'parcours_anterieur__{self.experience_uuid}'
+            experience_authentication_state = experience['extra'].get('etat_authentification') or ''
+            context['checklist_additional_icons'][tab_identifier].append(
+                ChecklistTabIcon(
+                    identifier='authentication_state',
+                    icon=authentication_css_class(authentication_status=experience_authentication_state),
+                    title=EtatAuthentificationParcours.get_value(experience_authentication_state),
+                    displayed=bool(experience_authentication_state),
+                )
+            )
         return context
 
     def get_success_url(self):

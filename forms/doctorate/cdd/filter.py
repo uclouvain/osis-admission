@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import json
 
 from dal import forward
 from django import forms
@@ -32,6 +33,7 @@ from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext_lazy
 
+from admission.admission_utils.get_actor_option_text import get_actor_option_text
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
     ENTITY_CDE,
     ENTITY_CDSS,
@@ -131,7 +133,7 @@ class DoctorateListFilterForm(BaseAdmissionFilterForm):
         required=False,
         widget=autocomplete.Select2Multiple(),
     )
-    uuid_promoteur = forms.CharField(
+    id_promoteur = forms.CharField(
         label=pgettext_lazy('gender', 'Supervisor'),
         required=False,
         widget=autocomplete.ListSelect2(
@@ -321,16 +323,11 @@ class DoctorateListFilterForm(BaseAdmissionFilterForm):
                 if country:
                     self.fields['nationalite'].widget.choices = ((nationality, country[0]),)
 
-            promoter_uuid = self.data.get(self.add_prefix('uuid_promoteur'))
-            if promoter_uuid:
-                promoter = SupervisionActor.objects.filter(uuid=promoter_uuid).select_related('person').first()
-                if promoter:
-                    self.fields['uuid_promoteur'].widget.choices = (
-                        (
-                            promoter_uuid,
-                            promoter.complete_name,
-                        ),
-                    )
+            promoter_id = self.data.get(self.add_prefix('id_promoteur'))
+            if promoter_id:
+                promoter_as_dict = json.loads(promoter_id)
+                promoter_option = get_actor_option_text(promoter_as_dict)
+                self.fields['id_promoteur'].widget.choices = ((promoter_id, promoter_option),)
 
     def clean(self):
         cleaned_data = super().clean()

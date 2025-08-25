@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@ from osis_common.ddd import interface
 class CandidatSignaletique(interface.ValueObject):
     nom: Optional[str]
     prenom: Optional[str]
+    autres_prenoms: Optional[str]
     date_naissance: Optional[datetime.date]
     annee_naissance: Optional[int]
     pays_nationalite: Optional[str]

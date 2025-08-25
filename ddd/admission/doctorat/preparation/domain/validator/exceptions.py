@@ -202,7 +202,7 @@ class GroupeSupervisionCompletPourPromoteursException(BusinessException):
     status_code = "PROPOSITION-22"
 
     def __init__(self, **kwargs):
-        message = _("There can be no more promoters in the supervision group.")
+        message = _("There can be no more supervisors in the supervision group.")
         super().__init__(message, **kwargs)
 
 
@@ -374,7 +374,7 @@ class PromoteurDeReferenceManquantException(BusinessException):
     status_code = "PROPOSITION-42"
 
     def __init__(self, **kwargs):
-        message = _("You must set a lead supervisor.")
+        message = _("You must set a contact supervisor.")
         super().__init__(message, **kwargs)
 
 
@@ -669,6 +669,22 @@ class ExperiencesNonAcademiquesCertificatManquantException(BusinessException):
     def __init__(self, reference, **kwargs):
         self.reference = reference
         message = _("The professional experience is missing a certificate.")
+        super().__init__(message, **kwargs)
+
+
+class PrenomTropLongException(BusinessException):
+    status_code = "PROPOSITION-74"
+
+    def __init__(self, **kwargs):
+        message = _("The first name must be less than 20 characters long.")
+        super().__init__(message, **kwargs)
+
+
+class AutresPrenomsTropLongException(BusinessException):
+    status_code = "PROPOSITION-75"
+
+    def __init__(self, **kwargs):
+        message = _("The other given names must be less than 40 characters long.")
         super().__init__(message, **kwargs)
 
 

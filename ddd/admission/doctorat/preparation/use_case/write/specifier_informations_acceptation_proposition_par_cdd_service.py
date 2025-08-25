@@ -51,6 +51,7 @@ def specifier_informations_acceptation_proposition_par_cdd(
         nom_personne_contact_programme_annuel=cmd.nom_personne_contact_programme_annuel,
         email_personne_contact_programme_annuel=cmd.email_personne_contact_programme_annuel,
         commentaire_programme_conjoint=cmd.commentaire_programme_conjoint,
+        communication_au_candidat=cmd.communication_au_candidat,
     )
 
     proposition_repository.save(entity=proposition)
