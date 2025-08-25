@@ -25,6 +25,7 @@
 # ##############################################################################
 import datetime
 import itertools
+from collections import defaultdict
 from typing import Dict, List, Optional, Set, Union
 
 import attr
@@ -67,7 +68,11 @@ from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
-    ExperienceNonTrouveeException, InformationsDestinatairePasTrouvee,
+    ExperienceNonTrouveeException,
+    InformationsDestinatairePasTrouvee,
+)
+from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
+    EtatAuthentificationParcours,
 )
 from admission.ddd.admission.shared_kernel.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
@@ -80,7 +85,6 @@ from admission.ddd.admission.shared_kernel.enums import Onglets, TypeItemFormula
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     DocumentsAssimilation,
     DocumentsEtudesSecondaires,
-    DocumentsExamens,
     OngletsDemande,
     StatutReclamationEmplacementDocument,
 )
@@ -219,6 +223,7 @@ from admission.utils import (
     get_training_url,
 )
 from admission.views.common.detail_tabs.checklist import (
+    ChecklistTabIcon,
     PropositionFromResumeMixin,
     change_admission_status,
 )
@@ -236,7 +241,6 @@ from base.utils.utils import format_academic_year
 from ddd.logic.shared_kernel.profil.commands import (
     RecupererExperiencesParcoursInterneQuery,
 )
-from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
@@ -247,8 +251,7 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
 from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
-from osis_profile.models import EducationalExperience, EducationGroupYearExam, Exam
-from osis_profile.models.enums.exam import ExamTypes
+from osis_profile.models import EducationalExperience
 from osis_profile.utils.curriculum import groupe_curriculum_par_annee_decroissante
 from osis_role.templatetags.osis_role import has_perm
 from parcours_interne import etudiants_PCE_avant_2015
@@ -386,8 +389,16 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        checklist_additional_icons = {}
-        checklist_additional_icons_title = {}
+        checklist_additional_icons: Dict[str, List[ChecklistTabIcon]] = defaultdict(list)
+
+        checklist_additional_icons['decision_facultaire'].append(
+            ChecklistTabIcon(
+                identifier='approval_other_training',
+                icon='fa-regular fa-dice',
+                title=gettext('Approval for another training'),
+                displayed=bool(self.admission.other_training_accepted_by_fac_id),
+            )
+        )
 
         # A SIC user has an additional icon for the decision of the faculty if a fac manager wrote a comment
         if self.is_sic:
@@ -399,15 +410,32 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
                 .exclude(content='')
                 .exists()
             )
-            if has_comment:
-                checklist_additional_icons['decision_facultaire'] = 'fa-regular fa-comment'
+            checklist_additional_icons['decision_facultaire'].append(
+                ChecklistTabIcon(
+                    identifier='fac_comment',
+                    icon='fa-regular fa-comment',
+                    title=gettext('A comment from the faculty for the SIC is specified'),
+                    displayed=has_comment,
+                )
+            )
 
-        if self.demande_est_en_quarantaine:
-            checklist_additional_icons['donnees_personnelles'] = 'fas fa-warning text-warning'
+        checklist_additional_icons['donnees_personnelles'].append(
+            ChecklistTabIcon(
+                identifier='quarantine',
+                icon='fas fa-warning text-warning',
+                title=gettext('The application is in quarantine'),
+                displayed=self.demande_est_en_quarantaine,
+            )
+        )
 
-        if self.proposition.est_inscription_tardive:
-            checklist_additional_icons['choix_formation'] = 'fa-regular fa-calendar-clock'
-            checklist_additional_icons_title['choix_formation'] = _('Late enrollment')
+        checklist_additional_icons['choix_formation'].append(
+            ChecklistTabIcon(
+                identifier='late_enrolment',
+                icon='fa-regular fa-calendar-clock',
+                title=gettext('Late enrollment'),
+                displayed=self.proposition.est_inscription_tardive,
+            )
+        )
 
         candidate_admissions: List[DemandeRechercheDTO] = message_bus_instance.invoke(
             ListerToutesDemandesQuery(
@@ -431,28 +459,33 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
         context['toutes_les_demandes'] = candidate_admissions
         context['autres_demandes'] = submitted_for_the_current_year_admissions
 
-        if any(
-            admission
-            for admission in submitted_for_the_current_year_admissions
-            if admission.etat_demande in STATUTS_TOUTE_PROPOSITION_AUTORISEE
-        ):
-            checklist_additional_icons['choix_formation'] = 'fa-solid fa-square-2'
-            checklist_additional_icons_title['choix_formation'] = _(
-                'Another admission has been authorized for this candidate for this academic year.'
+        checklist_additional_icons['choix_formation'].append(
+            ChecklistTabIcon(
+                identifier='other_authorized_admission',
+                icon='fa-solid fa-square-2',
+                title=gettext('Another admission has been authorized for this candidate for this academic year.'),
+                displayed=any(
+                    admission
+                    for admission in submitted_for_the_current_year_admissions
+                    if admission.etat_demande in STATUTS_TOUTE_PROPOSITION_AUTORISEE
+                ),
             )
+        )
 
-        if any(
-            admission
-            for admission in submitted_for_the_current_year_admissions
-            if admission.sigle_formation == self.proposition.formation.sigle
-        ):
-            checklist_additional_icons['choix_formation'] = 'fa-solid fa-triangle-exclamation'
-            checklist_additional_icons_title['choix_formation'] = _(
-                'The candidate has already applied for this course for this academic year.'
+        checklist_additional_icons['choix_formation'].append(
+            ChecklistTabIcon(
+                identifier='similar_course',
+                icon='fa-solid fa-triangle-exclamation',
+                title=gettext('The candidate has already applied for this course for this academic year.'),
+                displayed=any(
+                    admission
+                    for admission in submitted_for_the_current_year_admissions
+                    if admission.sigle_formation == self.proposition.formation.sigle
+                ),
             )
+        )
 
         context['checklist_additional_icons'] = checklist_additional_icons
-        context['checklist_additional_icons_title'] = checklist_additional_icons_title
         context['can_update_checklist_tab'] = self.can_update_checklist_tab
         context['can_change_payment'] = self.request.user.has_perm('admission.change_payment', self.admission)
         context['can_change_faculty_decision'] = self.request.user.has_perm(
@@ -685,6 +718,7 @@ class FacultyDecisionMixin(CheckListDefaultContextMixin):
             prefix='fac-decision-approval',
             educational_experience_program_name_by_uuid=self.candidate_cv_program_names_by_experience_uuid,
             current_training_uuid=str(self.admission.training.uuid),
+            is_admission=self.admission.type_demande == TypeDemande.ADMISSION.name,
         )
 
     @cached_property
@@ -958,6 +992,7 @@ class FacultyApprovalDecisionView(
             'nom_personne_contact_programme_annuel': form.cleaned_data['annual_program_contact_person_name'],
             'email_personne_contact_programme_annuel': form.cleaned_data['annual_program_contact_person_email'],
             'commentaire_programme_conjoint': form.cleaned_data['join_program_fac_comment'],
+            'communication_au_candidat': form.cleaned_data.get('communication_to_the_candidate') or '',
             'gestionnaire': self.request.user.person.global_id,
         }
         try:
@@ -2870,7 +2905,8 @@ class SinglePastExperienceMixin(
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['current'] = self.experience
+        experience = self.experience
+        context['current'] = experience
         context['initial'] = self.experience or {}
         context['experience_type'] = self.experience_type
         authentication_comment_identifier = f'parcours_anterieur__{self.experience_uuid}__authentication'
@@ -2900,6 +2936,18 @@ class SinglePastExperienceMixin(
             .order_by('-created')
             .first()
         )
+
+        if experience:
+            tab_identifier = f'parcours_anterieur__{self.experience_uuid}'
+            experience_authentication_state = experience['extra'].get('etat_authentification') or ''
+            context['checklist_additional_icons'][tab_identifier].append(
+                ChecklistTabIcon(
+                    identifier='authentication_state',
+                    icon=authentication_css_class(authentication_status=experience_authentication_state),
+                    title=EtatAuthentificationParcours.get_value(experience_authentication_state),
+                    displayed=bool(experience_authentication_state),
+                )
+            )
 
         return context
 
@@ -3258,8 +3306,14 @@ class ChecklistView(
                     experience_checklist_info = Checklist.initialiser_checklist_experience(experience_uuid).to_dict()
                     children.append(experience_checklist_info)
 
-                context['checklist_additional_icons'][tab_identifier] = authentication_css_class(
-                    authentication_status=experience_checklist_info['extra'].get('etat_authentification'),
+                experience_authentication_state = experience_checklist_info['extra'].get('etat_authentification') or ''
+                context['checklist_additional_icons'][tab_identifier].append(
+                    ChecklistTabIcon(
+                        identifier='authentication_state',
+                        icon=authentication_css_class(authentication_status=experience_authentication_state),
+                        title=EtatAuthentificationParcours.get_value(experience_authentication_state),
+                        displayed=bool(experience_authentication_state),
+                    )
                 )
                 context['authentication_forms'].setdefault(
                     experience_uuid,

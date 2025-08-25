@@ -221,6 +221,12 @@ msgstr "Carte A"
 msgid "A close mail has already been sent to the candidate."
 msgstr "Un courrier de clotûre a déjà été envoyé au candidat."
 
+msgid "A comment from the CDD for the SIC is specified"
+msgstr "Un commentaire de la CDD pour le SIC est présent "
+
+msgid "A comment from the faculty for the SIC is specified"
+msgstr "Un commentaire de la faculté pour le SIC est présent"
+
 msgid "A deny mail has already been sent to the candidate."
 msgstr "Un courrier de refus a été envoyé au candidat."
 
@@ -1578,9 +1584,6 @@ msgstr "Commentaires"
 
 msgid "Commitment and declaration"
 msgstr "Engagement et déclaration"
-
-msgid "Communication to the candidate"
-msgstr "Communication au candidat"
 
 #, python-brace-format
 msgid ""
@@ -3325,6 +3328,9 @@ msgstr "Libre et téléversé par FAC pour les gestionnaires"
 
 msgid "Free and uploaded by SIC for the managers"
 msgstr "Libre et téléversé par SIC pour les gestionnaires"
+
+msgid "Free comment for the candidate"
+msgstr "Commentaire libre à destination du·de la candidat·e"
 
 msgid "Free documents"
 msgstr "Documents libres"
@@ -5511,6 +5517,14 @@ msgstr ""
 "soumission."
 
 msgid ""
+"Please note that you are allowed to enroll in a different program than the "
+"one you originally applied for. For more information, contact your faculty."
+msgstr ""
+"Nous vous informons que vous êtes autorisé à vous inscrire à un autre "
+"programme que celui initialement demandé. Nous vous invitons à prendre "
+"contact avec votre faculté pour plus d’informations à ce sujet."
+
+msgid ""
 "Please provide a copy of the residence permit covering the entire course, "
 "including the assessment test (except for online courses)."
 msgstr ""
@@ -6901,6 +6915,9 @@ msgstr "La demande est actuellement en IUFC"
 msgid "The application is in faculty"
 msgstr "La demande est actuellement en faculté"
 
+msgid "The application is in quarantine"
+msgstr "La demande est en quarantaine"
+
 msgid ""
 "The authorization can not be done while there is one or more documents to be "
 "requested immediately."
@@ -7094,6 +7111,9 @@ msgstr ""
 "Le mail de la décision fac a été envoyé au candidat le %(date)s par "
 "%(sender)s."
 
+msgid "The first name must be less than 20 characters long."
+msgstr "Le prénom ne doit pas faire plus de 20 caractères."
+
 msgid "The first name of the candidate"
 msgstr "Le prénom du candidat"
 
@@ -7224,6 +7244,9 @@ msgid ""
 msgstr ""
 "L'option {index} doit avoir un identifiant et une traduction pour chaque "
 "langue requise."
+
+msgid "The other given names must be less than 40 characters long."
+msgstr "Les autres prénoms ne doivent pas faire plus de 40 caractères."
 
 msgid "The payment has already been made."
 msgstr "Le paiement a déjà été réalisé."
