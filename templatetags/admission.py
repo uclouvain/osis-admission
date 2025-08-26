@@ -611,7 +611,7 @@ def document_component(document_write_token, document_metadata, can_edit=True):
             if not can_edit:
                 attrs = {action: False for action in ['pagination', 'zoom', 'comment', 'highlight', 'rotation']}
             return {
-                'template': 'osis_document/editor.html',
+                'template': 'osis_document_components/editor.html',
                 'value': document_write_token,
                 'base_url': settings.OSIS_DOCUMENT_BASE_URL,
                 'attrs': attrs,
