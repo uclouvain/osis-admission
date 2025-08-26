@@ -33,7 +33,7 @@ from admission.models import AdmissionTask
 from admission.tests.factories import DoctorateAdmissionFactory
 from osis_async.models import AsyncTask
 from osis_async.models.enums import TaskState
-from osis_document.enums import PostProcessingType, DocumentExpirationPolicy
+from osis_document_components.enums import PostProcessingType, DocumentExpirationPolicy
 
 
 class ExportPdfTestCase(TestCase):
@@ -48,11 +48,11 @@ class ExportPdfTestCase(TestCase):
         self.addCleanup(patcher.stop)
 
     @patch('admission.exports.admission_archive.launch_post_processing')
-    @patch('osis_document.api.utils.get_remote_metadata')
-    @patch('osis_document.utils.save_raw_content_remotely')
-    @patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+    @patch('osis_document_components.services.get_remote_metadata')
+    @patch('osis_document_components.services.save_raw_content_remotely')
+    @patch('osis_document_components.fields.FileField._confirm_multiple_upload')
     @patch('admission.exports.admission_archive.confirm_remote_upload')
-    @patch('osis_document.api.utils.confirm_remote_upload')
+    @patch('osis_document_components.services.confirm_remote_upload')
     def test_pdf_archive(self, confirm, adm_confirm, confirm_multiple_upload, save, get_metadata, post_processing):
         get_metadata.return_value = {"name": "test.pdf", "size": 1}
         save.return_value = 'a-token'
@@ -87,8 +87,8 @@ class ExportPdfTestCase(TestCase):
     def _raise_exception(self, text):
         raise Exception(text)
 
-    @patch('osis_document.utils.save_raw_content_remotely')
-    @patch('osis_document.api.utils.confirm_remote_upload')
+    @patch('osis_document_components.services.save_raw_content_remotely')
+    @patch('osis_document_components.services.confirm_remote_upload')
     def test_pdf_archive_with_error(self, confirm, save):
         save.side_effect = Exception("API not working")
         async_task = AsyncTask.objects.create(name="Export pdf")

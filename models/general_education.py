@@ -30,7 +30,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from osis_document.contrib import FileField
+from osis_document_components.fields import FileField
 from rest_framework.settings import api_settings
 
 from admission.constants import CONTEXT_GENERAL

@@ -296,7 +296,7 @@ def get_document_from_identifier(
         max_documents_number = 1
 
         if document_uuids:
-            from osis_document.api.utils import get_remote_metadata, get_remote_token
+            from osis_document_components.services import get_remote_metadata, get_remote_token
 
             token = get_remote_token(uuid=document_uuids[0], for_modified_upload=True)
             metadata = get_remote_metadata(token=token) or {}
@@ -445,7 +445,7 @@ def get_document_from_identifier(
     if obj and field and document_type:
         if document_uuids:
             if not metadata:
-                from osis_document.api.utils import (
+                from osis_document_components.services import (
                     get_remote_metadata,
                     get_remote_token,
                 )

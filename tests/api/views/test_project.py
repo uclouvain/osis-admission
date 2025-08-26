@@ -477,7 +477,7 @@ class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixi
         cls.url = resolve_url("admission_api_v1:project", uuid=cls.admission.uuid)
         cls.dto_url = resolve_url("admission_api_v1:doctorate_propositions", uuid=cls.admission.uuid)
 
-    @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
+    @patch("osis_document_components.fields.FileField._confirm_multiple_upload")
     def test_admission_doctorate_update_using_api_candidate(self, confirm_upload):
         confirm_upload.side_effect = lambda _, value, __: ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
         self.client.force_authenticate(user=self.candidate.user)
@@ -541,7 +541,7 @@ class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixi
 @override_settings(ROOT_URLCONF='admission.api.url_v1')
 class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
     @classmethod
-    @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
+    @patch("osis_document_components.fields.FileField._confirm_multiple_upload")
     def setUpTestData(cls, confirm_upload):
         confirm_upload.side_effect = lambda _, value, __: ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
         cls.admission = DoctorateAdmissionFactory(
@@ -766,7 +766,7 @@ class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
 @freezegun.freeze_time('2020-12-15')
 class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
     @classmethod
-    @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
+    @patch("osis_document_components.fields.FileField._confirm_multiple_upload")
     def setUpTestData(cls, confirm_upload):
         AdmissionAcademicCalendarFactory.produce_all_required()
         language_fr = FrenchLanguageFactory()

@@ -39,7 +39,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import get_language, gettext
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import ngettext_lazy, override, pgettext, pgettext_lazy
-from osis_document.utils import is_uuid
+from osis_document_components.utils import is_uuid
 
 from admission.constants import (
     COMMENT_TAG_FAC,

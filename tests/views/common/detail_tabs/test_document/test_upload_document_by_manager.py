@@ -38,7 +38,7 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
 )
 from admission.tests.views.common.detail_tabs.test_document import BaseDocumentViewTestCase
 from base.forms.utils.file_field import PDF_MIME_TYPE
-from osis_document.contrib.forms import FileUploadField
+from osis_document_components.forms import FileUploadField
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')

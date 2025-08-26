@@ -37,7 +37,7 @@ from osis_profile.models import EducationGroupYearExam
 class EmplacementsDocumentsPropositionTranslator(IEmplacementsDocumentsPropositionTranslator):
     @classmethod
     def recuperer_metadonnees_par_uuid_document(cls, uuids_documents: List[str]) -> Dict[str, Dict]:
-        from osis_document.api.utils import get_remote_tokens, get_several_remote_metadata
+        from osis_document_components.services import get_remote_tokens, get_several_remote_metadata
 
         tokens = get_remote_tokens(uuids_documents, for_modified_upload=True)
         metadata = get_several_remote_metadata(list(tokens.values()))

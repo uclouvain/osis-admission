@@ -43,7 +43,7 @@ from django.utils.safestring import SafeString, mark_safe
 from django.utils.translation import get_language, gettext
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext, pgettext_lazy
-from osis_document.api.utils import get_remote_metadata, get_remote_token
+from osis_document_components.services import get_remote_metadata, get_remote_token
 from osis_history.models import HistoryEntry
 from rules.templatetags import rules
 

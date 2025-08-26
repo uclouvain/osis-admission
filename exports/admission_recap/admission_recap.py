@@ -28,7 +28,7 @@ from io import BytesIO
 from typing import Optional, Union
 
 from django.utils.translation import override
-from osis_document.utils import save_raw_content_remotely
+from osis_document_components.services import save_raw_content_remotely
 from pikepdf import OutlineItem, PasswordError, Pdf, PdfError
 
 from admission.ddd.admission.doctorat.preparation import (
@@ -58,7 +58,7 @@ def admission_pdf_recap(
     with_annotated_documents=False,
 ):
     """Generates the admission pdf and returns a token to access it."""
-    from osis_document.api.utils import get_remote_tokens, get_several_remote_metadata
+    from osis_document_components.services import get_remote_tokens, get_several_remote_metadata
 
     from admission.exports.utils import get_pdf_from_template
 

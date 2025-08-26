@@ -31,7 +31,7 @@ from django import forms
 from django.core.exceptions import ImproperlyConfigured
 from django.test import TestCase
 from django.test.utils import override_settings
-from osis_document.contrib import FileUploadField
+from osis_document_components.fields import FileUploadField
 
 from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.shared_kernel.enums import (
@@ -193,12 +193,12 @@ class ConfigurableFormItemFieldTestCase(TestCase):
         cls.field_configurations = field_configurations
 
     def setUp(self) -> None:
-        patcher = patch('osis_document.api.utils.get_remote_token', return_value='foobar')
+        patcher = patch('osis_document_components.services.get_remote_token', return_value='foobar')
         patcher.start()
         self.addCleanup(patcher.stop)
 
         patcher = patch(
-            'osis_document.api.utils.get_remote_metadata',
+            'osis_document_components.services.get_remote_metadata',
             return_value={'name': 'myfile', 'mimetype': PDF_MIME_TYPE, 'size': 1},
         )
         patcher.start()
