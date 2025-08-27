@@ -564,7 +564,7 @@ def field_data(
         elif context.get('load_files') is False:
             data = _('Specified') if data else _('Incomplete field')
         elif data:
-            template_string = "{% load osis_document %}{% document_visualizer files for_modified_upload=True %}"
+            template_string = "{% load osis_document_components %}{% document_visualizer files for_modified_upload=True %}"
             template_context = {'files': data}
             data = template.Template(template_string).render(template.Context(template_context))
         else:
