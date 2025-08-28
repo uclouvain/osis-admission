@@ -497,6 +497,7 @@ class CommonApprovalForm(forms.ModelForm):
             'annual_program_contact_person_name',
             'annual_program_contact_person_email',
             'join_program_fac_comment',
+            'communication_to_the_candidate',
             'with_prerequisite_courses',
         ]
         labels = {
@@ -506,12 +507,14 @@ class CommonApprovalForm(forms.ModelForm):
         widgets = {
             'prerequisite_courses_fac_comment': CKEditorWidget(config_name='comment_link_only'),
             'join_program_fac_comment': CKEditorWidget(config_name='comment_link_only'),
+            'communication_to_the_candidate': CKEditorWidget(config_name='comment_link_only'),
             'with_prerequisite_courses': forms.RadioSelect(choices=[(True, _('Yes')), (False, _('No'))]),
         }
 
     def __init__(
         self,
         academic_year,
+        is_admission,
         *args,
         **kwargs,
     ):
@@ -539,6 +542,9 @@ class CommonApprovalForm(forms.ModelForm):
         )
 
         self.fields['prerequisite_courses'].choices = LearningUnitYearAutocomplete.dtos_to_choices(learning_units)
+
+        if not is_admission:
+            self.fields.pop('communication_to_the_candidate', None)
 
     def clean(self):
         cleaned_data = super().clean()

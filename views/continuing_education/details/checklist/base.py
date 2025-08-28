@@ -104,6 +104,10 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
         return has_perm('admission.change_checklist_iufc', user=self.request.user, obj=self.admission)
 
     @cached_property
+    def can_cancel_admission_iufc(self):
+        return has_perm('admission.cancel_admission_iufc', user=self.request.user, obj=self.admission)
+
+    @cached_property
     def mail_tokens(self):
         candidate = self.admission.candidate
         person = self.request.user.person
@@ -312,9 +316,7 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        checklist_additional_icons = {}
 
-        context['checklist_additional_icons'] = checklist_additional_icons
         context['can_update_checklist_tab'] = self.can_update_checklist_tab
         context['can_change_payment'] = self.request.user.has_perm('admission.change_payment', self.admission)
         context['can_change_faculty_decision'] = self.request.user.has_perm(
@@ -360,7 +362,7 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
                 context['decision_fac_approval_form']: self.can_update_checklist_tab,
                 context['decision_hold_form']: self.can_update_checklist_tab,
                 context['decision_deny_form']: self.can_update_checklist_tab,
-                context['decision_cancel_form']: self.can_update_checklist_tab,
+                context['decision_cancel_form']: self.can_cancel_admission_iufc,
                 context['decision_close_form']: self.can_update_checklist_tab,
                 context['decision_send_to_fac_form']: self.can_update_iufc_checklist_tab,
                 **{

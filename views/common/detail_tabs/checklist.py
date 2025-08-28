@@ -56,6 +56,7 @@ __all__ = [
     'ChangeStatusView',
     'SaveCommentView',
     'PropositionFromResumeMixin',
+    'ChecklistTabIcon',
 ]
 
 __namespace__ = False
@@ -198,6 +199,7 @@ class SaveCommentView(AdmissionFormMixin, FormView):
                 'author': self.request.user.person,
             },
         )
+        self.update_admission_author = self.is_continuing
         return super().form_valid(CommentForm(comment=comment, **self.get_form_kwargs()))
 
 
@@ -208,3 +210,19 @@ class PropositionFromResumeMixin:
     def proposition(self):
         # Override it to avoid unuseful request
         return self.proposition_resume.resume.proposition
+
+
+class ChecklistTabIcon:
+    """Encapsulate the information needed to display the checklist tab icons"""
+
+    def __init__(self, identifier, icon: str, title: str, displayed: bool):
+        """
+        :param identifier: Identifier of the icon (must be unique in a checklist tab)
+        :param icon: The css class of the icon to display
+        :param title: The title displayed when hovering the icon
+        :param displayed: True if the icon must be displayed, otherwise False
+        """
+        self.icon = icon
+        self.title = title
+        self.identifier = identifier
+        self.displayed = displayed

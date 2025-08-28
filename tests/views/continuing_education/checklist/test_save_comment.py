@@ -31,8 +31,11 @@ from django.test import TestCase
 from osis_comment.models import CommentEntry
 
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
-from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.doctorate import DoctorateFactory
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.tests.factories.continuing_education import (
+    ContinuingEducationTrainingFactory,
+    ContinuingEducationAdmissionFactory,
+)
 from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
@@ -44,16 +47,16 @@ class SaveCommentViewTestCase(TestCase):
     def setUpTestData(cls):
         cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
 
-        cls.first_doctoral_commission = EntityWithVersionFactory(version__acronym=ENTITY_CDE)
-        EntityVersionFactory(entity=cls.first_doctoral_commission)
+        cls.entity = EntityWithVersionFactory(version__acronym=ENTITY_CDE)
+        EntityVersionFactory(entity=cls.entity)
 
-        cls.training = DoctorateFactory(
-            management_entity=cls.first_doctoral_commission,
+        cls.training = ContinuingEducationTrainingFactory(
+            management_entity=cls.entity,
             academic_year=cls.academic_years[0],
         )
 
-        cls.sic_manager_user = SicManagementRoleFactory(entity=cls.first_doctoral_commission).person.user
-        cls.second_sic_manager_user = SicManagementRoleFactory(entity=cls.first_doctoral_commission).person.user
+        cls.sic_manager_user = SicManagementRoleFactory(entity=cls.entity).person.user
+        cls.second_sic_manager_user = SicManagementRoleFactory(entity=cls.entity).person.user
         cls.fac_manager_user = ProgramManagerRoleFactory(education_group=cls.training.education_group).person.user
         cls.second_fac_manager_user = ProgramManagerRoleFactory(
             education_group=cls.training.education_group
@@ -64,9 +67,9 @@ class SaveCommentViewTestCase(TestCase):
     @freezegun.freeze_time('2021-12-1')
     def setUp(self) -> None:
         super().setUp()
-        self.admission = DoctorateAdmissionFactory(
+        self.admission = ContinuingEducationAdmissionFactory(
             training=self.training,
-            submitted=True,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
             last_update_author=self.fac_manager_user.person,
         )
 
@@ -74,7 +77,7 @@ class SaveCommentViewTestCase(TestCase):
     def test_submit_a_new_comment(self):
         self.client.force_login(user=self.sic_manager_user)
         url = resolve_url(
-            'admission:doctorate:save-comment',
+            'admission:continuing-education:save-comment',
             uuid=self.admission.uuid,
             tab='donnees_personnelles',
         )
@@ -98,16 +101,16 @@ class SaveCommentViewTestCase(TestCase):
         self.assertIsNotNone(comment_entry)
         self.assertEqual(comment_entry.content, 'Test comment')
 
-        # Check that the last modification information of the admission have not been updated
+        # Check that the last modification information of the admission have been updated
         self.admission.refresh_from_db()
-        self.assertEqual(self.admission.modified_at, datetime.datetime(2021, 12, 1))
-        self.assertEqual(self.admission.last_update_author, self.fac_manager_user.person)
+        self.assertEqual(self.admission.modified_at, datetime.datetime(2021, 12, 31, 8, 15))
+        self.assertEqual(self.admission.last_update_author, self.sic_manager_user.person)
 
     def test_submit_an_updated_comment(self):
         self.client.force_login(user=self.sic_manager_user)
 
         url = resolve_url(
-            'admission:doctorate:save-comment',
+            'admission:continuing-education:save-comment',
             uuid=self.admission.uuid,
             tab='donnees_personnelles',
         )
@@ -145,7 +148,7 @@ class SaveCommentViewTestCase(TestCase):
             self.assertIsNotNone(comment_entry)
             self.assertEqual(comment_entry.content, 'Test comment 2')
 
-            # Check that the last modification information of the admission have not been updated
+            # Check that the last modification information of the admission have been updated
             self.admission.refresh_from_db()
-            self.assertEqual(self.admission.modified_at, datetime.datetime(2021, 12, 1))
-            self.assertEqual(self.admission.last_update_author, self.fac_manager_user.person)
+            self.assertEqual(self.admission.modified_at, datetime.datetime(2021, 12, 31, 8, 20))
+            self.assertEqual(self.admission.last_update_author, self.sic_manager_user.person)

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,8 +27,12 @@ from admission.ddd.admission.shared_kernel.domain.model.proposition import Propo
 from admission.ddd.admission.formation_generale.commands import (
     SpecifierInformationsAcceptationPropositionParFaculteCommand,
 )
-from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    PropositionIdentity,
+)
+from admission.ddd.admission.formation_generale.repository.i_proposition import (
+    IPropositionRepository,
+)
 
 
 def specifier_informations_acceptation_proposition_par_faculte(
@@ -52,6 +56,7 @@ def specifier_informations_acceptation_proposition_par_faculte(
         nom_personne_contact_programme_annuel=cmd.nom_personne_contact_programme_annuel,
         email_personne_contact_programme_annuel=cmd.email_personne_contact_programme_annuel,
         commentaire_programme_conjoint=cmd.commentaire_programme_conjoint,
+        communication_au_candidat=cmd.communication_au_candidat,
     )
 
     proposition_repository.save(entity=proposition)

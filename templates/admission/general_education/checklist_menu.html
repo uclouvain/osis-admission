@@ -6,7 +6,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -39,9 +39,13 @@
           <a>
             {% include 'admission/general_education/checklist_menu_item_status.html' with statut=statut item_name=checklist_item_name %}
             {{ checklist_tabs|get_item:checklist_item_name }}
-            {% if checklist_additional_icons and checklist_additional_icons|get_item_or_none:checklist_item_name %}
-              {% include 'admission/general_education/checklist_menu_item_additional_icon.html' with item_name=checklist_item_name additional_icon=checklist_additional_icons|get_item:checklist_item_name title=checklist_additional_icons_title|get_item:checklist_item_name %}
-            {% endif %}
+            {% with item_icons=checklist_additional_icons|get_item_or_none:checklist_item_name %}
+              {% if item_icons %}
+                {% for item_icon in item_icons %}
+                  {% include 'admission/general_education/checklist_menu_item_additional_icon.html' with item_name=checklist_item_name item_icon=item_icon %}
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
           </a>
         </div>
         {% if current.enfants %}
@@ -53,13 +57,19 @@
                   data-toggle="tab"
                   href="#{{ child_identifier }}"
               >
-                <a class="sub-item-link"">
+                <a class="sub-item-link">
                   {% include 'admission/general_education/checklist_menu_item_status.html' with statut=child.statut item_name=child_identifier %}
                     {{ checklist_tabs|get_item:child_identifier }}
                     {% if child.extra.identifiant in curex_a_fusionner %}
                         <div class="pull-right badge small badge-warning">Fusion</div>
                     {% endif %}
-                  {% include 'admission/general_education/checklist_menu_item_additional_icon.html' with item_name=child_identifier additional_icon=checklist_additional_icons|get_item:child_identifier title=checklist_additional_icons_title|get_item:child_identifier %}
+                  {% with item_icons=checklist_additional_icons|get_item_or_none:child_identifier %}
+                    {% if item_icons %}
+                      {% for item_icon in item_icons %}
+                        {% include 'admission/general_education/checklist_menu_item_additional_icon.html' with item_name=child_identifier item_icon=item_icon %}
+                      {% endfor %}
+                    {% endif %}
+                  {% endwith %}
                 </a>
               </li>
             {% endfor %}

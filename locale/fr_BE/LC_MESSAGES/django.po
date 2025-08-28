@@ -91,8 +91,8 @@ msgctxt "admission"
 msgid "(Expected) date of graduation"
 msgstr "Date (prévue) de délivrance du diplôme"
 
-msgid "(Expected) graduation date (signed diploma)"
-msgstr "Date (prévue) de délivrance du diplôme (document signé)"
+msgid "(Expected) graduation date"
+msgstr "Date (prévue) de délivrance du diplôme"
 
 msgid ", on"
 msgstr ", le"
@@ -220,6 +220,12 @@ msgstr "Carte A"
 
 msgid "A close mail has already been sent to the candidate."
 msgstr "Un courrier de clotûre a déjà été envoyé au candidat."
+
+msgid "A comment from the CDD for the SIC is specified"
+msgstr "Un commentaire de la CDD pour le SIC est présent "
+
+msgid "A comment from the faculty for the SIC is specified"
+msgstr "Un commentaire de la faculté pour le SIC est présent"
 
 msgid "A deny mail has already been sent to the candidate."
 msgstr "Un courrier de refus a été envoyé au candidat."
@@ -471,9 +477,6 @@ msgstr "Ajouter une communication à ce séjour"
 msgid "Add a paper/presentation for this seminar"
 msgstr "Ajouter une communication à ce séminaire"
 
-msgid "Add a promoter or a CA member"
-msgstr "Ajouter un.e promoteur.trice ou un.e membre du comité d'accompagnement"
-
 msgid "Add a publication"
 msgstr "Ajouter une publication"
 
@@ -488,6 +491,9 @@ msgstr "Ajouter un séminaire"
 
 msgid "Add a service"
 msgstr "Ajouter un service"
+
+msgid "Add a supervisor or a supervision committee member"
+msgstr "Ajouter un·e promoteur·trice ou un·e membre du comité d'accompagnement"
 
 msgctxt "admission"
 msgid "Add an academic course"
@@ -1390,7 +1396,7 @@ msgstr ""
 msgid "Carbon-copy the CA members"
 msgstr "Mettre en copie les membres du comité d'accompagnement"
 
-msgid "Carbon-copy the promoters"
+msgid "Carbon-copy the supervisors"
 msgstr "Mettre en copie les promoteurs"
 
 msgid "Category"
@@ -1585,9 +1591,6 @@ msgstr "Commentaires"
 msgid "Commitment and declaration"
 msgstr "Engagement et déclaration"
 
-msgid "Communication to the candidate"
-msgstr "Communication au candidat"
-
 #, python-brace-format
 msgid ""
 "Communication to the candidate (refusal reason), in <span class=\"label "
@@ -1690,6 +1693,9 @@ msgstr "Personne de contact pour la composition du programme annuel"
 
 msgid "Contact person for the design of the annual program (PAE)"
 msgstr "Personne de contact pour la composition du programme annuel (PAE)"
+
+msgid "Contact supervisor"
+msgstr "Promoteur·trice de contact"
 
 msgid "Context"
 msgstr "Contexte"
@@ -2208,8 +2214,8 @@ msgstr "Description"
 msgid "Description of your communication"
 msgstr "Description de votre communication"
 
-msgid "Designate as lead supervisor"
-msgstr "Désigner comme promoteur de référence"
+msgid "Designate as contact supervisor"
+msgstr "Désigner comme promoteur·trice de contact"
 
 msgid "Detailed curriculum vitae, dated and signed"
 msgstr "Curriculum vitae détaillé, daté et signé"
@@ -3332,6 +3338,9 @@ msgstr "Libre et téléversé par FAC pour les gestionnaires"
 msgid "Free and uploaded by SIC for the managers"
 msgstr "Libre et téléversé par SIC pour les gestionnaires"
 
+msgid "Free comment for the candidate"
+msgstr "Commentaire libre à destination du·de la candidat·e"
+
 msgid "Free documents"
 msgstr "Documents libres"
 
@@ -3905,11 +3914,12 @@ msgstr ""
 "doctorale de domaine"
 
 msgid ""
-"If known, indicate the name of the laboratory, clinical department or "
-"research centre where the thesis will be carried out at UCLouvain"
+"If known, indicate, for example, the name of the laboratory, clinical "
+"department, research centre, ... where the thesis will be carried out at "
+"UCLouvain"
 msgstr ""
-"Si connu, indiquez ici le nom du laboratoire, du service clinique ou du "
-"centre de recherche où sera réalisée la thèse à l'UCLouvain"
+"Si connu, indiquez ici par exemple le nom du laboratoire, du service "
+"clinique, du centre de recherche, ... où sera réalisée la thèse à l'UCLouvain"
 
 msgid ""
 "If necessary, please finish inputting doctoral activities and complete the "
@@ -4256,6 +4266,11 @@ msgstr "UE en proposition de suppression"
 msgid "Language"
 msgstr "Langue"
 
+msgid "Language in which the domain doctoral committee can contact this person"
+msgstr ""
+"Langue dans laquelle la Commission doctorale de domaine peut contacter cette "
+"personne"
+
 msgid "Language regime"
 msgstr "Régime linguistique"
 
@@ -4322,9 +4337,6 @@ msgstr "Ultérieurement > non-bloquant"
 
 msgid "Launch"
 msgstr "Lancer"
-
-msgid "Lead supervisor"
-msgstr "Promoteur de référence"
 
 msgid "Leave page?"
 msgstr "Quitter la page ?"
@@ -4459,16 +4471,29 @@ msgstr ""
 "E-mail envoyé aux membres du groupe de supervision pour demander une "
 "signature"
 
-msgid "Mail sent to promoters when a member of the supervision panel refuses"
+msgid ""
+"Mail sent to each promoter of the supervision group to request a signature"
+msgstr ""
+"E-mail envoyé aux promoteurs du groupe de supervision pour demander une "
+"signature"
+
+msgid "Mail sent to supervisors when a member of the supervision panel refuses"
 msgstr ""
 "E-mail envoyé aux promoteurs lors du refus d'un membre du groupe de "
 "supervision"
 
 msgid ""
-"Mail sent to the applicant following approval or rejection by a member of "
-"the supervisory group"
+"Mail sent to the applicant following approval by a member of the supervisory "
+"group"
 msgstr ""
-"E-mail envoyé au candidat suite à l'approbation ou au refus d'un membre du "
+"E-mail envoyé au candidat suite à l'approbation d'un membre du "
+"groupe de supervision"
+
+msgid ""
+"Mail sent to the applicant following rejection by a member of the "
+"supervisory group"
+msgstr ""
+"E-mail envoyé au candidat suite au refus d'un membre du "
 "groupe de supervision"
 
 #, python-format
@@ -5514,6 +5539,14 @@ msgstr ""
 "soumission."
 
 msgid ""
+"Please note that you are allowed to enroll in a different program than the "
+"one you originally applied for. For more information, contact your faculty."
+msgstr ""
+"Nous vous informons que vous êtes autorisé à vous inscrire à un autre "
+"programme que celui initialement demandé. Nous vous invitons à prendre "
+"contact avec votre faculté pour plus d’informations à ce sujet."
+
+msgid ""
 "Please provide a copy of the residence permit covering the entire course, "
 "including the assessment test (except for online courses)."
 msgstr ""
@@ -5668,10 +5701,10 @@ msgstr "Proposition de programme"
 msgid "Project"
 msgstr "Projet"
 
-msgid "Project resume"
+msgid "Project abstract"
 msgstr "Résumé"
 
-msgid "Project resume (max. 2000 characters)"
+msgid "Project abstract (max. 2000 characters)"
 msgstr "Résumé (max. 2000 caractères)"
 
 msgid "Project title"
@@ -5679,9 +5712,6 @@ msgstr "Sujet"
 
 msgid "Project title (max. 100 characters)"
 msgstr "Sujet (max. 100 caractères)"
-
-msgid "Promoters"
-msgstr "Promoteurs"
 
 msgid "Promotion"
 msgstr "Promotion"
@@ -6097,6 +6127,9 @@ msgstr "Projet de recherche"
 msgid "Research scholarship"
 msgstr "Bourse de recherche"
 
+msgid "Research start date"
+msgstr "Date de début des travaux"
+
 msgid "Resend invitation"
 msgstr "Renvoyer une invitation"
 
@@ -6183,17 +6216,17 @@ msgstr "Rôle: Gestionnaire d'admission d'un programme"
 msgid "Role: Program managers"
 msgstr "Rôle: Gestionnaires d'admission d'un programme"
 
-msgid "Role: Promoter"
-msgstr "Rôle: Promoteur"
-
-msgid "Role: Promoters"
-msgstr "Rôle: Promoteurs"
-
 msgid "Role: SCEB"
 msgstr "Rôle: SCEB"
 
 msgid "Role: SCEBs"
 msgstr "Rôle: SCEBs"
+
+msgid "Role: Supervisor"
+msgstr "Rôle: Promoteur"
+
+msgid "Role: Supervisors"
+msgstr "Rôle: Promoteurs"
 
 msgid "SEARCH_SCHOLARSHIP"
 msgstr "Bourse de recherche"
@@ -6665,7 +6698,7 @@ msgid "Supervisor not found."
 msgstr "Promoteur non trouvé."
 
 msgid "Supervisors"
-msgstr "Promoteurs"
+msgstr "Promoteurs·trices"
 
 msgid "Supervisory panel"
 msgstr "Comité d'accompagnement"
@@ -6907,6 +6940,9 @@ msgstr "La demande est actuellement en IUFC"
 msgid "The application is in faculty"
 msgstr "La demande est actuellement en faculté"
 
+msgid "The application is in quarantine"
+msgstr "La demande est en quarantaine"
+
 msgid ""
 "The authorization can not be done while there is one or more documents to be "
 "requested immediately."
@@ -6998,6 +7034,9 @@ msgstr "La configuration n'est pas valide pour un texte : "
 
 msgid "The contact address I provided"
 msgstr "L'adresse de correspondance que j'ai fournie"
+
+msgid "The contact supervisor must be internal UCLouvain"
+msgstr "Le·la promoteur·trice de contact doit être interne UCLouvain"
 
 msgid "The css class must be a string."
 msgstr "La classe css doit être une chaîne de caractères."
@@ -7096,6 +7135,9 @@ msgid ""
 msgstr ""
 "Le mail de la décision fac a été envoyé au candidat le %(date)s par "
 "%(sender)s."
+
+msgid "The first name must be less than 20 characters long."
+msgstr "Le prénom ne doit pas faire plus de 20 caractères."
 
 msgid "The first name of the candidate"
 msgstr "Le prénom du candidat"
@@ -7228,6 +7270,9 @@ msgstr ""
 "L'option {index} doit avoir un identifiant et une traduction pour chaque "
 "langue requise."
 
+msgid "The other given names must be less than 40 characters long."
+msgstr "Les autres prénoms ne doivent pas faire plus de 40 caractères."
+
 msgid "The payment has already been made."
 msgstr "Le paiement a déjà été réalisé."
 
@@ -7314,6 +7359,9 @@ msgstr "La proposition doit être gérée par la CDD pour réaliser cette action
 msgid "The proposition must be submitted to realize this action."
 msgstr "La proposition doit être soumise pour réaliser cette action."
 
+msgid "The proposition must be validated to realize this action."
+msgstr "La proposition doit être validée pour réaliser cette action."
+
 msgid ""
 "The proposition must involve a change of course and must have a defined "
 "access condition."
@@ -7327,8 +7375,14 @@ msgstr "La proposition ne doit pas être annulée pour réaliser cette action."
 msgid "The proposition must not be concerned by the payment."
 msgstr "La proposition ne doit pas être concernée par le paiement."
 
+msgid "The public comment about the approval"
+msgstr "Le commentaire public de l'approbation"
+
 msgid "The public comment about the approval/refusal"
 msgstr "Le commentaire public de la décision"
+
+msgid "The public comment about the refusal"
+msgstr "Le commentaire public du refus"
 
 msgid "The reason for refusal"
 msgstr "La raison du refus"
@@ -7428,7 +7482,7 @@ msgstr ""
 "Il ne peut y avoir davantage de membres du comité d'accompagnement dans le "
 "groupe de supervision."
 
-msgid "There can be no more promoters in the supervision group."
+msgid "There can be no more supervisors in the supervision group."
 msgstr ""
 "Il ne peut y avoir davantage de promoteurs dans le groupe de supervision."
 
@@ -8075,9 +8129,6 @@ msgstr ""
 msgid "Work contract type"
 msgstr "Type de contrat de travail"
 
-msgid "Work start date"
-msgstr "Date de début des travaux"
-
 msgid "Working contract type"
 msgstr "Type de contrat de travail"
 
@@ -8167,7 +8218,7 @@ msgstr ""
 "(<a href=\"%(url)s\" target=\"_blank\">Informations</a>)"
 
 msgid ""
-"Write your resume in the language decided with your accompanying committee."
+"Write your abstract in the language decided with your accompanying committee."
 msgstr ""
 "Rédigez votre résumé dans la langue convenue avec votre comité "
 "d'accompagnement."
@@ -8517,14 +8568,15 @@ msgstr ""
 "Vous devez être invité à payer les frais de dossier ou vous devez avoir "
 "soumis votre demande."
 
-msgid "You must be the reference promoter to access this admission"
+msgid "You must be the contact supervisor to access this admission"
 msgstr ""
-"Vous devez être le promoteur de référence pour accéder à cette admission"
+"Vous devez être le·la promoteur·trice de contact pour accéder à cette "
+"admission"
 
 msgid "You must be the request author to access this admission"
 msgstr "Vous devez être l'auteur de la demande pour accéder à cette admission"
 
-msgid "You must be the request promoter to access this admission"
+msgid "You must be the request supervisor to access this admission"
 msgstr ""
 "Vous devez être le promoteur de la demande pour accéder à cette admission"
 
@@ -8559,8 +8611,8 @@ msgstr ""
 msgid "You must reference a person in UCLouvain."
 msgstr "Vous devez référencer une personne de l'UCLouvain."
 
-msgid "You must set a lead supervisor."
-msgstr "Vous devez désigner un promoteur de référence."
+msgid "You must set a contact supervisor."
+msgstr "Vous devez désigner un·e promoteur·trice de contact."
 
 msgid "You need to create the message before sending it."
 msgstr "Il est nécessaire de créer le message avant de pouvoir envoyer."

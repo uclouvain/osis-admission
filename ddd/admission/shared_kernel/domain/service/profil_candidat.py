@@ -97,6 +97,7 @@ class ProfilCandidat(interface.DomainService):
                 pays_nationalite=identification.pays_nationalite,
                 photo_identite=identification.photo_identite,
                 prenom=identification.prenom,
+                autres_prenoms=identification.autres_prenoms,
                 langue_contact=identification.langue_contact,
                 sexe=identification.sexe,
                 nom=identification.nom,

@@ -62,7 +62,7 @@
 
 {% panel _("Research project") %}
   {% field_data _("Project title") proposition.titre_projet %}
-  {% field_data _("Project resume") proposition.resume_projet|linebreaks %}
+  {% field_data _("Project abstract") proposition.resume_projet|linebreaks %}
   {% field_data _("Thesis language") proposition.nom_langue_redaction_these %}
   {% if proposition.institut_these %}
     {% display proposition.nom_institut_these ' ' '(' proposition.sigle_institut_these ')' as institut_these %}
@@ -82,7 +82,7 @@
   {% field_data _("Has your PhD project already started?") proposition.projet_doctoral_deja_commence %}
   {% if proposition.projet_doctoral_deja_commence %}
     {% field_data _("Institution") proposition.projet_doctoral_institution %}
-    {% field_data _("Work start date") proposition.projet_doctoral_date_debut %}
+    {% field_data _("Research start date") proposition.projet_doctoral_date_debut %}
   {% endif %}
   {% field_data _("Have you previously enrolled for a PhD?") proposition.doctorat_deja_realise|enum_display:'ChoixDoctoratDejaRealise' %}
   {% if proposition.doctorat_deja_realise != "NO" %}

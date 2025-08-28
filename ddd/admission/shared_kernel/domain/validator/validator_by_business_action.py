@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 # ##############################################################################
 
 import datetime
-from typing import List, Optional, Dict
+from typing import Dict, List, Optional
 
 import attr
 
@@ -33,6 +33,10 @@ from admission.ddd.admission.shared_kernel.domain.model._candidat_adresse import
 from admission.ddd.admission.shared_kernel.domain.model._candidat_signaletique import CandidatSignaletique
 from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import EmplacementDocument
 from admission.ddd.admission.shared_kernel.domain.validator import *
+from admission.ddd.admission.shared_kernel.domain.validator._should_identification_candidat_etre_completee import (
+    ShouldCandidatAutresPrenomsEtreSuffisammentCourt,
+    ShouldCandidatPrenomEtreSuffisammentCourt,
+)
 from admission.ddd.admission.shared_kernel.domain.validator._should_ne_pas_etre_en_quarantaine import ShouldNePasEtreEnQuarantaine
 from admission.ddd.admission.shared_kernel.dtos.merge_proposal import MergeProposalDTO
 from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
@@ -69,6 +73,12 @@ class IdentificationValidatorList(TwoStepsMultipleBusinessExceptionListValidator
             ShouldCandidatSpecifierNomOuPrenom(
                 nom=self.identite_signaletique.nom,
                 prenom=self.identite_signaletique.prenom,
+            ),
+            ShouldCandidatPrenomEtreSuffisammentCourt(
+                prenom=self.identite_signaletique.prenom,
+            ),
+            ShouldCandidatAutresPrenomsEtreSuffisammentCourt(
+                autres_prenoms=self.identite_signaletique.autres_prenoms,
             ),
             ShouldCandidatSpecifierNumeroIdentite(
                 numero_registre_national_belge=self.numero_registre_national_belge,

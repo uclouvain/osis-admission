@@ -195,6 +195,10 @@
     {% endwith %}
   </p>
 
+  {% if proposition.autre_formation_choisie_fac %}
+    <p>{% translate "Please note that you are allowed to enroll in a different program than the one you originally applied for. For more information, contact your faculty." %}</p>
+  {% endif %}
+
   {% with name=proposition.nom_personne_contact_programme_annuel_annuel email=proposition.email_personne_contact_programme_annuel_annuel %}
     {% if name or email %}
     <p class="mb-0">

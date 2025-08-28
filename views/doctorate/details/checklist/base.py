@@ -32,6 +32,7 @@ from django.shortcuts import resolve_url
 from django.template.defaultfilters import truncatechars
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext_lazy
 from django.views.generic import FormView, TemplateView
 from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
@@ -51,6 +52,9 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     DocumentsCotutelle,
     DocumentsProjetRecherche,
     OngletsDemande,
+)
+from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
+    EtatAuthentificationParcours,
 )
 from admission.ddd.admission.shared_kernel.utils import initialiser_checklist_experience
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
@@ -75,7 +79,10 @@ from admission.templatetags.admission import (
     bg_class_by_checklist_experience,
 )
 from admission.utils import get_salutation_prefix
-from admission.views.common.detail_tabs.checklist import PropositionFromResumeMixin
+from admission.views.common.detail_tabs.checklist import (
+    ChecklistTabIcon,
+    PropositionFromResumeMixin,
+)
 from admission.views.common.detail_tabs.comments import (
     COMMENT_TAG_CDD_FOR_SIC,
     COMMENT_TAG_SIC_FOR_CDD,
@@ -383,8 +390,14 @@ class ChecklistView(
                     experience_checklist_info = initialiser_checklist_experience(experience_uuid).to_dict()
                     children.append(experience_checklist_info)
 
-                context['checklist_additional_icons'][tab_identifier] = authentication_css_class(
-                    authentication_status=experience_checklist_info['extra'].get('etat_authentification'),
+                experience_authentication_state = experience_checklist_info['extra'].get('etat_authentification') or ''
+                context['checklist_additional_icons'][tab_identifier].append(
+                    ChecklistTabIcon(
+                        identifier='authentication_state',
+                        icon=authentication_css_class(authentication_status=experience_authentication_state),
+                        title=EtatAuthentificationParcours.get_value(experience_authentication_state),
+                        displayed=bool(experience_authentication_state),
+                    )
                 )
                 context['authentication_forms'].setdefault(
                     experience_uuid,

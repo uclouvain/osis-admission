@@ -129,7 +129,7 @@ class DoctorateAdmissionProjectForm(forms.Form):
     duree_prevue = forms.IntegerField(
         label=_("Estimated time to complete the PhD (in months)"),
         min_value=0,
-        max_value=100,
+        max_value=200,
         required=False,
     )
     temps_consacre = forms.IntegerField(
@@ -162,8 +162,8 @@ class DoctorateAdmissionProjectForm(forms.Form):
         label=_("Thesis location"),
         required=False,
         help_text=_(
-            "If known, indicate the name of the laboratory, clinical department or research centre where the thesis "
-            "will be carried out at UCLouvain"
+            "If known, indicate, for example, the name of the laboratory, clinical department, research centre, "
+            "... where the thesis will be carried out at UCLouvain"
         ),
         max_length=255,
     )
@@ -173,8 +173,8 @@ class DoctorateAdmissionProjectForm(forms.Form):
         max_length=1023,
     )
     resume_projet = forms.CharField(
-        label=_("Project resume (max. 2000 characters)"),
-        help_text=_("Write your resume in the language decided with your accompanying committee."),
+        label=_("Project abstract (max. 2000 characters)"),
+        help_text=_("Write your abstract in the language decided with your accompanying committee."),
         required=False,
         widget=forms.Textarea,
     )
@@ -233,7 +233,7 @@ class DoctorateAdmissionProjectForm(forms.Form):
         max_length=255,
     )
     projet_doctoral_date_debut = forms.DateField(
-        label=_("Work start date"),
+        label=_("Research start date"),
         widget=CustomDateInput(),
         required=False,
     )
