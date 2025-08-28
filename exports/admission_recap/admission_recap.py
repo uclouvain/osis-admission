@@ -28,6 +28,7 @@ from io import BytesIO
 from typing import Optional, Union
 
 from django.utils.translation import override
+from osis_document.enums import PostProcessingWanted
 from osis_document.utils import save_raw_content_remotely
 from pikepdf import OutlineItem, PasswordError, Pdf, PdfError
 
@@ -94,7 +95,11 @@ def admission_pdf_recap(
             for file_uuid in attachment.uuids
         ]
 
-        file_tokens = get_remote_tokens(all_file_uuids, for_modified_upload=with_annotated_documents)
+        file_tokens = get_remote_tokens(
+            all_file_uuids,
+            wanted_post_process=PostProcessingWanted.ORIGINAL.name,
+            for_modified_upload=with_annotated_documents,
+        )
         file_metadata = get_several_remote_metadata(list(file_tokens.values()))
 
         # Generate the PDF
