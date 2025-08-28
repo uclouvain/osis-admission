@@ -44,6 +44,7 @@ from admission.ddd.admission.doctorat.preparation.commands import (
     RecalculerEmplacementsDocumentsNonLibresPropositionCommand
     as RecalculerEmplacementsDocumentsNonLibresDoctoratCommand,
 )
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixTypeAdmission
 from admission.ddd.admission.formation_continue.commands import (
     RecalculerEmplacementsDocumentsNonLibresPropositionCommand as RecalculerEmplacementsDocumentsNonLibresIUFCCommand,
 )
@@ -293,6 +294,7 @@ class InjectionEPCAdmission:
             ),
             "inscription_annee_academique": cls._get_inscription_annee_academique(
                 admission=admission,
+                admission_doctorat=admission_doctorat,
                 comptabilite=comptabilite,
             ),
             "inscription_offre": cls._get_inscription_offre(
@@ -468,7 +470,11 @@ class InjectionEPCAdmission:
         }
 
     @staticmethod
-    def _get_inscription_annee_academique(admission: BaseAdmission, comptabilite: Accounting) -> Dict:
+    def _get_inscription_annee_academique(
+        admission: BaseAdmission,
+        comptabilite: Accounting,
+        admission_doctorat: Optional[DoctorateAdmission],
+    ) -> Dict:
         candidat = admission.candidate  # type: Person
         assimilation_checklist = admission.checklist.get('current', {}).get('assimilation', {})
         date_assimilation = assimilation_checklist.get('extra', {}).get('date_debut', None)
@@ -476,6 +482,9 @@ class InjectionEPCAdmission:
             'annee_academique': admission.training.academic_year.year,
             'nationalite': candidat.country_of_citizenship.iso_code,
             'type_demande': admission.type_demande,
+            'pre_admission': (
+                False if not admission_doctorat else admission_doctorat.type == ChoixTypeAdmission.PRE_ADMISSION.name
+            ),
             'contexte': admission.get_admission_context().upper().replace('-', '_'),
             'carte_sport_lln_woluwe': (
                 comptabilite.sport_affiliation in [ChoixAffiliationSport.LOUVAIN_WOLUWE.name] + SPORT_TOUT_CAMPUS
