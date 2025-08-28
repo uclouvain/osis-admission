@@ -339,6 +339,12 @@ msgstr "Formations académiques"
 msgid "Academic experience"
 msgstr "Expérience académique"
 
+msgid "Academic record retrieved"
+msgstr "Parcours académique récupéré"
+
+msgid "Academic record specified by the candidate"
+msgstr "Parcours académique spécifié par le candidat"
+
 msgid "Academic year"
 msgstr "Année académique"
 
@@ -4043,9 +4049,9 @@ msgid ""
 "document(s) listed below between 1 June and 30 September %(year)s to <a "
 "href=\"mailto:%(email)s\">%(email)s</a>:"
 msgstr ""
-"Afin de finaliser votre inscription à l'Université, nous vous remercions "
-"de nous transmettre entre le 1 juin et le 30 septembre %(year)s au plus tard "
-"à l'adresse <a href=\"mailto:%(email)s\">%(email)s</a> le/les document.s "
+"Afin de finaliser votre inscription à l'Université, nous vous remercions de "
+"nous transmettre entre le 1 juin et le 30 septembre %(year)s au plus tard à "
+"l'adresse <a href=\"mailto:%(email)s\">%(email)s</a> le/les document.s "
 "repris ci-dessous :"
 
 msgid "In payement order"
@@ -6671,6 +6677,9 @@ msgstr "Suffisant"
 
 msgid "Supervision"
 msgstr "Supervision"
+
+msgid "Supervision committee"
+msgstr "Comité d'accompagnement"
 
 msgid "Supervision committee modification by candidate"
 msgstr "Modification du comité d’accompagnement par le candidat"

@@ -285,6 +285,12 @@ msgstr ""
 msgid "Academic experience"
 msgstr ""
 
+msgid "Academic record retrieved"
+msgstr ""
+
+msgid "Academic record specified by the candidate"
+msgstr ""
+
 msgid "Academic year"
 msgstr ""
 
@@ -6053,6 +6059,9 @@ msgstr ""
 msgid "Supervision"
 msgstr ""
 
+msgid "Supervision committee"
+msgstr ""
+
 msgid "Supervision committee modification by candidate"
 msgstr ""
 
@@ -6538,6 +6547,12 @@ msgstr ""
 #, python-format
 msgid ""
 "The on hold mail has been sent to the candidate the %(date)s by %(sender)s."
+msgstr ""
+
+#, python-brace-format
+msgid ""
+"The option {index} must have an identifier and a translation for each "
+"required language."
 msgstr ""
 
 #, python-brace-format
