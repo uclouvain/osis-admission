@@ -52,8 +52,6 @@ from admission.ddd.admission.doctorat.preparation.dtos import DoctoratFormationD
 from admission.ddd.admission.doctorat.preparation.dtos import (
     PropositionDTO as DoctoratPropositionDTO,
 )
-from admission.ddd.admission.shared_kernel.dtos.campus import CampusDTO
-from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
 )
@@ -66,6 +64,8 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.ddd.admission.formation_generale.dtos import (
     PropositionDTO as FormationGeneralePropositionDTO,
 )
+from admission.ddd.admission.shared_kernel.dtos.campus import CampusDTO
+from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from admission.models import DoctorateAdmission, GeneralEducationAdmission
 from backoffice.settings.rest_framework.fields import ActionLinksField
 from base.utils.serializers import DTOSerializer
@@ -457,6 +457,7 @@ class DoctoratePropositionDTOSerializer(IncludedFieldsMixin, DoctoratePropositio
             'retrieve_supervision': DOCTORATE_ACTION_LINKS['retrieve_supervision'],
             'request_signatures': DOCTORATE_ACTION_LINKS['request_signatures'],
             'approve_by_pdf': DOCTORATE_ACTION_LINKS['approve_by_pdf'],
+            'retrieve_doctorate_management': DOCTORATE_ACTION_LINKS['retrieve_doctorate_management'],
             # Curriculum
             'retrieve_curriculum': DOCTORATE_ACTION_LINKS['retrieve_curriculum'],
             'update_curriculum': DOCTORATE_ACTION_LINKS['update_curriculum'],
