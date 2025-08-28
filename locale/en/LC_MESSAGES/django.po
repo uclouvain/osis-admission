@@ -6555,12 +6555,6 @@ msgid ""
 "required language."
 msgstr ""
 
-#, python-brace-format
-msgid ""
-"The option {index} must have an identifier and a translation for each "
-"required language."
-msgstr ""
-
 msgid "The other given names must be less than 40 characters long."
 msgstr ""
 
