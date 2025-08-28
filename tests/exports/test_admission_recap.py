@@ -43,8 +43,7 @@ from admission.calendar.admission_calendar import (
     AdmissionPoolExternalEnrollmentChangeCalendar,
     AdmissionPoolExternalReorientationCalendar,
 )
-from admission.constants import JPEG_MIME_TYPE, ORDERED_CAMPUSES_UUIDS, PNG_MIME_TYPE
-from admission.ddd import FR_ISO_CODE
+from admission.constants import ORDERED_CAMPUSES_UUIDS
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixEtatSignature,
     ChoixStatutPropositionDoctorale,
@@ -66,6 +65,24 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     CurriculumAdmissionDTO,
+)
+from admission.ddd.admission.formation_continue.commands import (
+    RecupererQuestionsSpecifiquesQuery,
+)
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixEdition,
+    ChoixInscriptionATitre,
+    ChoixStatutPropositionContinue,
+)
+from admission.ddd.admission.formation_continue.dtos import (
+    PropositionDTO as PropositionFormationContinueDTO,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.formation_generale.dtos import ComptabiliteDTO
+from admission.ddd.admission.formation_generale.dtos import (
+    PropositionDTO as PropositionFormationGeneraleDTO,
 )
 from admission.ddd.admission.shared_kernel.dtos import (
     AdressePersonnelleDTO,
@@ -106,24 +123,6 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     IdentifiantBaseEmplacementDocument,
 )
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
-from admission.ddd.admission.formation_continue.commands import (
-    RecupererQuestionsSpecifiquesQuery,
-)
-from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixEdition,
-    ChoixInscriptionATitre,
-    ChoixStatutPropositionContinue,
-)
-from admission.ddd.admission.formation_continue.dtos import (
-    PropositionDTO as PropositionFormationContinueDTO,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
-)
-from admission.ddd.admission.formation_generale.dtos import ComptabiliteDTO
-from admission.ddd.admission.formation_generale.dtos import (
-    PropositionDTO as PropositionFormationGeneraleDTO,
-)
 from admission.exports.admission_recap.attachments import Attachment
 from admission.exports.admission_recap.section import (
     get_accounting_section,
@@ -192,7 +191,8 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceNonAcademiqueDTO,
 )
 from infrastructure.messages_bus import message_bus_instance
-from osis_profile import BE_ISO_CODE
+from osis_profile import BE_ISO_CODE, FR_ISO_CODE
+from osis_profile.constants import JPEG_MIME_TYPE, PNG_MIME_TYPE
 from osis_profile.models.enums.curriculum import (
     CURRICULUM_ACTIVITY_LABEL,
     ActivitySector,

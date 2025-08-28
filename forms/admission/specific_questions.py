@@ -32,13 +32,13 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixTypeAdresseFacturation,
 )
 from admission.forms import get_diplomatic_post_initial_choices
-from admission.forms.admission.coordonnees import BaseAdmissionAddressForm
 from admission.forms.specific_question import ConfigurableFormMixin
 from admission.models import DiplomaticPost
 from base.forms.utils import FIELD_REQUIRED_MESSAGE, autocomplete
 from base.forms.utils.fields import RadioBooleanField
 from base.forms.utils.file_field import MaxOneFileUploadField
 from base.utils.mark_safe_lazy import mark_safe_lazy
+from osis_profile.forms.coordonnees import BaseAddressForm
 
 
 class CommonSpecificQuestionsForm(ConfigurableFormMixin, forms.Form):
@@ -225,7 +225,7 @@ class GeneralSpecificQuestionsForm(CommonSpecificQuestionsForm):
         return data
 
 
-class ContinuingSpecificQuestionsForm(ConfigurableFormMixin, BaseAdmissionAddressForm):
+class ContinuingSpecificQuestionsForm(ConfigurableFormMixin, BaseAddressForm):
     configurable_form_field_name = 'reponses_questions_specifiques'
 
     copie_titre_sejour = MaxOneFileUploadField(
@@ -286,7 +286,7 @@ class ContinuingSpecificQuestionsForm(ConfigurableFormMixin, BaseAdmissionAddres
         js = (
             'js/dependsOn.min.js',
             'js/jquery.mask.min.js',
-            'admission/formatter.js',
+            'osis_profile/formatter.js',
         )
 
     def __init__(self, display_residence_permit_question, **kwargs):

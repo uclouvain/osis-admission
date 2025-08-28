@@ -60,14 +60,6 @@ from admission.ddd.admission.doctorat.preparation.dtos.liste import (
 from admission.ddd.admission.doctorat.preparation.read_view.domain.enums.tableau_bord import (
     IndicateurTableauBordEnum,
 )
-from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
-from admission.ddd.admission.shared_kernel.dtos.liste import (
-    DemandeRechercheDTO,
-    VisualiseurAdmissionDTO,
-)
-from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
-from admission.ddd.admission.shared_kernel.enums.liste import TardiveModificationReorientationFiltre
-from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixEdition,
     ChoixInscriptionATitre,
@@ -84,6 +76,13 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     OngletsChecklist as OngletsChecklistGenerale,
 )
+from admission.ddd.admission.shared_kernel.dtos.liste import (
+    DemandeRechercheDTO,
+    VisualiseurAdmissionDTO,
+)
+from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
+from admission.ddd.admission.shared_kernel.enums.liste import TardiveModificationReorientationFiltre
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.shared_kernel.tests.factory.profil import (
     AnneeExperienceAcademiqueDTOFactory,
     ExperienceAcademiqueDTOFactory,
@@ -139,6 +138,7 @@ from base.tests.factories.student import StudentFactory
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile.models import EducationalExperience, ProfessionalExperience
 from osis_profile.models.enums.curriculum import ActivitySector, ActivityType
+from osis_profile.models.enums.person import ChoixGenre
 from program_management.models.education_group_version import EducationGroupVersion
 from reference.models.enums.cycle import Cycle
 from reference.tests.factories.country import CountryFactory

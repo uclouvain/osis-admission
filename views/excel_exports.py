@@ -50,7 +50,6 @@ from osis_export.models import Export
 from osis_export.models.enums.types import ExportTypes
 
 from admission.admission_utils.get_actor_option_text import get_actor_option_text
-from admission.ddd.admission.shared_kernel.commands import ListerToutesDemandesQuery
 from admission.ddd.admission.doctorat.preparation.commands import (
     ListerDemandesQuery as ListerDemandesDoctoralesQuery,
 )
@@ -70,16 +69,6 @@ from admission.ddd.admission.doctorat.preparation.dtos.liste import DemandeReche
 from admission.ddd.admission.doctorat.preparation.read_view.repository.i_tableau_bord import (
     ITableauBordRepositoryAdmissionMixin,
 )
-from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
-from admission.ddd.admission.shared_kernel.dtos.liste import (
-    DemandeRechercheDTO as TouteDemandeRechercheDTO,
-)
-from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
-from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire
-from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
-from admission.ddd.admission.shared_kernel.enums.liste import TardiveModificationReorientationFiltre
-from admission.ddd.admission.shared_kernel.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION_DICT
-from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_continue.commands import (
     ListerDemandesQuery as ListerDemandesContinuesQuery,
 )
@@ -109,12 +98,22 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT_GENERALE,
 )
+from admission.ddd.admission.shared_kernel.commands import ListerToutesDemandesQuery
+from admission.ddd.admission.shared_kernel.dtos.liste import (
+    DemandeRechercheDTO as TouteDemandeRechercheDTO,
+)
+from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
+from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire
+from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
+from admission.ddd.admission.shared_kernel.enums.liste import TardiveModificationReorientationFiltre
+from admission.ddd.admission.shared_kernel.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION_DICT
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.forms.admission.filter import (
     AllAdmissionsFilterForm,
     ContinuingAdmissionsFilterForm,
 )
 from admission.forms.doctorate.cdd.filter import DoctorateListFilterForm
-from admission.models import AdmissionFormItem, SupervisionActor
+from admission.models import AdmissionFormItem
 from admission.templatetags.admission import admission_status
 from admission.utils import add_messages_into_htmx_response
 from admission.views import PaginatedList
@@ -124,11 +123,9 @@ from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import GotDiploma
 from base.models.person import Person
 from base.utils.utils import format_academic_year
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
-    ExperienceNonAcademiqueDTO,
-)
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile.models.enums.curriculum import ActivitySector, ActivityType
+from osis_profile.models.enums.person import ChoixGenre
 from reference.models.country import Country
 from reference.models.enums.cycle import Cycle
 from reference.models.scholarship import Scholarship

@@ -36,7 +36,6 @@ from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 from django.utils.translation import gettext, gettext_lazy
 
-from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
     ENTITY_CDE,
     ENTITY_CDSS,
@@ -80,7 +79,7 @@ from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.user import UserFactory
-from osis_profile import BE_ISO_CODE
+from osis_profile import BE_ISO_CODE, FR_ISO_CODE
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.scholarship import (
     DoctorateScholarshipFactory,

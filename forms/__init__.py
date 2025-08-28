@@ -23,27 +23,22 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
 import html
 from typing import Dict, Iterable, List, Mapping, Optional, Union
 
-import phonenumbers
-from dal import forward
 from django import forms
 from django.conf import settings
-from django.core.exceptions import ValidationError
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext_lazy
 
 from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
-from base.forms.utils import EMPTY_CHOICE, autocomplete
+from base.forms.utils import EMPTY_CHOICE
 from base.models.academic_year import AcademicYear
 from base.models.campus import Campus
 from education_group.forms.fields import MainCampusChoiceField
 from education_group.templatetags.education_group_extra import format_to_academic_year
-from reference.models.country import Country
 from reference.models.enums.scholarship_type import ScholarshipType
 
 NONE_CHOICE = ((None, ' - '),)
@@ -54,10 +49,6 @@ MINIMUM_SELECTABLE_YEAR = 2004
 MAXIMUM_SELECTABLE_YEAR = 2031
 EMPTY_CHOICE_AS_LIST = [list(EMPTY_CHOICE[0])]
 REQUIRED_FIELD_CLASS = 'required_field'
-
-DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS = {
-    'data-minimum-input-length': 3,
-}
 
 CKEDITOR_MAIL_EXTRA_ALLOWED_CONTENT = 'span(*)[*]{*};ul(*)[*]{*}'
 
@@ -140,21 +131,6 @@ class SelectOrOtherField(forms.MultiValueField):
         return super().widget_attrs(widget)
 
 
-class PhoneField(forms.CharField):
-    def clean(self, value):
-        value = super().clean(value)
-
-        if not value:
-            return ''
-        try:
-            phone_number_obj = phonenumbers.parse(value)
-            if phonenumbers.is_valid_number(phone_number_obj):
-                return value
-        except phonenumbers.NumberParseException:
-            pass
-        raise ValidationError(_('Invalid phone number'))
-
-
 def get_academic_year_choices(
     min_year=MINIMUM_SELECTABLE_YEAR, max_year=MAXIMUM_SELECTABLE_YEAR, format_label_function=None
 ):
@@ -166,30 +142,6 @@ def get_academic_year_choices(
     if format_label_function is None:
         format_label_function = format_to_academic_year
     return [(academic_year.year, format_label_function(academic_year.year)) for academic_year in academic_years]
-
-
-def get_year_choices(min_year=1920, max_year=None, full_format=False, empty_label=' - '):
-    """
-    Return the choices for a year choice field.
-    :param min_year: The minimum year.
-    :param max_year: The maximum year. If not specified, the current year is used.
-    :param full_format: If True, the choices are in the format 'YYYY-YYYY', otherwise they are 'YYYY'.
-    :param empty_label: The label of the empty choice.
-    :return: The list of choices.
-    """
-    if max_year is None:
-        max_year = datetime.datetime.now().year
-
-    year_range = range(max_year, min_year - 1, -1)
-
-    if full_format:
-        choices = [('', empty_label)]
-        for year in year_range:
-            current_year = f'{year}-{year + 1}'
-            choices.append((current_year, current_year))
-        return choices
-    else:
-        return [('', empty_label)] + [(year, year) for year in year_range]
 
 
 def get_scholarship_choices(scholarships, scholarship_type: ScholarshipType):
@@ -217,50 +169,6 @@ def format_training(training: FormationDTO):
         campus=training.campus,
         sigle=training.sigle,
     )
-
-
-# Move to base or reference (move url too)
-class AdmissionModelCountryChoiceField(forms.ModelChoiceField):
-    def __init__(self, *args, **kwargs):
-        to_field_name = kwargs.get('to_field_name', '')
-
-        forward_params = kwargs.pop('additional_forward_params', []) + [
-            forward.Const(True, 'active'),
-        ]
-
-        # The ids of the returned results will be the 'id_field' fields of the country model instead of 'pk'
-        if to_field_name:
-            forward_params.append(forward.Const(to_field_name, 'id_field'))
-
-        kwargs.setdefault(
-            'widget',
-            autocomplete.ListSelect2(
-                url=kwargs.pop('autocomplete_url_path', 'admission:autocomplete:countries'),
-                attrs=DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
-                forward=forward_params,
-            ),
-        )
-        kwargs.setdefault('queryset', Country.objects.none())
-        super().__init__(*args, **kwargs)
-
-    def label_from_instance(self, obj):
-        return getattr(obj, 'name' if get_language() == settings.LANGUAGE_CODE_FR else 'name_en')
-
-
-class AdmissionModelForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        """
-        When using a model form, the fields that are not specified in the 'data' attribute of the form are not updated,
-        even if some data is provided through the 'cleaned_data' so we need to initialize them to
-        simulate their submission.
-        Define the 'fields_to_init' attribute in the Meta class of the form to specify which fields should be
-        initialized.
-        """
-        super().__init__(*args, **kwargs)
-        if self.data:
-            self.data = self.data.copy()
-            for field in getattr(self.Meta, 'fields_to_init', []):
-                self.data.setdefault(self.add_prefix(field), None)
 
 
 class FilterFieldWidget(forms.SelectMultiple):

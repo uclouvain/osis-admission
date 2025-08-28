@@ -31,10 +31,6 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.translation import ngettext, pgettext_lazy
 
 from admission.constants import DEFAULT_PAGINATOR_SIZE
-from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
-from admission.ddd.admission.shared_kernel.enums.liste import TardiveModificationReorientationFiltre
-from admission.ddd.admission.shared_kernel.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
-from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixEdition,
     ChoixStatutPropositionContinue,
@@ -45,9 +41,12 @@ from admission.ddd.admission.formation_continue.domain.model.statut_checklist im
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST as ORGANISATION_ONGLETS_CHECKLIST_GENERALE,
 )
+from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
+from admission.ddd.admission.shared_kernel.enums.liste import TardiveModificationReorientationFiltre
+from admission.ddd.admission.shared_kernel.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.forms import (
     ALL_EMPTY_CHOICE,
-    DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
     NullBooleanSelectField,
     get_academic_year_choices,
 )
@@ -67,6 +66,7 @@ from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
 from base.templatetags.pagination_bs5 import PAGINATOR_SIZE_LIST
 from education_group.forms.fields import MainCampusChoiceField
+from osis_profile.forms import DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS
 from reference.models.enums.scholarship_type import ScholarshipType
 from reference.models.scholarship import Scholarship
 

@@ -36,7 +36,6 @@ from rest_framework import status
 from rest_framework.status import HTTP_200_OK
 from rest_framework.test import APITestCase
 
-from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
@@ -61,6 +60,7 @@ from admission.tests.factories.roles import CandidateFactory
 from base.models.enums.got_diploma import GotDiploma
 from base.models.enums.teaching_type import TeachingTypeEnum
 from base.tests.factories.academic_year import AcademicYearFactory
+from osis_profile import FR_ISO_CODE
 from osis_profile.models import (
     EducationalExperience,
     EducationalExperienceYear,

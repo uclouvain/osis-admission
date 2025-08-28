@@ -34,7 +34,11 @@ from django.utils.translation import gettext
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.ddd import EN_ISO_CODE, FR_ISO_CODE
+from admission.ddd import EN_ISO_CODE
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixInscriptionATitre,
+    ChoixTypeAdresseFacturation,
+)
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     PosteDiplomatiqueNonTrouveException,
 )
@@ -46,10 +50,6 @@ from admission.ddd.admission.shared_kernel.enums.question_specifique import (
     CritereItemFormulaireVIP,
     Onglets,
     TypeItemFormulaire,
-)
-from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixInscriptionATitre,
-    ChoixTypeAdresseFacturation,
 )
 from admission.models import ContinuingEducationAdmission, GeneralEducationAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
@@ -78,7 +78,7 @@ from base.tests.factories.education_group import EducationGroupFactory
 from base.tests.factories.education_group_type import EducationGroupTypeFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
-from osis_profile import BE_ISO_CODE
+from osis_profile import BE_ISO_CODE, FR_ISO_CODE
 from osis_profile.models import EducationalExperience
 from osis_profile.tests.factories.curriculum import EducationalExperienceFactory
 from reference.tests.factories.country import CountryFactory

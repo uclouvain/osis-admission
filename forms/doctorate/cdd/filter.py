@@ -57,7 +57,6 @@ from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageCh
 from admission.forms import (
     ALL_EMPTY_CHOICE,
     ALL_FEMININE_EMPTY_CHOICE,
-    DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
     SelectWithDisabledOptions,
 )
 from admission.forms.admission.filter import BaseAdmissionFilterForm
@@ -68,7 +67,7 @@ from admission.infrastructure.admission.doctorat.preparation.read_view.repositor
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
-from admission.models import EntityProxy, SupervisionActor
+from admission.models import EntityProxy
 from base.forms.utils import EMPTY_CHOICE, FIELD_REQUIRED_MESSAGE, autocomplete
 from base.forms.utils.datefield import DatePickerInput
 from base.models.education_group_year import EducationGroupYear
@@ -76,6 +75,7 @@ from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
 from education_group.contrib.models import EducationGroupRoleModel
+from osis_profile.forms import DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS
 from osis_role.contrib.models import EntityRoleModel
 from osis_role.contrib.permissions import _get_relevant_roles
 from reference.models.country import Country
@@ -90,7 +90,7 @@ class DoctorateListFilterForm(BaseAdmissionFilterForm):
         label=_("Nationality"),
         required=False,
         widget=autocomplete.ListSelect2(
-            url="admission:autocomplete:countries",
+            url="countries-autocomplete",
             attrs={
                 'data-placeholder': _('Country'),
                 **DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,

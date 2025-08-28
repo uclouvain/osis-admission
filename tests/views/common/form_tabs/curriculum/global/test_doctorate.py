@@ -30,17 +30,16 @@ from django.shortcuts import resolve_url
 from django.test import TestCase, override_settings
 from rest_framework import status
 
-from admission.models import DoctorateAdmission
-from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.shared_kernel.enums import Onglets
 from admission.forms import REQUIRED_FIELD_CLASS
+from admission.models import DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.doctorate import DoctorateFactory
 from admission.tests.factories.form_item import TextAdmissionFormItemFactory, AdmissionFormItemInstantiationFactory
 from admission.tests.factories.roles import ProgramManagerRoleFactory, CentralManagerRoleFactory
 from base.tests.factories.academic_year import AcademicYearFactory
-from osis_profile import BE_ISO_CODE
+from osis_profile import BE_ISO_CODE, FR_ISO_CODE
 from reference.tests.factories.country import CountryFactory
 
 

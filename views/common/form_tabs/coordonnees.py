@@ -24,68 +24,23 @@
 #
 # ##############################################################################
 from django.urls import reverse
-from django.views.generic import FormView
 
-from admission.ddd.admission.formation_generale.events import CoordonneesCandidatModifiees
-from admission.forms.admission.coordonnees import AdmissionAddressForm, AdmissionCoordonneesForm
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
-from base.models.enums.person_address_type import PersonAddressType
-from base.models.person_address import PersonAddress
-from osis_profile import BE_ISO_CODE
 
 __all__ = ['AdmissionCoordonneesFormView']
 
+from osis_profile.views.coordonnees import CoordonneesFormView
 
-class AdmissionCoordonneesFormView(AdmissionFormMixin, LoadDossierViewMixin, FormView):
+
+class AdmissionCoordonneesFormView(AdmissionFormMixin, LoadDossierViewMixin, CoordonneesFormView):
     template_name = 'admission/forms/coordonnees.html'
     permission_required = 'admission.change_admission_coordinates'
     update_admission_author = True
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.forms = None
-
     def get_context_data(self, **kwargs):
-        kwargs['force_form'] = True
-        kwargs['form'] = True
         context_data = super().get_context_data(**kwargs)
-        context_data.update(self.get_forms())
-        context_data['BE_ISO_CODE'] = BE_ISO_CODE
         context_data['proposition_fusion'] = self.proposition_fusion
         return context_data
-
-    def post(self, request, *args, **kwargs):
-        forms = self.get_forms()
-        if all(form.is_valid() for form in forms.values()):
-            return self.form_valid(forms)
-        return self.form_invalid(forms)
-
-    def form_valid(self, forms):
-        # Update person
-        self.forms['main_form'].save()
-        # Update person addresses
-        PersonAddress.objects.update_or_create(
-            person=self.admission.candidate,
-            label=PersonAddressType.RESIDENTIAL.name,
-            defaults=forms['residential'].address_data_to_save,
-        )
-        if forms['main_form'].cleaned_data['show_contact']:
-            PersonAddress.objects.update_or_create(
-                person=self.admission.candidate,
-                label=PersonAddressType.CONTACT.name,
-                defaults=forms['contact'].address_data_to_save,
-            )
-        else:
-            PersonAddress.objects.filter(
-                person=self.admission.candidate,
-                label=PersonAddressType.CONTACT.name,
-            ).delete()
-
-        form_valid = super().form_valid(forms)
-        from infrastructure.messages_bus import message_bus_instance
-
-        message_bus_instance.publish(CoordonneesCandidatModifiees(matricule=self.admission.candidate.global_id))
-        return form_valid
 
     def update_current_admission_on_form_valid(self, form, admission):
         # Update submitted profile with newer data
@@ -103,49 +58,6 @@ class AdmissionCoordonneesFormView(AdmissionFormMixin, LoadDossierViewMixin, For
                 'street_number': address.get('street_number'),
                 'postal_box': address.get('postal_box'),
             }
-
-    def get_initial(self):
-        addresses = PersonAddress.objects.filter(
-            person=self.admission.candidate,
-            label__in=[PersonAddressType.CONTACT.name, PersonAddressType.RESIDENTIAL.name],
-        )
-        return {
-            'contact': next(
-                (address for address in addresses if address.label == PersonAddressType.CONTACT.name),
-                None,
-            ),
-            'residential': next(
-                (address for address in addresses if address.label == PersonAddressType.RESIDENTIAL.name),
-                None,
-            ),
-            'main_form': self.admission.candidate,
-        }
-
-    def get_forms(self):
-        if not self.forms:
-            kwargs = self.get_form_kwargs()
-            kwargs.pop('prefix')
-            initial = kwargs.pop('initial')
-            self.forms = {
-                'main_form': AdmissionCoordonneesForm(
-                    show_contact=bool(initial.get('contact')),
-                    prefix='',
-                    instance=initial['main_form'],
-                    **kwargs,
-                ),
-                'contact': AdmissionAddressForm(
-                    check_coordinates_fields=bool(kwargs.get('data') and kwargs['data'].get('show_contact')),
-                    prefix='contact',
-                    instance=initial['contact'],
-                    **kwargs,
-                ),
-                'residential': AdmissionAddressForm(
-                    prefix='residential',
-                    instance=initial['residential'],
-                    **kwargs,
-                ),
-            }
-        return self.forms
 
     def get_success_url(self):
         return self.next_url or reverse(

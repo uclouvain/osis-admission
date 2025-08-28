@@ -48,6 +48,16 @@ from admission.constants import (
     CONTEXT_GENERAL,
 )
 from admission.ddd import DUREE_MAXIMALE_PROGRAMME, DUREE_MINIMALE_PROGRAMME
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    BesoinDeDerogation,
+    BesoinDeDerogationDelegueVrae,
+    ChoixStatutChecklist,
+    DerogationFinancement,
+    DispenseOuDroitsMajores,
+    DroitsInscriptionMontant,
+    PoursuiteDeCycle,
+    TypeDeRefus,
+)
 from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
     EtatAuthentificationParcours,
 )
@@ -62,18 +72,7 @@ from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import
 from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    BesoinDeDerogation,
-    BesoinDeDerogationDelegueVrae,
-    ChoixStatutChecklist,
-    DerogationFinancement,
-    DispenseOuDroitsMajores,
-    DroitsInscriptionMontant,
-    PoursuiteDeCycle,
-    TypeDeRefus,
-)
 from admission.forms import (
-    DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
     EMPTY_CHOICE_AS_LIST,
     AdmissionHTMLCharField,
     AutoGrowTextareaWidget,
@@ -120,6 +119,7 @@ from ddd.logic.financabilite.domain.model.enums.situation import (
 )
 from ddd.logic.learning_unit.commands import LearningUnitAndPartimSearchCommand
 from infrastructure.messages_bus import message_bus_instance
+from osis_profile.forms import DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS
 
 FINANCABILITE_REFUS_CATEGORY = 'Finançabilité'
 

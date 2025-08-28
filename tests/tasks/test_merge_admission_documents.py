@@ -32,11 +32,10 @@ from django.test import override_settings
 from osis_document.enums import PostProcessingType
 from rest_framework.test import APITestCase
 
-from admission.constants import PNG_MIME_TYPE
-from admission.ddd.admission.shared_kernel.enums import CleConfigurationItemFormulaire, Onglets
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
+from admission.ddd.admission.shared_kernel.enums import CleConfigurationItemFormulaire, Onglets
 from admission.exceptions import MergeDocumentsException
 from admission.tasks.merge_admission_documents import (
     base_education_admission_document_merging,
@@ -57,6 +56,7 @@ from admission.tests.factories.person import CompletePersonFactory
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group_year import Master120TrainingFactory
+from osis_profile.constants import PNG_MIME_TYPE
 from osis_profile.models.enums.curriculum import TranscriptType
 
 

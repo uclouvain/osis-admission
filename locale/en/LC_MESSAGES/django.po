@@ -2135,9 +2135,6 @@ msgid ""
 "%(email_address)s\" target=\"_blank\">%(email_address)s</a> address?"
 msgstr ""
 
-msgid "Do you have a Belgian National Register Number (NISS)?"
-msgstr ""
-
 msgid "Do you have a secondary school diploma?"
 msgstr ""
 
@@ -2789,14 +2786,6 @@ msgstr ""
 msgid "Feedback from Fac"
 msgstr ""
 
-msgctxt "admission gender"
-msgid "Female"
-msgstr ""
-
-msgctxt "admission sex"
-msgid "Female"
-msgstr ""
-
 msgid "File"
 msgstr ""
 
@@ -3405,9 +3394,9 @@ msgid ""
 "Agreement between UCLouvain and the Host Hospitals drawn up as part of the "
 "UCLouvain bachelor's or master's course in medicine with a view to acquiring "
 "the corresponding course units, and I undertake to comply with its terms: <a "
-"href=\"https://cdn.uclouvain.be/groups/cms-editors-mede/ConventionStageMed."
-"pdf\" target=\"_blank\">https://cdn.uclouvain.be/groups/cms-editors-mede/"
-"ConventionStageMed.pdf</a>"
+"href=\"https://cdn.uclouvain.be/groups/cms-editors-mede/"
+"ConventionStageMed.pdf\" target=\"_blank\">https://cdn.uclouvain.be/groups/"
+"cms-editors-mede/ConventionStageMed.pdf</a>"
 msgstr ""
 
 msgid "I hereby declare that"
@@ -3563,20 +3552,20 @@ msgstr ""
 
 msgid ""
 "In accordance with the information at <a target=\"_blank\" href=\"https://"
-"uclouvain.be/en/study/inscriptions/acces-aux-professions-reglementees."
-"html\">https://uclouvain.be/en/study/inscriptions/acces-aux-professions-"
-"reglementees.html</a>, I declare that, if the courses listed therein concern "
-"me, I have received the information relating to their requirements for "
-"admission or continuation and to the specific rules or restrictions of "
-"accreditation or professional establishment to which the professional or "
-"accredited title is subject and I accept the terms thereof."
+"uclouvain.be/en/study/inscriptions/acces-aux-professions-"
+"reglementees.html\">https://uclouvain.be/en/study/inscriptions/acces-aux-"
+"professions-reglementees.html</a>, I declare that, if the courses listed "
+"therein concern me, I have received the information relating to their "
+"requirements for admission or continuation and to the specific rules or "
+"restrictions of accreditation or professional establishment to which the "
+"professional or accredited title is subject and I accept the terms thereof."
 msgstr ""
 
 msgid ""
 "In accordance with the information at <a target=\"_blank\" href=\"https://"
-"uclouvain.be/en/study/inscriptions/reglementations.html\">https://uclouvain."
-"be/en/study/inscriptions/reglementations.html</a>, I declare that I have "
-"read the university regulations and accept their terms."
+"uclouvain.be/en/study/inscriptions/reglementations.html\">https://"
+"uclouvain.be/en/study/inscriptions/reglementations.html</a>, I declare that "
+"I have read the university regulations and accept their terms."
 msgstr ""
 
 msgid ""
@@ -3595,9 +3584,9 @@ msgstr ""
 #, python-format
 msgid ""
 "In accordance with the registration calendar <a href=\"https://uclouvain.be/"
-"en/study/inscriptions/calendrier-inscriptions.html\" target=\"_blank\">www."
-"uclouvain.be/enrolment-calendar</a>, I confirm that I am applying for the "
-"academic year %(year)s."
+"en/study/inscriptions/calendrier-inscriptions.html\" "
+"target=\"_blank\">www.uclouvain.be/enrolment-calendar</a>, I confirm that I "
+"am applying for the academic year %(year)s."
 msgstr ""
 
 msgid "In draft form"
@@ -4103,14 +4092,6 @@ msgstr ""
 msgid ""
 "Mail sent to the member of the supervision panel when deleted by the "
 "candidate"
-msgstr ""
-
-msgctxt "admission gender"
-msgid "Male"
-msgstr ""
-
-msgctxt "admission sex"
-msgid "Male"
 msgstr ""
 
 msgid "Management of the enrolment applications"
@@ -4650,10 +4631,6 @@ msgstr ""
 msgid "Other"
 msgstr ""
 
-msgctxt "admission gender"
-msgid "Other"
-msgstr ""
-
 msgctxt "ways_hear_about_training"
 msgid "Other"
 msgstr ""
@@ -4946,12 +4923,6 @@ msgid "Please fill in at least your last or first name."
 msgstr ""
 
 msgid ""
-"Please indicate your other given names in accordance with your identity "
-"document. If there are no other given names on your identity document, you "
-"do not need to enter anything."
-msgstr ""
-
-msgid ""
 "Please look up the website of your domain doctoral committee on how to "
 "download the document."
 msgstr ""
@@ -4993,9 +4964,6 @@ msgid ""
 msgstr ""
 
 msgid "Please provide a copy of your passport and specify its expiry date."
-msgstr ""
-
-msgid "Please provide one of these two pieces of identification information:"
 msgstr ""
 
 msgid ""
@@ -6168,18 +6136,6 @@ msgid ""
 "three letters or numbers)</li></ul>"
 msgstr ""
 
-msgid ""
-"The Belgian national register number (or NISS, Social Security "
-"Identification Number) is a number composed of 11 digits, the first 6 of "
-"which refer to the date of birth of the concerned person. This number is "
-"assigned to every person living in Belgium when they register with the "
-"municipality (or other official body). It can be found on the Belgian "
-"identity card or on the residence permit."
-msgstr ""
-
-msgid "The Belgian national register number must consist of 11 digits."
-msgstr ""
-
 msgid "The CA is not currently to be completed"
 msgstr ""
 
@@ -6528,12 +6484,6 @@ msgid ""
 "The on hold mail has been sent to the candidate the %(date)s by %(sender)s."
 msgstr ""
 
-#, python-brace-format
-msgid ""
-"The option {index} must have an identifier and a translation for each "
-"required language."
-msgstr ""
-
 msgid "The other given names must be less than 40 characters long."
 msgstr ""
 
@@ -6799,11 +6749,6 @@ msgid "This activity will be restored"
 msgstr ""
 
 msgid ""
-"This choice will define the language of communication throughout your "
-"admission process."
-msgstr ""
-
-msgid ""
 "This course is closed. The candidate can express its interest by ticking the "
 "box below or by contacting a course administrator."
 msgstr ""
@@ -6830,8 +6775,8 @@ msgstr ""
 msgid ""
 "This enrolment authorisation letter allows you to submit an application for "
 "accommodation to the Logistics and Student Accommodation Service (LOGE). To "
-"find out how, go to <a href=\"https://www.uclouvain.be/en/logement\">www."
-"uclouvain.be/en/logement</a>."
+"find out how, go to <a href=\"https://www.uclouvain.be/en/"
+"logement\">www.uclouvain.be/en/logement</a>."
 msgstr ""
 
 msgid "This experience can't be validated if mandatory information is missing."
@@ -6844,12 +6789,6 @@ msgstr ""
 msgid ""
 "This experience has been added by the applicant in <a "
 "href=\"%(admission_url)s\" target=\"_blank\">another application</a>."
-msgstr ""
-
-msgid "This field is required if the first name is missing."
-msgstr ""
-
-msgid "This field is required if the surname is missing."
 msgstr ""
 
 msgid "This field is required."
@@ -7086,9 +7025,6 @@ msgid "Unknown PDF type."
 msgstr ""
 
 msgid "Unknown citizenship"
-msgstr ""
-
-msgid "Unknown date of birth"
 msgstr ""
 
 msgid "Unknown noma"
@@ -7514,8 +7450,8 @@ msgid ""
 "<em>%(training_name)s</em> for non-resident students is managed on another "
 "registration platform. We invite you to consult the complete registration "
 "procedure on the following page: <a href=\"https://www.uclouvain.be/en/"
-"enrolment/limited-enrolment-courses\" target=\"_blank\">https://www."
-"uclouvain.be/en/enrolment/limited-enrolment-courses</a>"
+"enrolment/limited-enrolment-courses\" target=\"_blank\">https://"
+"www.uclouvain.be/en/enrolment/limited-enrolment-courses</a>"
 msgstr ""
 
 msgid "You cannot enter a language more than once, please correct the form."
@@ -7873,12 +7809,6 @@ msgid "your mother"
 msgstr ""
 
 msgid "your partner"
-msgstr ""
-
-#, python-brace-format
-msgid ""
-"{current_mimetype} is not a valid mimetype for the field "
-"\"{field}\" ({field_mimetypes_as_str})"
 msgstr ""
 
 #, python-brace-format
