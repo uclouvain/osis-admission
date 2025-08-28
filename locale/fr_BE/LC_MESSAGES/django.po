@@ -3115,6 +3115,9 @@ msgstr "Finançable - %(rule)s (Établi par %(established_by)s)"
 msgid "Financeability"
 msgstr "Financabilité"
 
+msgid "Financeability dispensation needed"
+msgstr "Besoin dérogation finançabilité"
+
 msgid "Financeability view"
 msgstr "Vue financabilité"
 
@@ -6803,8 +6806,8 @@ msgstr ""
 
 msgid "The 'Dispensation needed' status is reserved to enrolment application."
 msgstr ""
-"Le passage à l'état 'Dérogation accordée' est réservé aux demandes de type "
-"inscription."
+"Le passage à l'état ‘Besoin dérogation’ est réservé aux demandes de type "
+"inscription"
 
 msgid "The <strong>additional training</strong> has been completed: yes / no."
 msgstr ""
