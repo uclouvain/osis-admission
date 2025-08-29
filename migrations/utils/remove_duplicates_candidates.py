@@ -25,7 +25,7 @@
 # ##############################################################################
 
 from django.contrib.postgres.aggregates import ArrayAgg
-from django.db.models import Count
+from django.db.models import Count, Value
 
 
 def remove_duplicate_candidates(candidate_model):
@@ -36,7 +36,7 @@ def remove_duplicate_candidates(candidate_model):
         candidate_model.objects.all()
         .values('person_id')
         .alias(count=Count('person_id'))
-        .annotate(candidates_pks=ArrayAgg('pk'))
+        .annotate(candidates_pks=ArrayAgg('pk', default=Value([])))
         .filter(count__gt=1)
     )
 

@@ -27,7 +27,6 @@ import json
 
 from dal import autocomplete
 from django.conf import settings
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import SearchVector
 from django.db.models import Exists, F, OuterRef, Q
 
@@ -53,7 +52,7 @@ __all__ = [
 __namespace__ = False
 
 
-class PersonsAutocomplete(LoginRequiredMixin):
+class PersonsAutocomplete:
     def get_results(self, context):
         return [
             {
@@ -186,7 +185,7 @@ class TutorAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetView):
         return qs
 
 
-class PromotersAutocomplete(LoginRequiredMixin, autocomplete.Select2ListView):
+class PromotersAutocomplete(autocomplete.Select2ListView):
     urlpatterns = 'promoters'
 
     def autocomplete_results(self, results):

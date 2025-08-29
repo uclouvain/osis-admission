@@ -25,7 +25,6 @@
 # ##############################################################################
 
 from dal_select2.views import Select2ListView
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 
 from admission.ddd.admission.doctorat.preparation.commands import RechercherDoctoratQuery
@@ -39,7 +38,7 @@ __all__ = [
 ]
 
 
-class DoctorateTrainingsAutocomplete(LoginRequiredMixin, Select2ListView):
+class DoctorateTrainingsAutocomplete(Select2ListView):
     urlpatterns = 'doctorate-trainings'
 
     def get(self, request, *args, **kwargs):

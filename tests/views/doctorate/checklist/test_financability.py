@@ -544,7 +544,7 @@ class FinancabiliteDerogationViewTestCase(OsisDocumentMockTestMixin, TestCase):
             self.admission.financability_dispensation_status,
             DerogationFinancement.REFUS_DE_DEROGATION_FACULTAIRE.name,
         )
-        self.assertQuerysetEqual(
+        self.assertQuerySetEqual(
             self.admission.refusal_reasons.all(),
             [refusal_reason],
         )
