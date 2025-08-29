@@ -27,7 +27,6 @@ import json
 from typing import Dict, Optional, Union, List
 
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.cache import cache
 from django.db.models import Value
 from django.db.models.functions import Concat
@@ -58,22 +57,9 @@ from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionDoctoraleQuery,
 )
 from admission.ddd.admission.doctorat.preparation.dtos import (
-    CotutelleDTO,
     PropositionDTO,
 )
-from admission.ddd.admission.doctorat.preparation.dtos.doctorat import DoctoratDTO
 from admission.ddd.admission.doctorat.validation.commands import RecupererDemandeQuery
-from admission.ddd.admission.doctorat.validation.dtos import DemandeDTO
-from admission.ddd.admission.shared_kernel.domain.model.enums.type_gestionnaire import (
-    TypeGestionnaire,
-)
-from admission.ddd.admission.shared_kernel.dtos.proposition_fusion_personne import (
-    PropositionFusionPersonneDTO,
-)
-from admission.ddd.admission.shared_kernel.dtos.titre_acces_selectionnable import (
-    TitreAccesSelectionnableDTO,
-)
-from admission.ddd.admission.shared_kernel.enums import Onglets
 from admission.ddd.admission.formation_continue.commands import (
     RecupererPropositionQuery,
 )
@@ -98,6 +84,13 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.ddd.admission.formation_generale.dtos.proposition import (
     PropositionGestionnaireDTO,
 )
+from admission.ddd.admission.shared_kernel.domain.model.enums.type_gestionnaire import (
+    TypeGestionnaire,
+)
+from admission.ddd.admission.shared_kernel.dtos.titre_acces_selectionnable import (
+    TitreAccesSelectionnableDTO,
+)
+from admission.ddd.admission.shared_kernel.enums import Onglets
 from admission.models import (
     ContinuingEducationAdmission,
     DoctorateAdmission,
@@ -125,7 +118,7 @@ from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import PermissionRequiredMixin
 
 
-class AdmissionViewMixin(LoginRequiredMixin, PermissionRequiredMixin, ContextMixin):
+class AdmissionViewMixin(PermissionRequiredMixin, ContextMixin):
     @property
     def admission_uuid(self) -> str:
         return self.kwargs.get('uuid', '')
