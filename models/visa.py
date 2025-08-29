@@ -26,6 +26,7 @@
 from django.conf import settings
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.db import models
+from django.db.models import Value
 from django.utils.translation import gettext_lazy as _, pgettext
 
 __all__ = [
@@ -36,7 +37,7 @@ __all__ = [
 class DiplomaticPostQuerySet(models.QuerySet):
     def annotate_countries(self):
         return self.annotate(
-            countries_iso_codes=ArrayAgg('countries__iso_code'),
+            countries_iso_codes=ArrayAgg('countries__iso_code', default=Value([])),
         )
 
 

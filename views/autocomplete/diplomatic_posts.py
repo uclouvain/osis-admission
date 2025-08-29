@@ -27,17 +27,15 @@ from dal import autocomplete
 from django.conf import settings
 from django.db.models import ExpressionWrapper, Q, BooleanField
 from django.utils.translation import get_language
-from rules.contrib.views import LoginRequiredMixin
 
 from admission.models import DiplomaticPost
-
 
 __all__ = [
     'DiplomaticPostsAutocomplete',
 ]
 
 
-class DiplomaticPostsAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
+class DiplomaticPostsAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         queryset = DiplomaticPost.objects.annotate_countries().all()
 

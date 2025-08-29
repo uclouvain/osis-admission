@@ -27,7 +27,6 @@ from dal import autocomplete
 from django.conf import settings
 from django.utils.functional import cached_property
 from django.utils.translation import get_language
-from rules.contrib.views import LoginRequiredMixin
 
 from osis_profile import BE_ISO_CODE
 from reference.models.country import Country
@@ -38,7 +37,7 @@ __all__ = [
 
 
 # TODO: To move into reference or base
-class CountriesAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
+class CountriesAutocomplete(autocomplete.Select2QuerySetView):
     """
     Return a list of countries based on the search term and the active flag. The returned ids are the model pks.
     """

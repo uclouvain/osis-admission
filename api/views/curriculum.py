@@ -29,7 +29,7 @@ from functools import partial
 from typing import Union
 
 from django.contrib.postgres.aggregates import ArrayAgg
-from django.db.models import OuterRef, Q, Subquery
+from django.db.models import OuterRef, Q, Subquery, Value
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from drf_spectacular.types import OpenApiTypes
@@ -131,6 +131,7 @@ class BaseCurriculumView(APIPermissionRequiredMixin, RetrieveAPIView):
                 valuated_from_trainings=ArrayAgg(
                     'valuated_from_admission__training__education_group_type__name',
                     filter=Q(valuated_from_admission__isnull=False),
+                    default=Value([])
                 ),
             )
             .order_by('-start_date', '-end_date')
@@ -147,6 +148,7 @@ class BaseCurriculumView(APIPermissionRequiredMixin, RetrieveAPIView):
                 valuated_from_trainings=ArrayAgg(
                     'valuated_from_admission__training__education_group_type__name',
                     filter=Q(valuated_from_admission__isnull=False),
+                    default=Value([])
                 ),
             )
             .order_by("-last_academic_year")
@@ -293,6 +295,7 @@ class ExperienceViewSet(
                 valuated_from_trainings=ArrayAgg(
                     'valuated_from_admission__training__education_group_type__name',
                     filter=Q(valuated_from_admission__isnull=False),
+                    default=Value([])
                 ),
             )
             if self.kwargs.get('uuid')

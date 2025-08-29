@@ -17,7 +17,7 @@ def forward(apps, schema_editor):
     )
 
     AdmissionFormItem.objects.filter(internal_label__in=duplicated_labels).update(
-        internal_label=Concat('internal_label', Value('.'), 'id'),
+        internal_label=Concat('internal_label', Value('.'), 'id', output_field=models.CharField()),
     )
 
 

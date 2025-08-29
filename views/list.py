@@ -25,7 +25,7 @@
 # ##############################################################################
 import datetime
 
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.core.cache import cache
 from django.core.exceptions import NON_FIELD_ERRORS
 from django.utils.functional import cached_property
@@ -48,7 +48,7 @@ __all__ = [
 ]
 
 
-class BaseAdmissionList(LoginRequiredMixin, PermissionRequiredMixin, HtmxMixin, FormMixin, ListView):
+class BaseAdmissionList(PermissionRequiredMixin, HtmxMixin, FormMixin, ListView):
     raise_exception = True
     filtering_query_class = None
     htmx_template_name = None

@@ -27,14 +27,13 @@ from typing import List, Dict
 
 from dal_select2.views import Select2ListView, Select2QuerySetView
 from django.conf import settings
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q, F, Value, Case, When
 from django.db.models.functions import Concat
 from django.utils.functional import cached_property
 from django.utils.translation import get_language
 
-from admission.ddd.admission.shared_kernel.dtos.formation import BaseFormationDTO
 from admission.ddd.admission.shared_kernel.commands import RechercherFormationsGereesQuery
+from admission.ddd.admission.shared_kernel.dtos.formation import BaseFormationDTO
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
@@ -55,7 +54,7 @@ from osis_role.contrib.models import EntityRoleModel
 from osis_role.contrib.permissions import _get_relevant_roles
 
 
-class ManagedEducationTrainingsAutocomplete(LoginRequiredMixin, Select2ListView):
+class ManagedEducationTrainingsAutocomplete(Select2ListView):
     urlpatterns = 'managed-education-trainings'
 
     def get_list(self) -> List[BaseFormationDTO]:
@@ -93,7 +92,7 @@ class ManagedEducationTrainingsAutocomplete(LoginRequiredMixin, Select2ListView)
         return formatted_results
 
 
-class ContinuingManagedEducationTrainingsAutocomplete(LoginRequiredMixin, Select2QuerySetView):
+class ContinuingManagedEducationTrainingsAutocomplete(Select2QuerySetView):
     urlpatterns = 'continuing-managed-education-trainings'
     model_field_name = 'formatted_title'
 

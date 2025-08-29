@@ -24,7 +24,6 @@
 #
 # ##############################################################################
 
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import TemplateView
 
 __all__ = [
@@ -32,7 +31,7 @@ __all__ = [
 ]
 
 
-class LazyImageLoadingView(LoginRequiredMixin, TemplateView):
+class LazyImageLoadingView(TemplateView):
     urlpatterns = {
         'lazy-image-loading': 'lazy-image-loading/<uuid:image_uuid>',
     }

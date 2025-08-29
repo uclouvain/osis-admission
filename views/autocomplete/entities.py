@@ -24,7 +24,6 @@
 #
 # ##############################################################################
 from dal import autocomplete
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 
 from base.models.entity_version import EntityVersion
@@ -36,7 +35,7 @@ __all__ = [
 __namespace__ = False
 
 
-class EntityAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
+class EntityAutocomplete(autocomplete.Select2QuerySetView):
     url_patterns = 'entities'
 
     def get_result_value(self, result):

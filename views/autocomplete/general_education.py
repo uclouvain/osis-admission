@@ -25,7 +25,6 @@
 # ##############################################################################
 
 from dal_select2.views import Select2ListView
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 
 from admission.ddd.admission.formation_generale.commands import RechercherFormationGeneraleQuery
@@ -39,7 +38,7 @@ __all__ = [
 ]
 
 
-class GeneralEducationTrainingsAutocomplete(LoginRequiredMixin, Select2ListView):
+class GeneralEducationTrainingsAutocomplete(Select2ListView):
     urlpatterns = 'general-education-trainings'
 
     def get(self, request, *args, **kwargs):

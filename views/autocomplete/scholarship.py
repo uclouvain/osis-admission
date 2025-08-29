@@ -26,7 +26,6 @@
 
 from dal import autocomplete
 from django.db.models import Q
-from rules.contrib.views import LoginRequiredMixin
 
 from reference.models.scholarship import Scholarship
 
@@ -35,7 +34,7 @@ __all__ = [
 ]
 
 
-class ScholarshipAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
+class ScholarshipAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         qs = Scholarship.objects.filter(disabled=False)
 
