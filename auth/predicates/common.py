@@ -70,6 +70,18 @@ def candidate_has_other_doctorate_or_general_admissions(self, user: User, obj: B
 
 
 @predicate(bind=True)
+@predicate_failed_msg(
+    message=_(
+        "This action cannot be performed as an admission or an internal experience is related to a general "
+        "or a doctorate or a IUFC education."
+    ),
+)
+def candidate_has_other_doctorate_general_or_iufc_admissions(self, user: User, obj: BaseAdmission):
+    other_admissions = obj.other_candidate_trainings
+    return any(other_admissions.values())
+
+
+@predicate(bind=True)
 @predicate_failed_msg(message=_("Another admission has been submitted."))
 def does_not_have_a_submitted_admission(self, user: User, obj: DoctorateAdmission):
     return not BaseAdmission.objects.candidate_has_submission(user.person)
