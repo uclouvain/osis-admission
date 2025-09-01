@@ -1390,7 +1390,9 @@ class CddApprovalFinalDecisionViewTestCase(TestCase):
         self.assertIn('groupe_supervision', pdf_context)
         self.assertIsNotNone(pdf_context['groupe_supervision'])
 
-        self.assertIn('cdd_president', pdf_context)
+        self.assertIn('gestionnaire', pdf_context)
+        self.assertEqual(pdf_context['gestionnaire'].prenom, self.fac_manager_user.person.first_name)
+        self.assertEqual(pdf_context['gestionnaire'].nom, self.fac_manager_user.person.last_name)
 
         # Check that an entry in the history has been created
         history_entries = HistoryEntry.objects.filter(object_uuid=self.admission.uuid).order_by('-id')

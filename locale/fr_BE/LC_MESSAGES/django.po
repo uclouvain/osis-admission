@@ -1627,6 +1627,9 @@ msgstr "Formulaire de réorientation complété et signé"
 msgid "Completed for Fac"
 msgstr "Complétée pour Fac"
 
+msgid "Completed for Fac/CDD"
+msgstr "Complétée pour Fac/CDD"
+
 msgid "Completed for SIC"
 msgstr "Complétée pour SIC"
 
@@ -3047,6 +3050,9 @@ msgstr "Faux"
 
 msgid "Feedback from Fac"
 msgstr "Retour de FAC"
+
+msgid "Feedback from Fac/CDD"
+msgstr "Retour de FAC/CDD"
 
 msgctxt "admission gender"
 msgid "Female"
@@ -5665,6 +5671,9 @@ msgstr "Adresse électronique privée"
 msgid "Processing by Fac"
 msgstr "Traitement en Fac"
 
+msgid "Processing by Fac/CDD"
+msgstr "Traitement en Fac/CDD"
+
 msgid "Produce xls"
 msgstr "Produire un fichier xls"
 
@@ -7736,6 +7745,9 @@ msgstr "À compléter par SIC"
 
 msgid "To be completed for Fac"
 msgstr "A compléter pour Fac"
+
+msgid "To be completed for Fac/CDD"
+msgstr "A compléter pour Fac/CDD"
 
 msgid "To be completed for the Enrolment Office (SIC)"
 msgstr "A compléter pour SIC"
