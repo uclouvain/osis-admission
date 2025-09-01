@@ -43,6 +43,12 @@ from admission.constants import PNG_MIME_TYPE, SUPPORTED_MIME_TYPES
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     DocumentsCompletesDifferentsDesReclamesException,
     DocumentsReclamesImmediatementNonCompletesException,
@@ -59,12 +65,6 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     StatutEmplacementDocument,
     StatutReclamationEmplacementDocument,
     TypeEmplacementDocument,
-)
-from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutPropositionContinue,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
 )
 from admission.models import AdmissionTask
 from admission.tests.factories import DoctorateAdmissionFactory
@@ -267,6 +267,55 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedDoc
         self.admission.save(update_fields=['requested_documents'])
 
         self.url = resolve_url('admission_api_v1:general_documents', uuid=self.admission.uuid)
+
+    def test_permission_access_before_request(self):
+        self.client.force_authenticate(user=self.admission.candidate.user)
+
+        self.admission.status = ChoixStatutPropositionGenerale.EN_BROUILLON.name
+        self.admission.save(update_fields=['status'])
+
+        # No document request
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        json_response = response.json()
+
+        self.assertEqual(json_response.get('detail'), gettext('You must be invited to complete this admission.'))
+
+    def test_permission_access_after_completion_for_sic(self):
+        self.client.force_authenticate(user=self.admission.candidate.user)
+
+        self.admission.status = ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC.name
+        self.admission.save(update_fields=['status'])
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        json_response = response.json()
+
+        self.assertEqual(json_response.get('detail'), gettext('You must be invited to complete this admission.'))
+
+    def test_permission_access_after_completion_for_fac(self):
+        self.client.force_authenticate(user=self.admission.candidate.user)
+
+        self.admission.status = ChoixStatutPropositionGenerale.COMPLETEE_POUR_FAC.name
+        self.admission.save(update_fields=['status'])
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        json_response = response.json()
+
+        self.assertEqual(json_response.get('detail'), gettext('You must be invited to complete this admission.'))
 
     def test_retrieve_requested_documents(self):
         self.client.force_authenticate(user=self.admission.candidate.user)
