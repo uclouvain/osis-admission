@@ -29,7 +29,7 @@
   <li>
     <button
       type="button"
-      class="scroll-to-top"
+      class="scroll-to-top btn btn-link"
       hx-get="{% url 'admission:excel-exports:doctorate-admissions-list' %}?{{ view.query_params.urlencode }}"
       hx-indicator="#htmx-overlay"
       hx-swap="none"

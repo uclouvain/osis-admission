@@ -1680,7 +1680,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             proposition=continuing_proposition_dto,
             comptabilite=None,
             groupe_supervision=None,
-            examens=examens_dto,
+            examen_formation=examens_dto,
         )
         cls.general_bachelor_context = _ResumePropositionDTO(
             identification=identification_dto,
@@ -1691,7 +1691,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             proposition=bachelor_proposition_dto,
             comptabilite=accounting_dto,
             groupe_supervision=None,
-            examens=examens_dto,
+            examen_formation=examens_dto,
         )
         cls.doctorate_context = _ResumePropositionDTO(
             identification=identification_dto,
@@ -1771,7 +1771,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                     autre_institution_adresse='',
                 ),
             ),
-            examens=examens_dto,
+            examen_formation=examens_dto,
         )
 
     @classmethod
@@ -3083,7 +3083,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
 
     def test_exam_not_required(self):
         with mock.patch.multiple(
-            self.general_bachelor_context.examens,
+            self.general_bachelor_context.examen_formation,
             requis=False,
             attestation=['attestation-examen'],
             annee=2022,
@@ -3111,7 +3111,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
 
     def test_exam_required(self):
         with mock.patch.multiple(
-            self.general_bachelor_context.examens,
+            self.general_bachelor_context.examen_formation,
             requis=True,
             attestation=[],
             annee=None,
