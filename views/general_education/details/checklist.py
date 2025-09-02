@@ -3503,7 +3503,7 @@ class ChecklistView(
             experiences_academiques=resume.curriculum.experiences_academiques,
             experiences_professionnelles=resume.curriculum.experiences_non_academiques,
             etudes_secondaires=resume.etudes_secondaires,
-            examens=resume.examens,
+            examens=[resume.examens],
             experiences_parcours_interne=self.internal_experiences,
             additional_messages=self.curriculum_additional_messages(),
         )
