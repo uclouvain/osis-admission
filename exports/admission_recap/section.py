@@ -131,7 +131,7 @@ class Section:
                     'coordonnees': context.coordonnees,
                     'curriculum': context.curriculum,
                     'etudes_secondaires': context.etudes_secondaires,
-                    'examen': context.examens,
+                    'examen': context.examen_formation,
                     'connaissances_langues': context.connaissances_langues,
                     'proposition': context.proposition,
                     'comptabilite': context.comptabilite,
