@@ -1165,7 +1165,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 has_default_language=has_default_language,
             ),
             connaissances_langues=cls._get_language_knowledge_dto(candidate) if is_doctorate else None,
-            examens=cls.get_examen(matricule, formation.sigle, formation.annee),
+            examen_formation=cls.get_examen(matricule, formation.sigle, formation.annee),
         )
 
     @classmethod

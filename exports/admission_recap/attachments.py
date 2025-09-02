@@ -327,9 +327,9 @@ def get_exams_attachments(context: ResumePropositionDTO) -> List[Attachment]:
     return [
         Attachment(
             identifier='ATTESTATION_DE_REUSSITE_CONCOURS_D_ENTREE_OU_D_ADMISSION',
-            label=context.examens.titre,
-            uuids=context.examens.attestation,
-            required=context.examens.requis,
+            label=context.examen_formation.titre,
+            uuids=context.examen_formation.attestation,
+            required=context.examen_formation.requis,
             candidate_language=context.identification.langue_contact,
         )
     ]
