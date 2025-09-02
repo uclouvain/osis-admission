@@ -119,7 +119,7 @@ class ResumeProposition(interface.DomainService):
             connaissances_langues=resume_candidat_dto.connaissances_langues,
             groupe_supervision=groupe_supervision_dto,
             questions_specifiques_dtos=questions_specifiques_dtos,
-            examens=resume_candidat_dto.examens,
+            examen_formation=resume_candidat_dto.examen_formation,
         )
 
     @classmethod
@@ -178,7 +178,7 @@ class ResumeProposition(interface.DomainService):
             connaissances_langues=resume_candidat_dto.connaissances_langues,
             groupe_supervision=groupe_supervision_dto,
             questions_specifiques_dtos=questions_specifiques_dtos,
-            examens=examen_dto,
+            examen_formation=examen_dto,
         )
 
     @classmethod
