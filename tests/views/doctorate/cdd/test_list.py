@@ -35,6 +35,7 @@ from django.core.exceptions import NON_FIELD_ERRORS
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 from django.utils.translation import gettext, gettext_lazy
+from osis_signature.enums import SignatureState
 
 from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
@@ -307,6 +308,9 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             person=program_manager_person,
         )
         cls.program_manager_user = program_manager_person.user
+        cls.doctorate_committee_member = DoctorateCommitteeMemberRoleFactory(
+            education_group=cls.admissions[0].training.education_group,
+        ).person.user
 
         # User with several cdds
         person_with_several_cdds = SicManagementRoleFactory(entity=first_doctoral_commission).person
@@ -351,6 +355,12 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['object_list'], [])
+
+    def test_form_initialization_for_a_doctorate_committee_member(self):
+        self.client.force_login(user=self.doctorate_committee_member)
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
 
     def test_form_initialization_for_a_program_manager(self):
         self.client.force_login(user=self.program_manager_user)
@@ -1204,6 +1214,103 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             self.assertEqual(proposition.nom_auteur_derniere_modification, '')
             self.assertEqual(proposition.code_pays_nationalite_candidat, '')
             self.assertEqual(proposition.nom_pays_nationalite_candidat, '')
+
+    def test_signatures_are_completed_field(self):
+        self.client.force_login(user=self.user_with_several_cdds)
+
+        new_admission = DoctorateAdmissionFactory(
+            training=self.admissions[0].training,
+            determined_academic_year=self.admissions[0].determined_academic_year,
+            supervision_group=None,
+        )
+
+        data = {
+            'annee_academique': '2021',
+            'numero': f'M-{ENTITY_CDE}21-{str(new_admission)}',
+        }
+
+        # No signature process
+        with self.assertNumQueriesLessThan(1000):
+            response = self.client.get(self.url, data)
+
+            self.assertEqual(response.status_code, 200)
+
+            results = response.context['object_list']
+
+            self.assertEqual(len(results), 1)
+            self.assertFalse(results[0].signatures_completees)
+
+        # Actors not yet invited to sign
+        first_promoter = PromoterFactory()
+        second_promoter = PromoterFactory(process=first_promoter.process)
+        new_admission.supervision_group = first_promoter.process
+        new_admission.save(update_fields=['supervision_group'])
+
+        with self.assertNumQueriesLessThan(1000):
+            response = self.client.get(self.url, data)
+
+            self.assertEqual(response.status_code, 200)
+
+            results = response.context['object_list']
+
+            self.assertEqual(len(results), 1)
+            self.assertFalse(results[0].signatures_completees)
+
+        # A signature process with invited actors but no completed signatures
+        with freezegun.freeze_time('2021-12-01'):
+            first_promoter.actor_ptr.switch_state(SignatureState.INVITED)
+            second_promoter.actor_ptr.switch_state(SignatureState.INVITED)
+        with freezegun.freeze_time('2021-12-02'):
+            second_promoter.actor_ptr.switch_state(SignatureState.DECLINED)
+        with self.assertNumQueriesLessThan(1000):
+            response = self.client.get(self.url, data)
+
+            self.assertEqual(response.status_code, 200)
+
+            results = response.context['object_list']
+
+            self.assertEqual(len(results), 1)
+            self.assertFalse(results[0].signatures_completees)
+
+        # A signature process with completed signatures
+        with freezegun.freeze_time('2021-12-03'):
+            first_promoter.actor_ptr.switch_state(SignatureState.APPROVED)
+            second_promoter.actor_ptr.switch_state(SignatureState.APPROVED)
+        with self.assertNumQueriesLessThan(1000):
+            response = self.client.get(self.url, data)
+
+            self.assertEqual(response.status_code, 200)
+
+            results = response.context['object_list']
+
+            self.assertEqual(len(results), 1)
+            self.assertTrue(results[0].signatures_completees)
+
+        # A signature process with completed signatures but not the last ones
+        with freezegun.freeze_time('2021-12-04'):
+            second_promoter.actor_ptr.switch_state(SignatureState.DECLINED)
+        with self.assertNumQueriesLessThan(1000):
+            response = self.client.get(self.url, data)
+
+            self.assertEqual(response.status_code, 200)
+
+            results = response.context['object_list']
+
+            self.assertEqual(len(results), 1)
+            self.assertFalse(results[0].signatures_completees)
+
+        # A signature process without actor
+        first_promoter.delete()
+        second_promoter.delete()
+        with self.assertNumQueriesLessThan(1000):
+            response = self.client.get(self.url, data)
+
+            self.assertEqual(response.status_code, 200)
+
+            results = response.context['object_list']
+
+            self.assertEqual(len(results), 1)
+            self.assertFalse(results[0].signatures_completees)
 
     def test_htmx_form_errors(self):
         self.client.force_login(user=self.user_with_several_cdds)

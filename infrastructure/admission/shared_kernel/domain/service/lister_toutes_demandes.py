@@ -47,16 +47,6 @@ from django.utils.translation import get_language
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
-from admission.ddd.admission.shared_kernel.domain.service.i_filtrer_toutes_demandes import (
-    IListerToutesDemandes,
-)
-from admission.ddd.admission.shared_kernel.dtos.liste import (
-    DemandeRechercheDTO,
-    VisualiseurAdmissionDTO,
-)
-from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
-from admission.ddd.admission.shared_kernel.enums.liste import TardiveModificationReorientationFiltre
-from admission.ddd.admission.shared_kernel.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
 )
@@ -68,6 +58,20 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
     ConfigurationStatutChecklist,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_filtrer_toutes_demandes import (
+    IListerToutesDemandes,
+)
+from admission.ddd.admission.shared_kernel.dtos.liste import (
+    DemandeRechercheDTO,
+    VisualiseurAdmissionDTO,
+)
+from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
+from admission.ddd.admission.shared_kernel.enums.liste import (
+    TardiveModificationReorientationFiltre,
+)
+from admission.ddd.admission.shared_kernel.enums.statut import (
+    CHOIX_STATUT_TOUTE_PROPOSITION,
 )
 from admission.infrastructure.utils import get_entities_with_descendants_ids
 from admission.models import AdmissionViewer
@@ -97,6 +101,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
         bourse_internationale: Optional[str] = '',
         bourse_erasmus_mundus: Optional[str] = '',
         bourse_double_diplomation: Optional[str] = '',
+        bourse_recherche: Optional[str] = '',
         quarantaine: Optional[bool] = None,
         demandeur: Optional[str] = '',
         tri_inverse: bool = False,
@@ -248,14 +253,13 @@ class ListerToutesDemandes(IListerToutesDemandes):
         if etats:
             qs = qs.filter(status__in=etats)
         if bourse_internationale:
-            qs = qs.filter(
-                Q(doctorateadmission__international_scholarship_id=bourse_internationale)
-                | Q(generaleducationadmission__international_scholarship_id=bourse_internationale),
-            )
+            qs = qs.filter(generaleducationadmission__international_scholarship_id=bourse_internationale)
         if bourse_erasmus_mundus:
             qs = qs.filter(generaleducationadmission__erasmus_mundus_scholarship_id=bourse_erasmus_mundus)
         if bourse_double_diplomation:
             qs = qs.filter(generaleducationadmission__double_degree_scholarship_id=bourse_double_diplomation)
+        if bourse_recherche:
+            qs = qs.filter(doctorateadmission__international_scholarship_id=bourse_recherche)
 
         if quarantaine in [True, False]:
             # Validation de la quarantaine queryset

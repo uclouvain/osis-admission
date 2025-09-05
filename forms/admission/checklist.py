@@ -48,6 +48,16 @@ from admission.constants import (
     CONTEXT_GENERAL,
 )
 from admission.ddd import DUREE_MAXIMALE_PROGRAMME, DUREE_MINIMALE_PROGRAMME
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    BesoinDeDerogation,
+    BesoinDeDerogationDelegueVrae,
+    ChoixStatutChecklist,
+    DerogationFinancement,
+    DispenseOuDroitsMajores,
+    DroitsInscriptionMontant,
+    PoursuiteDeCycle,
+    TypeDeRefus,
+)
 from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
     EtatAuthentificationParcours,
 )
@@ -59,19 +69,11 @@ from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import
     StatutEquivalenceTitreAcces,
     TypeEquivalenceTitreAcces,
 )
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
+    EmplacementDocumentDTO,
+)
 from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    BesoinDeDerogation,
-    BesoinDeDerogationDelegueVrae,
-    ChoixStatutChecklist,
-    DerogationFinancement,
-    DispenseOuDroitsMajores,
-    DroitsInscriptionMontant,
-    PoursuiteDeCycle,
-    TypeDeRefus,
-)
 from admission.forms import (
     DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
     EMPTY_CHOICE_AS_LIST,
@@ -898,6 +900,8 @@ class SicDecisionApprovalDocumentsForm(forms.Form):
 
 class CommonSicDecisionApprovalForm(forms.ModelForm):
     SEPARATOR = ';'
+    is_doctorate = False
+    is_general = False
 
     prerequisite_courses = MultipleChoiceFieldWithBetterError(
         label=_('List of LUs of the additional module or others'),
@@ -1010,7 +1014,7 @@ class CommonSicDecisionApprovalForm(forms.ModelForm):
 
         if self.is_admission and candidate_nationality_is_no_ue_5:
             if self.instance.must_provide_student_visa_d is None:
-                self.initial['must_provide_student_visa_d'] = True
+                self.initial['must_provide_student_visa_d'] = self.is_general
         else:
             del self.fields['must_provide_student_visa_d']
 
@@ -1067,6 +1071,8 @@ class CommonSicDecisionApprovalForm(forms.ModelForm):
 
 
 class SicDecisionApprovalForm(CommonSicDecisionApprovalForm):
+    is_general = True
+
     all_additional_approval_conditions = forms.MultipleChoiceField(
         label=_('Additional conditions'),
         required=False,
@@ -1212,6 +1218,8 @@ class SicDecisionApprovalForm(CommonSicDecisionApprovalForm):
 
 
 class DoctorateSicDecisionApprovalForm(CommonSicDecisionApprovalForm):
+    is_doctorate = True
+
     class Meta(CommonSicDecisionApprovalForm.Meta):
         model = DoctorateAdmission
 

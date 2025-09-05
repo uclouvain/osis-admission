@@ -44,6 +44,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     CandidatNonTrouveException,
     CarteBancaireRemboursementAutreFormatNonCompleteDoctoratException,
     CarteBancaireRemboursementIbanNonCompleteDoctoratException,
+    MaximumPropositionsDoctoralesAtteintException,
     ProcedureDemandeSignatureNonLanceeException,
     PropositionNonApprouveeParMembresCAException,
     PropositionNonApprouveeParPromoteurException,
@@ -55,6 +56,7 @@ from admission.ddd.admission.doctorat.preparation.test.factory.groupe_de_supervi
 )
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
     PropositionAdmissionSC3DPConfirmeeFactory,
+    PropositionAdmissionSC3DPTraitementFacFactory,
     _ComptabiliteFactory,
 )
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
@@ -90,10 +92,7 @@ from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import (
     AcademicYearInMemoryRepository,
 )
-from osis_profile.models.enums.curriculum import (
-    ActivitySector,
-    ActivityType,
-)
+from osis_profile.models.enums.curriculum import ActivitySector, ActivityType
 
 
 class TestVerifierPropositionServiceCommun(TestCase):
@@ -153,6 +152,7 @@ class TestVerifierPropositionServiceCommun(TestCase):
 
 class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
     def test_should_verifier_etre_ok_si_complet(self):
+        PropositionInMemoryRepository.entities = [self.proposition]
         proposition_id = self.message_bus.invoke(self.cmd)
         self.assertEqual(proposition_id.uuid, self.proposition.entity_id.uuid)
 
@@ -160,7 +160,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         with mock.patch.multiple(self.candidat, matricule='unknown_user_id'):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.cmd)
-            self.assertIsInstance(context.exception.exceptions.pop(), CandidatNonTrouveException)
+            self.assertHasInstance(context.exception.exceptions, CandidatNonTrouveException)
 
     def test_should_retourner_erreur_si_demande_signature_pas_en_cours(self):
         with mock.patch.object(
@@ -170,7 +170,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         ):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.cmd)
-            self.assertIsInstance(context.exception.exceptions.pop(), ProcedureDemandeSignatureNonLanceeException)
+            self.assertHasInstance(context.exception.exceptions, ProcedureDemandeSignatureNonLanceeException)
 
     def test_should_retourner_erreur_si_tous_promoteurs_n_ont_pas_approuve(self):
         self.groupe_supervision.signatures_promoteurs.append(
@@ -178,7 +178,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
-        self.assertIsInstance(context.exception.exceptions.pop(), PropositionNonApprouveeParPromoteurException)
+        self.assertHasInstance(context.exception.exceptions, PropositionNonApprouveeParPromoteurException)
 
         self.groupe_supervision.signatures_promoteurs.pop()
 
@@ -189,7 +189,7 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
 
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
-        self.assertIsInstance(context.exception.exceptions.pop(), PropositionNonApprouveeParMembresCAException)
+        self.assertHasInstance(context.exception.exceptions, PropositionNonApprouveeParMembresCAException)
 
         self.groupe_supervision.signatures_membres_CA.pop()
 
@@ -748,12 +748,12 @@ class TestVerifierPropositionService(TestVerifierPropositionServiceCommun):
         )
 
     def test_should_verification_renvoyer_erreur_si_trop_de_demandes_envoyees(self):
-        propositions = self.proposition_repository.search(matricule_candidat=self.candidat.matricule)
-        last_proposition = propositions.pop()
-        for proposition in propositions:
-            proposition.statut = ChoixStatutPropositionDoctorale.EN_BROUILLON
-        last_proposition.statut = ChoixStatutPropositionDoctorale.CONFIRMEE
+        PropositionInMemoryRepository.entities = [
+            self.proposition,
+            PropositionAdmissionSC3DPTraitementFacFactory(matricule_candidat=self.proposition.matricule_candidat),
+        ]
+
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
 
-        self.assertHasInstance(context.exception.exceptions, NombrePropositionsSoumisesDepasseException)
+        self.assertHasInstance(context.exception.exceptions, MaximumPropositionsDoctoralesAtteintException)

@@ -47,6 +47,8 @@ class DemandeRechercheDTO(interface.DTO):
     decision_fac: str
     decision_sic: str
 
+    signatures_completees: bool
+
     date_confirmation: Optional[datetime.datetime]
 
     derniere_modification_le: datetime.datetime

@@ -43,13 +43,18 @@
   <div>
     <details>
       <summary>{% translate "Advanced filters" %}</summary>
-      <div id="additional-filters" class="row">
-        {% bootstrap_field filter_form.bourse_internationale form_group_class="form-group col-md-2" %}
-        {% bootstrap_field filter_form.bourse_erasmus_mundus form_group_class="form-group col-md-2" %}
-        {% bootstrap_field filter_form.bourse_double_diplomation form_group_class="form-group col-md-2" %}
-        {% bootstrap_field filter_form.quarantaine form_group_class="form-group col-md-2" %}
-        {% bootstrap_field filter_form.tardif_modif_reorientation form_group_class="form-group col-md-2" %}
-        {% bootstrap_field filter_form.delai_depasse_complements form_group_class="form-group col-md-2" %}
+      <div id="additional-filters">
+        <div class="row">
+          {% bootstrap_field filter_form.bourse_internationale form_group_class="form-group col-md-3" %}
+          {% bootstrap_field filter_form.bourse_erasmus_mundus form_group_class="form-group col-md-3" %}
+          {% bootstrap_field filter_form.bourse_double_diplomation form_group_class="form-group col-md-3" %}
+          {% bootstrap_field filter_form.bourse_recherche form_group_class="form-group col-md-3" %}
+        </div>
+        <div class="row">
+          {% bootstrap_field filter_form.quarantaine form_group_class="form-group col-md-3" %}
+          {% bootstrap_field filter_form.tardif_modif_reorientation form_group_class="form-group col-md-3" %}
+          {% bootstrap_field filter_form.delai_depasse_complements form_group_class="form-group col-md-3" %}
+        </div>
       </div>
     </details>
   </div>

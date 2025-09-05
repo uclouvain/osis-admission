@@ -29,10 +29,11 @@ from collections import defaultdict
 from typing import Dict, List, Optional
 
 from django.conf import settings
-from django.contrib.postgres.search import SearchVector
-from django.db.models import F, Q, When
-from django.db.models.functions import Coalesce, Concat
+from django.db.models import Exists, OuterRef, Q
+from django.db.models.functions import Coalesce
 from django.utils.translation import get_language
+from osis_signature.enums import SignatureState
+from osis_signature.models import Actor
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     BourseRecherche,
@@ -104,6 +105,12 @@ class ListerDemandesService(IListerDemandesService):
             .annotate_with_reference(with_management_faculty=False)
             .annotate(
                 scholarship=Coalesce('international_scholarship__short_name', 'other_international_scholarship'),
+                signatures_are_completed=Exists(Actor.objects.filter(process_id=OuterRef('supervision_group_id')))
+                & ~Exists(
+                    Actor.objects.filter(process_id=OuterRef('supervision_group_id')).exclude(
+                        last_state=SignatureState.APPROVED.name
+                    )
+                ),
             )
             .prefetch_related(
                 'candidate__student_set',
@@ -273,6 +280,7 @@ class ListerDemandesService(IListerDemandesService):
                 'derniere_modification_par': ['last_update_author__last_name', 'last_update_author__first_name'],
                 'pre_admission': ['type'],
                 'cotutelle': ['cotutelle'],
+                'signatures_completees': ['signatures_are_completed'],
             }[champ_tri]
 
             if tri_inverse:
@@ -376,6 +384,7 @@ class ListerDemandesService(IListerDemandesService):
             type_admission=admission.type,
             cotutelle=admission.cotutelle,
             code_bourse=admission.scholarship if admission.scholarship else '',  # From annotation
+            signatures_completees=admission.signatures_are_completed,  # From annotation
             **country_data,
             **last_author_data,
         )

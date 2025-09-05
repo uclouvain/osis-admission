@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,19 +23,31 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+from typing import Optional
 
 from django.db.models import Count, Q
 
-from admission.models import GeneralEducationAdmission, ContinuingEducationAdmission, DoctorateAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixStatutPropositionDoctorale,
     STATUTS_PROPOSITION_AVANT_SOUMISSION,
+    STATUTS_PROPOSITION_DOCTORALE_TERMINEE,
 )
-from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    PropositionIdentity,
+)
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
     STATUTS_PROPOSITION_GENERALE_SOUMISE_HORS_FRAIS_DOSSIER,
+    ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions import (
+    IMaximumPropositionsAutorisees,
+)
+from admission.models import (
+    ContinuingEducationAdmission,
+    DoctorateAdmission,
+    GeneralEducationAdmission,
 )
 from base.models.person import Person
 
@@ -54,13 +66,6 @@ class MaximumPropositionsAutorisees(IMaximumPropositionsAutorisees):
         return ContinuingEducationAdmission.objects.filter(
             candidate__global_id=matricule,
             status=ChoixStatutPropositionContinue.CONFIRMEE.name,
-        ).count()
-
-    @classmethod
-    def nb_propositions_envoyees_formation_doctorale(cls, matricule: str) -> int:
-        return DoctorateAdmission.objects.filter(
-            candidate__global_id=matricule,
-            status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
         ).count()
 
     @classmethod
@@ -98,3 +103,18 @@ class MaximumPropositionsAutorisees(IMaximumPropositionsAutorisees):
             .get(global_id=matricule)
         )
         return sum(nb_propositions)
+
+    @classmethod
+    def nb_propositions_en_cours_formation_doctorale(
+        cls,
+        matricule: str,
+        proposition_identity: Optional[PropositionIdentity] = None,
+    ) -> int:
+        qs = DoctorateAdmission.objects.filter(candidate__global_id=matricule).exclude(
+            status__in=STATUTS_PROPOSITION_DOCTORALE_TERMINEE
+        )
+
+        if proposition_identity:
+            qs = qs.exclude(uuid=proposition_identity.uuid)
+
+        return qs.count()

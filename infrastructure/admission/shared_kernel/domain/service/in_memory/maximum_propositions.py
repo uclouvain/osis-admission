@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,21 +23,32 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+from typing import Optional
+
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixStatutPropositionDoctorale,
     STATUTS_PROPOSITION_AVANT_SOUMISSION,
+    STATUTS_PROPOSITION_DOCTORALE_TERMINEE,
 )
-from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    PropositionIdentity,
+)
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions import (
+    IMaximumPropositionsAutorisees,
+)
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository as PropositionDoctoraleInMemoryRepository,
 )
-from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
-    PropositionInMemoryRepository as PropositionGeneraleInMemoryRepository,
-)
 from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
     PropositionInMemoryRepository as PropositionContinueInMemoryRepository,
+)
+from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
+    PropositionInMemoryRepository as PropositionGeneraleInMemoryRepository,
 )
 
 
@@ -55,14 +66,6 @@ class MaximumPropositionsAutoriseesInMemory(IMaximumPropositionsAutorisees):
         propositions_candidat = PropositionContinueInMemoryRepository.search(matricule_candidat=matricule)
         return sum(
             proposition.statut.name == ChoixStatutPropositionContinue.CONFIRMEE.name
-            for proposition in propositions_candidat
-        )
-
-    @classmethod
-    def nb_propositions_envoyees_formation_doctorale(cls, matricule: str) -> int:
-        propositions_candidat = PropositionDoctoraleInMemoryRepository.search(matricule_candidat=matricule)
-        return sum(
-            proposition.statut.name == ChoixStatutPropositionDoctorale.CONFIRMEE.name
             for proposition in propositions_candidat
         )
 
@@ -85,4 +88,17 @@ class MaximumPropositionsAutoriseesInMemory(IMaximumPropositionsAutorisees):
                 proposition.statut.name in STATUTS_PROPOSITION_AVANT_SOUMISSION
                 for proposition in propositions_doctorales_candidat
             )
+        )
+
+    @classmethod
+    def nb_propositions_en_cours_formation_doctorale(
+        cls,
+        matricule: str,
+        proposition_identity: Optional[PropositionIdentity] = None,
+    ) -> int:
+        propositions_candidat = PropositionDoctoraleInMemoryRepository.search(matricule_candidat=matricule)
+        return sum(
+            proposition.statut.name not in STATUTS_PROPOSITION_DOCTORALE_TERMINEE
+            and proposition.entity_id != proposition_identity
+            for proposition in propositions_candidat
         )

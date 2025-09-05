@@ -26,22 +26,8 @@
 
 {% has_perm 'admission.change_admission_project' as can_change_admission_project %}
 {% if can_change_admission_project %}
-  {% url view.base_namespace|add:':update:training-choice' uuid=view.kwargs.uuid as edit_choix_formation_url %}
   {% url view.base_namespace|add:':update:project' uuid=view.kwargs.uuid as edit_project_url %}
 {% endif %}
-
-{% panel _("Course choice") edit_link_button=edit_choix_formation_url %}
-  {% field_data _("Admission type") admission.type_admission|enum_display:'ChoixTypeAdmission' %}
-  {% if admission.justification %}
-    {% field_data _("Brief justification") admission.justification|linebreaks %}
-  {% endif %}
-  {% field_data _("Sector") admission.intitule_secteur_formation %}
-  {% display admission.doctorat.intitule " (" admission.doctorat.campus ")" as doctorate_title %}
-  {% field_data _("PhD") doctorate_title %}
-  {% if admission.commission_proximite %}
-    {% field_data _("Proximity commission / Subdomain") admission.commission_proximite|enum_display:'ChoixCommissionProximiteCDEouCLSM'|enum_display:'ChoixCommissionProximiteCDSS'|enum_display:'ChoixSousDomaineSciences' %}
-  {% endif %}
-{% endpanel %}
 
 {% translate "Funding" context "admission" as funding_translation %}
 {% panel funding_translation edit_link_button=edit_project_url %}

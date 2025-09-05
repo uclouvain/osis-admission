@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,15 +27,25 @@ from typing import Optional
 
 from django.utils.translation import ngettext
 
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import MaximumPropositionsAtteintException
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import NombrePropositionsSoumisesDepasseException
-from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition as PropositionGenerale
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    PropositionIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    MaximumPropositionsAtteintException,
+    MaximumPropositionsDoctoralesAtteintException,
+)
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    Proposition as PropositionGenerale,
+)
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
+    NombrePropositionsSoumisesDepasseException,
+)
 from osis_common.ddd import interface
 
-MAXIMUM_PROPOSITIONS_ENVOYEES_FORMATION_DOCTORALE = 1
 MAXIMUM_PROPOSITIONS_ENVOYEES_FORMATION_GENERALE = 2
 MAXIMUM_PROPOSITIONS_ENVOYEES_FORMATION_CONTINUE = 2
 MAXIMUM_PROPOSITIONS_EN_COURS = 5
+MAXIMUM_PROPOSITIONS_EN_COURS_FORMATION_DOCTORALE = 1
 
 
 class IMaximumPropositionsAutorisees(interface.DomainService):
@@ -48,11 +58,19 @@ class IMaximumPropositionsAutorisees(interface.DomainService):
         raise NotImplementedError
 
     @classmethod
-    def nb_propositions_envoyees_formation_doctorale(cls, matricule: str) -> int:
+    def nb_propositions_en_cours(cls, matricule: str) -> int:
         raise NotImplementedError
 
     @classmethod
-    def nb_propositions_en_cours(cls, matricule: str) -> int:
+    def nb_propositions_en_cours_formation_doctorale(
+        cls,
+        matricule: str,
+        proposition_identity: Optional[PropositionIdentity] = None,
+    ) -> int:
+        """
+        Retourne le nombre de propositions en cours en formation doctorale pour un candidat, excluant la proposition
+        dont l'identité est spécifiée, le cas échéant.
+        """
         raise NotImplementedError
 
     @classmethod
@@ -99,24 +117,18 @@ class IMaximumPropositionsAutorisees(interface.DomainService):
             )
 
     @classmethod
-    def verifier_nombre_propositions_envoyees_formation_doctorale(cls, matricule: str) -> None:
-        if (
-            cls.nb_propositions_envoyees_formation_doctorale(matricule)
-            >= MAXIMUM_PROPOSITIONS_ENVOYEES_FORMATION_DOCTORALE
-        ):
-            raise NombrePropositionsSoumisesDepasseException(
-                ngettext(
-                    'You cannot submit this admission for a doctorate education as you already have submitted one.',
-                    'You cannot submit this admission for a doctorate education as '
-                    'you already have submitted %(maximum_number)s of them.',
-                    MAXIMUM_PROPOSITIONS_ENVOYEES_FORMATION_DOCTORALE,
-                )
-                % {
-                    'maximum_number': MAXIMUM_PROPOSITIONS_ENVOYEES_FORMATION_DOCTORALE,
-                }
-            )
-
-    @classmethod
     def verifier_nombre_propositions_en_cours(cls, matricule: str) -> None:
         if cls.nb_propositions_en_cours(matricule) >= MAXIMUM_PROPOSITIONS_EN_COURS:
             raise MaximumPropositionsAtteintException(MAXIMUM_PROPOSITIONS_EN_COURS)
+
+    @classmethod
+    def verifier_nombre_propositions_en_cours_formation_doctorale(
+        cls,
+        matricule: str,
+        proposition_identity: Optional[PropositionIdentity] = None,
+    ) -> None:
+        if (
+            cls.nb_propositions_en_cours_formation_doctorale(matricule, proposition_identity)
+            >= MAXIMUM_PROPOSITIONS_EN_COURS_FORMATION_DOCTORALE
+        ):
+            raise MaximumPropositionsDoctoralesAtteintException(MAXIMUM_PROPOSITIONS_EN_COURS_FORMATION_DOCTORALE)
