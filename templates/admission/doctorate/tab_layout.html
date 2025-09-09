@@ -131,6 +131,7 @@
     {% endif %}
   </div>
   <div class="admission-badges min-width">
+    {% include 'admission/includes/epc_injection_button.html' %}
     {% if admission.candidat_a_plusieurs_demandes %}
       <span
           class="label label-admission-primary"
