@@ -1,0 +1,41 @@
+{% load i18n %}
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+{% if original_admission.sent_to_epc %}
+    <span class="label label-danger">{% translate 'Sent to EPC' %}</span>
+{% else %}
+    <form hx-post="{% url 'admission:services:epc-injection' uuid=view.kwargs.uuid %}">
+        {% csrf_token %}
+        <button title="
+                {% if injection_possible %}{% trans 'Send to EPC' %}{% else %}{{ raison_injection_impossible }}{% endif %}"
+                type="submit" class="btn btn-default fa-xs" {% if not injection_possible %}disabled{% endif %}
+                data-toggle="tooltip" data-placement="top">
+                <span class="fa-stack">
+                    <i class="fas fa-database fa-stack-2x"></i>
+                    <i class="fas fa-arrow-right fa-stack-1x fa-inverse"></i>
+                </span>
+            <span class="btn-text">&nbsp;{% trans 'Send to EPC' %}</span>
+        </button>
+    </form>
+{% endif %}
