@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Admission API
-  version: 1.1.7
+  version: 1.1.8
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -3655,6 +3655,36 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
   /propositions/doctorate/{uuid}/supervision/approve:
+    get:
+      operationId: retrieve_doctorate_management
+      description: This method is only used to check the access permission to the
+        doctorate management pages.
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      tags:
+      - propositions
+      security:
+      - tokenAuth: []
+      - Token: []
+      responses:
+        '200':
+          description: No response body
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
     post:
       operationId: approve_proposition
       description: Approve the proposition.
@@ -7703,6 +7733,8 @@ components:
             request_signatures:
               $ref: '#/components/schemas/ActionLink'
             approve_by_pdf:
+              $ref: '#/components/schemas/ActionLink'
+            retrieve_doctorate_management:
               $ref: '#/components/schemas/ActionLink'
             retrieve_curriculum:
               $ref: '#/components/schemas/ActionLink'

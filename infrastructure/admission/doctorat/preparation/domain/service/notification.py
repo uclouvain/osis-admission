@@ -75,10 +75,18 @@ from admission.ddd.admission.doctorat.preparation.dtos import AvisDTO, Propositi
 from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import (
     EmplacementDocument,
 )
-from admission.ddd.admission.shared_kernel.domain.model.formation import FormationIdentity
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import StatutEmplacementDocument
-from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import IMatriculeEtudiantService
+from admission.ddd.admission.shared_kernel.domain.model.formation import (
+    FormationIdentity,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import (
+    IMatriculeEtudiantService,
+)
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
+    EmplacementDocumentDTO,
+)
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    StatutEmplacementDocument,
+)
 from admission.infrastructure.admission.doctorat.preparation.domain.service.doctorat import (
     DoctoratTranslator,
 )
@@ -113,11 +121,14 @@ from admission.utils import (
     get_backoffice_admission_url,
     get_ca_member_salutation_prefix,
     get_portal_admission_url,
+    get_portal_doctorate_management_url,
     get_salutation_prefix,
 )
 from base.models.person import Person
 from base.utils.utils import format_academic_year
-from ddd.logic.gestion_des_comptes.domain.validator.exceptions import MatriculeEtudiantIntrouvableException
+from ddd.logic.gestion_des_comptes.domain.validator.exceptions import (
+    MatriculeEtudiantIntrouvableException,
+)
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
 
 EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN = 'SERA_AUTOMATIQUEMENT_REMPLACE_PAR_LE_LIEN'
@@ -236,6 +247,11 @@ class Notification(INotification):
 
         # Envoyer aux acteurs n'ayant pas répondu
         actors_invited = [actor for actor in actor_list if actor.last_state == SignatureState.INVITED.name]
+
+        # Surcharger les liens du front avec ceux dédiés aux membres du groupe de supervision
+        frontend_link_for_supervision_member = get_portal_doctorate_management_url(proposition.entity_id.uuid)
+        supervision_frontend_link_for_supervision_member = f'{frontend_link_for_supervision_member}supervision'
+
         for actor in actors_invited:
             tokens = {
                 **common_tokens,
@@ -246,6 +262,9 @@ class Notification(INotification):
             }
             if actor.is_external:
                 tokens["admission_link_front"] = cls._lien_invitation_externe(proposition, actor)
+            else:
+                tokens["admission_link_front"] = supervision_frontend_link_for_supervision_member
+                tokens["admission_link_front_supervision"] = supervision_frontend_link_for_supervision_member
             if actor.type == ActorType.PROMOTER.name:
                 email_message = generate_email(
                     ADMISSION_EMAIL_SIGNATURE_REQUESTS_PROMOTER,
@@ -334,6 +353,10 @@ class Notification(INotification):
                 .exclude(uuid=signataire_id.uuid)
             )
 
+            # Surcharger les liens du front avec ceux dédiés aux membres du groupe de supervision
+            frontend_link_for_supervision_member = get_portal_doctorate_management_url(proposition.entity_id.uuid)
+            supervision_frontend_link_for_supervision_member = f'{frontend_link_for_supervision_member}supervision'
+
             for other_promoter in other_promoters:
                 email_message = generate_email(
                     ADMISSION_EMAIL_SIGNATURE_REFUSAL,
@@ -346,6 +369,8 @@ class Notification(INotification):
                         "actor_first_name": other_promoter.first_name,
                         "actor_last_name": other_promoter.last_name,
                         "salutation": get_ca_member_salutation_prefix(other_promoter),
+                        "admission_link_front": frontend_link_for_supervision_member,
+                        "admission_link_front_supervision": supervision_frontend_link_for_supervision_member,
                     },
                     recipients=[other_promoter.email],
                 )
@@ -434,6 +459,7 @@ class Notification(INotification):
 
         if actor.state in [SignatureState.APPROVED.name, SignatureState.DECLINED.name]:
             candidat = Person.objects.get(global_id=proposition.matricule_candidat)
+            frontend_link_for_supervision_member = get_portal_doctorate_management_url(proposition.entity_id.uuid)
             email_message = generate_email(
                 ADMISSION_EMAIL_MEMBER_REMOVED,
                 actor.language,
@@ -447,6 +473,7 @@ class Notification(INotification):
                     'program_managers_names': get_admission_program_managers_names(
                         admission.training.education_group_id
                     ),
+                    'admission_link_front': frontend_link_for_supervision_member,
                 },
                 recipients=[actor.email],
             )
@@ -816,7 +843,7 @@ class Notification(INotification):
             try:
                 noma_genere = matricule_etudiant_service.recuperer(
                     msg_bus=message_bus,
-                    matricule_personne=admission.candidate.global_id
+                    matricule_personne=admission.candidate.global_id,
                 )
             except MatriculeEtudiantIntrouvableException:
                 noma_genere = gettext('NOMA not found')

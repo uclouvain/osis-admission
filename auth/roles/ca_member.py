@@ -69,6 +69,7 @@ class CommitteeMember(RoleModel):
             'admission.api_view_admission_project': is_part_of_committee,
             'admission.api_view_admission_cotutelle': is_admission & is_part_of_committee,
             'admission.api_view_admission_supervision': is_part_of_committee,
+            'admission.api_view_doctorate_management': is_part_of_committee,
             # A ca member can approve as long as he is invited to the committee
             'admission.api_approve_proposition': is_part_of_committee_and_invited,
             # Once the candidate is enrolling, a ca member can

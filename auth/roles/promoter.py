@@ -76,6 +76,7 @@ class Promoter(RoleModel):
             'admission.api_view_admission_cotutelle': is_admission & is_admission_request_promoter,
             'admission.api_view_admission_supervision': is_admission_request_promoter,
             'admission.api_view_admission_jury': is_admission_request_promoter,
+            'admission.api_view_doctorate_management': is_admission_request_promoter,
             # A promoter can approve as long as he is invited to the admission committee
             'admission.api_approve_proposition': is_part_of_committee_and_invited,
         }
