@@ -40,6 +40,8 @@ from admission.tests.factories.secondary_studies import (
     HighSchoolDiplomaAlternativeFactory,
 )
 from base.tests.factories.person import PersonFactory
+from osis_profile.models.enums.exam import ExamTypes
+from osis_profile.tests.factories.exam import ExamFactory
 
 
 class ValorisationEtudesSecondairesTestCase(TestCase):
@@ -309,3 +311,15 @@ class RecupererUuidsExperiencesCurriculumValoriseesParAdmissionTestCase(TestCase
             uuids,
             [str(other_educational_experience.uuid), str(other_professional_experience.uuid)],
         )
+
+    def retrieve_valuated_exam_requis(self):
+        ExamFactory(
+            person=self.admission.candidate, education_group_year_exam__education_group_year=self.admission.training
+        )
+        uuids = ProfilCandidatTranslator.get_uuids_experiences_curriculum_valorisees_par_admission(self.admission.uuid)
+        self.assertEqual(uuids, ['EXAMS'])
+
+    def retrieve_valuated_alternative_secondary_study_exam(self):
+        ExamFactory(person=self.admission.candidate, type=ExamTypes.PREMIER_CYCLE.name)
+        uuids = ProfilCandidatTranslator.get_uuids_experiences_curriculum_valorisees_par_admission(self.admission.uuid)
+        self.assertEqual(uuids, ['ETUDES_SECONDAIRES'])

@@ -23,27 +23,24 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 {% panel _('Exams') edit_link_button=edit_link_button %}
+  {% if LANGUAGE_CODE == 'fr-be' %}
+    {% firstof examen.titre education_group_year_exam.title_fr "Examen" as titre_examen %}
+  {% else %}
+    {% firstof examen.titre education_group_year_exam.title_en "Exam" as titre_examen %}
+  {% endif %}
+
   {% if hide_files %}
-    {% if LANGUAGE_CODE == 'fr-be' %}
-      {% if examen.attestation %}
-        {% field_data education_group_year_exam.title_fr _("Specified") %}
-      {% else %}
-        {% field_data education_group_year_exam.title_fr _("Not specified") %}
-      {% endif %}
+
+    {% if examen.attestation %}
+      {% field_data titre_examen _("Specified") %}
     {% else %}
-      {% if examen.attestation %}
-        {% field_data education_group_year_exam.title_en _("Specified") %}
-      {% else %}
-        {% field_data education_group_year_exam.title_en _("Not specified") %}
-      {% endif %}
+      {% field_data titre_examen _("Not specified") %}
     {% endif %}
 
   {% else %}
-    {% if LANGUAGE_CODE == 'fr-be' %}
-      {% field_data education_group_year_exam.title_fr examen.attestation %}
-    {% else %}
-      {% field_data education_group_year_exam.title_en examen.attestation %}
-    {% endif %}
+
+    {% field_data titre_examen examen.attestation %}
+
   {% endif %}
 
   {% if examen.annee %}

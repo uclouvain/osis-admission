@@ -41,8 +41,8 @@ from django.utils.safestring import SafeString, mark_safe
 from django.utils.translation import get_language, gettext
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext, pgettext_lazy
-from osis_document_components.services import get_remote_metadata, get_remote_token
 from osis_document_components.enums import PostProcessingWanted
+from osis_document_components.services import get_remote_metadata, get_remote_token
 from osis_history.models import HistoryEntry
 from rules.templatetags import rules
 
@@ -91,10 +91,14 @@ from admission.ddd.admission.shared_kernel.dtos import (
     EtudesSecondairesAdmissionDTO,
     IdentificationDTO,
 )
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
+    EmplacementDocumentDTO,
+)
 from admission.ddd.admission.shared_kernel.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.shared_kernel.dtos.profil_candidat import ProfilCandidatDTO
-from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import (
+    QuestionSpecifiqueDTO,
+)
 from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.shared_kernel.dtos.titre_acces_selectionnable import (
     TitreAccesSelectionnableDTO,
@@ -103,7 +107,9 @@ from admission.ddd.admission.shared_kernel.enums import Onglets, TypeItemFormula
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     StatutReclamationEmplacementDocument,
 )
-from admission.ddd.admission.shared_kernel.repository.i_proposition import formater_reference
+from admission.ddd.admission.shared_kernel.repository.i_proposition import (
+    formater_reference,
+)
 from admission.exports.admission_recap.section import (
     get_educational_experience_context,
     get_non_educational_experience_context,
@@ -123,10 +129,7 @@ from admission.models import (
 )
 from admission.models.base import BaseAdmission
 from admission.models.epc_injection import EPCInjectionStatus
-from admission.utils import (
-    get_access_conditions_url,
-    get_experience_urls,
-)
+from admission.utils import get_access_conditions_url, get_experience_urls
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.enums.civil_state import CivilState
 from base.models.person import Person
@@ -144,7 +147,11 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
 )
 from osis_profile.constants import IMAGE_MIME_TYPES
 from osis_profile.models.enums.person import ChoixSexe
-from osis_profile.utils.utils import get_superior_institute_queryset, format_school_title, format_address
+from osis_profile.utils.utils import (
+    format_address,
+    format_school_title,
+    get_superior_institute_queryset,
+)
 from osis_role.templatetags.osis_role import has_perm
 from reference.models.country import Country
 from reference.models.language import Language
@@ -1182,6 +1189,10 @@ def experience_details_template(
                 specific_questions[Onglets.ETUDES_SECONDAIRES.name],
             )
         )
+
+    elif experience.__class__ == ExamenDTO:
+        res_context['custom_base_template'] = 'admission/exports/recap/includes/exams.html'
+        res_context['examen'] = experience
 
     return res_context
 
