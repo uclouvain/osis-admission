@@ -64,26 +64,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist 
     INDEX_ONGLETS_CHECKLIST as INDEX_ONGLETS_CHECKLIST_DOCTORALE,
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixSexe
-from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
-    EtatAuthentificationParcours,
-)
-from admission.ddd.admission.shared_kernel.dtos import (
-    CoordonneesDTO,
-    EtudesSecondairesAdmissionDTO,
-    IdentificationDTO,
-)
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
-from admission.ddd.admission.shared_kernel.dtos.liste import DemandeRechercheDTO
-from admission.ddd.admission.shared_kernel.dtos.profil_candidat import ProfilCandidatDTO
-from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
-from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
-from admission.ddd.admission.shared_kernel.dtos.titre_acces_selectionnable import (
-    TitreAccesSelectionnableDTO,
-)
-from admission.ddd.admission.shared_kernel.enums import Onglets, TypeItemFormulaire
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
-    StatutReclamationEmplacementDocument,
-)
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixMoyensDecouverteFormation,
     ChoixStatutPropositionContinue,
@@ -108,7 +88,33 @@ from admission.ddd.admission.formation_generale.dtos.proposition import (
 from admission.ddd.admission.formation_generale.dtos.proposition import (
     PropositionGestionnaireDTO,
 )
-from admission.ddd.admission.shared_kernel.repository.i_proposition import formater_reference
+from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
+    EtatAuthentificationParcours,
+)
+from admission.ddd.admission.shared_kernel.dtos import (
+    CoordonneesDTO,
+    EtudesSecondairesAdmissionDTO,
+    IdentificationDTO,
+)
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
+    EmplacementDocumentDTO,
+)
+from admission.ddd.admission.shared_kernel.dtos.liste import DemandeRechercheDTO
+from admission.ddd.admission.shared_kernel.dtos.profil_candidat import ProfilCandidatDTO
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import (
+    QuestionSpecifiqueDTO,
+)
+from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
+from admission.ddd.admission.shared_kernel.dtos.titre_acces_selectionnable import (
+    TitreAccesSelectionnableDTO,
+)
+from admission.ddd.admission.shared_kernel.enums import Onglets, TypeItemFormulaire
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    StatutReclamationEmplacementDocument,
+)
+from admission.ddd.admission.shared_kernel.repository.i_proposition import (
+    formater_reference,
+)
 from admission.exports.admission_recap.section import (
     get_educational_experience_context,
     get_non_educational_experience_context,
@@ -1261,6 +1267,10 @@ def experience_details_template(
                 specific_questions[Onglets.ETUDES_SECONDAIRES.name],
             )
         )
+
+    elif experience.__class__ == ExamenDTO:
+        res_context['custom_base_template'] = 'admission/exports/recap/includes/exams.html'
+        res_context['examen'] = experience
 
     return res_context
 
