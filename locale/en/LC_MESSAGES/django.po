@@ -95,20 +95,6 @@ msgstr ""
 #, python-format
 msgid ""
 "<a href=\"%(admission_link_back)s\">%(reference)s</a> - "
-"%(candidate_first_name)s %(candidate_last_name)s requested signatures for "
-"%(training_title)s"
-msgstr ""
-
-#, python-format
-msgid ""
-"<a href=\"%(admission_link_back)s\">%(reference)s</a> - "
-"%(candidate_first_name)s %(candidate_last_name)s submitted request for "
-"%(training_title)s"
-msgstr ""
-
-#, python-format
-msgid ""
-"<a href=\"%(admission_link_back)s\">%(reference)s</a> - "
 "%(candidate_first_name)s %(candidate_last_name)s uploaded documents for "
 "%(training_title)s"
 msgstr ""
@@ -2721,7 +2707,7 @@ msgstr ""
 msgid "FNRS"
 msgstr ""
 
-msgid "FNRS, FRIA, FRESH"
+msgid "FNRS, FRIA, FRESH, CSC"
 msgstr ""
 
 msgid "FR"
@@ -2901,6 +2887,9 @@ msgid "First name Last name:"
 msgstr ""
 
 msgid "First name and last name"
+msgstr ""
+
+msgid "First name of the manager"
 msgstr ""
 
 msgid ""
@@ -3875,6 +3864,9 @@ msgstr ""
 msgid "Last name / First name / Global id"
 msgstr ""
 
+msgid "Last name of the manager"
+msgstr ""
+
 msgid "Last registration id"
 msgstr ""
 
@@ -4116,6 +4108,11 @@ msgstr ""
 msgid ""
 "Mail sent to the candidate to inform him that some requested documents have "
 "been received and some are still missing for general education"
+msgstr ""
+
+msgid ""
+"Mail sent to the manager to inform him that an application has been "
+"submitted by a candidate"
 msgstr ""
 
 msgid ""
@@ -5139,13 +5136,10 @@ msgstr ""
 msgid "Project abstract"
 msgstr ""
 
-msgid "Project abstract (max. 2000 characters)"
+msgid "Project abstract (max. 4000 characters)"
 msgstr ""
 
 msgid "Project title"
-msgstr ""
-
-msgid "Project title (max. 100 characters)"
 msgstr ""
 
 msgid "Promotion"
@@ -7563,20 +7557,20 @@ msgstr ""
 
 #, python-format
 msgid ""
-"You cannot submit this admission for a continuing education as you already "
-"have submitted one."
+"You cannot have two applications for a doctorate education in progress at "
+"the same time."
 msgid_plural ""
-"You cannot submit this admission for a continuing education as you already "
-"have submitted %(maximum_number)s of them."
+"You cannot have more than %(max)s applications for a doctorate education in "
+"progress at the same time."
 msgstr[0] ""
 msgstr[1] ""
 
 #, python-format
 msgid ""
-"You cannot submit this admission for a doctorate education as you already "
+"You cannot submit this admission for a continuing education as you already "
 "have submitted one."
 msgid_plural ""
-"You cannot submit this admission for a doctorate education as you already "
+"You cannot submit this admission for a continuing education as you already "
 "have submitted %(maximum_number)s of them."
 msgstr[0] ""
 msgstr[1] ""

@@ -234,13 +234,8 @@ def force_title(string: str):
     return ''.join(title_string)
 
 
-def get_admission_cdd_managers(education_group_id) -> models.QuerySet[Person]:
-    return Person.objects.filter(
-        models.Q(
-            id__in=AdmissionProgramManager.objects.filter(education_group_id=education_group_id).values('person_id')
-        )
-        | models.Q(id__in=ProgramManager.objects.filter(education_group_id=education_group_id).values('person_id'))
-    )
+def get_admission_cdd_managers(education_group_id) -> models.QuerySet[AdmissionProgramManager]:
+    return AdmissionProgramManager.objects.filter(education_group_id=education_group_id).select_related('person')
 
 
 def get_doctoral_cdd_managers(education_group_id) -> QuerySet[Person]:

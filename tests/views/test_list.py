@@ -36,15 +36,6 @@ from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
 from admission.auth.scope import Scope
-from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
-    EtatAuthentificationParcours,
-)
-from admission.ddd.admission.shared_kernel.dtos.liste import (
-    DemandeRechercheDTO,
-    VisualiseurAdmissionDTO,
-)
-from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
-from admission.ddd.admission.shared_kernel.enums.liste import TardiveModificationReorientationFiltre
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     BesoinDeDerogation,
     ChoixStatutChecklist,
@@ -57,11 +48,23 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.ddd.admission.formation_generale.domain.service.checklist import (
     Checklist,
 )
+from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
+    EtatAuthentificationParcours,
+)
+from admission.ddd.admission.shared_kernel.dtos.liste import (
+    DemandeRechercheDTO,
+    VisualiseurAdmissionDTO,
+)
+from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
+from admission.ddd.admission.shared_kernel.enums.liste import (
+    TardiveModificationReorientationFiltre,
+)
 from admission.models import (
     ContinuingEducationAdmission,
     DoctorateAdmission,
     GeneralEducationAdmission,
 )
+from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.admission_viewer import AdmissionViewerFactory
 from admission.tests.factories.continuing_education import (
     ContinuingEducationAdmissionFactory,
@@ -94,6 +97,7 @@ from base.tests.factories.student import StudentFactory
 from base.tests.factories.user import UserFactory
 from program_management.models.education_group_version import EducationGroupVersion
 from reference.tests.factories.country import CountryFactory
+from reference.tests.factories.scholarship import DoctorateScholarshipFactory
 
 
 @freezegun.freeze_time('2023-01-01')
@@ -105,21 +109,10 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.factory = RequestFactory()
-        root_entity = MainEntityVersionFactory(acronym="UCL", parent=None, entity_type="").entity
-
-        # Users
-        cls.user = User.objects.create_user(
-            username='john_doe',
-            password='top_secret',
-        )
-
-        cls.sic_management_user = SicManagementRoleFactory(entity=root_entity).person.user
-        cls.other_sic_management = SicManagementRoleFactory().person
-
-        # Academic years
-        AcademicYearFactory.produce(base_year=2023, number_past=2, number_future=2)
 
         # Entities
+        root_entity = MainEntityVersionFactory(acronym="UCL", parent=None, entity_type="").entity
+
         faculty_entity = EntityVersionFactory(
             acronym='ABCDEF',
             entity_type=EntityType.FACULTY.name,
@@ -131,6 +124,21 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             entity_type=EntityType.SCHOOL.name,
             parent=faculty_entity,
         ).entity
+
+        # Users
+        cls.user = User.objects.create_user(
+            username='john_doe',
+            password='top_secret',
+        )
+
+        cls.sic_management_user = SicManagementRoleFactory(entity=root_entity).person.user
+        cls.other_sic_management = SicManagementRoleFactory().person
+        cls.central_management_user = CentralManagerRoleFactory(
+            entity=cls.first_entity,
+        ).person.user
+
+        # Academic years
+        AcademicYearFactory.produce(base_year=2023, number_past=2, number_future=2)
 
         # Admissions
         cls.admissions: List[Union[DoctorateAdmission, GeneralEducationAdmission, ContinuingEducationAdmission]] = [
@@ -686,6 +694,24 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         response = self._do_request(bourse_double_diplomation=self.admissions[0].double_degree_scholarship.uuid)
         self.assertEqual(response.status_code, 200)
         self.assertIn(self.results[0], response.context['object_list'])
+
+    def test_list_with_research_scholarship(self):
+        self.client.force_login(user=self.central_management_user)
+
+        scholarship = DoctorateScholarshipFactory()
+
+        doctorate_admission = DoctorateAdmissionFactory(
+            international_scholarship=scholarship,
+            training__management_entity=self.first_entity,
+        )
+
+        response = self._do_request(bourse_recherche=scholarship.uuid)
+        self.assertEqual(response.status_code, 200)
+
+        results = response.context['object_list']
+
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0].uuid, doctorate_admission.uuid)
 
     def test_list_asc_sort_by_reference(self):
         self.client.force_login(user=self.sic_management_user)
