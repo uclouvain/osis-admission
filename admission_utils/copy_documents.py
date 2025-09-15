@@ -25,7 +25,7 @@
 # ##############################################################################
 import uuid
 
-from osis_document.enums import PostProcessingWanted
+from osis_document_components.enums import PostProcessingWanted
 
 
 def copy_documents(objs, id_attribute='uuid'):

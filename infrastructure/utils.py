@@ -34,7 +34,7 @@ from django.conf import settings
 from django.db.models import F, Func, Model, Q
 from django.utils import translation
 from django.utils.translation import gettext_lazy as _
-from osis_document.enums import PostProcessingWanted
+from osis_document_components.enums import PostProcessingWanted
 
 from admission.constants import SUPPORTED_MIME_TYPES
 from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import (
