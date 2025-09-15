@@ -31,6 +31,7 @@ from django.utils.functional import cached_property
 from django.utils.translation import get_language
 from django.utils.translation import gettext as _
 from django.views.generic import FormView, RedirectView, TemplateView
+from osis_document_components.enums import PostProcessingWanted
 from osis_document_components.utils import get_file_url
 from rest_framework.status import HTTP_204_NO_CONTENT
 
@@ -287,6 +288,7 @@ class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, Htmx
                 uuid=context['document_uuid'],
                 write_token=True,
                 for_modified_upload=True,
+                wanted_post_process=PostProcessingWanted.ORIGINAL.name,
             )
             context['document_metadata'] = get_remote_metadata(context['document_write_token'])
 

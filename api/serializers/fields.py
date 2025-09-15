@@ -255,6 +255,11 @@ DOCTORATE_ACTION_LINKS = {
         'method': 'POST',
         'params': ['uuid'],
     },
+    'retrieve_doctorate_management': {
+        'path_name': 'admission_api_v1:approvals',
+        'method': 'GET',
+        'params': ['uuid'],
+    },
     'request_signatures': {
         'path_name': 'admission_api_v1:request-signatures',
         'method': 'POST',

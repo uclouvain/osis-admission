@@ -110,11 +110,20 @@ class ApprovalsApiTestCase(ApprovalMixin, APITestCase):
 
     def test_assert_methods_not_allowed(self):
         self.client.force_authenticate(user=self.promoter.person.user)
-        methods_not_allowed = ['get', 'delete', 'patch']
+        methods_not_allowed = ['delete', 'patch']
 
         for method in methods_not_allowed:
             response = getattr(self.client, method)(self.url)
             self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_approval_get(self):
+        self.client.force_authenticate(user=self.promoter.person.user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.client.force_authenticate(user=self.ca_member.person.user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_supervision_get(self):
         self.client.force_authenticate(user=self.promoter.person.user)

@@ -25,6 +25,8 @@
 # ##############################################################################
 import uuid
 
+from osis_document.enums import PostProcessingWanted
+
 
 def copy_documents(objs, id_attribute='uuid'):
     """
@@ -56,7 +58,10 @@ def copy_documents(objs, id_attribute='uuid'):
                     document_fields_by_obj_uuid[getattr(obj, id_attribute)][field.name] = field
                     all_document_uuids += [document_uuid for document_uuid in document_uuids if document_uuid]
 
-    all_tokens = get_remote_tokens(all_document_uuids)
+    all_tokens = get_remote_tokens(
+        all_document_uuids,
+        wanted_post_process=PostProcessingWanted.ORIGINAL.name,
+    )
     metadata_by_token = get_several_remote_metadata(tokens=list(all_tokens.values()))
 
     # Get the upload paths of the documents to duplicate

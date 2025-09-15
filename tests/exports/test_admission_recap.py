@@ -33,6 +33,7 @@ import attr
 import freezegun
 import img2pdf
 import mock
+from PIL import Image
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import override_settings
@@ -429,33 +430,49 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
 
     def test_convert_and_get_raw_with_jpeg_attachment(self):
         image_attachment = Attachment(label='JPEG', uuids=[''], identifier='CARTE_IDENTITE')
-        image_attachment.get_raw(
-            token='token',
-            metadata={
-                'name': 'myfile',
-                'mimetype': JPEG_MIME_TYPE,
-            },
-            default_content=self.bytes_io_default_content,
-        )
-        self.get_raw_content_mock.assert_called_once_with('token')
-        self.convert_img_mock.assert_called_once_with(
-            self.get_raw_content_mock.return_value, rotation=img2pdf.Rotation.ifvalid
-        )
+
+        image = Image.new('RGB', (1, 1), (255, 255, 255))
+        with BytesIO() as out_buf:
+            image.save(out_buf, format='JPEG')
+            self.get_raw_content_mock.return_value = out_buf.getvalue()
+
+            image_attachment.get_raw(
+                token='token',
+                metadata={
+                    'name': 'myfile',
+                    'mimetype': JPEG_MIME_TYPE,
+                },
+                default_content=self.bytes_io_default_content,
+            )
+            self.get_raw_content_mock.assert_called_once_with('token')
+            self.convert_img_mock.assert_called_once_with(
+                self.get_raw_content_mock.return_value,
+                rotation=img2pdf.Rotation.ifvalid,
+                first_frame_only=True,
+            )
 
     def test_convert_and_get_raw_with_png_attachment(self):
         image_attachment = Attachment(label='PNG', uuids=[''], identifier='CARTE_IDENTITE')
-        image_attachment.get_raw(
-            token='token',
-            metadata={
-                'name': 'myfile',
-                'mimetype': PNG_MIME_TYPE,
-            },
-            default_content=self.bytes_io_default_content,
-        )
-        self.get_raw_content_mock.assert_called_once_with('token')
-        self.convert_img_mock.assert_called_once_with(
-            self.get_raw_content_mock.return_value, rotation=img2pdf.Rotation.ifvalid
-        )
+
+        image = Image.new('RGB', (1, 1), (255, 255, 255))
+        with BytesIO() as out_buf:
+            image.save(out_buf, format='PNG')
+            self.get_raw_content_mock.return_value = out_buf.getvalue()
+
+            image_attachment.get_raw(
+                token='token',
+                metadata={
+                    'name': 'myfile',
+                    'mimetype': PNG_MIME_TYPE,
+                },
+                default_content=self.bytes_io_default_content,
+            )
+            self.get_raw_content_mock.assert_called_once_with('token')
+            self.convert_img_mock.assert_called_once_with(
+                self.get_raw_content_mock.return_value,
+                rotation=img2pdf.Rotation.ifvalid,
+                first_frame_only=True,
+            )
 
     def test_get_default_content_if_mimetype_is_not_supported(self):
         unknown_attachment = Attachment(label='Unknown', uuids=[''], identifier='CARTE_IDENTITE')

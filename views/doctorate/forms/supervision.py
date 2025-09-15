@@ -41,7 +41,7 @@ from admission.ddd.admission.doctorat.preparation.commands import (
     IdentifierPromoteurCommand,
     ModifierMembreSupervisionExterneCommand,
     RedonnerLaMainAuCandidatCommand,
-    RenvoyerInvitationSignatureExterneCommand,
+    RenvoyerInvitationSignatureCommand,
     SupprimerMembreCACommand,
     SupprimerPromoteurCommand,
     VerifierProjetQuery,
@@ -226,7 +226,7 @@ class DoctorateAdmissionEditExternalMemberFormView(PermissionRequiredMixin, Busi
 class DoctorateAdmissionSetReferencePromoterFormView(PermissionRequiredMixin, BusinessExceptionFormViewMixin, FormView):
     urlpatterns = {'set-reference-promoter': 'set-reference-promoter/<uuid_promoteur>'}
     form_class = forms.Form
-    permission_required = 'admission.add_supervision_member'
+    permission_required = 'admission.set_reference_promoter'
 
     def get_permission_object(self):
         return get_cached_admission_perm_obj(self.kwargs.get('uuid'))
@@ -304,7 +304,7 @@ class DoctorateAdmissionExternalResendFormView(PermissionRequiredMixin, Business
 
     def call_command(self, form):
         data = self.prepare_data(form.cleaned_data)
-        message_bus_instance.invoke(RenvoyerInvitationSignatureExterneCommand(**data))
+        message_bus_instance.invoke(RenvoyerInvitationSignatureCommand(**data))
 
     def get_success_url(self):
         display_info_messages(self.request, _("An invitation has been sent again."))

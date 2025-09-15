@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,14 +24,20 @@
 #
 # ##############################################################################
 from django.utils.translation import gettext_lazy as _
-
 from osis_mail_template import Token, templates
-from .tokens import CONTINUING_ADMISSION_TAG, DOCTORATE_ADMISSION_TAG, GENERAL_ADMISSION_TAG, admission_common_tokens
+
+from .tokens import (
+    CONTINUING_ADMISSION_TAG,
+    DOCTORATE_ADMISSION_TAG,
+    GENERAL_ADMISSION_TAG,
+    admission_common_tokens,
+)
 
 __all__ = [
     "ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED",
     "ADMISSION_EMAIL_MEMBER_REMOVED",
     "ADMISSION_EMAIL_CONFIRM_SUBMISSION_DOCTORATE",
+    "ADMISSION_EMAIL_CONFIRM_SUBMISSION_FOR_MANAGER_DOCTORATE",
     "ADMISSION_EMAIL_CONFIRM_SUBMISSION_GENERAL",
     "ADMISSION_EMAIL_CONFIRM_SUBMISSION_CONTINUING",
 ]
@@ -78,6 +84,25 @@ templates.register(
             name='program_managers_names',
             description=_("List of names of the program managers."),
             example='John Doe, Jane Doe',
+        ),
+    ],
+    tag=DOCTORATE_ADMISSION_TAG,
+)
+ADMISSION_EMAIL_CONFIRM_SUBMISSION_FOR_MANAGER_DOCTORATE = 'osis-admission-submission-manager'
+templates.register(
+    ADMISSION_EMAIL_CONFIRM_SUBMISSION_FOR_MANAGER_DOCTORATE,
+    description=_('Mail sent to the manager to inform him that an application has been submitted by a candidate'),
+    tokens=admission_common_tokens
+    + [
+        Token(
+            name='manager_first_name',
+            description=_('First name of the manager'),
+            example='John',
+        ),
+        Token(
+            name='manager_last_name',
+            description=_('Last name of the manager'),
+            example='Doe',
         ),
     ],
     tag=DOCTORATE_ADMISSION_TAG,

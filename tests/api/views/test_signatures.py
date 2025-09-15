@@ -275,15 +275,12 @@ class RequestSignaturesApiTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         EmailNotification.objects.all().delete()
 
-        # Resend for internal must fail
+        # Resend for internal
         response = self.client.put(self.url, {'uuid_membre': promoter.uuid})
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(
-            response.json()['non_field_errors'][0]['status_code'],
-            SignataireNonTrouveException.status_code,
-        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(EmailNotification.objects.count(), 1)
 
         # Resend for external
         response = self.client.put(self.url, {'uuid_membre': external_promoter.uuid})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(EmailNotification.objects.count(), 1)
+        self.assertEqual(EmailNotification.objects.count(), 2)

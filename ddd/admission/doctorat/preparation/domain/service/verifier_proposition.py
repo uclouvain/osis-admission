@@ -39,7 +39,9 @@ from admission.ddd.admission.doctorat.preparation.domain.model.proposition impor
 from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import (
     IDoctoratTranslator,
 )
-from admission.ddd.admission.shared_kernel.domain.model.question_specifique import QuestionSpecifique
+from admission.ddd.admission.shared_kernel.domain.model.question_specifique import (
+    QuestionSpecifique,
+)
 from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription import (
     ICalendrierInscription,
 )
@@ -49,8 +51,12 @@ from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
-from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import ITitresAcces
-from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidat
+from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import (
+    ITitresAcces,
+)
+from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import (
+    ProfilCandidat,
+)
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from base.ddd.utils.business_validator import execute_functions_and_aggregate_exceptions
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
@@ -106,8 +112,9 @@ class VerifierProposition(interface.DomainService):
                 formation=formation,
             ),
             partial(
-                maximum_propositions_service.verifier_nombre_propositions_envoyees_formation_doctorale,
+                maximum_propositions_service.verifier_nombre_propositions_en_cours_formation_doctorale,
                 matricule=proposition_candidat.matricule_candidat,
+                proposition_identity=proposition_candidat.entity_id,
             ),
         )
 
