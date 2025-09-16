@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,9 +24,14 @@
 #
 # ##############################################################################
 from django.utils.translation import gettext_lazy as _
-
 from osis_mail_template import Token, templates
-from .tokens import CONTINUING_ADMISSION_TAG, DOCTORATE_ADMISSION_TAG, GENERAL_ADMISSION_TAG, admission_common_tokens
+
+from .tokens import (
+    CONTINUING_ADMISSION_TAG,
+    DOCTORATE_ADMISSION_TAG,
+    GENERAL_ADMISSION_TAG,
+    admission_common_tokens,
+)
 
 __all__ = [
     'ADMISSION_EMAIL_REQUEST_SIC_DOCUMENTS_GENERAL',
@@ -88,6 +93,11 @@ DOCUMENT_TOKENS = admission_common_tokens + [
         name='management_entity_acronym',
         description=_('Acronym of the management entity'),
         example='ESPO',
+    ),
+    Token(
+        name='admission_link_front_documents',
+        description=_("Link to the documents tab of the admission (front-office)"),
+        example="http://dev.studies.uclouvain.be/somewhere",
     ),
     Token(
         name='admissions_link_front',
