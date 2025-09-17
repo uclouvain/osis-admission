@@ -8171,12 +8171,6 @@ components:
         title_en:
           type: string
           readOnly: true
-        help_text_fr:
-          type: string
-          readOnly: true
-        help_text_en:
-          type: string
-          readOnly: true
         certificate:
           type: array
           items:

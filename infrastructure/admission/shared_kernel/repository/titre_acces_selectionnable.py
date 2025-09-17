@@ -60,9 +60,8 @@ from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
     IExperienceParcoursInterneTranslator,
 )
 from osis_profile import BE_ISO_CODE, MOIS_DEBUT_ANNEE_ACADEMIQUE
-from osis_profile.models import Exam
+from osis_profile.models import EXAM_TYPE_PREMIER_CYCLE_LABEL_FR, Exam
 from osis_profile.models.enums.curriculum import ActivityType, Result
-from osis_profile.models.enums.exam import ExamTypes
 
 
 class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
@@ -86,7 +85,7 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
             .prefetch_related(
                 Prefetch(
                     'candidate__exams',
-                    queryset=Exam.objects.filter(type=ExamTypes.PREMIER_CYCLE.name),
+                    queryset=Exam.objects.filter(type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR),
                     to_attr='exam_high_school_diploma_alternative',
                 ),
             )
@@ -223,8 +222,7 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
         exam = (
             Exam.objects.filter(
                 person=admission.candidate,
-                type=ExamTypes.FORMATION.name,
-                education_group_year_exam__education_group_year=admission.training,
+                type__education_group_years=admission.training,
             )
             .select_related('year')
             .first()
@@ -241,11 +239,7 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
                     annee=exam.year.year if exam.year else None,
                     pays_iso_code='',
                     nom='{title} ({year})'.format(
-                        title=(
-                            exam.education_group_year_exam.title_fr
-                            if has_default_language
-                            else exam.education_group_year_exam.title_en
-                        ),
+                        title=exam.type.title,
                         year=format_academic_year(exam.year.year) if exam.year else '',
                     ),
                 ),

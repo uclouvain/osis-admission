@@ -33,11 +33,11 @@ import attr
 import freezegun
 import img2pdf
 import mock
-from PIL import Image
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import override_settings
 from osis_async.models import AsyncTask
+from PIL import Image
 from rest_framework import status
 
 from admission.calendar.admission_calendar import (
@@ -95,7 +95,9 @@ from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import (
     EtudesSecondairesAdmissionDTO,
 )
 from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
-from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import (
+    QuestionSpecifiqueDTO,
+)
 from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.shared_kernel.enums import (
     ChoixAffiliationSport,
@@ -968,7 +970,9 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
     @classmethod
     def setUpTestData(cls):
         # Mock osis-document
-        cls.get_remote_token_patcher = mock.patch("osis_document_components.services.get_remote_token", return_value="foobar")
+        cls.get_remote_token_patcher = mock.patch(
+            "osis_document_components.services.get_remote_token", return_value="foobar"
+        )
         cls.get_remote_token_patcher.start()
 
         cls.get_remote_metadata_patcher = mock.patch(
@@ -1680,7 +1684,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             proposition=continuing_proposition_dto,
             comptabilite=None,
             groupe_supervision=None,
-            examens=examens_dto,
+            examen_formation=examens_dto,
         )
         cls.general_bachelor_context = _ResumePropositionDTO(
             identification=identification_dto,
@@ -1691,7 +1695,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             proposition=bachelor_proposition_dto,
             comptabilite=accounting_dto,
             groupe_supervision=None,
-            examens=examens_dto,
+            examen_formation=examens_dto,
         )
         cls.doctorate_context = _ResumePropositionDTO(
             identification=identification_dto,
@@ -1771,7 +1775,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                     autre_institution_adresse='',
                 ),
             ),
-            examens=examens_dto,
+            examen_formation=examens_dto,
         )
 
     @classmethod
@@ -3083,7 +3087,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
 
     def test_exam_not_required(self):
         with mock.patch.multiple(
-            self.general_bachelor_context.examens,
+            self.general_bachelor_context.examen_formation,
             requis=False,
             attestation=['attestation-examen'],
             annee=2022,
@@ -3111,7 +3115,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
 
     def test_exam_required(self):
         with mock.patch.multiple(
-            self.general_bachelor_context.examens,
+            self.general_bachelor_context.examen_formation,
             requis=True,
             attestation=[],
             annee=None,
