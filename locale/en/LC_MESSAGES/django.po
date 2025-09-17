@@ -285,6 +285,12 @@ msgstr ""
 msgid "Academic experience"
 msgstr ""
 
+msgid "Academic record retrieved"
+msgstr ""
+
+msgid "Academic record specified by the candidate"
+msgstr ""
+
 msgid "Academic year"
 msgstr ""
 
@@ -6060,6 +6066,9 @@ msgid "Sufficient"
 msgstr ""
 
 msgid "Supervision"
+msgstr ""
+
+msgid "Supervision committee"
 msgstr ""
 
 msgid "Supervision committee modification by candidate"
