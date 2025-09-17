@@ -29,6 +29,7 @@ from typing import List
 from django.conf import settings
 from django.db.models import Q, Exists, OuterRef, When, Case, Value
 
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.models.base import BaseAdmission
@@ -59,8 +60,8 @@ def run():  # pragma: no cover
     ).filter(
         # Dossier doit être en INSCRIPTION AUTORISEE
         Q(generaleducationadmission__status=ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name)
-        | Q(continuingeducationadmission__status=ChoixStatutPropositionContinue.INSCRIPTION_AUTORISEE.name),
-        # | Q(doctorateadmission__status=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name),
+        | Q(continuingeducationadmission__status=ChoixStatutPropositionContinue.INSCRIPTION_AUTORISEE.name)
+        | Q(doctorateadmission__status=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name),
         # Dossier doit etre sur la bonne annee
         determined_academic_year__year=annee_ouverte,
         # Doit avoir un matricule fgs interne
