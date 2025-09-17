@@ -78,7 +78,7 @@
             requestStatusInput.val(defaultRequestStatus);
         });
 
-        $('#request-form').on('htmx:beforeSend', function (evt) {
+        $('#request-form').on('htmx:before-send', function (evt) {
             {# Hide the modal when submitting the form #}
             $('.modal').modal('hide');
         });

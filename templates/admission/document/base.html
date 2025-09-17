@@ -240,7 +240,7 @@
           }
 
           {# The document viewer is resizable so we apply the previous custom height if there is one #}
-          $(document).on('htmx:afterSettle', '#document-details', function(){
+          $(document).on('htmx:after-settle', '#document-details', function(){
               const documentEditorContainer = $('#document-editor-container');
               documentEditorContainer.css(
                   'height',
@@ -341,7 +341,7 @@
           })
 
           {# When an error is encountered #}
-          $('#document-container').on('htmx:responseError', function(event) {
+          $('#document-container').on('htmx:response-error', function(event) {
               $('#document-container .modal').modal('hide');
               $('#document-container .collapse').collapse('hide');
 
