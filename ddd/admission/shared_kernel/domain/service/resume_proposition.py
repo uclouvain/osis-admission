@@ -60,7 +60,9 @@ from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat impo
 from admission.ddd.admission.shared_kernel.domain.service.i_unites_enseignement_translator import (
     IUnitesEnseignementTranslator,
 )
-from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import (
+    QuestionSpecifiqueDTO,
+)
 from admission.ddd.admission.shared_kernel.dtos.resume import (
     AdmissionComptabiliteDTO,
     AdmissionPropositionDTO,
@@ -119,7 +121,7 @@ class ResumeProposition(interface.DomainService):
             connaissances_langues=resume_candidat_dto.connaissances_langues,
             groupe_supervision=groupe_supervision_dto,
             questions_specifiques_dtos=questions_specifiques_dtos,
-            examens=resume_candidat_dto.examens,
+            examen_formation=resume_candidat_dto.examen_formation,
         )
 
     @classmethod
@@ -155,6 +157,7 @@ class ResumeProposition(interface.DomainService):
         )
 
         examen_dto = profil_candidat_translator.get_examen(
+            uuid_proposition=proposition_dto.uuid,
             matricule=proposition_dto.matricule_candidat,
             formation_sigle=(
                 proposition_dto.doctorat.sigle
@@ -178,7 +181,7 @@ class ResumeProposition(interface.DomainService):
             connaissances_langues=resume_candidat_dto.connaissances_langues,
             groupe_supervision=groupe_supervision_dto,
             questions_specifiques_dtos=questions_specifiques_dtos,
-            examens=examen_dto,
+            examen_formation=examen_dto,
         )
 
     @classmethod
