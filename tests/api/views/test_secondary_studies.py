@@ -57,7 +57,7 @@ from base.tests.factories.entity_version_address import EntityVersionAddressFact
 from base.tests.factories.person import PersonFactory
 from osis_profile.models import BelgianHighSchoolDiploma, Exam, ForeignHighSchoolDiploma
 from osis_profile.models.enums.education import EducationalType
-from osis_profile.models.enums.exam import ExamTypes
+from osis_profile.models.exam import EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.high_school import HighSchoolFactory
 from reference.tests.factories.language import LanguageFactory
@@ -577,7 +577,7 @@ class HighSchoolDiplomaAlternativeTestCase(APITestCase):
         self.assertIsNotNone(json_response["high_school_diploma_alternative"])
         # Check the updated object
         high_school_diploma_alternative = Exam.objects.get(
-            person__user_id=self.user.pk, type=ExamTypes.PREMIER_CYCLE.name
+            person__user_id=self.user.pk, type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
         )
         self.assertEqual(high_school_diploma_alternative.certificate, [UUID(self.file_uuid)])
         # Clean previous high school diplomas
@@ -598,7 +598,7 @@ class HighSchoolDiplomaAlternativeTestCase(APITestCase):
         self.assertIsNotNone(json_response["high_school_diploma_alternative"])
         # Check the created object
         high_school_diploma_alternative = Exam.objects.get(
-            person__user_id=self.user.pk, type=ExamTypes.PREMIER_CYCLE.name
+            person__user_id=self.user.pk, type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
         )
         self.assertEqual(high_school_diploma_alternative.certificate, [UUID(self.file_uuid)])
         # Clean previous high school diplomas
@@ -608,14 +608,16 @@ class HighSchoolDiplomaAlternativeTestCase(APITestCase):
     def test_delete_diploma(self):
         self.create_high_school_diploma_alternative(self.high_school_diploma_alternative_data)
         self.assertEqual(
-            Exam.objects.get(person__user_id=self.user.pk, type=ExamTypes.PREMIER_CYCLE.name).certificate,
+            Exam.objects.get(person__user_id=self.user.pk, type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR).certificate,
             [UUID(self.file_uuid)],
         )
         self.client.put(self.admission_url, {"graduated_from_high_school": GotDiploma.NO.name})
         self.assertEqual(
-            Exam.objects.filter(person__user_id=self.user.pk, type=ExamTypes.PREMIER_CYCLE.name).count(), 1
+            Exam.objects.filter(person__user_id=self.user.pk, type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR).count(),
+            1,
         )
         self.client.put(self.admission_url, {"graduated_from_high_school": GotDiploma.YES.name})
         self.assertEqual(
-            Exam.objects.filter(person__user_id=self.user.pk, type=ExamTypes.PREMIER_CYCLE.name).count(), 0
+            Exam.objects.filter(person__user_id=self.user.pk, type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR).count(),
+            0,
         )
