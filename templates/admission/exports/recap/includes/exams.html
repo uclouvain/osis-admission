@@ -23,11 +23,7 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 {% panel _('Exams') edit_link_button=edit_link_button %}
-  {% if LANGUAGE_CODE == 'fr-be' %}
-    {% firstof examen.titre education_group_year_exam.title_fr "Examen" as titre_examen %}
-  {% else %}
-    {% firstof examen.titre education_group_year_exam.title_en "Exam" as titre_examen %}
-  {% endif %}
+  {% firstof examen.titre exam_type.title examen.type.title _("Exam") as titre_examen %}
 
   {% if hide_files %}
 
@@ -38,9 +34,7 @@
     {% endif %}
 
   {% else %}
-
     {% field_data titre_examen examen.attestation %}
-
   {% endif %}
 
   {% if examen.annee %}

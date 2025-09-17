@@ -276,6 +276,7 @@ class PDFGeneration(IPDFGeneration):
             elif access_title.entity_id.type_titre == TypeTitreAccesSelectionnable.EXAMENS:
                 if examen_dto is None:
                     examen_dto = profil_candidat_translator.get_examen(
+                        uuid_proposition=proposition.entity_id.uuid,
                         matricule=proposition.matricule_candidat,
                         formation_sigle=proposition.formation_id.sigle,
                         formation_annee=proposition.formation_id.annee,

@@ -155,6 +155,7 @@ class ResumeProposition(interface.DomainService):
         )
 
         examen_dto = profil_candidat_translator.get_examen(
+            uuid_proposition=proposition_dto.uuid,
             matricule=proposition_dto.matricule_candidat,
             formation_sigle=(
                 proposition_dto.doctorat.sigle

@@ -99,6 +99,9 @@ msgctxt "admission"
 msgid "(Expected) date of graduation"
 msgstr "Date (prévue) de délivrance du diplôme"
 
+#, fuzzy
+#| msgctxt "admission"
+#| msgid "(Expected) date of graduation"
 msgid "(Expected) graduation date"
 msgstr "Date (prévue) de délivrance du diplôme"
 
@@ -2870,6 +2873,11 @@ msgstr "Système d'évaluation"
 
 msgid "Every education"
 msgstr "Toutes les formations"
+
+#, fuzzy
+#| msgid "Exams"
+msgid "Exam"
+msgstr "Examens"
 
 msgid "Exam must be completed for this training."
 msgstr "L'examen est nécessaire pour cette formation."
@@ -8805,3 +8813,6 @@ msgstr "{items} types sur {total}"
 #, python-brace-format
 msgid "{obj.dates_formatees} : {obj.fonction} at {obj.employeur}"
 msgstr "{obj.dates_formatees} : {obj.fonction} à {obj.employeur}"
+
+#~ msgid "(Expected) graduation date (signed diploma)"
+#~ msgstr "Date (prévue) de délivrance du diplôme (diplôme signé)"
