@@ -31,15 +31,17 @@ from django.views.generic import FormView
 
 from admission.forms.admission.exam import ExamForm
 from admission.models import EPCInjection as AdmissionEPCInjection
-from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
-from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
-from osis_profile.models import EducationGroupYearExam, Exam
-from osis_profile.models.enums.exam import ExamTypes
+from admission.models.epc_injection import (
+    EPCInjectionStatus as AdmissionEPCInjectionStatus,
+)
+from admission.models.epc_injection import EPCInjectionType
+from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
+from osis_profile.models import Exam, ExamType
+from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection
 from osis_profile.models.epc_injection import (
-    EPCInjection as CurriculumEPCInjection,
-    ExperienceType,
     EPCInjectionStatus as CurriculumEPCInjectionStatus,
 )
+from osis_profile.models.epc_injection import ExperienceType
 
 __all__ = [
     'ExamFormView',
@@ -71,37 +73,28 @@ class ExamFormView(AdmissionFormMixin, LoadDossierViewMixin, FormView):
             status__in=CurriculumEPCInjectionStatus.blocking_statuses_for_experience(),
         )
 
-        return not (
-            self.education_group_year_exam is None or cv_injections.exists() or admission_injections.exists()
-        )
+        return not (self.exam_type is None or cv_injections.exists() or admission_injections.exists())
 
     @cached_property
-    def education_group_year_exam(self):
-        return EducationGroupYearExam.objects.filter(education_group_year=self.admission.training).first()
+    def exam_type(self):
+        return ExamType.objects.filter(education_group_years=self.admission.training).first()
 
     @cached_property
     def exam(self):
         return Exam.objects.filter(
             person=self.admission.candidate,
-            type=ExamTypes.FORMATION.name,
-            education_group_year_exam=self.education_group_year_exam,
+            type=self.exam_type,
         ).first()
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        if get_language() == settings.LANGUAGE_CODE_FR:
-            kwargs['certificate_title'] = self.education_group_year_exam.title_fr
-            kwargs['certificate_help_text'] = self.education_group_year_exam.help_text_fr
-        else:
-            kwargs['certificate_title'] = self.education_group_year_exam.title_en
-            kwargs['certificate_help_text'] = self.education_group_year_exam.help_text_en
+        kwargs['certificate_title'] = self.exam_type.title
         kwargs['instance'] = self.exam
         return kwargs
 
     def form_valid(self, form):
         exam = form.save(commit=False)
         exam.person = self.admission.candidate
-        exam.type = ExamTypes.FORMATION.name
-        exam.education_group_year_exam = self.education_group_year_exam
+        exam.type = self.exam_type
         exam.save()
         return super().form_valid(form)

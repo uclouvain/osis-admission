@@ -46,13 +46,13 @@ from rest_framework.status import HTTP_200_OK
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
     ENTITY_CDE,
 )
-from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
     ChoixStatutPropositionGenerale,
     DecisionFacultaireEnum,
     PoursuiteDeCycle,
 )
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.models import GeneralEducationAdmission
 from admission.models.checklist import (
     AdditionalApprovalCondition,
@@ -113,7 +113,7 @@ from osis_profile.models import (
     ForeignHighSchoolDiploma,
     ProfessionalExperience,
 )
-from osis_profile.models.enums.exam import ExamTypes
+from osis_profile.models.exam import EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
 
 
 class FacultyDecisionViewTestCase(TestCase):
@@ -858,7 +858,7 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         # > High school diploma alternative
         BelgianHighSchoolDiploma.objects.filter(person=candidate).delete()
         ForeignHighSchoolDiploma.objects.filter(person=candidate).delete()
-        Exam.objects.filter(person=candidate, type=ExamTypes.PREMIER_CYCLE.name).delete()
+        Exam.objects.filter(person=candidate, type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR).delete()
         diploma_alternative = HighSchoolDiplomaAlternativeFactory(person=candidate)
 
         candidate.graduated_from_high_school = GotDiploma.NO.name

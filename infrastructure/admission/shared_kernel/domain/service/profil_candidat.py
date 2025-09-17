@@ -117,17 +117,17 @@ from osis_profile import BE_ISO_CODE
 from osis_profile.models import (
     EducationalExperience,
     EducationalExperienceYear,
-    EducationGroupYearExam,
     Exam,
+    ExamType,
     ProfessionalExperience,
 )
 from osis_profile.models.education import LanguageKnowledge
-from osis_profile.models.enums.exam import ExamTypes
 from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection
 from osis_profile.models.epc_injection import (
     EPCInjectionStatus as CurriculumEPCInjectionStatus,
 )
 from osis_profile.models.epc_injection import ExperienceType
+from osis_profile.models.exam import EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
 
 
 # TODO: a mettre dans infra/shared_kernel/profil
@@ -670,7 +670,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             .prefetch_related(
                 Prefetch(
                     'exams',
-                    queryset=Exam.objects.filter(type=ExamTypes.PREMIER_CYCLE.name),
+                    queryset=Exam.objects.filter(type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR),
                     to_attr='exam_high_school_diploma_alternative',
                 ),
             )
@@ -701,28 +701,22 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def get_examen(cls, matricule: str, formation_sigle: str, formation_annee: int) -> 'ExamenDTO':
-        education_group_year_exam = EducationGroupYearExam.objects.filter(
-            education_group_year__acronym=formation_sigle,
-            education_group_year__academic_year__year=formation_annee,
+        exam_type = ExamType.objects.filter(
+            education_group_years__acronym=formation_sigle,
+            education_group_years__academic_year__year=formation_annee,
         ).first()
-        if education_group_year_exam is None:
+        if exam_type is None:
             return ExamenDTO(uuid='', requis=False, titre='', attestation=[], annee=None)
         exam = Exam.objects.filter(
             person__global_id=matricule,
-            type=ExamTypes.FORMATION.name,
-            education_group_year_exam=education_group_year_exam,
+            type=exam_type,
         ).first()
-        titre = (
-            education_group_year_exam.title_fr
-            if get_language() == settings.LANGUAGE_CODE_FR
-            else education_group_year_exam.title_en
-        )
         if exam is None:
-            return ExamenDTO(uuid='', requis=True, titre=titre, attestation=[], annee=None)
+            return ExamenDTO(uuid='', requis=True, titre=exam_type.title, attestation=[], annee=None)
         return ExamenDTO(
             uuid=str(exam.uuid),
             requis=True,
-            titre=titre,
+            titre=exam_type.title,
             attestation=exam.certificate,
             annee=exam.year.year if exam.year else None,
         )
@@ -1063,7 +1057,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             .prefetch_related(
                 Prefetch(
                     'exams',
-                    queryset=Exam.objects.filter(type=ExamTypes.PREMIER_CYCLE.name),
+                    queryset=Exam.objects.filter(type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR),
                     to_attr='exam_high_school_diploma_alternative',
                 ),
             )

@@ -37,11 +37,19 @@ from django.utils.dateparse import parse_date, parse_datetime
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     OngletsChecklist as OngletsChecklistDoctorat,
 )
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    OngletsChecklist as OngletsChecklistContinue,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    OngletsChecklist as OngletsChecklistGenerale,
+)
 from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import (
     EmplacementDocument,
     EmplacementDocumentIdentity,
 )
-from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.shared_kernel.domain.model.proposition import (
+    PropositionIdentity,
+)
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     EmplacementDocumentNonTrouveException,
     PropositionNonTrouveeException,
@@ -59,12 +67,6 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     StatutEmplacementDocument,
     StatutReclamationEmplacementDocument,
     TypeEmplacementDocument,
-)
-from admission.ddd.admission.formation_continue.domain.model.enums import (
-    OngletsChecklist as OngletsChecklistContinue,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    OngletsChecklist as OngletsChecklistGenerale,
 )
 from admission.ddd.admission.shared_kernel.repository.i_emplacement_document import (
     IEmplacementDocumentRepository,
@@ -88,11 +90,11 @@ from admission.services.injection_epc.injection_dossier import (
 from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
 from osis_profile.models import OSIS_PROFILE_MODELS, Exam
-from osis_profile.models.enums.exam import ExamTypes
 from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection
 from osis_profile.models.epc_injection import (
     EPCInjectionStatus as CurriculumEPCInjectionStatus,
 )
+from osis_profile.models.exam import EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
 from osis_profile.services.injection_epc import InjectionEPCCurriculum
 
 
@@ -268,7 +270,7 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
             .annotate(
                 exam_secondary=Subquery(
                     Exam.objects.filter(
-                        type=ExamTypes.PREMIER_CYCLE.name,
+                        type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR,
                         person=OuterRef('admission__candidate'),
                     ).values('uuid')[:1]
                 ),
@@ -466,7 +468,7 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
             # Remove the document from the admission field
             getattr(admission, model_field).remove(entity.uuids_documents[0])
             admission.save(update_fields=admission_update_fields)
-            
+
         elif entity.type.name in EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES:
             with transaction.atomic():
                 # Don't keep the data related to the document request and the answer to the specific question
@@ -484,7 +486,6 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
                 related_form_item = form_item_instantiation_to_delete.form_item
                 form_item_instantiation_to_delete.delete()
                 related_form_item.delete()
-
 
         elif entity.type.name in EMPLACEMENTS_DOCUMENTS_RECLAMABLES:
             # Remove the document from the field of the related object

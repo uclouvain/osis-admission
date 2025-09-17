@@ -91,8 +91,8 @@ msgctxt "admission"
 msgid "(Expected) date of graduation"
 msgstr "Date (prévue) de délivrance du diplôme"
 
-msgid "(Expected) graduation date"
-msgstr "Date (prévue) de délivrance du diplôme"
+msgid "(Expected) graduation date (signed diploma)"
+msgstr "Date (prévue) de délivrance du diplôme (diplôme signé)"
 
 msgid ", on"
 msgstr ", le"

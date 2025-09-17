@@ -28,7 +28,9 @@ from typing import List
 
 from django.db import models
 
-from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import ITitresAcces
+from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import (
+    ITitresAcces,
+)
 from admission.ddd.admission.shared_kernel.dtos.conditions import AdmissionConditionsDTO
 from base.models.enums.got_diploma import GotDiploma
 from base.models.person import Person
@@ -41,7 +43,7 @@ from osis_profile.models import (
     ProfessionalExperience,
 )
 from osis_profile.models.enums.curriculum import Result
-from osis_profile.models.enums.exam import ExamTypes
+from osis_profile.models.exam import EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
 from reference.models.enums.cycle import Cycle
 
 
@@ -58,7 +60,9 @@ class TitresAcces(ITitresAcces):
                     ForeignHighSchoolDiploma.objects.filter(person_id=models.OuterRef('pk'))
                 ),
                 diplome_alternatif=models.Exists(
-                    Exam.objects.filter(person_id=models.OuterRef('pk'), type=ExamTypes.PREMIER_CYCLE.name)
+                    Exam.objects.filter(
+                        person_id=models.OuterRef('pk'), type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
+                    )
                 ),
             )
             .annotate(

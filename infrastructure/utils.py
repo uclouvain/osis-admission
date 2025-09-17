@@ -40,7 +40,9 @@ from admission.constants import SUPPORTED_MIME_TYPES
 from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import (
     EmplacementDocument,
 )
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
+    EmplacementDocumentDTO,
+)
 from admission.ddd.admission.shared_kernel.enums import CleConfigurationItemFormulaire
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     IdentifiantBaseEmplacementDocument,
@@ -56,7 +58,7 @@ from base.models.entity_version import (
 )
 from base.models.enums.entity_type import PEDAGOGICAL_ENTITY_TYPES
 from osis_profile.models import EducationalExperienceYear
-from osis_profile.models.enums.exam import ExamTypes
+from osis_profile.models.exam import EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
 
 FORMATTED_EMAIL_FOR_HISTORY = """{sender_label} : {sender}
 {recipient_label} : {recipient}
@@ -351,14 +353,13 @@ def get_document_from_identifier(
                 obj = getattr(admission.candidate, 'foreignhighschooldiploma', None)
                 field = CORRESPONDANCE_CHAMPS_ETUDES_SECONDAIRES_ETRANGERES[domain_identifier]
             elif domain_identifier in CORRESPONDANCE_CHAMPS_ETUDES_SECONDAIRES_ALTERNATIVES:
-                obj = admission.candidate.exams.filter(type=ExamTypes.PREMIER_CYCLE.name).first()
+                obj = admission.candidate.exams.filter(type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR).first()
                 field = CORRESPONDANCE_CHAMPS_ETUDES_SECONDAIRES_ALTERNATIVES[domain_identifier]
 
         elif base_identifier == OngletsDemande.EXAMS.name:
             # EXAMS.[DOMAIN_IDENTIFIER]
             obj = admission.candidate.exams.filter(
-                type=ExamTypes.FORMATION.name,
-                education_group_year_exam__education_group_year=admission.training,
+                type__education_group_years=admission.training,
             ).first()
             field = CORRESPONDANCE_CHAMPS_EXAMENS.get(domain_identifier)
 

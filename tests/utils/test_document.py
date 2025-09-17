@@ -30,15 +30,15 @@ from unittest.mock import patch
 from django.test import override_settings
 
 from admission.constants import JPEG_MIME_TYPE, SUPPORTED_MIME_TYPES
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    OngletsChecklist,
+)
 from admission.ddd.admission.shared_kernel.enums import Onglets
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     IdentifiantBaseEmplacementDocument,
     OngletsDemande,
     StatutEmplacementDocument,
     TypeEmplacementDocument,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    OngletsChecklist,
 )
 from admission.infrastructure.utils import (
     CORRESPONDANCE_CHAMPS_COMPTABILITE,
@@ -72,7 +72,6 @@ from admission.tests.factories.secondary_studies import (
 from admission.tests.factories.supervision import PromoterFactory
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.tests import TestCaseWithQueriesAssertions
-from osis_profile.models.enums.exam import ExamTypes
 from osis_profile.tests.factories.exam import ExamFactory
 from reference.tests.factories.language import FrenchLanguageFactory
 
@@ -641,8 +640,7 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
         # first cycle admission exam
         file_uuid = uuid.uuid4()
         exam = ExamFactory(
-            education_group_year_exam__education_group_year=self.general_admission.training,
-            type=ExamTypes.FORMATION.name,
+            type__education_group_years=[self.general_admission.training],
             person=self.general_admission.candidate,
             certificate=[file_uuid],
         )

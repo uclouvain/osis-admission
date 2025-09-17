@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,22 +23,28 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List, Dict
+from typing import Dict, List
+
+from osis_document.enums import PostProcessingWanted
 
 from admission.ddd.admission.shared_kernel.domain.service.i_emplacements_documents_proposition import (
     IEmplacementsDocumentsPropositionTranslator,
 )
-from osis_document.enums import PostProcessingWanted
-from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import (
+    QuestionSpecifiqueDTO,
+)
 from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
 from admission.exports.admission_recap.section import get_sections
-from osis_profile.models import EducationGroupYearExam
+from osis_profile.models import ExamType
 
 
 class EmplacementsDocumentsPropositionTranslator(IEmplacementsDocumentsPropositionTranslator):
     @classmethod
     def recuperer_metadonnees_par_uuid_document(cls, uuids_documents: List[str]) -> Dict[str, Dict]:
-        from osis_document.api.utils import get_remote_tokens, get_several_remote_metadata
+        from osis_document.api.utils import (
+            get_remote_tokens,
+            get_several_remote_metadata,
+        )
 
         tokens = get_remote_tokens(
             uuids_documents,
@@ -59,14 +65,14 @@ class EmplacementsDocumentsPropositionTranslator(IEmplacementsDocumentsPropositi
         questions_specifiques: List[QuestionSpecifiqueDTO],
         avec_documents_libres: bool,
     ) -> dict:
-        education_group_year_exam = EducationGroupYearExam.objects.filter(
-            education_group_year__acronym=resume_dto.proposition.formation.sigle,
-            education_group_year__academic_year__year=resume_dto.proposition.formation.annee,
+        exam_type = ExamType.objects.filter(
+            education_group_years__acronym=resume_dto.proposition.formation.sigle,
+            education_group_years__academic_year__year=resume_dto.proposition.formation.annee,
         ).first()
 
         return get_sections(
             context=resume_dto,
             specific_questions=questions_specifiques,
             with_free_requestable_documents=avec_documents_libres,
-            education_group_year_exam=education_group_year_exam,
+            exam_type=exam_type,
         )

@@ -32,6 +32,9 @@ from admission.calendar.admission_calendar import (
     AdmissionPoolExternalEnrollmentChangeCalendar,
     AdmissionPoolExternalReorientationCalendar,
 )
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    STATUTS_PROPOSITION_GENERALE_NON_SOUMISE,
+)
 from admission.ddd.admission.shared_kernel.domain.model.formation import (
     est_formation_medecine_ou_dentisterie,
 )
@@ -41,15 +44,17 @@ from admission.ddd.admission.shared_kernel.domain.service.i_elements_confirmatio
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
-from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import (
+    QuestionSpecifiqueDTO,
+)
 from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
-from admission.ddd.admission.shared_kernel.enums import CHOIX_AFFILIATION_SPORT_SELON_SITE, Onglets
+from admission.ddd.admission.shared_kernel.enums import (
+    CHOIX_AFFILIATION_SPORT_SELON_SITE,
+    Onglets,
+)
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     IdentifiantBaseEmplacementDocument,
     OngletsDemande,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    STATUTS_PROPOSITION_GENERALE_NON_SOUMISE,
 )
 from admission.exports.admission_recap.attachments import (
     Attachment,
@@ -84,8 +89,8 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceNonAcademiqueDTO,
 )
 from osis_profile import BE_ISO_CODE, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
-from osis_profile.models import EducationGroupYearExam
 from osis_profile.models.enums.curriculum import CURRICULUM_ACTIVITY_LABEL
+from osis_profile.models.exam import ExamType
 from osis_profile.views.edit_experience_academique import (
     SYSTEMES_EVALUATION_AVEC_CREDITS,
 )
@@ -238,12 +243,12 @@ def get_secondary_studies_section(
 
 def get_exams_section(
     context: ResumePropositionDTO,
-    education_group_year_exam: EducationGroupYearExam,
+    exam_type: ExamType,
     load_content: bool,
 ) -> Section:
     """Returns the exams section."""
     extra_context = {
-        'education_group_year_exam': education_group_year_exam,
+        'exam_type': exam_type,
     }
     return Section(
         identifier=OngletsDemande.EXAMS,
@@ -597,7 +602,7 @@ def get_sections(
     with_free_requestable_documents=False,
     hide_curriculum=False,
     with_additional_documents=True,
-    education_group_year_exam: Optional[EducationGroupYearExam]=None,
+    exam_type: Optional[ExamType] = None,
 ):
     specific_questions_by_tab = get_dynamic_questions_by_tab(specific_questions)
 
@@ -631,7 +636,7 @@ def get_sections(
         pdf_sections.append(get_curriculum_specific_questions_section(context, specific_questions_by_tab, load_content))
 
     if context.est_proposition_generale:
-        pdf_sections.append(get_exams_section(context, education_group_year_exam, load_content))
+        pdf_sections.append(get_exams_section(context, exam_type, load_content))
 
     if context.est_proposition_generale or context.est_proposition_continue:
         pdf_sections.append(get_specific_questions_section(context, specific_questions_by_tab, load_content))
