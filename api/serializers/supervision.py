@@ -181,6 +181,7 @@ class PersonSerializer(serializers.ModelSerializer):
             'first_name',
             'last_name',
             'global_id',
+            'email',
         )
 
 
@@ -188,3 +189,4 @@ class TutorSerializer(PersonSerializer):
     first_name = serializers.ReadOnlyField()
     last_name = serializers.ReadOnlyField()
     global_id = serializers.ReadOnlyField()
+    email = serializers.ReadOnlyField()

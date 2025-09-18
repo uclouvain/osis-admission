@@ -49,7 +49,22 @@ class PersonAutocompleteTestCase(APITestCase):
             format="json",
         )
         self.assertEqual(response.status_code, 200, response.content)
-        self.assertEqual(response.json()['count'], 1)
+
+        json_response = response.json()
+        self.assertEqual(json_response['count'], 1)
+
+        results = json_response['results']
+        self.assertEqual(len(results), 1)
+        self.assertEqual(
+            results[0],
+            {
+                'first_name': person.first_name,
+                'last_name': person.last_name,
+                'global_id': person.global_id,
+                'email': person.email,
+            },
+        )
+
         response = self.client.get(
             resolve_url('autocomplete-person') + '?search=57',
             format="json",
