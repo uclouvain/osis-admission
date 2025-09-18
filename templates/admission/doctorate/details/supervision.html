@@ -85,7 +85,7 @@
   {% endif %}
 
   {% has_perm 'admission.request_signatures' as can_request_signatures %}
-  {% has_perm 'admission.change_admission_project' as can_change_admission_project %}
+  {% has_perm 'admission.send_back_to_candidate' as can_send_back_to_candidate %}
   {% if can_request_signatures and admission.statut == "EN_BROUILLON" %}
     <div class="text-center">
       <button
@@ -99,7 +99,7 @@
     </div>
 
     {% include "admission/doctorate/details/includes/request_signature_modal.html" %}
-  {% elif can_change_admission_project and admission.statut == "EN_ATTENTE_DE_SIGNATURE" %}
+  {% elif can_send_back_to_candidate and admission.statut == "EN_ATTENTE_DE_SIGNATURE" %}
     <div class="text-center">
       <button
         type="button"
