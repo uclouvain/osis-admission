@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,13 +25,18 @@
 # ##############################################################################
 
 from django.forms import BaseForm
-from django.utils.translation import gettext_lazy as _, override
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import override
 from django.views.generic import FormView
 from osis_mail_template.models import MailTemplate
 
-from admission.ddd.admission.doctorat.preparation.commands import EnvoyerMessageCandidatCommand
+from admission.ddd.admission.doctorat.preparation.commands import (
+    EnvoyerMessageCandidatCommand,
+)
 from admission.forms.doctorate.cdd.send_mail import CddDoctorateSendMailForm
-from admission.infrastructure.admission.doctorat.preparation.domain.service.notification import Notification
+from admission.infrastructure.admission.doctorat.preparation.domain.service.notification import (
+    Notification,
+)
 from admission.mail_templates import ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from infrastructure.messages_bus import message_bus_instance
@@ -67,6 +72,8 @@ class DoctorateSendMailView(HtmxMixin, AdmissionFormMixin, LoadDossierViewMixin,
             language=self.admission.candidate.language,
         )
         tokens = Notification.get_common_tokens(self.proposition, self.admission.candidate)
+        tokens['sender_name'] = f'{self.request.user.person.first_name} {self.request.user.person.last_name}'
+        tokens['doctoral_commission'] = self.proposition.doctorat.intitule_entite_gestion
 
         with override(language=self.admission.candidate.language):
             return {
