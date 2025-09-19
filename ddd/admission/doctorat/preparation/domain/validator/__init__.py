@@ -61,6 +61,7 @@ from ._should_informations_checklist_etre_completees import (
     ShouldChecklistEtreDansEtatCorrectPourApprouverInscription,
     ShouldComplementsFormationEtreVidesSiPasDeComplementsFormation,
     ShouldConditionAccesEtreSelectionne,
+    ShouldDecisionCddEtreDansEtatCorrectPourApprouverDemande,
     ShouldDemandeEtreTypeAdmission,
     ShouldDemandeEtreTypeInscription,
     ShouldDonneesPersonnellesEtreDansEtatCorrectPourApprouverDemande,
@@ -167,4 +168,5 @@ __all__ = [
     "ShouldStatutsChecklistExperiencesEtreValidees",
     "ShouldStatutChecklistEtreDifferentCloture",
     "ShouldDonneesPersonnellesEtreDansEtatCorrectPourApprouverDemande",
+    "ShouldDecisionCddEtreDansEtatCorrectPourApprouverDemande",
 ]

@@ -79,7 +79,9 @@ from admission.ddd.admission.doctorat.preparation.domain.validator._should_statu
 from admission.ddd.admission.shared_kernel.domain.model.complement_formation import (
     ComplementFormationIdentity,
 )
-from admission.ddd.admission.shared_kernel.domain.model.motif_refus import MotifRefusIdentity
+from admission.ddd.admission.shared_kernel.domain.model.motif_refus import (
+    MotifRefusIdentity,
+)
 from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import (
     TitreAccesSelectionnable,
 )
@@ -91,7 +93,9 @@ from admission.ddd.admission.shared_kernel.domain.validator import (
 from admission.ddd.admission.shared_kernel.domain.validator._should_curriculum_etre_complete import (
     ShouldExperiencesNonAcademiquesAvoirUnCertificat,
 )
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
+    EmplacementDocumentDTO,
+)
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from base.ddd.utils.business_validator import (
     BusinessValidator,
@@ -718,6 +722,9 @@ class ApprouverAdmissionParSicValidatorList(TwoStepsMultipleBusinessExceptionLis
             ShouldDonneesPersonnellesEtreDansEtatCorrectPourApprouverDemande(
                 checklist_actuelle=self.checklist,
             ),
+            ShouldDecisionCddEtreDansEtatCorrectPourApprouverDemande(
+                checklist_actuelle=self.checklist,
+            ),
             ShouldFinancabiliteEtreDansEtatCorrectPourApprouverDemande(
                 checklist_actuelle=self.checklist,
             ),
@@ -748,6 +755,9 @@ class ApprouverInscriptionParSicValidatorList(TwoStepsMultipleBusinessExceptionL
                 statut=self.statut,
             ),
             ShouldDonneesPersonnellesEtreDansEtatCorrectPourApprouverDemande(
+                checklist_actuelle=self.checklist,
+            ),
+            ShouldDecisionCddEtreDansEtatCorrectPourApprouverDemande(
                 checklist_actuelle=self.checklist,
             ),
             ShouldFinancabiliteEtreDansEtatCorrectPourApprouverDemande(
@@ -822,7 +832,7 @@ class SpecifierNouvellesInformationsDecisionCDDValidatorList(TwoStepsMultipleBus
 @attr.dataclass(frozen=True, slots=True)
 class ApprouverParSicAValiderValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     statut: ChoixStatutPropositionDoctorale
-    statut_checklist_parcours_anterieur: StatutChecklist
+    checklist: StatutsChecklistDoctorale
     documents_dto: List[EmplacementDocumentDTO]
     type_demande: TypeDemande
 
@@ -835,13 +845,16 @@ class ApprouverParSicAValiderValidatorList(TwoStepsMultipleBusinessExceptionList
                 statut=self.statut,
             ),
             ShouldParcoursAnterieurEtreSuffisant(
-                statut=self.statut_checklist_parcours_anterieur,
+                statut=self.checklist.parcours_anterieur,
             ),
             ShouldNePasAvoirDeDocumentReclameImmediat(
                 documents_dto=self.documents_dto,
             ),
             ShouldDemandeEtreTypeAdmission(
                 type_demande=self.type_demande,
+            ),
+            ShouldDecisionCddEtreDansEtatCorrectPourApprouverDemande(
+                checklist_actuelle=self.checklist,
             ),
         ]
 

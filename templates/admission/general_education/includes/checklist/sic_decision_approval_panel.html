@@ -31,11 +31,17 @@
     <div class="panel panel-default">
       <div class="panel-heading">
         {% if can_change_sic_decision and current.statut != 'GEST_REUSSITE' %}
-          {% translate 'The Previous experience must be in the "Sufficient" status in order to do this action.' as approval_to_validate_tooltip %}
+          {% if admission.est_admission %}
+            {% if not past_experiences_are_sufficient %}
+              {% translate 'The Previous experience must be in the "Sufficient" status in order to do this action.' as approval_panel_to_validate_tooltip %}
+            {% elif view.is_doctorate and original_admission.checklist.current.decision_cdd.statut != 'GEST_REUSSITE' %}
+              {% translate 'The admission must be approved by the CDD.' as approval_panel_to_validate_tooltip %}
+            {% endif %}
+          {% endif %}
           <button
             class="btn btn-default pull-right btn-sm"
-            {% if admission.est_admission and not past_experiences_are_sufficient %}
-              title="{{ approval_to_validate_tooltip|force_escape }}"
+            {% if approval_panel_to_validate_tooltip %}
+              title="{{ approval_panel_to_validate_tooltip|force_escape }}"
               disabled
               data-toggle="tooltip"
               data-placement="bottom"
