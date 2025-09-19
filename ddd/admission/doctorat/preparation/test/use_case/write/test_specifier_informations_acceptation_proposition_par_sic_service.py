@@ -42,6 +42,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
     MobiliteNombreDeMois,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    EtatChecklistDecisionCddNonValidePourApprouverDemande,
     ParcoursAnterieurNonSuffisantException,
     SituationPropositionNonSICException,
 )
@@ -92,6 +93,7 @@ class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
             est_confirmee=True,
             est_approuvee_par_fac=True,
         )
+        self.proposition.checklist_actuelle.decision_cdd.statut = ChoixStatutChecklist.GEST_REUSSITE
         self.proposition_repository.save(self.proposition)
         self.parametres_commande_par_defaut = {
             'uuid_proposition': 'uuid-SC3DP-confirmee',
@@ -156,6 +158,16 @@ class TestSpecifierInformationsAcceptationPropositionParSic(TestCase):
             self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
 
         self.assertIsInstance(context.exception.exceptions.pop(), ParcoursAnterieurNonSuffisantException)
+
+    def test_should_lever_exception_si_pas_acceptation_par_cdd(self):
+        self.proposition.statut = ChoixStatutPropositionDoctorale.COMPLETEE_POUR_SIC
+        self.proposition.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist.GEST_REUSSITE
+        self.proposition.checklist_actuelle.decision_cdd.statut = ChoixStatutChecklist.GEST_EN_COURS
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
+
+        self.assertIsInstance(context.exception.exceptions.pop(), EtatChecklistDecisionCddNonValidePourApprouverDemande)
 
     def test_should_etre_ok_si_completee_avec_max_informations(self):
         self.proposition.statut = ChoixStatutPropositionDoctorale.COMPLETEE_POUR_SIC

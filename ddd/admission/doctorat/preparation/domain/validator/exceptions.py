@@ -688,6 +688,14 @@ class AutresPrenomsTropLongException(BusinessException):
         super().__init__(message, **kwargs)
 
 
+class EtatChecklistDecisionCddNonValidePourApprouverDemande(BusinessException):
+    status_code = "PROPOSITION-76"
+
+    def __init__(self, **kwargs):
+        message = _("The admission must be approved by the CDD.")
+        super().__init__(message, **kwargs)
+
+
 class AbsenceDeDetteNonCompleteeDoctoratException(BusinessException):
     status_code = "DOCTORAT-1"
 
