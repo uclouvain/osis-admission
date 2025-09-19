@@ -38,16 +38,16 @@ from admission.auth.scope import Scope
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
     ENTITY_CDE,
 )
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
-    StatutEmplacementDocument,
-    StatutReclamationEmplacementDocument,
-    TypeEmplacementDocument,
-)
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixMotifAttente,
     ChoixMotifRefus,
     ChoixStatutChecklist,
     ChoixStatutPropositionContinue,
+)
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    StatutEmplacementDocument,
+    StatutReclamationEmplacementDocument,
+    TypeEmplacementDocument,
 )
 from admission.forms.admission.continuing_education.checklist import (
     CloseForm,
@@ -61,11 +61,11 @@ from admission.infrastructure.admission.formation_continue.domain.service.histor
     TAGS_APPROBATION_PROPOSITION,
 )
 from admission.models import ContinuingEducationAdmission
+from admission.models.epc_injection import EPCInjection as AdmissionEPCInjection
 from admission.models.epc_injection import (
-    EPCInjection as AdmissionEPCInjection,
-    EPCInjectionType,
     EPCInjectionStatus as AdmissionEPCInjectionStatus,
 )
+from admission.models.epc_injection import EPCInjectionType
 from admission.tests.factories.continuing_education import (
     ContinuingEducationAdmissionFactory,
     ContinuingEducationTrainingFactory,
@@ -143,7 +143,6 @@ class ChecklistViewTestCase(TestCase):
             submitted=True,
         )
         self.candidate = self.continuing_admission.candidate
-
 
     #### IUFC MANAGER
 
