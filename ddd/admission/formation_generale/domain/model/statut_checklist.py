@@ -30,15 +30,15 @@ import attr
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext_lazy
 
-from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
-    EtatAuthentificationParcours,
-)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     BesoinDeDerogation,
     ChoixStatutChecklist,
     DecisionFacultaireEnum,
     DerogationFinancement,
     OngletsChecklist,
+)
+from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
+    EtatAuthentificationParcours,
 )
 from osis_common.ddd import interface
 
@@ -360,7 +360,7 @@ onglet_financabilite = ConfigurationOngletChecklist(
         ),
         ConfigurationStatutChecklist(
             identifiant='BESOIN_DEROGATION',
-            libelle=_('Non-progression dispensation needed'),
+            libelle=_('Financeability dispensation needed'),
             statut=ChoixStatutChecklist.GEST_EN_COURS,
             extra={'en_cours': 'derogation'},
         ),

@@ -134,9 +134,7 @@ class ProgramManager(EducationGroupRoleModel):
             'admission.send_back_to_candidate': is_part_of_education_group
             & doctorate.signing_in_progress_before_submition
             & ~is_sent_to_epc,
-            'admission.change_admission_project': is_part_of_education_group
-            & doctorate.is_submitted
-            & ~is_sent_to_epc,
+            'admission.change_admission_project': is_part_of_education_group & doctorate.is_submitted & ~is_sent_to_epc,
             'admission.view_admission_cotutelle': doctorate.is_admission & is_part_of_education_group,
             'admission.change_admission_cotutelle': doctorate.is_admission
             & is_part_of_education_group
@@ -157,9 +155,8 @@ class ProgramManager(EducationGroupRoleModel):
             'admission.change_admission_supervision': is_part_of_education_group
             & doctorate.is_submitted
             & ~is_sent_to_epc,
-            'admission.add_supervision_member': is_part_of_education_group
-            & doctorate.is_submitted
-            & ~is_sent_to_epc,
+            'admission.add_supervision_member': is_part_of_education_group & doctorate.is_submitted & ~is_sent_to_epc,
+            'admission.set_reference_promoter': is_part_of_education_group,
             'admission.remove_supervision_member': is_part_of_education_group
             & doctorate.is_submitted
             & ~is_sent_to_epc,
@@ -217,8 +214,8 @@ class ProgramManager(EducationGroupRoleModel):
             & past_experiences_checklist_tab_is_not_sufficient
             & ~is_sent_to_epc,
             'admission.checklist_change_fac_comment': is_part_of_education_group & ~is_sent_to_epc,
-            'admission.checklist_financability_dispensation_fac': general.in_fac_status
-            & is_part_of_education_group
+            'admission.checklist_financability_dispensation_fac': is_part_of_education_group
+            & (general.in_fac_status | general.can_send_to_fac_faculty_decision)
             & ~is_sent_to_epc,
             'admission.continuing_checklist_change_fac_comment': is_part_of_education_group & ~is_sent_to_epc,
             'admission.checklist_change_comment': is_part_of_education_group

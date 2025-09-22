@@ -56,14 +56,14 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     AnneesCurriculumNonSpecifieesException,
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
+from admission.ddd.admission.formation_generale.commands import (
+    VerifierCurriculumApresSoumissionQuery as VerifierCurriculumApresSoumissionGeneraleQuery,
+)
 from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import (
     EtudesSecondairesAdmissionDTO,
 )
 from admission.ddd.admission.shared_kernel.dtos.titre_acces_selectionnable import (
     TitreAccesSelectionnableDTO,
-)
-from admission.ddd.admission.formation_generale.commands import (
-    VerifierCurriculumApresSoumissionQuery as VerifierCurriculumApresSoumissionGeneraleQuery,
 )
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
@@ -234,13 +234,8 @@ def force_title(string: str):
     return ''.join(title_string)
 
 
-def get_admission_cdd_managers(education_group_id) -> models.QuerySet[Person]:
-    return Person.objects.filter(
-        models.Q(
-            id__in=AdmissionProgramManager.objects.filter(education_group_id=education_group_id).values('person_id')
-        )
-        | models.Q(id__in=ProgramManager.objects.filter(education_group_id=education_group_id).values('person_id'))
-    )
+def get_admission_cdd_managers(education_group_id) -> models.QuerySet[AdmissionProgramManager]:
+    return AdmissionProgramManager.objects.filter(education_group_id=education_group_id).select_related('person')
 
 
 def get_doctoral_cdd_managers(education_group_id) -> QuerySet[Person]:
@@ -271,6 +266,11 @@ def get_portal_admission_url(context, admission_uuid) -> str:
         context=context,
         uuid=admission_uuid,
     )
+
+
+def get_portal_doctorate_management_url(admission_uuid) -> str:
+    """Return the url of the admission in the portal."""
+    return settings.DOCTORAT_SUPERVISION_FRONTEND_LINK.format(uuid=admission_uuid)
 
 
 def get_backoffice_admission_url(context, admission_uuid, sub_namespace='', url_suffix='') -> str:

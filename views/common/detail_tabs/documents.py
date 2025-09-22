@@ -41,7 +41,21 @@ from admission.ddd.admission.doctorat.preparation import (
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     STATUTS_PROPOSITION_AVANT_SOUMISSION,
 )
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.formation_continue import (
+    commands as continuing_education_commands,
+)
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+)
+from admission.ddd.admission.formation_generale import (
+    commands as general_education_commands,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
+    EmplacementDocumentDTO,
+)
 from admission.ddd.admission.shared_kernel.dtos.resume import (
     ResumeEtEmplacementsDocumentsPropositionDTO,
 )
@@ -54,18 +68,6 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
 )
 from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
     ExperiencesCVRecuperees,
-)
-from admission.ddd.admission.formation_continue import (
-    commands as continuing_education_commands,
-)
-from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutPropositionContinue,
-)
-from admission.ddd.admission.formation_generale import (
-    commands as general_education_commands,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
 )
 from admission.forms.admission.document import RequestAllDocumentsForm
 from admission.mail_templates import (
@@ -324,6 +326,8 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
             }[self.proposition.langue_contact_candidat],
             'admissions_link_front': get_portal_admission_list_url(),
             'admission_link_front': get_portal_admission_url(self.current_context, self.admission_uuid),
+            'admission_link_front_documents': get_portal_admission_url(self.current_context, self.admission_uuid)
+            + 'documents',
             'admission_link_back': get_backoffice_admission_url(self.current_context, self.admission_uuid),
             'salutation': get_salutation_prefix(self.admission.candidate),
             'sender_name': self.current_user_name,

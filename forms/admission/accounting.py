@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -28,32 +28,37 @@ from typing import List
 
 from django import forms
 from django.core.exceptions import ValidationError
-from django.utils.translation import gettext_lazy as _, ngettext
-from localflavor.generic.forms import BICFormField, IBAN_MIN_LENGTH
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import ngettext
+from localflavor.generic.forms import IBAN_COUNTRY_CODE_LENGTH, BICFormField
 
-from admission.ddd.admission.shared_kernel.domain.validator._should_comptabilite_etre_completee import DEPENDANCES_CHAMPS_ASSIMILATION
+from admission.ddd.admission.shared_kernel.domain.validator._should_comptabilite_etre_completee import (
+    DEPENDANCES_CHAMPS_ASSIMILATION,
+)
 from admission.ddd.admission.shared_kernel.enums import (
-    TypeSituationAssimilation,
+    ChoixAffiliationSport,
     ChoixAssimilation1,
     ChoixAssimilation2,
     ChoixAssimilation3,
-    LienParente,
     ChoixAssimilation5,
-    dynamic_person_concerned,
     ChoixAssimilation6,
     ChoixTypeCompteBancaire,
-    ChoixAffiliationSport,
+    LienParente,
+    TypeSituationAssimilation,
+    dynamic_person_concerned,
 )
-from base.forms.utils import get_example_text, FIELD_REQUIRED_MESSAGE
+from base.forms.utils import FIELD_REQUIRED_MESSAGE, get_example_text
 from base.forms.utils.fields import RadioBooleanField
 from base.forms.utils.file_field import MaxOneFileUploadField
 from base.utils.mark_safe_lazy import mark_safe_lazy
 from education_group.templatetags.academic_year_display import get_academic_year
 from reference.services.iban_validator import (
-    IBANValidatorService,
     IBANValidatorException,
     IBANValidatorRequestException,
+    IBANValidatorService,
 )
+
+IBAN_MIN_LENGTH = min(IBAN_COUNTRY_CODE_LENGTH.values())
 
 
 class AccountingForm(forms.Form):
