@@ -63,6 +63,7 @@ def initier_proposition(
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
 ) -> 'PropositionIdentity':
     # GIVEN
+    maximum_propositions_service.verifier_nombre_propositions_en_cours_formation_doctorale(cmd.matricule_candidat)
     maximum_propositions_service.verifier_nombre_propositions_en_cours(cmd.matricule_candidat)
 
     parcours_doctoral_pre_admission_associee = ParcoursDoctoralTranslator.recuperer(
