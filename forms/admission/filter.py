@@ -42,8 +42,12 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
     ORGANISATION_ONGLETS_CHECKLIST as ORGANISATION_ONGLETS_CHECKLIST_GENERALE,
 )
 from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
-from admission.ddd.admission.shared_kernel.enums.liste import TardiveModificationReorientationFiltre
-from admission.ddd.admission.shared_kernel.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
+from admission.ddd.admission.shared_kernel.enums.liste import (
+    TardiveModificationReorientationFiltre,
+)
+from admission.ddd.admission.shared_kernel.enums.statut import (
+    CHOIX_STATUT_TOUTE_PROPOSITION,
+)
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.forms import (
     ALL_EMPTY_CHOICE,
@@ -229,12 +233,10 @@ class AllAdmissionsFilterForm(AdmissionFilterWithEntitiesAndTrainingTypesForm):
     training_types = AnneeInscriptionFormationTranslator.ADMISSION_EDUCATION_TYPE_BY_OSIS_TYPE.keys()
 
     scholarship_types_by_field = {
-        'bourse_internationale': {
-            ScholarshipType.BOURSE_INTERNATIONALE_DOCTORAT.name,
-            ScholarshipType.BOURSE_INTERNATIONALE_FORMATION_GENERALE.name,
-        },
+        'bourse_internationale': {ScholarshipType.BOURSE_INTERNATIONALE_FORMATION_GENERALE.name},
         'bourse_erasmus_mundus': {ScholarshipType.ERASMUS_MUNDUS.name},
         'bourse_double_diplomation': {ScholarshipType.DOUBLE_TRIPLE_DIPLOMATION.name},
+        'bourse_recherche': {ScholarshipType.BOURSE_INTERNATIONALE_DOCTORAT.name},
     }
 
     noma = forms.RegexField(
@@ -283,6 +285,12 @@ class AllAdmissionsFilterForm(AdmissionFilterWithEntitiesAndTrainingTypesForm):
         label=_('Dual degree scholarship'),
         empty_value=None,
         required=False,
+    )
+
+    bourse_recherche = forms.TypedChoiceField(
+        label=_("Research scholarship"),
+        required=False,
+        empty_value=None,
     )
 
     quarantaine = forms.TypedChoiceField(
@@ -390,6 +398,10 @@ class AllAdmissionsFilterForm(AdmissionFilterWithEntitiesAndTrainingTypesForm):
     def clean_bourse_double_diplomation(self):
         bourse_double_diplomation = self.cleaned_data.get('bourse_double_diplomation')
         return str(bourse_double_diplomation.uuid) if bourse_double_diplomation else ''
+
+    def clean_bourse_recherche(self):
+        bourse_recherche = self.cleaned_data.get('bourse_recherche')
+        return str(bourse_recherche.uuid) if bourse_recherche else ''
 
 
 class ContinuingAdmissionsFilterForm(AdmissionFilterWithEntitiesAndTrainingTypesForm):

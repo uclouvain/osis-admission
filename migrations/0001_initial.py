@@ -4,7 +4,7 @@ import uuid
 
 import django.contrib.postgres.fields.jsonb
 import django.db.models.deletion
-import osis_document.contrib.fields
+import osis_document_components.fields
 import osis_signature.contrib.fields
 from django.db import migrations, models
 
@@ -222,25 +222,25 @@ class Migration(migrations.Migration):
                 ),
                 (
                     'project_document',
-                    osis_document.contrib.fields.FileField(
+                    osis_document_components.fields.FileField(
                         base_field=models.UUIDField(), default=list, size=None, verbose_name='Project'
                     ),
                 ),
                 (
                     'gantt_graph',
-                    osis_document.contrib.fields.FileField(
+                    osis_document_components.fields.FileField(
                         base_field=models.UUIDField(), default=list, size=None, verbose_name='Gantt chart'
                     ),
                 ),
                 (
                     'program_proposition',
-                    osis_document.contrib.fields.FileField(
+                    osis_document_components.fields.FileField(
                         base_field=models.UUIDField(), default=list, size=None, verbose_name='Program proposition'
                     ),
                 ),
                 (
                     'additional_training_project',
-                    osis_document.contrib.fields.FileField(
+                    osis_document_components.fields.FileField(
                         base_field=models.UUIDField(),
                         default=list,
                         size=None,

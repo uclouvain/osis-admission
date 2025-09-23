@@ -33,6 +33,7 @@ import attr
 import freezegun
 import img2pdf
 import mock
+from PIL import Image
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import override_settings
@@ -343,12 +344,12 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
         self.bytes_io_default_content = BytesIO(b'some content')
 
         # Mock osis-document
-        patcher = mock.patch('osis_document.api.utils.get_remote_token', return_value='foobar')
+        patcher = mock.patch('osis_document_components.services.get_remote_token', return_value='foobar')
         patcher.start()
         self.addCleanup(patcher.stop)
 
         patcher = mock.patch(
-            'osis_document.api.utils.get_remote_metadata',
+            'osis_document_components.services.get_remote_metadata',
             return_value={
                 'name': 'myfile',
                 'mimetype': PDF_MIME_TYPE,
@@ -358,21 +359,21 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = mock.patch('osis_document.api.utils.confirm_remote_upload')
+        patcher = mock.patch('osis_document_components.services.confirm_remote_upload')
         patched = patcher.start()
         patched.return_value = '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'
         self.addCleanup(patcher.stop)
-        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patcher = mock.patch('osis_document_components.fields.FileField._confirm_multiple_upload')
         patched = patcher.start()
         patched.side_effect = lambda _, value, __: ['550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'] if value else []
         self.addCleanup(patcher.stop)
 
-        patcher = mock.patch('osis_document.api.utils.get_remote_tokens')
+        patcher = mock.patch('osis_document_components.services.get_remote_tokens')
         patched = patcher.start()
         patched.side_effect = lambda uuids, **kwargs: {uuid: f'token-{index}' for index, uuid in enumerate(uuids)}
         self.addCleanup(patcher.stop)
 
-        patcher = mock.patch('osis_document.api.utils.get_several_remote_metadata')
+        patcher = mock.patch('osis_document_components.services.get_several_remote_metadata')
         patched = patcher.start()
         patched.side_effect = lambda tokens: {
             token: {
@@ -429,33 +430,49 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
 
     def test_convert_and_get_raw_with_jpeg_attachment(self):
         image_attachment = Attachment(label='JPEG', uuids=[''], identifier='CARTE_IDENTITE')
-        image_attachment.get_raw(
-            token='token',
-            metadata={
-                'name': 'myfile',
-                'mimetype': JPEG_MIME_TYPE,
-            },
-            default_content=self.bytes_io_default_content,
-        )
-        self.get_raw_content_mock.assert_called_once_with('token')
-        self.convert_img_mock.assert_called_once_with(
-            self.get_raw_content_mock.return_value, rotation=img2pdf.Rotation.ifvalid
-        )
+
+        image = Image.new('RGB', (1, 1), (255, 255, 255))
+        with BytesIO() as out_buf:
+            image.save(out_buf, format='JPEG')
+            self.get_raw_content_mock.return_value = out_buf.getvalue()
+
+            image_attachment.get_raw(
+                token='token',
+                metadata={
+                    'name': 'myfile',
+                    'mimetype': JPEG_MIME_TYPE,
+                },
+                default_content=self.bytes_io_default_content,
+            )
+            self.get_raw_content_mock.assert_called_once_with('token')
+            self.convert_img_mock.assert_called_once_with(
+                self.get_raw_content_mock.return_value,
+                rotation=img2pdf.Rotation.ifvalid,
+                first_frame_only=True,
+            )
 
     def test_convert_and_get_raw_with_png_attachment(self):
         image_attachment = Attachment(label='PNG', uuids=[''], identifier='CARTE_IDENTITE')
-        image_attachment.get_raw(
-            token='token',
-            metadata={
-                'name': 'myfile',
-                'mimetype': PNG_MIME_TYPE,
-            },
-            default_content=self.bytes_io_default_content,
-        )
-        self.get_raw_content_mock.assert_called_once_with('token')
-        self.convert_img_mock.assert_called_once_with(
-            self.get_raw_content_mock.return_value, rotation=img2pdf.Rotation.ifvalid
-        )
+
+        image = Image.new('RGB', (1, 1), (255, 255, 255))
+        with BytesIO() as out_buf:
+            image.save(out_buf, format='PNG')
+            self.get_raw_content_mock.return_value = out_buf.getvalue()
+
+            image_attachment.get_raw(
+                token='token',
+                metadata={
+                    'name': 'myfile',
+                    'mimetype': PNG_MIME_TYPE,
+                },
+                default_content=self.bytes_io_default_content,
+            )
+            self.get_raw_content_mock.assert_called_once_with('token')
+            self.convert_img_mock.assert_called_once_with(
+                self.get_raw_content_mock.return_value,
+                rotation=img2pdf.Rotation.ifvalid,
+                first_frame_only=True,
+            )
 
     def test_get_default_content_if_mimetype_is_not_supported(self):
         unknown_attachment = Attachment(label='Unknown', uuids=[''], identifier='CARTE_IDENTITE')
@@ -951,22 +968,22 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
     @classmethod
     def setUpTestData(cls):
         # Mock osis-document
-        cls.get_remote_token_patcher = mock.patch("osis_document.api.utils.get_remote_token", return_value="foobar")
+        cls.get_remote_token_patcher = mock.patch("osis_document_components.services.get_remote_token", return_value="foobar")
         cls.get_remote_token_patcher.start()
 
         cls.get_remote_metadata_patcher = mock.patch(
-            "osis_document.api.utils.get_remote_metadata", return_value={"name": "myfile", "size": 1}
+            "osis_document_components.services.get_remote_metadata", return_value={"name": "myfile", "size": 1}
         )
         cls.get_remote_metadata_patcher.start()
 
         cls.confirm_remote_upload_patcher = mock.patch(
-            "osis_document.api.utils.confirm_remote_upload",
+            "osis_document_components.services.confirm_remote_upload",
             side_effect=lambda token, *args, **kwargs: token,
         )
         cls.confirm_remote_upload_patcher.start()
 
         cls.confirm_multiple_remote_upload_patcher = mock.patch(
-            "osis_document.contrib.fields.FileField._confirm_multiple_upload",
+            "osis_document_components.fields.FileField._confirm_multiple_upload",
             side_effect=lambda _, value, __: value,
         )
         cls.confirm_multiple_remote_upload_patcher.start()

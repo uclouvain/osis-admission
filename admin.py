@@ -43,7 +43,7 @@ from django_admin_listfilter_dropdown.filters import RelatedDropdownFilter
 from django_json_widget.widgets import JSONEditorWidget
 from hijack.contrib.admin import HijackUserAdminMixin
 from ordered_model.admin import OrderedModelAdmin
-from osis_document.contrib import FileField
+from osis_document_components.fields import FileField
 
 from admission.auth.roles.ca_member import CommitteeMember
 from admission.auth.roles.candidate import Candidate

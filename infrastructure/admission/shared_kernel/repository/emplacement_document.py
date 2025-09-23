@@ -127,7 +127,7 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
 
     @classmethod
     def save_multiple_emplacements_documents_reclamables(cls, entities: List[EmplacementDocument], auteur: str) -> None:
-        from osis_document.api.utils import change_remote_metadata
+        from osis_document_components.services import change_remote_metadata
 
         if not entities:
             return
@@ -215,7 +215,7 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
             experiences_injectees_uuid_set = cls._retrieve_experiences_uuid_set(admission.candidate_id)
 
             for model_object, fields in updated_fields_by_object.items():
-                # Ensure the files are not deleted by osis_document.contrib.fields.FileField.pre_save
+                # Ensure the files are not deleted by osis_document_components.fields.FileField.pre_save
                 model_object._files_to_keep = [
                     uuid_document
                     for entity in entities
@@ -319,7 +319,7 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
         admission = cls.get_admission(entity_id=emplacement_document.entity_id.proposition_id)
 
         # Save the metadata of the file
-        from osis_document.api.utils import change_remote_metadata
+        from osis_document_components.services import change_remote_metadata
 
         change_remote_metadata(
             token=emplacement_document.uuids_documents[0],

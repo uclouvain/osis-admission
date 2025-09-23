@@ -53,16 +53,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator import (
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     DoctoratNonTrouveException,
-)
-from admission.ddd.admission.shared_kernel.enums import (
-    ChoixAssimilation1,
-    ChoixAssimilation2,
-    ChoixAssimilation3,
-    ChoixAssimilation5,
-    ChoixAssimilation6,
-    ChoixTypeCompteBancaire,
-    LienParente,
-    TypeSituationAssimilation,
+    MaximumPropositionsDoctoralesAtteintException,
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixMoyensDecouverteFormation,
@@ -76,6 +67,16 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 )
 from admission.ddd.admission.formation_generale.domain.validator import (
     exceptions as general_education_exceptions,
+)
+from admission.ddd.admission.shared_kernel.enums import (
+    ChoixAssimilation1,
+    ChoixAssimilation2,
+    ChoixAssimilation3,
+    ChoixAssimilation5,
+    ChoixAssimilation6,
+    ChoixTypeCompteBancaire,
+    LienParente,
+    TypeSituationAssimilation,
 )
 from admission.models import (
     ContinuingEducationAdmission,
@@ -102,10 +103,7 @@ from admission.tests.factories.form_item import (
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory
-from admission.tests.factories.supervision import (
-    CaMemberFactory,
-    PromoterFactory,
-)
+from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.enums.entity_type import EntityType
 from base.tests import QueriesAssertionsMixin
@@ -220,12 +218,12 @@ class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
 
     def setUp(self):
         # Mock documents
-        patcher = patch('osis_document.api.utils.get_remote_tokens')
+        patcher = patch('osis_document_components.services.get_remote_tokens')
         patched = patcher.start()
         patched.side_effect = lambda uuids, **kwargs: {uuid: f'token-{index}' for index, uuid in enumerate(uuids)}
         self.addCleanup(patcher.stop)
 
-        patcher = patch('osis_document.api.utils.get_several_remote_metadata')
+        patcher = patch('osis_document_components.services.get_several_remote_metadata')
         patched = patcher.start()
         patched.side_effect = lambda tokens: {
             token: {
@@ -237,29 +235,29 @@ class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
         }
         self.addCleanup(patcher.stop)
 
-        patcher = patch("osis_document.api.utils.get_remote_token", return_value="foobar")
+        patcher = patch("osis_document_components.services.get_remote_token", return_value="foobar")
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = patch("osis_document.api.utils.get_remote_metadata", return_value={"name": "myfile", "size": 1})
+        patcher = patch("osis_document_components.services.get_remote_metadata", return_value={"name": "myfile", "size": 1})
         patcher.start()
         self.addCleanup(patcher.stop)
 
         patcher = patch(
-            "osis_document.api.utils.confirm_remote_upload",
+            "osis_document_components.services.confirm_remote_upload",
             side_effect=lambda token, *args, **kwargs: token,
         )
         patcher.start()
         self.addCleanup(patcher.stop)
 
         patcher = patch(
-            "osis_document.contrib.fields.FileField._confirm_multiple_upload",
+            "osis_document_components.fields.FileField._confirm_multiple_upload",
             side_effect=lambda _, value, __: value,
         )
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        self.documents_remote_duplicate_patcher = patch('osis_document.api.utils.documents_remote_duplicate')
+        self.documents_remote_duplicate_patcher = patch('osis_document_components.services.documents_remote_duplicate')
         self.documents_remote_duplicate_patched = self.documents_remote_duplicate_patcher.start()
         self.documents_remote_duplicate_patched.return_value = self.duplicated_documents_tokens_by_uuid
         self.addCleanup(self.documents_remote_duplicate_patcher.stop)
@@ -299,7 +297,9 @@ class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
 
         from parcours_doctoral.ddd.domain.model.enums import ChoixStatutParcoursDoctoral
         from parcours_doctoral.models import ParcoursDoctoral
-        from parcours_doctoral.tests.factories.parcours_doctoral import ParcoursDoctoralFactory
+        from parcours_doctoral.tests.factories.parcours_doctoral import (
+            ParcoursDoctoralFactory,
+        )
         from parcours_doctoral.tests.factories.supervision import (
             CaMemberFactory as DoctorateCaMemberFactory,
         )
@@ -801,6 +801,19 @@ class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
         response = self.client.post(self.url, data=self.create_data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+    def test_admission_doctorate_creation_using_api_with_too_much_doctorate_propositions_in_parallel(self):
+        self.client.force_authenticate(user=self.candidate.user)
+        other_admission = DoctorateAdmissionFactory(
+            status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
+            candidate=self.candidate,
+        )
+        response = self.client.post(self.url, data=self.create_data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.json()['non_field_errors'][0]['status_code'],
+            MaximumPropositionsDoctoralesAtteintException.status_code,
+        )
+
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)
 
@@ -1022,20 +1035,20 @@ class GeneralEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
         cls.url = resolve_url('admission_api_v1:general_training_choice', uuid=str(cls.admission.uuid))
 
     def setUp(self) -> None:
-        patcher = patch('osis_document.api.utils.get_remote_token', return_value='foobar')
+        patcher = patch('osis_document_components.services.get_remote_token', return_value='foobar')
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = patch('osis_document.api.utils.get_remote_metadata', return_value={'name': 'myfile', 'size': 1})
+        patcher = patch('osis_document_components.services.get_remote_metadata', return_value={'name': 'myfile', 'size': 1})
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = patch('osis_document.api.utils.confirm_remote_upload')
+        patcher = patch('osis_document_components.services.confirm_remote_upload')
         patched = patcher.start()
         patched.return_value = '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'
         self.addCleanup(patcher.stop)
 
-        patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patcher = patch('osis_document_components.fields.FileField._confirm_multiple_upload')
         patched = patcher.start()
         patched.side_effect = lambda _, value, __: ['550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'] if value else []
         self.addCleanup(patcher.stop)
@@ -1155,20 +1168,20 @@ class ContinuingEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
         cls.url = resolve_url('admission_api_v1:continuing_training_choice', uuid=str(cls.admission.uuid))
 
     def setUp(self) -> None:
-        patcher = patch('osis_document.api.utils.get_remote_token', return_value='foobar')
+        patcher = patch('osis_document_components.services.get_remote_token', return_value='foobar')
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = patch('osis_document.api.utils.get_remote_metadata', return_value={'name': 'myfile', 'size': 1})
+        patcher = patch('osis_document_components.services.get_remote_metadata', return_value={'name': 'myfile', 'size': 1})
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = patch('osis_document.api.utils.confirm_remote_upload')
+        patcher = patch('osis_document_components.services.confirm_remote_upload')
         patched = patcher.start()
         patched.return_value = '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'
         self.addCleanup(patcher.stop)
 
-        patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patcher = patch('osis_document_components.fields.FileField._confirm_multiple_upload')
         patched = patcher.start()
         patched.side_effect = lambda _, value, __: ['550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'] if value else []
         self.addCleanup(patcher.stop)
@@ -1304,20 +1317,20 @@ class DoctorateEducationAdmissionTypeUpdateApiTestCase(QueriesAssertionsMixin, A
         cls.url = resolve_url('admission_api_v1:doctorate_admission_type_update', uuid=str(cls.admission.uuid))
 
     def setUp(self) -> None:
-        patcher = patch('osis_document.api.utils.get_remote_token', return_value='foobar')
+        patcher = patch('osis_document_components.services.get_remote_token', return_value='foobar')
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = patch('osis_document.api.utils.get_remote_metadata', return_value={'name': 'myfile', 'size': 1})
+        patcher = patch('osis_document_components.services.get_remote_metadata', return_value={'name': 'myfile', 'size': 1})
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = patch('osis_document.api.utils.confirm_remote_upload')
+        patcher = patch('osis_document_components.services.confirm_remote_upload')
         patched = patcher.start()
         patched.return_value = '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'
         self.addCleanup(patcher.stop)
 
-        patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patcher = patch('osis_document_components.fields.FileField._confirm_multiple_upload')
         patched = patcher.start()
         patched.side_effect = lambda _, value, __: ['550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'] if value else []
         self.addCleanup(patcher.stop)

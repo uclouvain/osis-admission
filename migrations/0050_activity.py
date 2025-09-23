@@ -2,7 +2,7 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-import osis_document.contrib.fields
+import osis_document_components.fields
 import uuid
 
 
@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
                 ('category', models.CharField(choices=[('CONFERENCE', 'CONFERENCE'), ('COMMUNICATION', 'COMMUNICATION'), ('SEMINAR', 'SEMINAR'), ('PUBLICATION', 'PUBLICATION'), ('SERVICE', 'SERVICE'), ('RESIDENCY', 'RESIDENCY'), ('VAE', 'VAE'), ('COURSE', 'COURSE'), ('PAPER', 'PAPER')], max_length=50)),
                 ('type', models.CharField(blank=True, default='', max_length=100, verbose_name='Activity type')),
                 ('title', models.CharField(blank=True, default='', max_length=200, verbose_name='Title')),
-                ('participating_proof', osis_document.contrib.fields.FileField(base_field=models.UUIDField(), blank=True, default=list, size=1, verbose_name='Participation certification')),
+                ('participating_proof', osis_document_components.fields.FileField(base_field=models.UUIDField(), blank=True, default=list, size=1, verbose_name='Participation certification')),
                 ('comment', models.TextField(blank=True, default='', verbose_name='Comment')),
                 ('start_date', models.DateField(blank=True, null=True, verbose_name='Start date')),
                 ('end_date', models.DateField(blank=True, null=True, verbose_name='End date')),
@@ -35,8 +35,8 @@ class Migration(migrations.Migration):
                 ('website', models.URLField(blank=True, default='', verbose_name='Website')),
                 ('committee', models.CharField(blank=True, choices=[('YES', 'YES'), ('NO', 'NO'), ('NA', 'N/A')], max_length=100, default='')),
                 ('dial_reference', models.CharField(blank=True, default='', max_length=100, verbose_name='Reference DIAL.Pr')),
-                ('acceptation_proof', osis_document.contrib.fields.FileField(base_field=models.UUIDField(), blank=True, default=list, size=1, verbose_name='Participation certification')),
-                ('summary', osis_document.contrib.fields.FileField(base_field=models.UUIDField(), blank=True, default=list, size=1, verbose_name='Summary')),
+                ('acceptation_proof', osis_document_components.fields.FileField(base_field=models.UUIDField(), blank=True, default=list, size=1, verbose_name='Participation certification')),
+                ('summary', osis_document_components.fields.FileField(base_field=models.UUIDField(), blank=True, default=list, size=1, verbose_name='Summary')),
                 ('subtype', models.CharField(blank=True, default='', max_length=100, verbose_name='Activity subtype')),
                 ('subtitle', models.TextField(blank=True, default='')),
                 ('authors', models.CharField(blank=True, default='', max_length=100, verbose_name='Authors')),

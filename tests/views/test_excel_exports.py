@@ -81,7 +81,9 @@ from admission.ddd.admission.shared_kernel.dtos.liste import (
     VisualiseurAdmissionDTO,
 )
 from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
-from admission.ddd.admission.shared_kernel.enums.liste import TardiveModificationReorientationFiltre
+from admission.ddd.admission.shared_kernel.enums.liste import (
+    TardiveModificationReorientationFiltre,
+)
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.shared_kernel.tests.factory.profil import (
     AnneeExperienceAcademiqueDTOFactory,
@@ -1713,7 +1715,7 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
         self.assertStrEqual(names[13], _('Funding type'))
         self.assertStrEqual(names[14], _('Research scholarship'))
         self.assertStrEqual(names[15], _('Cotutelle'))
-        self.assertStrEqual(names[16], _('FNRS, FRIA, FRESH'))
+        self.assertStrEqual(names[16], _('FNRS, FRIA, FRESH, CSC'))
         self.assertStrEqual(names[17], _('Submitted from'))
         self.assertStrEqual(names[18], _('Submitted until'))
         self.assertStrEqual(names[19], _('Include or exclude the checklist filters'))

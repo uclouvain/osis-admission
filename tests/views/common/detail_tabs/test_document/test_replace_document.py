@@ -30,7 +30,6 @@ import uuid
 import freezegun
 from django.shortcuts import resolve_url
 from django.test import override_settings
-from osis_document.contrib.forms import FileUploadField
 
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     IdentifiantBaseEmplacementDocument,
@@ -38,6 +37,7 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
 )
 from admission.tests.views.common.detail_tabs.test_document import BaseDocumentViewTestCase
 from base.forms.utils.file_field import PDF_MIME_TYPE
+from osis_document_components.forms import FileUploadField
 from osis_profile.constants import IMAGE_MIME_TYPES
 
 

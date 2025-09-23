@@ -27,7 +27,7 @@
 from dal import forward
 from django import forms
 from django.utils.translation import gettext_lazy as _
-from osis_document.contrib import FileUploadField
+from osis_document_components.fields import FileUploadField
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixDoctoratDejaRealise,
@@ -168,12 +168,12 @@ class DoctorateAdmissionProjectForm(forms.Form):
         max_length=255,
     )
     titre_projet = forms.CharField(
-        label=_("Project title (max. 100 characters)"),
+        label=_("Project title"),
         required=False,
         max_length=1023,
     )
     resume_projet = forms.CharField(
-        label=_("Project abstract (max. 2000 characters)"),
+        label=_("Project abstract (max. 4000 characters)"),
         help_text=_("Write your abstract in the language decided with your accompanying committee."),
         required=False,
         widget=forms.Textarea,

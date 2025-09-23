@@ -67,12 +67,12 @@ class PDFRecapApiTestCase(APITestCase, QueriesAssertionsMixin):
         cls.continuing_url = resolve_url("admission_api_v1:continuing_pdf_recap", uuid=continuation_admission.uuid)
 
     def setUp(self):
-        patcher = mock.patch('osis_document.api.utils.get_remote_tokens')
+        patcher = mock.patch('osis_document_components.services.get_remote_tokens')
         patched = patcher.start()
         patched.side_effect = lambda uuids, **kwargs: {uuid: f'token-{index}' for index, uuid in enumerate(uuids)}
         self.addCleanup(patcher.stop)
 
-        patcher = mock.patch('osis_document.api.utils.get_several_remote_metadata')
+        patcher = mock.patch('osis_document_components.services.get_several_remote_metadata')
         patched = patcher.start()
         patched.side_effect = lambda tokens: {
             token: {
@@ -84,7 +84,7 @@ class PDFRecapApiTestCase(APITestCase, QueriesAssertionsMixin):
         }
         self.addCleanup(patcher.stop)
 
-        save_raw_content_remotely_patcher = mock.patch('osis_document.utils.save_raw_content_remotely')
+        save_raw_content_remotely_patcher = mock.patch('osis_document_components.services.save_raw_content_remotely')
         patched = save_raw_content_remotely_patcher.start()
         patched.return_value = 'a-token'
         self.addCleanup(save_raw_content_remotely_patcher.stop)

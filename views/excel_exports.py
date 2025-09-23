@@ -105,15 +105,19 @@ from admission.ddd.admission.shared_kernel.dtos.liste import (
 from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire
 from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
-from admission.ddd.admission.shared_kernel.enums.liste import TardiveModificationReorientationFiltre
-from admission.ddd.admission.shared_kernel.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION_DICT
+from admission.ddd.admission.shared_kernel.enums.liste import (
+    TardiveModificationReorientationFiltre,
+)
+from admission.ddd.admission.shared_kernel.enums.statut import (
+    CHOIX_STATUT_TOUTE_PROPOSITION_DICT,
+)
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.forms.admission.filter import (
     AllAdmissionsFilterForm,
     ContinuingAdmissionsFilterForm,
 )
 from admission.forms.doctorate.cdd.filter import DoctorateListFilterForm
-from admission.models import AdmissionFormItem
+from admission.models import AdmissionFormItem, SupervisionActor
 from admission.templatetags.admission import admission_status
 from admission.utils import add_messages_into_htmx_response
 from admission.views import PaginatedList
@@ -354,6 +358,7 @@ class AdmissionListExcelExportView(BaseAdmissionExcelExportView):
                 'bourse_internationale',
                 'bourse_erasmus_mundus',
                 'bourse_double_diplomation',
+                'bourse_recherche',
             ]
             if formatted_filters.get(scholarship)
         }

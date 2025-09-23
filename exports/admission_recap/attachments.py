@@ -27,9 +27,9 @@ from io import BytesIO
 from typing import Dict, List, Optional
 
 import img2pdf
-from PIL.Image import DecompressionBombError
 from django.utils.translation import override
-from osis_document.api.utils import get_raw_content_remotely
+from osis_document_components.services import get_raw_content_remotely
+from PIL import Image, UnidentifiedImageError
 
 from admission.constants import SUPPORTED_MIME_TYPES
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
@@ -45,7 +45,9 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.ddd.admission.shared_kernel.domain.validator._should_comptabilite_etre_completee import (
     recuperer_champs_requis_dto,
 )
-from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import (
+    QuestionSpecifiqueDTO,
+)
 from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
@@ -121,8 +123,31 @@ class Attachment:
                 return default_content
             if metadata.get('mimetype') in IMAGE_MIME_TYPES:
                 try:
-                    raw_content = img2pdf.convert(raw_content, rotation=img2pdf.Rotation.ifvalid)
-                except (DecompressionBombError, ValueError, img2pdf.ImageOpenError):
+                    with Image.open(BytesIO(raw_content)) as img:
+                        # Convert the image to RGB if necessary as img2pdf does not handle all cases
+                        with_transparency = 'transparency' in img.info
+                        if with_transparency or img.mode not in {'RGB', 'L'}:
+                            if img.mode in {'RGBA', 'LA', 'PA'} or with_transparency:
+                                # Set a white background
+                                background = Image.new('RGBA', img.size, (255, 255, 255))
+                                img = Image.alpha_composite(background, img.convert('RGBA'))
+
+                            img = img.convert('RGB')
+
+                            with BytesIO() as out_buf:
+                                img.save(out_buf, format='PNG')
+                                raw_content = img2pdf.convert(
+                                    out_buf.getvalue(),
+                                    rotation=img2pdf.Rotation.ifvalid,
+                                    first_frame_only=True,
+                                )
+                        else:
+                            raw_content = img2pdf.convert(
+                                raw_content,
+                                rotation=img2pdf.Rotation.ifvalid,
+                                first_frame_only=True,
+                            )
+                except (Image.DecompressionBombError, ValueError, img2pdf.ImageOpenError, UnidentifiedImageError):
                     # If the image size is too big or the image cannot be opened, display the default content
                     return default_content
             return BytesIO(raw_content)

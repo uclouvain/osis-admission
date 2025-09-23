@@ -28,6 +28,7 @@ from typing import List, Dict
 from admission.ddd.admission.shared_kernel.domain.service.i_emplacements_documents_proposition import (
     IEmplacementsDocumentsPropositionTranslator,
 )
+from osis_document_components.enums import PostProcessingWanted
 from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
 from admission.exports.admission_recap.section import get_sections
@@ -37,9 +38,13 @@ from osis_profile.models import EducationGroupYearExam
 class EmplacementsDocumentsPropositionTranslator(IEmplacementsDocumentsPropositionTranslator):
     @classmethod
     def recuperer_metadonnees_par_uuid_document(cls, uuids_documents: List[str]) -> Dict[str, Dict]:
-        from osis_document.api.utils import get_remote_tokens, get_several_remote_metadata
+        from osis_document_components.services import get_remote_tokens, get_several_remote_metadata
 
-        tokens = get_remote_tokens(uuids_documents, for_modified_upload=True)
+        tokens = get_remote_tokens(
+            uuids_documents,
+            for_modified_upload=True,
+            wanted_post_process=PostProcessingWanted.ORIGINAL.name,
+        )
         metadata = get_several_remote_metadata(list(tokens.values()))
 
         return {

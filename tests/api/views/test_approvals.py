@@ -110,11 +110,20 @@ class ApprovalsApiTestCase(ApprovalMixin, APITestCase):
 
     def test_assert_methods_not_allowed(self):
         self.client.force_authenticate(user=self.promoter.person.user)
-        methods_not_allowed = ['get', 'delete', 'patch']
+        methods_not_allowed = ['delete', 'patch']
 
         for method in methods_not_allowed:
             response = getattr(self.client, method)(self.url)
             self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_approval_get(self):
+        self.client.force_authenticate(user=self.promoter.person.user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.client.force_authenticate(user=self.ca_member.person.user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_supervision_get(self):
         self.client.force_authenticate(user=self.promoter.person.user)
@@ -304,9 +313,9 @@ class ApproveByPdfApiTestCase(ApprovalMixin, APITestCase):
         response = self.client.post(self.url, {"uuid_membre": str(self.ca_member.uuid), **self.approved_data})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    @patch('osis_document.api.utils.get_remote_metadata')
-    @patch('osis_document.api.utils.confirm_remote_upload')
-    @patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+    @patch('osis_document_components.services.get_remote_metadata')
+    @patch('osis_document_components.services.confirm_remote_upload')
+    @patch('osis_document_components.fields.FileField._confirm_multiple_upload')
     def test_approve_proposition_api_by_pdf(self, confirm_multiple_upload, confirm_remote_upload, get_remote_metadata):
         get_remote_metadata.return_value = {"name": "test.pdf", "size": 1}
         confirm_remote_upload.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'

@@ -115,24 +115,24 @@ class AdmissionCurriculumGlobalFormViewForContinuingTestCase(TestCase):
 
     def setUp(self):
         # Mock documents
-        patcher = patch('osis_document.api.utils.get_remote_token', return_value='foobar')
+        patcher = patch('osis_document_components.services.get_remote_token', return_value='foobar')
         patcher.start()
         self.addCleanup(patcher.stop)
 
         patcher = patch(
-            'osis_document.api.utils.get_remote_metadata',
+            'osis_document_components.services.get_remote_metadata',
             return_value={'name': 'myfile', 'size': 1, 'mimetype': PDF_MIME_TYPE},
         )
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patcher = patch('osis_document_components.fields.FileField._confirm_multiple_upload')
         patched = patcher.start()
         patched.side_effect = lambda _, value, __: ['550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'] if value else []
         self.addCleanup(patcher.stop)
 
         patcher = patch(
-            'osis_document.api.utils.get_several_remote_metadata',
+            'osis_document_components.services.get_several_remote_metadata',
             side_effect=lambda tokens, *args, **kwargs: {
                 token: {'name': 'test.pdf', 'size': 1, 'mimetype': PDF_MIME_TYPE} for token in tokens
             },

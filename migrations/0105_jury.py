@@ -2,7 +2,7 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-import osis_document.contrib.fields
+import osis_document_components.fields
 import uuid
 
 
@@ -118,7 +118,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='doctorateadmission',
             name='jury_approval',
-            field=osis_document.contrib.fields.FileField(
+            field=osis_document_components.fields.FileField(
                 base_field=models.UUIDField(), default=list, size=None, verbose_name='Jury approval'
             ),
         ),

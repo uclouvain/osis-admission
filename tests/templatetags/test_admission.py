@@ -477,7 +477,7 @@ class DisplayTagTestCase(TestCase):
         self.assertEqual(
             component,
             {
-                'template': 'osis_document/editor.html',
+                'template': 'osis_document_components/editor.html',
                 'value': 'token',
                 'base_url': settings.OSIS_DOCUMENT_BASE_URL,
                 'attrs': {},
@@ -495,7 +495,7 @@ class DisplayTagTestCase(TestCase):
         self.assertEqual(
             component,
             {
-                'template': 'osis_document/editor.html',
+                'template': 'osis_document_components/editor.html',
                 'value': 'token',
                 'base_url': settings.OSIS_DOCUMENT_BASE_URL,
                 'attrs': {'pagination': False, 'zoom': False, 'comment': False, 'highlight': False, 'rotation': False},

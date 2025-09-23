@@ -261,41 +261,41 @@ class CddDecisionSendToSicViewTestCase(TestCase):
         )
         self.file_uuid = uuid.UUID('4bdffb42-552d-415d-9e4c-725f10dce228')
 
-        self.confirm_remote_upload_patcher = mock.patch('osis_document.api.utils.confirm_remote_upload')
+        self.confirm_remote_upload_patcher = mock.patch('osis_document_components.services.confirm_remote_upload')
         patched = self.confirm_remote_upload_patcher.start()
         patched.return_value = str(self.file_uuid)
         self.addCleanup(self.confirm_remote_upload_patcher.stop)
 
         self.confirm_multiple_remote_upload_patcher = mock.patch(
-            'osis_document.contrib.fields.FileField._confirm_multiple_upload'
+            'osis_document_components.fields.FileField._confirm_multiple_upload'
         )
         patched = self.confirm_multiple_remote_upload_patcher.start()
         patched.side_effect = lambda _, value, __: [str(self.file_uuid)] if value else []
         self.addCleanup(self.confirm_multiple_remote_upload_patcher.stop)
 
-        self.get_remote_metadata_patcher = mock.patch('osis_document.api.utils.get_remote_metadata')
+        self.get_remote_metadata_patcher = mock.patch('osis_document_components.services.get_remote_metadata')
         patched = self.get_remote_metadata_patcher.start()
         patched.return_value = {"name": "test.pdf", "size": 1}
         self.addCleanup(self.get_remote_metadata_patcher.stop)
 
-        self.get_remote_token_patcher = mock.patch('osis_document.api.utils.get_remote_token')
+        self.get_remote_token_patcher = mock.patch('osis_document_components.services.get_remote_token')
         patched = self.get_remote_token_patcher.start()
         patched.return_value = 'foobar'
         self.addCleanup(self.get_remote_token_patcher.stop)
 
-        patcher = patch('osis_document.api.utils.get_remote_tokens')
+        patcher = patch('osis_document_components.services.get_remote_tokens')
         patched = patcher.start()
         patched.side_effect = lambda uuids, **kwargs: {
             document_uuid: f'token-{index}' for index, document_uuid in enumerate(uuids)
         }
         self.addCleanup(patcher.stop)
 
-        self.get_several_remote_metadata_patcher = mock.patch('osis_document.api.utils.get_several_remote_metadata')
+        self.get_several_remote_metadata_patcher = mock.patch('osis_document_components.services.get_several_remote_metadata')
         patched = self.get_several_remote_metadata_patcher.start()
         patched.return_value = {"foo": {"name": "test.pdf", "size": 1}}
         self.addCleanup(self.get_several_remote_metadata_patcher.stop)
 
-        self.save_raw_content_remotely_patcher = mock.patch('osis_document.utils.save_raw_content_remotely')
+        self.save_raw_content_remotely_patcher = mock.patch('osis_document_components.services.save_raw_content_remotely')
         patched = self.save_raw_content_remotely_patcher.start()
         patched.return_value = 'a-token'
         self.addCleanup(self.save_raw_content_remotely_patcher.stop)
@@ -545,29 +545,29 @@ class CddRefusalDecisionViewTestCase(TestCase):
         )
         self.file_uuid = uuid.UUID('4bdffb42-552d-415d-9e4c-725f10dce228')
 
-        self.confirm_remote_upload_patcher = mock.patch('osis_document.api.utils.confirm_remote_upload')
+        self.confirm_remote_upload_patcher = mock.patch('osis_document_components.services.confirm_remote_upload')
         patched = self.confirm_remote_upload_patcher.start()
         patched.return_value = str(self.file_uuid)
         self.addCleanup(self.confirm_remote_upload_patcher.stop)
 
         self.confirm_remote_upload_patcher = mock.patch(
-            'osis_document.contrib.fields.FileField._confirm_multiple_upload'
+            'osis_document_components.fields.FileField._confirm_multiple_upload'
         )
         patched = self.confirm_remote_upload_patcher.start()
         patched.side_effect = lambda _, value, __: [str(self.file_uuid)] if value else []
         self.addCleanup(self.confirm_remote_upload_patcher.stop)
 
-        self.get_remote_metadata_patcher = mock.patch('osis_document.api.utils.get_remote_metadata')
+        self.get_remote_metadata_patcher = mock.patch('osis_document_components.services.get_remote_metadata')
         patched = self.get_remote_metadata_patcher.start()
         patched.return_value = {"name": "test.pdf", "size": 1}
         self.addCleanup(self.get_remote_metadata_patcher.stop)
 
-        self.get_remote_token_patcher = mock.patch('osis_document.api.utils.get_remote_token')
+        self.get_remote_token_patcher = mock.patch('osis_document_components.services.get_remote_token')
         patched = self.get_remote_token_patcher.start()
         patched.return_value = 'foobar'
         self.addCleanup(self.get_remote_token_patcher.stop)
 
-        self.save_raw_content_remotely_patcher = mock.patch('osis_document.utils.save_raw_content_remotely')
+        self.save_raw_content_remotely_patcher = mock.patch('osis_document_components.services.save_raw_content_remotely')
         patched = self.save_raw_content_remotely_patcher.start()
         patched.return_value = 'a-token'
         self.addCleanup(self.save_raw_content_remotely_patcher.stop)
@@ -577,14 +577,14 @@ class CddRefusalDecisionViewTestCase(TestCase):
         self.change_remote_metadata_patcher.return_value = 'a-token'
         self.addCleanup(patcher.stop)
 
-        patcher = patch('osis_document.api.utils.get_remote_tokens')
+        patcher = patch('osis_document_components.services.get_remote_tokens')
         patched = patcher.start()
         patched.side_effect = lambda uuids, **kwargs: {
             document_uuid: f'token-{index}' for index, document_uuid in enumerate(uuids)
         }
         self.addCleanup(patcher.stop)
 
-        self.get_several_remote_metadata_patcher = mock.patch('osis_document.api.utils.get_several_remote_metadata')
+        self.get_several_remote_metadata_patcher = mock.patch('osis_document_components.services.get_several_remote_metadata')
         patched = self.get_several_remote_metadata_patcher.start()
         patched.return_value = {"foo": {"name": "test.pdf", "size": 1}}
         self.addCleanup(self.get_several_remote_metadata_patcher.stop)
@@ -872,41 +872,41 @@ class CddApprovalDecisionViewTestCase(TestCase):
         )
         self.file_uuid = uuid.UUID('4bdffb42-552d-415d-9e4c-725f10dce228')
 
-        self.confirm_remote_upload_patcher = mock.patch('osis_document.api.utils.confirm_remote_upload')
+        self.confirm_remote_upload_patcher = mock.patch('osis_document_components.services.confirm_remote_upload')
         patched = self.confirm_remote_upload_patcher.start()
         patched.return_value = str(self.file_uuid)
         self.addCleanup(self.confirm_remote_upload_patcher.stop)
 
         self.confirm_remote_upload_patcher = mock.patch(
-            'osis_document.contrib.fields.FileField._confirm_multiple_upload'
+            'osis_document_components.fields.FileField._confirm_multiple_upload'
         )
         patched = self.confirm_remote_upload_patcher.start()
         patched.side_effect = lambda _, value, __: [str(self.file_uuid)] if value else []
         self.addCleanup(self.confirm_remote_upload_patcher.stop)
 
-        self.get_remote_metadata_patcher = mock.patch('osis_document.api.utils.get_remote_metadata')
+        self.get_remote_metadata_patcher = mock.patch('osis_document_components.services.get_remote_metadata')
         patched = self.get_remote_metadata_patcher.start()
         patched.return_value = {"name": "test.pdf", "size": 1}
         self.addCleanup(self.get_remote_metadata_patcher.stop)
 
-        self.get_remote_token_patcher = mock.patch('osis_document.api.utils.get_remote_token')
+        self.get_remote_token_patcher = mock.patch('osis_document_components.services.get_remote_token')
         patched = self.get_remote_token_patcher.start()
         patched.return_value = 'foobar'
         self.addCleanup(self.get_remote_token_patcher.stop)
 
-        patcher = patch('osis_document.api.utils.get_remote_tokens')
+        patcher = patch('osis_document_components.services.get_remote_tokens')
         patched = patcher.start()
         patched.side_effect = lambda uuids, **kwargs: {
             document_uuid: f'token-{index}' for index, document_uuid in enumerate(uuids)
         }
         self.addCleanup(patcher.stop)
 
-        self.get_several_remote_metadata_patcher = mock.patch('osis_document.api.utils.get_several_remote_metadata')
+        self.get_several_remote_metadata_patcher = mock.patch('osis_document_components.services.get_several_remote_metadata')
         patched = self.get_several_remote_metadata_patcher.start()
         patched.return_value = {"foo": {"name": "test.pdf", "size": 1}}
         self.addCleanup(self.get_several_remote_metadata_patcher.stop)
 
-        self.save_raw_content_remotely_patcher = mock.patch('osis_document.utils.save_raw_content_remotely')
+        self.save_raw_content_remotely_patcher = mock.patch('osis_document_components.services.save_raw_content_remotely')
         patched = self.save_raw_content_remotely_patcher.start()
         patched.return_value = 'a-token'
         self.addCleanup(self.save_raw_content_remotely_patcher.stop)
@@ -1245,41 +1245,41 @@ class CddApprovalFinalDecisionViewTestCase(TestCase):
         )
         self.file_uuid = uuid.UUID('4bdffb42-552d-415d-9e4c-725f10dce228')
 
-        self.confirm_remote_upload_patcher = mock.patch('osis_document.api.utils.confirm_remote_upload')
+        self.confirm_remote_upload_patcher = mock.patch('osis_document_components.services.confirm_remote_upload')
         patched = self.confirm_remote_upload_patcher.start()
         patched.return_value = str(self.file_uuid)
         self.addCleanup(self.confirm_remote_upload_patcher.stop)
 
         self.confirm_multiple_remote_upload_patcher = mock.patch(
-            'osis_document.contrib.fields.FileField._confirm_multiple_upload'
+            'osis_document_components.fields.FileField._confirm_multiple_upload'
         )
         patched = self.confirm_multiple_remote_upload_patcher.start()
         patched.side_effect = lambda _, value, __: [str(self.file_uuid)] if value else []
         self.addCleanup(self.confirm_multiple_remote_upload_patcher.stop)
 
-        self.get_remote_metadata_patcher = mock.patch('osis_document.api.utils.get_remote_metadata')
+        self.get_remote_metadata_patcher = mock.patch('osis_document_components.services.get_remote_metadata')
         patched = self.get_remote_metadata_patcher.start()
         patched.return_value = {"name": "test.pdf", "size": 1}
         self.addCleanup(self.get_remote_metadata_patcher.stop)
 
-        self.get_remote_token_patcher = mock.patch('osis_document.api.utils.get_remote_token')
+        self.get_remote_token_patcher = mock.patch('osis_document_components.services.get_remote_token')
         patched = self.get_remote_token_patcher.start()
         patched.return_value = 'foobar'
         self.addCleanup(self.get_remote_token_patcher.stop)
 
-        patcher = patch('osis_document.api.utils.get_remote_tokens')
+        patcher = patch('osis_document_components.services.get_remote_tokens')
         patched = patcher.start()
         patched.side_effect = lambda uuids, **kwargs: {
             document_uuid: f'token-{index}' for index, document_uuid in enumerate(uuids)
         }
         self.addCleanup(patcher.stop)
 
-        self.get_several_remote_metadata_patcher = mock.patch('osis_document.api.utils.get_several_remote_metadata')
+        self.get_several_remote_metadata_patcher = mock.patch('osis_document_components.services.get_several_remote_metadata')
         patched = self.get_several_remote_metadata_patcher.start()
         patched.return_value = {"foo": {"name": "test.pdf", "size": 1}}
         self.addCleanup(self.get_several_remote_metadata_patcher.stop)
 
-        self.save_raw_content_remotely_patcher = mock.patch('osis_document.utils.save_raw_content_remotely')
+        self.save_raw_content_remotely_patcher = mock.patch('osis_document_components.services.save_raw_content_remotely')
         patched = self.save_raw_content_remotely_patcher.start()
         patched.return_value = 'a-token'
         self.addCleanup(self.save_raw_content_remotely_patcher.stop)
@@ -1389,7 +1389,9 @@ class CddApprovalFinalDecisionViewTestCase(TestCase):
         self.assertIn('groupe_supervision', pdf_context)
         self.assertIsNotNone(pdf_context['groupe_supervision'])
 
-        self.assertIn('cdd_president', pdf_context)
+        self.assertIn('gestionnaire', pdf_context)
+        self.assertEqual(pdf_context['gestionnaire'].prenom, self.fac_manager_user.person.first_name)
+        self.assertEqual(pdf_context['gestionnaire'].nom, self.fac_manager_user.person.last_name)
 
         # Check that an entry in the history has been created
         history_entries = HistoryEntry.objects.filter(object_uuid=self.admission.uuid).order_by('-id')

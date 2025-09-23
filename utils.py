@@ -218,13 +218,21 @@ def get_uuid_value(value: str) -> Union[uuid.UUID, str]:
         return value
 
 
-def get_admission_cdd_managers(education_group_id) -> models.QuerySet[Person]:
-    return Person.objects.filter(
-        models.Q(
-            id__in=AdmissionProgramManager.objects.filter(education_group_id=education_group_id).values('person_id')
-        )
-        | models.Q(id__in=ProgramManager.objects.filter(education_group_id=education_group_id).values('person_id'))
-    )
+def force_title(string: str):
+    """
+    Return a string in which all words are lowercase, except for the first letter of each one, which can written in
+    upper or lower case"""
+    title_string = list(string.title())
+
+    for index, char in enumerate(title_string):
+        if char.isupper() and string[index].islower():
+            title_string[index] = string[index]
+
+    return ''.join(title_string)
+
+
+def get_admission_cdd_managers(education_group_id) -> models.QuerySet[AdmissionProgramManager]:
+    return AdmissionProgramManager.objects.filter(education_group_id=education_group_id).select_related('person')
 
 
 def get_doctoral_cdd_managers(education_group_id) -> QuerySet[Person]:
@@ -255,6 +263,11 @@ def get_portal_admission_url(context, admission_uuid) -> str:
         context=context,
         uuid=admission_uuid,
     )
+
+
+def get_portal_doctorate_management_url(admission_uuid) -> str:
+    """Return the url of the admission in the portal."""
+    return settings.DOCTORAT_SUPERVISION_FRONTEND_LINK.format(uuid=admission_uuid)
 
 
 def get_backoffice_admission_url(context, admission_uuid, sub_namespace='', url_suffix='') -> str:
@@ -612,7 +625,6 @@ def get_experience_urls(
         )
 
     return res_context
-
 
 def get_thesis_location_initial_choices(value):
     return EMPTY_CHOICE if not value else EMPTY_CHOICE + ((value, value),)

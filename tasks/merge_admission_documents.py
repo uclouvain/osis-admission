@@ -31,7 +31,7 @@ from typing import List
 
 from django.db import transaction
 from django.utils.text import slugify
-from osis_document.enums import PostProcessingType
+from osis_document_components.enums import PostProcessingType
 
 from admission.models import (
     AdmissionTask,
@@ -59,7 +59,7 @@ from infrastructure.messages_bus import message_bus_instance
 
 def base_education_admission_document_merging(admission):
     """Merging of each document field of the proposition into one PDF."""
-    from osis_document.api.utils import launch_post_processing
+    from osis_document_components.services import launch_post_processing
 
     command = {
         GeneralEducationAdmission: RecupererDocumentsPropositionGeneraleQuery,

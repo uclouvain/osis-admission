@@ -641,12 +641,12 @@ class Historique(IHistorique):
 
         add_history_entry(
             proposition.entity_id.uuid,
-            f"Demande au candidat de modifier le comité d'accompagnement par {gestionnaire_dto.prenom}"
+            f"Demande au candidat de modifier le comité d'accompagnement par {gestionnaire_dto.prenom} "
             f'{gestionnaire_dto.nom}.',
             f'Candidate asked to modify the supervision committee by {gestionnaire_dto.prenom} '
             f'{gestionnaire_dto.nom}.',
             '{gestionnaire_dto.prenom} {gestionnaire_dto.nom}'.format(gestionnaire_dto=gestionnaire_dto),
-            tags=['proposition', 'supervision', 'status-changed', 'message'],
+            tags=['proposition', 'supervision', 'status-changed'],
         )
 
     @classmethod

@@ -35,7 +35,7 @@ from django.test import override_settings
 from django.utils.translation import gettext_lazy as _
 from gestion_des_comptes.models import HistoriqueMatriculeCompte
 from osis_history.models import HistoryEntry
-from osis_notification.models import WebNotification
+from osis_notification.models import WebNotification, EmailNotification
 from osis_signature.enums import SignatureState
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -48,6 +48,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AbsenceDeDetteNonCompleteeDoctoratException,
     DetailProjetNonCompleteException,
+    MaximumPropositionsDoctoralesAtteintException,
     MembreCAManquantException,
     PromoteurDeReferenceManquantException,
     PromoteurManquantException,
@@ -55,6 +56,9 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 from admission.ddd.admission.doctorat.validation.domain.model.enums import (
     ChoixStatutCDD,
     ChoixStatutSIC,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
 )
 from admission.ddd.admission.shared_kernel.domain.service.i_elements_confirmation import (
     IElementsConfirmation,
@@ -65,9 +69,6 @@ from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     QuestionsSpecifiquesCurriculumNonCompleteesException,
 )
 from admission.ddd.admission.shared_kernel.enums.question_specifique import Onglets
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
-)
 from admission.models import (
     AdmissionFormItemInstantiation,
     AdmissionTask,
@@ -477,7 +478,7 @@ class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixi
         cls.url = resolve_url("admission_api_v1:project", uuid=cls.admission.uuid)
         cls.dto_url = resolve_url("admission_api_v1:doctorate_propositions", uuid=cls.admission.uuid)
 
-    @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
+    @patch("osis_document_components.fields.FileField._confirm_multiple_upload")
     def test_admission_doctorate_update_using_api_candidate(self, confirm_upload):
         confirm_upload.side_effect = lambda _, value, __: ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
         self.client.force_authenticate(user=self.candidate.user)
@@ -541,7 +542,7 @@ class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixi
 @override_settings(ROOT_URLCONF='admission.api.url_v1')
 class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
     @classmethod
-    @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
+    @patch("osis_document_components.fields.FileField._confirm_multiple_upload")
     def setUpTestData(cls, confirm_upload):
         confirm_upload.side_effect = lambda _, value, __: ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
         cls.admission = DoctorateAdmissionFactory(
@@ -766,10 +767,10 @@ class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
 @freezegun.freeze_time('2020-12-15')
 class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
     @classmethod
-    @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
+    @patch("osis_document_components.fields.FileField._confirm_multiple_upload")
     def setUpTestData(cls, confirm_upload):
         AdmissionAcademicCalendarFactory.produce_all_required()
-        language_fr = FrenchLanguageFactory()
+        cls.language_fr = FrenchLanguageFactory()
 
         confirm_upload.side_effect = lambda _, value, __: ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
         # Create candidates
@@ -805,22 +806,11 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         cls.second_invited_promoter.actor_ptr.switch_state(SignatureState.INVITED)
 
         # Create admissions
-        cls.first_admission_with_invitation = DoctorateAdmissionFactory(
-            candidate=cls.first_candidate,
-            status=ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
-            supervision_group=cls.first_invited_promoter.actor_ptr.process,
-            thesis_language=language_fr,
-        )
-        cls.first_admission_without_invitation = DoctorateAdmissionFactory(
-            candidate=cls.first_candidate,
-            supervision_group=cls.first_not_invited_promoter.actor_ptr.process,
-            thesis_language=language_fr,
-        )
         cls.second_admission = DoctorateAdmissionFactory(
             candidate=cls.second_candidate,
             status=ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
             supervision_group=cls.second_invited_promoter.actor_ptr.process,
-            thesis_language=language_fr,
+            thesis_language=cls.language_fr,
         )
         # Create other users
         cls.no_role_user = PersonFactory(first_name="Joe").user
@@ -829,14 +819,6 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         AdmissionFormItemFactory(internal_label=PASS_ET_LAS_LABEL)
 
         # Targeted urls
-        cls.first_admission_with_invitation_url = resolve_url(
-            "admission_api_v1:submit-doctoral-proposition",
-            uuid=cls.first_admission_with_invitation.uuid,
-        )
-        cls.first_admission_without_invitation_url = resolve_url(
-            "admission_api_v1:submit-doctoral-proposition",
-            uuid=cls.first_admission_without_invitation.uuid,
-        )
         cls.second_admission_url = resolve_url(
             "admission_api_v1:submit-doctoral-proposition",
             uuid=cls.second_admission.uuid,
@@ -871,17 +853,28 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         )
 
     def test_assert_methods_not_allowed(self):
-        self.client.force_authenticate(user=self.first_candidate.user)
+        self.client.force_authenticate(user=self.second_candidate.user)
         methods_not_allowed = ['patch', 'put', 'delete']
 
         for method in methods_not_allowed:
-            response = getattr(self.client, method)(self.first_admission_with_invitation_url)
+            response = getattr(self.client, method)(self.second_admission_url)
             self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED, f"{method} is allowed")
 
     def test_verify_valid_proposition_using_api(self):
         self.client.force_authenticate(user=self.first_candidate.user)
 
-        response = self.client.get(self.first_admission_with_invitation_url)
+        first_admission_with_invitation = DoctorateAdmissionFactory(
+            candidate=self.first_candidate,
+            status=ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
+            supervision_group=self.first_invited_promoter.actor_ptr.process,
+            thesis_language=self.language_fr,
+        )
+        first_admission_with_invitation_url = resolve_url(
+            "admission_api_v1:submit-doctoral-proposition",
+            uuid=first_admission_with_invitation.uuid,
+        )
+
+        response = self.client.get(first_admission_with_invitation_url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()["errors"]), 0)
@@ -896,22 +889,61 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
 
     def test_verify_no_role(self):
         self.client.force_authenticate(user=self.no_role_user)
-        response = self.client.get(self.first_admission_with_invitation_url)
+        first_admission_with_invitation = DoctorateAdmissionFactory(
+            candidate=self.first_candidate,
+            status=ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
+            supervision_group=self.first_invited_promoter.actor_ptr.process,
+            thesis_language=self.language_fr,
+        )
+        first_admission_with_invitation_url = resolve_url(
+            "admission_api_v1:submit-doctoral-proposition",
+            uuid=first_admission_with_invitation.uuid,
+        )
+        response = self.client.get(first_admission_with_invitation_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_verify_no_invited_promoters(self):
         self.client.force_authenticate(user=self.first_candidate.user)
-        response = self.client.get(self.first_admission_without_invitation_url)
+        first_admission_without_invitation = DoctorateAdmissionFactory(
+            candidate=self.first_candidate,
+            supervision_group=self.first_not_invited_promoter.actor_ptr.process,
+            thesis_language=self.language_fr,
+        )
+        first_admission_without_invitation_url = resolve_url(
+            "admission_api_v1:submit-doctoral-proposition",
+            uuid=first_admission_without_invitation.uuid,
+        )
+        response = self.client.get(first_admission_without_invitation_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_verify_other_candidate(self):
         self.client.force_authenticate(user=self.second_candidate.user)
-        response = self.client.get(self.first_admission_with_invitation_url)
+        first_admission_with_invitation = DoctorateAdmissionFactory(
+            candidate=self.first_candidate,
+            status=ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
+            supervision_group=self.first_invited_promoter.actor_ptr.process,
+            thesis_language=self.language_fr,
+        )
+        first_admission_with_invitation_url = resolve_url(
+            "admission_api_v1:submit-doctoral-proposition",
+            uuid=first_admission_with_invitation.uuid,
+        )
+        response = self.client.get(first_admission_with_invitation_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)
-        response = self.client.get(self.first_admission_with_invitation_url)
+        first_admission_with_invitation = DoctorateAdmissionFactory(
+            candidate=self.first_candidate,
+            status=ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
+            supervision_group=self.first_invited_promoter.actor_ptr.process,
+            thesis_language=self.language_fr,
+        )
+        first_admission_with_invitation_url = resolve_url(
+            "admission_api_v1:submit-doctoral-proposition",
+            uuid=first_admission_with_invitation.uuid,
+        )
+        response = self.client.get(first_admission_with_invitation_url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_submit_valid_proposition_using_api(self):
@@ -959,8 +991,8 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
                 },
             },
         )
-        self.assertEqual(WebNotification.objects.count(), 1)
-        self.assertEqual(WebNotification.objects.first().person, manager.person)
+        self.assertEqual(EmailNotification.objects.filter(person=admission.candidate).count(), 1)
+        self.assertEqual(EmailNotification.objects.filter(person=manager.person).count(), 1)
 
         admission_tasks = AdmissionTask.objects.filter(admission=admission).order_by('type')
         self.assertEqual(len(admission_tasks), 2)
@@ -972,30 +1004,39 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         self.assertCountEqual(history_entry.tags, ['proposition', 'status-changed', 'soumission'])
 
     def test_submit_valid_proposition_using_api_but_too_much_submitted_propositions(self):
-        DoctorateAdmissionFactory(
-            training__academic_year__current=True,
-            candidate=self.first_candidate,
-            status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
+        self.client.force_authenticate(user=self.second_candidate.user)
+
+        previous_proposition = DoctorateAdmissionFactory(
+            candidate=self.second_candidate,
             supervision_group=self.first_invited_promoter.actor_ptr.process,
         )
 
-        admission = DoctorateAdmissionFactory(
-            training__academic_year__current=True,
-            candidate=self.first_candidate,
-            status=ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
-            supervision_group=self.first_invited_promoter.actor_ptr.process,
-        )
+        finished_statuses = {
+            ChoixStatutPropositionDoctorale.ANNULEE.name,
+            ChoixStatutPropositionDoctorale.CLOTUREE.name,
+            ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
+            ChoixStatutPropositionDoctorale.INSCRIPTION_REFUSEE.name,
+        }
 
-        self.client.force_authenticate(user=self.first_candidate.user)
+        error_to_found = {
+            'status_code': MaximumPropositionsDoctoralesAtteintException.status_code,
+            'detail': 'Vous ne pouvez pas avoir deux demandes ouvertes en parallèle pour une formation doctorale.',
+        }
 
-        url = resolve_url("admission_api_v1:submit-doctoral-proposition", uuid=admission.uuid)
-        response = self.client.post(url, self.submitted_data)
+        for current_status in ChoixStatutPropositionDoctorale.get_names():
+            previous_proposition.status = current_status
+            previous_proposition.save(update_fields=['status'])
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        ret = response.json()
-        self.assertIn(
-            NombrePropositionsSoumisesDepasseException.status_code, [e["status_code"] for e in ret['non_field_errors']]
-        )
+            response = self.client.get(self.second_admission_url)
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            json_response = response.json()
+
+            if current_status in finished_statuses:
+                self.assertNotIn(error_to_found, json_response['errors'])
+            else:
+                self.assertIn(error_to_found, json_response['errors'])
 
     def test_submit_invalid_proposition_using_api(self):
         admission = DoctorateAdmissionFactory(

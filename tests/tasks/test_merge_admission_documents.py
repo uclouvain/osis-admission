@@ -29,7 +29,7 @@ from unittest.mock import patch
 
 from django.conf import settings
 from django.test import override_settings
-from osis_document.enums import PostProcessingType
+from osis_document_components.enums import PostProcessingType
 from rest_framework.test import APITestCase
 
 from admission.ddd.admission.formation_generale.domain.model.enums import (
@@ -138,30 +138,30 @@ class MergeAdmissionDocumentsTestCase(APITestCase):
         self.metadata_by_token = {token: self.pdf_file_metadata.copy() for token in self.uuid_documents_by_token}
 
         # Mock documents
-        patcher = patch("osis_document.api.utils.get_remote_token", return_value="a-token")
+        patcher = patch("osis_document_components.services.get_remote_token", return_value="a-token")
         patcher.start()
         self.addCleanup(patcher.stop)
 
         patcher = patch(
-            "osis_document.api.utils.get_remote_metadata",
+            "osis_document_components.services.get_remote_metadata",
             return_value={"name": "myfile.myext", "mimetype": "application/pdf", "size": 1},
         )
         patcher.start()
         self.addCleanup(patcher.stop)
 
         patcher = patch(
-            "osis_document.api.utils.confirm_remote_upload",
+            "osis_document_components.services.confirm_remote_upload",
             side_effect=lambda token, *args, **kwargs: self.uuid_documents_by_token[token],
         )
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = patch("osis_document.api.utils.declare_remote_files_as_deleted")
+        patcher = patch("osis_document_components.services.declare_remote_files_as_deleted")
         patcher.start()
         self.addCleanup(patcher.stop)
 
         patcher = patch(
-            "osis_document.api.utils.get_several_remote_metadata",
+            "osis_document_components.services.get_several_remote_metadata",
             side_effect=lambda tokens: {
                 token: {"name": "myfile.myext", "mimetype": "application/pdf", "size": 1} for token in tokens
             },
@@ -170,20 +170,20 @@ class MergeAdmissionDocumentsTestCase(APITestCase):
         self.addCleanup(patcher.stop)
 
         patcher = patch(
-            "osis_document.api.utils.confirm_remote_upload",
+            "osis_document_components.services.confirm_remote_upload",
             side_effect=lambda token, *args, **kwargs: self.uuid_documents_by_token[token],
         )
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        self.patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        self.patcher = patch('osis_document_components.fields.FileField._confirm_multiple_upload')
         patched = self.patcher.start()
         patched.side_effect = lambda _, att_values, __: [
             self.uuid_documents_by_token.get(value, value) for value in att_values
         ]
         self.addCleanup(self.patcher.stop)
 
-        patcher = patch('osis_document.api.utils.get_remote_tokens')
+        patcher = patch('osis_document_components.services.get_remote_tokens')
         patched = patcher.start()
         patched.side_effect = lambda uuids, **kwargs: {
             document_uuid: self.tokens_by_uuid.get(document_uuid, f'token-{index}')
@@ -191,24 +191,24 @@ class MergeAdmissionDocumentsTestCase(APITestCase):
         }
         self.addCleanup(patcher.stop)
 
-        patcher = patch('osis_document.api.utils.get_several_remote_metadata')
+        patcher = patch('osis_document_components.services.get_several_remote_metadata')
         self.get_several_remote_metadata_patched = patcher.start()
         self.get_several_remote_metadata_patched.side_effect = lambda tokens: {
             token: self.metadata_by_token.get(token, self.pdf_file_metadata) for token in tokens
         }
         self.addCleanup(patcher.stop)
 
-        patcher = patch('osis_document.utils.save_raw_content_remotely')
+        patcher = patch('osis_document_components.services.save_raw_content_remotely')
         patched = patcher.start()
         patched.return_value = 'a-token'
         self.addCleanup(patcher.stop)
 
-        patcher = patch('osis_document.api.utils.change_remote_metadata')
+        patcher = patch('osis_document_components.services.change_remote_metadata')
         self.change_remote_metadata_patcher = patcher.start()
         self.change_remote_metadata_patcher.return_value = 'a-token'
         self.addCleanup(patcher.stop)
 
-        patcher = patch('osis_document.api.utils.launch_post_processing')
+        patcher = patch('osis_document_components.services.launch_post_processing')
         self.launch_post_processing_patcher = patcher.start()
         self.launch_post_processing_patcher.side_effect = self._simulate_post_processing
         self.addCleanup(patcher.stop)

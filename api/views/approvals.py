@@ -103,13 +103,23 @@ class ApprovePropositionMixin:
         responses=serializers.PropositionIdentityDTOSerializer,
         operation_id='reject_proposition',
     ),
+    get=extend_schema(
+        responses=None,
+        operation_id='retrieve_doctorate_management',
+    ),
 )
 class ApprovePropositionAPIView(ApprovePropositionMixin, APIPermissionRequiredMixin, APIView):
     name = "approvals"
     permission_mapping = {
         'POST': 'admission.api_approve_proposition',
         'PUT': 'admission.api_approve_proposition',
+        'GET': 'admission.api_view_doctorate_management',
     }
+
+    def get(self, request, *args, **kwargs):
+        """This method is only used to check the access permission to the doctorate management pages."""
+        # We have to return some data as the schema expects a 200 status and the deserializer expects some data.
+        return Response(data=[])
 
 
 @extend_schema_view(

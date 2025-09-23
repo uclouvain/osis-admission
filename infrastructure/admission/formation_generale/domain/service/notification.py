@@ -31,8 +31,9 @@ from django.conf import settings
 from django.utils import translation, formats
 from django.utils.translation import gettext as _, gettext
 from osis_async.models import AsyncTask
-from osis_document.api.utils import get_remote_token, get_remote_tokens
-from osis_document.utils import get_file_url
+from osis_document_components.services import get_remote_token, get_remote_tokens
+from osis_document_components.enums import PostProcessingWanted
+from osis_document_components.utils import get_file_url
 from osis_mail_template import generate_email
 from osis_mail_template.utils import transform_html_to_text
 from osis_notification.contrib.handlers import EmailNotificationHandler
@@ -374,7 +375,11 @@ class Notification(INotification):
         document_uuid = (
             GeneralEducationAdmission.objects.filter(uuid=proposition.entity_id.uuid).values('sic_refusal_certificate')
         )[0]['sic_refusal_certificate'][0]
-        token = get_remote_token(document_uuid, custom_ttl=ONE_YEAR_SECONDS)
+        token = get_remote_token(
+            document_uuid,
+            custom_ttl=ONE_YEAR_SECONDS,
+            wanted_post_process=PostProcessingWanted.ORIGINAL.name,
+        )
         document_url = get_file_url(token)
         corps_message = corps_message.replace(EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN, document_url)
 
@@ -421,7 +426,11 @@ class Notification(INotification):
         document_uuids_list = [document for document in document_uuids.values() if document]
 
         if document_uuids_list:
-            document_tokens = get_remote_tokens(document_uuids_list, custom_ttl=ONE_YEAR_SECONDS)
+            document_tokens = get_remote_tokens(
+                document_uuids_list,
+                custom_ttl=ONE_YEAR_SECONDS,
+                wanted_post_process=PostProcessingWanted.ORIGINAL.name,
+            )
 
             if document_tokens:
                 if document_uuids['sic_approval_certificate'] and document_tokens.get(

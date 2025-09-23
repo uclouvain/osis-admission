@@ -771,6 +771,7 @@ class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixi
             'approve_by_pdf',
             'retrieve_documents',
             'update_documents',
+            'retrieve_doctorate_management',
         ]
         self.assertActionLinks(response.data['links'], allowed_actions, forbidden_actions)
 

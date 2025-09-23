@@ -47,7 +47,7 @@ from django.views.generic import FormView, TemplateView
 from django.views.generic.base import RedirectView, View
 from django_htmx.http import HttpResponseClientRefresh
 from osis_comment.models import CommentEntry
-from osis_document.utils import get_file_url
+from osis_document_components.utils import get_file_url
 from osis_history.models import HistoryEntry
 from osis_history.utilities import add_history_entry
 from osis_mail_template.exceptions import EmptyMailTemplateContent

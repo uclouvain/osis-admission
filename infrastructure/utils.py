@@ -34,6 +34,7 @@ from django.conf import settings
 from django.db.models import F, Func, Model, Q
 from django.utils import translation
 from django.utils.translation import gettext_lazy as _
+from osis_document_components.enums import PostProcessingWanted
 
 from admission.constants import SUPPORTED_MIME_TYPES
 from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import (
@@ -296,9 +297,13 @@ def get_document_from_identifier(
         max_documents_number = 1
 
         if document_uuids:
-            from osis_document.api.utils import get_remote_metadata, get_remote_token
+            from osis_document_components.services import get_remote_metadata, get_remote_token
 
-            token = get_remote_token(uuid=document_uuids[0], for_modified_upload=True)
+            token = get_remote_token(
+                uuid=document_uuids[0],
+                for_modified_upload=True,
+                wanted_post_process=PostProcessingWanted.ORIGINAL.name,
+            )
             metadata = get_remote_metadata(token=token) or {}
             document_author = metadata.get('author', '')
             document_label = metadata.get('explicit_name', '')
@@ -445,12 +450,16 @@ def get_document_from_identifier(
     if obj and field and document_type:
         if document_uuids:
             if not metadata:
-                from osis_document.api.utils import (
+                from osis_document_components.services import (
                     get_remote_metadata,
                     get_remote_token,
                 )
 
-                token = get_remote_token(uuid=document_uuids[0], for_modified_upload=True)
+                token = get_remote_token(
+                    uuid=document_uuids[0],
+                    for_modified_upload=True,
+                    wanted_post_process=PostProcessingWanted.ORIGINAL.name,
+                )
                 metadata = get_remote_metadata(token=token)
             if metadata:
                 document_submitted_by = metadata.get('author', '')
