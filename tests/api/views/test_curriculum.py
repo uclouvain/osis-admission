@@ -156,20 +156,20 @@ class BaseCurriculumTestCase:
 
     def setUp(self):
         # Mock files
-        patcher = mock.patch('osis_document.api.utils.get_remote_token', return_value='foobar')
+        patcher = mock.patch('osis_document_components.services.get_remote_token', return_value='foobar')
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = mock.patch('osis_document.api.utils.get_remote_metadata', return_value={'name': 'myfile', "size": 1})
+        patcher = mock.patch('osis_document_components.services.get_remote_metadata', return_value={'name': 'myfile', "size": 1})
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = mock.patch('osis_document.api.utils.confirm_remote_upload')
+        patcher = mock.patch('osis_document_components.services.confirm_remote_upload')
         patched = patcher.start()
         patched.return_value = '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'
         self.addCleanup(patcher.stop)
 
-        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patcher = mock.patch('osis_document_components.fields.FileField._confirm_multiple_upload')
         patched = patcher.start()
         patched.side_effect = lambda _, value, __: ['550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'] if value else []
         self.addCleanup(patcher.stop)

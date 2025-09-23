@@ -32,7 +32,7 @@ from django.db import models
 from django.db.models import OuterRef, Prefetch
 from django.utils.datetime_safe import date
 from django.utils.translation import gettext_lazy as _
-from osis_document.contrib import FileField
+from osis_document_components.fields import FileField
 from osis_signature.contrib.fields import SignatureProcessField
 from rest_framework.settings import api_settings
 

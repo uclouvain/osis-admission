@@ -2,7 +2,7 @@
 
 from django.db import migrations, models
 import django.db.models.expressions
-import osis_document.contrib.fields
+import osis_document_components.fields
 import uuid
 
 
@@ -54,13 +54,13 @@ class Migration(migrations.Migration):
                 ('confirmation_deadline', models.DateField(blank=True, verbose_name='Confirmation deadline')),
                 (
                     'research_report',
-                    osis_document.contrib.fields.FileField(
+                    osis_document_components.fields.FileField(
                         base_field=models.UUIDField(), default=list, size=1, verbose_name='Research report'
                     ),
                 ),
                 (
                     'supervisor_panel_report',
-                    osis_document.contrib.fields.FileField(
+                    osis_document_components.fields.FileField(
                         base_field=models.UUIDField(),
                         default=list,
                         size=1,
@@ -69,7 +69,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     'thesis_funding_renewal',
-                    osis_document.contrib.fields.FileField(
+                    osis_document_components.fields.FileField(
                         base_field=models.UUIDField(),
                         default=list,
                         help_text='Only for FNRS, FRIA and FRESH scholarship students',
@@ -79,7 +79,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     'research_mandate_renewal_opinion',
-                    osis_document.contrib.fields.FileField(
+                    osis_document_components.fields.FileField(
                         base_field=models.UUIDField(),
                         default=list,
                         size=1,
@@ -88,13 +88,13 @@ class Migration(migrations.Migration):
                 ),
                 (
                     'certificate_of_failure',
-                    osis_document.contrib.fields.FileField(
+                    osis_document_components.fields.FileField(
                         base_field=models.UUIDField(), default=list, size=None, verbose_name='Certificate of failure'
                     ),
                 ),
                 (
                     'certificate_of_achievement',
-                    osis_document.contrib.fields.FileField(
+                    osis_document_components.fields.FileField(
                         base_field=models.UUIDField(),
                         default=list,
                         size=None,
@@ -105,7 +105,7 @@ class Migration(migrations.Migration):
                 ('cdd_opinion', models.TextField(blank=True, default='', verbose_name='CDD opinion')),
                 (
                     'justification_letter',
-                    osis_document.contrib.fields.FileField(
+                    osis_document_components.fields.FileField(
                         base_field=models.UUIDField(), default=list, size=None, verbose_name='Justification letter'
                     ),
                 ),

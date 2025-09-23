@@ -28,7 +28,7 @@ from typing import Dict, List, Optional
 
 import img2pdf
 from django.utils.translation import override
-from osis_document.api.utils import get_raw_content_remotely
+from osis_document_components.services import get_raw_content_remotely
 from PIL import Image, UnidentifiedImageError
 
 from admission.constants import IMAGE_MIME_TYPES, SUPPORTED_MIME_TYPES

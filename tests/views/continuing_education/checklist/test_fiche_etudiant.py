@@ -85,20 +85,20 @@ class ChecklistViewTestCase(TestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = mock.patch('osis_document.api.utils.get_remote_token', return_value='foobar')
+        patcher = mock.patch('osis_document_components.services.get_remote_token', return_value='foobar')
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = mock.patch('osis_document.api.utils.get_remote_tokens')
+        patcher = mock.patch('osis_document_components.services.get_remote_tokens')
         patched = patcher.start()
         patched.side_effect = lambda uuids, **kwargs: {uuid: f'token-{index}' for index, uuid in enumerate(uuids)}
         self.addCleanup(patcher.stop)
 
-        patcher = mock.patch('osis_document.api.utils.get_remote_metadata', return_value=self.file_metadata)
+        patcher = mock.patch('osis_document_components.services.get_remote_metadata', return_value=self.file_metadata)
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = mock.patch('osis_document.api.utils.get_several_remote_metadata')
+        patcher = mock.patch('osis_document_components.services.get_several_remote_metadata')
         patched = patcher.start()
         patched.side_effect = lambda tokens: {token: self.file_metadata for token in tokens}
         self.addCleanup(patcher.stop)

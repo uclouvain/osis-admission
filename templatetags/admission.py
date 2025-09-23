@@ -43,8 +43,8 @@ from django.utils.safestring import SafeString, mark_safe
 from django.utils.translation import get_language, gettext
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext, pgettext_lazy
-from osis_document.api.utils import get_remote_metadata, get_remote_token
-from osis_document.enums import PostProcessingWanted
+from osis_document_components.services import get_remote_metadata, get_remote_token
+from osis_document_components.enums import PostProcessingWanted
 from osis_history.models import HistoryEntry
 from rules.templatetags import rules
 
@@ -566,7 +566,7 @@ def field_data(
             data = _('Specified') if data else _('Incomplete field')
         elif data:
             template_string = (
-                "{% load osis_document %}"
+                "{% load osis_document_components %}"
                 "{% document_visualizer files wanted_post_process='ORIGINAL' for_modified_upload=True %}"
             )
             template_context = {'files': data}
@@ -619,7 +619,7 @@ def document_component(document_write_token, document_metadata, can_edit=True):
             if not can_edit:
                 attrs = {action: False for action in ['pagination', 'zoom', 'comment', 'highlight', 'rotation']}
             return {
-                'template': 'osis_document/editor.html',
+                'template': 'osis_document_components/editor.html',
                 'value': document_write_token,
                 'base_url': settings.OSIS_DOCUMENT_BASE_URL,
                 'attrs': attrs,

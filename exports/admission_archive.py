@@ -28,8 +28,8 @@ import uuid
 from django.db import models
 from django.utils import translation
 from django.utils.translation import gettext_lazy as _
-from osis_document.api.utils import confirm_remote_upload, launch_post_processing
-from osis_document.enums import DocumentExpirationPolicy, PostProcessingType
+from osis_document_components.services import confirm_remote_upload, launch_post_processing
+from osis_document_components.enums import DocumentExpirationPolicy, PostProcessingType
 
 from admission.exceptions import MergePDFException
 from admission.exports.utils import admission_generate_pdf

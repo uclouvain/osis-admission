@@ -2,7 +2,7 @@
 
 import django.core.serializers.json
 from django.db import migrations, models
-import osis_document.contrib.fields
+import osis_document_components.fields
 
 
 class Migration(migrations.Migration):
@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='baseadmission',
             name='fac_documents',
-            field=osis_document.contrib.fields.FileField(base_field=models.UUIDField(), blank=True, default=list, size=None, verbose_name='FAC free documents'),
+            field=osis_document_components.fields.FileField(base_field=models.UUIDField(), blank=True, default=list, size=None, verbose_name='FAC free documents'),
         ),
         migrations.AddField(
             model_name='baseadmission',
@@ -25,16 +25,16 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='baseadmission',
             name='sic_documents',
-            field=osis_document.contrib.fields.FileField(base_field=models.UUIDField(), blank=True, default=list, size=None, verbose_name='SIC free documents'),
+            field=osis_document_components.fields.FileField(base_field=models.UUIDField(), blank=True, default=list, size=None, verbose_name='SIC free documents'),
         ),
         migrations.AddField(
             model_name='baseadmission',
             name='uclouvain_fac_documents',
-            field=osis_document.contrib.fields.FileField(base_field=models.UUIDField(), blank=True, default=list, size=None, verbose_name='UCLouvain FAC free documents'),
+            field=osis_document_components.fields.FileField(base_field=models.UUIDField(), blank=True, default=list, size=None, verbose_name='UCLouvain FAC free documents'),
         ),
         migrations.AddField(
             model_name='baseadmission',
             name='uclouvain_sic_documents',
-            field=osis_document.contrib.fields.FileField(base_field=models.UUIDField(), blank=True, default=list, size=None, verbose_name='UCLouvain SIC free documents'),
+            field=osis_document_components.fields.FileField(base_field=models.UUIDField(), blank=True, default=list, size=None, verbose_name='UCLouvain SIC free documents'),
         ),
     ]
