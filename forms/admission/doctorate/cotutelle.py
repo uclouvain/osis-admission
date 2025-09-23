@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,10 +26,11 @@
 from dal import autocomplete, forward
 from django import forms
 from django.db.models import F
-from django.utils.translation import gettext_lazy as _, pgettext_lazy
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext_lazy
 from osis_document_components.fields import FileUploadField
 
-from base.forms.utils import FIELD_REQUIRED_MESSAGE, EMPTY_CHOICE
+from base.forms.utils import EMPTY_CHOICE, FIELD_REQUIRED_MESSAGE
 from base.models.entity_version import EntityVersion
 from osis_profile.utils.utils import format_school_title
 
@@ -69,7 +70,7 @@ class DoctorateAdmissionCotutelleForm(forms.Form):
         label=pgettext_lazy('admission', 'Institute'),
         required=False,
         widget=autocomplete.ListSelect2(
-            url='admission:autocomplete:superior-institute-uuid',
+            url='superior-institute-autocomplete-uuid',
             forward=[
                 forward.Field('institution_fwb', 'is_belgian'),
             ],
@@ -122,14 +123,19 @@ class DoctorateAdmissionCotutelleForm(forms.Form):
         if not institute_id:
             return EMPTY_CHOICE
 
-        institute = EntityVersion.objects.annotate(
-            organization_uuid=F('entity__organization__uuid'),
-            name=F('entity__organization__name'),
-            city=F('entityversionaddress__city'),
-            street=F('entityversionaddress__street'),
-            street_number=F('entityversionaddress__street_number'),
-            zipcode=F('entityversionaddress__postal_code'),
-        ).filter(organization_uuid=institute_id).order_by('-start_date').first()
+        institute = (
+            EntityVersion.objects.annotate(
+                organization_uuid=F('entity__organization__uuid'),
+                name=F('entity__organization__name'),
+                city=F('entityversionaddress__city'),
+                street=F('entityversionaddress__street'),
+                street_number=F('entityversionaddress__street_number'),
+                zipcode=F('entityversionaddress__postal_code'),
+            )
+            .filter(organization_uuid=institute_id)
+            .order_by('-start_date')
+            .first()
+        )
         return EMPTY_CHOICE + ((institute.organization_uuid, format_school_title(school=institute)),)
 
     def clean(self):

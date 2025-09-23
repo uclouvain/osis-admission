@@ -229,13 +229,6 @@ msgid ""
 msgstr ""
 "Un membre doit être soit interne, soit externe, veuillez vérifier les champs."
 
-msgid ""
-"A merger proposal is currently being resolved. Saving the tab will cause a "
-"merge reset"
-msgstr ""
-"Une proposition de fusion est en cours de résolution. La sauvegarde de "
-"l’onglet entraînera une réinitialisation de la fusion"
-
 msgid "A new version of the analysis folder has been generated."
 msgstr "Une nouvelle version du dossier d'analyse a été générée."
 
@@ -2304,9 +2297,6 @@ msgstr ""
 "Confirmez-vous l'envoi de ce mail à l'adresse <a href=\"mailto:"
 "%(email_address)s\" target=\"_blank\">%(email_address)s</a> ?"
 
-msgid "Do you have a Belgian National Register Number (NISS)?"
-msgstr "Avez-vous un numéro de registre national belge (NISS) ?"
-
 msgid "Do you have a secondary school diploma?"
 msgstr "Avez-vous obtenu un diplôme de fin d'études secondaires ?"
 
@@ -2757,9 +2747,6 @@ msgstr "Emails des gestionnaires de la formation"
 msgid "Emergency contact"
 msgstr "Contact en cas d'urgence"
 
-msgid "Emergency contact (telephone number)"
-msgstr "Contact en cas d'urgence (numéro de téléphone)"
-
 msgctxt "admission"
 msgid "Emergency contact (telephone number)"
 msgstr "Contact en cas d'urgence (numéro de téléphone)"
@@ -3033,14 +3020,6 @@ msgstr "Retour de FAC"
 
 msgid "Feedback from Fac/CDD"
 msgstr "Retour de FAC/CDD"
-
-msgctxt "admission gender"
-msgid "Female"
-msgstr "Féminin"
-
-msgctxt "admission sex"
-msgid "Female"
-msgstr "Féminin"
 
 msgid "File"
 msgstr "Fichier"
@@ -3810,11 +3789,6 @@ msgstr ""
 msgid "I would like the billing address to be"
 msgstr "Je souhaite que l'adresse de facturation soit"
 
-msgid ""
-"I would like to receive my mail at an address other than my legal address"
-msgstr ""
-"Je souhaite recevoir mon courrier à une autre adresse que mon domicile légal"
-
 msgid "IBAN account number"
 msgstr "Numéro de compte IBAN"
 
@@ -4168,9 +4142,6 @@ msgstr "Convention cadre de stages"
 
 msgid "Invalid date"
 msgstr "Date invalide"
-
-msgid "Invalid phone number"
-msgstr "Numéro de téléphone invalide"
 
 #, python-format
 msgid "Invalid property: %(config_params)s"
@@ -4608,14 +4579,6 @@ msgid ""
 msgstr ""
 "E-mail envoyé au membre du groupe de supervision lors de sa suppression par "
 "le candidat"
-
-msgctxt "admission gender"
-msgid "Male"
-msgstr "Masculin"
-
-msgctxt "admission sex"
-msgid "Male"
-msgstr "Masculin"
 
 msgid "Management of the enrolment applications"
 msgstr "Gestion des demandes d'inscription"
@@ -5187,10 +5150,6 @@ msgstr "Pays organisateur"
 msgid "Other"
 msgstr "Autre"
 
-msgctxt "admission gender"
-msgid "Other"
-msgstr "Autre"
-
 msgctxt "ways_hear_about_training"
 msgid "Other"
 msgstr "Autre"
@@ -5500,15 +5459,6 @@ msgid "Please fill in at least your last or first name."
 msgstr "Merci de spécifier au-moins votre nom ou votre prénom."
 
 msgid ""
-"Please indicate your other given names in accordance with your identity "
-"document. If there are no other given names on your identity document, you "
-"do not need to enter anything."
-msgstr ""
-"Nous vous invitons à indiquer vos autres prénoms conformément à votre "
-"document d'identité. Si aucun autre prénom n'est mentionné sur votre "
-"document d'identité, vous ne devez rien indiquer."
-
-msgid ""
 "Please look up the website of your domain doctoral committee on how to "
 "download the document."
 msgstr ""
@@ -5569,9 +5519,6 @@ msgid "Please provide a copy of your passport and specify its expiry date."
 msgstr ""
 "Merci de fournir une copie de votre passeport et de spécifier sa date de fin "
 "de validité."
-
-msgid "Please provide one of these two pieces of identification information:"
-msgstr "Veuillez fournir l’une de ces deux informations d’identification :"
 
 msgid ""
 "Please select in the previous experience, the diploma(s), or non-academic "
@@ -6825,24 +6772,6 @@ msgstr ""
 "lettres)</li><li>code emplacement (deux lettres ou chiffres)</li><li>code "
 "branche (optionnel, trois lettres ou chiffres)</li></ul>"
 
-msgid ""
-"The Belgian national register number (or NISS, Social Security "
-"Identification Number) is a number composed of 11 digits, the first 6 of "
-"which refer to the date of birth of the concerned person. This number is "
-"assigned to every person living in Belgium when they register with the "
-"municipality (or other official body). It can be found on the Belgian "
-"identity card or on the residence permit."
-msgstr ""
-"Le numéro de registre national belge (ou NISS, Numéro d’Identification à la "
-"Sécurité Sociale) est un numéro composé de 11 chiffres dont les 6 premiers "
-"font référence à la date de naissance de la personne concernée. Ce numéro "
-"est attribué à toute personne vivant en Belgique, lors de l’inscription à la "
-"commune (ou autre organisme officiel). On le retrouve notamment sur la carte "
-"d’identité belge ou sur le titre de séjour."
-
-msgid "The Belgian national register number must consist of 11 digits."
-msgstr "Le numéro de registre national belge doit être composé de 11 chiffres."
-
 msgid "The CA is not currently to be completed"
 msgstr "Le comité d’accompagnement n'est pas en attente de complétion"
 
@@ -7587,13 +7516,6 @@ msgid "This activity will be restored"
 msgstr "Cette activité sera remise au statut soumise"
 
 msgid ""
-"This choice will define the language of communication throughout your "
-"admission process."
-msgstr ""
-"Ce choix définira la langue de communication tout au long de votre parcours "
-"d'admission."
-
-msgid ""
 "This course is closed. The candidate can express its interest by ticking the "
 "box below or by contacting a course administrator."
 msgstr ""
@@ -7656,12 +7578,6 @@ msgid ""
 msgstr ""
 "Cette expérience a été ajoutée par le·la candidat·e dans une <a "
 "href=\"%(admission_url)s\" target=\"_blank\">autre demande</a>."
-
-msgid "This field is required if the first name is missing."
-msgstr "Ce champ est obligatoire si le prénom est manquant."
-
-msgid "This field is required if the surname is missing."
-msgstr "Ce champ est obligatoire si le nom est manquant."
 
 msgid "This field is required."
 msgstr "Ce champ est obligatoire."
@@ -7932,9 +7848,6 @@ msgstr "Type de PDF inconnu."
 
 msgid "Unknown citizenship"
 msgstr "Nationalité inconnue"
-
-msgid "Unknown date of birth"
-msgstr "Date de naissance exacte inconnue"
 
 msgid "Unknown noma"
 msgstr "Noma inconnu"

@@ -300,6 +300,8 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
         self.assertEqual(base_form['end'].value(), self.academic_years[2].year)
         self.assertEqual([(c[0], c[1]) for c in base_form.fields['end'].choices], academic_year_choices)
 
+        self.experience.refresh_from_db()
+
         # Country
         self.assertEqual(base_form['country'].value(), self.experience.country.iso_code)
         self.assertEqual(base_form.initial.get('is_ue_country'), self.experience.country.european_union)

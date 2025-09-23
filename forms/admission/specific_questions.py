@@ -286,7 +286,7 @@ class ContinuingSpecificQuestionsForm(ConfigurableFormMixin, BaseAddressForm):
         js = (
             'js/dependsOn.min.js',
             'js/jquery.mask.min.js',
-            'osis_profile/formatter.js',
+            'osis_profile/js/formatter.js',
         )
 
     def __init__(self, display_residence_permit_question, **kwargs):

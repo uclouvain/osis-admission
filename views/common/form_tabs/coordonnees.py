@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,16 +26,20 @@
 from django.urls import reverse
 
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
+from base.models.person import Person
+from osis_profile.views.coordonnees import CoordonneesFormView
 
 __all__ = ['AdmissionCoordonneesFormView']
-
-from osis_profile.views.coordonnees import CoordonneesFormView
 
 
 class AdmissionCoordonneesFormView(AdmissionFormMixin, LoadDossierViewMixin, CoordonneesFormView):
     template_name = 'admission/forms/coordonnees.html'
     permission_required = 'admission.change_admission_coordinates'
     update_admission_author = True
+
+    @property
+    def person(self) -> Person:
+        return self.admission.candidate
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
