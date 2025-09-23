@@ -24,11 +24,11 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-<div class="row">
+<div class="dashboard-grid">
+
   {% if perms.admission.view_enrolment_applications or perms.admission.view_doctorate_enrolment_applications or perms.admission.view_continuing_enrolment_applications %}
-    <div class="col-md-6" style="margin-bottom: 2em">
-      <div class="col-md-2"><i class="fa fa-chalkboard-user" style="font-size: 400%; color: #6699FF;"></i></div>
-      <div class="col-md-10">
+        <div class="grid-item" style="grid-area: auto/{{ tile.column }}">
+        <i class="icon fa fa-chalkboard-user"></i>
         <h4 class="media-heading">
           <a
             {% if perms.admission.view_enrolment_applications %}
@@ -40,11 +40,13 @@
             {% endif %}
               id="lnk_admissions"
           >
-            {% trans 'Enrolment applications' %}
+              {% trans 'Enrolment applications' %}
           </a>
         </h4>
-        <p>{% trans 'Management of the enrolment applications' %}</p>
-      </div>
+        <div class="description">
+            <p>{% trans 'Management of the enrolment applications' %}</p>
+        </div>
     </div>
   {% endif %}
+
 </div>
