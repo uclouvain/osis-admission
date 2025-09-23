@@ -75,7 +75,6 @@ from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
 from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.forms import (
-    DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
     EMPTY_CHOICE_AS_LIST,
     AdmissionHTMLCharField,
     AutoGrowTextareaWidget,
@@ -122,6 +121,7 @@ from ddd.logic.financabilite.domain.model.enums.situation import (
 )
 from ddd.logic.learning_unit.commands import LearningUnitAndPartimSearchCommand
 from infrastructure.messages_bus import message_bus_instance
+from osis_profile.forms import DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS
 
 FINANCABILITE_REFUS_CATEGORY = 'Finançabilité'
 

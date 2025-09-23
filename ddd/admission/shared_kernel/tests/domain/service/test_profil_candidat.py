@@ -29,7 +29,6 @@ import datetime
 import freezegun
 from django.test import TestCase
 
-from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
@@ -40,6 +39,7 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     AnneeExperienceAcademiqueDTO,
     ExperienceAcademiqueDTO,
 )
+from osis_profile import FR_ISO_CODE
 from osis_profile.models.enums.curriculum import (
     EvaluationSystem,
     Grade,

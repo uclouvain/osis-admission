@@ -27,7 +27,8 @@ import freezegun
 from django import forms
 from django.test import SimpleTestCase
 
-from admission.forms import get_year_choices, AdmissionHTMLCharField
+from admission.forms import AdmissionHTMLCharField
+from osis_profile.forms import get_year_choices
 
 
 @freezegun.freeze_time('2020-01-01')

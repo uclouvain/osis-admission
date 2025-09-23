@@ -81,18 +81,6 @@ class FormationDuDossierAdmissionModifieeEvent(Event):
 
 
 @attr.dataclass(frozen=True, slots=True, kw_only=True)
-class DonneesIdentificationCandidatModifiee(Event):
-    entity_id: EntityIdentity = None
-    matricule: str
-
-
-@attr.dataclass(frozen=True, slots=True, kw_only=True)
-class CoordonneesCandidatModifiees(Event):
-    entity_id: EntityIdentity = None
-    matricule: str
-
-
-@attr.dataclass(frozen=True, slots=True, kw_only=True)
 class DonneesPersonellesCandidatValidee(Event):
     entity_id: EntityIdentity = None
     matricule: str

@@ -50,7 +50,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
     ChoixStatutChecklist,
     DecisionCDDEnum,
 )
-from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.models import DoctorateAdmission
 from admission.models.checklist import AdditionalApprovalCondition
 from admission.tests import OsisDocumentMockTestMixin
@@ -62,7 +61,6 @@ from admission.tests.factories.curriculum import (
 )
 from admission.tests.factories.doctorate import DoctorateFactory
 from admission.tests.factories.faculty_decision import DoctorateRefusalReasonFactory
-from admission.tests.factories.history import HistoryEntryFactory
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import (
     ProgramManagerRoleFactory,
@@ -74,6 +72,7 @@ from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.learning_unit_year import LearningUnitYearFactory
 from osis_profile.models import EducationalExperience, ProfessionalExperience
+from osis_profile.models.enums.person import ChoixGenre
 
 
 @override_settings(BACKEND_LINK_PREFIX='https//example.com')

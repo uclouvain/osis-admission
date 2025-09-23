@@ -35,16 +35,13 @@ from django.shortcuts import resolve_url
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils.http import urlencode
-from django.utils.translation import gettext_lazy as _
 
-from admission.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
-from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
-from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre, ChoixSexe
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
-from admission.forms.admission.person import AdmissionPersonForm, IdentificationType
+from admission.forms.admission.person import AdmissionPersonForm
+from admission.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.curriculum import (
@@ -56,7 +53,6 @@ from admission.tests.factories.general_education import GeneralEducationAdmissio
 from admission.tests.factories.roles import (
     SicManagementRoleFactory,
     ProgramManagerRoleFactory,
-    CentralManagerRoleFactory,
 )
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.enums.civil_state import CivilState
@@ -66,14 +62,15 @@ from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.person_address import PersonAddressFactory
-from osis_profile import BE_ISO_CODE
+from osis_profile import BE_ISO_CODE, FR_ISO_CODE
 from osis_profile.models.enums.curriculum import TranscriptType
+from osis_profile.models.enums.person import ChoixGenre, ChoixSexe
 from reference.tests.factories.country import CountryFactory
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
 @freezegun.freeze_time('2021-12-01')
-class PersonFormTestCase(TestCase):
+class AdmissionPersonFormTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.belgium_country = CountryFactory(iso_code=BE_ISO_CODE)
@@ -207,199 +204,6 @@ class PersonFormTestCase(TestCase):
         )
         self.assertEqual(form.initial.get('already_registered'), False)
 
-    def test_unknown_birth_date_field_initialization(self):
-        form = AdmissionPersonForm(
-            instance=PersonFactory(
-                birth_year=1990,
-            ),
-        )
-        self.assertEqual(form.initial.get('unknown_birth_date'), True)
-
-        form = AdmissionPersonForm(
-            instance=PersonFactory(
-                birth_year=None,
-            ),
-        )
-        self.assertEqual(form.initial.get('unknown_birth_date'), None)
-
-    def test_country_fields_initialization(self):
-        # Without birth or citizenship country
-        form = AdmissionPersonForm(
-            instance=PersonFactory(
-                birth_country=None,
-                country_of_citizenship=None,
-            ),
-        )
-        self.assertEqual(len(form.fields['birth_country'].queryset), 0)
-        self.assertEqual(len(form.fields['country_of_citizenship'].queryset), 0)
-
-        # With birth country but no citizenship country
-        form = AdmissionPersonForm(
-            instance=PersonFactory(
-                birth_country=self.france_country,
-                country_of_citizenship=None,
-            ),
-        )
-        self.assertIn(self.france_country, form.fields['birth_country'].queryset)
-
-        # With citizenship country but no birth country
-        form = AdmissionPersonForm(
-            instance=PersonFactory(
-                birth_country=None,
-                country_of_citizenship=self.belgium_country,
-            ),
-        )
-        self.assertIn(self.belgium_country, form.fields['country_of_citizenship'].queryset)
-
-        # With birth country and citizenship country
-        form = AdmissionPersonForm(
-            instance=PersonFactory(
-                birth_country=self.france_country,
-                country_of_citizenship=self.belgium_country,
-            ),
-        )
-        self.assertIn(self.france_country, form.fields['birth_country'].queryset)
-        self.assertIn(self.belgium_country, form.fields['country_of_citizenship'].queryset)
-
-    def test_identification_type_field_initialization(self):
-        # With id card number
-        form = AdmissionPersonForm(
-            instance=PersonFactory(
-                id_card_number='123456789',
-                passport_number='',
-            ),
-        )
-        self.assertEqual(form.initial.get('identification_type'), IdentificationType.ID_CARD_NUMBER.name)
-
-        # With passport number
-        form = AdmissionPersonForm(
-            instance=PersonFactory(
-                id_card_number='',
-                passport_number='123456789',
-            ),
-        )
-        self.assertEqual(form.initial.get('identification_type'), IdentificationType.PASSPORT_NUMBER.name)
-
-    def test_national_number_field_initialization(self):
-        # With national number
-        form = AdmissionPersonForm(
-            instance=PersonFactory(
-                national_number='123456789',
-                passport_number='',
-            ),
-        )
-        self.assertEqual(form.initial.get('has_national_number'), True)
-
-        # With passport number
-        form = AdmissionPersonForm(
-            instance=PersonFactory(
-                national_number='',
-                passport_number='123456789',
-            ),
-        )
-        self.assertEqual(form.initial.get('has_national_number'), False)
-
-        # With id card number
-        form = AdmissionPersonForm(
-            instance=PersonFactory(
-                national_number='',
-                passport_number='',
-                id_card_number='123456789',
-            ),
-        )
-        self.assertEqual(form.initial.get('has_national_number'), False)
-
-        # Without any number
-        form = AdmissionPersonForm(
-            instance=PersonFactory(
-                national_number='',
-                passport_number='',
-                id_card_number='',
-            ),
-        )
-        self.assertEqual(form.initial.get('has_national_number'), None)
-
-    def form_submission_without_any_data(self):
-        form = AdmissionPersonForm(
-            data={},
-        )
-        self.assertFalse(form.is_valid())
-        errors_fields = [
-            'first_name',
-            'last_name',
-            'birth_date',
-            'birth_country',
-            'birth_place',
-            'sex',
-            'gender',
-            'civil_state',
-            'has_national_number',
-            'identification_type',
-        ]
-        self.assertCountEqual(form.errors.keys(), errors_fields)
-
-    def test_base_data_form_submission(self):
-        form = AdmissionPersonForm(
-            data=self.form_data,
-        )
-        self.assertTrue(form.is_valid())
-
-    def test_birth_dates_fields_submission(self):
-        # The birth date is unknown and the birth year and the birth date are specified
-        form = AdmissionPersonForm(
-            data={
-                **self.form_data_as_dict,
-                'birth_year': 1990,
-                'birth_date': datetime.date(1990, 1, 1),
-                'unknown_birth_date': True,
-            },
-        )
-        self.assertTrue(form.is_valid())
-        self.assertEqual(form.cleaned_data.get('birth_year'), 1990)
-        self.assertEqual(form.cleaned_data.get('birth_date'), None)
-
-        # The birthdate is known and the birth year and the birth date are specified
-        form = AdmissionPersonForm(
-            data={
-                **self.form_data_as_dict,
-                'birth_year': 1990,
-                'birth_date': datetime.date(1990, 1, 1),
-                'unknown_birth_date': False,
-            },
-        )
-        self.assertTrue(form.is_valid())
-        self.assertEqual(form.cleaned_data.get('birth_year'), None)
-        self.assertEqual(form.cleaned_data.get('birth_date'), datetime.date(1990, 1, 1))
-
-        # The birth date is unknown but the birth year is not specified
-        form = AdmissionPersonForm(
-            data={
-                **self.form_data_as_dict,
-                'birth_year': None,
-                'unknown_birth_date': True,
-            },
-        )
-        self.assertFalse(form.is_valid())
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('birth_year', []))
-
-        # The birth date is known but not specified
-        form = AdmissionPersonForm(
-            data={
-                **self.form_data_as_dict,
-                'birth_date': None,
-                'unknown_birth_date': False,
-            },
-        )
-        self.assertFalse(form.is_valid())
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('birth_date', []))
-
-        # Nothing is specified -> the birth date is required
-        form = AdmissionPersonForm(
-            data={},
-        )
-        self.assertFalse(form.is_valid())
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('birth_date', []))
-
     def test_last_registration_fields_submission(self):
         # The candidate hasn't already been registered but the related fields are specified -> to clean
         form = AdmissionPersonForm(
@@ -425,216 +229,6 @@ class PersonFormTestCase(TestCase):
         )
         self.assertFalse(form.is_valid())
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('last_registration_year', []))
-
-    def test_name_fields_on_submission(self):
-        # The first name and / or the last name must be specified
-        form = AdmissionPersonForm(
-            data={
-                **self.form_data_as_dict,
-                'first_name': '',
-                'last_name': '',
-            },
-        )
-        self.assertFalse(form.is_valid())
-        self.assertIn(_('This field is required if the surname is missing.'), form.errors.get('first_name', []))
-        self.assertIn(_('This field is required if the first name is missing.'), form.errors.get('last_name', []))
-
-    def test_national_number_fields(self):
-        # The candidate is belgian and resides in Belgium -> the belgian national number is required
-        form = AdmissionPersonForm(
-            data={
-                **self.form_data_as_dict,
-                'has_national_number': False,
-                'national_number': '',
-                'id_card_expiry_date': '',
-                'id_card': ['file-2-token'],
-                'country_of_citizenship': self.belgium_country.pk,
-            },
-        )
-        self.assertFalse(form.is_valid())
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('national_number', []))
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('id_card_expiry_date', []))
-        self.assertEqual(form.cleaned_data.get('id_card'), ['file-2-token'])
-
-        form = AdmissionPersonForm(
-            data={
-                **self.form_data_as_dict,
-                'has_national_number': False,
-                'country_of_citizenship': self.belgium_country.pk,
-                'id_card': [],
-            },
-        )
-        self.assertTrue(form.is_valid())
-
-        # The candidate indicated that he has a belgian national number -> the belgian national number is required
-        form = AdmissionPersonForm(
-            data={
-                **self.form_data_as_dict,
-                'has_national_number': True,
-                'national_number': '',
-                'id_card_expiry_date': '',
-                'id_card': ['file-2-token'],
-            },
-        )
-        self.assertFalse(form.is_valid())
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('national_number', []))
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('id_card_expiry_date', []))
-        self.assertEqual(form.cleaned_data.get('id_card'), ['file-2-token'])
-
-        form = AdmissionPersonForm(
-            data={
-                **self.form_data_as_dict,
-                'has_national_number': True,
-                'id_card': [],
-            },
-        )
-        self.assertTrue(form.is_valid())
-
-        form = AdmissionPersonForm(
-            data={
-                **self.form_data_as_dict,
-                'has_national_number': True,
-                'national_number': '01234567899',
-                'id_card_expiry_date': datetime.date(2020, 1, 1),
-                'passport_number': '0123456',
-                'passport_expiry_date': datetime.date(2020, 1, 1),
-                'id_card_number': '0123456',
-                'passport': ['file-1-token'],
-                'id_card': ['file-2-token'],
-            },
-        )
-
-        self.assertTrue(form.is_valid())
-        self.assertEqual(form.cleaned_data.get('national_number'), '01234567899')
-        self.assertEqual(form.cleaned_data.get('id_card_expiry_date'), datetime.date(2020, 1, 1))
-        self.assertEqual(form.cleaned_data.get('passport_number'), '')
-        self.assertEqual(form.cleaned_data.get('passport_expiry_date'), None)
-        self.assertEqual(form.cleaned_data.get('id_card_number'), '')
-        self.assertEqual(form.cleaned_data.get('passport'), [])
-        self.assertEqual(form.cleaned_data.get('id_card'), ['file-2-token'])
-
-        # The candidate indicated that he has another national number -> this number is required
-        form = AdmissionPersonForm(
-            data={
-                **self.form_data_as_dict,
-                'country_of_citizenship': self.france_country.pk,
-                'has_national_number': False,
-                'identification_type': IdentificationType.ID_CARD_NUMBER.name,
-                'id_card_number': '',
-                'id_card_expiry_date': '',
-                'id_card': ['file-2-token'],
-            },
-        )
-        self.assertFalse(form.is_valid())
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('id_card_number', []))
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('id_card_expiry_date', []))
-        self.assertEqual(form.cleaned_data.get('id_card'), ['file-2-token'])
-
-        form = AdmissionPersonForm(
-            data={
-                **self.form_data_as_dict,
-                'country_of_citizenship': self.france_country.pk,
-                'has_national_number': False,
-                'identification_type': IdentificationType.ID_CARD_NUMBER.name,
-                'id_card_number': '0123456',
-                'id_card_expiry_date': datetime.date(2020, 1, 1),
-                'id_card': ['file-2-token'],
-                'national_number': '01234567899',
-                'passport_number': '0123456',
-                'passport_expiry_date': datetime.date(2020, 1, 1),
-                'passport': ['file-1-token'],
-            },
-        )
-        self.assertTrue(form.is_valid())
-        self.assertEqual(form.cleaned_data.get('id_card_number'), '0123456')
-        self.assertEqual(form.cleaned_data.get('id_card_expiry_date'), datetime.date(2020, 1, 1))
-        self.assertEqual(form.cleaned_data.get('passport_number'), '')
-        self.assertEqual(form.cleaned_data.get('passport_expiry_date'), None)
-        self.assertEqual(form.cleaned_data.get('id_card'), ['file-2-token'])
-        self.assertEqual(form.cleaned_data.get('national_number'), '')
-        self.assertEqual(form.cleaned_data.get('passport'), [])
-
-        # The candidate indicated that he has a passport number -> this number is required
-        form = AdmissionPersonForm(
-            data={
-                **self.form_data_as_dict,
-                'country_of_citizenship': self.france_country.pk,
-                'has_national_number': False,
-                'identification_type': IdentificationType.PASSPORT_NUMBER.name,
-                'passport_number': '',
-                'passport_expiry_date': '',
-                'passport': ['file-1-token'],
-            },
-        )
-        self.assertFalse(form.is_valid())
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('passport_number', []))
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('passport_expiry_date', []))
-        self.assertEqual(form.cleaned_data.get('passport'), ['file-1-token'])
-
-        form = AdmissionPersonForm(
-            data={
-                **self.form_data_as_dict,
-                'country_of_citizenship': self.france_country.pk,
-                'has_national_number': False,
-                'identification_type': IdentificationType.PASSPORT_NUMBER.name,
-                'passport_number': '0123456',
-                'passport_expiry_date': datetime.date(2020, 1, 1),
-                'passport': ['file-1-token'],
-                'id_card_number': '0123456',
-                'national_number': '01234567899',
-                'id_card': ['file-2-token'],
-                'id_card_expiry_date': datetime.date(2020, 1, 1),
-            },
-        )
-        self.assertTrue(form.is_valid())
-        self.assertEqual(form.cleaned_data.get('passport_number'), '0123456')
-        self.assertEqual(form.cleaned_data.get('passport_expiry_date'), datetime.date(2020, 1, 1))
-        self.assertEqual(form.cleaned_data.get('id_card_number'), '')
-        self.assertEqual(form.cleaned_data.get('id_card'), [])
-        self.assertEqual(form.cleaned_data.get('national_number'), '')
-        self.assertEqual(form.cleaned_data.get('id_card_expiry_date'), None)
-        self.assertEqual(form.cleaned_data.get('passport'), ['file-1-token'])
-
-        # Some data are specified but the type of national number is not -> to clean
-        form = AdmissionPersonForm(
-            data={
-                **self.form_data_as_dict,
-                'country_of_citizenship': self.france_country.pk,
-                'has_national_number': None,
-                'identification_type': '',
-                'passport_number': '0123456',
-                'passport': ['file-1-token'],
-                'id_card_number': '0123456',
-                'national_number': '01234567899',
-                'id_card': ['file-2-token'],
-                'id_card_expiry_date': datetime.date(2020, 1, 1),
-                'passport_expiry_date': datetime.date(2020, 1, 1),
-            },
-        )
-        self.assertFalse(form.is_valid())
-        self.assertEqual(form.cleaned_data.get('passport_number'), '')
-        self.assertEqual(form.cleaned_data.get('id_card_number'), '')
-        self.assertEqual(form.cleaned_data.get('id_card'), [])
-        self.assertEqual(form.cleaned_data.get('national_number'), '')
-        self.assertEqual(form.cleaned_data.get('passport'), [])
-        self.assertEqual(form.cleaned_data.get('id_card_expiry_date'), None)
-        self.assertEqual(form.cleaned_data.get('passport_expiry_date'), None)
-
-    def test_transform_fields_to_title_case(self):
-        form = AdmissionPersonForm(
-            data={
-                **self.form_data_as_dict,
-                'first_name': 'JOHN',
-                'last_name': 'DOE',
-                'middle_name': 'JIM',
-                'birth_place': 'LOUVAIN-LA-NEUVE',
-            },
-        )
-        self.assertTrue(form.is_valid())
-        self.assertEqual(form.cleaned_data.get('first_name'), 'John')
-        self.assertEqual(form.cleaned_data.get('last_name'), 'Doe')
-        self.assertEqual(form.cleaned_data.get('middle_name'), 'Jim')
-        self.assertEqual(form.cleaned_data.get('birth_place'), 'Louvain-La-Neuve')
 
     def test_general_person_form_on_get_sic_manager(self):
         self.client.force_login(user=self.sic_manager_user)

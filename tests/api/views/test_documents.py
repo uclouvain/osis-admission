@@ -39,7 +39,7 @@ from osis_notification.models import EmailNotification
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.constants import PNG_MIME_TYPE, SUPPORTED_MIME_TYPES
+from admission.constants import SUPPORTED_MIME_TYPES
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
@@ -86,6 +86,7 @@ from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group_year import Master120TrainingFactory
 from base.tests.factories.person import PersonFactory
+from osis_profile.constants import PNG_MIME_TYPE
 
 
 class BaseAdmissionRequestedDocumentListApiTestCase(APITestCase):

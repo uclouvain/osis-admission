@@ -46,7 +46,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
     ChoixStatutChecklist,
     DerogationFinancement,
 )
-from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.forms import disable_unavailable_forms
 from admission.forms.admission.checklist import (
     CommentForm,
@@ -75,6 +74,7 @@ from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from base.utils.utils import format_academic_year
 from infrastructure.messages_bus import message_bus_instance
+from osis_profile.models.enums.person import ChoixGenre
 
 __all__ = [
     'FinancabiliteComputeRuleView',

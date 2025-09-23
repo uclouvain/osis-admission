@@ -32,7 +32,6 @@ import mock
 from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import resolve_url
-from django.template import Context, Template
 from django.test import RequestFactory, TestCase
 from django.test.utils import override_settings
 from django.urls import path, reverse
@@ -41,19 +40,12 @@ from django.utils.translation import gettext as _
 from django.utils.translation import pgettext
 from django.views import View
 
-from admission.constants import JPEG_MIME_TYPE, PNG_MIME_TYPE
-from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     message_candidat_avec_pae_avant_2015,
 )
-from admission.ddd.admission.shared_kernel.domain.enums import TypeFormation
-from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
-    EtatAuthentificationParcours,
-)
-from admission.ddd.admission.shared_kernel.enums import Onglets, TypeItemFormulaire
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixMoyensDecouverteFormation,
     ChoixStatutPropositionContinue,
@@ -61,16 +53,17 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
+from admission.ddd.admission.shared_kernel.domain.enums import TypeFormation
+from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
+    EtatAuthentificationParcours,
+)
+from admission.ddd.admission.shared_kernel.enums import Onglets, TypeItemFormulaire
 from admission.ddd.admission.shared_kernel.tests.factory.profil import (
     AnneeExperienceAcademiqueDTOFactory,
     EtudesSecondairesDTOFactory,
     ExperienceAcademiqueDTOFactory,
     ExperienceNonAcademiqueDTOFactory,
 )
-from admission.ddd.admission.shared_kernel.tests.factory.question_specifique import (
-    QuestionSpecifiqueDTOFactory,
-)
-from admission.models import ContinuingEducationAdmissionProxy, DoctorateAdmission
 from admission.ddd.admission.shared_kernel.tests.factory.question_specifique import QuestionSpecifiqueDTOFactory
 from admission.models import ContinuingEducationAdmissionProxy, DoctorateAdmission
 from admission.templatetags.admission import (
@@ -108,7 +101,6 @@ from admission.templatetags.admission import (
     need_to_display_specific_questions,
     part_of_dict,
     sortable_header_div,
-    strip,
     update_tab_path_from_detail,
 )
 from admission.tests.factories import DoctorateAdmissionFactory
@@ -121,13 +113,15 @@ from base.models.entity import Entity
 from base.models.entity_version import EntityVersion
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
+from base.templatetags.format import strip
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import (
     EntityVersionFactory,
     MainEntityVersionFactory,
 )
 from base.tests.factories.entity_version_address import EntityVersionAddressFactory
-from osis_profile import BE_ISO_CODE
+from osis_profile import BE_ISO_CODE, FR_ISO_CODE
+from osis_profile.constants import JPEG_MIME_TYPE, PNG_MIME_TYPE
 from osis_profile.models.enums.curriculum import (
     CURRICULUM_ACTIVITY_LABEL,
     EvaluationSystem,
@@ -314,21 +308,6 @@ class AdmissionTabsTestCase(TestCase):
             result['subtabs'],
             TAB_TREES['doctorate'][Tab('doctorate', pgettext('tab', 'Research'), 'graduation-cap')],
         )
-
-
-class AdmissionPanelTagTestCase(TestCase):
-    def test_normal_panel(self):
-        template = Template("{% load admission %}{% panel 'Coucou' %}{% endpanel %}")
-        rendered = template.render(Context())
-        self.assertIn('<h4 class="panel-title">', rendered)
-        self.assertIn('Coucou', rendered)
-        self.assertIn('<div class="panel-body">', rendered)
-
-    def test_panel_no_title(self):
-        template = Template("{% load admission %}{% panel %}{% endpanel %}")
-        rendered = template.render(Context())
-        self.assertNotIn('<h4 class="panel-title">', rendered)
-        self.assertIn('<div class="panel-body">', rendered)
 
 
 class AdmissionFieldsDataTestCase(TestCase):

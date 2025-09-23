@@ -55,10 +55,6 @@ from osis_mail_template.models import MailTemplate
 
 from admission.constants import COMMENT_TAG_FAC, COMMENT_TAG_SIC
 from admission.ddd import MAIL_VERIFICATEUR_CURSUS, MONTANT_FRAIS_DOSSIER
-from admission.ddd.admission.shared_kernel.commands import (
-    ListerToutesDemandesQuery,
-    RechercherParcoursAnterieurQuery, RecupererInformationsDestinataireQuery,
-)
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AnneesCurriculumNonSpecifieesException,
     ExperiencesAcademiquesNonCompleteesException,
@@ -66,34 +62,6 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     message_candidat_avec_pae_avant_2015,
 )
-from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
-    ExperienceNonTrouveeException,
-    InformationsDestinatairePasTrouvee,
-)
-from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
-    EtatAuthentificationParcours,
-)
-from admission.ddd.admission.shared_kernel.dtos.liste import DemandeRechercheDTO
-from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
-from admission.ddd.admission.shared_kernel.dtos.resume import (
-    ResumeCandidatDTO,
-    ResumeEtEmplacementsDocumentsPropositionDTO,
-    ResumePropositionDTO,
-)
-from admission.ddd.admission.shared_kernel.enums import Onglets, TypeItemFormulaire
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
-    DocumentsAssimilation,
-    DocumentsEtudesSecondaires,
-    OngletsDemande,
-    StatutReclamationEmplacementDocument,
-)
-from admission.ddd.admission.shared_kernel.enums.statut import (
-    STATUTS_TOUTE_PROPOSITION_AUTORISEE,
-    STATUTS_TOUTE_PROPOSITION_SOUMISE,
-    STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER_OU_ANNULEE,
-)
-from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.commands import (
     ApprouverAdmissionParSicCommand,
     ApprouverInscriptionParSicCommand,
@@ -160,6 +128,37 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
 from admission.ddd.admission.formation_generale.dtos.proposition import (
     PropositionGestionnaireDTO,
 )
+from admission.ddd.admission.shared_kernel.commands import (
+    ListerToutesDemandesQuery,
+    RechercherParcoursAnterieurQuery, RecupererInformationsDestinataireQuery,
+)
+from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
+    EtatAuthentificationParcours,
+)
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
+    ExperienceNonTrouveeException,
+    InformationsDestinatairePasTrouvee,
+)
+from admission.ddd.admission.shared_kernel.dtos.liste import DemandeRechercheDTO
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
+from admission.ddd.admission.shared_kernel.dtos.resume import (
+    ResumeCandidatDTO,
+    ResumeEtEmplacementsDocumentsPropositionDTO,
+    ResumePropositionDTO,
+)
+from admission.ddd.admission.shared_kernel.enums import Onglets, TypeItemFormulaire
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    DocumentsAssimilation,
+    DocumentsEtudesSecondaires,
+    OngletsDemande,
+    StatutReclamationEmplacementDocument,
+)
+from admission.ddd.admission.shared_kernel.enums.statut import (
+    STATUTS_TOUTE_PROPOSITION_AUTORISEE,
+    STATUTS_TOUTE_PROPOSITION_SOUMISE,
+    STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER_OU_ANNULEE,
+)
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
 from admission.forms import disable_unavailable_forms
 from admission.forms.admission.checklist import (
@@ -252,6 +251,7 @@ from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
 from osis_profile.models import EducationalExperience
+from osis_profile.models.enums.person import ChoixGenre
 from osis_profile.utils.curriculum import groupe_curriculum_par_annee_decroissante
 from osis_role.templatetags.osis_role import has_perm
 from parcours_interne import etudiants_PCE_avant_2015

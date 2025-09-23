@@ -29,7 +29,6 @@ from unittest.mock import patch
 from django.shortcuts import resolve_url
 from django.test import TestCase, override_settings
 
-from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
 )
@@ -60,6 +59,7 @@ from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO
+from osis_profile import FR_ISO_CODE
 from osis_profile.models import EducationalExperience, EducationalExperienceYear
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.language import LanguageFactory

@@ -31,7 +31,7 @@ from django.utils.translation import override
 from osis_document_components.services import get_raw_content_remotely
 from PIL import Image, UnidentifiedImageError
 
-from admission.constants import IMAGE_MIME_TYPES, SUPPORTED_MIME_TYPES
+from admission.constants import SUPPORTED_MIME_TYPES
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixEtatSignature,
     ChoixTypeFinancement,
@@ -56,7 +56,6 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     DocumentsCotutelle,
     DocumentsCurriculum,
     DocumentsEtudesSecondaires,
-    DocumentsExamens,
     DocumentsIdentification,
     DocumentsProjetRecherche,
     DocumentsQuestionsSpecifiques,
@@ -72,6 +71,7 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
 )
+from osis_profile.constants import IMAGE_MIME_TYPES
 from osis_profile.models.enums.curriculum import (
     CURRICULUM_ACTIVITY_LABEL,
     Result,

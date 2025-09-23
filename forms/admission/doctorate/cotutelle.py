@@ -29,9 +29,9 @@ from django.db.models import F
 from django.utils.translation import gettext_lazy as _, pgettext_lazy
 from osis_document_components.fields import FileUploadField
 
-from admission.views.autocomplete.superior_institute import format_school_title
 from base.forms.utils import FIELD_REQUIRED_MESSAGE, EMPTY_CHOICE
 from base.models.entity_version import EntityVersion
+from osis_profile.utils.utils import format_school_title
 
 
 class DoctorateAdmissionCotutelleForm(forms.Form):

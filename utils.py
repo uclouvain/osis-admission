@@ -35,14 +35,13 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models
-from django.db.models import F, QuerySet
+from django.db.models import QuerySet
 from django.shortcuts import resolve_url
 from django.utils import timezone
 from django.utils.translation import get_language, override, pgettext
 from django_htmx.http import trigger_client_event
 from rest_framework.generics import get_object_or_404
 
-from admission.admission_utils.format_address import format_address
 from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.program_manager import (
     ProgramManager as AdmissionProgramManager,
@@ -55,7 +54,6 @@ from admission.ddd.admission.doctorat.preparation.commands import (
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AnneesCurriculumNonSpecifieesException,
 )
-from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.ddd.admission.formation_generale.commands import (
     VerifierCurriculumApresSoumissionQuery as VerifierCurriculumApresSoumissionGeneraleQuery,
 )
@@ -79,10 +77,8 @@ from base.auth.roles.program_manager import ProgramManager
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.forms.utils import EMPTY_CHOICE
 from base.models.academic_calendar import AcademicCalendar
-from base.models.entity_version import EntityVersion
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
-from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.person import Person
 from ddd.logic.formation_catalogue.commands import GetSigleFormationParenteQuery
 from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
@@ -91,6 +87,7 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceNonAcademiqueDTO,
 )
 from osis_common.ddd.interface import BusinessException, QueryRequest
+from osis_profile.models.enums.person import ChoixGenre
 from program_management.ddd.domain.exception import ProgramTreeNotFoundException
 from reference.models.country import Country
 from reference.models.language import Language
@@ -628,41 +625,6 @@ def get_experience_urls(
         )
 
     return res_context
-
-
-def format_school_title(school):
-    """Return the concatenation of the school name and city."""
-    return '{} <span class="school-address">{}</span>'.format(
-        school.name,
-        format_address(
-            street=school.street,
-            street_number=school.street_number,
-            postal_code=school.zipcode,
-            city=school.city,
-        ),
-    )
-
-
-def get_superior_institute_queryset():
-    return EntityVersion.objects.filter(
-        entity__organization__establishment_type__in=[
-            EstablishmentTypeEnum.UNIVERSITY.name,
-            EstablishmentTypeEnum.NON_UNIVERSITY_HIGHER.name,
-        ],
-        parent__isnull=True,
-    ).annotate(
-        organization_id=F('entity__organization_id'),
-        organization_uuid=F('entity__organization__uuid'),
-        organization_acronym=F('entity__organization__acronym'),
-        organization_community=F('entity__organization__community'),
-        organization_establishment_type=F('entity__organization__establishment_type'),
-        name=F('entity__organization__name'),
-        city=F('entityversionaddress__city'),
-        street=F('entityversionaddress__street'),
-        street_number=F('entityversionaddress__street_number'),
-        zipcode=F('entityversionaddress__postal_code'),
-    )
-
 
 def get_thesis_location_initial_choices(value):
     return EMPTY_CHOICE if not value else EMPTY_CHOICE + ((value, value),)

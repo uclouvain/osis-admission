@@ -69,7 +69,6 @@ from admission.ddd.admission.doctorat.preparation.dtos.liste import DemandeReche
 from admission.ddd.admission.doctorat.preparation.read_view.repository.i_tableau_bord import (
     ITableauBordRepositoryAdmissionMixin,
 )
-from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.ddd.admission.formation_continue.commands import (
     ListerDemandesQuery as ListerDemandesContinuesQuery,
 )
@@ -128,11 +127,9 @@ from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import GotDiploma
 from base.models.person import Person
 from base.utils.utils import format_academic_year
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
-    ExperienceNonAcademiqueDTO,
-)
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile.models.enums.curriculum import ActivitySector, ActivityType
+from osis_profile.models.enums.person import ChoixGenre
 from reference.models.country import Country
 from reference.models.enums.cycle import Cycle
 from reference.models.scholarship import Scholarship
