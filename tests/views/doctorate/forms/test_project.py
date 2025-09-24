@@ -169,6 +169,7 @@ class ProjectViewTestCase(TestCase):
         self.assertEqual(form['non_soutenue'].value(), None)
         self.assertEqual(form['date_soutenance'].value(), self.admission.phd_already_done_defense_date)
         self.assertEqual(form['raison_non_soutenue'].value(), self.admission.phd_already_done_no_defense_reason)
+        self.assertEqual(form['avec_autre_bourse_recherche'].value(), False)
 
         self.assertCountEqual(
             form.fields['institut_these'].widget.choices,
