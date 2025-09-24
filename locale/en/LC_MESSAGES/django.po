@@ -4702,6 +4702,9 @@ msgstr ""
 msgid "Other refusal reasons"
 msgstr ""
 
+msgid "Other scholarship"
+msgstr ""
+
 msgid ""
 "Our University is pleased to welcome you and wishes you an enriching and "
 "fruitful stay."
