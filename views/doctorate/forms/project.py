@@ -117,6 +117,7 @@ class DoctorateAdmissionProjectFormView(
             data['raison_non_soutenue'] = ''
 
         del data['non_soutenue']
+        del data['avec_autre_bourse_recherche']
 
         return data
 
