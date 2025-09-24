@@ -186,11 +186,6 @@ msgid ""
 "A member should be either internal or external, please check the fields."
 msgstr ""
 
-msgid ""
-"A merger proposal is currently being resolved. Saving the tab will cause a "
-"merge reset"
-msgstr ""
-
 msgid "A new version of the analysis folder has been generated."
 msgstr ""
 
@@ -2124,9 +2119,6 @@ msgid ""
 "%(email_address)s\" target=\"_blank\">%(email_address)s</a> address?"
 msgstr ""
 
-msgid "Do you have a Belgian National Register Number (NISS)?"
-msgstr ""
-
 msgid "Do you have a secondary school diploma?"
 msgstr ""
 
@@ -2522,9 +2514,6 @@ msgstr ""
 msgid "Emergency contact"
 msgstr ""
 
-msgid "Emergency contact (telephone number)"
-msgstr ""
-
 msgctxt "admission"
 msgid "Emergency contact (telephone number)"
 msgstr ""
@@ -2779,14 +2768,6 @@ msgid "Feedback from Fac"
 msgstr ""
 
 msgid "Feedback from Fac/CDD"
-msgstr ""
-
-msgctxt "admission gender"
-msgid "Female"
-msgstr ""
-
-msgctxt "admission sex"
-msgid "Female"
 msgstr ""
 
 msgid "File"
@@ -3432,10 +3413,6 @@ msgstr ""
 msgid "I would like the billing address to be"
 msgstr ""
 
-msgid ""
-"I would like to receive my mail at an address other than my legal address"
-msgstr ""
-
 msgid "IBAN account number"
 msgstr ""
 
@@ -3739,9 +3716,6 @@ msgid "Internship Framework Agreement"
 msgstr ""
 
 msgid "Invalid date"
-msgstr ""
-
-msgid "Invalid phone number"
 msgstr ""
 
 #, python-format
@@ -4121,14 +4095,6 @@ msgstr ""
 msgid ""
 "Mail sent to the member of the supervision panel when deleted by the "
 "candidate"
-msgstr ""
-
-msgctxt "admission gender"
-msgid "Male"
-msgstr ""
-
-msgctxt "admission sex"
-msgid "Male"
 msgstr ""
 
 msgid "Management of the enrolment applications"
@@ -4668,10 +4634,6 @@ msgstr ""
 msgid "Other"
 msgstr ""
 
-msgctxt "admission gender"
-msgid "Other"
-msgstr ""
-
 msgctxt "ways_hear_about_training"
 msgid "Other"
 msgstr ""
@@ -4964,12 +4926,6 @@ msgid "Please fill in at least your last or first name."
 msgstr ""
 
 msgid ""
-"Please indicate your other given names in accordance with your identity "
-"document. If there are no other given names on your identity document, you "
-"do not need to enter anything."
-msgstr ""
-
-msgid ""
 "Please look up the website of your domain doctoral committee on how to "
 "download the document."
 msgstr ""
@@ -5011,9 +4967,6 @@ msgid ""
 msgstr ""
 
 msgid "Please provide a copy of your passport and specify its expiry date."
-msgstr ""
-
-msgid "Please provide one of these two pieces of identification information:"
 msgstr ""
 
 msgid ""
@@ -6186,18 +6139,6 @@ msgid ""
 "three letters or numbers)</li></ul>"
 msgstr ""
 
-msgid ""
-"The Belgian national register number (or NISS, Social Security "
-"Identification Number) is a number composed of 11 digits, the first 6 of "
-"which refer to the date of birth of the concerned person. This number is "
-"assigned to every person living in Belgium when they register with the "
-"municipality (or other official body). It can be found on the Belgian "
-"identity card or on the residence permit."
-msgstr ""
-
-msgid "The Belgian national register number must consist of 11 digits."
-msgstr ""
-
 msgid "The CA is not currently to be completed"
 msgstr ""
 
@@ -6828,11 +6769,6 @@ msgid "This activity will be restored"
 msgstr ""
 
 msgid ""
-"This choice will define the language of communication throughout your "
-"admission process."
-msgstr ""
-
-msgid ""
 "This course is closed. The candidate can express its interest by ticking the "
 "box below or by contacting a course administrator."
 msgstr ""
@@ -6873,12 +6809,6 @@ msgstr ""
 msgid ""
 "This experience has been added by the applicant in <a "
 "href=\"%(admission_url)s\" target=\"_blank\">another application</a>."
-msgstr ""
-
-msgid "This field is required if the first name is missing."
-msgstr ""
-
-msgid "This field is required if the surname is missing."
 msgstr ""
 
 msgid "This field is required."
@@ -7118,9 +7048,6 @@ msgid "Unknown PDF type."
 msgstr ""
 
 msgid "Unknown citizenship"
-msgstr ""
-
-msgid "Unknown date of birth"
 msgstr ""
 
 msgid "Unknown noma"
