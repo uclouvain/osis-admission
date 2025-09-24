@@ -41,7 +41,7 @@ from admission.utils import (
     get_scholarship_initial_choices,
     get_thesis_location_initial_choices,
 )
-from base.forms.utils import EMPTY_CHOICE
+from base.forms.utils import EMPTY_CHOICE, FIELD_REQUIRED_MESSAGE
 from base.forms.utils.autocomplete import ListSelect2
 from base.forms.utils.datefield import CustomDateInput
 from base.forms.utils.fields import RadioBooleanField
@@ -102,8 +102,12 @@ class DoctorateAdmissionProjectForm(forms.Form):
             forward=[forward.Const(ScholarshipType.BOURSE_INTERNATIONALE_DOCTORAT.name, 'scholarship_type')],
         ),
     )
-    autre_bourse_recherche = forms.CharField(
+    avec_autre_bourse_recherche = forms.BooleanField(
         label=_("If other scholarship, specify"),
+        required=False,
+    )
+    autre_bourse_recherche = forms.CharField(
+        label=_('Other scholarship'),
         required=False,
         max_length=255,
     )
@@ -311,6 +315,8 @@ class DoctorateAdmissionProjectForm(forms.Form):
                 ]
 
         # Initialize some fields if they are not already set in the input data
+        self.initial['avec_autre_bourse_recherche'] = bool(self.initial.get('autre_bourse_recherche'))
+
         for field in [
             'est_lie_fnrs_fria_fresh_csc',
             'projet_doctoral_deja_commence',
@@ -331,13 +337,14 @@ class DoctorateAdmissionProjectForm(forms.Form):
                 self.add_error('eft', _("This field is required."))
 
         elif data.get('type_financement') == ChoixTypeFinancement.SEARCH_SCHOLARSHIP.name:
-            if data.get('bourse_recherche'):
-                data['autre_bourse_recherche'] = ''
-            elif data.get('autre_bourse_recherche'):
+            if data.get('avec_autre_bourse_recherche'):
                 data['bourse_recherche'] = ''
+                if not data.get('autre_bourse_recherche'):
+                    self.add_error('autre_bourse_recherche', FIELD_REQUIRED_MESSAGE)
             else:
-                self.add_error('bourse_recherche', _('This field is required.'))
-                self.add_error('autre_bourse_recherche', '')
+                data['autre_bourse_recherche'] = ''
+                if not data.get('bourse_recherche'):
+                    self.add_error('bourse_recherche', FIELD_REQUIRED_MESSAGE)
 
         if data.get('non_soutenue') and not data.get('raison_non_soutenue'):
             self.add_error('raison_non_soutenue', _("This field is required."))
