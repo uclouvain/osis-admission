@@ -72,7 +72,7 @@ from admission.tests.factories.secondary_studies import (
 from admission.tests.factories.supervision import PromoterFactory
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.tests import TestCaseWithQueriesAssertions
-from osis_profile.constants import JPEG_MIME_TYPE
+from osis_profile.constants import JPEG_MIME_TYPE, PNG_MIME_TYPE
 from osis_profile.models.enums.exam import ExamTypes
 from osis_profile.tests.factories.exam import ExamFactory
 from reference.tests.factories.language import FrenchLanguageFactory
@@ -384,6 +384,19 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
         self.assertEqual(document.obj, self.general_admission)
         self.assertEqual(document.field, 'fac_refusal_certificate')
         self.assertEqual(document.mimetypes, [PDF_MIME_TYPE])
+
+        # Application form document
+        file_uuid = uuid.uuid4()
+        doctorate_admission = DoctorateAdmissionFactory(archived_record_signatures_sent=[file_uuid])
+        document = get_document_from_identifier(
+            doctorate_admission,
+            f'{base_identifier}.FICHE_ARCHIVE_SIGNATURE_ENVOYEES',
+        )
+
+        self.assertIsNotNone(document)
+        self.assertEqual(document.obj, doctorate_admission)
+        self.assertEqual(document.field, 'archived_record_signatures_sent')
+        self.assertCountEqual(document.mimetypes, [PDF_MIME_TYPE, PNG_MIME_TYPE, JPEG_MIME_TYPE])
 
     def test_get_non_free_identification_document(self):
         base_identifier = OngletsDemande.IDENTIFICATION.name

@@ -6043,6 +6043,10 @@ msgstr ""
 msgid "Supervisors"
 msgstr ""
 
+msgctxt "no_gender"
+msgid "Supervisors"
+msgstr ""
+
 msgid "Supervisory panel"
 msgstr ""
 

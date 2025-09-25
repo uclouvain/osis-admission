@@ -170,7 +170,7 @@ class ProgramManager(EducationGroupRoleModel):
             'admission.add_internalnote': is_part_of_education_group & ~is_sent_to_epc,
             'admission.view_internalnote': is_part_of_education_group,
             'admission.view_documents_management': is_part_of_education_group
-            & (general.is_submitted | continuing.is_submitted_or_not_cancelled | doctorate.is_submitted),
+            & (general.is_submitted | continuing.is_submitted_or_not_cancelled | doctorate.not_cancelled),
             'admission.edit_documents': is_part_of_education_group
             & (general.is_submitted | continuing.not_cancelled | doctorate.is_submitted)
             & ~is_sent_to_epc,
@@ -185,8 +185,7 @@ class ProgramManager(EducationGroupRoleModel):
             )
             & ~is_sent_to_epc,
             'admission.generate_in_progress_analysis_folder': is_part_of_education_group
-            & continuing.is_continuing
-            & continuing.in_progress,
+            & (continuing.in_progress | doctorate.in_progress),
             'admission.view_checklist': is_part_of_education_group
             & (general.is_submitted | continuing.is_submitted | doctorate.is_submitted),
             'admission.change_checklist': is_part_of_education_group
