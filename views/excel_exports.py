@@ -26,6 +26,7 @@
 
 import ast
 import datetime
+import itertools
 import json
 import uuid
 from typing import Dict
@@ -117,7 +118,7 @@ from admission.forms.admission.filter import (
     ContinuingAdmissionsFilterForm,
 )
 from admission.forms.doctorate.cdd.filter import DoctorateListFilterForm
-from admission.models import AdmissionFormItem, SupervisionActor
+from admission.models import AdmissionFormItem
 from admission.templatetags.admission import admission_status
 from admission.utils import add_messages_into_htmx_response
 from admission.views import PaginatedList
@@ -991,31 +992,56 @@ class DoctorateAdmissionListExcelExportView(BaseAdmissionExcelExportView):
             _('Nationality'),
             _('Scholarship'),
             pgettext('admission', 'Course'),
+            _('Academic record specified by the candidate'),
+            _('Academic record retrieved'),
+            _('Supervisors'),
+            _('Supervision committee'),
+            _('Thesis institute'),
+            _('Pre-admission'),
+            _('Cotutelle'),
+            _('Thesis title'),
             _('Dossier status'),
             _('CDD decision'),
             _('SIC decision'),
             _('Submission date'),
             _('Last modification'),
             _('Modification author'),
-            _('Pre-admission'),
-            _('Cotutelle'),
         ]
 
     def get_row_data(self, row: DemandeRechercheDTO):
+        internal_academic_record = (
+            '\n'.join(str(experience) for experience in row.experiences_academiques_reussies_internes)
+            if row.experiences_academiques_reussies_internes
+            else ''
+        )
+        external_academic_record = (
+            '\n'.join(str(experience) for experience in row.experiences_academiques_reussies_externes)
+            if row.experiences_academiques_reussies_externes
+            else ''
+        )
+        supervisors = '\n'.join(str(actor) for actor in row.promoteurs) if row.promoteurs else ''
+        supervision_committee_members = '\n'.join(str(actor) for actor in row.membres_ca) if row.membres_ca else ''
+
         return [
             row.numero_demande,
             row.candidat,
             row.nom_pays_nationalite_candidat,
             row.code_bourse,
             row.formation,
+            external_academic_record,
+            internal_academic_record,
+            supervisors,
+            supervision_committee_members,
+            row.institut_these,
+            yesno(row.type_admission == ChoixTypeAdmission.PRE_ADMISSION.name),
+            yesno(row.cotutelle, _('yes,no,')),
+            row.titre_projet,
             str(ChoixStatutPropositionDoctorale.get_value(row.etat_demande)),
             str(row.decision_fac),
             str(row.decision_sic),
             row.date_confirmation.strftime(SHORT_DATE_FORMAT) if row.date_confirmation else '',
             row.derniere_modification_le.strftime(SHORT_DATE_FORMAT),
             row.derniere_modification_par,
-            yesno(row.type_admission == ChoixTypeAdmission.PRE_ADMISSION.name),
-            yesno(row.cotutelle, _('yes,no,')),
         ]
 
     def get_filters(self):
@@ -1032,6 +1058,10 @@ class DoctorateAdmissionListExcelExportView(BaseAdmissionExcelExportView):
                 filters['champ_tri'] = ordering_field.lstrip('-')
 
             filters['demandeur'] = str(self.request.user.person.uuid)
+
+            # Get additional data needed for the export
+            filters['avec_experiences_academiques_reussies'] = True
+            filters['avec_acteurs_groupe_supervision'] = True
 
             # Convert the dates to strings
             for date_field in self.DATE_FIELDS:

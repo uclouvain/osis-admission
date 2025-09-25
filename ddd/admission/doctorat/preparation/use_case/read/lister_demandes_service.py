@@ -61,4 +61,6 @@ def lister_demandes(
         champ_tri=cmd.champ_tri,
         page=cmd.page,
         taille_page=cmd.taille_page,
+        avec_experiences_academiques_reussies=cmd.avec_experiences_academiques_reussies,
+        avec_acteurs_groupe_supervision=cmd.avec_acteurs_groupe_supervision,
     )

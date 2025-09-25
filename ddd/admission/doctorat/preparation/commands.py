@@ -28,11 +28,11 @@ from typing import Dict, List, Optional
 
 import attr
 
-from admission.ddd.admission.shared_kernel import commands
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixDoctoratDejaRealise,
     ChoixLangueRedactionThese,
 )
+from admission.ddd.admission.shared_kernel import commands
 from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
     ExperiencesCVRecuperees,
 )
@@ -512,6 +512,8 @@ class ListerDemandesQuery(SortedQueryRequest):
     demandeur: Optional[str] = ''
     fnrs_fria_fresh: Optional[bool] = None
     indicateur_tableau_bord: Optional[str] = ''
+    avec_experiences_academiques_reussies: bool = False
+    avec_acteurs_groupe_supervision: bool = False
 
 
 @attr.dataclass(frozen=True, slots=True)
