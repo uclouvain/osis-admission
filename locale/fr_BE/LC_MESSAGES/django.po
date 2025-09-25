@@ -319,6 +319,12 @@ msgstr "Formations académiques"
 msgid "Academic experience"
 msgstr "Expérience académique"
 
+msgid "Academic record retrieved"
+msgstr "Parcours académique récupéré"
+
+msgid "Academic record specified by the candidate"
+msgstr "Parcours académique spécifié par le candidat"
+
 msgid "Academic year"
 msgstr "Année académique"
 
@@ -4475,8 +4481,8 @@ msgid ""
 "Mail sent to the applicant following approval by a member of the supervisory "
 "group"
 msgstr ""
-"E-mail envoyé au candidat suite à l'approbation d'un membre du "
-"groupe de supervision"
+"E-mail envoyé au candidat suite à l'approbation d'un membre du groupe de "
+"supervision"
 
 msgid ""
 "Mail sent to the applicant following rejection by a member of the "
@@ -6672,6 +6678,9 @@ msgstr "Suffisant"
 
 msgid "Supervision"
 msgstr "Supervision"
+
+msgid "Supervision committee"
+msgstr "Comité d'accompagnement"
 
 msgid "Supervision committee modification by candidate"
 msgstr "Modification du comité d’accompagnement par le candidat"
