@@ -42,4 +42,5 @@ class DoctorateAdmissionList(BaseAdmissionList):
     def additional_command_kwargs(self):
         return {
             'demandeur': self.request.user.person.uuid,
+            'avec_acteurs_groupe_supervision': True,
         }

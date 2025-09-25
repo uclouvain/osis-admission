@@ -44,17 +44,18 @@
   {% translate 'Scholarship' context 'doctorate-header-list' as scholarship_label %}
   {% translate 'Dossier status' context 'doctorate-header-list' as status_label %}
   {% translate 'Submission date' context 'doctorate-header-list' as submission_date_label %}
+  {% translate 'Supervisors' context 'no_gender' as supervisor_label %}
   {% sortable_header_div 'numero_demande' _('Application numero') %}
   {% sortable_header_div 'nom_candidat' _('Last name / First name') %}
   {% sortable_header_div 'nationalite' _('Nationality') %}
   {% sortable_header_div 'code_bourse' scholarship_label %}
   {% sortable_header_div 'formation' course_label %}
+  {% sortable_header_div 'promoteurs' supervisor_label %}
   {% sortable_header_div 'etat_demande' status_label %}
   {% sortable_header_div 'fac_decision' _('Fac decision') %}
   {% sortable_header_div 'sic_decision' _('SIC decision') %}
   {% sortable_header_div 'date_confirmation' submission_date_label %}
   {% sortable_header_div 'derniere_modification' _('Last modification') %}
-  {% sortable_header_div 'derniere_modification_par' _('Actor') %}
   {% sortable_header_div 'pre_admission' _('Pre-admission') %}
   {% sortable_header_div 'cotutelle' _('Cotutelle') %}
   {% sortable_header_div 'signatures_completees' _('Signatures') %}
@@ -66,12 +67,17 @@
   <td>{{ admission.nom_pays_nationalite_candidat|default:'' }}</td>
   <td>{{ admission.code_bourse }}</td>
   <td>{{ admission.formation }}</td>
+  <td>
+    {% for promoteur in admission.promoteurs %}
+      <span title="{{ promoteur }}">{{ promoteur.nom_acteur }}</span>
+      {% if not forloop.last %}<br>{% endif %}
+    {% endfor %}
+  </td>
   <td>{{ admission.etat_demande|enum_display:'ChoixStatutPropositionDoctorale' }}</td>
   <td>{{ admission.decision_fac }}</td>
   <td>{{ admission.decision_sic }}</td>
   <td>{{ admission.date_confirmation|date:'SHORT_DATE_FORMAT'|default:'' }}</td>
-  <td>{{ admission.derniere_modification_le|date:'SHORT_DATE_FORMAT' }}</td>
-  <td>{{ admission.derniere_modification_par }}</td>
+  <td>{{ admission.derniere_modification_le|date:'SHORT_DATE_FORMAT' }}<br>{{ admission.derniere_modification_par }}</td>
   <td class="text-center">
     {% if admission.type_admission == 'PRE_ADMISSION' %}
       <i class="fa-solid fa-flag" style="color: #c01c28;"></i>
