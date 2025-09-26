@@ -53,13 +53,15 @@
     {% checklist_state_button tab='decision_sic' label=_("Dispensation needed") icon='pencil' state='GEST_EN_COURS' en_cours="derogation" class='warning' htmx_post=change_status_url %}
     {% checklist_state_button tab='decision_sic' label=_("Refusal to validate") icon='pencil' state='GEST_EN_COURS' en_cours="refusal" open_modal='#sic-decision-refusal-modal' class='warning' %}
 
-    {% if past_experiences_are_sufficient and admission.est_admission %}
+    {% if past_experiences_are_sufficient and admission.est_admission and original_admission.checklist.current.decision_cdd.statut == 'GEST_REUSSITE' %}
       {% checklist_state_button tab='decision_sic' label=_("Approval to validate") icon='pencil' state='GEST_EN_COURS' en_cours="approval" class='warning' open_modal='#sic-decision-approval-modal' %}
     {% else %}
       {% if admission.est_inscription %}
         {% translate 'This status is not available for the inscription type admissions.' as approval_to_validate_tooltip %}
-      {% else %}
+      {% elif not past_experiences_are_sufficient %}
         {% translate 'The Previous experience must be in the "Sufficient" status in order to do this action.' as approval_to_validate_tooltip %}
+      {% else %}
+        {% translate 'The admission must be approved by the CDD.' as approval_to_validate_tooltip %}
       {% endif %}
       {% checklist_state_button tab='decision_sic' label=_("Approval to validate") icon='pencil' state='GEST_EN_COURS' en_cours="approval" class='warning' open_modal='#sic-decision-approval-modal' tooltip=approval_to_validate_tooltip|force_escape disabled=True %}
     {% endif %}
@@ -77,6 +79,9 @@
     {% checklist_state_button tab='decision_sic' label=_("Approved") icon='check' state='GEST_REUSSITE' class='success' tooltip=approval_disabled_tooltip|force_escape disabled=True %}
   {% elif original_admission.checklist.current.financabilite.statut != 'INITIAL_NON_CONCERNE' and original_admission.checklist.current.financabilite.statut != 'GEST_REUSSITE' %}
     {% translate 'The status of the checklist for the financability must be "Not concerned" or "Financable" or "Dispensation granted".' as approval_disabled_tooltip %}
+    {% checklist_state_button tab='decision_sic' label=_("Approved") icon='check' state='GEST_REUSSITE' class='success' tooltip=approval_disabled_tooltip|force_escape disabled=True %}
+  {% elif original_admission.checklist.current.decision_cdd.statut != 'GEST_REUSSITE' %}
+    {% translate 'The admission must be approved by the CDD.' as approval_disabled_tooltip %}
     {% checklist_state_button tab='decision_sic' label=_("Approved") icon='check' state='GEST_REUSSITE' class='success' tooltip=approval_disabled_tooltip|force_escape disabled=True %}
   {% elif original_admission.is_in_quarantine %}
     {% translate 'The transition to this status is not possible while the application is in quarantine.' as approval_disabled_tooltip %}

@@ -32,6 +32,7 @@ from django.conf import settings
 from django.db.models import QuerySet
 from django.shortcuts import resolve_url
 from django.test import TestCase
+from django.utils.translation import gettext
 from osis_history.models import HistoryEntry
 from osis_notification.models import EmailNotification
 
@@ -158,6 +159,7 @@ class SicApprovalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
         )
         self.admission.checklist['current']['parcours_anterieur']['statut'] = ChoixStatutChecklist.GEST_REUSSITE.name
         self.admission.checklist['current']['donnees_personnelles']['statut'] = ChoixStatutChecklist.GEST_REUSSITE.name
+        self.admission.checklist['current']['decision_cdd']['statut'] = ChoixStatutChecklist.GEST_REUSSITE.name
         self.admission.checklist['current']['financabilite']['statut'] = ChoixStatutChecklist.GEST_REUSSITE.name
         self.admission.checklist['current']['financabilite']['extra'] = {'reussite': 'financable'}
         self.admission.save(update_fields=['checklist'])
@@ -177,11 +179,10 @@ class SicApprovalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
         # Mock recuperer_matricule_etudiant (used inside mail)
         patcher_matricule_etudiant = mock.patch(
             'ddd.logic.gestion_des_comptes.use_case.read.recuperer_matricule_etudiant_assigne_service',
-            return_value='12654879'
+            return_value='12654879',
         )
         self.mock_recuperer_matricule_etudiant = patcher_matricule_etudiant.start()
         self.addCleanup(patcher_matricule_etudiant.stop)
-
 
     def test_submit_approval_final_decision_is_forbidden_with_fac_user(self):
         self.client.force_login(user=self.fac_manager_user)
@@ -196,6 +197,27 @@ class SicApprovalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
         response = self.client.get(self.url, **self.default_headers)
 
         self.assertEqual(response.status_code, 200)
+
+    def test_approval_final_raises_an_exception_if_no_cdd_approval(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        self.admission.checklist['current']['decision_cdd']['statut'] = ChoixStatutChecklist.GEST_BLOCAGE.name
+        self.admission.save()
+
+        response = self.client.post(
+            self.url,
+            data={
+                'sic-decision-approval-final-subject': 'subject',
+                'sic-decision-approval-final-body': 'body',
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            gettext('The admission must be approved by the CDD.'),
+            [m.message for m in response.context['messages']],
+        )
 
     def test_approval_final_decision_form_submitting_ue5_candidate(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -352,6 +374,28 @@ class SicApprovalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.admission.checklist['current']['decision_sic']['statut'] = ChoixStatutChecklist.INITIAL_CANDIDAT.name
         self.admission.type_demande = TypeDemande.INSCRIPTION.name
         self.admission.save()
+
+    def test_approval_final_raises_an_exception_if_no_cdd_approval_with_inscription(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        self.admission.checklist['current']['decision_cdd']['statut'] = ChoixStatutChecklist.GEST_BLOCAGE.name
+        self.admission.type_demande = TypeDemande.INSCRIPTION.name
+        self.admission.save()
+
+        response = self.client.post(
+            self.url,
+            data={
+                'sic-decision-approval-final-subject': 'subject',
+                'sic-decision-approval-final-body': 'body',
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            gettext('The admission must be approved by the CDD.'),
+            [m.message for m in response.context['messages']],
+        )
 
     def test_approval_final_decision_form_submitting_inscription(self):
         self.client.force_login(user=self.sic_manager_user)
