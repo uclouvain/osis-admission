@@ -29,8 +29,12 @@ from typing import Dict, List, Optional
 
 from django.utils.dateparse import parse_datetime
 
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
-from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
+    EmplacementDocumentDTO,
+)
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import (
+    QuestionSpecifiqueDTO,
+)
 from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     DocumentsSysteme,
@@ -124,6 +128,7 @@ class IEmplacementsDocumentsPropositionTranslator(interface.DomainService):
             )
         elif resume_dto.est_proposition_doctorale:
             documents_systeme = (
+                ('FICHE_ARCHIVE_SIGNATURE_ENVOYEES', resume_dto.proposition.fiche_archive_signatures_envoyees),
                 ('DOSSIER_ANALYSE', resume_dto.proposition.pdf_recapitulatif),
                 ('ATTESTATION_ACCORD_CDD', resume_dto.proposition.certificat_approbation_cdd),
                 ('ATTESTATION_REFUS_CDD', resume_dto.proposition.certificat_refus_cdd),
