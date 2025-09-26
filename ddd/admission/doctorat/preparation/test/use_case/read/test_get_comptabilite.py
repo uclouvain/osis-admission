@@ -38,6 +38,9 @@ from admission.ddd.admission.shared_kernel.enums import (
     ChoixAssimilation6,
     LienParente,
 )
+from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
+    PropositionInMemoryRepository,
+)
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
 
@@ -45,6 +48,8 @@ class GetComptabiliteTestCase(SimpleTestCase):
     def setUp(self):
         self.message_bus = message_bus_in_memory_instance
         self.cmd = GetComptabiliteQuery(uuid_proposition='uuid-SC3DP')
+        self.proposition_repository = PropositionInMemoryRepository()
+        self.addCleanup(self.proposition_repository.reset)
 
     def test_get_comptabilite(self):
         result = self.message_bus.invoke(self.cmd)
