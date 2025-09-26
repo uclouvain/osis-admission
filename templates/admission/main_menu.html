@@ -29,7 +29,7 @@
   {% if perms.admission.view_enrolment_applications or perms.admission.view_doctorate_enrolment_applications or perms.admission.view_continuing_enrolment_applications %}
         <div class="grid-item" style="grid-area: auto/{{ tile.column }}">
         <i class="icon fa fa-chalkboard-user"></i>
-        <h4 class="media-heading">
+        <h5 class="media-heading">
           <a
             {% if perms.admission.view_enrolment_applications %}
               href="{% url 'admission:all-list' %}"
@@ -42,7 +42,7 @@
           >
               {% trans 'Enrolment applications' %}
           </a>
-        </h4>
+        </h5>
         <div class="description">
             <p>{% trans 'Management of the enrolment applications' %}</p>
         </div>
