@@ -74,12 +74,15 @@
     <div id="scholarship">
       <div class="row">
         {% bootstrap_field form.bourse_recherche label_class=form.label_classes.bourse_recherche form_group_class="form-group col-md-4" %}
+        <div class="col-md-4">
+          {% bootstrap_field form.avec_autre_bourse_recherche %}
+        </div>
         <div id="other-scholarship-container" class="col-md-4">
-          {% bootstrap_field form.autre_bourse_recherche placeholder="" %}
+          {% bootstrap_field form.autre_bourse_recherche label_class=form.label_classes.autre_bourse_recherche placeholder="" %}
         </div>
       </div>
       <div class="row">
-        {% bootstrap_field form.bourse_date_debut label_class=form.label_classes.bourse_date_debut form_group_class="form-group col-md-5" %}
+        {% bootstrap_field form.bourse_date_debut label_class=form.label_classes.bourse_date_debut form_group_class="form-group col-md-4" %}
         {% bootstrap_field_with_tooltip form.bourse_date_fin label_class=form.label_classes.bourse_date_fin classes="form-group col-md-4" %}
       </div>
       {% bootstrap_field_with_tooltip form.bourse_preuve label_class=form.label_classes.bourse_preuve %}
@@ -175,16 +178,17 @@
 
   <script>
   $(function () {
-    const isFalsy = val => !val;
-
     $('#work').dependsOn({
       '#id_type_financement': { values: ['WORK_CONTRACT'] },
     });
     $('#scholarship').dependsOn({
       '#id_type_financement': { values: ['SEARCH_SCHOLARSHIP'] },
     });
+    $('#id_bourse_recherche').dependsOn({
+      "#id_avec_autre_bourse_recherche": { checked: false },
+    }, { valueOnDisable: '', hide: false });
     $('#other-scholarship-container').dependsOn({
-        "#id_bourse_recherche": { isFalsy },
+      "#id_avec_autre_bourse_recherche": { checked: true },
     });
     $('#financing-details').dependsOn({
       '#id_type_financement': { not: [''] },

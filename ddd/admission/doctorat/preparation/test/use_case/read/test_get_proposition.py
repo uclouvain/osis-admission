@@ -29,6 +29,9 @@ from admission.ddd.admission.doctorat.preparation.commands import GetProposition
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixTypeAdmission
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.doctorat.preparation.test.factory.person import PersonneConnueUclDTOFactory
+from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
+    PropositionInMemoryRepository,
+)
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
     PersonneConnueUclInMemoryTranslator,
@@ -40,6 +43,8 @@ class GetPropositionTestCase(SimpleTestCase):
         PersonneConnueUclInMemoryTranslator.personnes_connues_ucl = {
             PersonneConnueUclDTOFactory(matricule='0123456789'),
         }
+        self.proposition_repository = PropositionInMemoryRepository()
+        self.addCleanup(self.proposition_repository.reset)
         self.cmd = GetPropositionCommand(uuid_proposition='uuid-ECGE3DP')
         self.message_bus = message_bus_in_memory_instance
 
