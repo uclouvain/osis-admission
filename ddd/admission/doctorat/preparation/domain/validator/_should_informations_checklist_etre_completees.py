@@ -50,6 +50,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     DemandeDoitEtreAdmissionException,
     DemandeDoitEtreInscriptionException,
     DocumentAReclamerImmediatException,
+    EtatChecklistDecisionCddNonValidePourApprouverDemande,
     EtatChecklistDecisionSicNonValidePourApprouverUneInscription,
     EtatChecklistDonneesPersonnellesNonValidePourApprouverDemande,
     EtatChecklistFinancabiliteNonValidePourApprouverDemande,
@@ -66,11 +67,15 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 from admission.ddd.admission.shared_kernel.domain.model.complement_formation import (
     ComplementFormationIdentity,
 )
-from admission.ddd.admission.shared_kernel.domain.model.motif_refus import MotifRefusIdentity
+from admission.ddd.admission.shared_kernel.domain.model.motif_refus import (
+    MotifRefusIdentity,
+)
 from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import (
     TitreAccesSelectionnable,
 )
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
+    EmplacementDocumentDTO,
+)
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
     StatutReclamationEmplacementDocument,
@@ -309,3 +314,12 @@ class ShouldDonneesPersonnellesEtreDansEtatCorrectPourApprouverDemande(BusinessV
     def validate(self, *args, **kwargs):
         if self.checklist_actuelle.donnees_personnelles.statut != ChoixStatutChecklist.GEST_REUSSITE:
             raise EtatChecklistDonneesPersonnellesNonValidePourApprouverDemande
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldDecisionCddEtreDansEtatCorrectPourApprouverDemande(BusinessValidator):
+    checklist_actuelle: StatutsChecklistDoctorale
+
+    def validate(self, *args, **kwargs):
+        if self.checklist_actuelle.decision_cdd.statut != ChoixStatutChecklist.GEST_REUSSITE:
+            raise EtatChecklistDecisionCddNonValidePourApprouverDemande

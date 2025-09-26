@@ -6250,6 +6250,9 @@ msgstr ""
 msgid "The University tuition fee is EUR 0.0."
 msgstr ""
 
+msgid "The admission must be approved by the CDD."
+msgstr ""
+
 msgid "The admission must not follow a pre-admission"
 msgstr ""
 
