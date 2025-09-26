@@ -130,7 +130,8 @@ from admission.ddd.admission.formation_generale.dtos.proposition import (
 )
 from admission.ddd.admission.shared_kernel.commands import (
     ListerToutesDemandesQuery,
-    RechercherParcoursAnterieurQuery, RecupererInformationsDestinataireQuery,
+    RechercherParcoursAnterieurQuery,
+    RecupererInformationsDestinataireQuery,
 )
 from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
     EtatAuthentificationParcours,
@@ -140,7 +141,9 @@ from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     InformationsDestinatairePasTrouvee,
 )
 from admission.ddd.admission.shared_kernel.dtos.liste import DemandeRechercheDTO
-from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import (
+    QuestionSpecifiqueDTO,
+)
 from admission.ddd.admission.shared_kernel.dtos.resume import (
     ResumeCandidatDTO,
     ResumeEtEmplacementsDocumentsPropositionDTO,
@@ -379,13 +382,17 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
 
     @cached_property
     def incomplete_curriculum_experiences(self):
-        return {
+        experiences = {
             str(experience.uuid)
             for experience in self.proposition_resume.resume.curriculum.experiences_academiques
             if experience.champs_credits_bloc_1_et_complements_non_remplis(
                 self.proposition_resume.resume.proposition.formation.grade_academique,
             )
         }
+        examen = self.proposition_resume.resume.examens
+        if examen.requis and (not examen.attestation or not examen.annee):
+            experiences.add(OngletsDemande.EXAMS.name)
+        return experiences
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -3522,4 +3529,6 @@ class ChecklistView(
         for experience_non_academique in resume.curriculum.experiences_non_academiques:
             experiences[str(experience_non_academique.uuid)] = experience_non_academique
         experiences[OngletsDemande.ETUDES_SECONDAIRES.name] = resume.etudes_secondaires
+        if resume.examens.requis:
+            experiences[OngletsDemande.EXAMS.name] = resume.examens
         return experiences
