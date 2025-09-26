@@ -433,6 +433,9 @@ msgctxt "admission"
 msgid "Add an academic course"
 msgstr ""
 
+msgid "Add the corresponding program manager roles (doctorate)"
+msgstr ""
+
 msgid "Add validation of prior experience (VAE)"
 msgstr ""
 
@@ -785,6 +788,11 @@ msgid ""
 msgstr ""
 "Are you currently enrolled in the first year of a bachelor's degree at a "
 "French Community of Belgium haute école or university?"
+
+msgid ""
+"Are you sure you want to add the corresponding program managers roles in the "
+"base app based on the ones from the admission app (doctorate)?"
+msgstr ""
 
 msgid "Are you sure you want to change the status?"
 msgstr ""
@@ -4486,6 +4494,9 @@ msgstr ""
 msgid "No pool was found to match."
 msgstr ""
 
+msgid "No role has been created."
+msgstr ""
+
 msgid "No specific profile"
 msgstr ""
 
@@ -4659,6 +4670,12 @@ msgstr[1] ""
 msgid "One enrolment application"
 msgid_plural ""
 "%(start_index)s to %(end_index)s of %(total_counts)s enrolment applications"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "One role has been created."
+msgid_plural "%(nb)d roles have been created."
 msgstr[0] ""
 msgstr[1] ""
 

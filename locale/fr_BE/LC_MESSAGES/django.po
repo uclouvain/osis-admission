@@ -487,6 +487,11 @@ msgctxt "admission"
 msgid "Add an academic course"
 msgstr "Ajouter une formation académique"
 
+msgid "Add the corresponding program manager roles (doctorate)"
+msgstr ""
+"Ajouter les rôles de gestionnaire de parcours étudiant correspondants "
+"(doctorat)"
+
 msgid "Add validation of prior experience (VAE)"
 msgstr "Ajouter une valorisation des acquis de l'expérience"
 
@@ -871,6 +876,13 @@ msgid ""
 msgstr ""
 "Êtes-vous actuellement inscrit∙e en première année de bachelier dans une "
 "haute école ou une université de la Communauté française de Belgique ?"
+
+msgid ""
+"Are you sure you want to add the corresponding program managers roles in the "
+"base app based on the ones from the admission app (doctorate)?"
+msgstr ""
+"Êtes-vous sûr d'ajouter les rôles de gestionnaire de parcours étudiant correspondants dans "
+"l'application 'base' en se basant sur ceux de l'application 'admission' (doctorat) ?"
 
 msgid "Are you sure you want to change the status?"
 msgstr "Êtes-vous sûr·e de vouloir changer d'état ?"
@@ -4996,6 +5008,9 @@ msgstr "Aucun paiement"
 msgid "No pool was found to match."
 msgstr "Aucun pot ne correspond."
 
+msgid "No role has been created."
+msgstr "Aucun rôle n'a été créé."
+
 msgid "No specific profile"
 msgstr "Pas de profil particulier"
 
@@ -5185,6 +5200,12 @@ msgid_plural ""
 msgstr[0] "Une demande d'inscription"
 msgstr[1] ""
 "%(start_index)s à %(end_index)s sur %(total_counts)s demandes d'inscription"
+
+#, python-format
+msgid "One role has been created."
+msgid_plural "%(nb)d roles have been created."
+msgstr[0] "Un rôle a été créé."
+msgstr[1] "%(nb)d rôles ont été créés."
 
 msgid "Online"
 msgstr "En ligne"
