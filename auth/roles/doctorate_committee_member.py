@@ -46,6 +46,7 @@ class DoctorateCommitteeMember(EducationGroupRoleModel):
         verbose_name = _("Role: Doctorate committee member")
         verbose_name_plural = _("Role: Doctorate committee members")
         group_name = "doctorate_committee_member"
+        unique_together = ("person", "education_group")
 
     @classmethod
     def rule_set(cls):
