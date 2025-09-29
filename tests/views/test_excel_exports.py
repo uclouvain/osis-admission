@@ -61,13 +61,6 @@ from admission.ddd.admission.doctorat.preparation.read_view.domain.enums.tableau
     IndicateurTableauBordEnum,
 )
 from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
-from admission.ddd.admission.shared_kernel.dtos.liste import (
-    DemandeRechercheDTO,
-    VisualiseurAdmissionDTO,
-)
-from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
-from admission.ddd.admission.shared_kernel.enums.liste import TardiveModificationReorientationFiltre
-from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixEdition,
     ChoixInscriptionATitre,
@@ -84,6 +77,15 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     OngletsChecklist as OngletsChecklistGenerale,
 )
+from admission.ddd.admission.shared_kernel.dtos.liste import (
+    DemandeRechercheDTO,
+    VisualiseurAdmissionDTO,
+)
+from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
+from admission.ddd.admission.shared_kernel.enums.liste import (
+    TardiveModificationReorientationFiltre,
+)
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.shared_kernel.tests.factory.profil import (
     AnneeExperienceAcademiqueDTOFactory,
     ExperienceAcademiqueDTOFactory,
@@ -1632,7 +1634,7 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
         # Academic record
         self.assertStrEqual(
             row_data[5],
-            'Computer science - Institute - 2022-06-30 - 27.5 ECTS - Grande distinction (80-89%)'
+            'Computer science - Institute - 2022-06-30 - 27.5 ECTS - Grande distinction (80-89%)',
         )
         self.assertStrEqual(
             row_data[6],
@@ -1787,7 +1789,7 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
         self.assertStrEqual(names[13], _('Funding type'))
         self.assertStrEqual(names[14], _('Research scholarship'))
         self.assertStrEqual(names[15], _('Cotutelle'))
-        self.assertStrEqual(names[16], _('FNRS, FRIA, FRESH'))
+        self.assertStrEqual(names[16], _('FNRS, FRIA, FRESH, CSC'))
         self.assertStrEqual(names[17], _('Submitted from'))
         self.assertStrEqual(names[18], _('Submitted until'))
         self.assertStrEqual(names[19], _('Include or exclude the checklist filters'))

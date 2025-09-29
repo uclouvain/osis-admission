@@ -31,6 +31,7 @@ from rules import RuleSet
 
 from admission.auth.predicates import continuing, doctorate, general
 from admission.auth.predicates.common import (
+    candidate_has_other_doctorate_general_or_iufc_admissions,
     candidate_has_other_doctorate_or_general_admissions,
     candidate_has_other_general_admissions,
     has_scope,
@@ -147,6 +148,7 @@ class CentralManager(EntityRoleModel):
             & (
                 general.in_sic_status
                 | (continuing.in_manager_status & ~candidate_has_other_doctorate_or_general_admissions)
+                | (doctorate.in_sic_status & ~candidate_has_other_doctorate_general_or_iufc_admissions)
             )
             & ~is_sent_to_epc,
             'admission.view_admission_project': is_entity_manager,

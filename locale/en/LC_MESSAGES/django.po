@@ -80,7 +80,7 @@ msgctxt "admission"
 msgid "(Expected) date of graduation"
 msgstr ""
 
-msgid "(Expected) graduation date"
+msgid "(Expected) graduation date (signed diploma)"
 msgstr ""
 
 msgid ", on"
@@ -90,20 +90,6 @@ msgid "12"
 msgstr ""
 
 msgid "6"
-msgstr ""
-
-#, python-format
-msgid ""
-"<a href=\"%(admission_link_back)s\">%(reference)s</a> - "
-"%(candidate_first_name)s %(candidate_last_name)s requested signatures for "
-"%(training_title)s"
-msgstr ""
-
-#, python-format
-msgid ""
-"<a href=\"%(admission_link_back)s\">%(reference)s</a> - "
-"%(candidate_first_name)s %(candidate_last_name)s submitted request for "
-"%(training_title)s"
 msgstr ""
 
 #, python-format
@@ -1503,6 +1489,9 @@ msgstr ""
 msgid "Completed for Fac"
 msgstr ""
 
+msgid "Completed for Fac/CDD"
+msgstr ""
+
 msgid "Completed for SIC"
 msgstr ""
 
@@ -2724,7 +2713,7 @@ msgstr ""
 msgid "FNRS"
 msgstr ""
 
-msgid "FNRS, FRIA, FRESH"
+msgid "FNRS, FRIA, FRESH, CSC"
 msgstr ""
 
 msgid "FR"
@@ -2793,6 +2782,9 @@ msgid "False"
 msgstr ""
 
 msgid "Feedback from Fac"
+msgstr ""
+
+msgid "Feedback from Fac/CDD"
 msgstr ""
 
 msgctxt "admission gender"
@@ -2901,6 +2893,9 @@ msgid "First name Last name:"
 msgstr ""
 
 msgid "First name and last name"
+msgstr ""
+
+msgid "First name of the manager"
 msgstr ""
 
 msgid ""
@@ -3875,6 +3870,9 @@ msgstr ""
 msgid "Last name / First name / Global id"
 msgstr ""
 
+msgid "Last name of the manager"
+msgstr ""
+
 msgid "Last registration id"
 msgstr ""
 
@@ -3938,6 +3936,9 @@ msgid "Link to the application in the back-office"
 msgstr ""
 
 msgid "Link to the application on the portal"
+msgstr ""
+
+msgid "Link to the documents tab of the admission (front-office)"
 msgstr ""
 
 msgid ""
@@ -4116,6 +4117,11 @@ msgstr ""
 msgid ""
 "Mail sent to the candidate to inform him that some requested documents have "
 "been received and some are still missing for general education"
+msgstr ""
+
+msgid ""
+"Mail sent to the manager to inform him that an application has been "
+"submitted by a candidate"
 msgstr ""
 
 msgid ""
@@ -4740,6 +4746,9 @@ msgstr ""
 msgid "Other refusal reasons"
 msgstr ""
 
+msgid "Other scholarship"
+msgstr ""
+
 msgid ""
 "Our University is pleased to welcome you and wishes you an enriching and "
 "fruitful stay."
@@ -5103,6 +5112,9 @@ msgstr ""
 msgid "Processing by Fac"
 msgstr ""
 
+msgid "Processing by Fac/CDD"
+msgstr ""
+
 msgid "Produce xls"
 msgstr ""
 
@@ -5136,13 +5148,10 @@ msgstr ""
 msgid "Project abstract"
 msgstr ""
 
-msgid "Project abstract (max. 2000 characters)"
+msgid "Project abstract (max. 4000 characters)"
 msgstr ""
 
 msgid "Project title"
-msgstr ""
-
-msgid "Project title (max. 100 characters)"
 msgstr ""
 
 msgid "Promotion"
@@ -6244,6 +6253,9 @@ msgstr ""
 msgid "The University tuition fee is EUR 0.0."
 msgstr ""
 
+msgid "The admission must be approved by the CDD."
+msgstr ""
+
 msgid "The admission must not follow a pre-admission"
 msgstr ""
 
@@ -6794,6 +6806,11 @@ msgid ""
 "related to a general or a doctorate education."
 msgstr ""
 
+msgid ""
+"This action cannot be performed as an admission or an internal experience is "
+"related to a general or a doctorate or a IUFC education."
+msgstr ""
+
 msgid "This action is limited to a specific admission context."
 msgstr ""
 
@@ -6948,6 +6965,9 @@ msgid "To be completed by SIC"
 msgstr ""
 
 msgid "To be completed for Fac"
+msgstr ""
+
+msgid "To be completed for Fac/CDD"
 msgstr ""
 
 msgid "To be completed for the Enrolment Office (SIC)"
@@ -7555,20 +7575,20 @@ msgstr ""
 
 #, python-format
 msgid ""
-"You cannot submit this admission for a continuing education as you already "
-"have submitted one."
+"You cannot have two applications for a doctorate education in progress at "
+"the same time."
 msgid_plural ""
-"You cannot submit this admission for a continuing education as you already "
-"have submitted %(maximum_number)s of them."
+"You cannot have more than %(max)s applications for a doctorate education in "
+"progress at the same time."
 msgstr[0] ""
 msgstr[1] ""
 
 #, python-format
 msgid ""
-"You cannot submit this admission for a doctorate education as you already "
+"You cannot submit this admission for a continuing education as you already "
 "have submitted one."
 msgid_plural ""
-"You cannot submit this admission for a doctorate education as you already "
+"You cannot submit this admission for a continuing education as you already "
 "have submitted %(maximum_number)s of them."
 msgstr[0] ""
 msgstr[1] ""

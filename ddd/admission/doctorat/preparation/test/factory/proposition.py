@@ -73,7 +73,9 @@ from admission.ddd.admission.shared_kernel.domain.model.complement_formation imp
 from admission.ddd.admission.shared_kernel.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
 )
-from admission.ddd.admission.shared_kernel.domain.model.motif_refus import MotifRefusIdentity
+from admission.ddd.admission.shared_kernel.domain.model.motif_refus import (
+    MotifRefusIdentity,
+)
 from admission.ddd.admission.shared_kernel.enums import (
     ChoixAssimilation1,
     ChoixAssimilation2,
@@ -89,8 +91,12 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     StatutReclamationEmplacementDocument,
     TypeEmplacementDocument,
 )
-from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationIdentityFactory
-from admission.ddd.admission.shared_kernel.tests.factory.reference import REFERENCE_MEMORY_ITERATOR
+from admission.ddd.admission.shared_kernel.tests.factory.formation import (
+    FormationIdentityFactory,
+)
+from admission.ddd.admission.shared_kernel.tests.factory.reference import (
+    REFERENCE_MEMORY_ITERATOR,
+)
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
 )
@@ -312,6 +318,10 @@ class _PropositionFactory(factory.Factory):
             commentaire_programme_conjoint=factory.fuzzy.FuzzyText(),
             communication_au_candidat=factory.fuzzy.FuzzyText(),
             approuvee_par_cdd_le=factory.Faker('past_datetime'),
+            checklist_actuelle=factory.SubFactory(
+                StatutsChecklistDoctoraleFactory,
+                decision_cdd__statut=ChoixStatutChecklist.GEST_REUSSITE,
+            ),
         )
         est_approuvee_par_sic = factory.Trait(
             complements_formation=factory.List(
@@ -332,6 +342,7 @@ class _PropositionFactory(factory.Factory):
                 financabilite__statut=ChoixStatutChecklist.GEST_REUSSITE,
                 financabilite__extra={'reussite': 'financable'},
                 donnees_personnelles__statut=ChoixStatutChecklist.GEST_REUSSITE,
+                decision_cdd__statut=ChoixStatutChecklist.GEST_REUSSITE,
             ),
         )
 

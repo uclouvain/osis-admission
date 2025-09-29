@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -128,12 +128,6 @@
   </p>
 
   <p>
-    Le formulaire de formation doctorale sera accessible lors de votre première connexion à votre bureau virtuel.
-    Ce formulaire doit être tenu à jour tout au long de votre parcours et au minimum avant chaque réunion de/avec
-    votre comité d’accompagnement.
-  </p>
-
-  <p>
     Nous attirons votre attention sur la nécessite de respecter le délai prévu par le règlement doctoral pour la
     présentation de votre épreuve de confirmation.
   </p>
@@ -145,11 +139,7 @@
 
   <div id="signature">
     <p>
-      {% if cdd_president.function == 'Présidente' %}
-        Votre présidente de CDD : {{ cdd_president.firstname }} {{ cdd_president.lastname }}
-      {% else %}
-        Votre président de CDD : {{ cdd_president.firstname }} {{ cdd_president.lastname }}
-      {% endif %}
+      Pour le·la président·e de CDD : {{ gestionnaire.prenom }} {{ gestionnaire.nom }} le {{ today_date }}
     </p>
   </div>
 </div>

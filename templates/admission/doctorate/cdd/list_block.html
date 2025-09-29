@@ -57,6 +57,7 @@
   {% sortable_header_div 'derniere_modification_par' _('Actor') %}
   {% sortable_header_div 'pre_admission' _('Pre-admission') %}
   {% sortable_header_div 'cotutelle' _('Cotutelle') %}
+  {% sortable_header_div 'signatures_completees' _('Signatures') %}
 {% endblock %}
 
 {% block list_block_row_result %}
@@ -79,6 +80,11 @@
   <td class="text-center">
     {% if admission.cotutelle %}
       <i class="fa-solid fa-seedling" style="color: #26a269;"></i>
+    {% endif %}
+  </td>
+  <td class="text-center">
+    {% if admission.signatures_completees %}
+      <i class="fa-solid fa-flag" style="color: #26a269;"></i>
     {% endif %}
   </td>
 {% endblock %}

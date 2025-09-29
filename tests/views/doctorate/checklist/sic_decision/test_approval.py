@@ -30,6 +30,7 @@ from django.conf import settings
 from django.db.models import QuerySet
 from django.shortcuts import resolve_url
 from django.test import TestCase
+from django.utils.translation import gettext
 from osis_history.models import HistoryEntry
 
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
@@ -92,6 +93,7 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         )
         cls.experience_uuid = str(cls.admission.candidate.educationalexperience_set.first().uuid)
         cls.admission.checklist['current']['parcours_anterieur']['statut'] = ChoixStatutChecklist.GEST_REUSSITE.name
+        cls.admission.checklist['current']['decision_cdd']['statut'] = ChoixStatutChecklist.GEST_REUSSITE.name
         cls.admission.save()
         cls.url = resolve_url(
             'admission:doctorate:sic-decision-approval',
@@ -154,7 +156,7 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.assertEqual(form.initial.get('communication_to_the_candidate'), '')
         self.assertEqual(form.initial.get('must_provide_student_visa_d'), False)
 
-        # By default, candidate who are not from UE+5 must provide a student visa
+        # By default, candidate who are not from UE+5 must not provide a student visa
         self.admission.must_provide_student_visa_d = None
         self.admission.save()
         self.admission.candidate.country_of_citizenship = CountryFactory(european_union=False, iso_code='ZB')
@@ -165,7 +167,7 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.assertEqual(response.status_code, 200)
 
         form = response.context['sic_decision_approval_form']
-        self.assertEqual(form.initial.get('must_provide_student_visa_d'), True)
+        self.assertEqual(form.initial.get('must_provide_student_visa_d'), False)
 
         self.admission.candidate.country_of_citizenship = CountryFactory(european_union=False, iso_code='CH')
         self.admission.candidate.save()
@@ -364,6 +366,34 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
 
         self.assertIn('is_mobility', form.fields)
         self.assertIn('mobility_months_amount', form.fields)
+
+    def test_approval_decision_raises_an_exception_if_no_cdd_approval(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        self.admission.checklist['current']['decision_cdd']['statut'] = ChoixStatutChecklist.GEST_BLOCAGE.name
+        self.admission.save()
+
+        response = self.client.post(
+            self.url,
+            data={
+                'sic-decision-approval-with_prerequisite_courses': 'False',
+                'sic-decision-approval-prerequisite_courses_fac_comment': 'Comment about the additional trainings',
+                'sic-decision-approval-annual_program_contact_person_name': 'John Doe',
+                'sic-decision-approval-annual_program_contact_person_email': 'john.doe@example.be',
+                'sic-decision-approval-join_program_fac_comment': 'Comment about the join program',
+                'sic-decision-approval-tuition_fees_amount': 'NOUVEAUX_DROITS_MAJORES',
+                'sic-decision-approval-tuition_fees_dispensation': 'DISPENSE_OFFRE',
+                'sic-decision-approval-communication_to_the_candidate': 'Communication',
+                'sic-decision-approval-must_provide_student_visa_d': 'on',
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            gettext('The admission must be approved by the CDD.'),
+            [m.message for m in response.context['messages']],
+        )
 
     def test_approval_decision_form_has_must_report_to_sic_and_must_provide_student_visa_d_for_an_admission(self):
         self.client.force_login(user=self.sic_manager_user)

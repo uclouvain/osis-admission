@@ -75,10 +75,18 @@ from admission.ddd.admission.doctorat.preparation.dtos import AvisDTO, Propositi
 from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import (
     EmplacementDocument,
 )
-from admission.ddd.admission.shared_kernel.domain.model.formation import FormationIdentity
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import StatutEmplacementDocument
-from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import IMatriculeEtudiantService
+from admission.ddd.admission.shared_kernel.domain.model.formation import (
+    FormationIdentity,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import (
+    IMatriculeEtudiantService,
+)
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
+    EmplacementDocumentDTO,
+)
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    StatutEmplacementDocument,
+)
 from admission.infrastructure.admission.doctorat.preparation.domain.service.doctorat import (
     DoctoratTranslator,
 )
@@ -104,6 +112,9 @@ from admission.mail_templates import (
     EMAIL_TEMPLATE_ENROLLMENT_GENERATED_NOMA_DOCTORATE_TOKEN,
     EMAIL_TEMPLATE_VISA_APPLICATION_DOCUMENT_URL_DOCTORATE_TOKEN,
 )
+from admission.mail_templates.submission import (
+    ADMISSION_EMAIL_CONFIRM_SUBMISSION_FOR_MANAGER_DOCTORATE,
+)
 from admission.models import AdmissionTask, DoctorateAdmission, SupervisionActor
 from admission.models.base import BaseAdmission
 from admission.models.doctorate import PropositionProxy
@@ -113,11 +124,14 @@ from admission.utils import (
     get_backoffice_admission_url,
     get_ca_member_salutation_prefix,
     get_portal_admission_url,
+    get_portal_doctorate_management_url,
     get_salutation_prefix,
 )
 from base.models.person import Person
 from base.utils.utils import format_academic_year
-from ddd.logic.gestion_des_comptes.domain.validator.exceptions import MatriculeEtudiantIntrouvableException
+from ddd.logic.gestion_des_comptes.domain.validator.exceptions import (
+    MatriculeEtudiantIntrouvableException,
+)
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
 
 EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN = 'SERA_AUTOMATIQUEMENT_REMPLACE_PAR_LE_LIEN'
@@ -202,20 +216,6 @@ class Notification(INotification):
             admission.training.education_group_id
         )
 
-        # Envoyer aux gestionnaires CDD
-        for manager in get_admission_cdd_managers(admission.training.education_group_id):
-            with translation.override(manager.language):
-                content = (
-                    _(
-                        '<a href="%(admission_link_back)s">%(reference)s</a> - '
-                        '%(candidate_first_name)s %(candidate_last_name)s requested '
-                        'signatures for %(training_title)s'
-                    )
-                    % common_tokens
-                )
-                web_notification = WebNotification(recipient=manager, content=str(content))
-            WebNotificationHandler.create(web_notification)
-
         # Envoyer au doctorant
         with translation.override(candidat.language):
             actor_list_str = [
@@ -236,6 +236,11 @@ class Notification(INotification):
 
         # Envoyer aux acteurs n'ayant pas répondu
         actors_invited = [actor for actor in actor_list if actor.last_state == SignatureState.INVITED.name]
+
+        # Surcharger les liens du front avec ceux dédiés aux membres du groupe de supervision
+        frontend_link_for_supervision_member = get_portal_doctorate_management_url(proposition.entity_id.uuid)
+        supervision_frontend_link_for_supervision_member = f'{frontend_link_for_supervision_member}supervision'
+
         for actor in actors_invited:
             tokens = {
                 **common_tokens,
@@ -246,6 +251,9 @@ class Notification(INotification):
             }
             if actor.is_external:
                 tokens["admission_link_front"] = cls._lien_invitation_externe(proposition, actor)
+            else:
+                tokens["admission_link_front"] = supervision_frontend_link_for_supervision_member
+                tokens["admission_link_front_supervision"] = supervision_frontend_link_for_supervision_member
             if actor.type == ActorType.PROMOTER.name:
                 email_message = generate_email(
                     ADMISSION_EMAIL_SIGNATURE_REQUESTS_PROMOTER,
@@ -334,6 +342,10 @@ class Notification(INotification):
                 .exclude(uuid=signataire_id.uuid)
             )
 
+            # Surcharger les liens du front avec ceux dédiés aux membres du groupe de supervision
+            frontend_link_for_supervision_member = get_portal_doctorate_management_url(proposition.entity_id.uuid)
+            supervision_frontend_link_for_supervision_member = f'{frontend_link_for_supervision_member}supervision'
+
             for other_promoter in other_promoters:
                 email_message = generate_email(
                     ADMISSION_EMAIL_SIGNATURE_REFUSAL,
@@ -346,6 +358,8 @@ class Notification(INotification):
                         "actor_first_name": other_promoter.first_name,
                         "actor_last_name": other_promoter.last_name,
                         "salutation": get_ca_member_salutation_prefix(other_promoter),
+                        "admission_link_front": frontend_link_for_supervision_member,
+                        "admission_link_front_supervision": supervision_frontend_link_for_supervision_member,
                     },
                     recipients=[other_promoter.email],
                 )
@@ -410,17 +424,17 @@ class Notification(INotification):
 
         # Envoyer aux gestionnaires CDD
         for manager in get_admission_cdd_managers(admission.training.education_group_id):
-            with translation.override(manager.language):
-                content = (
-                    _(
-                        '<a href="%(admission_link_back)s">%(reference)s</a> - '
-                        '%(candidate_first_name)s %(candidate_last_name)s '
-                        'submitted request for %(training_title)s'
-                    )
-                    % common_tokens
-                )
-                web_notification = WebNotification(recipient=manager, content=str(content))
-            WebNotificationHandler.create(web_notification)
+            email_message = generate_email(
+                ADMISSION_EMAIL_CONFIRM_SUBMISSION_FOR_MANAGER_DOCTORATE,
+                manager.person.language,
+                {
+                    **common_tokens,
+                    'manager_first_name': manager.person.first_name,
+                    'manager_last_name': manager.person.last_name,
+                },
+                recipients=[manager.person.email],
+            )
+            EmailNotificationHandler.create(email_message, person=manager.person)
 
     @classmethod
     def notifier_suppression_membre(cls, proposition: Proposition, signataire_id: 'SignataireIdentity') -> None:
@@ -434,6 +448,7 @@ class Notification(INotification):
 
         if actor.state in [SignatureState.APPROVED.name, SignatureState.DECLINED.name]:
             candidat = Person.objects.get(global_id=proposition.matricule_candidat)
+            frontend_link_for_supervision_member = get_portal_doctorate_management_url(proposition.entity_id.uuid)
             email_message = generate_email(
                 ADMISSION_EMAIL_MEMBER_REMOVED,
                 actor.language,
@@ -447,6 +462,7 @@ class Notification(INotification):
                     'program_managers_names': get_admission_program_managers_names(
                         admission.training.education_group_id
                     ),
+                    'admission_link_front': frontend_link_for_supervision_member,
                 },
                 recipients=[actor.email],
             )
@@ -457,7 +473,6 @@ class Notification(INotification):
         # Charger le membre et vérifier qu'il est externe et déjà invité
         actor = SupervisionActor.objects.filter(
             uuid=membre.uuid,
-            person_id=None,
             last_state=SignatureState.INVITED.name,
         ).first()
         if not actor:
@@ -615,7 +630,7 @@ class Notification(INotification):
 
         # Envoyer une notification aux gestionnaires CDD
         for manager in get_admission_cdd_managers(admission.training.education_group_id):
-            with translation.override(manager.language):
+            with translation.override(manager.person.language):
                 content = (
                     _(
                         '<a href="%(admission_link_back)s">%(reference)s</a> - '
@@ -624,7 +639,7 @@ class Notification(INotification):
                     )
                     % web_notification_tokens
                 )
-                web_notification = WebNotification(recipient=manager, content=str(content))
+                web_notification = WebNotification(recipient=manager.person, content=str(content))
             WebNotificationHandler.create(web_notification)
 
         # Create the async task to create the folder analysis containing the submitted documents
@@ -816,7 +831,7 @@ class Notification(INotification):
             try:
                 noma_genere = matricule_etudiant_service.recuperer(
                     msg_bus=message_bus,
-                    matricule_personne=admission.candidate.global_id
+                    matricule_personne=admission.candidate.global_id,
                 )
             except MatriculeEtudiantIntrouvableException:
                 noma_genere = gettext('NOMA not found')
@@ -834,6 +849,14 @@ class Notification(INotification):
         )
 
         candidate_email_message = EmailNotificationHandler.build(email_notification)
+
+        actors = SupervisionActor.objects.filter(process=admission.supervision_group).select_related('person')
+        cc_list = []
+        for promoter in actors.filter(type=ActorType.PROMOTER.name):
+            cc_list.append(cls._format_email(promoter))
+        if cc_list:
+            candidate_email_message['Cc'] = ','.join(cc_list)
+
         EmailNotificationHandler.create(candidate_email_message, person=admission.candidate)
 
         return candidate_email_message

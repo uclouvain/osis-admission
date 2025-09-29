@@ -28,11 +28,11 @@ from typing import Dict, List, Optional
 
 import attr
 
-from admission.ddd.admission.shared_kernel import commands
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixDoctoratDejaRealise,
     ChoixLangueRedactionThese,
 )
+from admission.ddd.admission.shared_kernel import commands
 from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
     ExperiencesCVRecuperees,
 )
@@ -161,7 +161,7 @@ class RedonnerLaMainAuCandidatCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class RenvoyerInvitationSignatureExterneCommand(interface.CommandRequest):
+class RenvoyerInvitationSignatureCommand(interface.CommandRequest):
     uuid_proposition: str
     uuid_membre: str
 

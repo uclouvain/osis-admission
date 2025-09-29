@@ -30,10 +30,11 @@ from decimal import Decimal
 from typing import Dict, List, Optional
 
 from django.conf import settings
-from django.db.models import OuterRef, Prefetch, Q, Subquery, Sum
+from django.db.models import Exists, OuterRef, Prefetch, Q, Subquery, Sum
 from django.db.models.fields import CharField
 from django.db.models.functions import Coalesce
 from django.utils.translation import get_language
+from osis_signature.enums import SignatureState
 from osis_signature.models import Actor
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
@@ -120,6 +121,12 @@ class ListerDemandesService(IListerDemandesService):
             .annotate_with_reference(with_management_faculty=False)
             .annotate(
                 scholarship=Coalesce('international_scholarship__short_name', 'other_international_scholarship'),
+                signatures_are_completed=Exists(Actor.objects.filter(process_id=OuterRef('supervision_group_id')))
+                & ~Exists(
+                    Actor.objects.filter(process_id=OuterRef('supervision_group_id')).exclude(
+                        last_state=SignatureState.APPROVED.name
+                    )
+                ),
             )
             .prefetch_related(
                 'candidate__student_set',
@@ -133,8 +140,7 @@ class ListerDemandesService(IListerDemandesService):
                     'educational_valuated_experiences',
                     EducationalExperience.objects.filter(
                         obtained_diploma=True,
-                    )
-                    .annotate(
+                    ).annotate(
                         formatted_program_name=Coalesce('program__title', 'education_name'),
                         formatted_institute_name=Coalesce('institute__name', 'institute_name'),
                         acquired_credits=Sum('educationalexperienceyear__acquired_credit_number'),
@@ -332,6 +338,7 @@ class ListerDemandesService(IListerDemandesService):
                 'derniere_modification_par': ['last_update_author__last_name', 'last_update_author__first_name'],
                 'pre_admission': ['type'],
                 'cotutelle': ['cotutelle'],
+                'signatures_completees': ['signatures_are_completed'],
             }[champ_tri]
 
             if tri_inverse:
@@ -508,6 +515,7 @@ class ListerDemandesService(IListerDemandesService):
             type_admission=admission.type,
             cotutelle=admission.cotutelle,
             code_bourse=admission.scholarship if admission.scholarship else '',  # From annotation
+            signatures_completees=admission.signatures_are_completed,  # From annotation
             nom_institut_these=admission.thesis_institute.title if admission.thesis_institute else '',
             sigle_institut_these=admission.thesis_institute.acronym if admission.thesis_institute else '',
             titre_projet=admission.project_title,
