@@ -1,5 +1,5 @@
-{% extends "admission/admin/common_change_list_template.html" %}
-{% load i18n %}
+{% extends "admin/change_list.html" %}
+{% load i18n static %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -25,17 +25,21 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% block object-tools-items %}
+{% block extrastyle %}
   {{ block.super }}
-  <li>
-    {% translate "Are you sure you want to add the corresponding program managers roles in the base app based on the ones from the admission app (doctorate)?" as confirm_message %}
-    <a
-      id="copy-doctorate-roles-link"
-      href="{% url 'admin:admission_programmanager_copy_doctorate_roles' %}"
-      onclick="return confirm(`{{ confirm_message }}`);"
-    >
-      {% translate 'Add the corresponding program manager roles (doctorate)' %}
-      <i class="fas fa-copy"></i>
-    </a>
-  </li>
+  <link rel="stylesheet" href="{% static 'fontawesome-pro-6.5.1-web/css/all.min.css' %}">
+  <style>
+    #content-main {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .object-tools {
+      display: flex;
+      flex-direction: column;
+      gap: 1em;
+      margin-bottom: 2em;
+      align-items: end;
+    }
+  </style>
 {% endblock %}

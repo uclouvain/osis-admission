@@ -863,8 +863,9 @@ msgid ""
 "Are you sure you want to add the corresponding program managers roles in the "
 "base app based on the ones from the admission app (doctorate)?"
 msgstr ""
-"Êtes-vous sûr d'ajouter les rôles de gestionnaire de parcours étudiant correspondants dans "
-"l'application 'base' en se basant sur ceux de l'application 'admission' (doctorat) ?"
+"Êtes-vous sûr d'ajouter les rôles de gestionnaire de parcours étudiant "
+"correspondants dans l'application 'base' en se basant sur ceux de "
+"l'application 'admission' (doctorat) ?"
 
 msgid "Are you sure you want to change the status?"
 msgstr "Êtes-vous sûr·e de vouloir changer d'état ?"
@@ -1207,6 +1208,9 @@ msgstr "Carte CIRE, séjour illimité ou d'étranger"
 
 msgid "CSS class"
 msgstr "Classe CSS"
+
+msgid "CSV file"
+msgstr "Fichier CSV"
 
 msgid "Campus"
 msgstr "Campus"
@@ -2365,6 +2369,9 @@ msgctxt "inclusive"
 msgid "Doctorate candidate"
 msgstr "Candidat.e doctorant.e"
 
+msgid "Doctorate committee members"
+msgstr "Membres de la commission doctorale"
+
 msgctxt "admission context"
 msgid "Doctorate education"
 msgstr "Formation doctorale"
@@ -3041,6 +3048,9 @@ msgstr "Retour de FAC/CDD"
 
 msgid "File"
 msgstr "Fichier"
+
+msgid "File with header"
+msgstr "Fichier avec en-tête"
 
 msgid "Filter by documents"
 msgstr "Filtrer par documents"
@@ -3936,6 +3946,15 @@ msgstr ""
 
 msgid "Immediately"
 msgstr "Immédiatement"
+
+msgid "Import from csv file"
+msgstr "Importer depuis un fichier CSV"
+
+msgid "Import of the doctorate committee members"
+msgstr "Importer des membres de la commission doctorale"
+
+msgid "Import of the doctorate committee members from a csv file"
+msgstr "Importer des membres de la commission doctorale depuis un fichier csv"
 
 msgid "Important information:"
 msgstr "Informations importantes"
@@ -4930,6 +4949,9 @@ msgid "No document is defined as requestable. At least one is required."
 msgstr ""
 "Aucun document n'est spécifié comme réclamable. Au-moins un est requis."
 
+msgid "No education group has been found for:"
+msgstr "Aucune formation n'a été trouvée pour :"
+
 msgid "No enrolment application"
 msgstr "Aucune demande d'inscription n'a été trouvée"
 
@@ -4947,6 +4969,9 @@ msgstr "Aucune connaissance des langues renseignée."
 
 msgid "No longer designate the document as to be requested"
 msgstr "Ne plus désigner le document comme étant à réclamer"
+
+msgid "No one has been found for:"
+msgstr "Aucune personne n'a été trouvée pour :"
 
 msgid "No one invited"
 msgstr "Aucun invité"
@@ -6158,6 +6183,9 @@ msgstr "Retyper le document"
 msgid "Role of the signing actor"
 msgstr "Rôle du signataire"
 
+msgid "Role:"
+msgstr "Rôle :"
+
 msgid "Role: Candidate"
 msgstr "Rôle: Candidat"
 
@@ -6391,6 +6419,9 @@ msgstr "Plusieurs demandes"
 
 msgid "Several applications?"
 msgstr "Plusieurs demandes ?"
+
+msgid "Several persons have been found for:"
+msgstr "Plusieurs personnes ont été trouvées pour :"
 
 msgid "Sex"
 msgstr "Sexe"
@@ -7002,6 +7033,9 @@ msgid "The current training is attached to this document."
 msgstr ""
 "La formation réalisée à ce jour se trouve en annexe à ce procès-verbal."
 
+msgid "The data import has been completed."
+msgstr "L'import des données a été réalisé."
+
 msgid "The decision of the signing actor"
 msgstr "La décision du signataire"
 
@@ -7092,6 +7126,17 @@ msgid ""
 msgstr ""
 "Le mail de la décision fac a été envoyé au candidat le %(date)s par "
 "%(sender)s."
+
+msgid ""
+"The file must contain, line by line, the CDD acronym in the first column and "
+"the names (concatenation of the first name and the last name) or the global identifiers of the persons "
+"to be added for this CDD in the following columns. The columns must be "
+"separated by commas."
+msgstr ""
+"Le fichier doit contenir, ligne par ligne, l'acronyme de la CDD dans la "
+"première colonne et les noms (concaténation du prénom et du nom) ou les identifiants globaux des "
+"personnes à ajouter à la CDD dans les colonnes suivantes. Les colonnes "
+"doivent être séparées par des virgules."
 
 msgid "The first name must be less than 20 characters long."
 msgstr "Le prénom ne doit pas faire plus de 20 caractères."
