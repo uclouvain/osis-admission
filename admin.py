@@ -33,8 +33,9 @@ from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.messages import info, warning
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-from django.db.models import Case, Exists, F, OuterRef, Q, Value, When
-from django.shortcuts import resolve_url
+from django.db.models import Case, Exists, F, OuterRef, Q, Subquery, Value, When
+from django.shortcuts import redirect, resolve_url, reverse
+from django.urls.conf import path
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
@@ -45,6 +46,9 @@ from hijack.contrib.admin import HijackUserAdminMixin
 from ordered_model.admin import OrderedModelAdmin
 from osis_document_components.fields import FileField
 
+from admission.admission_utils.copy_program_managers_from_admission_to_base import (
+    copy_program_managers_from_admission_to_base,
+)
 from admission.auth.roles.ca_member import CommitteeMember
 from admission.auth.roles.candidate import Candidate
 from admission.auth.roles.central_manager import CentralManager
@@ -60,8 +64,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_POUR_LISTING,
 )
-from admission.ddd.admission.shared_kernel.enums import CritereItemFormulaireFormation
-from admission.ddd.admission.shared_kernel.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
 )
@@ -73,6 +75,10 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST as ORGANISATION_ONGLETS_CHECKLIST_GENERALE,
+)
+from admission.ddd.admission.shared_kernel.enums import CritereItemFormulaireFormation
+from admission.ddd.admission.shared_kernel.enums.statut import (
+    CHOIX_STATUT_TOUTE_PROPOSITION,
 )
 from admission.forms.checklist_state_filter import ChecklistStateFilterField
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
@@ -113,7 +119,9 @@ from admission.services.injection_epc.injection_dossier import InjectionEPCAdmis
 from admission.views.mollie_webhook import MollieWebHook
 from base.models.academic_year import AcademicYear
 from base.models.education_group_type import EducationGroupType
+from base.models.education_group_year import EducationGroupYear
 from base.models.enums.education_group_categories import Categories
+from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
 from base.models.person_merge_proposal import PersonMergeStatus
 from education_group.contrib.admin import EducationGroupRoleModelAdmin
@@ -123,6 +131,24 @@ from osis_role.contrib.admin import EntityRoleModelAdmin, RoleModelAdmin
 
 # ##############################################################################
 # Models
+
+
+class EducationGroupRoleModelWithAnnotatedQuerysetAdmin(EducationGroupRoleModelAdmin):
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .annotate(
+                most_recent_acronym=Subquery(
+                    EducationGroupYear.objects.filter(education_group_id=OuterRef('education_group_id'))
+                    .order_by('-academic_year__year')
+                    .values('acronym')[:1]
+                )
+            )
+        )
+
+    def most_recent_acronym(self, obj):
+        return obj.most_recent_acronym
 
 
 class AdmissionAdminForm(forms.ModelForm):
@@ -1013,10 +1039,10 @@ class CentralManagerAdmin(HijackUserAdminMixin, EntityRoleModelAdmin):
         return central_manager
 
 
-class AdmissionReaderAdmin(HijackUserAdminMixin, EducationGroupRoleModelAdmin):
+class AdmissionReaderAdmin(HijackUserAdminMixin, EducationGroupRoleModelWithAnnotatedQuerysetAdmin):
     list_display = (
         'person',
-        'education_group_most_recent_acronym',
+        'most_recent_acronym',
         'cohort',
         'changed',
     )
@@ -1025,13 +1051,51 @@ class AdmissionReaderAdmin(HijackUserAdminMixin, EducationGroupRoleModelAdmin):
         return obj.person.user
 
 
-@admin.register(ProgramManager, DoctorateCommitteeMember)
-class ProgramManagerAdmin(HijackUserAdminMixin, EducationGroupRoleModelAdmin):
+@admin.register(DoctorateCommitteeMember)
+class DoctorateCommitteeMemberAdmin(HijackUserAdminMixin, EducationGroupRoleModelWithAnnotatedQuerysetAdmin):
     list_select_related = ['person__user']
-    list_display = ['person', 'education_group_most_recent_acronym']
+    list_display = ['person', 'most_recent_acronym']
 
     def get_hijack_user(self, obj):
         return obj.person.user
+
+
+@admin.register(ProgramManager)
+class ProgramManagerAdmin(DoctorateCommitteeMemberAdmin):
+    change_list_template = ['admission/admin/program_manager_change_list_template.html']
+
+    @property
+    def base_url(self):
+        return f'{(self.model._meta.app_label)}_{self.model._meta.model_name}'
+
+    def get_urls(self):
+        return super().get_urls() + [
+            path(
+                'actions/copy-doctorate-roles',
+                self.admin_site.admin_view(self.copy_doctorate_program_managers_from_admission_to_base),
+                name=f'{self.base_url}_copy_doctorate_roles',
+            ),
+        ]
+
+    def copy_doctorate_program_managers_from_admission_to_base(self, request):
+        '''
+        Add the program managers roles of the base app based on the ones specified in the admission app for the
+        managers linked to doctorate education groups.
+        '''
+        created_roles = copy_program_managers_from_admission_to_base(training_type=TrainingType.PHD)
+        nb_created_roles = len(created_roles)
+
+        info(
+            request,
+            (
+                ngettext('One role has been created.', '%(nb)d roles have been created.', nb_created_roles)
+                % {'nb': nb_created_roles}
+                if nb_created_roles
+                else _('No role has been created.')
+            ),
+        )
+
+        return redirect(reverse(f'admin:{self.base_url}_changelist'))
 
 
 class WorkingListForm(forms.ModelForm):
