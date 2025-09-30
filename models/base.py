@@ -96,7 +96,6 @@ from admission.models.epc_injection import (
     EPCInjectionStatus,
     EPCInjectionType,
 )
-from admission.models.form_item import ConfigurableModelFormItemField
 from admission.models.functions import ToChar
 from base.models.academic_calendar import AcademicCalendar
 from base.models.education_group_year import EducationGroupYear
@@ -546,14 +545,6 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         blank=True,
     )
 
-    specific_question_answers = ConfigurableModelFormItemField(
-        blank=True,
-        default=dict,
-        encoder=DjangoJSONEncoder,
-        upload_to=admission_directory_path,
-        education_field_name='training',
-    )
-
     curriculum = FileField(
         blank=True,
         upload_to=admission_directory_path,
@@ -844,3 +835,42 @@ class AdmissionViewer(models.Model):
             )
         except (IntegrityError, ValidationError):
             pass
+
+
+class SpecificQuestionAnswer(models.Model):
+
+    admission = models.ForeignKey(
+        BaseAdmission,
+        verbose_name=_('Admission'),
+        related_name='specific_question_answers',
+        on_delete=models.CASCADE,
+    )
+
+    form_item = models.ForeignKey(
+        'admission.AdmissionFormItem',
+        verbose_name=_('Admission'),
+        on_delete=models.PROTECT,
+    )
+
+    file = FileField(
+        verbose_name=_('File'),
+        upload_to=admission_directory_path,
+        blank=True,
+        null=True,
+    )
+
+    answer = models.JSONField(
+        verbose_name=_('Answer'),
+        encoder=DjangoJSONEncoder,
+        blank=True,
+        null=True,
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['admission', 'form_item'], name='admission_specific_question_answers_unique'),
+            models.CheckConstraint(
+                check=Q(file__isnull=False) | Q(answer__isnull=False),
+                name='admission_specific_question_answers_file_or_answer',
+            ),
+        ]

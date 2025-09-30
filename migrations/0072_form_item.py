@@ -98,7 +98,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='baseadmission',
             name='specific_question_answers',
-            field=admission.models.form_item.ConfigurableModelFormItemField(
+            field=models.JSONField(
                 blank=True, default=dict, encoder=django.core.serializers.json.DjangoJSONEncoder
             ),
         ),
