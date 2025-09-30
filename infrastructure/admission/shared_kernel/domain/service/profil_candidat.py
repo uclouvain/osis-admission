@@ -815,9 +815,11 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
     def get_uuids_experiences_curriculum_valorisees_par_admission(cls, uuid_proposition: str) -> set[str]:
         valuated_professionnal_experiences_uuids = AdmissionProfessionalValuatedExperiences.objects.filter(
             baseadmission_id=uuid_proposition,
+            professionalexperience__person_id=F('baseadmission__candidate_id'),
         ).values_list('professionalexperience_id', flat=True)
         valuated_educational_experiences_uuids = AdmissionEducationalValuatedExperiences.objects.filter(
             baseadmission_id=uuid_proposition,
+            educationalexperience__person_id=F('baseadmission__candidate_id'),
         ).values_list('educationalexperience_id', flat=True)
 
         exams_uuids = []
