@@ -423,7 +423,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
                         else:
                             prerequisite_courses_detail_paragraph += complement_formation.full_title
                         if complement_formation.credits:
-                            prerequisite_courses_detail_paragraph += f"({complement_formation.full_title} ECTS)"
+                            prerequisite_courses_detail_paragraph += f" ({complement_formation.credits} ECTS)"
                         prerequisite_courses_detail_paragraph += '</li>'
                     prerequisite_courses_detail_paragraph += "</ul>"
                 if self.proposition.commentaire_complements_formation:
