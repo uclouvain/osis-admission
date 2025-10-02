@@ -598,7 +598,7 @@ class DoctorateCurriculumTestCase(BaseCurriculumTestCase, BaseIncompleteCurricul
         updated_admission = BaseAdmission.objects.get(uuid=self.admission.uuid)
 
         self.assertEqual(
-            updated_admission.specific_question_answers,
+            updated_admission.get_specific_question_answers_dict(),
             {
                 str(self.admission_form_item.uuid): 'My answer !',
             },
@@ -686,7 +686,7 @@ class GeneralEducationCurriculumTestCase(
         self.assertEqual(response.json().get('errors'), updated_admission.detailed_status)
 
         self.assertEqual(
-            updated_admission.specific_question_answers,
+            updated_admission.get_specific_question_answers_dict(),
             {
                 str(self.admission_form_item.uuid): 'My answer !',
             },
@@ -780,7 +780,7 @@ class ContinuingEducationCurriculumTestCase(BaseCurriculumTestCase, APITestCase)
         updated_admission = ContinuingEducationAdmission.objects.get(uuid=self.admission.uuid)
 
         self.assertEqual(
-            updated_admission.specific_question_answers,
+            updated_admission.get_specific_question_answers_dict(),
             {
                 str(self.admission_form_item.uuid): 'My answer !',
             },

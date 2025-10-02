@@ -112,6 +112,7 @@ def base_education_admission_document_merging(admission):
 
     updated_fields_by_object = defaultdict(list)
     document_exceptions = {}
+    specific_question_answers = admission.get_specific_question_answers_dict()
 
     # Update the models whose some document fields have been merged
     with transaction.atomic():
@@ -155,7 +156,7 @@ def base_education_admission_document_merging(admission):
 
             if specific_question_uuid:
                 # For a specific question, replace the previous file
-                admission.specific_question_answers[specific_question_uuid] = new_document_uuids
+                specific_question_answers[specific_question_uuid] = new_document_uuids
             else:
                 # Otherwise, update the related field in the specific object
                 setattr(model_object, model_field, new_document_uuids)

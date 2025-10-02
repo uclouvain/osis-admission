@@ -33,6 +33,8 @@ import freezegun
 from django.shortcuts import resolve_url
 from django.test import override_settings
 from django.utils.translation import gettext_lazy as _
+
+from admission.models.base import SpecificQuestionAnswer
 from gestion_des_comptes.models import HistoriqueMatriculeCompte
 from osis_history.models import HistoryEntry
 from osis_notification.models import EmailNotification, WebNotification
@@ -68,7 +70,7 @@ from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     QuestionsSpecifiquesChoixFormationNonCompleteesException,
     QuestionsSpecifiquesCurriculumNonCompleteesException,
 )
-from admission.ddd.admission.shared_kernel.enums.question_specifique import Onglets
+from admission.ddd.admission.shared_kernel.enums.question_specifique import Onglets, TypeItemFormulaire
 from admission.models import (
     AdmissionFormItemInstantiation,
     AdmissionTask,
@@ -449,7 +451,6 @@ class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixi
         cls.admission = DoctorateAdmissionFactory(
             training__management_entity=cls.commission,
             supervision_group=promoter.process,
-            with_answers_to_specific_questions=True,
         )
 
         cls.update_data = {
@@ -737,8 +738,14 @@ class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
         form_item_instantiation.save()
 
         # The question is required for this admission and the field is completed
-        admission.specific_question_answers = {'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response.'}
-        admission.save()
+        SpecificQuestionAnswer.objects.create(
+            admission=admission,
+            form_item=AdmissionFormItemFactory(
+                uuid='fe254203-17c7-47d6-95e4-3c5c532da551',
+                type=TypeItemFormulaire.TEXTE.name,
+            ),
+            answer='My response',
+        )
 
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)

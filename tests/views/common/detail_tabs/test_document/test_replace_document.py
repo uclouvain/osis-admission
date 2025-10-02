@@ -31,10 +31,13 @@ import freezegun
 from django.shortcuts import resolve_url
 from django.test import override_settings
 
+from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     IdentifiantBaseEmplacementDocument,
     OngletsDemande,
 )
+from admission.models.base import SpecificQuestionAnswer
+from admission.tests.factories.form_item import AdmissionFormItemFactory
 from admission.tests.views.common.detail_tabs.test_document import BaseDocumentViewTestCase
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from osis_document_components.forms import FileUploadField
@@ -129,10 +132,17 @@ class ReplaceDocumentTestCase(BaseDocumentViewTestCase):
         # Requestable document
         self.change_remote_metadata_patcher.reset_mock()
         specific_question_uuid = str(uuid.UUID(self.sic_free_requestable_document.split('.')[-1]))
-        self.general_admission.specific_question_answers[specific_question_uuid] = [uuid.uuid4()]
+        SpecificQuestionAnswer.objects.create(
+            admission=self.general_admission,
+            form_item=AdmissionFormItemFactory(
+                uuid=specific_question_uuid,
+                type=TypeItemFormulaire.DOCUMENT.name,
+            ),
+            file=[uuid.uuid4()],
+        )
         frozen_time.move_to('2022-01-04')
         self.general_admission.last_update_author = None
-        self.general_admission.save(update_fields=['specific_question_answers', 'last_update_author'])
+        self.general_admission.save(update_fields=['last_update_author'])
 
         old_document_uuid = self.general_admission.requested_documents.get(self.sic_free_requestable_document)
         self.assertIsNotNone(old_document_uuid)
@@ -148,10 +158,10 @@ class ReplaceDocumentTestCase(BaseDocumentViewTestCase):
         self.assertEqual(response.status_code, 200)
         self.general_admission.refresh_from_db()
         self.assertNotEqual(
-            self.general_admission.specific_question_answers.get(specific_question_uuid),
+            self.general_admission.get_specific_question_answers_dict().get(specific_question_uuid),
             old_document_uuid,
         )
-        self.assertEqual(len(self.general_admission.specific_question_answers.get(specific_question_uuid)), 1)
+        self.assertEqual(len(self.general_admission.get_specific_question_answers_dict().get(specific_question_uuid)), 1)
 
         # Check last modification data
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
@@ -334,10 +344,17 @@ class ReplaceDocumentTestCase(BaseDocumentViewTestCase):
         # Requestable document
         self.change_remote_metadata_patcher.reset_mock()
         specific_question_uuid = str(uuid.UUID(self.fac_free_requestable_document.split('.')[-1]))
-        self.general_admission.specific_question_answers[specific_question_uuid] = [uuid.uuid4()]
+        SpecificQuestionAnswer.objects.create(
+            admission=self.general_admission,
+            form_item=AdmissionFormItemFactory(
+                uuid=specific_question_uuid,
+                type=TypeItemFormulaire.DOCUMENT.name,
+            ),
+            file=[uuid.uuid4()],
+        )
         frozen_time.move_to('2022-01-03')
         self.general_admission.last_update_author = None
-        self.general_admission.save(update_fields=['specific_question_answers', 'last_update_author'])
+        self.general_admission.save(update_fields=['last_update_author'])
 
         old_document_uuid = self.general_admission.requested_documents.get(self.fac_free_requestable_document)
         self.assertIsNotNone(old_document_uuid)
@@ -361,10 +378,10 @@ class ReplaceDocumentTestCase(BaseDocumentViewTestCase):
         self.assertEqual(response.status_code, 200)
         self.general_admission.refresh_from_db()
         self.assertNotEqual(
-            self.general_admission.specific_question_answers.get(specific_question_uuid),
+            self.general_admission.get_specific_question_answers_dict().get(specific_question_uuid),
             old_document_uuid,
         )
-        self.assertEqual(len(self.general_admission.specific_question_answers.get(specific_question_uuid)), 1)
+        self.assertEqual(len(self.general_admission.get_specific_question_answers_dict().get(specific_question_uuid)), 1)
 
         # Check last modification data
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
@@ -419,10 +436,17 @@ class ReplaceDocumentTestCase(BaseDocumentViewTestCase):
         # Requestable document
         self.change_remote_metadata_patcher.reset_mock()
         specific_question_uuid = str(uuid.UUID(self.sic_free_requestable_document.split('.')[-1]))
-        self.continuing_admission.specific_question_answers[specific_question_uuid] = [uuid.uuid4()]
+        SpecificQuestionAnswer.objects.create(
+            admission=self.continuing_admission,
+            form_item=AdmissionFormItemFactory(
+                uuid=specific_question_uuid,
+                type=TypeItemFormulaire.DOCUMENT.name,
+            ),
+            file=[uuid.uuid4()],
+        )
         frozen_time.move_to('2022-01-04')
         self.continuing_admission.last_update_author = None
-        self.continuing_admission.save(update_fields=['specific_question_answers', 'last_update_author'])
+        self.continuing_admission.save(update_fields=['last_update_author'])
 
         old_document_uuid = self.continuing_admission.requested_documents.get(self.sic_free_requestable_document)
         self.assertIsNotNone(old_document_uuid)
@@ -438,10 +462,10 @@ class ReplaceDocumentTestCase(BaseDocumentViewTestCase):
         self.assertEqual(response.status_code, 200)
         self.continuing_admission.refresh_from_db()
         self.assertNotEqual(
-            self.continuing_admission.specific_question_answers.get(specific_question_uuid),
+            self.continuing_admission.get_specific_question_answers_dict().get(specific_question_uuid),
             old_document_uuid,
         )
-        self.assertEqual(len(self.continuing_admission.specific_question_answers.get(specific_question_uuid)), 1)
+        self.assertEqual(len(self.continuing_admission.get_specific_question_answers_dict().get(specific_question_uuid)), 1)
 
         # Check last modification data
         self.assertEqual(self.continuing_admission.modified_at, datetime.datetime.now())
@@ -633,10 +657,17 @@ class ReplaceDocumentTestCase(BaseDocumentViewTestCase):
         # Requestable document
         self.change_remote_metadata_patcher.reset_mock()
         specific_question_uuid = str(uuid.UUID(self.sic_free_requestable_document.split('.')[-1]))
-        self.doctorate_admission.specific_question_answers[specific_question_uuid] = [uuid.uuid4()]
+        SpecificQuestionAnswer.objects.create(
+            admission=self.doctorate_admission,
+            form_item=AdmissionFormItemFactory(
+                uuid=specific_question_uuid,
+                type=TypeItemFormulaire.DOCUMENT.name,
+            ),
+            file=[uuid.uuid4()],
+        )
         frozen_time.move_to('2022-01-04')
         self.doctorate_admission.last_update_author = None
-        self.doctorate_admission.save(update_fields=['specific_question_answers', 'last_update_author'])
+        self.doctorate_admission.save(update_fields=['last_update_author'])
 
         old_document_uuid = self.doctorate_admission.requested_documents.get(self.sic_free_requestable_document)
         self.assertIsNotNone(old_document_uuid)
@@ -652,10 +683,10 @@ class ReplaceDocumentTestCase(BaseDocumentViewTestCase):
         self.assertEqual(response.status_code, 200)
         self.doctorate_admission.refresh_from_db()
         self.assertNotEqual(
-            self.doctorate_admission.specific_question_answers.get(specific_question_uuid),
+            self.doctorate_admission.get_specific_question_answers_dict().get(specific_question_uuid),
             old_document_uuid,
         )
-        self.assertEqual(len(self.doctorate_admission.specific_question_answers.get(specific_question_uuid)), 1)
+        self.assertEqual(len(self.doctorate_admission.get_specific_question_answers_dict().get(specific_question_uuid)), 1)
 
         # Check last modification data
         self.assertEqual(self.doctorate_admission.modified_at, datetime.datetime.now())
@@ -846,10 +877,18 @@ class ReplaceDocumentTestCase(BaseDocumentViewTestCase):
         # Requestable document
         self.change_remote_metadata_patcher.reset_mock()
         specific_question_uuid = str(uuid.UUID(self.fac_free_requestable_document.split('.')[-1]))
-        self.doctorate_admission.specific_question_answers[specific_question_uuid] = [uuid.uuid4()]
+        SpecificQuestionAnswer.objects.create(
+            admission=self.doctorate_admission,
+            form_item=AdmissionFormItemFactory(
+                uuid=specific_question_uuid,
+                type=TypeItemFormulaire.DOCUMENT.name,
+            ),
+            file=[uuid.uuid4()],
+        )
+
         frozen_time.move_to('2022-01-03')
         self.doctorate_admission.last_update_author = None
-        self.doctorate_admission.save(update_fields=['specific_question_answers', 'last_update_author'])
+        self.doctorate_admission.save(update_fields=['last_update_author'])
 
         old_document_uuid = self.doctorate_admission.requested_documents.get(self.fac_free_requestable_document)
         self.assertIsNotNone(old_document_uuid)
@@ -873,10 +912,10 @@ class ReplaceDocumentTestCase(BaseDocumentViewTestCase):
         self.assertEqual(response.status_code, 200)
         self.doctorate_admission.refresh_from_db()
         self.assertNotEqual(
-            self.doctorate_admission.specific_question_answers.get(specific_question_uuid),
+            self.doctorate_admission.get_specific_question_answers_dict().get(specific_question_uuid),
             old_document_uuid,
         )
-        self.assertEqual(len(self.doctorate_admission.specific_question_answers.get(specific_question_uuid)), 1)
+        self.assertEqual(len(self.doctorate_admission.get_specific_question_answers_dict().get(specific_question_uuid)), 1)
 
         # Check last modification data
         self.assertEqual(self.doctorate_admission.modified_at, datetime.datetime.now())

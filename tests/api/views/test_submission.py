@@ -51,7 +51,7 @@ from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
 from admission.ddd.admission.shared_kernel.enums import (
     CritereItemFormulaireFormation,
     Onglets,
-    TypeSituationAssimilation,
+    TypeSituationAssimilation, TypeItemFormulaire,
 )
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_continue.domain.model.enums import (
@@ -64,6 +64,7 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
     EtudesSecondairesNonCompleteesException,
 )
 from admission.models import AdmissionTask
+from admission.models.base import SpecificQuestionAnswer
 from admission.tests.factories.calendar import (
     AdmissionAcademicCalendarFactory,
     AdmissionMedDentEnrollmentAcademicCalendarFactory,
@@ -423,10 +424,22 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         )
         required_admission_form_item.refresh_from_db()
         facultative_admission_form_item.refresh_from_db()
-        self.admission_ok.specific_question_answers = {
-            str(required_admission_form_item.uuid): 'My first answer',
-            str(uuid.uuid4()): 'My second answer',
-        }
+        SpecificQuestionAnswer.objects.create(
+            admission=self.admission,
+            form_item=AdmissionFormItemFactory(
+                uuid=str(required_admission_form_item.uuid),
+                type=TypeItemFormulaire.TEXTE.name,
+            ),
+            answer='My first answer',
+        )
+        SpecificQuestionAnswer.objects.create(
+            admission=self.admission,
+            form_item=AdmissionFormItemFactory(
+                uuid=str(uuid.uuid4()),
+                type=TypeItemFormulaire.TEXTE.name,
+            ),
+            answer='My second answer',
+        )
         self.admission_ok.save(update_fields=['specific_question_answers'])
         response = self.client.post(self.ok_url, self.data_ok)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
@@ -456,7 +469,7 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
             },
         )
         self.assertEqual(
-            self.admission_ok.specific_question_answers,
+            self.admission_ok.get_specific_question_answers_dict(),
             {
                 str(required_admission_form_item.uuid): 'My first answer',
                 str(facultative_admission_form_item.uuid): '',
@@ -1189,8 +1202,15 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
         status_codes = [e["status_code"] for e in json_response['errors']]
         self.assertIn(QuestionsSpecifiquesInformationsComplementairesNonCompleteesException.status_code, status_codes)
 
-        admission.specific_question_answers = {str(admission_form_item.uuid): 'My answer'}
-        admission.save()
+        SpecificQuestionAnswer.objects.create(
+            admission=admission,
+            form_item=AdmissionFormItemFactory(
+                uuid=str(admission_form_item.uuid),
+                type=TypeItemFormulaire.TEXTE.name,
+            ),
+            answer='My answer',
+        )
+
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)

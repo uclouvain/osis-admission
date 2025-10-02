@@ -194,7 +194,7 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         self.assertEqual(foreign_diploma.count(), 0)
         updated_admission = BaseAdmission.objects.get(uuid=self.doctorate_admission_uuid)
         self.assertEqual(
-            updated_admission.specific_question_answers,
+            updated_admission.get_specific_question_answers_dict(),
             {
                 'fe254203-17c7-47d6-95e4-3c5c532da551': 'My answer !',
             },
@@ -213,7 +213,7 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
 
         updated_admission = BaseAdmission.objects.get(uuid=self.general_master_admission_uuid)
         self.assertEqual(
-            updated_admission.specific_question_answers,
+            updated_admission.get_specific_question_answers_dict(),
             {
                 'fe254203-17c7-47d6-95e4-3c5c532da551': 'My answer !',
             },
@@ -234,7 +234,7 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
 
         updated_admission = BaseAdmission.objects.get(uuid=self.continuing_admission_uuid)
         self.assertEqual(
-            updated_admission.specific_question_answers,
+            updated_admission.get_specific_question_answers_dict(),
             {
                 'fe254203-17c7-47d6-95e4-3c5c532da551': 'My answer !',
             },
@@ -311,7 +311,7 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
 
         self.general_master_admission.refresh_from_db()
         self.assertEqual(
-            self.general_master_admission.specific_question_answers,
+            self.general_master_admission.get_specific_question_answers_dict(),
             self.diploma_data['specific_question_answers'],
         )
         self.assertEqual(self.general_master_admission.modified_at, datetime.datetime.now())
@@ -331,7 +331,7 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         self.assertEqual(diploma.person.graduated_from_high_school, self.diploma_data['graduated_from_high_school'])
 
         admission = BaseAdmission.objects.get(uuid=self.general_master_admission_uuid)
-        self.assertEqual(admission.specific_question_answers, self.diploma_updated_data['specific_question_answers'])
+        self.assertEqual(admission.get_specific_question_answers_dict(), self.diploma_updated_data['specific_question_answers'])
 
         # Valuate the secondary studies by a general bachelor education admission
         valuated_bachelor_education_admission = GeneralEducationAdmissionFactory(
@@ -351,7 +351,7 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
 
         self.general_bachelor_admission.refresh_from_db()
         self.assertEqual(
-            self.general_bachelor_admission.specific_question_answers,
+            self.general_bachelor_admission.get_specific_question_answers_dict(),
             self.diploma_updated_data['specific_question_answers'],
         )
 
@@ -383,7 +383,7 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
 
         admission = BaseAdmission.objects.get(uuid=self.general_master_admission_uuid)
 
-        self.assertEqual(admission.specific_question_answers, self.diploma_data['specific_question_answers'])
+        self.assertEqual(admission.get_specific_question_answers_dict(), self.diploma_data['specific_question_answers'])
         self.assertEqual(admission.modified_at, datetime.datetime.now())
         self.assertEqual(admission.last_update_author, self.candidate_user.person)
 
@@ -400,7 +400,7 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         self.assertEqual(diploma.person.graduated_from_high_school, self.diploma_data['graduated_from_high_school'])
 
         admission = BaseAdmission.objects.get(uuid=self.general_master_admission_uuid)
-        self.assertEqual(admission.specific_question_answers, self.diploma_updated_data['specific_question_answers'])
+        self.assertEqual(admission.get_specific_question_answers_dict(), self.diploma_updated_data['specific_question_answers'])
 
         # Even for a bachelor education admission
         self.create_belgian_diploma_with_general_bachelor_admission(self.diploma_updated_data)
@@ -411,7 +411,7 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         self.assertEqual(diploma.person.graduated_from_high_school, self.diploma_data['graduated_from_high_school'])
 
         admission = BaseAdmission.objects.get(uuid=self.general_master_admission_uuid)
-        self.assertEqual(admission.specific_question_answers, self.diploma_updated_data['specific_question_answers'])
+        self.assertEqual(admission.get_specific_question_answers_dict(), self.diploma_updated_data['specific_question_answers'])
 
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1')

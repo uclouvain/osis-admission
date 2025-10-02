@@ -75,7 +75,7 @@ class AdmissionEducationFormView(AdmissionFormMixin, LoadDossierViewMixin, EditE
     def high_school_diploma(self):
         return {
             **super().high_school_diploma,
-            'specific_question_answers': self.admission.specific_question_answers,
+            'specific_question_answers': self.admission.get_specific_question_answers_dict(),
             'is_vae_potential': ProfilCandidatTranslator.est_potentiel_vae(self.person.global_id),
         }
 
@@ -111,6 +111,7 @@ class AdmissionEducationFormView(AdmissionFormMixin, LoadDossierViewMixin, EditE
         )
 
     def update_current_admission_on_form_valid(self, form, admission):
+        TODO
         admission.specific_question_answers = form.cleaned_data['specific_question_answers'] or {}
 
     @property

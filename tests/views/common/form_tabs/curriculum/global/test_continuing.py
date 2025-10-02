@@ -269,7 +269,7 @@ class AdmissionCurriculumGlobalFormViewForContinuingTestCase(TestCase):
         self.continuing_admission_without_attachments.refresh_from_db()
 
         self.assertEqual(
-            self.continuing_admission_without_attachments.specific_question_answers,
+            self.continuing_admission_without_attachments.get_specific_question_answers_dict(),
             {
                 self.other_question_uuid: 'My other answer',
                 self.text_question_uuid: 'My new answer',
@@ -287,7 +287,7 @@ class AdmissionCurriculumGlobalFormViewForContinuingTestCase(TestCase):
         self.continuing_admission_with_attachments.refresh_from_db()
 
         self.assertEqual(
-            self.continuing_admission_with_attachments.specific_question_answers,
+            self.continuing_admission_with_attachments.get_specific_question_answers_dict(),
             {
                 self.other_question_uuid: 'My other answer',
                 self.text_question_uuid: 'My new answer',

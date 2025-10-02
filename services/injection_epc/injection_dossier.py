@@ -352,8 +352,9 @@ class InjectionEPCAdmission:
     @classmethod
     def _recuperer_documents_specifiques(cls, admission):
         documents_specifiques = []
+        specific_question_answers = admission.get_specific_question_answers_dict()
         form_items = AdmissionFormItem.objects.filter(
-            uuid__in=admission.specific_question_answers.keys(),
+            uuid__in=specific_question_answers.keys(),
             type=TypeItemFormulaire.DOCUMENT.name,
         )
         for form_item in form_items:
@@ -364,7 +365,7 @@ class InjectionEPCAdmission:
             documents_specifiques.append(
                 {
                     "type": re.sub(r'[\W_]+', '_', unidecode(label.upper())).strip('_'),
-                    "documents": admission.specific_question_answers[str(form_item.uuid)],
+                    "documents": specific_question_answers[str(form_item.uuid)],
                 }
             )
         return documents_specifiques

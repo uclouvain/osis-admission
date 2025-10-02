@@ -206,5 +206,5 @@ class AdmissionCurriculumGlobalFormViewForGeneralTestCase(TestCase):
 
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.specific_question_answers.get(self.text_question_uuid), 'My new answer')
+        self.assertEqual(self.general_admission.get_specific_question_answers_dict().get(self.text_question_uuid), 'My new answer')
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)

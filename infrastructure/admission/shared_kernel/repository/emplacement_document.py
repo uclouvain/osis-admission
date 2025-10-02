@@ -31,7 +31,7 @@ from typing import List, Optional, Set, Union
 
 from django.conf import settings
 from django.db import transaction
-from django.db.models import Case, F, OuterRef, Q, Subquery, UUIDField, When
+from django.db.models import Case, F, OuterRef, Q, Subquery, UUIDField, When, Prefetch
 from django.utils.dateparse import parse_date, parse_datetime
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
@@ -80,7 +80,7 @@ from admission.models import (
     DoctorateAdmission,
     GeneralEducationAdmission,
 )
-from admission.models.base import BaseAdmission
+from admission.models.base import BaseAdmission, SpecificQuestionAnswer
 from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
 from admission.services.injection_epc.injection_dossier import (
     EPCInjection as DemandeEPCInjection,
@@ -198,7 +198,7 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
 
                     if specific_question_uuid:
                         # For a specific question, replace the previous file
-                        admission.specific_question_answers[specific_question_uuid] = entity.uuids_documents
+                        SpecificQuestionAnswer.objects.filter(admission=admission, form_item__uuid=specific_question_uuid).update(file=entity.uuids_documents)
                     else:
                         # Otherwise, update the related field in the specific object
                         setattr(model_object, model_field, entity.uuids_documents)
@@ -457,7 +457,7 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
         model_field = emplacement_document.field
         specific_question_uuid = emplacement_document.specific_question_uuid
 
-        if model_object == admission:
+        if model_object == admission and model_field != 'specific_question_answers':
             admission_update_fields.append(model_field)
 
         entity = cls.entity_from_dict(entity_id, emplacement_document)
@@ -471,7 +471,7 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
             with transaction.atomic():
                 # Don't keep the data related to the document request and the answer to the specific question
                 admission.requested_documents.pop(entity.entity_id.identifiant, None)
-                admission.specific_question_answers.pop(specific_question_uuid, None)
+                SpecificQuestionAnswer.objects.filter(admission=admission, form_item__uuid=specific_question_uuid).delete()
                 admission_update_fields.append('requested_documents')
                 admission.save(update_fields=admission_update_fields)
 
@@ -489,19 +489,19 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
         elif entity.type.name in EMPLACEMENTS_DOCUMENTS_RECLAMABLES:
             # Remove the document from the field of the related object
             if supprimer_donnees:
-
-                if specific_question_uuid:
-                    # For a specific question, remove the answer from the specific question field of the admission
-                    admission.specific_question_answers.pop(specific_question_uuid, None)
-
-                else:
-                    # Otherwise, reset the related field in the specific object
-                    setattr(model_object, model_field, [])
-
                 with transaction.atomic():
-                    if model_object != admission:
-                        model_object.save(update_fields=[model_field])
-                    admission.save(update_fields=admission_update_fields)
+                    if specific_question_uuid:
+                        # For a specific question, remove the answer from the specific question field of the admission
+                        SpecificQuestionAnswer.objects.filter(admission=admission, form_item__uuid=specific_question_uuid).delete()
+
+                    else:
+                        # Otherwise, reset the related field in the specific object
+                        setattr(model_object, model_field, [])
+
+                    with transaction.atomic():
+                        if model_object != admission:
+                            model_object.save(update_fields=[model_field])
+                        admission.save(update_fields=admission_update_fields)
 
             # Don't keep the data related to the document request
             else:
@@ -518,6 +518,8 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
         entity_id: PropositionIdentity,
     ) -> Union[GeneralEducationAdmission, DoctorateAdmission, ContinuingEducationAdmission]:
         try:
-            return cls.admission_model_class.objects.get(uuid=entity_id.uuid)
+            return cls.admission_model_class.objects.prefetch_related(
+                Prefetch('specific_question_answers', queryset=SpecificQuestionAnswer.objects.select_related('form_item'))
+            ).get(uuid=entity_id.uuid)
         except cls.admission_model_class.DoesNotExist:
             raise PropositionNonTrouveeException

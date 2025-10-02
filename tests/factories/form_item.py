@@ -39,10 +39,12 @@ from base.tests.factories.academic_year import AcademicYearFactory
 
 
 class AdmissionFormItemFactory(factory.django.DjangoModelFactory):
+    uuid = Faker('uuid4')
     internal_label = Faker('uuid4')
 
     class Meta:
         model = AdmissionFormItem
+        django_get_or_create = ['uuid']
 
     configuration = {}
 

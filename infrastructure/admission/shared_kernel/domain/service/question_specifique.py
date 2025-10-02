@@ -25,10 +25,11 @@
 ##############################################################################
 from typing import List
 
+from django.db.models import Prefetch
 from django.utils.translation import get_language
 
 from admission.models import AdmissionFormItemInstantiation
-from admission.models.base import BaseAdmission
+from admission.models.base import BaseAdmission, SpecificQuestionAnswer
 from admission.ddd.admission.shared_kernel.domain.model.question_specifique import QuestionSpecifique, QuestionSpecifiqueIdentity
 from admission.ddd.admission.shared_kernel.domain.service.i_question_specifique import ISuperQuestionSpecifiqueTranslator
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import PropositionNonTrouveeException
@@ -52,6 +53,8 @@ class SuperQuestionSpecifiqueTranslator(ISuperQuestionSpecifiqueTranslator):
                 'candidate__country_of_citizenship',
                 'candidate__belgianhighschooldiploma',
                 'candidate__foreignhighschooldiploma__linguistic_regime',
+            ).prefetch_related(
+                Prefetch('specific_question_answers', queryset=SpecificQuestionAnswer.objects.select_related('form_item'))
             ).get(uuid=proposition_uuid)
         except cls.admission_model.DoesNotExist:
             raise PropositionNonTrouveeException
@@ -135,7 +138,7 @@ class SuperQuestionSpecifiqueTranslator(ISuperQuestionSpecifiqueTranslator):
         current_language = get_language()
         admission = cls.get_admission(proposition_uuid)
         return [
-            cls.build_dto(question, admission.specific_question_answers, current_language, admission.candidate.language)
+            cls.build_dto(question, admission.get_specific_question_answers_dict(), current_language, admission.candidate.language)
             for question in AdmissionFormItemInstantiation.objects.form_items_by_admission(
                 admission=admission,
                 tabs=onglets,

@@ -1103,7 +1103,7 @@ class GeneralEducationSpecificQuestionUpdateApiTestCase(APITestCase):
 
         admission = GeneralEducationAdmission.objects.get(uuid=self.admission.uuid)
         self.assertEqual(
-            admission.specific_question_answers,
+            admission.get_specific_question_answers_dict(),
             {
                 'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
             },
@@ -1255,7 +1255,7 @@ class ContinuingEducationSpecificQuestionUpdateApiTestCase(APITestCase):
 
         admission = ContinuingEducationAdmission.objects.get(uuid=self.admission.uuid)
         self.assertEqual(
-            admission.specific_question_answers,
+            admission.get_specific_question_answers_dict(),
             {
                 'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
             },

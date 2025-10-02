@@ -60,7 +60,7 @@ class RetypeDocumentTestCase(BaseDocumentViewTestCase):
 
         with self.subTest('Post a valid form'):
             other_doc = self.sic_free_requestable_document.split('.')[-1]
-            self.general_admission.specific_question_answers[other_doc] = ['uuid-doc']
+            self.general_admission.get_specific_question_answers_dict()[other_doc] = ['uuid-doc']
             self.general_admission.save()
 
             response = self.client.post(
@@ -89,7 +89,7 @@ class RetypeDocumentTestCase(BaseDocumentViewTestCase):
 
         with self.subTest('Post a valid form to empty doc'):
             other_doc = self.sic_free_requestable_document.split('.')[-1]
-            self.general_admission.specific_question_answers[other_doc] = []
+            self.general_admission.get_specific_question_answers_dict()[other_doc] = []
             self.general_admission.save()
 
             response = self.client.post(
@@ -137,7 +137,7 @@ class RetypeDocumentTestCase(BaseDocumentViewTestCase):
 
         with self.subTest('Post a valid form'):
             other_doc = self.sic_free_requestable_document.split('.')[-1]
-            self.doctorate_admission.specific_question_answers[other_doc] = ['uuid-doc']
+            self.doctorate_admission.get_specific_question_answers_dict()[other_doc] = ['uuid-doc']
             self.doctorate_admission.save()
 
             response = self.client.post(
@@ -166,7 +166,7 @@ class RetypeDocumentTestCase(BaseDocumentViewTestCase):
 
         with self.subTest('Post a valid form to empty doc'):
             other_doc = self.sic_free_requestable_document.split('.')[-1]
-            self.doctorate_admission.specific_question_answers[other_doc] = []
+            self.doctorate_admission.get_specific_question_answers_dict()[other_doc] = []
             self.doctorate_admission.save()
 
             response = self.client.post(

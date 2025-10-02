@@ -1076,7 +1076,7 @@ class GeneralEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
             'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
             'fe254203-17c7-47d6-95e4-3c5c532da552': [self.file_uuid, '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'],
         }
-        self.assertEqual(admission.specific_question_answers, expected)
+        self.assertEqual(admission.get_specific_question_answers_dict(), expected)
         self.assertEqual(admission.modified_at, datetime.datetime.now())
         self.assertEqual(admission.last_update_author, self.candidate.user.person)
 
@@ -1203,7 +1203,7 @@ class ContinuingEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
             'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
             'fe254203-17c7-47d6-95e4-3c5c532da552': [self.file_uuid, '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'],
         }
-        self.assertEqual(admission.specific_question_answers, expected)
+        self.assertEqual(admission.get_specific_question_answers_dict(), expected)
         self.assertEqual(admission.motivations, 'Motivation')
         self.assertEqual(
             admission.ways_to_find_out_about_the_course,
@@ -1266,7 +1266,6 @@ class DoctorateEducationAdmissionTypeUpdateApiTestCase(QueriesAssertionsMixin, A
         cls.admission = DoctorateAdmissionFactory(
             training__management_entity=cls.commission,
             supervision_group=promoter.process,
-            with_answers_to_specific_questions=True,
         )
         AdmissionAcademicCalendarFactory.produce_all_required()
 
@@ -1354,7 +1353,7 @@ class DoctorateEducationAdmissionTypeUpdateApiTestCase(QueriesAssertionsMixin, A
             'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
             'fe254203-17c7-47d6-95e4-3c5c532da552': [self.file_uuid, '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'],
         }
-        self.assertEqual(admission.specific_question_answers, expected)
+        self.assertEqual(admission.get_specific_question_answers_dict(), expected)
 
     def test_admission_type_update_with_admission_based_on_pre_admission(self):
         self.client.force_authenticate(user=self.candidate.user)

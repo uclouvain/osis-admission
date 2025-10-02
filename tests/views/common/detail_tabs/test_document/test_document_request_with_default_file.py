@@ -149,7 +149,7 @@ class DocumentRequestWithDefaultFileTestCase(BaseDocumentViewTestCase):
         # Check that a default answer to the specific question has been specified
         self.assertEqual(
             len(
-                form_item_instantiation.admission.specific_question_answers.get(
+                form_item_instantiation.admission.get_specific_question_answers_dict().get(
                     str(form_item_instantiation.form_item.uuid), []
                 ),
             ),
@@ -269,7 +269,7 @@ class DocumentRequestWithDefaultFileTestCase(BaseDocumentViewTestCase):
         # Check that a default answer to the specific question has been specified
         self.assertEqual(
             len(
-                form_item_instantiation.admission.specific_question_answers.get(
+                form_item_instantiation.admission.get_specific_question_answers_dict().get(
                     str(form_item_instantiation.form_item.uuid), []
                 ),
             ),
@@ -362,7 +362,7 @@ class DocumentRequestWithDefaultFileTestCase(BaseDocumentViewTestCase):
         # Check that a default answer to the specific question has been specified
         self.assertEqual(
             len(
-                form_item_instantiation.admission.specific_question_answers.get(
+                form_item_instantiation.admission.get_specific_question_answers_dict().get(
                     str(form_item_instantiation.form_item.uuid), []
                 ),
             ),
@@ -455,7 +455,7 @@ class DocumentRequestWithDefaultFileTestCase(BaseDocumentViewTestCase):
         # Check that a default answer to the specific question has been specified
         self.assertEqual(
             len(
-                form_item_instantiation.admission.specific_question_answers.get(
+                form_item_instantiation.admission.get_specific_question_answers_dict().get(
                     str(form_item_instantiation.form_item.uuid), []
                 ),
             ),
@@ -575,7 +575,7 @@ class DocumentRequestWithDefaultFileTestCase(BaseDocumentViewTestCase):
         # Check that a default answer to the specific question has been specified
         self.assertEqual(
             len(
-                form_item_instantiation.admission.specific_question_answers.get(
+                form_item_instantiation.admission.get_specific_question_answers_dict().get(
                     str(form_item_instantiation.form_item.uuid), []
                 ),
             ),
@@ -668,7 +668,7 @@ class DocumentRequestWithDefaultFileTestCase(BaseDocumentViewTestCase):
         # Check that a default answer to the specific question has been specified
         self.assertEqual(
             len(
-                form_item_instantiation.admission.specific_question_answers.get(
+                form_item_instantiation.admission.get_specific_question_answers_dict().get(
                     str(form_item_instantiation.form_item.uuid), []
                 ),
             ),

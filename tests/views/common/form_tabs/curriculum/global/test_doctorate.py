@@ -174,6 +174,6 @@ class AdmissionCurriculumGlobalFormViewForDoctorateTestCase(TestCase):
         self.doctorate_admission.refresh_from_db()
 
         self.assertEqual(
-            self.doctorate_admission.specific_question_answers.get(self.text_question_uuid), 'My new answer'
+            self.doctorate_admission.get_specific_question_answers_dict().get(self.text_question_uuid), 'My new answer'
         )
         self.assertEqual(self.doctorate_admission.last_update_author, self.sic_manager_user.person)

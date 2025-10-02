@@ -29,6 +29,7 @@ from contextlib import suppress
 from django.contrib.postgres.fields import ArrayField
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.db.models import Prefetch
 from django.utils.translation import gettext_lazy as _
 from osis_document_components.fields import FileField
 from rest_framework.settings import api_settings
@@ -55,7 +56,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.models.base import (
     BaseAdmission,
     BaseAdmissionQuerySet,
-    admission_directory_path,
+    admission_directory_path, SpecificQuestionAnswer,
 )
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.academic_year import AcademicYear
@@ -636,6 +637,10 @@ class GeneralEducationAdmissionManager(models.Manager.from_queryset(BaseAdmissio
             .select_related(
                 "training__main_domain",
                 "training__enrollment_campus__country",
+            )
+            .prefetch_related(
+                Prefetch('specific_question_answers',
+                         queryset=SpecificQuestionAnswer.objects.select_related('form_item'))
             )
             .annotate_campus()
             .annotate_training_management_entity()

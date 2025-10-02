@@ -116,7 +116,7 @@ class BaseAdmissionRequestedDocumentListApiTestCase(APITestCase):
 
         cls.uuid_documents_by_token = {
             'curriculum_file_token': uuid.uuid4(),
-            'non_free_specific_question_file_token': uuid.uuid4(),
+            '8f6b07ad-bac9-4166-a913-33f52c6e6842': uuid.uuid4(),
             'free_file_token': uuid.uuid4(),
             'certificate_token': uuid.uuid4(),
             'transcript_token': uuid.uuid4(),
@@ -501,10 +501,10 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedDoc
         self.client.force_authenticate(user=self.admission.candidate.user)
 
         curriculum_file = ['curriculum_file_token']
-        non_free_specific_question_file = ['non_free_specific_question_file_token']
+        non_free_specific_question_file = ['8f6b07ad-bac9-4166-a913-33f52c6e6842']
         several_non_free_specific_question_files = [
-            'non_free_specific_question_file_token-1',
-            'non_free_specific_question_file_token-2',
+            '8f6b07ad-bac9-4166-a913-33f52c6e6800',
+            '8f6b07ad-bac9-4166-a913-33f52c6e6801',
         ]
         free_file = ['free_file_token']
 
@@ -600,7 +600,7 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedDoc
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
             self.launch_post_processing_patcher.assert_called_once_with(
-                uuid_list=['non_free_specific_question_file_token-uuid'],
+                uuid_list=['8f6b07ad-bac9-4166-a913-33f52c6e6842-uuid'],
                 post_processing_types=[PostProcessingType.CONVERT.name],
                 post_process_params={
                     PostProcessingType.MERGE.name: {},
@@ -630,8 +630,8 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedDoc
 
             self.launch_post_processing_patcher.assert_called_once_with(
                 uuid_list=[
-                    'non_free_specific_question_file_token-1-uuid',
-                    'non_free_specific_question_file_token-2-uuid',
+                    '8f6b07ad-bac9-4166-a913-33f52c6e6800-uuid',
+                    '8f6b07ad-bac9-4166-a913-33f52c6e6801-uuid',
                 ],
                 post_processing_types=[PostProcessingType.CONVERT.name, PostProcessingType.MERGE.name],
                 post_process_params={
@@ -671,8 +671,8 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedDoc
 
             self.launch_post_processing_patcher.assert_called_once_with(
                 uuid_list=[
-                    'non_free_specific_question_file_token-1-uuid',
-                    'non_free_specific_question_file_token-2-uuid',
+                    '8f6b07ad-bac9-4166-a913-33f52c6e6800-uuid',
+                    '8f6b07ad-bac9-4166-a913-33f52c6e6801-uuid',
                 ],
                 post_processing_types=[PostProcessingType.MERGE.name],
                 post_process_params={
@@ -689,10 +689,10 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedDoc
         self.client.force_authenticate(user=self.admission.candidate.user)
 
         curriculum_file = ['curriculum_file_token']
-        non_free_specific_question_file = ['non_free_specific_question_file_token']
+        non_free_specific_question_file = ['8f6b07ad-bac9-4166-a913-33f52c6e6842']
         several_non_free_specific_question_files = [
-            'non_free_specific_question_file_token-1',
-            'non_free_specific_question_file_token-2',
+            '8f6b07ad-bac9-4166-a913-33f52c6e6800',
+            '8f6b07ad-bac9-4166-a913-33f52c6e6801',
         ]
         free_file = ['free_file_token']
 
@@ -781,7 +781,7 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedDoc
         # Check the updates of the files
         self.assertEqual(self.admission.curriculum, [self.uuid_documents_by_token[curriculum_file[0]]])
         self.assertEqual(
-            self.admission.specific_question_answers,
+            self.admission.get_specific_question_answers_dict(),
             {
                 str(self.non_free_document.form_item.uuid): [
                     str(self.uuid_documents_by_token[non_free_specific_question_file[0]]),
@@ -821,10 +821,10 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedDoc
         self.client.force_authenticate(user=self.admission.candidate.user)
 
         curriculum_file = ['curriculum_file_token']
-        non_free_specific_question_file = ['non_free_specific_question_file_token']
+        non_free_specific_question_file = ['8f6b07ad-bac9-4166-a913-33f52c6e6842']
         several_non_free_specific_question_files = [
-            'non_free_specific_question_file_token-1',
-            'non_free_specific_question_file_token-2',
+            '8f6b07ad-bac9-4166-a913-33f52c6e6800',
+            '8f6b07ad-bac9-4166-a913-33f52c6e6801',
         ]
 
         response = self.client.post(
@@ -905,7 +905,7 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedDoc
         # Check the updates of the files
         self.assertEqual(self.admission.curriculum, [self.uuid_documents_by_token[curriculum_file[0]]])
         self.assertEqual(
-            self.admission.specific_question_answers,
+            self.admission.get_specific_question_answers_dict(),
             {
                 str(self.non_free_document.form_item.uuid): [
                     str(self.uuid_documents_by_token[non_free_specific_question_file[0]]),
@@ -1099,10 +1099,10 @@ class ContinuingAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequested
         self.client.force_authenticate(user=self.admission.candidate.user)
 
         curriculum_file = ['curriculum_file_token']
-        non_free_specific_question_file = ['non_free_specific_question_file_token']
+        non_free_specific_question_file = ['8f6b07ad-bac9-4166-a913-33f52c6e6842']
         several_non_free_specific_question_files = [
-            'non_free_specific_question_file_token-1',
-            'non_free_specific_question_file_token-2',
+            '8f6b07ad-bac9-4166-a913-33f52c6e6800',
+            '8f6b07ad-bac9-4166-a913-33f52c6e6801',
         ]
         free_file = ['free_file_token']
 
@@ -1198,7 +1198,7 @@ class ContinuingAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequested
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
             self.launch_post_processing_patcher.assert_called_once_with(
-                uuid_list=['non_free_specific_question_file_token-uuid'],
+                uuid_list=['8f6b07ad-bac9-4166-a913-33f52c6e6842-uuid'],
                 post_processing_types=[PostProcessingType.CONVERT.name],
                 post_process_params={
                     PostProcessingType.MERGE.name: {},
@@ -1228,8 +1228,8 @@ class ContinuingAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequested
 
             self.launch_post_processing_patcher.assert_called_once_with(
                 uuid_list=[
-                    'non_free_specific_question_file_token-1-uuid',
-                    'non_free_specific_question_file_token-2-uuid',
+                    '8f6b07ad-bac9-4166-a913-33f52c6e6800-uuid',
+                    '8f6b07ad-bac9-4166-a913-33f52c6e6801-uuid',
                 ],
                 post_processing_types=[PostProcessingType.CONVERT.name, PostProcessingType.MERGE.name],
                 post_process_params={
@@ -1269,8 +1269,8 @@ class ContinuingAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequested
 
             self.launch_post_processing_patcher.assert_called_once_with(
                 uuid_list=[
-                    'non_free_specific_question_file_token-1-uuid',
-                    'non_free_specific_question_file_token-2-uuid',
+                    '8f6b07ad-bac9-4166-a913-33f52c6e6800-uuid',
+                    '8f6b07ad-bac9-4166-a913-33f52c6e6801-uuid',
                 ],
                 post_processing_types=[PostProcessingType.MERGE.name],
                 post_process_params={
@@ -1287,10 +1287,10 @@ class ContinuingAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequested
         self.client.force_authenticate(user=self.admission.candidate.user)
 
         curriculum_file = ['curriculum_file_token']
-        non_free_specific_question_file = ['non_free_specific_question_file_token']
+        non_free_specific_question_file = ['8f6b07ad-bac9-4166-a913-33f52c6e6842']
         several_non_free_specific_question_files = [
-            'non_free_specific_question_file_token-1',
-            'non_free_specific_question_file_token-2',
+            '8f6b07ad-bac9-4166-a913-33f52c6e6800',
+            '8f6b07ad-bac9-4166-a913-33f52c6e6801',
         ]
         free_file = ['free_file_token']
 
@@ -1379,7 +1379,7 @@ class ContinuingAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequested
         # Check the updates of the files
         self.assertEqual(self.admission.curriculum, [self.uuid_documents_by_token[curriculum_file[0]]])
         self.assertEqual(
-            self.admission.specific_question_answers,
+            self.admission.get_specific_question_answers_dict(),
             {
                 str(self.non_free_document.form_item.uuid): [
                     str(self.uuid_documents_by_token[non_free_specific_question_file[0]]),
@@ -1419,10 +1419,10 @@ class ContinuingAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequested
         self.client.force_authenticate(user=self.admission.candidate.user)
 
         curriculum_file = ['curriculum_file_token']
-        non_free_specific_question_file = ['non_free_specific_question_file_token']
+        non_free_specific_question_file = ['8f6b07ad-bac9-4166-a913-33f52c6e6842']
         several_non_free_specific_question_files = [
-            'non_free_specific_question_file_token-1',
-            'non_free_specific_question_file_token-2',
+            '8f6b07ad-bac9-4166-a913-33f52c6e6800',
+            '8f6b07ad-bac9-4166-a913-33f52c6e6801',
         ]
 
         response = self.client.post(
@@ -1503,7 +1503,7 @@ class ContinuingAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequested
         # Check the updates of the files
         self.assertEqual(self.admission.curriculum, [self.uuid_documents_by_token[curriculum_file[0]]])
         self.assertEqual(
-            self.admission.specific_question_answers,
+            self.admission.get_specific_question_answers_dict(),
             {
                 str(self.non_free_document.form_item.uuid): [
                     str(self.uuid_documents_by_token[non_free_specific_question_file[0]]),
@@ -1766,10 +1766,10 @@ class DoctorateAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedD
         self.client.force_authenticate(user=self.admission.candidate.user)
 
         curriculum_file = ['curriculum_file_token']
-        non_free_specific_question_file = ['non_free_specific_question_file_token']
+        non_free_specific_question_file = ['8f6b07ad-bac9-4166-a913-33f52c6e6842']
         several_non_free_specific_question_files = [
-            'non_free_specific_question_file_token-1',
-            'non_free_specific_question_file_token-2',
+            '8f6b07ad-bac9-4166-a913-33f52c6e6800',
+            '8f6b07ad-bac9-4166-a913-33f52c6e6801',
         ]
         free_file = ['free_file_token']
 
@@ -1865,7 +1865,7 @@ class DoctorateAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedD
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
             self.launch_post_processing_patcher.assert_called_once_with(
-                uuid_list=['non_free_specific_question_file_token-uuid'],
+                uuid_list=['8f6b07ad-bac9-4166-a913-33f52c6e6842-uuid'],
                 post_processing_types=[PostProcessingType.CONVERT.name],
                 post_process_params={
                     PostProcessingType.MERGE.name: {},
@@ -1895,8 +1895,8 @@ class DoctorateAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedD
 
             self.launch_post_processing_patcher.assert_called_once_with(
                 uuid_list=[
-                    'non_free_specific_question_file_token-1-uuid',
-                    'non_free_specific_question_file_token-2-uuid',
+                    '8f6b07ad-bac9-4166-a913-33f52c6e6800-uuid',
+                    '8f6b07ad-bac9-4166-a913-33f52c6e6801-uuid',
                 ],
                 post_processing_types=[PostProcessingType.CONVERT.name, PostProcessingType.MERGE.name],
                 post_process_params={
@@ -1936,8 +1936,8 @@ class DoctorateAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedD
 
             self.launch_post_processing_patcher.assert_called_once_with(
                 uuid_list=[
-                    'non_free_specific_question_file_token-1-uuid',
-                    'non_free_specific_question_file_token-2-uuid',
+                    '8f6b07ad-bac9-4166-a913-33f52c6e6800-uuid',
+                    '8f6b07ad-bac9-4166-a913-33f52c6e6801-uuid',
                 ],
                 post_processing_types=[PostProcessingType.MERGE.name],
                 post_process_params={
@@ -1954,10 +1954,10 @@ class DoctorateAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedD
         self.client.force_authenticate(user=self.admission.candidate.user)
 
         curriculum_file = ['curriculum_file_token']
-        non_free_specific_question_file = ['non_free_specific_question_file_token']
+        non_free_specific_question_file = ['8f6b07ad-bac9-4166-a913-33f52c6e6842']
         several_non_free_specific_question_files = [
-            'non_free_specific_question_file_token-1',
-            'non_free_specific_question_file_token-2',
+            '8f6b07ad-bac9-4166-a913-33f52c6e6800',
+            '8f6b07ad-bac9-4166-a913-33f52c6e6801',
         ]
         free_file = ['free_file_token']
 
@@ -2046,7 +2046,7 @@ class DoctorateAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedD
         # Check the updates of the files
         self.assertEqual(self.admission.curriculum, [self.uuid_documents_by_token[curriculum_file[0]]])
         self.assertEqual(
-            self.admission.specific_question_answers,
+            self.admission.get_specific_question_answers_dict(),
             {
                 str(self.non_free_document.form_item.uuid): [
                     str(self.uuid_documents_by_token[non_free_specific_question_file[0]]),
@@ -2086,10 +2086,10 @@ class DoctorateAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedD
         self.client.force_authenticate(user=self.admission.candidate.user)
 
         curriculum_file = ['curriculum_file_token']
-        non_free_specific_question_file = ['non_free_specific_question_file_token']
+        non_free_specific_question_file = ['8f6b07ad-bac9-4166-a913-33f52c6e6842']
         several_non_free_specific_question_files = [
-            'non_free_specific_question_file_token-1',
-            'non_free_specific_question_file_token-2',
+            '8f6b07ad-bac9-4166-a913-33f52c6e6800',
+            '8f6b07ad-bac9-4166-a913-33f52c6e6801',
         ]
 
         response = self.client.post(
@@ -2170,7 +2170,7 @@ class DoctorateAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedD
         # Check the updates of the files
         self.assertEqual(self.admission.curriculum, [self.uuid_documents_by_token[curriculum_file[0]]])
         self.assertEqual(
-            self.admission.specific_question_answers,
+            self.admission.get_specific_question_answers_dict(),
             {
                 str(self.non_free_document.form_item.uuid): [
                     str(self.uuid_documents_by_token[non_free_specific_question_file[0]]),

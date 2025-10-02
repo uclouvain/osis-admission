@@ -66,7 +66,7 @@ from admission.ddd.admission.shared_kernel.dtos.formation import (
     FormationDTO,
 )
 from admission.ddd.admission.shared_kernel.dtos.profil_candidat import ProfilCandidatDTO
-from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation
+from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation, TypeItemFormulaire
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
@@ -111,7 +111,8 @@ from admission.infrastructure.admission.shared_kernel.repository.proposition imp
     GlobalPropositionRepository,
 )
 from admission.infrastructure.utils import dto_to_dict
-from admission.models import Accounting, GeneralEducationAdmissionProxy
+from admission.models import Accounting, GeneralEducationAdmissionProxy, AdmissionFormItem
+from admission.models.base import SpecificQuestionAnswer
 from admission.models.checklist import FreeAdditionalApprovalCondition, RefusalReason
 from admission.models.general_education import GeneralEducationAdmission
 from base.models.academic_year import AcademicYear
@@ -171,6 +172,9 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                     'other_training_accepted_by_fac__academic_year',
                     'admission_requirement_year',
                     'last_update_author',
+                )
+                .prefetch_related(
+                    Prefetch('specific_question_answers', queryset=SpecificQuestionAnswer.objects.select_related('form_item')),
                 )
                 .get(uuid=entity_id.uuid)
             )
@@ -300,7 +304,6 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 ),
                 'is_non_resident': entity.est_non_resident_au_sens_decret,
                 'status': entity.statut.name,
-                'specific_question_answers': entity.reponses_questions_specifiques,
                 'curriculum': entity.curriculum,
                 'diploma_equivalence': entity.equivalence_diplome,
                 'confirmation_elements': entity.elements_confirmation,
@@ -417,6 +420,21 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                     for condition in entity.conditions_complementaires_libres
                 ],
             )
+
+        form_items = {
+            str(form_item.uuid): form_item
+            for form_item in AdmissionFormItem.objects.filter(uuid__in=entity.reponses_questions_specifiques.keys())
+        }
+        SpecificQuestionAnswer.objects.bulk_create([
+            SpecificQuestionAnswer(
+                admission=admission,
+                form_item=form_items[form_item_uuid],
+                file=reponse if form_items[form_item_uuid].type == TypeItemFormulaire.DOCUMENT.name else None,
+                answer=reponse if form_items[form_item_uuid].type != TypeItemFormulaire.DOCUMENT.name else None,
+            ) for form_item_uuid, reponse in entity.reponses_questions_specifiques.items()
+        ], update_conflicts=True, update_fields=['file', 'answer'], unique_fields=['admission', 'form_item'])
+        SpecificQuestionAnswer.objects.filter(admission=admission).exclude(
+            form_item__uuid__in=form_items.keys()).delete()
 
     @classmethod
     def _sauvegarder_comptabilite(cls, admission, entity):
@@ -555,7 +573,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 if admission.erasmus_mundus_scholarship
                 else None
             ),
-            reponses_questions_specifiques=admission.specific_question_answers,
+            reponses_questions_specifiques=admission.get_specific_question_answers_dict(),
             est_bachelier_belge=admission.is_belgian_bachelor,
             est_reorientation_inscription_externe=admission.is_external_reorientation,
             attestation_inscription_reguliere=admission.regular_registration_proof,
@@ -820,7 +838,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 if admission.erasmus_mundus_scholarship
                 else None
             ),
-            reponses_questions_specifiques=admission.specific_question_answers,
+            reponses_questions_specifiques=admission.get_specific_question_answers_dict(),
             curriculum=admission.curriculum,
             equivalence_diplome=admission.diploma_equivalence,
             est_bachelier_belge=admission.is_belgian_bachelor,

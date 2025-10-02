@@ -560,7 +560,7 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
             required=True,
         )
 
-        self.general_admission.specific_question_answers[text_question_uuid] = 'My first answer'
+        self.general_admission.get_specific_question_answers_dict()[text_question_uuid] = 'My first answer'
         self.general_admission.save(update_fields=['specific_question_answers'])
 
         # No specific question in the form
@@ -575,7 +575,7 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
 
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.specific_question_answers.get(text_question_uuid), 'My first answer')
+        self.assertEqual(self.general_admission.get_specific_question_answers_dict().get(text_question_uuid), 'My first answer')
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
 
         # One specific question in the form
@@ -616,7 +616,7 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
 
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.specific_question_answers.get(text_question_uuid), 'My second answer')
+        self.assertEqual(self.general_admission.get_specific_question_answers_dict().get(text_question_uuid), 'My second answer')
 
     def test_submit_valid_data_when_the_candidate_has_no_diploma_with_existing_belgian_diploma(self):
         self.client.force_login(self.sic_manager_user)
@@ -863,7 +863,7 @@ class AdmissionEducationFormViewForContinuingTestCase(TestCase):
         self.assertFalse(Exam.objects.filter(person=candidate, type=ExamTypes.PREMIER_CYCLE.name).exists())
 
         self.assertEqual(
-            self.continuing_admission.specific_question_answers,
+            self.continuing_admission.get_specific_question_answers_dict(),
             {
                 self.specific_question_uuid: 'My answer',
                 self.other_specific_question_uuid: 'My other answer',
@@ -2405,7 +2405,7 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
             required=True,
         )
 
-        self.general_admission.specific_question_answers[text_question_uuid] = 'My first answer'
+        self.general_admission.get_specific_question_answers_dict()[text_question_uuid] = 'My first answer'
         self.general_admission.save(update_fields=['specific_question_answers'])
 
         # No specific question in the form
@@ -2420,7 +2420,7 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
 
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.specific_question_answers.get(text_question_uuid), 'My first answer')
+        self.assertEqual(self.general_admission.get_specific_question_answers_dict().get(text_question_uuid), 'My first answer')
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
 
         # One specific question in the form
@@ -2461,4 +2461,4 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
 
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.specific_question_answers.get(text_question_uuid), 'My second answer')
+        self.assertEqual(self.general_admission.get_specific_question_answers_dict().get(text_question_uuid), 'My second answer')

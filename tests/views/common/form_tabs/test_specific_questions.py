@@ -320,7 +320,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
         general_admission.refresh_from_db()
 
         self.assertEqual(
-            general_admission.specific_question_answers.get(str(self.specific_questions[0].form_item.uuid)),
+            general_admission.get_specific_question_answers_dict().get(str(self.specific_questions[0].form_item.uuid)),
             '',
         )
         self.assertEqual(general_admission.diplomatic_post, None)
@@ -366,7 +366,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
         general_admission.refresh_from_db()
 
         self.assertEqual(
-            general_admission.specific_question_answers.get(str(self.specific_questions[0].form_item.uuid)),
+            general_admission.get_specific_question_answers_dict().get(str(self.specific_questions[0].form_item.uuid)),
             'My answer',
         )
         self.assertEqual(general_admission.diplomatic_post, None)
@@ -1135,7 +1135,7 @@ class ContinuingSpecificQuestionsFormViewTestCase(TestCase):
         self.assertEqual(self.continuing_admission.billing_address_recipient, '')
         self.assertEqual(self.continuing_admission.billing_address_postal_box, '')
         self.assertEqual(
-            self.continuing_admission.specific_question_answers,
+            self.continuing_admission.get_specific_question_answers_dict(),
             {
                 str(self.specific_questions[0].form_item.uuid): 'my answer',
             },
@@ -1190,7 +1190,7 @@ class ContinuingSpecificQuestionsFormViewTestCase(TestCase):
         self.assertEqual(self.continuing_admission.billing_address_recipient, '')
         self.assertEqual(self.continuing_admission.billing_address_postal_box, '')
         self.assertEqual(
-            self.continuing_admission.specific_question_answers,
+            self.continuing_admission.get_specific_question_answers_dict(),
             {
                 str(self.specific_questions[0].form_item.uuid): 'my answer',
             },
@@ -1237,7 +1237,7 @@ class ContinuingSpecificQuestionsFormViewTestCase(TestCase):
         self.assertEqual(self.continuing_admission.billing_address_recipient, 'other.recipient@example.be')
         self.assertEqual(self.continuing_admission.billing_address_postal_box, 'BP7')
         self.assertEqual(
-            self.continuing_admission.specific_question_answers,
+            self.continuing_admission.get_specific_question_answers_dict(),
             {
                 str(self.specific_questions[0].form_item.uuid): '',
             },
@@ -1284,7 +1284,7 @@ class ContinuingSpecificQuestionsFormViewTestCase(TestCase):
         self.assertEqual(self.continuing_admission.billing_address_recipient, 'other.recipient@example.be')
         self.assertEqual(self.continuing_admission.billing_address_postal_box, 'BP7')
         self.assertEqual(
-            self.continuing_admission.specific_question_answers,
+            self.continuing_admission.get_specific_question_answers_dict(),
             {
                 str(self.specific_questions[0].form_item.uuid): '',
             },

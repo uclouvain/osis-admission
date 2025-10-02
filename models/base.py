@@ -25,7 +25,7 @@
 ##############################################################################
 import itertools
 import uuid
-from typing import Dict, Set
+from typing import Dict, Set, Union, List
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -78,6 +78,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE,
     STATUTS_PROPOSITION_DOCTORALE_PEU_AVANCEE,
 )
+from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE,
@@ -735,6 +736,13 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
             other_admissions[ADMISSION_CONTEXT_BY_ALL_OSIS_EDUCATION_TYPE[training]].add(training)
 
         return other_admissions
+
+    def get_specific_question_answers_dict(self) -> Dict[str, Union[str, List[str]]]:
+        """ Return a dict of form item uuid to answers, as the old format was. """
+        return {
+            str(answer.form_item.uuid): answer.file if answer.form_item.type == TypeItemFormulaire.DOCUMENT.name else answer.answer
+            for answer in self.specific_question_answers.all()
+        }
 
 
 class AdmissionEducationalValuatedExperiences(models.Model):

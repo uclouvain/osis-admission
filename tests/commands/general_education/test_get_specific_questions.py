@@ -36,13 +36,14 @@ from admission.models import GeneralEducationAdmission
 from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.shared_kernel.enums import CritereItemFormulaireFormation, Onglets, TypeItemFormulaire
 from admission.ddd.admission.formation_generale.commands import RecupererQuestionsSpecifiquesQuery
+from admission.models.base import SpecificQuestionAnswer
 from admission.tests.factories.form_item import (
     AdmissionFormItemInstantiationFactory,
     MessageAdmissionFormItemFactory,
     TextAdmissionFormItemFactory,
     DocumentAdmissionFormItemFactory,
     RadioButtonSelectionAdmissionFormItemFactory,
-    CheckboxSelectionAdmissionFormItemFactory,
+    CheckboxSelectionAdmissionFormItemFactory, AdmissionFormItemFactory,
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from base.tests.factories.entity import EntityFactory
@@ -125,13 +126,38 @@ class GetSpecificQuestionsTestCase(TestCase):
         self.document_uuid = uuid.uuid4()
 
     def test_get_specific_questions_with_answers(self):
-        self.admission.specific_question_answers = {
-            str(self.questions_configurations[1].form_item.uuid): 'My answer',
-            str(self.questions_configurations[2].form_item.uuid): [str(self.document_uuid), 'other-token'],
-            str(self.questions_configurations[3].form_item.uuid): '1',
-            str(self.questions_configurations[4].form_item.uuid): ['1', '2'],
-        }
-        self.admission.save()
+        SpecificQuestionAnswer.objects.create(
+            admission=self.admission,
+            form_item=AdmissionFormItemFactory(
+                uuid=str(self.questions_configurations[1].form_item.uuid),
+                type=TypeItemFormulaire.TEXTE.name,
+            ),
+            answer='My answer',
+        )
+        SpecificQuestionAnswer.objects.create(
+            admission=self.admission,
+            form_item=AdmissionFormItemFactory(
+                uuid=str(self.questions_configurations[2].form_item.uuid),
+                type=TypeItemFormulaire.DOCUMENT.name,
+            ),
+            file=[str(self.document_uuid), 'other-token'],
+        )
+        SpecificQuestionAnswer.objects.create(
+            admission=self.admission,
+            form_item=AdmissionFormItemFactory(
+                uuid=str(self.questions_configurations[3].form_item.uuid),
+                type=TypeItemFormulaire.TEXTE.name,
+            ),
+            answer='1',
+        )
+        SpecificQuestionAnswer.objects.create(
+            admission=self.admission,
+            form_item=AdmissionFormItemFactory(
+                uuid=str(self.questions_configurations[4].form_item.uuid),
+                type=TypeItemFormulaire.TEXTE.name,
+            ),
+            answer=['1', '2'],
+        )
 
         with translation.override(settings.LANGUAGE_CODE_FR):
             specific_questions: List[QuestionSpecifiqueDTO] = message_bus_instance.invoke(

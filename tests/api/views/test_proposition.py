@@ -581,7 +581,6 @@ class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixi
         cls.admission = DoctorateAdmissionFactory(
             training__management_entity=cls.commission,
             supervision_group=promoter.process,
-            with_answers_to_specific_questions=True,
         )
 
         cls.update_data = {

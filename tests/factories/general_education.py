@@ -24,6 +24,8 @@
 #
 # ##############################################################################
 import datetime
+import uuid
+from typing import Dict, Union, List
 
 import factory.fuzzy
 
@@ -32,12 +34,15 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     OngletsChecklist,
 )
+from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
 from admission.models import GeneralEducationAdmission
+from admission.models.base import SpecificQuestionAnswer
 from admission.models.general_education import AdmissionPrerequisiteCourses
 from admission.tests.factories.accounting import AccountingFactory
+from admission.tests.factories.form_item import AdmissionFormItemFactory
 from admission.tests.factories.person import CompletePersonForBachelorFactory
 from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.utils import generate_proposition_reference
@@ -167,6 +172,37 @@ class GeneralEducationAdmissionFactory(factory.django.DjangoModelFactory):
                 'current': get_checklist(),
             }
         )
+
+    @factory.post_generation
+    def specific_question_answers(self, create, extracted: Dict[str, Union[str, List[str]]], **kwargs):
+        if extracted is None:
+            SpecificQuestionAnswer.objects.create(
+                admission=self,
+                form_item=AdmissionFormItemFactory(
+                    uuid='fe254203-17c7-47d6-95e4-3c5c532da551',
+                    type=TypeItemFormulaire.TEXTE.name,
+                ),
+                answer='My response',
+            )
+            SpecificQuestionAnswer.objects.create(
+                admission=self,
+                form_item=AdmissionFormItemFactory(
+                    uuid='fe254203-17c7-47d6-95e4-3c5c532da552',
+                    type=TypeItemFormulaire.DOCUMENT.name,
+                ),
+                file=[uuid.UUID('ae254203-17c7-47d6-95e4-3c5c532da550')],
+            )
+        else:
+            for form_item_uuid, answer in extracted.items():
+                SpecificQuestionAnswer.objects.create(
+                    admission=self,
+                    form_item=AdmissionFormItemFactory(
+                        uuid=form_item_uuid,
+                        type=TypeItemFormulaire.DOCUMENT.name if isinstance(answer, list) else TypeItemFormulaire.TEXTE.name,
+                    ),
+                    file=answer if isinstance(answer, list) else None,
+                    answer=answer if not isinstance(answer, list) else None,
+                )
 
 
 class AdmissionPrerequisiteCoursesFactory(factory.django.DjangoModelFactory):
