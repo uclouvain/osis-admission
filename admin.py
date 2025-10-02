@@ -116,6 +116,9 @@ from admission.models.working_list import (
     WorkingList,
 )
 from admission.services.injection_epc.injection_dossier import InjectionEPCAdmission
+from admission.views.admin.doctorate_committee_members_import import (
+    DoctorateCommitteeMembersImportView,
+)
 from admission.views.mollie_webhook import MollieWebHook
 from base.models.academic_year import AcademicYear
 from base.models.education_group_type import EducationGroupType
@@ -149,6 +152,10 @@ class EducationGroupRoleModelWithAnnotatedQuerysetAdmin(EducationGroupRoleModelA
 
     def most_recent_acronym(self, obj):
         return obj.most_recent_acronym
+
+    @property
+    def base_url(self):
+        return f'{(self.model._meta.app_label)}_{self.model._meta.model_name}'
 
 
 class AdmissionAdminForm(forms.ModelForm):
@@ -1053,20 +1060,31 @@ class AdmissionReaderAdmin(HijackUserAdminMixin, EducationGroupRoleModelWithAnno
 
 @admin.register(DoctorateCommitteeMember)
 class DoctorateCommitteeMemberAdmin(HijackUserAdminMixin, EducationGroupRoleModelWithAnnotatedQuerysetAdmin):
+    change_list_template = ['admission/admin/doctorate_committee_members_change_list_template.html']
     list_select_related = ['person__user']
     list_display = ['person', 'most_recent_acronym']
 
     def get_hijack_user(self, obj):
         return obj.person.user
 
+    def get_urls(self):
+        return super().get_urls() + [
+            path(
+                'actions/import',
+                self.admin_site.admin_view(DoctorateCommitteeMembersImportView.as_view()),
+                name=f'{self.base_url}_import',
+            ),
+        ]
+
 
 @admin.register(ProgramManager)
-class ProgramManagerAdmin(DoctorateCommitteeMemberAdmin):
+class ProgramManagerAdmin(HijackUserAdminMixin, EducationGroupRoleModelWithAnnotatedQuerysetAdmin):
     change_list_template = ['admission/admin/program_manager_change_list_template.html']
+    list_select_related = ['person__user']
+    list_display = ['person', 'most_recent_acronym']
 
-    @property
-    def base_url(self):
-        return f'{(self.model._meta.app_label)}_{self.model._meta.model_name}'
+    def get_hijack_user(self, obj):
+        return obj.person.user
 
     def get_urls(self):
         return super().get_urls() + [

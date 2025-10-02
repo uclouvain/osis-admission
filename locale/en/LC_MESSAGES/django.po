@@ -1106,6 +1106,9 @@ msgstr ""
 msgid "CSS class"
 msgstr ""
 
+msgid "CSV file"
+msgstr ""
+
 msgid "Campus"
 msgstr ""
 
@@ -2183,6 +2186,9 @@ msgctxt "inclusive"
 msgid "Doctorate candidate"
 msgstr ""
 
+msgid "Doctorate committee members"
+msgstr ""
+
 msgctxt "admission context"
 msgid "Doctorate education"
 msgstr ""
@@ -2785,6 +2791,9 @@ msgid "Feedback from Fac/CDD"
 msgstr ""
 
 msgid "File"
+msgstr ""
+
+msgid "File with header"
 msgstr ""
 
 msgid "Filter by documents"
@@ -3537,6 +3546,15 @@ msgid ""
 msgstr ""
 
 msgid "Immediately"
+msgstr ""
+
+msgid "Import from csv file"
+msgstr ""
+
+msgid "Import of the doctorate committee members"
+msgstr ""
+
+msgid "Import of the doctorate committee members from a csv file"
 msgstr ""
 
 msgid "Important information:"
@@ -4424,6 +4442,9 @@ msgstr ""
 msgid "No document is defined as requestable. At least one is required."
 msgstr ""
 
+msgid "No education group has been found for:"
+msgstr ""
+
 msgid "No enrolment application"
 msgstr ""
 
@@ -4440,6 +4461,9 @@ msgid "No knowledge of languages provided."
 msgstr ""
 
 msgid "No longer designate the document as to be requested"
+msgstr ""
+
+msgid "No one has been found for:"
 msgstr ""
 
 msgid "No one invited"
@@ -5575,6 +5599,9 @@ msgstr ""
 msgid "Role of the signing actor"
 msgstr ""
 
+msgid "Role:"
+msgstr ""
+
 msgid "Role: Candidate"
 msgstr ""
 
@@ -5805,6 +5832,9 @@ msgid "Several applications"
 msgstr ""
 
 msgid "Several applications?"
+msgstr ""
+
+msgid "Several persons have been found for:"
 msgstr ""
 
 msgid "Sex"
@@ -6330,6 +6360,9 @@ msgstr ""
 msgid "The current training is attached to this document."
 msgstr ""
 
+msgid "The data import has been completed."
+msgstr ""
+
 msgid "The decision of the signing actor"
 msgstr ""
 
@@ -6414,6 +6447,13 @@ msgstr ""
 msgid ""
 "The fac approval mail has been sent to the candidate the %(date)s by "
 "%(sender)s."
+msgstr ""
+
+msgid ""
+"The file must contain, line by line, the CDD acronym in the first column and "
+"the names (concatenation of the first name and the last name) or the global "
+"identifiers of the persons to be added for this CDD in the following "
+"columns. The columns must be separated by commas."
 msgstr ""
 
 msgid "The first name must be less than 20 characters long."

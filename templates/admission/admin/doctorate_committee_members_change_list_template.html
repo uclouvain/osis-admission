@@ -28,14 +28,9 @@
 {% block object-tools-items %}
   {{ block.super }}
   <li>
-    {% translate "Are you sure you want to add the corresponding program managers roles in the base app based on the ones from the admission app (doctorate)?" as confirm_message %}
-    <a
-      id="copy-doctorate-roles-link"
-      href="{% url 'admin:admission_programmanager_copy_doctorate_roles' %}"
-      onclick="return confirm(`{{ confirm_message }}`);"
-    >
-      {% translate 'Add the corresponding program manager roles (doctorate)' %}
-      <i class="fas fa-copy"></i>
+    <a href="{% url 'admin:admission_doctoratecommitteemember_import' %}">
+      {% translate 'Import from csv file' %}
+      <i class="fas fa-file-import"></i>
     </a>
   </li>
 {% endblock %}
