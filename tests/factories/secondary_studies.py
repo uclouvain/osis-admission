@@ -33,7 +33,7 @@ from osis_profile.models.enums.education import (
     BelgianCommunitiesOfEducation,
     EducationalType,
 )
-from osis_profile.models.enums.exam import ExamTypes
+from osis_profile.models.exam import EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.language import LanguageFactory
 
@@ -64,7 +64,9 @@ class ForeignHighSchoolDiplomaFactory(HighSchoolDiplomaFactory):
 
 class HighSchoolDiplomaAlternativeFactory(factory.django.DjangoModelFactory):
     person = factory.SubFactory('base.tests.factories.person.PersonFactory')
-    type = ExamTypes.PREMIER_CYCLE.name
+    type = factory.SubFactory(
+        'osis_profile.tests.factories.exam.ExamTypeFactory', label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
+    )
 
     class Meta:
         model = Exam

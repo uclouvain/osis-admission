@@ -24,26 +24,14 @@
 {% endcomment %}
 {% panel _('Exams') edit_link_button=edit_link_button %}
   {% if hide_files %}
-    {% if LANGUAGE_CODE == 'fr-be' %}
-      {% if examen.attestation %}
-        {% field_data education_group_year_exam.title_fr _("Specified") %}
-      {% else %}
-        {% field_data education_group_year_exam.title_fr _("Not specified") %}
-      {% endif %}
+    {% if examen.attestation %}
+      {% field_data exam_type.title _("Specified") %}
     {% else %}
-      {% if examen.attestation %}
-        {% field_data education_group_year_exam.title_en _("Specified") %}
-      {% else %}
-        {% field_data education_group_year_exam.title_en _("Not specified") %}
-      {% endif %}
+      {% field_data exam_type.title _("Not specified") %}
     {% endif %}
 
   {% else %}
-    {% if LANGUAGE_CODE == 'fr-be' %}
-      {% field_data education_group_year_exam.title_fr examen.attestation %}
-    {% else %}
-      {% field_data education_group_year_exam.title_en examen.attestation %}
-    {% endif %}
+    {% field_data exam_type.title examen.attestation %}
   {% endif %}
 
   {% if examen.annee %}

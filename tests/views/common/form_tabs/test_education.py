@@ -40,13 +40,15 @@ from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formatio
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
-from admission.ddd.admission.shared_kernel.enums import Onglets
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.shared_kernel.enums import Onglets
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    OngletsDemande,
 )
 from admission.models import ContinuingEducationAdmission
 from admission.models import EPCInjection as AdmissionEPCInjection
@@ -89,26 +91,24 @@ from base.tests.factories.education_group_year import (
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
-from osis_profile.models import (
-    BelgianHighSchoolDiploma,
-    Exam,
-    ForeignHighSchoolDiploma,
-)
+from osis_profile.models import BelgianHighSchoolDiploma, Exam, ForeignHighSchoolDiploma
 from osis_profile.models.enums.education import (
     EducationalType,
     Equivalence,
     ForeignDiplomaTypes,
     HighSchoolDiplomaTypes,
 )
-from osis_profile.models.enums.exam import ExamTypes
+from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection
 from osis_profile.models.epc_injection import (
-    EPCInjection as CurriculumEPCInjection,
     EPCInjectionStatus as CurriculumEPCInjectionStatus,
 )
 from osis_profile.models.epc_injection import ExperienceType
+from osis_profile.models.exam import EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
+from osis_profile.tests.factories.exam import ExamFactory
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.domain import DomainFactory
 from reference.tests.factories.language import FrenchLanguageFactory, LanguageFactory
+
 
 @freezegun.freeze_time("2022-01-01")
 class AdmissionEducationFormViewForMasterTestCase(TestCase):
@@ -292,7 +292,9 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(
-            Exam.objects.filter(person=self.general_admission.candidate, type=ExamTypes.PREMIER_CYCLE.name).exists()
+            Exam.objects.filter(
+                person=self.general_admission.candidate, type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
+            ).exists()
         )
 
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
@@ -329,7 +331,9 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         self.assertTrue(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(
-            Exam.objects.filter(person=self.general_admission.candidate, type=ExamTypes.PREMIER_CYCLE.name).exists()
+            Exam.objects.filter(
+                person=self.general_admission.candidate, type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
+            ).exists()
         )
 
         belgian_high_school_diploma.refresh_from_db()
@@ -364,7 +368,9 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertTrue(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(
-            Exam.objects.filter(person=self.general_admission.candidate, type=ExamTypes.PREMIER_CYCLE.name).exists()
+            Exam.objects.filter(
+                person=self.general_admission.candidate, type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
+            ).exists()
         )
 
         foreign_high_school_diploma.refresh_from_db()
@@ -398,7 +404,9 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(
-            Exam.objects.filter(person=self.general_admission.candidate, type=ExamTypes.PREMIER_CYCLE.name).exists()
+            Exam.objects.filter(
+                person=self.general_admission.candidate, type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
+            ).exists()
         )
 
     def test_submit_valid_data_when_the_candidate_will_have_a_diploma_without_existing_ones(self):
@@ -423,7 +431,9 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(
-            Exam.objects.filter(person=self.general_admission.candidate, type=ExamTypes.PREMIER_CYCLE.name).exists()
+            Exam.objects.filter(
+                person=self.general_admission.candidate, type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
+            ).exists()
         )
 
     def test_submit_valid_data_when_the_candidate_will_have_a_diploma_with_existing_belgian_diploma(self):
@@ -453,7 +463,9 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         self.assertTrue(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(
-            Exam.objects.filter(person=self.general_admission.candidate, type=ExamTypes.PREMIER_CYCLE.name).exists()
+            Exam.objects.filter(
+                person=self.general_admission.candidate, type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
+            ).exists()
         )
 
         belgian_high_school_diploma.refresh_from_db()
@@ -488,7 +500,9 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertTrue(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(
-            Exam.objects.filter(person=self.general_admission.candidate, type=ExamTypes.PREMIER_CYCLE.name).exists()
+            Exam.objects.filter(
+                person=self.general_admission.candidate, type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
+            ).exists()
         )
 
         foreign_high_school_diploma.refresh_from_db()
@@ -519,7 +533,9 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(
-            Exam.objects.filter(person=self.general_admission.candidate, type=ExamTypes.PREMIER_CYCLE.name).exists()
+            Exam.objects.filter(
+                person=self.general_admission.candidate, type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
+            ).exists()
         )
 
     def test_submit_valid_data_when_the_candidate_has_no_diploma_without_existing_ones(self):
@@ -544,7 +560,9 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(
-            Exam.objects.filter(person=self.general_admission.candidate, type=ExamTypes.PREMIER_CYCLE.name).exists()
+            Exam.objects.filter(
+                person=self.general_admission.candidate, type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
+            ).exists()
         )
 
     def test_submit_answers_to_specific_questions(self):
@@ -645,7 +663,9 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(
-            Exam.objects.filter(person=self.general_admission.candidate, type=ExamTypes.PREMIER_CYCLE.name).exists()
+            Exam.objects.filter(
+                person=self.general_admission.candidate, type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
+            ).exists()
         )
 
     def test_submit_valid_data_when_the_candidate_has_no_diploma_with_existing_foreign_diploma(self):
@@ -676,7 +696,9 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(
-            Exam.objects.filter(person=self.general_admission.candidate, type=ExamTypes.PREMIER_CYCLE.name).exists()
+            Exam.objects.filter(
+                person=self.general_admission.candidate, type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
+            ).exists()
         )
 
     def test_submit_valid_data_when_the_candidate_has_no_diploma_with_existing_alternative_diploma(self):
@@ -703,7 +725,9 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertTrue(
-            Exam.objects.filter(person=self.general_admission.candidate, type=ExamTypes.PREMIER_CYCLE.name).exists()
+            Exam.objects.filter(
+                person=self.general_admission.candidate, type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
+            ).exists()
         )
 
 
@@ -860,7 +884,9 @@ class AdmissionEducationFormViewForContinuingTestCase(TestCase):
 
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=candidate).exists())
-        self.assertFalse(Exam.objects.filter(person=candidate, type=ExamTypes.PREMIER_CYCLE.name).exists())
+        self.assertFalse(
+            Exam.objects.filter(person=candidate, type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR).exists()
+        )
 
         self.assertEqual(
             self.continuing_admission.specific_question_answers,
@@ -1645,7 +1671,9 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         self.assertTrue(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(
-            Exam.objects.filter(person=self.general_admission.candidate, type=ExamTypes.PREMIER_CYCLE.name).exists()
+            Exam.objects.filter(
+                person=self.general_admission.candidate, type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
+            ).exists()
         )
 
         # Check saved data
@@ -1690,7 +1718,9 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         self.assertTrue(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(
-            Exam.objects.filter(person=self.general_admission.candidate, type=ExamTypes.PREMIER_CYCLE.name).exists()
+            Exam.objects.filter(
+                person=self.general_admission.candidate, type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
+            ).exists()
         )
 
         # Check saved data
@@ -1755,7 +1785,9 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         self.assertTrue(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(
-            Exam.objects.filter(person=self.general_admission.candidate, type=ExamTypes.PREMIER_CYCLE.name).exists()
+            Exam.objects.filter(
+                person=self.general_admission.candidate, type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
+            ).exists()
         )
 
         # Check saved data
@@ -1805,7 +1837,9 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         self.assertTrue(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(
-            Exam.objects.filter(person=self.general_admission.candidate, type=ExamTypes.PREMIER_CYCLE.name).exists()
+            Exam.objects.filter(
+                person=self.general_admission.candidate, type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
+            ).exists()
         )
 
         # Check saved data
@@ -1884,7 +1918,9 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertTrue(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(
-            Exam.objects.filter(person=self.general_admission.candidate, type=ExamTypes.PREMIER_CYCLE.name).exists()
+            Exam.objects.filter(
+                person=self.general_admission.candidate, type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
+            ).exists()
         )
 
         # Check saved data
@@ -1982,7 +2018,9 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertTrue(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(
-            Exam.objects.filter(person=self.general_admission.candidate, type=ExamTypes.PREMIER_CYCLE.name).exists()
+            Exam.objects.filter(
+                person=self.general_admission.candidate, type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
+            ).exists()
         )
 
         # Check saved data
@@ -2062,7 +2100,9 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertTrue(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(
-            Exam.objects.filter(person=self.general_admission.candidate, type=ExamTypes.PREMIER_CYCLE.name).exists()
+            Exam.objects.filter(
+                person=self.general_admission.candidate, type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
+            ).exists()
         )
 
         # Check saved data
@@ -2289,7 +2329,7 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
 
         diploma_alternative = Exam.objects.filter(
-            person=self.general_admission.candidate, type=ExamTypes.PREMIER_CYCLE.name
+            person=self.general_admission.candidate, type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
         ).first()
 
         self.assertIsNotNone(diploma_alternative)
@@ -2314,12 +2354,14 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertTrue(
-            Exam.objects.filter(person=self.general_admission.candidate, type=ExamTypes.PREMIER_CYCLE.name).exists()
+            Exam.objects.filter(
+                person=self.general_admission.candidate, type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
+            ).exists()
         )
 
         diploma_alternative = Exam.objects.filter(
             person=self.general_admission.candidate,
-            type=ExamTypes.PREMIER_CYCLE.name,
+            type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR,
         ).first()
 
         self.assertIsNotNone(diploma_alternative)
@@ -2344,12 +2386,14 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertTrue(
-            Exam.objects.filter(person=self.general_admission.candidate, type=ExamTypes.PREMIER_CYCLE.name).exists()
+            Exam.objects.filter(
+                person=self.general_admission.candidate, type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
+            ).exists()
         )
 
         diploma_alternative = Exam.objects.filter(
             person=self.general_admission.candidate,
-            type=ExamTypes.PREMIER_CYCLE.name,
+            type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR,
         ).first()
 
         self.assertIsNotNone(diploma_alternative)
@@ -2362,7 +2406,7 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
     def test_submit_diploma_alternative_with_existing_diploma_alternative(self):
         self.client.force_login(self.sic_manager_user)
 
-        Exam(person=self.general_admission.candidate, type=ExamTypes.PREMIER_CYCLE.name)
+        ExamFactory(person=self.general_admission.candidate, type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR)
 
         response = self.client.post(
             self.form_url,
@@ -2377,12 +2421,14 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertTrue(
-            Exam.objects.filter(person=self.general_admission.candidate, type=ExamTypes.PREMIER_CYCLE.name).exists()
+            Exam.objects.filter(
+                person=self.general_admission.candidate, type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
+            ).exists()
         )
 
         diploma_alternative = Exam.objects.filter(
             person=self.general_admission.candidate,
-            type=ExamTypes.PREMIER_CYCLE.name,
+            type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR,
         ).first()
 
         self.assertIsNotNone(diploma_alternative)

@@ -25,16 +25,13 @@
 # ##############################################################################
 from functools import cached_property
 
-from django.conf import settings
 from django.core.exceptions import PermissionDenied
-from django.utils.translation import get_language
 from django.utils.translation import gettext as _
 from django.views.generic import TemplateView
 
 from admission.views.common.mixins import LoadDossierViewMixin
 from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
-from osis_profile.models import EducationGroupYearExam, Exam
-from osis_profile.models.enums.exam import ExamTypes
+from osis_profile.models import Exam, ExamType
 
 __all__ = [
     'ExamDetailView',
@@ -47,36 +44,30 @@ class ExamDetailView(LoadDossierViewMixin, TemplateView):
     permission_required = 'admission.view_admission_exam'
 
     def dispatch(self, *args, **kwargs):
-        if self.education_group_year_exam is None:
+        if self.exam_type is None:
             raise PermissionDenied(_("There is no required exam for this training."))
         return super().dispatch(*args, **kwargs)
 
     @cached_property
-    def education_group_year_exam(self):
-        return EducationGroupYearExam.objects.filter(education_group_year=self.admission.training).first()
+    def exam_type(self):
+        return ExamType.objects.filter(education_group_years=self.admission.training).first()
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
         try:
             exam = Exam.objects.get(
                 person=self.admission.candidate,
-                type=ExamTypes.FORMATION.name,
-                education_group_year_exam__education_group_year=self.admission.training,
+                type=self.exam_type,
             )
-            titre = ''
-            if self.education_group_year_exam is not None:
-                if get_language() == settings.LANGUAGE_CODE_FR:
-                    titre = self.education_group_year_exam.title_fr
-                else:
-                    titre = self.education_group_year_exam.title_en
+            titre = '' if self.exam_type is None else self.exam_type.title
             context_data['examen'] = ExamenDTO(
                 uuid=str(exam.uuid),
-                requis=self.education_group_year_exam is not None,
+                requis=self.exam_type is not None,
                 titre=titre,
                 attestation=exam.certificate,
                 annee=exam.year.year if exam.year else None,
             )
         except Exam.DoesNotExist:
             context_data['examen'] = None
-        context_data['education_group_year_exam'] = self.education_group_year_exam
+        context_data['exam_type'] = self.exam_type
         return context_data

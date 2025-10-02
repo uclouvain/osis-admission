@@ -25,17 +25,15 @@
 # ##############################################################################
 
 from django.utils.translation import gettext_lazy as _
-from drf_spectacular.utils import extend_schema_view, extend_schema
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import mixins
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import GenericAPIView
 
 from admission.api import serializers
-from admission.api.views.mixins import (
-    GeneralEducationPersonRelatedMixin,
-)
-from osis_profile.models import EducationGroupYearExam, Exam
-from osis_profile.models.enums.exam import ExamTypes
+from admission.api.views.mixins import GeneralEducationPersonRelatedMixin
+from osis_profile.models import Exam
+from osis_profile.models.exam import ExamType
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
@@ -54,8 +52,7 @@ class BaseExamViewSet(
         try:
             return Exam.objects.get(
                 person=admission.candidate,
-                type=ExamTypes.FORMATION.name,
-                education_group_year_exam__education_group_year=admission.training,
+                type__education_group_years=admission.training,
             )
         except Exam.DoesNotExist:
             return Exam()
@@ -72,7 +69,7 @@ class BaseExamViewSet(
 
     def put(self, request, *args, **kwargs):
         admission = self.get_permission_object()
-        if not EducationGroupYearExam.objects.filter(education_group_year=admission.training).exists():
+        if not ExamType.objects.filter(education_group_years=admission.training).exists():
             raise PermissionDenied(_("There is no required exam for this training."))
         response = self.update(request, *args, **kwargs)
         current_admission = self.get_permission_object()
