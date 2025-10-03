@@ -39,6 +39,15 @@ from osis_notification.models import EmailNotification
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutPropositionContinue,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
+    EtudesSecondairesNonCompleteesException,
+)
 from admission.ddd.admission.shared_kernel.domain.service.i_elements_confirmation import (
     IElementsConfirmation,
 )
@@ -54,15 +63,6 @@ from admission.ddd.admission.shared_kernel.enums import (
     TypeSituationAssimilation,
 )
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
-from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutPropositionContinue,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
-)
-from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
-    EtudesSecondairesNonCompleteesException,
-)
 from admission.models import AdmissionTask
 from admission.tests.factories.calendar import (
     AdmissionAcademicCalendarFactory,
@@ -98,6 +98,7 @@ from base.models.enums.person_address_type import PersonAddressType
 from base.models.enums.state_iufc import StateIUFC
 from base.models.person_address import PersonAddress
 from base.tests import QueriesAssertionsMixin
+from base.tests.factories.academic_year import AcademicYearFactory
 from infrastructure.financabilite.domain.service.financabilite import PASS_ET_LAS_LABEL
 from osis_profile import BE_ISO_CODE
 from osis_profile.models import EducationalExperience, ProfessionalExperience
@@ -368,16 +369,40 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
             self.assertEqual(
                 not_in_period_error['detail'],
                 "Dans l'attente de la publication des résultats du concours d'entrée en médecine et dentisterie, "
-                "votre demande ne pourra être soumise qu'à partir du 1 mars 1980.",
+                "votre demande ne pourra être soumise qu'à partir du 1 février 1980.",
             )
 
-        # Inside a period
+        # Inside the related period
         with freezegun.freeze_time("1980-02-01"):
             response = self.client.get(self.ok_url)
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
             ret = response.json()
             self.assertEqual(len(ret['errors']), 0)
+
+        # Inside another period
+        with freezegun.freeze_time("1980-03-01"):
+            response = self.client.get(self.ok_url)
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            ret = response.json()
+
+            not_in_period_error = next(
+                (
+                    error
+                    for error in ret['errors']
+                    if error['status_code'] == HorsPeriodeSpecifiqueInscription.status_code
+                ),
+                None,
+            )
+
+            self.assertIsNotNone(not_in_period_error)
+
+            self.assertEqual(
+                not_in_period_error['detail'],
+                "Dans l'attente de la publication des résultats du concours d'entrée en médecine et dentisterie, "
+                "votre demande ne pourra être soumise qu'à partir du 1 février 1980.",
+            )
 
     def test_general_proposition_verification_contingent_est_interdite(self):
         admission = GeneralEducationAdmissionFactory(
@@ -493,8 +518,14 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
             training__main_domain__code='11A',
         )
 
-        specific_enrolment_period = AdmissionMedDentEnrollmentAcademicCalendarFactory(
-            data_year=current_admission.determined_academic_year,
+        AdmissionMedDentEnrollmentAcademicCalendarFactory(
+            data_year__year=1979,
+            start_date=datetime.date(1980, 1, 1),
+            end_date=datetime.date(1980, 1, 15),
+        )
+
+        AdmissionMedDentEnrollmentAcademicCalendarFactory(
+            data_year__year=1980,
             start_date=datetime.date(1980, 2, 1),
             end_date=datetime.date(1980, 2, 15),
         )
@@ -504,6 +535,15 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
 
         # Outside the period
         with freezegun.freeze_time(datetime.date(1980, 1, 31)):
+            response = self.client.post(current_url, self.data_ok)
+
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+            errors_statuses = [e["status_code"] for e in response.json()['non_field_errors']]
+            self.assertIn(HorsPeriodeSpecifiqueInscription.status_code, errors_statuses)
+
+        # Inside the previous period
+        with freezegun.freeze_time(datetime.date(1980, 1, 1)):
             response = self.client.post(current_url, self.data_ok)
 
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
