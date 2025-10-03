@@ -80,7 +80,7 @@ msgctxt "admission"
 msgid "(Expected) date of graduation"
 msgstr ""
 
-msgid "(Expected) graduation date (signed diploma)"
+msgid "(Expected) graduation date"
 msgstr ""
 
 msgid ", on"
@@ -6251,6 +6251,9 @@ msgid ""
 msgstr ""
 
 msgid "The University tuition fee is EUR 0.0."
+msgstr ""
+
+msgid "The academic year of the period"
 msgstr ""
 
 msgid "The admission must be approved by the CDD."
