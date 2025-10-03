@@ -5688,6 +5688,17 @@ paths:
   /propositions/specific-enrolment-periods:
     get:
       operationId: retrieveSpecificEnrolmentPeriods
+      parameters:
+      - in: query
+        name: year
+        schema:
+          type: integer
+        description: L'année académique de la période'
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
       tags:
       - propositions
       security:
@@ -5706,12 +5717,6 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
-      parameters:
-      - $ref: '#/components/parameters/Accept-Language'
-      - $ref: '#/components/parameters/X-User-FirstName'
-      - $ref: '#/components/parameters/X-User-LastName'
-      - $ref: '#/components/parameters/X-User-Email'
-      - $ref: '#/components/parameters/X-User-GlobalID'
   /secondary_studies:
     get:
       operationId: retrieveHighSchoolDiploma
