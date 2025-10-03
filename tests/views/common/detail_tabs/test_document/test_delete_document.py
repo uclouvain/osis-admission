@@ -493,7 +493,7 @@ class DeleteDocumentTestCase(BaseDocumentViewTestCase):
         )
         frozen_time.move_to('2022-01-04')
         self.doctorate_admission.last_update_author = None
-        self.doctorate_admission.save(update_fields=['specific_question_answers', 'last_update_author'])
+        self.doctorate_admission.save(update_fields=['last_update_author'])
 
         self.assertIsNotNone(self.doctorate_admission.requested_documents.get(self.sic_free_requestable_document))
 
@@ -625,7 +625,7 @@ class DeleteDocumentTestCase(BaseDocumentViewTestCase):
         )
         frozen_time.move_to('2022-01-04')
         self.doctorate_admission.last_update_author = None
-        self.doctorate_admission.save(update_fields=['specific_question_answers', 'last_update_author'])
+        self.doctorate_admission.save(update_fields=['last_update_author'])
 
         self.assertIsNotNone(self.doctorate_admission.requested_documents.get(self.fac_free_requestable_document))
 

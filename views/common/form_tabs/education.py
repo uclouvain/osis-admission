@@ -26,12 +26,14 @@
 from typing import List
 from uuid import UUID
 
+from django.db import transaction
 from django.urls import reverse
 from django.utils.functional import cached_property
 
-from admission.models import EPCInjection as AdmissionEPCInjection
+from admission.models import EPCInjection as AdmissionEPCInjection, AdmissionFormItem
+from admission.models.base import SpecificQuestionAnswer
 from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
-from admission.ddd.admission.shared_kernel.enums import Onglets
+from admission.ddd.admission.shared_kernel.enums import Onglets, TypeItemFormulaire
 from admission.forms.admission.education import AdmissionBachelorEducationForeignDiplomaForm
 from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
@@ -111,8 +113,22 @@ class AdmissionEducationFormView(AdmissionFormMixin, LoadDossierViewMixin, EditE
         )
 
     def update_current_admission_on_form_valid(self, form, admission):
-        TODO
-        admission.specific_question_answers = form.cleaned_data['specific_question_answers'] or {}
+        with transaction.atomic():
+            specific_question_answers = form.cleaned_data['specific_question_answers'] or {}
+
+            form_items = {
+                str(form_item.uuid): form_item
+                for form_item in AdmissionFormItem.objects.filter(uuid__in=specific_question_answers.keys())
+            }
+            SpecificQuestionAnswer.objects.bulk_create([
+                SpecificQuestionAnswer(
+                    admission=admission,
+                    form_item=form_items[form_item_uuid],
+                    file=reponse if form_items[form_item_uuid].type == TypeItemFormulaire.DOCUMENT.name else None,
+                    answer=reponse if form_items[form_item_uuid].type != TypeItemFormulaire.DOCUMENT.name else None,
+                ) for form_item_uuid, reponse in specific_question_answers.items()
+            ], update_conflicts=True, update_fields=['file', 'answer'], unique_fields=['admission', 'form_item'])
+            SpecificQuestionAnswer.objects.filter(admission=admission).exclude(form_item__uuid__in=form_items.keys()).delete()
 
     @property
     def can_be_updated(self):

@@ -93,7 +93,7 @@ class DocumentRequestWithDefaultFileTestCase(BaseDocumentViewTestCase):
             url,
             data={
                 'free-document-request-with-default-file-form-file_name': 'My file name',
-                'free-document-request-with-default-file-form-file_0': ['file_0-token'],
+                'free-document-request-with-default-file-form-file_0': ['d4fba9f6-7d27-47fa-ab08-37926cc712d3'],
                 'free-document-request-with-default-file-form-document_type': '',
                 'free-document-request-with-default-file-form-checklist_tab': OngletsChecklistGenerale.assimilation.name,
             },
@@ -213,7 +213,7 @@ class DocumentRequestWithDefaultFileTestCase(BaseDocumentViewTestCase):
             url,
             data={
                 'free-document-request-with-default-file-form-file_name': 'My file name',
-                'free-document-request-with-default-file-form-file_0': ['file_0-token'],
+                'free-document-request-with-default-file-form-file_0': ['d4fba9f6-7d27-47fa-ab08-37926cc712d3'],
                 'free-document-request-with-default-file-form-document_type': categorized_document.pk,
                 'free-document-request-with-default-file-form-checklist_tab': OngletsChecklistGenerale.parcours_anterieur.name,
             },
@@ -308,7 +308,7 @@ class DocumentRequestWithDefaultFileTestCase(BaseDocumentViewTestCase):
             data={
                 'free-document-request-with-default-file-form-checklist_tab': 'donnees_personnelles',
                 'free-document-request-with-default-file-form-file_name': 'My file name',
-                'free-document-request-with-default-file-form-file_0': ['file_0-token'],
+                'free-document-request-with-default-file-form-file_0': ['d4fba9f6-7d27-47fa-ab08-37926cc712d3'],
             },
             **self.default_headers,
         )
@@ -399,7 +399,7 @@ class DocumentRequestWithDefaultFileTestCase(BaseDocumentViewTestCase):
             url,
             data={
                 'free-document-request-with-default-file-form-file_name': 'My file name',
-                'free-document-request-with-default-file-form-file_0': ['file_0-token'],
+                'free-document-request-with-default-file-form-file_0': ['d4fba9f6-7d27-47fa-ab08-37926cc712d3'],
                 'free-document-request-with-default-file-form-document_type': '',
                 'free-document-request-with-default-file-form-checklist_tab': OngletsChecklistDoctorale.assimilation.name,
             },
@@ -519,7 +519,7 @@ class DocumentRequestWithDefaultFileTestCase(BaseDocumentViewTestCase):
             url,
             data={
                 'free-document-request-with-default-file-form-file_name': 'My file name',
-                'free-document-request-with-default-file-form-file_0': ['file_0-token'],
+                'free-document-request-with-default-file-form-file_0': ['d4fba9f6-7d27-47fa-ab08-37926cc712d3'],
                 'free-document-request-with-default-file-form-document_type': categorized_document.pk,
                 'free-document-request-with-default-file-form-checklist_tab': OngletsChecklistDoctorale.parcours_anterieur.name,
             },
@@ -614,7 +614,7 @@ class DocumentRequestWithDefaultFileTestCase(BaseDocumentViewTestCase):
             data={
                 'free-document-request-with-default-file-form-checklist_tab': 'donnees_personnelles',
                 'free-document-request-with-default-file-form-file_name': 'My file name',
-                'free-document-request-with-default-file-form-file_0': ['file_0-token'],
+                'free-document-request-with-default-file-form-file_0': ['d4fba9f6-7d27-47fa-ab08-37926cc712d3'],
             },
             **self.default_headers,
         )

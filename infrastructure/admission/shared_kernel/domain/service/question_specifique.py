@@ -94,7 +94,7 @@ class SuperQuestionSpecifiqueTranslator(ISuperQuestionSpecifiqueTranslator):
         if question_type in TYPES_ITEMS_LECTURE_SEULE:
             formatted_value = question.form_item.text.get(language, '')
         elif question_type == TypeItemFormulaire.DOCUMENT.name:
-            formatted_value = [get_uuid_value(token) for token in answers.get(question_uuid, [])]
+            formatted_value = [get_uuid_value(str(token)) for token in answers.get(question_uuid, [])]
         elif question_type == TypeItemFormulaire.SELECTION.name:
             current_value = answers.get(question_uuid)
             selected_options = set(current_value) if isinstance(current_value, list) else {current_value}

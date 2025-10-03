@@ -140,7 +140,7 @@ class GetSpecificQuestionsTestCase(TestCase):
                 uuid=str(self.questions_configurations[2].form_item.uuid),
                 type=TypeItemFormulaire.DOCUMENT.name,
             ),
-            file=[str(self.document_uuid), 'other-token'],
+            file=[str(self.document_uuid), 'a9eba09d-ff97-4b3a-8924-dc370cffac44'],
         )
         SpecificQuestionAnswer.objects.create(
             admission=self.admission,
@@ -206,10 +206,10 @@ class GetSpecificQuestionsTestCase(TestCase):
         self.assertEqual(document_field.onglet, Onglets.CHOIX_FORMATION.name)
         self.assertEqual(document_field.label, 'Champ document')
         self.assertEqual(document_field.label_langue_candidat, 'Document field')
-        self.assertEqual(document_field.valeur_formatee, [self.document_uuid, 'other-token'])
+        self.assertEqual(document_field.valeur_formatee, [self.document_uuid, uuid.UUID('a9eba09d-ff97-4b3a-8924-dc370cffac44')])
         self.assertEqual(document_field.texte, 'Données détaillées.')
         self.assertEqual(document_field.texte_aide, '')
-        self.assertEqual(document_field.valeur, [str(self.document_uuid), 'other-token'])
+        self.assertEqual(document_field.valeur, [str(self.document_uuid), 'a9eba09d-ff97-4b3a-8924-dc370cffac44'])
 
         # Check properties for a multiple selection field
         self.assertEqual(multiple_selection_field.type, TypeItemFormulaire.SELECTION.name)

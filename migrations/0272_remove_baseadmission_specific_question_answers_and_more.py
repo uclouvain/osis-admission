@@ -26,7 +26,7 @@ def migrate_specific_answers(apps, schema_editor):
                 print(f'Unknown form item UUID {form_item_uuid} in admission {admission} (skipping this answer)')
                 continue
             answers.append(SpecificQuestionAnswer(
-                admission=admission,
+                admission_id=admission.id,
                 form_item_id=form_item['id'],
                 file=[uuid.UUID(file_uuid) for file_uuid in answer] if form_item['type'] == 'DOCUMENT' else None,
                 answer=answer if form_item['type'] != 'DOCUMENT' else None,

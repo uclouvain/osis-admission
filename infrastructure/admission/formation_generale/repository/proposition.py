@@ -425,14 +425,26 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             str(form_item.uuid): form_item
             for form_item in AdmissionFormItem.objects.filter(uuid__in=entity.reponses_questions_specifiques.keys())
         }
-        SpecificQuestionAnswer.objects.bulk_create([
-            SpecificQuestionAnswer(
-                admission=admission,
-                form_item=form_items[form_item_uuid],
-                file=reponse if form_items[form_item_uuid].type == TypeItemFormulaire.DOCUMENT.name else None,
-                answer=reponse if form_items[form_item_uuid].type != TypeItemFormulaire.DOCUMENT.name else None,
-            ) for form_item_uuid, reponse in entity.reponses_questions_specifiques.items()
-        ], update_conflicts=True, update_fields=['file', 'answer'], unique_fields=['admission', 'form_item'])
+        answers_not_documents = []
+        for form_item_uuid, reponse in entity.reponses_questions_specifiques.items():
+            if form_items[form_item_uuid].type == TypeItemFormulaire.DOCUMENT.name:
+                # Documents need to be saved individually for pre_save to be called on FileField
+                SpecificQuestionAnswer.objects.update_or_create(
+                    admission=admission,
+                    form_item=form_items[form_item_uuid],
+                    defaults={
+                        'file': reponse,
+                    },
+                )
+            else:
+                answers_not_documents.append(SpecificQuestionAnswer(
+                    admission=admission,
+                    form_item=form_items[form_item_uuid],
+                    answer=reponse,
+                ))
+        SpecificQuestionAnswer.objects.bulk_create(answers_not_documents, update_conflicts=True,
+                                                   update_fields=['file', 'answer'],
+                                                   unique_fields=['admission', 'form_item'])
         SpecificQuestionAnswer.objects.filter(admission=admission).exclude(
             form_item__uuid__in=form_items.keys()).delete()
 

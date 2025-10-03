@@ -440,7 +440,6 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
             ),
             answer='My second answer',
         )
-        self.admission_ok.save(update_fields=['specific_question_answers'])
         response = self.client.post(self.ok_url, self.data_ok)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         self.admission_ok.refresh_from_db()

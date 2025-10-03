@@ -740,7 +740,7 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
     def get_specific_question_answers_dict(self) -> Dict[str, Union[str, List[str]]]:
         """ Return a dict of form item uuid to answers, as the old format was. """
         return {
-            str(answer.form_item.uuid): answer.file if answer.form_item.type == TypeItemFormulaire.DOCUMENT.name else answer.answer
+            str(answer.form_item.uuid): list(map(str, answer.file)) if answer.form_item.type == TypeItemFormulaire.DOCUMENT.name else answer.answer
             for answer in self.specific_question_answers.all()
         }
 

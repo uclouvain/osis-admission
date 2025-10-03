@@ -40,7 +40,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formatio
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
-from admission.ddd.admission.shared_kernel.enums import Onglets
+from admission.ddd.admission.shared_kernel.enums import Onglets, TypeItemFormulaire
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
@@ -50,6 +50,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 )
 from admission.models import ContinuingEducationAdmission
 from admission.models import EPCInjection as AdmissionEPCInjection
+from admission.models.base import SpecificQuestionAnswer
 from admission.models.epc_injection import (
     EPCInjectionStatus as AdmissionEPCInjectionStatus,
 )
@@ -61,7 +62,7 @@ from admission.tests.factories.continuing_education import (
 )
 from admission.tests.factories.form_item import (
     AdmissionFormItemInstantiationFactory,
-    TextAdmissionFormItemFactory,
+    TextAdmissionFormItemFactory, AdmissionFormItemFactory,
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import (
@@ -560,8 +561,14 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
             required=True,
         )
 
-        self.general_admission.get_specific_question_answers_dict()[text_question_uuid] = 'My first answer'
-        self.general_admission.save(update_fields=['specific_question_answers'])
+        SpecificQuestionAnswer.objects.create(
+            admission=self.general_admission,
+            form_item=AdmissionFormItemFactory(
+                uuid=text_question_uuid,
+                type=TypeItemFormulaire.TEXTE.name,
+            ),
+            answer='My first answer',
+        )
 
         # No specific question in the form
         response = self.client.post(
@@ -2405,8 +2412,14 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
             required=True,
         )
 
-        self.general_admission.get_specific_question_answers_dict()[text_question_uuid] = 'My first answer'
-        self.general_admission.save(update_fields=['specific_question_answers'])
+        SpecificQuestionAnswer.objects.create(
+            admission=self.general_admission,
+            form_item=AdmissionFormItemFactory(
+                uuid=text_question_uuid,
+                type=TypeItemFormulaire.TEXTE.name,
+            ),
+            answer='My first answer',
+        )
 
         # No specific question in the form
         response = self.client.post(

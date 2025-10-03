@@ -219,33 +219,10 @@ class DoctorateAdmissionFactory(factory.django.DjangoModelFactory):
         with_thesis_institute = factory.Trait(
             thesis_institute=factory.SubFactory(EntityVersionFactory),
         )
-        with_answers_to_specific_questions = factory.Trait(
-            specific_question_answers={
-                'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
-                'fe254203-17c7-47d6-95e4-3c5c532da552': ['ae254203-17c7-47d6-95e4-3c5c532da550'],
-            },
-        )
 
     @factory.post_generation
     def specific_question_answers(self, create, extracted: Dict[str, Union[str, List[str]]], **kwargs):
-        if extracted is None:
-            SpecificQuestionAnswer.objects.create(
-                admission=self,
-                form_item=AdmissionFormItemFactory(
-                    uuid='fe254203-17c7-47d6-95e4-3c5c532da551',
-                    type=TypeItemFormulaire.TEXTE.name,
-                ),
-                answer='My response',
-            )
-            SpecificQuestionAnswer.objects.create(
-                admission=self,
-                form_item=AdmissionFormItemFactory(
-                    uuid='fe254203-17c7-47d6-95e4-3c5c532da552',
-                    type=TypeItemFormulaire.DOCUMENT.name,
-                ),
-                file=[uuid.UUID('ae254203-17c7-47d6-95e4-3c5c532da550')],
-            )
-        else:
+        if extracted is not None:
             for form_item_uuid, answer in extracted.items():
                 SpecificQuestionAnswer.objects.create(
                     admission=self,

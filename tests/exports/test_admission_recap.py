@@ -28,6 +28,7 @@ import datetime
 from io import BytesIO
 from typing import Dict, List
 from unittest.mock import MagicMock
+import uuid
 
 import attr
 import freezegun
@@ -1026,7 +1027,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 str(question.form_item.uuid): (
                     f'answer-{index}'
                     if question.form_item.type == TypeItemFormulaire.TEXTE.name
-                    else [f'uuid-file-{index}']
+                    else [uuid.uuid4()]
                 )
                 for index, tab_questions in enumerate(specific_questions.values())
                 for question in tab_questions

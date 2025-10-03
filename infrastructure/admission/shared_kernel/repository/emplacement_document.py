@@ -191,14 +191,21 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
                 document_uuids = emplacement_document.uuids
 
                 if document_uuids != entity.uuids_documents:
-                    if model_object not in updated_fields_by_object:
-                        updated_fields_by_object[model_object] = [model_field]
-                    else:
-                        updated_fields_by_object[model_object].append(model_field)
+                    if model_field != 'specific_question_answers':
+                        if model_object not in updated_fields_by_object:
+                            updated_fields_by_object[model_object] = [model_field]
+                        else:
+                            updated_fields_by_object[model_object].append(model_field)
 
                     if specific_question_uuid:
                         # For a specific question, replace the previous file
-                        SpecificQuestionAnswer.objects.filter(admission=admission, form_item__uuid=specific_question_uuid).update(file=entity.uuids_documents)
+                        SpecificQuestionAnswer.objects.update_or_create(
+                            admission=admission,
+                            form_item=AdmissionFormItem.objects.get(uuid=specific_question_uuid),
+                            defaults={
+                                'file': 'entity.uuids_documents',
+                            }
+                        )
                     else:
                         # Otherwise, update the related field in the specific object
                         setattr(model_object, model_field, entity.uuids_documents)

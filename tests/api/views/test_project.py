@@ -448,10 +448,16 @@ class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixi
             entity_type=EntityType.DOCTORAL_COMMISSION.name,
             acronym='CDA',
         ).entity
-        cls.admission = DoctorateAdmissionFactory(
-            training__management_entity=cls.commission,
-            supervision_group=promoter.process,
-        )
+        with patch("osis_document_components.fields.FileField._confirm_multiple_upload") as confirm_upload:
+            confirm_upload.side_effect = lambda _, value, __: ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
+            cls.admission = DoctorateAdmissionFactory(
+                training__management_entity=cls.commission,
+                supervision_group=promoter.process,
+                specific_question_answers={
+                    'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
+                    'fe254203-17c7-47d6-95e4-3c5c532da552': ['ae254203-17c7-47d6-95e4-3c5c532da550'],
+                },
+            )
 
         cls.update_data = {
             "uuid": cls.admission.uuid,

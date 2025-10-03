@@ -33,7 +33,7 @@ from admission.constants import SUPPORTED_MIME_TYPES
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     OngletsChecklist,
 )
-from admission.ddd.admission.shared_kernel.enums import Onglets
+from admission.ddd.admission.shared_kernel.enums import Onglets, TypeItemFormulaire
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     IdentifiantBaseEmplacementDocument,
     OngletsDemande,
@@ -49,6 +49,7 @@ from admission.models import (
     DoctorateAdmission,
     GeneralEducationAdmission,
 )
+from admission.models.base import SpecificQuestionAnswer
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import (
     ContinuingEducationAdmissionFactory,
@@ -60,7 +61,7 @@ from admission.tests.factories.curriculum import (
 )
 from admission.tests.factories.form_item import (
     AdmissionFormItemInstantiationFactory,
-    DocumentAdmissionFormItemFactory,
+    DocumentAdmissionFormItemFactory, AdmissionFormItemFactory,
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.language import LanguageKnowledgeFactory
@@ -145,7 +146,14 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
             'related_checklist_tab': OngletsChecklist.parcours_anterieur.name,
         }
 
-        self.general_admission.get_specific_question_answers_dict()[specific_question_uuid] = [uuid.uuid4()]
+        SpecificQuestionAnswer.objects.create(
+            admission=self.general_admission,
+            form_item=AdmissionFormItemFactory(
+                uuid=specific_question_uuid,
+                type=TypeItemFormulaire.DOCUMENT.name,
+            ),
+            file=[uuid.uuid4()],
+        )
 
         self.general_admission.save()
 
