@@ -4,7 +4,7 @@ import django.contrib.postgres.fields
 import django.core.validators
 from django.db import migrations, models
 import django.db.models.deletion
-import osis_document.contrib.fields
+import osis_document_components.fields
 import uuid
 
 
@@ -73,7 +73,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='generaleducationadmission',
             name='fac_approval_certificate',
-            field=osis_document.contrib.fields.FileField(
+            field=osis_document_components.fields.FileField(
                 base_field=models.UUIDField(),
                 blank=True,
                 default=list,
@@ -84,7 +84,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='generaleducationadmission',
             name='fac_refusal_certificate',
-            field=osis_document.contrib.fields.FileField(
+            field=osis_document_components.fields.FileField(
                 base_field=models.UUIDField(),
                 blank=True,
                 default=list,

@@ -1562,7 +1562,7 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
         valuated_experience.refresh_from_db()
         self.assertEqual(valuated_experience.is_access_title, False)
 
-    @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
+    @patch("osis_document_components.fields.FileField._confirm_multiple_upload")
     def test_specify_the_higher_education_experience_as_access_title(self, confirm_multiple_upload):
         confirm_multiple_upload.side_effect = lambda _, value, __: (
             ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []

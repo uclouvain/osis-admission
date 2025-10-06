@@ -34,12 +34,12 @@ from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import override_settings
 from django.utils.translation import gettext
-from osis_document.enums import PostProcessingType
+from osis_document_components.enums import PostProcessingType
 from osis_notification.models import EmailNotification
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.constants import PNG_MIME_TYPE, SUPPORTED_MIME_TYPES
+from admission.constants import SUPPORTED_MIME_TYPES
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
@@ -86,6 +86,7 @@ from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group_year import Master120TrainingFactory
 from base.tests.factories.person import PersonFactory
+from osis_profile.constants import PNG_MIME_TYPE
 
 
 class BaseAdmissionRequestedDocumentListApiTestCase(APITestCase):
@@ -153,26 +154,26 @@ class BaseAdmissionRequestedDocumentListApiTestCase(APITestCase):
 
     def setUp(self) -> None:
         # Mock documents
-        patcher = patch("osis_document.api.utils.get_remote_token", return_value="a-token")
+        patcher = patch("osis_document_components.services.get_remote_token", return_value="a-token")
         patcher.start()
         self.addCleanup(patcher.stop)
 
         patcher = patch(
-            "osis_document.api.utils.get_remote_metadata",
+            "osis_document_components.services.get_remote_metadata",
             return_value={"name": "myfile.myext", "mimetype": "application/pdf", "size": 1},
         )
         patcher.start()
         self.addCleanup(patcher.stop)
 
         patcher = patch(
-            "osis_document.api.utils.confirm_remote_upload",
+            "osis_document_components.services.confirm_remote_upload",
             side_effect=lambda token, *args, **kwargs: self.uuid_documents_by_token[token],
         )
         patcher.start()
         self.addCleanup(patcher.stop)
 
         patcher = patch(
-            "osis_document.contrib.fields.FileField._confirm_multiple_upload",
+            "osis_document_components.fields.FileField._confirm_multiple_upload",
             side_effect=lambda _, tokens, __: [
                 self.uuid_documents_by_token[token] for token in tokens if token in self.uuid_documents_by_token
             ],
@@ -180,31 +181,31 @@ class BaseAdmissionRequestedDocumentListApiTestCase(APITestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = patch('osis_document.api.utils.get_remote_tokens')
+        patcher = patch('osis_document_components.services.get_remote_tokens')
         patched = patcher.start()
         patched.side_effect = lambda uuids, **kwargs: {
             document_uuid: f'token-{index}' for index, document_uuid in enumerate(uuids)
         }
         self.addCleanup(patcher.stop)
 
-        patcher = patch('osis_document.api.utils.get_several_remote_metadata')
+        patcher = patch('osis_document_components.services.get_several_remote_metadata')
         self.get_several_remote_metadata_patched = patcher.start()
         self.get_several_remote_metadata_patched.side_effect = lambda tokens: {
             token: self.file_metadata for token in tokens
         }
         self.addCleanup(patcher.stop)
 
-        patcher = patch('osis_document.utils.save_raw_content_remotely')
+        patcher = patch('osis_document_components.services.save_raw_content_remotely')
         patched = patcher.start()
         patched.return_value = 'a-token'
         self.addCleanup(patcher.stop)
 
-        patcher = patch('osis_document.api.utils.change_remote_metadata')
+        patcher = patch('osis_document_components.services.change_remote_metadata')
         self.change_remote_metadata_patcher = patcher.start()
         self.change_remote_metadata_patcher.return_value = 'a-token'
         self.addCleanup(patcher.stop)
 
-        patcher = patch('osis_document.api.utils.launch_post_processing')
+        patcher = patch('osis_document_components.services.launch_post_processing')
         self.launch_post_processing_patcher = patcher.start()
         self.launch_post_processing_patcher.side_effect = self._simulate_post_processing
         self.addCleanup(patcher.stop)
@@ -571,7 +572,7 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedDoc
         self.assertFalse(EmailNotification.objects.filter(person=self.admission.candidate).exists())
 
         # > Some files must be converted
-        with mock.patch('osis_document.api.utils.get_several_remote_metadata') as get_several_remote_metadata_patcher:
+        with mock.patch('osis_document_components.services.get_several_remote_metadata') as get_several_remote_metadata_patcher:
             get_several_remote_metadata_patcher.side_effect = lambda tokens: {
                 token: {
                     **self.file_metadata,
@@ -642,7 +643,7 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedDoc
                 async_post_processing=False,
             )
 
-        with mock.patch('osis_document.api.utils.get_several_remote_metadata') as get_several_remote_metadata_patcher:
+        with mock.patch('osis_document_components.services.get_several_remote_metadata') as get_several_remote_metadata_patcher:
             get_several_remote_metadata_patcher.side_effect = lambda tokens: {
                 token: {
                     **self.file_metadata,
@@ -1169,7 +1170,7 @@ class ContinuingAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequested
         self.assertFalse(EmailNotification.objects.filter(person=self.admission.candidate).exists())
 
         # > Some files must be converted
-        with mock.patch('osis_document.api.utils.get_several_remote_metadata') as get_several_remote_metadata_patcher:
+        with mock.patch('osis_document_components.services.get_several_remote_metadata') as get_several_remote_metadata_patcher:
             get_several_remote_metadata_patcher.side_effect = lambda tokens: {
                 token: {
                     **self.file_metadata,
@@ -1240,7 +1241,7 @@ class ContinuingAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequested
                 async_post_processing=False,
             )
 
-        with mock.patch('osis_document.api.utils.get_several_remote_metadata') as get_several_remote_metadata_patcher:
+        with mock.patch('osis_document_components.services.get_several_remote_metadata') as get_several_remote_metadata_patcher:
             get_several_remote_metadata_patcher.side_effect = lambda tokens: {
                 token: {
                     **self.file_metadata,
@@ -1836,7 +1837,7 @@ class DoctorateAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedD
         self.assertFalse(EmailNotification.objects.filter(person=self.admission.candidate).exists())
 
         # > Some files must be converted
-        with mock.patch('osis_document.api.utils.get_several_remote_metadata') as get_several_remote_metadata_patcher:
+        with mock.patch('osis_document_components.services.get_several_remote_metadata') as get_several_remote_metadata_patcher:
             get_several_remote_metadata_patcher.side_effect = lambda tokens: {
                 token: {
                     **self.file_metadata,
@@ -1907,7 +1908,7 @@ class DoctorateAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedD
                 async_post_processing=False,
             )
 
-        with mock.patch('osis_document.api.utils.get_several_remote_metadata') as get_several_remote_metadata_patcher:
+        with mock.patch('osis_document_components.services.get_several_remote_metadata') as get_several_remote_metadata_patcher:
             get_several_remote_metadata_patcher.side_effect = lambda tokens: {
                 token: {
                     **self.file_metadata,

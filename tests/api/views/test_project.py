@@ -35,7 +35,7 @@ from django.test import override_settings
 from django.utils.translation import gettext_lazy as _
 from gestion_des_comptes.models import HistoriqueMatriculeCompte
 from osis_history.models import HistoryEntry
-from osis_notification.models import WebNotification, EmailNotification
+from osis_notification.models import EmailNotification, WebNotification
 from osis_signature.enums import SignatureState
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -478,7 +478,7 @@ class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixi
         cls.url = resolve_url("admission_api_v1:project", uuid=cls.admission.uuid)
         cls.dto_url = resolve_url("admission_api_v1:doctorate_propositions", uuid=cls.admission.uuid)
 
-    @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
+    @patch("osis_document_components.fields.FileField._confirm_multiple_upload")
     def test_admission_doctorate_update_using_api_candidate(self, confirm_upload):
         confirm_upload.side_effect = lambda _, value, __: ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
         self.client.force_authenticate(user=self.candidate.user)
@@ -542,7 +542,7 @@ class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixi
 @override_settings(ROOT_URLCONF='admission.api.url_v1')
 class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
     @classmethod
-    @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
+    @patch("osis_document_components.fields.FileField._confirm_multiple_upload")
     def setUpTestData(cls, confirm_upload):
         confirm_upload.side_effect = lambda _, value, __: ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
         cls.admission = DoctorateAdmissionFactory(
@@ -767,7 +767,7 @@ class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
 @freezegun.freeze_time('2020-12-15')
 class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
     @classmethod
-    @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
+    @patch("osis_document_components.fields.FileField._confirm_multiple_upload")
     def setUpTestData(cls, confirm_upload):
         AdmissionAcademicCalendarFactory.produce_all_required()
         cls.language_fr = FrenchLanguageFactory()
@@ -794,6 +794,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         )
         # Incomplete candidate
         cls.second_candidate = PersonFactory(first_name="Jim")
+        cls.third_candidate = PersonFactory(first_name="Jim")
         # Create promoters
         cls.first_invited_promoter = PromoterFactory(actor_ptr__person__first_name="Joe", is_reference_promoter=True)
         cls.first_invited_promoter.actor_ptr.switch_state(SignatureState.APPROVED)
@@ -1004,11 +1005,21 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         self.assertCountEqual(history_entry.tags, ['proposition', 'status-changed', 'soumission'])
 
     def test_submit_valid_proposition_using_api_but_too_much_submitted_propositions(self):
-        self.client.force_authenticate(user=self.second_candidate.user)
+        self.client.force_authenticate(user=self.third_candidate.user)
 
         previous_proposition = DoctorateAdmissionFactory(
-            candidate=self.second_candidate,
+            candidate=self.third_candidate,
             supervision_group=self.first_invited_promoter.actor_ptr.process,
+        )
+
+        new_proposition = DoctorateAdmissionFactory(
+            candidate=self.third_candidate,
+            supervision_group=self.first_invited_promoter.actor_ptr.process,
+        )
+
+        url = resolve_url(
+            "admission_api_v1:submit-doctoral-proposition",
+            uuid=new_proposition.uuid,
         )
 
         finished_statuses = {
@@ -1027,7 +1038,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
             previous_proposition.status = current_status
             previous_proposition.save(update_fields=['status'])
 
-            response = self.client.get(self.second_admission_url)
+            response = self.client.get(url)
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 

@@ -44,7 +44,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 )
 from admission.models import DoctorateAdmission
 from admission.models.enums.actor_type import ActorType
-from osis_role.cache import predicate_cache
 from osis_role.errors import predicate_failed_msg
 
 

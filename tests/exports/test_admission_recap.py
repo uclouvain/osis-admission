@@ -44,8 +44,7 @@ from admission.calendar.admission_calendar import (
     AdmissionPoolExternalEnrollmentChangeCalendar,
     AdmissionPoolExternalReorientationCalendar,
 )
-from admission.constants import JPEG_MIME_TYPE, ORDERED_CAMPUSES_UUIDS, PNG_MIME_TYPE
-from admission.ddd import FR_ISO_CODE
+from admission.constants import ORDERED_CAMPUSES_UUIDS
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixEtatSignature,
     ChoixStatutPropositionDoctorale,
@@ -67,6 +66,24 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     CurriculumAdmissionDTO,
+)
+from admission.ddd.admission.formation_continue.commands import (
+    RecupererQuestionsSpecifiquesQuery,
+)
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixEdition,
+    ChoixInscriptionATitre,
+    ChoixStatutPropositionContinue,
+)
+from admission.ddd.admission.formation_continue.dtos import (
+    PropositionDTO as PropositionFormationContinueDTO,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.formation_generale.dtos import ComptabiliteDTO
+from admission.ddd.admission.formation_generale.dtos import (
+    PropositionDTO as PropositionFormationGeneraleDTO,
 )
 from admission.ddd.admission.shared_kernel.dtos import (
     AdressePersonnelleDTO,
@@ -107,24 +124,6 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     IdentifiantBaseEmplacementDocument,
 )
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
-from admission.ddd.admission.formation_continue.commands import (
-    RecupererQuestionsSpecifiquesQuery,
-)
-from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixEdition,
-    ChoixInscriptionATitre,
-    ChoixStatutPropositionContinue,
-)
-from admission.ddd.admission.formation_continue.dtos import (
-    PropositionDTO as PropositionFormationContinueDTO,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
-)
-from admission.ddd.admission.formation_generale.dtos import ComptabiliteDTO
-from admission.ddd.admission.formation_generale.dtos import (
-    PropositionDTO as PropositionFormationGeneraleDTO,
-)
 from admission.exports.admission_recap.attachments import Attachment
 from admission.exports.admission_recap.section import (
     get_accounting_section,
@@ -193,7 +192,8 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceNonAcademiqueDTO,
 )
 from infrastructure.messages_bus import message_bus_instance
-from osis_profile import BE_ISO_CODE
+from osis_profile import BE_ISO_CODE, FR_ISO_CODE
+from osis_profile.constants import JPEG_MIME_TYPE, PNG_MIME_TYPE
 from osis_profile.models.enums.curriculum import (
     CURRICULUM_ACTIVITY_LABEL,
     ActivitySector,
@@ -344,12 +344,12 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
         self.bytes_io_default_content = BytesIO(b'some content')
 
         # Mock osis-document
-        patcher = mock.patch('osis_document.api.utils.get_remote_token', return_value='foobar')
+        patcher = mock.patch('osis_document_components.services.get_remote_token', return_value='foobar')
         patcher.start()
         self.addCleanup(patcher.stop)
 
         patcher = mock.patch(
-            'osis_document.api.utils.get_remote_metadata',
+            'osis_document_components.services.get_remote_metadata',
             return_value={
                 'name': 'myfile',
                 'mimetype': PDF_MIME_TYPE,
@@ -359,21 +359,21 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = mock.patch('osis_document.api.utils.confirm_remote_upload')
+        patcher = mock.patch('osis_document_components.services.confirm_remote_upload')
         patched = patcher.start()
         patched.return_value = '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'
         self.addCleanup(patcher.stop)
-        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patcher = mock.patch('osis_document_components.fields.FileField._confirm_multiple_upload')
         patched = patcher.start()
         patched.side_effect = lambda _, value, __: ['550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'] if value else []
         self.addCleanup(patcher.stop)
 
-        patcher = mock.patch('osis_document.api.utils.get_remote_tokens')
+        patcher = mock.patch('osis_document_components.services.get_remote_tokens')
         patched = patcher.start()
         patched.side_effect = lambda uuids, **kwargs: {uuid: f'token-{index}' for index, uuid in enumerate(uuids)}
         self.addCleanup(patcher.stop)
 
-        patcher = mock.patch('osis_document.api.utils.get_several_remote_metadata')
+        patcher = mock.patch('osis_document_components.services.get_several_remote_metadata')
         patched = patcher.start()
         patched.side_effect = lambda tokens: {
             token: {
@@ -968,22 +968,22 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
     @classmethod
     def setUpTestData(cls):
         # Mock osis-document
-        cls.get_remote_token_patcher = mock.patch("osis_document.api.utils.get_remote_token", return_value="foobar")
+        cls.get_remote_token_patcher = mock.patch("osis_document_components.services.get_remote_token", return_value="foobar")
         cls.get_remote_token_patcher.start()
 
         cls.get_remote_metadata_patcher = mock.patch(
-            "osis_document.api.utils.get_remote_metadata", return_value={"name": "myfile", "size": 1}
+            "osis_document_components.services.get_remote_metadata", return_value={"name": "myfile", "size": 1}
         )
         cls.get_remote_metadata_patcher.start()
 
         cls.confirm_remote_upload_patcher = mock.patch(
-            "osis_document.api.utils.confirm_remote_upload",
+            "osis_document_components.services.confirm_remote_upload",
             side_effect=lambda token, *args, **kwargs: token,
         )
         cls.confirm_remote_upload_patcher.start()
 
         cls.confirm_multiple_remote_upload_patcher = mock.patch(
-            "osis_document.contrib.fields.FileField._confirm_multiple_upload",
+            "osis_document_components.fields.FileField._confirm_multiple_upload",
             side_effect=lambda _, value, __: value,
         )
         cls.confirm_multiple_remote_upload_patcher.start()

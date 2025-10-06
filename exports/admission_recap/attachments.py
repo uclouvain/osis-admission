@@ -28,10 +28,10 @@ from typing import Dict, List, Optional
 
 import img2pdf
 from django.utils.translation import override
-from osis_document.api.utils import get_raw_content_remotely
+from osis_document_components.services import get_raw_content_remotely
 from PIL import Image, UnidentifiedImageError
 
-from admission.constants import IMAGE_MIME_TYPES, SUPPORTED_MIME_TYPES
+from admission.constants import SUPPORTED_MIME_TYPES
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixEtatSignature,
     ChoixTypeFinancement,
@@ -56,7 +56,6 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     DocumentsCotutelle,
     DocumentsCurriculum,
     DocumentsEtudesSecondaires,
-    DocumentsExamens,
     DocumentsIdentification,
     DocumentsProjetRecherche,
     DocumentsQuestionsSpecifiques,
@@ -72,6 +71,7 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
 )
+from osis_profile.constants import IMAGE_MIME_TYPES
 from osis_profile.models.enums.curriculum import (
     CURRICULUM_ACTIVITY_LABEL,
     Result,
@@ -123,30 +123,25 @@ class Attachment:
                 return default_content
             if metadata.get('mimetype') in IMAGE_MIME_TYPES:
                 try:
-                    with Image.open(BytesIO(raw_content)) as img:
+                    try:
+                        raw_content = img2pdf.convert(
+                            raw_content,
+                            rotation=img2pdf.Rotation.ifvalid,
+                            first_frame_only=True,
+                        )
+                    except img2pdf.AlphaChannelError:
                         # Convert the image to RGB if necessary as img2pdf does not handle all cases
-                        with_transparency = 'transparency' in img.info
-                        if with_transparency or img.mode not in {'RGB', 'L'}:
-                            if img.mode in {'RGBA', 'LA', 'PA'} or with_transparency:
-                                # Set a white background
-                                background = Image.new('RGBA', img.size, (255, 255, 255))
-                                img = Image.alpha_composite(background, img.convert('RGBA'))
-
+                        with Image.open(BytesIO(raw_content)) as img:
                             img = img.convert('RGB')
 
                             with BytesIO() as out_buf:
-                                img.save(out_buf, format='PNG')
+                                img.save(out_buf, format='JPEG')
+                                out_buf.seek(0)
                                 raw_content = img2pdf.convert(
-                                    out_buf.getvalue(),
+                                    out_buf,
                                     rotation=img2pdf.Rotation.ifvalid,
                                     first_frame_only=True,
                                 )
-                        else:
-                            raw_content = img2pdf.convert(
-                                raw_content,
-                                rotation=img2pdf.Rotation.ifvalid,
-                                first_frame_only=True,
-                            )
                 except (Image.DecompressionBombError, ValueError, img2pdf.ImageOpenError, UnidentifiedImageError):
                     # If the image size is too big or the image cannot be opened, display the default content
                     return default_content

@@ -23,26 +23,26 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.urls import reverse
-from django.views.generic import UpdateView
+from functools import cached_property
 
-from admission.ddd.admission.formation_generale.events import DonneesIdentificationCandidatModifiee
+from django.urls import reverse
+
 from admission.forms.admission.person import AdmissionPersonForm
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
-from osis_profile import BE_ISO_CODE
-from reference.models.country import Country
-from infrastructure.messages_bus import message_bus_instance
+from base.models.person import Person
+from osis_profile.views.personne import PersonneFormView
 
 __all__ = ['AdmissionPersonFormView']
 
 
-class AdmissionPersonFormView(AdmissionFormMixin, LoadDossierViewMixin, UpdateView):
+class AdmissionPersonFormView(AdmissionFormMixin, LoadDossierViewMixin, PersonneFormView):
     template_name = 'admission/forms/person.html'
     permission_required = 'admission.change_admission_person'
     form_class = AdmissionPersonForm
     update_admission_author = True
 
-    def get_object(self):
+    @cached_property
+    def person(self) -> Person:
         return self.admission.candidate
 
     def get_success_url(self):
@@ -54,7 +54,6 @@ class AdmissionPersonFormView(AdmissionFormMixin, LoadDossierViewMixin, UpdateVi
     def get_context_data(self, **kwargs):
         return {
             **super().get_context_data(**kwargs),
-            'BE_ISO_CODE': Country.objects.get(iso_code=BE_ISO_CODE).pk,
             'proposition_fusion': self.proposition_fusion,
         }
 
@@ -72,10 +71,3 @@ class AdmissionPersonFormView(AdmissionFormMixin, LoadDossierViewMixin, UpdateVi
                 if form.cleaned_data.get('birth_date')
                 else '',
             }
-
-    def form_valid(self, form):
-        form_valid = super().form_valid(form)
-        message_bus_instance.publish(
-            DonneesIdentificationCandidatModifiee(matricule=self.admission.candidate.global_id)
-        )
-        return form_valid

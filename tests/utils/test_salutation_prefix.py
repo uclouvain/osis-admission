@@ -26,12 +26,12 @@
 from django.conf import settings
 from django.test import TestCase
 
-from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.tests.factories.supervision import ExternalPromoterFactory, PromoterFactory
 from admission.utils import get_salutation_prefix, get_ca_member_salutation_prefix
 from base.tests import QueriesAssertionsMixin
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.tutor import TutorFactory
+from osis_profile.models.enums.person import ChoixGenre
 
 
 class SalutationPrefixTestCase(QueriesAssertionsMixin, TestCase):

@@ -117,6 +117,15 @@ class JuryMembersAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetV
 class PersonAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetView):
     urlpatterns = 'person'
 
+    def get_results(self, context):
+        return [
+            {
+                'id': person.get('global_id'),
+                'text': '%(last_name)s, %(first_name)s (%(email)s)' % person,
+            }
+            for person in context['object_list']
+        ]
+
     def get_queryset(self):
         q = self.request.GET.get('q', '')
         qs = Person.objects
@@ -139,6 +148,7 @@ class PersonAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetView):
             .values(
                 'first_name',
                 'last_name',
+                'email',
                 'global_id',
             )
         )

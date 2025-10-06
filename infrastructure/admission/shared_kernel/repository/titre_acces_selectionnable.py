@@ -33,19 +33,23 @@ from django.utils.translation import get_language, gettext
 from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import (
     TypeTitreAccesSelectionnable,
 )
-from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.shared_kernel.domain.model.proposition import (
+    PropositionIdentity,
+)
 from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import (
     TitreAccesSelectionnable,
     TitreAccesSelectionnableIdentity,
-)
-from admission.ddd.admission.shared_kernel.repository.i_titre_acces_selectionnable import (
-    ITitreAccesSelectionnableRepository,
 )
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     ExperienceNonTrouveeException,
     PropositionNonTrouveeException,
 )
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    OngletsDemande,
+)
+from admission.ddd.admission.shared_kernel.repository.i_titre_acces_selectionnable import (
+    ITitreAccesSelectionnableRepository,
+)
 from admission.models.base import (
     AdmissionEducationalValuatedExperiences,
     AdmissionProfessionalValuatedExperiences,
@@ -225,11 +229,7 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
             .select_related('year')
             .first()
         )
-        if (
-            exam is not None
-            and exam.year is not None
-            and (not seulement_selectionnes or admission.is_exam_access_title)
-        ):
+        if exam is not None and (not seulement_selectionnes or admission.is_exam_access_title):
             access_titles.append(
                 TitreAccesSelectionnable(
                     entity_id=TitreAccesSelectionnableIdentity(
@@ -238,7 +238,7 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
                         type_titre=TypeTitreAccesSelectionnable.EXAMENS,
                     ),
                     selectionne=bool(admission.is_exam_access_title),
-                    annee=exam.year.year,
+                    annee=exam.year.year if exam.year else None,
                     pays_iso_code='',
                     nom='{title} ({year})'.format(
                         title=(
@@ -246,7 +246,7 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
                             if has_default_language
                             else exam.education_group_year_exam.title_en
                         ),
-                        year=format_academic_year(exam.year.year),
+                        year=format_academic_year(exam.year.year) if exam.year else '',
                     ),
                 ),
             )

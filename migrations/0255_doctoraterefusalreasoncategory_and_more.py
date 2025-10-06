@@ -28,7 +28,7 @@ import uuid
 
 import ckeditor.fields
 import django.db.models.deletion
-import osis_document.contrib.fields
+import osis_document_components.fields
 from django.db import migrations, models
 
 
@@ -172,7 +172,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="doctorateadmission",
             name="cdd_refusal_certificate",
-            field=osis_document.contrib.fields.FileField(
+            field=osis_document_components.fields.FileField(
                 base_field=models.UUIDField(),
                 blank=True,
                 default=list,

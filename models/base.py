@@ -65,7 +65,7 @@ from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext_lazy
 from osis_comment.models import CommentDeleteMixin
-from osis_document.contrib import FileField
+from osis_document_components.fields import FileField
 from osis_history.models import HistoryEntry
 
 from admission.constants import (

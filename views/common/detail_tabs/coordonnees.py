@@ -23,38 +23,28 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.views.generic import TemplateView
+from functools import cached_property
 
 from admission.views.common.mixins import LoadDossierViewMixin
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
 from base.models.person_address import PersonAddress
+from osis_profile.views.coordonnees import CoordonneesDetailView
 
 __all__ = ['AdmissionCoordonneesDetailView']
 
 
-class AdmissionCoordonneesDetailView(LoadDossierViewMixin, TemplateView):
+
+class AdmissionCoordonneesDetailView(LoadDossierViewMixin, CoordonneesDetailView):
     permission_required = 'admission.view_admission_coordinates'
     template_name = 'admission/details/coordonnees_backoffice.html'
 
+    @cached_property
+    def person(self) -> Person:
+        return self.admission.candidate
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        addresses = {
-            address.label: address
-            for address in PersonAddress.objects.filter(
-                person=self.admission.candidate,
-                label__in=[PersonAddressType.CONTACT.name, PersonAddressType.RESIDENTIAL.name],
-            ).select_related('country')
-        }
-
-        context['coordonnees'] = {
-            'contact': addresses.get(PersonAddressType.CONTACT.name),
-            'residential': addresses.get(PersonAddressType.RESIDENTIAL.name),
-            'private_email': self.admission.candidate.private_email,
-            'phone_mobile': self.admission.candidate.phone_mobile,
-            'emergency_contact_phone': self.admission.candidate.emergency_contact_phone,
-        }
 
         if self.proposition_fusion:
             known_person = Person.objects.get(global_id=self.proposition_fusion.matricule)
@@ -76,6 +66,3 @@ class AdmissionCoordonneesDetailView(LoadDossierViewMixin, TemplateView):
         context['profil_candidat'] = context['admission'].profil_soumis_candidat
 
         return context
-
-    def get_digit_data(self):
-        return {'available': False, 'email': None}

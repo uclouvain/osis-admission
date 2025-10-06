@@ -28,13 +28,13 @@ from django import forms
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext_lazy
-from osis_document.contrib import FileUploadField
+from osis_document_components.fields import FileUploadField
 
-from admission.forms import AdmissionModelCountryChoiceField
 from admission.models.enums.actor_type import ActorType
 from admission.utils import get_country_initial_choices
 from base.forms.utils import EMPTY_CHOICE
 from osis_profile import BE_ISO_CODE
+from osis_profile.forms import ModelCountryChoiceField
 from reference.models.country import Country
 
 ACTOR_EXTERNAL = "EXTERNAL"
@@ -81,7 +81,7 @@ class DoctorateAdmissionMemberSupervisionForm(forms.Form):
         required=False,
         max_length=255,
     )
-    pays = AdmissionModelCountryChoiceField(
+    pays = ModelCountryChoiceField(
         label=_("Country"),
         required=False,
         to_field_name='iso_code',
@@ -155,9 +155,9 @@ class DoctorateAdmissionSupervisionForm(DoctorateAdmissionMemberSupervisionForm)
         js = (
             'js/dependsOn.min.js',
             # Add osis-document script in case of approved-by-pdf documents
-            'osis_document/osis-document.umd.min.js',
+            'osis_document_components/osis-document.umd.min.js',
         )
-        css = {'all': ('osis_document/osis-document.css',)}
+        css = {'all': ('osis_document_components/osis-document.css',)}
 
 
 class DoctorateAdmissionApprovalByPdfForm(forms.Form):

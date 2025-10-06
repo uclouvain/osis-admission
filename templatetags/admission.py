@@ -27,8 +27,6 @@
 import datetime
 import re
 from dataclasses import dataclass
-from functools import wraps
-from inspect import getfullargspec
 from typing import Dict, List, Optional, Union
 from urllib.parse import urlencode
 
@@ -43,18 +41,16 @@ from django.utils.safestring import SafeString, mark_safe
 from django.utils.translation import get_language, gettext
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext, pgettext_lazy
-from osis_document.api.utils import get_remote_metadata, get_remote_token
-from osis_document.enums import PostProcessingWanted
+from osis_document_components.enums import PostProcessingWanted
+from osis_document_components.services import get_remote_metadata, get_remote_token
 from osis_history.models import HistoryEntry
 from rules.templatetags import rules
 
-from admission.admission_utils.format_address import format_address
 from admission.auth.constants import READ_ACTIONS_BY_TAB, UPDATE_ACTIONS_BY_TAB
 from admission.constants import (
     CONTEXT_CONTINUING,
     CONTEXT_DOCTORATE,
     CONTEXT_GENERAL,
-    IMAGE_MIME_TYPES,
     ORDERED_CAMPUSES_UUIDS,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
@@ -62,27 +58,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
     INDEX_ONGLETS_CHECKLIST as INDEX_ONGLETS_CHECKLIST_DOCTORALE,
-)
-from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixSexe
-from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
-    EtatAuthentificationParcours,
-)
-from admission.ddd.admission.shared_kernel.dtos import (
-    CoordonneesDTO,
-    EtudesSecondairesAdmissionDTO,
-    IdentificationDTO,
-)
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
-from admission.ddd.admission.shared_kernel.dtos.liste import DemandeRechercheDTO
-from admission.ddd.admission.shared_kernel.dtos.profil_candidat import ProfilCandidatDTO
-from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
-from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
-from admission.ddd.admission.shared_kernel.dtos.titre_acces_selectionnable import (
-    TitreAccesSelectionnableDTO,
-)
-from admission.ddd.admission.shared_kernel.enums import Onglets, TypeItemFormulaire
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
-    StatutReclamationEmplacementDocument,
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixMoyensDecouverteFormation,
@@ -108,7 +83,33 @@ from admission.ddd.admission.formation_generale.dtos.proposition import (
 from admission.ddd.admission.formation_generale.dtos.proposition import (
     PropositionGestionnaireDTO,
 )
-from admission.ddd.admission.shared_kernel.repository.i_proposition import formater_reference
+from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
+    EtatAuthentificationParcours,
+)
+from admission.ddd.admission.shared_kernel.dtos import (
+    CoordonneesDTO,
+    EtudesSecondairesAdmissionDTO,
+    IdentificationDTO,
+)
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
+    EmplacementDocumentDTO,
+)
+from admission.ddd.admission.shared_kernel.dtos.liste import DemandeRechercheDTO
+from admission.ddd.admission.shared_kernel.dtos.profil_candidat import ProfilCandidatDTO
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import (
+    QuestionSpecifiqueDTO,
+)
+from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
+from admission.ddd.admission.shared_kernel.dtos.titre_acces_selectionnable import (
+    TitreAccesSelectionnableDTO,
+)
+from admission.ddd.admission.shared_kernel.enums import Onglets, TypeItemFormulaire
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    StatutReclamationEmplacementDocument,
+)
+from admission.ddd.admission.shared_kernel.repository.i_proposition import (
+    formater_reference,
+)
 from admission.exports.admission_recap.section import (
     get_educational_experience_context,
     get_non_educational_experience_context,
@@ -128,12 +129,7 @@ from admission.models import (
 )
 from admission.models.base import BaseAdmission
 from admission.models.epc_injection import EPCInjectionStatus
-from admission.utils import (
-    format_school_title,
-    get_access_conditions_url,
-    get_experience_urls,
-    get_superior_institute_queryset,
-)
+from admission.utils import get_access_conditions_url, get_experience_urls
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.enums.civil_state import CivilState
 from base.models.person import Person
@@ -148,6 +144,13 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
 )
 from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
     ExperienceParcoursInterneDTO,
+)
+from osis_profile.constants import IMAGE_MIME_TYPES
+from osis_profile.models.enums.person import ChoixSexe
+from osis_profile.utils.utils import (
+    format_address,
+    format_school_title,
+    get_superior_institute_queryset,
 )
 from osis_role.templatetags.osis_role import has_perm
 from reference.models.country import Country
@@ -168,45 +171,6 @@ SAINT_LOUIS = 'Bruxelles Saint-Louis'
 SAINT_GILLES = 'Bruxelles Saint-Gilles'
 
 register = template.Library()
-
-
-class PanelNode(template.library.InclusionNode):
-    def __init__(self, nodelist: dict, func, takes_context, args, kwargs, filename):
-        super().__init__(func, takes_context, args, kwargs, filename)
-        self.nodelist_dict = nodelist
-
-    def render(self, context):
-        for context_name, nodelist in self.nodelist_dict.items():
-            context[context_name] = nodelist.render(context)
-        return super().render(context)
-
-
-def register_panel(filename, takes_context=None, name=None):
-    def dec(func):
-        params, varargs, varkw, defaults, kwonly, kwonly_defaults, _ = getfullargspec(func)
-        function_name = name or getattr(func, '_decorated_function', func).__name__
-
-        @wraps(func)
-        def compile_func(parser, token):
-            # {% panel %} and its arguments
-            bits = token.split_contents()[1:]
-            args, kwargs = template.library.parse_bits(
-                parser, bits, params, varargs, varkw, defaults, kwonly, kwonly_defaults, takes_context, function_name
-            )
-            nodelist_dict = {'panel_body': parser.parse(('footer', 'endpanel'))}
-            token = parser.next_token()
-
-            # {% footer %} (optional)
-            if token.contents == 'footer':
-                nodelist_dict['panel_footer'] = parser.parse(('endpanel',))
-                parser.next_token()
-
-            return PanelNode(nodelist_dict, func, takes_context, args, kwargs, filename)
-
-        register.tag(function_name, compile_func)
-        return func
-
-    return dec
 
 
 @register.simple_tag
@@ -255,35 +219,6 @@ def reduce_list_separated(arg1, arg2, separator=", "):
     elif arg2:
         return SafeString(arg2)
     return ""
-
-
-@register_panel('panel.html', takes_context=True)
-def panel(
-    context,
-    title='',
-    title_level=4,
-    additional_class='',
-    edit_link_button='',
-    edit_link_button_in_new_tab=False,
-    **kwargs,
-):
-    """
-    Template tag for panel
-    :param title: the panel title
-    :param title_level: the title level
-    :param additional_class: css class to add
-    :param edit_link_button: url of the edit button
-    :param edit_link_button_in_new_tab: open the edit link in a new tab
-    :type context: django.template.context.RequestContext
-    """
-    context['title'] = title
-    context['title_level'] = title_level
-    context['additional_class'] = additional_class
-    if edit_link_button:
-        context['edit_link_button'] = edit_link_button
-        context['edit_link_button_in_new_tab'] = edit_link_button_in_new_tab
-    context['attributes'] = {k.replace('_', '-'): v for k, v in kwargs.items()}
-    return context
 
 
 @register.inclusion_tag('admission/includes/sortable_header_div.html', takes_context=True)
@@ -566,7 +501,7 @@ def field_data(
             data = _('Specified') if data else _('Incomplete field')
         elif data:
             template_string = (
-                "{% load osis_document %}"
+                "{% load osis_document_components %}"
                 "{% document_visualizer files wanted_post_process='ORIGINAL' for_modified_upload=True %}"
             )
             template_context = {'files': data}
@@ -619,7 +554,7 @@ def document_component(document_write_token, document_metadata, can_edit=True):
             if not can_edit:
                 attrs = {action: False for action in ['pagination', 'zoom', 'comment', 'highlight', 'rotation']}
             return {
-                'template': 'osis_document/editor.html',
+                'template': 'osis_document_components/editor.html',
                 'value': document_write_token,
                 'base_url': settings.OSIS_DOCUMENT_BASE_URL,
                 'attrs': attrs,
@@ -644,13 +579,6 @@ def phone_spaced(phone, with_optional_zero=False):
     if with_optional_zero and phone[0] == "0":
         return "(0)" + re.sub('(\\d{2})(\\d{2})(\\d{2})(\\d{2})', '\\1 \\2 \\3 \\4', phone[1:])
     return re.sub('(\\d{3})(\\d{2})(\\d{2})(\\d{2})', '\\1 \\2 \\3 \\4', phone)
-
-
-@register.filter
-def strip(value):
-    if isinstance(value, str):
-        return value.strip()
-    return value
 
 
 @register.inclusion_tag('admission/includes/bootstrap_field_with_tooltip.html')
@@ -1261,6 +1189,10 @@ def experience_details_template(
                 specific_questions[Onglets.ETUDES_SECONDAIRES.name],
             )
         )
+
+    elif experience.__class__ == ExamenDTO:
+        res_context['custom_base_template'] = 'admission/exports/recap/includes/exams.html'
+        res_context['examen'] = experience
 
     return res_context
 

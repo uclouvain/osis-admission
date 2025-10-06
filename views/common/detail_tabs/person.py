@@ -23,22 +23,24 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.utils.translation.trans_real import get_languages
-from django.views.generic import TemplateView
+from functools import cached_property
 
 from admission.views.common.mixins import LoadDossierViewMixin
+from osis_profile.views.personne import PersonneDetailView
 
 __all__ = ['AdmissionPersonDetailView']
 
 
-class AdmissionPersonDetailView(LoadDossierViewMixin, TemplateView):
+
+class AdmissionPersonDetailView(LoadDossierViewMixin, PersonneDetailView):
     permission_required = 'admission.view_admission_person'
     template_name = 'admission/details/person_backoffice.html'
 
+    @cached_property
+    def person(self):
+        return self.admission.candidate
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        context['person'] = self.admission.candidate
-        context['contact_language'] = get_languages().get(self.admission.candidate.language)
         context['profil_candidat'] = context['admission'].profil_soumis_candidat
         return context
