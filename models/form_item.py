@@ -34,9 +34,9 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q, QuerySet
 from django.utils.translation import gettext_lazy as _, ngettext_lazy, pgettext_lazy
-from osis_document.utils import generate_filename, is_uuid
+from osis_document_components.utils import generate_filename, is_uuid
 
-from admission.ddd import FR_ISO_CODE, EN_ISO_CODE
+from admission.ddd import EN_ISO_CODE
 from admission.ddd.admission.shared_kernel.enums.question_specifique import (
     TypeItemFormulaire,
     CleConfigurationItemFormulaire,
@@ -52,7 +52,7 @@ from admission.ddd.admission.shared_kernel.enums.question_specifique import (
 from admission.forms.translation_field import TranslatedValueField, IdentifiedTranslatedListsValueField
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.person import Person
-from osis_profile import BE_ISO_CODE
+from osis_profile import BE_ISO_CODE, FR_ISO_CODE
 from osis_profile.models import EducationalExperience
 
 TRANSLATION_LANGUAGES = [settings.LANGUAGE_CODE_EN, settings.LANGUAGE_CODE_FR]
@@ -594,7 +594,7 @@ class ConfigurableModelFormItemField(models.JSONField):
         return current_value
 
     def _confirm_upload(self, model_instance, token):
-        from osis_document.api.utils import confirm_remote_upload, get_remote_metadata
+        from osis_document_components.services import confirm_remote_upload, get_remote_metadata
 
         # Get the current filename by interrogating API
         filename = get_remote_metadata(token).get('name', 'filename')

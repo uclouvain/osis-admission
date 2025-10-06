@@ -30,7 +30,7 @@ from typing import List
 from django.utils.text import slugify
 from drf_spectacular.helpers import forced_singular_serializer
 from drf_spectacular.utils import extend_schema, extend_schema_view
-from osis_document.enums import PostProcessingType
+from osis_document_components.enums import PostProcessingType
 from rest_framework import generics
 from rest_framework.response import Response
 
@@ -100,7 +100,7 @@ class RequestedDocumentListView(APIPermissionRequiredMixin, generics.ListCreateA
         return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
-        from osis_document.api.utils import (
+        from osis_document_components.services import (
             get_several_remote_metadata,
             launch_post_processing,
         )

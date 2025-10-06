@@ -30,9 +30,9 @@ from django.conf import settings
 from django.shortcuts import resolve_url
 from django.utils.translation import gettext as _
 from osis_async.models import AsyncTask
-from osis_document.api.utils import get_remote_token
-from osis_document.enums import PostProcessingWanted
-from osis_document.utils import get_file_url
+from osis_document_components.services import get_remote_token
+from osis_document_components.enums import PostProcessingWanted
+from osis_document_components.utils import get_file_url
 from osis_mail_template import generate_email
 from osis_mail_template.utils import transform_html_to_text
 from osis_notification.contrib.handlers import EmailNotificationHandler

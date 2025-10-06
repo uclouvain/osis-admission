@@ -347,7 +347,7 @@ class GetAccessTitlesViewTestCase(TestCase):
         self.assertIn(non_educational_experience_uuid, access_titles)
         self.assertEqual(access_titles[non_educational_experience_uuid].annee, 2022)
 
-    @patch("osis_document.contrib.fields.FileField._confirm_multiple_upload")
+    @patch("osis_document_components.fields.FileField._confirm_multiple_upload")
     def test_get_access_title_with_high_school_diploma(self, confirm_multiple_upload):
         confirm_multiple_upload.side_effect = lambda _, value, __: (
             ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []

@@ -10279,7 +10279,7 @@ components:
       description: |-
         * `SUCCESS` - Réussite
         * `SUCCESS_WITH_RESIDUAL_CREDITS` - Réussite avec crédits résiduels
-        * `FAILURE` - Echoué
+        * `FAILURE` - Échec
         * `WAITING_RESULT` - En attente de résultat
     SectorDTO:
       type: object

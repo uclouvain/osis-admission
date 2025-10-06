@@ -2,7 +2,7 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-import osis_document.contrib.fields
+import osis_document_components.fields
 
 
 class Migration(migrations.Migration):
@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='doctorateadmission',
             name='archived_record_signatures_sent',
-            field=osis_document.contrib.fields.FileField(base_field=models.UUIDField(), default=list, editable=False, size=1, verbose_name='Archived record when signatures were sent'),
+            field=osis_document_components.fields.FileField(base_field=models.UUIDField(), default=list, editable=False, size=1, verbose_name='Archived record when signatures were sent'),
         ),
         migrations.CreateModel(
             name='AdmissionTask',

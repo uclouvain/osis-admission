@@ -51,7 +51,6 @@ from admission.ddd.admission.shared_kernel.enums.statut import (
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.forms import (
     ALL_EMPTY_CHOICE,
-    DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
     NullBooleanSelectField,
     get_academic_year_choices,
 )
@@ -71,6 +70,7 @@ from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
 from base.templatetags.pagination_bs5 import PAGINATOR_SIZE_LIST
 from education_group.forms.fields import MainCampusChoiceField
+from osis_profile.forms import DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS
 from reference.models.enums.scholarship_type import ScholarshipType
 from reference.models.scholarship import Scholarship
 
