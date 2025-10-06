@@ -59,6 +59,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
     INDEX_ONGLETS_CHECKLIST as INDEX_ONGLETS_CHECKLIST_DOCTORALE,
 )
+from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixSexe
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixMoyensDecouverteFormation,
     ChoixStatutPropositionContinue,

@@ -62,6 +62,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     message_candidat_avec_pae_avant_2015,
 )
+from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.ddd.admission.formation_generale.commands import (
     ApprouverAdmissionParSicCommand,
     ApprouverInscriptionParSicCommand,
