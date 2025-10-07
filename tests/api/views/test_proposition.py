@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import uuid
+from unittest.mock import patch
 
 import freezegun
 from django.shortcuts import resolve_url
@@ -578,11 +579,16 @@ class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixi
             entity_type=EntityType.DOCTORAL_COMMISSION.name,
             acronym='CDA',
         ).entity
-        cls.admission = DoctorateAdmissionFactory(
-            training__management_entity=cls.commission,
-            supervision_group=promoter.process,
-            with_answers_to_specific_questions=True,
-        )
+        with patch("osis_document_components.fields.FileField._confirm_multiple_upload") as confirm_upload:
+            confirm_upload.side_effect = lambda _, value, __: ["ae254203-17c7-47d6-95e4-3c5c532da550"] if value else []
+            cls.admission = DoctorateAdmissionFactory(
+                training__management_entity=cls.commission,
+                supervision_group=promoter.process,
+                specific_question_answers={
+                    'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
+                    'fe254203-17c7-47d6-95e4-3c5c532da552': ['ae254203-17c7-47d6-95e4-3c5c532da550'],
+                },
+            )
 
         cls.update_data = {
             "uuid": cls.admission.uuid,
@@ -628,7 +634,10 @@ class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixi
         self.assertTrue(self.admission.educational_valuated_experiences.exists())
         self.assertTrue(self.admission.professional_valuated_experiences.exists())
 
-        response = self.client.delete(self.url, format="json")
+        with patch("osis_document_components.fields.FileField._confirm_multiple_upload") as confirm_upload:
+            confirm_upload.side_effect = lambda _, value, __: ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
+            response = self.client.delete(self.url, format="json")
+
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
         # This is a soft-delete

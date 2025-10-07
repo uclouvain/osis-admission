@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -29,17 +29,26 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
 from admission.ddd.admission.shared_kernel.enums import Onglets
 from admission.forms import REQUIRED_FIELD_CLASS
 from admission.models.general_education import GeneralEducationAdmission
 from admission.tests.factories.curriculum import (
     AdmissionEducationalValuatedExperiencesFactory,
+    EducationalExperienceFactory,
+    EducationalExperienceYearFactory,
 )
-from admission.tests.factories.curriculum import EducationalExperienceFactory, EducationalExperienceYearFactory
-from admission.tests.factories.form_item import TextAdmissionFormItemFactory, AdmissionFormItemInstantiationFactory
+from admission.tests.factories.form_item import (
+    AdmissionFormItemInstantiationFactory,
+    TextAdmissionFormItemFactory,
+)
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
-from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
+from admission.tests.factories.roles import (
+    ProgramManagerRoleFactory,
+    SicManagementRoleFactory,
+)
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import GotDiploma
 from base.tests.factories.academic_year import AcademicYearFactory
@@ -206,5 +215,7 @@ class AdmissionCurriculumGlobalFormViewForGeneralTestCase(TestCase):
 
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.specific_question_answers.get(self.text_question_uuid), 'My new answer')
+        self.assertEqual(
+            self.general_admission.get_specific_question_answers_dict().get(self.text_question_uuid), 'My new answer'
+        )
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)

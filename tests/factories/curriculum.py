@@ -30,10 +30,8 @@ import uuid
 import factory
 from dateutil.relativedelta import relativedelta
 
-from admission.models.base import (
-    AdmissionEducationalValuatedExperiences,
-    AdmissionProfessionalValuatedExperiences,
-)
+from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences, \
+    AdmissionProfessionalValuatedExperiences
 from base.models.enums.community import CommunityEnum
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.organization import OrganizationFactory

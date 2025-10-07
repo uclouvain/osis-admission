@@ -545,5 +545,5 @@ class ListerToutesDemandes(IListerToutesDemandes):
             poursuite_de_cycle=admission.cycle_pursuit,  # From annotation
             annee_calculee=admission.determined_academic_year.year if admission.determined_academic_year_id else None,
             adresse_email_candidat=admission.candidate.private_email,
-            reponses_questions_specifiques=admission.specific_question_answers,
+            reponses_questions_specifiques=admission.get_specific_question_answers_dict(),
         )

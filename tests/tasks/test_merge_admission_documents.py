@@ -35,8 +35,13 @@ from rest_framework.test import APITestCase
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
-from admission.ddd.admission.shared_kernel.enums import CleConfigurationItemFormulaire, Onglets
+from admission.ddd.admission.shared_kernel.enums import (
+    CleConfigurationItemFormulaire,
+    Onglets,
+    TypeItemFormulaire,
+)
 from admission.exceptions import MergeDocumentsException
+from admission.models.specific_question import SpecificQuestionAnswer
 from admission.tasks.merge_admission_documents import (
     base_education_admission_document_merging,
 )
@@ -48,6 +53,7 @@ from admission.tests.factories.curriculum import (
     ProfessionalExperienceFactory,
 )
 from admission.tests.factories.form_item import (
+    AdmissionFormItemFactory,
     AdmissionFormItemInstantiationFactory,
     DocumentAdmissionFormItemFactory,
 )
@@ -358,10 +364,14 @@ class MergeAdmissionDocumentsTestCase(APITestCase):
         uuids = [
             self.uuid_documents_by_token['non_free_specific_question_file_token'],
         ]
-        self.admission.specific_question_answers = {
-            str(self.non_free_document.form_item.uuid): uuids,
-        }
-        self.admission.save()
+        SpecificQuestionAnswer.objects.create(
+            admission=self.admission,
+            form_item=AdmissionFormItemFactory(
+                uuid=str(self.non_free_document.form_item.uuid),
+                type=TypeItemFormulaire.DOCUMENT.name,
+            ),
+            file=uuids,
+        )
         self.metadata_by_token['non_free_specific_question_file_token']['mimetype'] = PNG_MIME_TYPE
 
         base_education_admission_document_merging(self.admission)
@@ -380,7 +390,7 @@ class MergeAdmissionDocumentsTestCase(APITestCase):
 
         self.admission.refresh_from_db()
         self.assertEqual(
-            self.admission.specific_question_answers,
+            self.admission.get_specific_question_answers_dict(),
             {
                 str(self.non_free_document.form_item.uuid): [str(self.PDF_CONVERT_UUID)],
             },
@@ -390,10 +400,14 @@ class MergeAdmissionDocumentsTestCase(APITestCase):
         uuids = [
             self.uuid_documents_by_token['non_free_specific_question_file_token'],
         ]
-        self.admission.specific_question_answers = {
-            str(self.non_free_document.form_item.uuid): uuids,
-        }
-        self.admission.save()
+        SpecificQuestionAnswer.objects.create(
+            admission=self.admission,
+            form_item=AdmissionFormItemFactory(
+                uuid=str(self.non_free_document.form_item.uuid),
+                type=TypeItemFormulaire.DOCUMENT.name,
+            ),
+            file=uuids,
+        )
 
         # The conversion is not possible because only images are allowed for the specific question
         self.non_free_document.form_item.configuration[CleConfigurationItemFormulaire.TYPES_MIME_FICHIER.name] = [
@@ -419,7 +433,7 @@ class MergeAdmissionDocumentsTestCase(APITestCase):
             )
 
             self.admission.refresh_from_db()
-            self.assertEqual(self.admission.specific_question_answers, {})
+            self.assertEqual(self.admission.get_specific_question_answers_dict(), {})
             document_identifier = f'CHOIX_FORMATION.QUESTION_SPECIFIQUE.{self.non_free_document.form_item.uuid}'
             self.assertEqual(
                 str(context_manager.exception),

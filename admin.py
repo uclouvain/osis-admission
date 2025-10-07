@@ -181,6 +181,7 @@ class AdmissionAdminMixin(ReadOnlyFilesMixin, admin.ModelAdmin):
         'candidate__first_name',
     ]
     readonly_fields = [
+        'uuid',
         'detailed_status',
         "submitted_at",
         "last_update_author",
