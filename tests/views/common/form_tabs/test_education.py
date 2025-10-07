@@ -40,16 +40,19 @@ from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formatio
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
-from admission.ddd.admission.shared_kernel.enums import Onglets
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
+from admission.ddd.admission.shared_kernel.enums import Onglets, TypeItemFormulaire
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    OngletsDemande,
+)
 from admission.models import ContinuingEducationAdmission
 from admission.models import EPCInjection as AdmissionEPCInjection
+from admission.models.specific_question import SpecificQuestionAnswer
 from admission.models.epc_injection import (
     EPCInjectionStatus as AdmissionEPCInjectionStatus,
 )
@@ -60,6 +63,7 @@ from admission.tests.factories.continuing_education import (
     ContinuingEducationAdmissionFactory,
 )
 from admission.tests.factories.form_item import (
+    AdmissionFormItemFactory,
     AdmissionFormItemInstantiationFactory,
     TextAdmissionFormItemFactory,
 )
@@ -89,11 +93,7 @@ from base.tests.factories.education_group_year import (
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
-from osis_profile.models import (
-    BelgianHighSchoolDiploma,
-    Exam,
-    ForeignHighSchoolDiploma,
-)
+from osis_profile.models import BelgianHighSchoolDiploma, Exam, ForeignHighSchoolDiploma
 from osis_profile.models.enums.education import (
     EducationalType,
     Equivalence,
@@ -101,14 +101,15 @@ from osis_profile.models.enums.education import (
     HighSchoolDiplomaTypes,
 )
 from osis_profile.models.enums.exam import ExamTypes
+from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection
 from osis_profile.models.epc_injection import (
-    EPCInjection as CurriculumEPCInjection,
     EPCInjectionStatus as CurriculumEPCInjectionStatus,
 )
 from osis_profile.models.epc_injection import ExperienceType
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.domain import DomainFactory
 from reference.tests.factories.language import FrenchLanguageFactory, LanguageFactory
+
 
 @freezegun.freeze_time("2022-01-01")
 class AdmissionEducationFormViewForMasterTestCase(TestCase):
@@ -144,7 +145,9 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         self.form_url = resolve_url('admission:general-education:update:education', uuid=self.general_admission.uuid)
 
         # Mock osis document api
-        patcher = mock.patch("osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value)
+        patcher = mock.patch(
+            "osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
@@ -560,8 +563,14 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
             required=True,
         )
 
-        self.general_admission.specific_question_answers[text_question_uuid] = 'My first answer'
-        self.general_admission.save(update_fields=['specific_question_answers'])
+        SpecificQuestionAnswer.objects.create(
+            admission=self.general_admission,
+            form_item=AdmissionFormItemFactory(
+                uuid=text_question_uuid,
+                type=TypeItemFormulaire.TEXTE.name,
+            ),
+            answer='My first answer',
+        )
 
         # No specific question in the form
         response = self.client.post(
@@ -575,7 +584,9 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
 
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.specific_question_answers.get(text_question_uuid), 'My first answer')
+        self.assertEqual(
+            self.general_admission.get_specific_question_answers_dict().get(text_question_uuid), 'My first answer'
+        )
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
 
         # One specific question in the form
@@ -616,7 +627,9 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
 
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.specific_question_answers.get(text_question_uuid), 'My second answer')
+        self.assertEqual(
+            self.general_admission.get_specific_question_answers_dict().get(text_question_uuid), 'My second answer'
+        )
 
     def test_submit_valid_data_when_the_candidate_has_no_diploma_with_existing_belgian_diploma(self):
         self.client.force_login(self.sic_manager_user)
@@ -760,7 +773,9 @@ class AdmissionEducationFormViewForContinuingTestCase(TestCase):
         )
 
         # Mock osis document api
-        patcher = mock.patch("osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value)
+        patcher = mock.patch(
+            "osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
@@ -863,7 +878,7 @@ class AdmissionEducationFormViewForContinuingTestCase(TestCase):
         self.assertFalse(Exam.objects.filter(person=candidate, type=ExamTypes.PREMIER_CYCLE.name).exists())
 
         self.assertEqual(
-            self.continuing_admission.specific_question_answers,
+            self.continuing_admission.get_specific_question_answers_dict(),
             {
                 self.specific_question_uuid: 'My answer',
                 self.other_specific_question_uuid: 'My other answer',
@@ -941,7 +956,9 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         self.form_url = resolve_url('admission:general-education:update:education', uuid=self.general_admission.uuid)
 
         # Mock osis document api
-        patcher = mock.patch("osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value)
+        patcher = mock.patch(
+            "osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
@@ -2405,8 +2422,14 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
             required=True,
         )
 
-        self.general_admission.specific_question_answers[text_question_uuid] = 'My first answer'
-        self.general_admission.save(update_fields=['specific_question_answers'])
+        SpecificQuestionAnswer.objects.create(
+            admission=self.general_admission,
+            form_item=AdmissionFormItemFactory(
+                uuid=text_question_uuid,
+                type=TypeItemFormulaire.TEXTE.name,
+            ),
+            answer='My first answer',
+        )
 
         # No specific question in the form
         response = self.client.post(
@@ -2420,7 +2443,9 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
 
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.specific_question_answers.get(text_question_uuid), 'My first answer')
+        self.assertEqual(
+            self.general_admission.get_specific_question_answers_dict().get(text_question_uuid), 'My first answer'
+        )
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
 
         # One specific question in the form
@@ -2461,4 +2486,6 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
 
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.specific_question_answers.get(text_question_uuid), 'My second answer')
+        self.assertEqual(
+            self.general_admission.get_specific_question_answers_dict().get(text_question_uuid), 'My second answer'
+        )

@@ -46,10 +46,8 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
 from admission.models import GeneralEducationAdmission
-from admission.models.base import (
-    AdmissionEducationalValuatedExperiences,
-    AdmissionProfessionalValuatedExperiences,
-)
+from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences, \
+    AdmissionProfessionalValuatedExperiences
 from admission.tests.factories.curriculum import (
     EducationalExperienceFactory,
     EducationalExperienceYearFactory,

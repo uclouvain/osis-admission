@@ -59,10 +59,8 @@ from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from admission.forms.admission.checklist import PastExperiencesAdmissionAccessTitleForm
 from admission.models import DoctorateAdmission
-from admission.models.base import (
-    AdmissionEducationalValuatedExperiences,
-    AdmissionProfessionalValuatedExperiences,
-)
+from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences, \
+    AdmissionProfessionalValuatedExperiences
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.curriculum import ProfessionalExperienceFactory
 from admission.tests.factories.doctorate import DoctorateFactory
