@@ -230,11 +230,11 @@
       });
 
       {# Display / hide the form errors #}
-      $('#admission-search').on('htmx:beforeSend', function (evt) {
+      $('#admission-search').on('htmx:before-send', function (evt) {
         $('#form_errors').html('');
       });
 
-      $('#admission-search').on('htmx:afterSwap', function(evt) {
+      $('#admission-search').on('htmx:after-swap', function(evt) {
         if(evt.target.classList.contains('scroll-to-top')) {
           main_container.scrollIntoView(true);
         };

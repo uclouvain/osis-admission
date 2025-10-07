@@ -182,7 +182,7 @@
     });
 
     // Display / hide the form errors
-    $('#admission-search').on('htmx:beforeSend', function(evt) {
+    $('#admission-search').on('htmx:before-send', function(evt) {
       $('#form_errors').html('');
     });
 
