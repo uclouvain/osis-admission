@@ -32,15 +32,13 @@
   {% if hide_files %}
 
     {% if examen.attestation %}
-      {% field_data titre_examen _("Specified") %}
+      {% field_data exam_type.title _("Specified") %}
     {% else %}
-      {% field_data titre_examen _("Not specified") %}
+      {% field_data exam_type.title _("Not specified") %}
     {% endif %}
 
   {% else %}
-
-    {% field_data titre_examen examen.attestation %}
-
+    {% field_data exam_type.title examen.attestation %}
   {% endif %}
 
   {% if examen.annee %}

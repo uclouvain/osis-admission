@@ -56,7 +56,9 @@ from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import
     StatutEquivalenceTitreAcces,
     TypeEquivalenceTitreAcces,
 )
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    OngletsDemande,
+)
 from admission.forms.admission.checklist import PastExperiencesAdmissionAccessTitleForm
 from admission.models import DoctorateAdmission
 from admission.models.base import (
@@ -99,7 +101,7 @@ from epc.tests.factories.inscription_programme_cycle import (
 )
 from osis_profile.models import BelgianHighSchoolDiploma, Exam, ForeignHighSchoolDiploma
 from osis_profile.models.enums.education import ForeignDiplomaTypes
-from osis_profile.models.enums.exam import ExamTypes
+from osis_profile.models.exam import EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
 from osis_profile.tests.factories.exam import ExamFactory
 
 
@@ -857,7 +859,7 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
         self.exam = ExamFactory(
             person=self.candidate,
             year=self.academic_years[1],
-            education_group_year_exam__education_group_year=self.training,
+            type__education_group_years=[self.training],
         )
 
         self.educational_experiences = self.candidate.educationalexperience_set.all()
@@ -1146,7 +1148,7 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
         self.assertTrue(self.admission.are_secondary_studies_access_title)
 
         # The candidate specified that he has secondary education but without more information
-        Exam.objects.filter(person=self.candidate, type=ExamTypes.PREMIER_CYCLE.name).delete()
+        Exam.objects.filter(person=self.candidate, type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR).delete()
 
         self.admission.are_secondary_studies_access_title = False
         self.admission.save()

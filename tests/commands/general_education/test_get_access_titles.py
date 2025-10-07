@@ -32,18 +32,20 @@ import freezegun
 from django.test import TestCase
 from django.utils.translation import gettext
 
+from admission.ddd.admission.formation_generale.commands import (
+    RecupererTitresAccesSelectionnablesPropositionQuery,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
 from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import (
     TypeTitreAccesSelectionnable,
 )
 from admission.ddd.admission.shared_kernel.dtos.titre_acces_selectionnable import (
     TitreAccesSelectionnableDTO,
 )
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
-from admission.ddd.admission.formation_generale.commands import (
-    RecupererTitresAccesSelectionnablesPropositionQuery,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    OngletsDemande,
 )
 from admission.models import GeneralEducationAdmission
 from admission.models.base import (
@@ -554,7 +556,7 @@ class GetAccessTitlesViewTestCase(TestCase):
         exam = ExamFactory(
             person=general_admission.candidate,
             year=self.academic_years[1],
-            education_group_year_exam__education_group_year=general_admission.training,
+            type__education_group_years=[general_admission.training],
         )
 
         access_titles = message_bus_instance.invoke(
