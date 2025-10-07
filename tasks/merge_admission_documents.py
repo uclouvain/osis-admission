@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -33,26 +33,38 @@ from django.db import transaction
 from django.utils.text import slugify
 from osis_document_components.enums import PostProcessingType
 
-from admission.models import (
-    AdmissionTask,
-    ContinuingEducationAdmission,
-    DoctorateAdmission,
-    GeneralEducationAdmission,
-)
 from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererDocumentsPropositionQuery as RecupererDocumentsPropositionDoctoraleQuery,
 )
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import EmplacementDocumentNonTrouveException
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION
 from admission.ddd.admission.formation_continue.commands import (
     RecupererDocumentsPropositionQuery as RecupererDocumentsPropositionContinueQuery,
 )
 from admission.ddd.admission.formation_generale.commands import (
     RecupererDocumentsPropositionQuery as RecupererDocumentsPropositionGeneraleQuery,
 )
-from admission.exceptions import DocumentPostProcessingException, InvalidMimeTypeException, MergeDocumentsException
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
+    EmplacementDocumentNonTrouveException,
+)
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
+    EmplacementDocumentDTO,
+)
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION,
+)
+from admission.exceptions import (
+    DocumentPostProcessingException,
+    InvalidMimeTypeException,
+    MergeDocumentsException,
+)
 from admission.infrastructure.utils import get_document_from_identifier
+from admission.models import (
+    AdmissionFormItem,
+    AdmissionTask,
+    ContinuingEducationAdmission,
+    DoctorateAdmission,
+    GeneralEducationAdmission,
+)
+from admission.models.specific_question import SpecificQuestionAnswer
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from infrastructure.messages_bus import message_bus_instance
 
@@ -144,21 +156,28 @@ def base_education_admission_document_merging(admission):
             new_document_uuids = [
                 uuid.UUID(
                     result[
-                        PostProcessingType.MERGE.name
-                        if result[PostProcessingType.MERGE.name].get('output')
-                        else PostProcessingType.CONVERT.name
+                        (
+                            PostProcessingType.MERGE.name
+                            if result[PostProcessingType.MERGE.name].get('output')
+                            else PostProcessingType.CONVERT.name
+                        )
                     ]['output']['upload_objects'][0]
                 )
             ]
 
-            updated_fields_by_object[model_object].append(model_field)
-
             if specific_question_uuid:
                 # For a specific question, replace the previous file
-                admission.specific_question_answers[specific_question_uuid] = new_document_uuids
+                SpecificQuestionAnswer.objects.update_or_create(
+                    admission=admission,
+                    form_item=AdmissionFormItem.objects.get(uuid=specific_question_uuid),
+                    defaults={
+                        'file': new_document_uuids,
+                    },
+                )
             else:
                 # Otherwise, update the related field in the specific object
                 setattr(model_object, model_field, new_document_uuids)
+                updated_fields_by_object[model_object].append(model_field)
 
         for model_object, fields in updated_fields_by_object.items():
             model_object.save(update_fields=fields)

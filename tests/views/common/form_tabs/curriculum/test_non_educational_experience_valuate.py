@@ -33,9 +33,7 @@ from django.test import TestCase
 from rest_framework import status
 
 from admission.models import DoctorateAdmission
-from admission.models.base import (
-    AdmissionProfessionalValuatedExperiences,
-)
+from admission.models.valuated_epxeriences import AdmissionProfessionalValuatedExperiences
 from admission.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.formation_generale.domain.model.enums import (

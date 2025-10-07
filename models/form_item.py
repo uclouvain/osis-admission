@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -33,23 +33,27 @@ from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q, QuerySet
-from django.utils.translation import gettext_lazy as _, ngettext_lazy, pgettext_lazy
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import ngettext_lazy, pgettext_lazy
 from osis_document_components.utils import generate_filename, is_uuid
 
 from admission.ddd import EN_ISO_CODE
 from admission.ddd.admission.shared_kernel.enums.question_specifique import (
-    TypeItemFormulaire,
     CleConfigurationItemFormulaire,
-    TypeChampTexteFormulaire,
+    CritereItemFormulaireFormation,
+    CritereItemFormulaireLangueEtudes,
     CritereItemFormulaireNationaliteCandidat,
     CritereItemFormulaireNationaliteDiplome,
-    CritereItemFormulaireLangueEtudes,
     CritereItemFormulaireVIP,
     Onglets,
-    CritereItemFormulaireFormation,
     TypeChampSelectionFormulaire,
+    TypeChampTexteFormulaire,
+    TypeItemFormulaire,
 )
-from admission.forms.translation_field import TranslatedValueField, IdentifiedTranslatedListsValueField
+from admission.forms.translation_field import (
+    IdentifiedTranslatedListsValueField,
+    TranslatedValueField,
+)
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.person import Person
 from osis_profile import BE_ISO_CODE, FR_ISO_CODE
@@ -562,46 +566,3 @@ class AdmissionFormItemInstantiation(models.Model):
 
         if errors:
             raise ValidationError(errors)
-
-
-class ConfigurableModelFormItemField(models.JSONField):
-    """This model field can be used to store the data related to the AdmissionFormItem linked to an education."""
-
-    def __init__(self, education_field_name='', upload_to='', *args, **kwargs):
-        self.education_field_name = education_field_name
-        self.upload_to = upload_to
-
-        super().__init__(*args, **kwargs)
-
-    def pre_save(self, model_instance, add):
-        # Convert all writing file tokens to UUIDs by remotely confirming their upload, leaving existing uuids
-        current_value = super().pre_save(model_instance, add) or {}
-
-        document_field_configurations: models.QuerySet[AdmissionFormItem] = AdmissionFormItem.objects.filter(
-            uuid__in=current_value.keys(),
-            type=TypeItemFormulaire.DOCUMENT.name,
-        )
-
-        for field_config in document_field_configurations:
-            data_key = str(field_config.uuid)
-            current_value[data_key] = [
-                self._confirm_upload(model_instance, token) if not is_uuid(token) else token
-                for token in current_value[data_key]
-            ]
-
-        setattr(model_instance, self.attname, current_value)
-
-        return current_value
-
-    def _confirm_upload(self, model_instance, token):
-        from osis_document_components.services import confirm_remote_upload, get_remote_metadata
-
-        # Get the current filename by interrogating API
-        filename = get_remote_metadata(token).get('name', 'filename')
-
-        return str(
-            confirm_remote_upload(
-                token=token,
-                upload_to=dirname(generate_filename(model_instance, filename, self.upload_to)),
-            )
-        )

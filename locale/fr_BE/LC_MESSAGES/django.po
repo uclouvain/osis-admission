@@ -720,6 +720,9 @@ msgstr ""
 msgid "Another admission has been submitted."
 msgstr "Une autre admission a déjà été soumise."
 
+msgid "Answer"
+msgstr "Réponse"
+
 msgid ""
 "Answer according to the European Framework of Reference for Languages (CEFR) "
 "classification. Detailed explanations of this framework can be found at <a "

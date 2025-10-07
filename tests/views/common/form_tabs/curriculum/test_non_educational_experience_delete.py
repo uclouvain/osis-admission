@@ -41,9 +41,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 )
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.models import EPCInjection as AdmissionEPCInjection, DoctorateAdmission, ContinuingEducationAdmission
-from admission.models.base import (
-    AdmissionProfessionalValuatedExperiences,
-)
+from admission.models.valuated_epxeriences import AdmissionProfessionalValuatedExperiences
 from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
 from admission.models.general_education import GeneralEducationAdmission
 from admission.tests.factories import DoctorateAdmissionFactory

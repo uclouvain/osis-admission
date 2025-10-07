@@ -33,7 +33,7 @@ from admission.constants import SUPPORTED_MIME_TYPES
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     OngletsChecklist,
 )
-from admission.ddd.admission.shared_kernel.enums import Onglets
+from admission.ddd.admission.shared_kernel.enums import Onglets, TypeItemFormulaire
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     IdentifiantBaseEmplacementDocument,
     OngletsDemande,
@@ -49,6 +49,7 @@ from admission.models import (
     DoctorateAdmission,
     GeneralEducationAdmission,
 )
+from admission.models.specific_question import SpecificQuestionAnswer
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import (
     ContinuingEducationAdmissionFactory,
@@ -59,6 +60,7 @@ from admission.tests.factories.curriculum import (
     ProfessionalExperienceFactory,
 )
 from admission.tests.factories.form_item import (
+    AdmissionFormItemFactory,
     AdmissionFormItemInstantiationFactory,
     DocumentAdmissionFormItemFactory,
 )
@@ -145,7 +147,14 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
             'related_checklist_tab': OngletsChecklist.parcours_anterieur.name,
         }
 
-        self.general_admission.specific_question_answers[specific_question_uuid] = [uuid.uuid4()]
+        SpecificQuestionAnswer.objects.create(
+            admission=self.general_admission,
+            form_item=AdmissionFormItemFactory(
+                uuid=specific_question_uuid,
+                type=TypeItemFormulaire.DOCUMENT.name,
+            ),
+            file=[uuid.uuid4()],
+        )
 
         self.general_admission.save()
 
@@ -162,7 +171,10 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
         self.assertIsNotNone(document)
         self.assertEqual(document.obj, self.general_admission)
         self.assertEqual(document.field, 'specific_question_answers')
-        self.assertEqual(document.uuids, self.general_admission.specific_question_answers[specific_question_uuid])
+        self.assertEqual(
+            list(map(str, document.uuids)),
+            self.general_admission.get_specific_question_answers_dict()[specific_question_uuid],
+        )
         self.assertEqual(document.type, TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name)
         self.assertEqual(document.requestable, True)
         self.assertEqual(document.specific_question_uuid, specific_question_uuid)
@@ -208,7 +220,14 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
             'automatically_required': False,
         }
 
-        self.general_admission.specific_question_answers[specific_question_uuid] = [uuid.uuid4()]
+        specific_question_answer = SpecificQuestionAnswer.objects.create(
+            admission=self.general_admission,
+            form_item=AdmissionFormItemFactory(
+                uuid=specific_question_uuid,
+                type=TypeItemFormulaire.DOCUMENT.name,
+            ),
+            file=[uuid.uuid4()],
+        )
 
         self.general_admission.save()
 
@@ -221,7 +240,13 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
         self.assertIsNotNone(document)
         self.assertEqual(document.obj, self.general_admission)
         self.assertEqual(document.field, 'specific_question_answers')
-        self.assertEqual(document.uuids, self.general_admission.specific_question_answers[specific_question_uuid])
+        self.assertEqual(
+            document.uuids,
+            [
+                uuid.UUID(value)
+                for value in self.general_admission.get_specific_question_answers_dict()[specific_question_uuid]
+            ],
+        )
         self.assertEqual(document.type, TypeEmplacementDocument.NON_LIBRE.name)
         self.assertEqual(document.requestable, True)
         self.assertEqual(document.specific_question_uuid, specific_question_uuid)
@@ -244,7 +269,13 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
         self.assertIsNotNone(document)
         self.assertEqual(document.obj, self.general_admission)
         self.assertEqual(document.field, 'specific_question_answers')
-        self.assertEqual(document.uuids, self.general_admission.specific_question_answers[specific_question_uuid])
+        self.assertEqual(
+            document.uuids,
+            [
+                uuid.UUID(value)
+                for value in self.general_admission.get_specific_question_answers_dict()[specific_question_uuid]
+            ],
+        )
         self.assertEqual(document.type, TypeEmplacementDocument.NON_LIBRE.name)
         self.assertEqual(document.requestable, True)
         self.assertEqual(document.specific_question_uuid, specific_question_uuid)
@@ -262,6 +293,7 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
         # Remove the specific question
         form_item = item.form_item
         item.delete()
+        specific_question_answer.delete()
         form_item.delete()
 
         document = get_document_from_identifier(self.general_admission, document_id)

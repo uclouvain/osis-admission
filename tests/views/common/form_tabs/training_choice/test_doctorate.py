@@ -205,7 +205,9 @@ class DoctorateTrainingChoiceFormViewTestCase(TestCase):
         self.assertEqual(form['admission_type'].value(), self.doctorate_admission.type)
         self.assertEqual(form['justification'].value(), self.doctorate_admission.comment)
         self.assertEqual(form['sector'].value(), 'SST')
-        self.assertEqual(form['specific_question_answers'].value(), self.doctorate_admission.specific_question_answers)
+        self.assertEqual(
+            form['specific_question_answers'].value(), self.doctorate_admission.get_specific_question_answers_dict()
+        )
         self.assertEqual(form['proximity_commission_cde'].value(), None)
         self.assertEqual(form['proximity_commission_cdss'].value(), None)
         self.assertEqual(form['science_sub_domain'].value(), None)
@@ -328,7 +330,7 @@ class DoctorateTrainingChoiceFormViewTestCase(TestCase):
         self.assertEqual(self.doctorate_admission.type, ChoixTypeAdmission.PRE_ADMISSION.name)
         self.assertEqual(self.doctorate_admission.comment, 'My justification')
         self.assertEqual(
-            self.doctorate_admission.specific_question_answers,
+            self.doctorate_admission.get_specific_question_answers_dict(),
             {
                 self.specific_questions_uuids[0]: 'My answer 1 updated',
                 self.specific_questions_uuids[1]: 'My answer 2',

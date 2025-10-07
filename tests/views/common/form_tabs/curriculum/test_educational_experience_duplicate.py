@@ -51,7 +51,7 @@ from admission.ddd.admission.formation_generale.domain.service.checklist import 
     Checklist,
 )
 from admission.models import ContinuingEducationAdmission, DoctorateAdmission
-from admission.models.base import AdmissionEducationalValuatedExperiences
+from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences
 from admission.models.general_education import GeneralEducationAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import (

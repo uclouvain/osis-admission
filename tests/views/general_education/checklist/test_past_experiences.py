@@ -57,10 +57,8 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 )
 from admission.forms.admission.checklist import PastExperiencesAdmissionAccessTitleForm
 from admission.models import GeneralEducationAdmission
-from admission.models.base import (
-    AdmissionEducationalValuatedExperiences,
-    AdmissionProfessionalValuatedExperiences,
-)
+from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences, \
+    AdmissionProfessionalValuatedExperiences
 from admission.tests.factories.curriculum import ProfessionalExperienceFactory
 from admission.tests.factories.general_education import (
     AdmissionPrerequisiteCoursesFactory,

@@ -49,10 +49,10 @@ from admission.ddd.admission.formation_generale.domain.model.proposition import 
     Proposition as PropositionGenerale,
 )
 from admission.models.base import (
-    AdmissionEducationalValuatedExperiences,
-    AdmissionProfessionalValuatedExperiences,
     BaseAdmission,
 )
+from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences, \
+    AdmissionProfessionalValuatedExperiences
 from osis_profile.models import EducationalExperience, ProfessionalExperience
 
 

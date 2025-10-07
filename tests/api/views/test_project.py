@@ -68,12 +68,16 @@ from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     QuestionsSpecifiquesChoixFormationNonCompleteesException,
     QuestionsSpecifiquesCurriculumNonCompleteesException,
 )
-from admission.ddd.admission.shared_kernel.enums.question_specifique import Onglets
+from admission.ddd.admission.shared_kernel.enums.question_specifique import (
+    Onglets,
+    TypeItemFormulaire,
+)
 from admission.models import (
     AdmissionFormItemInstantiation,
     AdmissionTask,
     DoctorateAdmission,
 )
+from admission.models.specific_question import SpecificQuestionAnswer
 from admission.tests import CheckActionLinksMixin
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
@@ -446,11 +450,16 @@ class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixi
             entity_type=EntityType.DOCTORAL_COMMISSION.name,
             acronym='CDA',
         ).entity
-        cls.admission = DoctorateAdmissionFactory(
-            training__management_entity=cls.commission,
-            supervision_group=promoter.process,
-            with_answers_to_specific_questions=True,
-        )
+        with patch("osis_document_components.fields.FileField._confirm_multiple_upload") as confirm_upload:
+            confirm_upload.side_effect = lambda _, value, __: ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
+            cls.admission = DoctorateAdmissionFactory(
+                training__management_entity=cls.commission,
+                supervision_group=promoter.process,
+                specific_question_answers={
+                    'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
+                    'fe254203-17c7-47d6-95e4-3c5c532da552': ['ae254203-17c7-47d6-95e4-3c5c532da550'],
+                },
+            )
 
         cls.update_data = {
             "uuid": cls.admission.uuid,
@@ -737,8 +746,14 @@ class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
         form_item_instantiation.save()
 
         # The question is required for this admission and the field is completed
-        admission.specific_question_answers = {'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response.'}
-        admission.save()
+        SpecificQuestionAnswer.objects.create(
+            admission=admission,
+            form_item=AdmissionFormItemFactory(
+                uuid='fe254203-17c7-47d6-95e4-3c5c532da551',
+                type=TypeItemFormulaire.TEXTE.name,
+            ),
+            answer='My response',
+        )
 
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -1180,7 +1195,7 @@ class DoctoratePreAdmissionListTestCase(QueriesAssertionsMixin, CheckActionLinks
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
         )
 
-        with self.assertNumQueriesLessThan(4):
+        with self.assertNumQueriesLessThan(5):
             response = self.client.get(self.url, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -1211,7 +1226,7 @@ class DoctoratePreAdmissionListTestCase(QueriesAssertionsMixin, CheckActionLinks
             type=ChoixTypeAdmission.PRE_ADMISSION.name,
         )
 
-        with self.assertNumQueriesLessThan(4, verbose=True):
+        with self.assertNumQueriesLessThan(5, verbose=True):
             response = self.client.get(self.url, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)

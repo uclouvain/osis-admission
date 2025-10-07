@@ -35,7 +35,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models
-from django.db.models import QuerySet
+from django.db.models import Prefetch, QuerySet
 from django.shortcuts import resolve_url
 from django.utils import timezone
 from django.utils.translation import get_language, override, pgettext
@@ -72,6 +72,7 @@ from admission.models import (
     GeneralEducationAdmission,
     SupervisionActor,
 )
+from admission.models.specific_question import SpecificQuestionAnswer
 from backoffice.settings.rest_framework.exception_handler import get_error_data
 from base.auth.roles.program_manager import ProgramManager
 from base.ddd.utils.business_validator import MultipleBusinessExceptions

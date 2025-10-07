@@ -80,6 +80,7 @@ from admission.ddd.admission.shared_kernel.dtos.liste import (
     DemandeRechercheDTO,
     VisualiseurAdmissionDTO,
 )
+from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire
 from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.shared_kernel.enums.liste import (
     TardiveModificationReorientationFiltre,
@@ -90,6 +91,7 @@ from admission.ddd.admission.shared_kernel.tests.factory.profil import (
     ExperienceAcademiqueDTOFactory,
     ExperienceNonAcademiqueDTOFactory,
 )
+from admission.models.specific_question import SpecificQuestionAnswer
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.admission_viewer import AdmissionViewerFactory
 from admission.tests.factories.comment import CommentEntryFactory
@@ -104,6 +106,7 @@ from admission.tests.factories.curriculum import (
     ProfessionalExperienceFactory,
 )
 from admission.tests.factories.form_item import (
+    AdmissionFormItemFactory,
     AdmissionFormItemInstantiationFactory,
     CheckboxSelectionAdmissionFormItemFactory,
     DocumentAdmissionFormItemFactory,
@@ -839,10 +842,14 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
         ).form_item
         cls.text_form_item_uuid = str(cls.text_form_item.uuid)
 
-        cls.admission.specific_question_answers = {
-            cls.text_form_item_uuid: 'T1',
-        }
-        cls.admission.save()
+        SpecificQuestionAnswer.objects.create(
+            admission=cls.admission,
+            form_item=AdmissionFormItemFactory(
+                uuid=cls.text_form_item_uuid,
+                type=TypeItemFormulaire.TEXTE.name,
+            ),
+            answer='T1',
+        )
 
         CommentEntryFactory(
             object_uuid=cls.admission.uuid,

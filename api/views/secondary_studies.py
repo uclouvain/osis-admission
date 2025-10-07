@@ -36,6 +36,9 @@ from admission.api.views.mixins import (
     GeneralEducationPersonRelatedMixin,
     PersonRelatedMixin,
 )
+from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire
+from admission.models import AdmissionFormItem
+from admission.models.specific_question import SpecificQuestionAnswer
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
@@ -56,8 +59,27 @@ class BaseSecondaryStudiesViewSet(
         response = self.update(request, *args, **kwargs)
         current_admission = self.get_permission_object()
         if current_admission:
-            current_admission.specific_question_answers = request.data.get('specific_question_answers')
-            current_admission.save(update_fields=['specific_question_answers'])
+            specific_question_answers = request.data.get('specific_question_answers')
+            if specific_question_answers is not None:
+                form_items = {
+                    str(form_item.uuid): form_item
+                    for form_item in AdmissionFormItem.objects.filter(uuid__in=specific_question_answers.keys())
+                }
+                for form_item_uuid, answer in specific_question_answers.items():
+                    SpecificQuestionAnswer.objects.update_or_create(
+                        admission=current_admission,
+                        form_item=form_items[form_item_uuid],
+                        defaults={
+                            'file': (
+                                answer if form_items[form_item_uuid].type == TypeItemFormulaire.DOCUMENT.name else None
+                            ),
+                            'answer': (
+                                answer if form_items[form_item_uuid].type != TypeItemFormulaire.DOCUMENT.name else None
+                            ),
+                        },
+                    )
+            else:
+                SpecificQuestionAnswer.objects.filter(admission=current_admission).delete()
             current_admission.update_detailed_status(request.user.person)
         return response
 
