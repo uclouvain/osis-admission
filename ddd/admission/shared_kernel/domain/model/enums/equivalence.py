@@ -36,11 +36,12 @@ class TypeEquivalenceTitreAcces(ChoiceEnum):
     EQUIVALENCE_DE_NIVEAU = pgettext_lazy('equivalence_type', 'Level equivalence')
     NON_RENSEIGNE = pgettext_lazy('equivalence_type', 'Not specified')
 
-    def types_concernes(self):
+    @classmethod
+    def types_concernes(cls):
         return [
-            self.EQUIVALENCE_CESS.name,
-            self.EQUIVALENCE_GRADE_ACADEMIQUE_FWB.name,
-            self.EQUIVALENCE_DE_NIVEAU.name,
+            cls.EQUIVALENCE_CESS.name,
+            cls.EQUIVALENCE_GRADE_ACADEMIQUE_FWB.name,
+            cls.EQUIVALENCE_DE_NIVEAU.name,
         ]
 
 
