@@ -342,7 +342,7 @@ class InjectionEPCAdmission:
             experience_annuelle = experience_academique.educationalexperience.educationalexperienceyear_set.filter(
                 academic_year__year=experience_academique.annee_max
             ).first() if experience_academique else None
-            condition_acces_uuid = experience_annuelle.uuid if experience_annuelle else None
+            condition_acces_uuid = str(experience_annuelle.uuid) if experience_annuelle else None
         return {
             "type": admission_generale.foreign_access_title_equivalency_type,
             "statut": admission_generale.foreign_access_title_equivalency_status,
