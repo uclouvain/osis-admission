@@ -732,6 +732,24 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         )
 
     @classmethod
+    def get_all_examens(cls, matricule: str) -> List['ExamenDTO']:
+        exams = Exam.objects.filter(
+            person__global_id=matricule,
+            type=ExamTypes.FORMATION.name,
+        )
+        return [
+            ExamenDTO(
+                uuid=str(exam.uuid),
+                requis=True,
+                titre=exam.education_group_year_exam.title_fr
+                if get_language() == settings.LANGUAGE_CODE_FR
+                else exam.education_group_year_exam.title_en,
+                attestation=exam.certificate,
+                annee=exam.year.year if exam.year else None,
+            ) for exam in exams
+        ]
+
+    @classmethod
     def get_experiences_non_academiques(
         cls,
         matricule: str,
@@ -1180,7 +1198,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 has_default_language=has_default_language,
             ),
             connaissances_langues=cls._get_language_knowledge_dto(candidate) if is_doctorate else None,
-            examens=cls.get_examen(matricule, formation.sigle, formation.annee),
+            examen_formation=cls.get_examen(matricule, formation.sigle, formation.annee),
         )
 
     @classmethod

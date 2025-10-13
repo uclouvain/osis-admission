@@ -1253,7 +1253,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             curriculum=cls.get_curriculum(matricule, annee_courante, uuid_proposition),
             etudes_secondaires=cls.get_etudes_secondaires(matricule),
             connaissances_langues=cls.get_connaissances_langues(matricule),
-            examens=cls.get_examen(matricule, formation.sigle, formation.annee),
+            examen_formation=cls.get_examen(matricule, formation.sigle, formation.annee),
         )
 
     @classmethod

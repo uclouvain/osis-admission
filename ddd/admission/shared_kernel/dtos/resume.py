@@ -72,7 +72,7 @@ class ResumeCandidatDTO(interface.DTO):
     curriculum: CurriculumAdmissionDTO
     etudes_secondaires: Optional[EtudesSecondairesAdmissionDTO]
     connaissances_langues: Optional[List[dtos_doctorat.ConnaissanceLangueDTO]]
-    examens: ExamenDTO
+    examen_formation: ExamenDTO
 
 
 @attr.dataclass(frozen=True, slots=True)
