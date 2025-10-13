@@ -172,6 +172,18 @@ class BaseCurriculumView(APIPermissionRequiredMixin, RetrieveAPIView):
                     for e in sorted(missing_year_exceptions, key=lambda exception: exception.periode[0], reverse=True)
                 ]
 
+        admission = self.get_permission_object()
+
+        training_academic_year = (
+            (
+                admission.determined_academic_year
+                if admission.determined_academic_year
+                else admission.training.academic_year
+            )
+            if admission
+            else None
+        )
+
         serializer = serializers.CurriculumDetailsSerializer(
             instance={
                 'professional_experiences': professional_experiences,
@@ -183,6 +195,7 @@ class BaseCurriculumView(APIPermissionRequiredMixin, RetrieveAPIView):
             },
             context={
                 'related_person': current_person,
+                'training_academic_year': training_academic_year,
                 **self.extra_serializer_context,
             },
         )
@@ -245,9 +258,6 @@ class GeneralCurriculumView(GeneralEducationPersonRelatedMixin, CurriculumView):
     serializer_mapping = {
         'PUT': serializers.GeneralEducationCompleterCurriculumCommandSerializer,
         'GET': serializers.CurriculumDetailsSerializer,
-    }
-    extra_serializer_context = {
-        'current_academic_year_start_month_is_facultative': True,
     }
 
 

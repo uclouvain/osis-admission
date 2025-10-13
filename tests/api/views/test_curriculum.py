@@ -133,6 +133,7 @@ def create_educational_experiences(person, country):
 class BaseCurriculumTestCase:
     with_incomplete_periods = True
     with_incomplete_experiences = True
+    with_admission = True
 
     @classmethod
     @freezegun.freeze_time('2020-11-01')
@@ -160,7 +161,9 @@ class BaseCurriculumTestCase:
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = mock.patch('osis_document_components.services.get_remote_metadata', return_value={'name': 'myfile', "size": 1})
+        patcher = mock.patch(
+            'osis_document_components.services.get_remote_metadata', return_value={'name': 'myfile', "size": 1}
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
 
@@ -203,7 +206,10 @@ class BaseCurriculumTestCase:
         # Check response data
         response = response.json()
         self.assertEqual(response.get('minimal_date'), '2016-09-01')
-        self.assertEqual(response.get('maximal_date'), '2020-10-01')
+        if self.with_admission:
+            self.assertEqual(response.get('maximal_date'), '2020-08-01')
+        else:
+            self.assertEqual(response.get('maximal_date'), '2020-10-01')
         self.assertEqual(
             response.get('professional_experiences'),
             [
@@ -359,7 +365,10 @@ class BaseCurriculumTestCase:
         # Check response data
         response = response.json()
         self.assertEqual(response.get('minimal_date'), '2019-09-01')
-        self.assertEqual(response.get('maximal_date'), '2020-10-01')
+        if self.with_admission:
+            self.assertEqual(response.get('maximal_date'), '2020-08-01')
+        else:
+            self.assertEqual(response.get('maximal_date'), '2020-10-01')
         self.assertEqual(
             response.get('incomplete_periods'),
             ['De Septembre 2019 à Décembre 2019'] if self.with_incomplete_periods else [],
@@ -378,7 +387,10 @@ class BaseCurriculumTestCase:
         # Check response data
         response = response.json()
         self.assertEqual(response.get('minimal_date'), '2020-09-01')
-        self.assertEqual(response.get('maximal_date'), '2020-10-01')
+        if self.with_admission:
+            self.assertEqual(response.get('maximal_date'), '2020-08-01')
+        else:
+            self.assertEqual(response.get('maximal_date'), '2020-10-01')
         self.assertEqual(response.get('incomplete_periods'), [])
 
 
@@ -557,7 +569,8 @@ class DoctorateCurriculumTestCase(BaseCurriculumTestCase, BaseIncompleteCurricul
         # Mocked data
         cls.admission = DoctorateAdmissionFactory(
             status=ChoixStatutPropositionDoctorale.EN_BROUILLON.name,
-            training__academic_year=cls.academic_year_2018,
+            training__academic_year=cls.academic_year_2020,
+            determined_academic_year=cls.academic_year_2020,
         )
         cls.other_admission = DoctorateAdmissionFactory()
         cls.user = cls.admission.candidate.user
@@ -649,7 +662,8 @@ class GeneralEducationCurriculumTestCase(
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         cls.admission = GeneralEducationAdmissionFactory(
-            training__academic_year=cls.academic_year_2018,
+            training__academic_year=cls.academic_year_2020,
+            determined_academic_year=cls.academic_year_2020,
         )
         cls.other_admission = GeneralEducationAdmissionFactory()
 
@@ -706,11 +720,10 @@ class GeneralEducationCurriculumTestCase(
             # Check response data
             response = response.json()
             self.assertEqual(response.get('minimal_date'), '2016-09-01')
-            self.assertEqual(response.get('maximal_date'), '2020-10-01')
+            self.assertEqual(response.get('maximal_date'), '2020-08-01')
             self.assertEqual(
                 response.get('incomplete_periods'),
                 [
-                    'De Septembre 2020 à Octobre 2020',
                     'De Septembre 2019 à Février 2020',
                     'De Septembre 2018 à Février 2019',
                     'De Septembre 2017 à Février 2018',
@@ -745,7 +758,8 @@ class ContinuingEducationCurriculumTestCase(BaseCurriculumTestCase, APITestCase)
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         cls.admission = ContinuingEducationAdmissionFactory(
-            training__academic_year=cls.academic_year_2018,
+            training__academic_year=cls.academic_year_2020,
+            determined_academic_year=cls.academic_year_2020,
         )
         cls.other_admission = ContinuingEducationAdmissionFactory()
 
@@ -794,6 +808,7 @@ class ContinuingEducationCurriculumTestCase(BaseCurriculumTestCase, APITestCase)
 class PersonCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
     with_incomplete_periods = False
     with_incomplete_experiences = False
+    with_admission = False
 
     @classmethod
     def setUpTestData(cls) -> None:

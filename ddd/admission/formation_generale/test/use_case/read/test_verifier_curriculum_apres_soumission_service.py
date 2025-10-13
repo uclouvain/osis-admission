@@ -34,24 +34,26 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     AnneesCurriculumNonSpecifieesException,
     ExperiencesAcademiquesNonCompleteesException,
 )
-from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import (
-    EtudesSecondairesAdmissionDTO,
-)
 from admission.ddd.admission.formation_generale.commands import (
     VerifierCurriculumApresSoumissionQuery,
 )
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
-from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationIdentityFactory
+from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import (
+    EtudesSecondairesAdmissionDTO,
+)
+from admission.ddd.admission.shared_kernel.tests.factory.formation import (
+    FormationIdentityFactory,
+)
+from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
+    PropositionInMemoryRepository,
+)
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
     AnneeExperienceAcademique,
     ExperienceAcademique,
     ExperienceNonAcademique,
     ProfilCandidatInMemoryTranslator,
-)
-from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
-    PropositionInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import (
     message_bus_in_memory_instance,
@@ -338,8 +340,8 @@ class TestVerifierCurriculumApresSoumissionService(TestCase):
             ],
         )
 
-        # Date de soumission au mois d'octobre -> le dernier mois de septembre n'est pas à valoriser
-        self.master_proposition.soumise_le = datetime.datetime(2014, 10, 31)
+        # Date de soumission apres le debut de l'année académique -> les mois ne sont pas à valoriser
+        self.master_proposition.soumise_le = datetime.datetime(2015, 10, 31)
 
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
@@ -351,10 +353,11 @@ class TestVerifierCurriculumApresSoumissionService(TestCase):
                 'De Septembre 2011 à Février 2012',
                 'De Septembre 2012 à Février 2013',
                 'De Septembre 2013 à Février 2014',
+                'De Septembre 2014 à Février 2015',
             ],
         )
 
-        self.master_proposition.soumise_le = datetime.datetime(2014, 11, 1)
+        self.master_proposition.soumise_le = datetime.datetime(2015, 11, 1)
 
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
@@ -366,7 +369,7 @@ class TestVerifierCurriculumApresSoumissionService(TestCase):
                 'De Septembre 2011 à Février 2012',
                 'De Septembre 2012 à Février 2013',
                 'De Septembre 2013 à Février 2014',
-                'De Septembre 2014 à Octobre 2014',
+                'De Septembre 2014 à Février 2015',
             ],
         )
 

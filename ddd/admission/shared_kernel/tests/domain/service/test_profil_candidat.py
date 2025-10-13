@@ -35,6 +35,10 @@ from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat impo
 from base.models.enums.community import CommunityEnum
 from base.models.enums.teaching_type import TeachingTypeEnum
 from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
+    AcademicYear,
+    AcademicYearIdentity,
+)
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     AnneeExperienceAcademiqueDTO,
     ExperienceAcademiqueDTO,
@@ -84,6 +88,16 @@ class ProfilCandidatTestCase(TestCase):
             'credits_acquis_complements': None,
             'grade_academique_formation': '1',
         }
+        cls.annee_academique_2022 = AcademicYear(
+            entity_id=AcademicYearIdentity(year=2022),
+            start_date=datetime.date(2022, 9, 15),
+            end_date=datetime.date(2023, 9, 14),
+        )
+        cls.annee_academique_2023 = AcademicYear(
+            entity_id=AcademicYearIdentity(year=2023),
+            start_date=datetime.date(2023, 9, 15),
+            end_date=datetime.date(2024, 9, 14),
+        )
 
     def test_recuperer_derniers_etablissements_superieurs_communaute_fr_frequentes_sans_etablissement(self):
         self.assertIsNone(
@@ -256,16 +270,10 @@ class ProfilCandidatTestCase(TestCase):
             ],
         )
 
-    def test_get_date_maximale_curriculum(self):
+    def test_get_date_maximale_curriculum_retourne_par_defaut_mois_precedent_date_jour(self):
         with freezegun.freeze_time('2023-04-01'):
             self.assertEqual(
                 IProfilCandidatTranslator.get_date_maximale_curriculum(),
-                datetime.date(2023, 3, 1),
-            )
-            self.assertEqual(
-                IProfilCandidatTranslator.get_date_maximale_curriculum(
-                    mois_debut_annee_academique_courante_facultatif=True,
-                ),
                 datetime.date(2023, 3, 1),
             )
 
@@ -275,31 +283,41 @@ class ProfilCandidatTestCase(TestCase):
                 datetime.date(2022, 12, 1),
             )
 
+    def test_get_date_maximale_curriculum_retourne_mois_precedent_date_soumission(self):
+        with freezegun.freeze_time('2023-01-31'):
             self.assertEqual(
                 IProfilCandidatTranslator.get_date_maximale_curriculum(date_soumission=datetime.date(2022, 2, 1)),
+                datetime.date(2022, 1, 1),
+            )
+
+    def test_get_date_maximale_curriculum_avec_date_soumission_et_annee_de_formation(self):
+        with freezegun.freeze_time('2023-04-01'):
+            self.assertEqual(
+                IProfilCandidatTranslator.get_date_maximale_curriculum(
+                    annee_formation=self.annee_academique_2022,
+                ),
+                datetime.date(2022, 8, 1),
+            )
+            self.assertEqual(
+                IProfilCandidatTranslator.get_date_maximale_curriculum(
+                    annee_formation=self.annee_academique_2023,
+                ),
+                datetime.date(2023, 3, 1),
+            )
+
+        with freezegun.freeze_time('2023-01-31'):
+            self.assertEqual(
+                IProfilCandidatTranslator.get_date_maximale_curriculum(
+                    date_soumission=datetime.date(2022, 2, 1),
+                    annee_formation=self.annee_academique_2022,
+                ),
                 datetime.date(2022, 1, 1),
             )
 
             self.assertEqual(
                 IProfilCandidatTranslator.get_date_maximale_curriculum(
                     date_soumission=datetime.date(2022, 2, 1),
-                    mois_debut_annee_academique_courante_facultatif=True,
+                    annee_formation=self.annee_academique_2023,
                 ),
                 datetime.date(2022, 1, 1),
             )
-
-        with freezegun.freeze_time('2023-10-01'):
-            self.assertEqual(
-                IProfilCandidatTranslator.get_date_maximale_curriculum(
-                    mois_debut_annee_academique_courante_facultatif=True,
-                ),
-                datetime.date(2023, 8, 1),
-            )
-
-        self.assertEqual(
-            IProfilCandidatTranslator.get_date_maximale_curriculum(
-                date_soumission=datetime.date(2022, 10, 1),
-                mois_debut_annee_academique_courante_facultatif=True,
-            ),
-            datetime.date(2022, 8, 1),
-        )
