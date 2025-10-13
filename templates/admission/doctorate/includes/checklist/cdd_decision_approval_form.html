@@ -1,4 +1,4 @@
-{% load i18n bootstrap3 admission static %}
+{% load i18n bootstrap3 admission static panel %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -30,6 +30,7 @@
   id="cdd-decision-approval-form"
   style="overflow: auto;"
   class="ckeditor-form"
+  data-init-function="cddDecisionApprovalForm"
 >
   <div id="cdd-decision-approval-modal-header" hx-preserve="true"></div>
 
@@ -117,9 +118,11 @@
       {# Update the content of the tab #}
       {% include 'admission/doctorate/includes/checklist/cdd_decision.html' %}
     {% endif %}
-    <script src="{% static "ckeditor/ckeditor-init.js" %}"></script>
     <script>
+        window.admission.cddDecisionApprovalForm = function(elt) {
         $(document).ready(function(){
+            initializeCKEditors(elt);
+
             {# Show / Hide fields depending on other field values #}
             $('input[name="cdd-decision-approval-with_prerequisite_courses"]:checked').change();
 
@@ -130,7 +133,11 @@
                 $('#cdd-decision-approval-modal').modal('hide');
                 $('#cdd-decision-approval-final-modal').modal('show');
             {% endif %}
-        });
+        })
+        };
+        {% if not request.htmx %}
+          window.admission.cddDecisionApprovalForm();
+        {% endif %}
     </script>
   {% endif %}
 </form>

@@ -177,16 +177,16 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
         )
 
         # Mock osis document api
-        patcher = mock.patch("osis_document.api.utils.get_remote_token", side_effect=lambda value, **kwargs: value)
+        patcher = mock.patch("osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value)
         patcher.start()
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
-            'osis_document.api.utils.get_remote_metadata',
+            'osis_document_components.services.get_remote_metadata',
             return_value={'name': 'myfile', 'mimetype': PDF_MIME_TYPE, "size": 1},
         )
         patcher.start()
         self.addCleanup(patcher.stop)
-        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patcher = mock.patch('osis_document_components.fields.FileField._confirm_multiple_upload')
         patched = patcher.start()
         patched.side_effect = lambda _, value, __: value
         self.addCleanup(patcher.stop)
@@ -299,6 +299,8 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
         # End
         self.assertEqual(base_form['end'].value(), self.academic_years[2].year)
         self.assertEqual([(c[0], c[1]) for c in base_form.fields['end'].choices], academic_year_choices)
+
+        self.experience.refresh_from_db()
 
         # Country
         self.assertEqual(base_form['country'].value(), self.experience.country.iso_code)

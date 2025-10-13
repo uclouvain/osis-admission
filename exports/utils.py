@@ -29,7 +29,7 @@ from django.utils import translation
 from weasyprint import HTML
 
 from osis_common.utils.url_fetcher import django_url_fetcher
-from osis_document.api.utils import change_remote_metadata
+from osis_document_components.services import change_remote_metadata
 
 
 def get_pdf_from_template(template_name, stylesheets, context) -> bytes:
@@ -53,7 +53,7 @@ def admission_generate_pdf(admission, template, filename, context=None, styleshe
     :param author: Author
     :return: Writing token of the saved file
     """
-    from osis_document.utils import save_raw_content_remotely
+    from osis_document_components.services import save_raw_content_remotely
 
     current_language = translation.get_language()
     try:

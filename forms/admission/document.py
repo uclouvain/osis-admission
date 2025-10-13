@@ -40,22 +40,20 @@ from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_G
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     OngletsChecklist as OngletsChecklistDoctorat,
 )
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
-    DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION,
-    StatutReclamationEmplacementDocument,
-)
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     OngletsChecklist as OngletsChecklistFormationContinue,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     OngletsChecklist as OngletsChecklistFormationGenerale,
 )
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION,
+    StatutReclamationEmplacementDocument,
+)
 from admission.forms import (
     OTHER_EMPTY_CHOICE,
     AdmissionHTMLCharField,
-    autocomplete,
-    get_year_choices,
 )
 from admission.models.categorized_free_document import (
     TOKEN_ACADEMIC_YEAR,
@@ -68,11 +66,12 @@ from admission.templatetags.admission import (
 from admission.views.autocomplete.categorized_free_documents import (
     CategorizedFreeDocumentsAutocomplete,
 )
-from base.forms.utils import EMPTY_CHOICE, FIELD_REQUIRED_MESSAGE
+from base.forms.utils import EMPTY_CHOICE, FIELD_REQUIRED_MESSAGE, autocomplete
 from base.forms.utils.choice_field import BLANK_CHOICE
 from base.forms.utils.datefield import CustomDateInput
 from base.forms.utils.file_field import MaxOneFileUploadField
 from base.models.academic_year import AcademicYear
+from osis_profile.forms import get_year_choices
 
 
 class UploadDocumentFormMixin(forms.Form):

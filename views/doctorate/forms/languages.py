@@ -47,7 +47,7 @@ class DoctorateAdmissionLanguagesFormView(AdmissionFormMixin, LoadDossierViewMix
         context_data = super().get_context_data(**kwargs)
 
         template_empty_form = """
-            {% load bootstrap3 i18n static admission %}
+            {% load bootstrap3 i18n static admission panel %}
             <div class="form-container">
               {% panel _("Add a language") %}
                 {% bootstrap_field language_form.language %}

@@ -46,7 +46,7 @@ class CopyDocumentsTestCase(TestCase):
         cls.person = PersonFactory()
 
     def setUp(self):
-        self.get_several_remote_metadata_patcher = mock.patch('osis_document.api.utils.get_several_remote_metadata')
+        self.get_several_remote_metadata_patcher = mock.patch('osis_document_components.services.get_several_remote_metadata')
         self.get_several_remote_metadata_patched = self.get_several_remote_metadata_patcher.start()
         self.get_several_remote_metadata_patched.return_value = {
             f'token{index}': {'name': f'test{index}.pdf', 'size': 1}
@@ -54,14 +54,14 @@ class CopyDocumentsTestCase(TestCase):
         }
         self.addCleanup(self.get_several_remote_metadata_patcher.stop)
 
-        self.get_remote_tokens_patcher = mock.patch('osis_document.api.utils.get_remote_tokens')
+        self.get_remote_tokens_patcher = mock.patch('osis_document_components.services.get_remote_tokens')
         self.get_remote_tokens_patched = self.get_remote_tokens_patcher.start()
         self.get_remote_tokens_patched.return_value = {
             original_file_uuid: f'token{index}' for index, original_file_uuid in enumerate(self.original_files_str)
         }
         self.addCleanup(self.get_remote_tokens_patcher.stop)
 
-        self.documents_remote_duplicate_patcher = mock.patch('osis_document.api.utils.documents_remote_duplicate')
+        self.documents_remote_duplicate_patcher = mock.patch('osis_document_components.services.documents_remote_duplicate')
         self.documents_remote_duplicate_patched = self.documents_remote_duplicate_patcher.start()
         self.documents_remote_duplicate_patched.return_value = {
             original_file_uuid: self.duplicate_files_str[index]

@@ -1,4 +1,4 @@
-{% load admission bootstrap3 i18n %}
+{% load admission bootstrap3 i18n panel %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -31,6 +31,7 @@
         hx-post="{% url view.base_namespace|add:':choix-formation-update' uuid=view.kwargs.uuid %}"
         hx-target="#choix-formation-form"
         hx-swap="outerHTML"
+        data-init-function="trainingChoiceForm"
     >
       {% csrf_token %}
       {% bootstrap_field form.type_demande %}
@@ -62,6 +63,7 @@
   {% endpanel %}
   {{ form.media }}
   <script>
+      window.admission.trainingChoiceForm = function() {
       $('#id_formation').on('select2:select select2:clear', function (event) {
           if(event.params.data.type === 'BACHELOR') {
               $('#bachelor-cycle-continuation-container').removeClass('hidden');
@@ -69,5 +71,9 @@
               $('#bachelor-cycle-continuation-container').addClass('hidden');
           }
       });
+      };
+      {% if not request.htmx %}
+        window.admission.trainingChoiceForm();
+      {% endif %}
   </script>
 </div>

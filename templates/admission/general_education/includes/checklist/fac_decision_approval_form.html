@@ -1,4 +1,4 @@
-{% load i18n bootstrap3 admission static %}
+{% load i18n bootstrap3 admission static panel %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -29,6 +29,7 @@
     hx-swap="outerHTML"
     id="fac-decision-approval-form"
     style="overflow: auto;"
+    data-init-function="facDecisionApprovalForm"
 >
   <div id="fac-decision-approval-modal-header" hx-preserve="true"></div>
 
@@ -78,7 +79,7 @@
     {% bootstrap_field fac_decision_approval_form.with_additional_approval_conditions label=fac_decision_approval_form.with_additional_approval_conditions.label|label_with_user_icon %}
     <div
         id="fac-decision-additional-approval-conditions-container"
-        class="hidden mb-15"
+        class="mb-15"
       >
         {% bootstrap_field fac_decision_approval_form.all_additional_approval_conditions label=fac_decision_approval_form.all_additional_approval_conditions.label|add:candidate_language_tag|label_with_user_icon form_group_class='required_field form-group' %}
 
@@ -181,9 +182,25 @@
       {# Update the content of the tab #}
       {% include 'admission/general_education/includes/checklist/fac_decision.html' %}
     {% endif %}
-    <script src="{% static "ckeditor/ckeditor-init.js" %}"></script>
     <script>
+      function formsetInitialization() {
+        $('#fac-decision-additional-approval-conditions-formset .fac-decision-additional-approval-conditions-form').formset({
+          addText: '<i class="fa fa-plus"></i> {% translate "Add" %}',
+          addCssClass: 'btn btn-primary',
+          deleteText: '{% translate "Confirm" %}',
+          deleteCssClass: 'no-link',
+          deleteContainerClass: 'formset-delete-button',
+          prefix: '{{ fac_decision_free_approval_condition_formset.prefix }}',
+          formCssClass: '{{ fac_decision_free_approval_condition_formset.prefix }}-formset',
+          formTemplate: $('#empty-fac-approval-form').clone(),
+        });
+      }
+
+        window.admission.facDecisionApprovalForm = function (elt) {
         $(document).ready(function(){
+            initializeCKEditors(elt);
+            formsetInitialization();
+
             {# Show / Hide fields depending on other field values #}
             $('#id_fac-decision-approval-another_training').change();
             $('input[name="fac-decision-approval-with_additional_approval_conditions"]:checked').change();
@@ -196,32 +213,11 @@
                 $('#fac-decision-approval-modal').modal('hide');
             {% endif %}
         });
+        };
+      {% if not request.htmx %}
+        window.admission.facDecisionApprovalForm();
+      {% endif %}
     </script>
   {% endif %}
-
-  <script>
-      $(document).ready(function(){
-          function formsetInitialization() {
-              $('#fac-decision-additional-approval-conditions-formset .fac-decision-additional-approval-conditions-form').formset({
-                  addText: '<i class="fa fa-plus"></i> {% translate "Add" %}',
-                  addCssClass: 'btn btn-primary',
-                  deleteText: '{% translate "Confirm" %}',
-                  deleteCssClass: 'no-link',
-                  deleteContainerClass: 'formset-delete-button',
-                  prefix: '{{ fac_decision_free_approval_condition_formset.prefix }}',
-                  formCssClass: '{{ fac_decision_free_approval_condition_formset.prefix }}-formset',
-                  formTemplate: $('#empty-fac-approval-form').clone(),
-              });
-          }
-
-          {% if request.htmx %}
-              formsetInitialization();
-          {% else %}
-            $('#fac-decision-approval-modal').one('shown.bs.modal', function() {
-                formsetInitialization()
-            });
-          {% endif %}
-      })
-  </script>
 
 </form>

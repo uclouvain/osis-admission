@@ -29,16 +29,16 @@ from unittest.mock import patch
 
 from django.test import override_settings
 
-from admission.constants import JPEG_MIME_TYPE, SUPPORTED_MIME_TYPES
+from admission.constants import SUPPORTED_MIME_TYPES
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    OngletsChecklist,
+)
 from admission.ddd.admission.shared_kernel.enums import Onglets
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     IdentifiantBaseEmplacementDocument,
     OngletsDemande,
     StatutEmplacementDocument,
     TypeEmplacementDocument,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    OngletsChecklist,
 )
 from admission.infrastructure.utils import (
     CORRESPONDANCE_CHAMPS_COMPTABILITE,
@@ -72,6 +72,7 @@ from admission.tests.factories.secondary_studies import (
 from admission.tests.factories.supervision import PromoterFactory
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.tests import TestCaseWithQueriesAssertions
+from osis_profile.constants import JPEG_MIME_TYPE
 from osis_profile.models.enums.exam import ExamTypes
 from osis_profile.tests.factories.exam import ExamFactory
 from reference.tests.factories.language import FrenchLanguageFactory
@@ -81,12 +82,12 @@ from reference.tests.factories.language import FrenchLanguageFactory
 class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
     def setUp(self) -> None:
         # Mock documents
-        patcher = patch("osis_document.api.utils.get_remote_token", return_value="foobar")
+        patcher = patch("osis_document_components.services.get_remote_token", return_value="foobar")
         patcher.start()
         self.addCleanup(patcher.stop)
 
         patcher = patch(
-            "osis_document.api.utils.get_remote_metadata",
+            "osis_document_components.services.get_remote_metadata",
             return_value={
                 "name": "myfile",
                 "explicit_name": "My file",
@@ -99,14 +100,14 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
         self.addCleanup(patcher.stop)
 
         patcher = patch(
-            "osis_document.api.utils.confirm_remote_upload",
+            "osis_document_components.services.confirm_remote_upload",
             side_effect=lambda token, *args, **kwargs: token,
         )
         patcher.start()
         self.addCleanup(patcher.stop)
 
         patcher = patch(
-            "osis_document.contrib.fields.FileField._confirm_multiple_upload",
+            "osis_document_components.fields.FileField._confirm_multiple_upload",
             side_effect=lambda _, tokens, __: tokens,
         )
         patcher.start()

@@ -23,14 +23,29 @@
  * see http://www.gnu.org/licenses/.
  *
  */
+/**
+ * Initialize a ckeditor field for a specific textarea.
+ */
 function initializeCKEditor(textareaId) {
     const textarea = document.getElementById(textareaId);
     return CKEDITOR.replace(textarea.id, JSON.parse(textarea.getAttribute('data-config')));
 }
 
+/**
+ * Remove the editor of a specific textarea.
+ */
 function removeEditor(textareaId) {
     const instance = CKEDITOR.instances[textareaId];
     if (instance) {
         instance.destroy();
     }
+}
+
+/**
+ * Initialize, in a container, all the textarea whose the type is "ckeditortype" (django-ckeditor).
+ */
+function initializeCKEditors(container) {
+  container.querySelectorAll('textarea[data-type="ckeditortype"]').forEach(function (textarea) {
+    initializeCKEditor(textarea.id);
+  });
 }

@@ -5,7 +5,7 @@ import uuid
 import django.contrib.postgres.fields
 import django.core.validators
 import django.db.models.deletion
-import osis_document.contrib.fields
+import osis_document_components.fields
 from django.db import migrations, models
 
 import admission.models.form_item
@@ -201,7 +201,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='doctorateadmission',
             name='fac_approval_certificate',
-            field=osis_document.contrib.fields.FileField(
+            field=osis_document_components.fields.FileField(
                 base_field=models.UUIDField(),
                 blank=True,
                 default=list,
@@ -212,7 +212,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='doctorateadmission',
             name='fac_refusal_certificate',
-            field=osis_document.contrib.fields.FileField(
+            field=osis_document_components.fields.FileField(
                 base_field=models.UUIDField(),
                 blank=True,
                 default=list,
@@ -573,7 +573,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='doctorateadmission',
             name='sic_annexe_approval_certificate',
-            field=osis_document.contrib.fields.FileField(
+            field=osis_document_components.fields.FileField(
                 base_field=models.UUIDField(),
                 blank=True,
                 default=list,
@@ -584,7 +584,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='doctorateadmission',
             name='sic_approval_certificate',
-            field=osis_document.contrib.fields.FileField(
+            field=osis_document_components.fields.FileField(
                 base_field=models.UUIDField(),
                 blank=True,
                 default=list,
@@ -595,7 +595,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='doctorateadmission',
             name='sic_refusal_certificate',
-            field=osis_document.contrib.fields.FileField(
+            field=osis_document_components.fields.FileField(
                 base_field=models.UUIDField(),
                 blank=True,
                 default=list,
@@ -606,7 +606,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='doctorateadmission',
             name='signed_enrollment_authorization',
-            field=osis_document.contrib.fields.FileField(
+            field=osis_document_components.fields.FileField(
                 base_field=models.UUIDField(),
                 blank=True,
                 default=list,
@@ -617,7 +617,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='doctorateadmission',
             name='student_visa_d',
-            field=osis_document.contrib.fields.FileField(
+            field=osis_document_components.fields.FileField(
                 base_field=models.UUIDField(),
                 blank=True,
                 default=list,

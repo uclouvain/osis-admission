@@ -37,6 +37,11 @@
 {% url base_namespace|add:request.resolver_match.url_name view.kwargs.pk as cancel_url %}
 {% url base_namespace|add:":update:"|add:request.resolver_match.url_name view.kwargs.pk as change_url %}
 
+{% block head %}
+  {{ block.super }}
+  <script>window.admission = {}</script>
+{% endblock %}
+
 {% block content %}
   {% if form or force_form %}
     {% include "admission/modal/prevent_quitting_modal.html" %}
@@ -224,7 +229,7 @@
       });
     </script>
   {% else %}
-    <script src="{% static 'osis_document/osis-document.umd.min.js' %}"></script>
+    <script src="{% static 'osis_document_components/osis-document.umd.min.js' %}"></script>
   {% endif %}
 {% endblock %}
 
@@ -235,7 +240,7 @@
   {% if form %}
     {{ form.media.css }}
   {% else %}
-    <link href="{% static "osis_document/osis-document.css" %}" rel="stylesheet" />
+    <link href="{% static "osis_document_components/osis-document.css" %}" rel="stylesheet" />
   {% endif %}
   <style>
     p {

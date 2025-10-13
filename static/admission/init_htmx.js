@@ -23,24 +23,20 @@
  * see http://www.gnu.org/licenses/.
  *
  */
-$(function () {
-  const is_letter = character => RegExp(/(\p{L})/, 'u').test(character);
-
-  // Format some fields
-  $(".formatted-field input").on('input', function () {
-    const splittedString = Array.from(this.value);
-    let hasChanged = false;
-
-    for (let i = 0; i < splittedString.length - 1; i++) {
-      if (is_letter(splittedString[i]) && is_letter(splittedString[i + 1])) {
-        splittedString[i + 1] = splittedString[i + 1].toLowerCase();
-        hasChanged = true;
+/*
+With htmx 1.9, inline scripts ($.ready) could be executed but with htmx 2.0, this no longer works very well so
+the old scripts are embedded in a function that is trigger after the dom is updated.
+The function name must be specified in the data-init-function property of the elements and the associated functions
+must be specified in the window.admission namespace.
+*/
+document.body.addEventListener('htmx:afterSettle', function (event) {
+    const originalElt = event.detail.elt;
+    const elementsToInitialize = Array.from(originalElt.querySelectorAll('[data-init-function]'));
+    elementsToInitialize.push(originalElt);
+    elementsToInitialize.forEach(function(elt) {
+      const currentFunctionName = elt.dataset.initFunction;
+      if (currentFunctionName && window.admission[currentFunctionName]) {
+        window.admission[currentFunctionName](elt);
       }
-    }
-    if (hasChanged) {
-      const previousCursorPosition = this.selectionEnd;
-      this.value = splittedString.join('');
-      this.selectionEnd = previousCursorPosition;
-    }
-  });
+    });
 });

@@ -31,11 +31,10 @@ from django.shortcuts import resolve_url
 from django.test import TestCase, override_settings
 from rest_framework import status
 
-from admission.models import ContinuingEducationAdmission
-from admission.ddd import FR_ISO_CODE
-from admission.ddd.admission.shared_kernel.enums import Onglets
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.shared_kernel.enums import Onglets
 from admission.forms import REQUIRED_FIELD_CLASS
+from admission.models import ContinuingEducationAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import (
     ContinuingEducationTrainingFactory,
@@ -53,7 +52,7 @@ from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import GotDiploma
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity_version import EntityVersionFactory
-from osis_profile import BE_ISO_CODE
+from osis_profile import BE_ISO_CODE, FR_ISO_CODE
 from osis_profile.models import EducationalExperience, EducationalExperienceYear
 from reference.tests.factories.country import CountryFactory
 
@@ -116,24 +115,24 @@ class AdmissionCurriculumGlobalFormViewForContinuingTestCase(TestCase):
 
     def setUp(self):
         # Mock documents
-        patcher = patch('osis_document.api.utils.get_remote_token', return_value='foobar')
+        patcher = patch('osis_document_components.services.get_remote_token', return_value='foobar')
         patcher.start()
         self.addCleanup(patcher.stop)
 
         patcher = patch(
-            'osis_document.api.utils.get_remote_metadata',
+            'osis_document_components.services.get_remote_metadata',
             return_value={'name': 'myfile', 'size': 1, 'mimetype': PDF_MIME_TYPE},
         )
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patcher = patch('osis_document_components.fields.FileField._confirm_multiple_upload')
         patched = patcher.start()
         patched.side_effect = lambda _, value, __: ['550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'] if value else []
         self.addCleanup(patcher.stop)
 
         patcher = patch(
-            'osis_document.api.utils.get_several_remote_metadata',
+            'osis_document_components.services.get_several_remote_metadata',
             side_effect=lambda tokens, *args, **kwargs: {
                 token: {'name': 'test.pdf', 'size': 1, 'mimetype': PDF_MIME_TYPE} for token in tokens
             },

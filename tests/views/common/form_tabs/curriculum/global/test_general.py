@@ -29,11 +29,10 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
-from admission.models.general_education import GeneralEducationAdmission
-from admission.ddd import FR_ISO_CODE
-from admission.ddd.admission.shared_kernel.enums import Onglets
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.shared_kernel.enums import Onglets
 from admission.forms import REQUIRED_FIELD_CLASS
+from admission.models.general_education import GeneralEducationAdmission
 from admission.tests.factories.curriculum import (
     AdmissionEducationalValuatedExperiencesFactory,
 )
@@ -46,7 +45,7 @@ from base.models.enums.got_diploma import GotDiploma
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group_year import Master120TrainingFactory
 from base.tests.factories.entity_version import EntityVersionFactory
-from osis_profile import BE_ISO_CODE
+from osis_profile import BE_ISO_CODE, FR_ISO_CODE
 from osis_profile.models import EducationalExperience, EducationalExperienceYear
 from reference.tests.factories.country import CountryFactory
 

@@ -31,8 +31,8 @@ from django.utils.functional import cached_property
 from django.utils.translation import get_language
 from django.utils.translation import gettext as _
 from django.views.generic import FormView, RedirectView, TemplateView
-from osis_document.enums import PostProcessingWanted
-from osis_document.utils import get_file_url
+from osis_document_components.enums import PostProcessingWanted
+from osis_document_components.utils import get_file_url
 from rest_framework.status import HTTP_204_NO_CONTENT
 
 from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
@@ -257,7 +257,7 @@ class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, Htmx
     name = 'document-detail'
 
     def get_context_data(self, **kwargs):
-        from osis_document.api.utils import get_remote_metadata, get_remote_token
+        from osis_document_components.services import get_remote_metadata, get_remote_token
 
         context = TemplateView().get_context_data(**kwargs)
         context['view'] = self

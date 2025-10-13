@@ -77,6 +77,9 @@ from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import (
 from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from admission.ddd.admission.shared_kernel.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.shared_kernel.dtos.resume import ResumeCandidatDTO
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    OngletsDemande,
+)
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
     ExperiencesCVRecuperees,
@@ -821,11 +824,9 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         ).values_list('educationalexperience_id', flat=True)
 
         exams_uuids = []
-        admission = (
-            BaseAdmission.objects
-                .values('candidate__global_id', 'training__acronym', 'training__academic_year__year')
-                .get(uuid=uuid_proposition)
-        )
+        admission = BaseAdmission.objects.values(
+            'candidate__global_id', 'training__acronym', 'training__academic_year__year'
+        ).get(uuid=uuid_proposition)
 
         exam = cls.get_examen(
             matricule=admission['candidate__global_id'],
@@ -836,12 +837,13 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             exams_uuids.append(OngletsDemande.EXAMS.name)
 
         alternative_secondary_study = (
-            Exam.objects
-            .filter(
+            Exam.objects.filter(
                 person__global_id=admission['candidate__global_id'],
                 type=ExamTypes.PREMIER_CYCLE.name,
                 education_group_year_exam__education_group_year__acronym=admission['training__acronym'],
-                education_group_year_exam__education_group_year__academic_year__year=admission['training__academic_year__year'],
+                education_group_year_exam__education_group_year__academic_year__year=admission[
+                    'training__academic_year__year'
+                ],
             )
             .values('uuid')
             .first()

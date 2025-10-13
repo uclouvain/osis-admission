@@ -135,7 +135,7 @@ class BaseDocumentViewTestCase(TestCase):
 
     def setUp(self):
         # Mock documents
-        patcher = patch('osis_document.api.utils.get_remote_token', return_value='foobar')
+        patcher = patch('osis_document_components.services.get_remote_token', return_value='foobar')
         patcher.start()
         self.addCleanup(patcher.stop)
 
@@ -143,7 +143,7 @@ class BaseDocumentViewTestCase(TestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = patch('osis_document.api.utils.change_remote_metadata', return_value='foobar')
+        patcher = patch('osis_document_components.services.change_remote_metadata', return_value='foobar')
         self.change_remote_metadata_patcher = patcher.start()
         self.addCleanup(patcher.stop)
 
@@ -159,29 +159,29 @@ class BaseDocumentViewTestCase(TestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = patch('osis_document.api.utils.get_remote_metadata', return_value=self.file_metadata)
+        patcher = patch('osis_document_components.services.get_remote_metadata', return_value=self.file_metadata)
         patcher.start()
         self.addCleanup(patcher.stop)
 
         patcher = patch(
-            'osis_document.api.utils.confirm_remote_upload',
+            'osis_document_components.services.confirm_remote_upload',
             side_effect=lambda **kwargs: uuid.uuid4(),
         )
         patcher.start()
         self.addCleanup(patcher.stop)
         patcher = patch(
-            'osis_document.contrib.fields.FileField._confirm_multiple_upload',
+            'osis_document_components.fields.FileField._confirm_multiple_upload',
             side_effect=lambda _, value, __: [uuid.uuid4()] if value else [],
         )
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = patch('osis_document.api.utils.get_remote_tokens')
+        patcher = patch('osis_document_components.services.get_remote_tokens')
         patched = patcher.start()
         patched.side_effect = lambda uuids, **kwargs: {uuid: f'token-{index}' for index, uuid in enumerate(uuids)}
         self.addCleanup(patcher.stop)
 
-        patcher = patch('osis_document.api.utils.get_several_remote_metadata')
+        patcher = patch('osis_document_components.services.get_several_remote_metadata')
         patched = patcher.start()
         patched.side_effect = lambda tokens: {token: self.file_metadata for token in tokens}
         self.addCleanup(patcher.stop)
@@ -341,7 +341,7 @@ class BaseDocumentViewTestCase(TestCase):
             admission.refresh_from_db()
 
     def _mock_folder_generation(self):
-        save_raw_content_remotely_patcher = mock.patch('osis_document.utils.save_raw_content_remotely')
+        save_raw_content_remotely_patcher = mock.patch('osis_document_components.services.save_raw_content_remotely')
         patched = save_raw_content_remotely_patcher.start()
         patched.return_value = 'a-token'
         self.addCleanup(save_raw_content_remotely_patcher.stop)
