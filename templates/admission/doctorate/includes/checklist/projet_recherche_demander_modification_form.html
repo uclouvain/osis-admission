@@ -30,6 +30,8 @@
     hx-swap="outerHTML"
     style="overflow: auto;"
     id="projet-recherche-demander-modification-ca-form"
+    class="ckeditor-form"
+    data-init-function="cddCaModificationForm"
 >
   <div class="modal-body" style="overflow:auto;">
 
@@ -71,6 +73,7 @@
   {{ projet_recherche_demander_modification_ca_form.initial.body|json_script:"projet_recherche_demander_modification_ca_form_body" }}
 
   <script>
+      window.admission.cddCaModificationForm = function () {
       $('#projet-recherche-demander-modification-ca-reset-subject').click((event) => {
           event.preventDefault();
           const value = JSON.parse(document.getElementById('projet_recherche_demander_modification_ca_form_subject').textContent);
@@ -86,9 +89,15 @@
 
       $(document).ready(() => {
           const editor = initializeCKEditor('id_projet-recherche-demander-modification-ca-body');
-          editor.on('change', function() {
-            $('#projet-recherche-demander-modification-ca-form .modal-footer button[name=save]').prop('disabled', false).tooltip('destroy');
+          editor.on('instanceReady', function (evt) {
+            editor.on('change', function () {
+              $('#projet-recherche-demander-modification-ca-form .modal-footer button[name=save]').prop('disabled', false).tooltip('destroy');
+            });
           });
       });
+      };
+      {% if not request.htmx %}
+        window.admission.cddCaModificationForm();
+      {% endif %}
   </script>
 </form>

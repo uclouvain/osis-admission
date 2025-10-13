@@ -27,6 +27,7 @@
     hx-post="{% url request.resolver_match.namespace|add:':candidate-request' uuid=request.resolver_match.kwargs.uuid identifier=document_identifier %}"
     method="post"
     hx-swap="outerHTML"
+    data-init-function="requestDocumentForm"
 >
   {% bootstrap_form_errors request_form %}
   {% csrf_token %}
@@ -52,6 +53,7 @@
 </form>
 
 <script>
+    window.admission.requestDocumentForm = function() {
     $(function () {
         const requestStatusInput = $('#id_request_status');
         const defaultRequestStatus = requestStatusInput.val();
@@ -87,4 +89,8 @@
             $('#request-form-modal').modal('show');
         {% endif %}
     });
+    };
+    {% if not request.htmx %}
+    window.admission.requestDocumentForm();
+    {% endif %}
 </script>

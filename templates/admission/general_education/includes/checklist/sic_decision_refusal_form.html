@@ -31,6 +31,7 @@
     style="overflow: auto;"
     id="sic-decision-refusal-form"
     autocomplete="off"
+    data-init-function="sicDecisionRefusalForm"
 >
   <div class="modal-body" style="overflow:auto;">
 
@@ -77,12 +78,17 @@
       {% include 'admission/general_education/includes/checklist/sic_decision.html' %}
     {% endif %}
     <script>
+      window.admission.sicDecisionRefusalForm = function () {
         $(document).ready(function(){
             AdmissionSelectFilter.init('id_sic-decision-refusal-reasons');
             {% if sic_decision_refusal_form.is_valid %}
                 $('#sic-decision-refusal-modal').modal('hide');
             {% endif %}
         });
+      };
+      {% if not request.htmx %}
+        window.admission.sicDecisionRefusalForm();
+      {% endif %}
     </script>
   {% endif %}
 </form>
