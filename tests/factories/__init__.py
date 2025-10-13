@@ -24,11 +24,10 @@
 #
 # ##############################################################################
 import string
+from uuid import uuid4
 
 import factory
 from factory.fuzzy import FuzzyText
-from osis_document.enums import TokenAccess
-from osis_document.models import Upload, Token
 
 from .doctorate import DoctorateAdmissionFactory
 
@@ -38,23 +37,20 @@ __all__ = [
 ]
 
 
-class PdfUploadFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = Upload
+class PdfUploadFactory:
+    def __init__(self, **kwargs):
+        self.uuid = uuid4()
+        self.file = factory.django.FileField(data=b'hello world', filename='the_file.pdf')
+        self.size = 1024
+        self.mimetype = 'application/pdf'
+        self.metadata = {
+            'hash': 'b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9',
+            'name': 'the_file.pdf',
+        }
 
-    file = factory.django.FileField(data=b'hello world', filename='the_file.pdf')
-    size = 1024
-    mimetype = 'application/pdf'
-    metadata = {
-        'hash': 'b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9',
-        'name': 'the_file.pdf',
-    }
 
-
-class WriteTokenFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = Token
-
-    token = FuzzyText(length=154, chars=string.ascii_letters + string.digits + ':-')
-    upload = factory.SubFactory(PdfUploadFactory)
-    access = TokenAccess.WRITE.name
+class WriteTokenFactory:
+    def __init__(self, **kwargs):
+        self.token = FuzzyText(length=154, chars=string.ascii_letters + string.digits + ':-').fuzz()
+        self.upload = PdfUploadFactory()
+        self.access = "WRITE"

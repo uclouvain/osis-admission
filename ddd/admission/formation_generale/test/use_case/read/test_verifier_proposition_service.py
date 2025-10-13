@@ -31,7 +31,6 @@ from unittest import mock
 import freezegun
 from django.test import TestCase
 
-from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AbsenceDeDetteNonCompleteeException,
     AffiliationsNonCompleteesException,
@@ -41,6 +40,26 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     ExperiencesAcademiquesNonCompleteesException,
     ReductionDesDroitsInscriptionNonCompleteeException,
     TypeCompteBancaireRemboursementNonCompleteException,
+)
+from admission.ddd.admission.formation_generale.commands import VerifierPropositionQuery
+from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
+    PropositionIdentityBuilder,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
+    BoursesEtudesNonRenseignees,
+    EquivalenceNonRenseigneeException,
+    EtudesSecondairesNonCompleteesException,
+    EtudesSecondairesNonCompleteesPourAlternativeException,
+    EtudesSecondairesNonCompleteesPourDiplomeBelgeException,
+    EtudesSecondairesNonCompleteesPourDiplomeEtrangerException,
+    FichierCurriculumNonRenseigneException,
+    InformationsVisaNonCompleteesException,
+)
+from admission.ddd.admission.formation_generale.test.factory.proposition import (
+    _ComptabiliteFactory,
 )
 from admission.ddd.admission.shared_kernel.domain.model.formation import FormationIdentity
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
@@ -66,25 +85,8 @@ from admission.ddd.admission.shared_kernel.enums import (
     LienParente,
     TypeSituationAssimilation,
 )
-from admission.ddd.admission.formation_generale.commands import VerifierPropositionQuery
-from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
-    PropositionIdentityBuilder,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
-)
-from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
-    BoursesEtudesNonRenseignees,
-    EquivalenceNonRenseigneeException,
-    EtudesSecondairesNonCompleteesException,
-    EtudesSecondairesNonCompleteesPourAlternativeException,
-    EtudesSecondairesNonCompleteesPourDiplomeBelgeException,
-    EtudesSecondairesNonCompleteesPourDiplomeEtrangerException,
-    FichierCurriculumNonRenseigneException,
-    InformationsVisaNonCompleteesException,
-)
-from admission.ddd.admission.formation_generale.test.factory.proposition import (
-    _ComptabiliteFactory,
+from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
+    PropositionInMemoryRepository,
 )
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.calendrier_inscription import (
     CalendrierInscriptionInMemory,
@@ -94,9 +96,6 @@ from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.p
     ExperienceAcademique,
     ExperienceNonAcademique,
     ProfilCandidatInMemoryTranslator,
-)
-from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
-    PropositionInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import (
     message_bus_in_memory_instance,
@@ -117,7 +116,7 @@ from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import (
     AcademicYearInMemoryRepository,
 )
-from osis_profile import BE_ISO_CODE
+from osis_profile import BE_ISO_CODE, FR_ISO_CODE
 from osis_profile.models.enums.curriculum import (
     ActivitySector,
     ActivityType,

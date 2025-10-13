@@ -34,11 +34,11 @@ from admission.ddd.admission.doctorat.preparation.dtos.doctorat import DoctoratD
 from admission.ddd.admission.doctorat.preparation.repository.i_doctorat import (
     IDoctoratRepository,
 )
-from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from base.ddd.utils.in_memory_repository import InMemoryGenericRepository
 from infrastructure.reference.domain.service.in_memory.bourse import (
     BourseInMemoryTranslator,
 )
+from osis_profile.models.enums.person import ChoixGenre
 
 
 @dataclass

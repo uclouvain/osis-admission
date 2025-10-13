@@ -25,7 +25,7 @@
 # ##############################################################################
 import uuid
 
-from osis_document.enums import PostProcessingWanted
+from osis_document_components.enums import PostProcessingWanted
 
 
 def copy_documents(objs, id_attribute='uuid'):
@@ -34,13 +34,13 @@ def copy_documents(objs, id_attribute='uuid'):
     :param objs: The list of objects.
     :param id_attribute: The attribute identifying the objects.
     """
-    from osis_document.api.utils import (
+    from osis_document_components.services import (
         documents_remote_duplicate,
         get_remote_tokens,
         get_several_remote_metadata,
     )
-    from osis_document.contrib import FileField
-    from osis_document.utils import generate_filename
+    from osis_document_components.fields import FileField
+    from osis_document_components.utils import generate_filename
 
     all_document_uuids = []
     all_document_upload_paths = {}

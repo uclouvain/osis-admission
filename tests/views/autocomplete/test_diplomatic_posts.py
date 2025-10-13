@@ -28,11 +28,11 @@ import json
 from django.test import TestCase
 from django.urls import reverse
 
+from admission.ddd import EN_ISO_CODE
 from admission.models import DiplomaticPost
-from admission.ddd import FR_ISO_CODE, EN_ISO_CODE
 from admission.tests.factories.diplomatic_post import DiplomaticPostFactory
 from base.tests.factories.person import PersonFactory
-from osis_profile import BE_ISO_CODE
+from osis_profile import BE_ISO_CODE, FR_ISO_CODE
 from reference.tests.factories.country import CountryFactory
 
 

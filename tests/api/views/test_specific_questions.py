@@ -34,7 +34,11 @@ from django.utils.translation import gettext
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.ddd import EN_ISO_CODE, FR_ISO_CODE
+from admission.ddd import EN_ISO_CODE
+from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixInscriptionATitre,
+    ChoixTypeAdresseFacturation,
+)
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     PosteDiplomatiqueNonTrouveException,
 )
@@ -46,10 +50,6 @@ from admission.ddd.admission.shared_kernel.enums.question_specifique import (
     CritereItemFormulaireVIP,
     Onglets,
     TypeItemFormulaire,
-)
-from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixInscriptionATitre,
-    ChoixTypeAdresseFacturation,
 )
 from admission.models import ContinuingEducationAdmission, GeneralEducationAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
@@ -78,7 +78,7 @@ from base.tests.factories.education_group import EducationGroupFactory
 from base.tests.factories.education_group_type import EducationGroupTypeFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person import PersonFactory
-from osis_profile import BE_ISO_CODE
+from osis_profile import BE_ISO_CODE, FR_ISO_CODE
 from osis_profile.models import EducationalExperience
 from osis_profile.tests.factories.curriculum import EducationalExperienceFactory
 from reference.tests.factories.country import CountryFactory
@@ -1012,23 +1012,23 @@ class ContinuingEducationSpecificQuestionListApiTestCase(APITestCase):
 class GeneralEducationSpecificQuestionUpdateApiTestCase(APITestCase):
     def setUp(self):
         # Mock osis-document
-        self.confirm_remote_upload_patcher = patch('osis_document.api.utils.confirm_remote_upload')
+        self.confirm_remote_upload_patcher = patch('osis_document_components.services.confirm_remote_upload')
         patched = self.confirm_remote_upload_patcher.start()
         patched.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
 
-        self.get_remote_metadata_patcher = patch('osis_document.api.utils.get_remote_metadata')
+        self.get_remote_metadata_patcher = patch('osis_document_components.services.get_remote_metadata')
         patched = self.get_remote_metadata_patcher.start()
         patched.return_value = {"name": "test.pdf", "size": 1}
 
-        self.get_remote_token_patcher = patch('osis_document.api.utils.get_remote_token')
+        self.get_remote_token_patcher = patch('osis_document_components.services.get_remote_token')
         patched = self.get_remote_token_patcher.start()
         patched.return_value = 'b-token'
 
-        self.save_raw_content_remotely_patcher = patch('osis_document.utils.save_raw_content_remotely')
+        self.save_raw_content_remotely_patcher = patch('osis_document_components.services.save_raw_content_remotely')
         patched = self.save_raw_content_remotely_patcher.start()
         patched.return_value = 'a-token'
 
-        patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patcher = patch('osis_document_components.fields.FileField._confirm_multiple_upload')
         patched = patcher.start()
         patched.side_effect = lambda _, value, __: ['4bdffb42-552d-415d-9e4c-725f10dce228'] if value else []
         self.addCleanup(patcher.stop)
@@ -1198,23 +1198,23 @@ class ContinuingEducationSpecificQuestionUpdateApiTestCase(APITestCase):
 
     def setUp(self):
         # Mock osis-document
-        self.confirm_remote_upload_patcher = patch('osis_document.api.utils.confirm_remote_upload')
+        self.confirm_remote_upload_patcher = patch('osis_document_components.services.confirm_remote_upload')
         patched = self.confirm_remote_upload_patcher.start()
         patched.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
 
-        self.get_remote_metadata_patcher = patch('osis_document.api.utils.get_remote_metadata')
+        self.get_remote_metadata_patcher = patch('osis_document_components.services.get_remote_metadata')
         patched = self.get_remote_metadata_patcher.start()
         patched.return_value = {"name": "test.pdf", "size": 1}
 
-        self.get_remote_token_patcher = patch('osis_document.api.utils.get_remote_token')
+        self.get_remote_token_patcher = patch('osis_document_components.services.get_remote_token')
         patched = self.get_remote_token_patcher.start()
         patched.return_value = 'b-token'
 
-        self.save_raw_content_remotely_patcher = patch('osis_document.utils.save_raw_content_remotely')
+        self.save_raw_content_remotely_patcher = patch('osis_document_components.services.save_raw_content_remotely')
         patched = self.save_raw_content_remotely_patcher.start()
         patched.return_value = 'a-token'
 
-        patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patcher = patch('osis_document_components.fields.FileField._confirm_multiple_upload')
         patched = patcher.start()
         patched.side_effect = lambda _, value, __: ['4bdffb42-552d-415d-9e4c-725f10dce228'] if value else []
         self.addCleanup(patcher.stop)

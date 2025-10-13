@@ -64,7 +64,7 @@ from reference.tests.factories.language import FrenchLanguageFactory
 class RequestSignaturesApiTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.patcher = patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        cls.patcher = patch('osis_document_components.fields.FileField._confirm_multiple_upload')
         patched = cls.patcher.start()
         patched.side_effect = lambda _, value, __: ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
         cls.language_fr = FrenchLanguageFactory()

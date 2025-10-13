@@ -38,7 +38,6 @@ from django.urls import reverse
 from django.utils.translation import gettext, gettext_lazy
 from osis_signature.enums import SignatureState
 
-from admission.ddd import FR_ISO_CODE
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
     ENTITY_CDE,
     ENTITY_CDSS,
@@ -96,6 +95,13 @@ from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
 from base.tests.factories.student import StudentFactory
 from base.tests.factories.user import UserFactory
+from epc.models.enums.decision_resultat_cycle import DecisionResultatCycle
+from epc.models.enums.etat_inscription import EtatInscriptionFormation
+from epc.tests.factories.inscription_programme_annuel import (
+    InscriptionProgrammeAnnuelFactory,
+)
+from osis_profile import BE_ISO_CODE, FR_ISO_CODE
+from osis_profile.models.enums.curriculum import Grade
 from epc.models.enums.decision_resultat_cycle import DecisionResultatCycle
 from epc.models.enums.etat_inscription import EtatInscriptionFormation
 from epc.tests.factories.inscription_programme_annuel import (

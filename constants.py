@@ -27,11 +27,9 @@ import uuid
 
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from osis_profile.constants import IMAGE_MIME_TYPES
 
 DEFAULT_PAGINATOR_SIZE = 500
-JPEG_MIME_TYPE = 'image/jpeg'
-PNG_MIME_TYPE = 'image/png'
-IMAGE_MIME_TYPES = {JPEG_MIME_TYPE, PNG_MIME_TYPE}
 SUPPORTED_MIME_TYPES = {PDF_MIME_TYPE} | IMAGE_MIME_TYPES
 DEFAULT_MIME_TYPES = [PDF_MIME_TYPE]
 UUID_REGEX = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'

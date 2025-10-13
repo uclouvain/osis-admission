@@ -2,7 +2,7 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-import osis_document.contrib.fields
+import osis_document_components.fields
 
 
 class Migration(migrations.Migration):
@@ -15,14 +15,14 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='baseadmission',
             name='curriculum',
-            field=osis_document.contrib.fields.FileField(
+            field=osis_document_components.fields.FileField(
                 base_field=models.UUIDField(), blank=True, default=list, size=None, verbose_name='Curriculum'
             ),
         ),
         migrations.AddField(
             model_name='continuingeducationadmission',
             name='diploma_equivalence',
-            field=osis_document.contrib.fields.FileField(
+            field=osis_document_components.fields.FileField(
                 base_field=models.UUIDField(), blank=True, default=list, size=None, verbose_name='Diploma equivalence'
             ),
         ),
@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='generaleducationadmission',
             name='bachelor_cycle_continuation_certificate',
-            field=osis_document.contrib.fields.FileField(
+            field=osis_document_components.fields.FileField(
                 base_field=models.UUIDField(),
                 blank=True,
                 default=list,
@@ -50,7 +50,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='generaleducationadmission',
             name='diploma_equivalence',
-            field=osis_document.contrib.fields.FileField(
+            field=osis_document_components.fields.FileField(
                 base_field=models.UUIDField(), blank=True, default=list, size=None, verbose_name='Diploma equivalence'
             ),
         ),

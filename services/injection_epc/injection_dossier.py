@@ -56,6 +56,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     DROITS_INSCRIPTION_MONTANT_VALEURS,
     PoursuiteDeCycle,
 )
+from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import TypeEquivalenceTitreAcces
 from admission.ddd.admission.shared_kernel.enums import (
     TypeItemFormulaire, TypeSituationAssimilation,
     ChoixAffiliationSport,
@@ -278,6 +279,10 @@ class InjectionEPCAdmission:
             Q(tags__contains=TAGS_AUTORISATION_SIC) | Q(tags__contains=TAGS_APPROBATION_PROPOSITION),
             object_uuid=admission.uuid
         ).order_by('-created').first().author
+        equivalence_pertinente = (
+            admission_generale
+            and admission_generale.foreign_access_title_equivalency_type in TypeEquivalenceTitreAcces.types_concernes()
+        )
         return {
             "dossier_uuid": str(admission.uuid),
             'auteur_autorisation_sic': auteur_autorisation_sic,
@@ -311,7 +316,7 @@ class InjectionEPCAdmission:
                 admission=admission,
                 admission_generale=admission_generale,
                 etudes_secondaires=etudes_secondaires,
-            ) if admission_generale and admission_generale.foreign_access_title_equivalency_type else None,
+            ) if equivalence_pertinente else None,
             "documents": (
                 InjectionEPCCurriculum._recuperer_documents(admission_generale or admission_iufc or admission_doctorat)
                 + documents_specifiques
@@ -334,10 +339,10 @@ class InjectionEPCAdmission:
             ).annotate(
                 annee_max=Max('educationalexperience__educationalexperienceyear__academic_year__year'),
             ).order_by('-annee_max').first()
-            experience_annuelle = experience_academique.educationalexperienceyear_set.filter(
+            experience_annuelle = experience_academique.educationalexperience.educationalexperienceyear_set.filter(
                 academic_year__year=experience_academique.annee_max
             ).first() if experience_academique else None
-            condition_acces_uuid = experience_annuelle.uuid if experience_annuelle else None
+            condition_acces_uuid = str(experience_annuelle.uuid) if experience_annuelle else None
         return {
             "type": admission_generale.foreign_access_title_equivalency_type,
             "statut": admission_generale.foreign_access_title_equivalency_status,

@@ -27,7 +27,7 @@
 from dal import forward
 from django import forms
 from django.utils.translation import gettext_lazy as _
-from osis_document.contrib import FileUploadField
+from osis_document_components.fields import FileUploadField
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixDoctoratDejaRealise,
@@ -210,7 +210,7 @@ class DoctorateAdmissionProjectForm(forms.Form):
     langue_redaction_these = forms.CharField(
         label=_("Thesis language"),
         widget=ListSelect2(
-            url="admission:autocomplete:language",
+            url="language-autocomplete",
         ),
         required=False,
     )

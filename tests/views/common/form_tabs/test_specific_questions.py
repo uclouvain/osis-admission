@@ -146,16 +146,16 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
 
     def setUp(self):
         # Mock osis document api
-        patcher = mock.patch("osis_document.api.utils.get_remote_token", return_value="foobar")
+        patcher = mock.patch("osis_document_components.services.get_remote_token", return_value="foobar")
         patcher.start()
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
-            'osis_document.api.utils.get_remote_metadata',
+            'osis_document_components.services.get_remote_metadata',
             return_value={'name': 'myfile', 'mimetype': PDF_MIME_TYPE, "size": 1},
         )
         patcher.start()
         self.addCleanup(patcher.stop)
-        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patcher = mock.patch('osis_document_components.fields.FileField._confirm_multiple_upload')
         patched = patcher.start()
         patched.side_effect = lambda _, value, __: value
 
@@ -853,16 +853,16 @@ class ContinuingSpecificQuestionsFormViewTestCase(TestCase):
 
     def setUp(self):
         # Mock osis document api
-        patcher = mock.patch("osis_document.api.utils.get_remote_token", return_value="foobar")
+        patcher = mock.patch("osis_document_components.services.get_remote_token", return_value="foobar")
         patcher.start()
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
-            'osis_document.api.utils.get_remote_metadata',
+            'osis_document_components.services.get_remote_metadata',
             return_value={'name': 'myfile', 'mimetype': PDF_MIME_TYPE, 'size': 1},
         )
         patcher.start()
         self.addCleanup(patcher.stop)
-        patcher = mock.patch('osis_document.contrib.fields.FileField._confirm_multiple_upload')
+        patcher = mock.patch('osis_document_components.fields.FileField._confirm_multiple_upload')
         patched = patcher.start()
         patched.side_effect = lambda _, value, __: value
 

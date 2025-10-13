@@ -106,7 +106,7 @@ class LanguageModelChoiceField(ModelChoiceField):
 class DoctorateAdmissionLanguageForm(forms.ModelForm):
     language = LanguageModelChoiceField(
         label=_('Language'),
-        widget=ModelSelect2(url='admission:autocomplete:language', forward=[forward.Const(val='id', dst='id_field')]),
+        widget=ModelSelect2(url='language-autocomplete', forward=[forward.Const(val='id', dst='id_field')]),
         queryset=Language.objects.all(),
     )
 

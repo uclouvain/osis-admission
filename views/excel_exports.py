@@ -70,7 +70,6 @@ from admission.ddd.admission.doctorat.preparation.dtos.liste import DemandeReche
 from admission.ddd.admission.doctorat.preparation.read_view.repository.i_tableau_bord import (
     ITableauBordRepositoryAdmissionMixin,
 )
-from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixGenre
 from admission.ddd.admission.formation_continue.commands import (
     ListerDemandesQuery as ListerDemandesContinuesQuery,
 )
@@ -119,7 +118,7 @@ from admission.forms.admission.filter import (
     ContinuingAdmissionsFilterForm,
 )
 from admission.forms.doctorate.cdd.filter import DoctorateListFilterForm
-from admission.models import AdmissionFormItem, SupervisionActor
+from admission.models import AdmissionFormItem
 from admission.templatetags.admission import admission_status
 from admission.utils import add_messages_into_htmx_response
 from admission.views import PaginatedList
@@ -131,6 +130,7 @@ from base.models.person import Person
 from base.utils.utils import format_academic_year
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile.models.enums.curriculum import ActivitySector, ActivityType
+from osis_profile.models.enums.person import ChoixGenre
 from reference.models.country import Country
 from reference.models.enums.cycle import Cycle
 from reference.models.scholarship import Scholarship
