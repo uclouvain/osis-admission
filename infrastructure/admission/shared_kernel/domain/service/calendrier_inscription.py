@@ -58,17 +58,23 @@ class CalendrierInscription(ICalendrierInscription):
         ).values_list('reference', 'data_year__year')
 
     @classmethod
-    def recuperer_periode_inscription_specifique_medecine_dentisterie(cls) -> Optional[PeriodeDTO]:
-        today = date.today()
-        academic_calendar = (
-            AcademicCalendar.objects.filter(
-                reference=AcademicCalendarTypes.ADMISSION_MEDICINE_DENTISTRY_BACHELOR_ENROLLMENT.name,
-            )
-            .filter(
-                Q(start_date__lte=today, end_date__gte=today) | Q(start_date__gt=today),
-            )
-            .order_by('start_date')[:1]
+    def recuperer_periode_inscription_specifique_medecine_dentisterie(
+        cls,
+        annee: Optional[int],
+    ) -> Optional[PeriodeDTO]:
+        qs = AcademicCalendar.objects.filter(
+            reference=AcademicCalendarTypes.ADMISSION_MEDICINE_DENTISTRY_BACHELOR_ENROLLMENT.name,
         )
+
+        if annee:
+            # Récupération de la période de l'année en question
+            qs = qs.filter(data_year__year=annee)
+        else:
+            # Récupération de la période courante si existante, sinon de la prochaine
+            today = date.today()
+            qs = qs.filter(Q(start_date__lte=today, end_date__gte=today) | Q(start_date__gt=today))
+
+        academic_calendar = qs.order_by('start_date')[:1]
 
         if academic_calendar:
             return PeriodeDTO(date_debut=academic_calendar[0].start_date, date_fin=academic_calendar[0].end_date)

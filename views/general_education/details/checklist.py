@@ -3530,5 +3530,5 @@ class ChecklistView(
             experiences[str(experience_non_academique.uuid)] = experience_non_academique
         experiences[OngletsDemande.ETUDES_SECONDAIRES.name] = resume.etudes_secondaires
         if resume.examens.requis:
-            experiences[OngletsDemande.EXAMS.name] = resume.examens
+            experiences[str(resume.examens.uuid)] = resume.examens
         return experiences

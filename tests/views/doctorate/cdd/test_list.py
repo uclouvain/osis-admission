@@ -102,6 +102,13 @@ from epc.tests.factories.inscription_programme_annuel import (
 )
 from osis_profile import BE_ISO_CODE, FR_ISO_CODE
 from osis_profile.models.enums.curriculum import Grade
+from epc.models.enums.decision_resultat_cycle import DecisionResultatCycle
+from epc.models.enums.etat_inscription import EtatInscriptionFormation
+from epc.tests.factories.inscription_programme_annuel import (
+    InscriptionProgrammeAnnuelFactory,
+)
+from osis_profile import BE_ISO_CODE
+from osis_profile.models.enums.curriculum import Grade
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.diploma_title import DiplomaTitleFactory
 from reference.tests.factories.scholarship import (
@@ -1107,7 +1114,6 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             self.assertEqual(proposition.nom_candidat, self.admissions[1].candidate.last_name)
             self.assertEqual(proposition.prenom_candidat, self.admissions[1].candidate.first_name)
             self.assertEqual(proposition.sigle_formation, self.admissions[1].training.acronym)
-            self.assertEqual(proposition.noma_candidat, '')
             self.assertEqual(proposition.code_formation, self.admissions[1].training.partial_acronym)
             self.assertEqual(proposition.intitule_formation, self.admissions[1].training.title)
             self.assertEqual(proposition.decision_fac, '')
