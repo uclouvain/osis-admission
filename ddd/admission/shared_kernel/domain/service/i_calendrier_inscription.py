@@ -39,7 +39,14 @@ from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formatio
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     IdentificationNonCompleteeException,
 )
-from admission.ddd.admission.shared_kernel.domain.model.formation import Formation, FormationIdentity
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    Proposition,
+)
+from admission.ddd.admission.formation_generale.dtos import PropositionDTO
+from admission.ddd.admission.shared_kernel.domain.model.formation import (
+    Formation,
+    FormationIdentity,
+)
 from admission.ddd.admission.shared_kernel.domain.model.periode import Periode
 from admission.ddd.admission.shared_kernel.domain.service.i_formation_translator import (
     IFormationTranslator,
@@ -63,10 +70,6 @@ from admission.ddd.admission.shared_kernel.dtos import IdentificationDTO
 from admission.ddd.admission.shared_kernel.dtos.conditions import InfosDetermineesDTO
 from admission.ddd.admission.shared_kernel.dtos.periode import PeriodeDTO
 from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation
-from admission.ddd.admission.formation_generale.domain.model.proposition import (
-    Proposition,
-)
-from admission.ddd.admission.formation_generale.dtos import PropositionDTO
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from osis_common.ddd import interface
@@ -221,7 +224,7 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
             if not formation_translator.verifier_existence(formation_id.sigle, determination.annee):
                 raise FormationNonTrouveeException(formation_id.sigle, determination.annee)
 
-        cls.verifier_periode_inscription_specifique(formation=formation)
+        cls.verifier_periode_inscription_specifique(formation=formation, annee_determinee=determination.annee)
 
         # Vérifier la concordance entre l'année/pool soumis et ceux calculés
         if (
@@ -232,7 +235,10 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
             raise PoolOuAnneeDifferentException(determination.annee, determination.pool, annee_soumise, pool_soumis)
 
     @classmethod
-    def recuperer_periode_inscription_specifique_medecine_dentisterie(cls) -> Optional[PeriodeDTO]:
+    def recuperer_periode_inscription_specifique_medecine_dentisterie(
+        cls,
+        annee: Optional[int],
+    ) -> Optional[PeriodeDTO]:
         raise NotImplementedError()
 
     @classmethod
@@ -244,11 +250,12 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
         raise NotImplementedError()
 
     @classmethod
-    def verifier_periode_inscription_specifique(cls, formation: Optional[Formation]):
+    def verifier_periode_inscription_specifique(cls, formation: Optional[Formation], annee_determinee: Optional[int]):
         """
-        Vérifier, si une période d'inscription spécifique est définie pour une formation, si la soumission de la demande
-        est possible.
+        Vérifier, si une période d'inscription spécifique est définie pour une formation et une année données,
+        si la soumission de la demande est possible.
         :param formation: La formation souhaitée
+        :param annee_determinee: L'année souhaitée
         :return:
         """
         if not formation:
@@ -259,7 +266,9 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
         date_jour = datetime.date.today()
 
         if formation.type == TrainingType.BACHELOR and formation.est_formation_medecine_ou_dentisterie:
-            periode_inscription = cls.recuperer_periode_inscription_specifique_medecine_dentisterie()
+            periode_inscription = cls.recuperer_periode_inscription_specifique_medecine_dentisterie(
+                annee=annee_determinee
+            )
 
             if periode_inscription:
                 message = gettext(
