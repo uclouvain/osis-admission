@@ -58,6 +58,9 @@ from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat impo
 from admission.ddd.admission.shared_kernel.domain.service.i_raccrocher_experiences_curriculum import (
     IRaccrocherExperiencesCurriculum,
 )
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
+    AcademicYearIdentity,
+)
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import (
     GetCurrentAcademicYear,
 )
@@ -89,6 +92,11 @@ def demander_signatures(
         )
         .year
     )
+    annee_formation = academic_year_repository.get(
+        entity_id=AcademicYearIdentity(
+            year=proposition_candidat.annee_calculee or proposition_candidat.formation_id.annee
+        )
+    )
     VerifierPropositionProjetDoctoral.verifier(
         proposition_candidat=proposition_candidat,
         groupe_de_supervision=groupe_de_supervision,
@@ -96,6 +104,7 @@ def demander_signatures(
         promoteur_translator=promoteur_translator,
         annee_courante=annee_courante,
         profil_candidat_translator=profil_candidat_translator,
+        annee_formation=annee_formation,
     )
 
     # WHEN

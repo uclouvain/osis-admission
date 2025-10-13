@@ -101,6 +101,9 @@ from base.ddd.utils.business_validator import (
     BusinessValidator,
     TwoStepsMultipleBusinessExceptionListValidator,
 )
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
+    AcademicYear,
+)
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
@@ -346,6 +349,7 @@ class CurriculumValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     experiences_non_academiques: List[ExperienceNonAcademiqueDTO]
     experiences_academiques: List[ExperienceAcademiqueDTO]
     experiences_academiques_incompletes: Dict[str, str]
+    annee_formation: AcademicYear
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -368,6 +372,7 @@ class CurriculumValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
                 annee_derniere_inscription_ucl=self.annee_derniere_inscription_ucl,
                 annee_diplome_etudes_secondaires=self.annee_diplome_etudes_secondaires,
                 experiences_non_academiques=self.experiences_non_academiques,
+                annee_formation=self.annee_formation,
             ),
         ]
 
@@ -382,6 +387,7 @@ class CurriculumPostSoumissionValidatorList(TwoStepsMultipleBusinessExceptionLis
     experiences_parcours_interne: List[ExperienceParcoursInterneDTO]
     verification_experiences_completees: bool
     grade_academique_formation_proposition: str
+    annee_formation: AcademicYear
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -397,6 +403,7 @@ class CurriculumPostSoumissionValidatorList(TwoStepsMultipleBusinessExceptionLis
                 experiences_non_academiques=self.experiences_non_academiques,
                 date_soumission=self.date_soumission,
                 experiences_parcours_interne=self.experiences_parcours_interne,
+                annee_formation=self.annee_formation,
             ),
         ]
 

@@ -48,8 +48,12 @@ from admission.ddd.admission.shared_kernel.dtos.resume import ResumeCandidatDTO
 from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
     ExperiencesCVRecuperees,
 )
+from base.models.academic_year import AcademicYear as AcademicYearModel
 from base.models.enums.community import CommunityEnum
 from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
+    AcademicYear,
+)
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     ValorisationEtudesSecondairesDTO,
 )
@@ -164,24 +168,23 @@ class IProfilCandidatTranslator(interface.DomainService):
     @classmethod
     def get_date_maximale_curriculum(
         cls,
+        annee_formation: AcademicYear | AcademicYearModel | None = None,
         date_soumission: Optional[datetime.date] = None,
-        mois_debut_annee_academique_courante_facultatif: bool = False,
     ):
         """
         Retourne la date de la dernière expérience à remplir dans le CV.
+        :param annee_formation: objet contenant l'année et les dates de début et de fin de la formation ciblée.
         :param date_soumission: date de soumission de la demande.
-        :param mois_debut_annee_academique_courante_facultatif: si vrai, rend facultatif le dernier mois normalement
-            obligatoire si celui-ci correspond au mois de début de l'année académique à valoriser.
         :return: la date de la dernière expérience à remplir dans le CV.
         """
-        date_reference = date_soumission if date_soumission else datetime.date.today()
-        date_maximale = (date_reference.replace(day=1) - datetime.timedelta(days=1)).replace(day=1)
+        dates_reference = [date_soumission if date_soumission else datetime.date.today()]
 
-        if (
-            mois_debut_annee_academique_courante_facultatif
-            and date_maximale.month == cls.MOIS_DEBUT_ANNEE_ACADEMIQUE_A_VALORISER
-        ):
-            return date_maximale.replace(month=cls.MOIS_DEBUT_ANNEE_ACADEMIQUE_A_VALORISER - 1)
+        if annee_formation:
+            dates_reference.append(annee_formation.start_date)
+
+        date_reference = min(dates_reference)
+
+        date_maximale = (date_reference.replace(day=1) - datetime.timedelta(days=1)).replace(day=1)
 
         return date_maximale
 
