@@ -246,5 +246,18 @@ ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED = 'osis-admission-generic-admitted'
 templates.register(
     ADMISSION_EMAIL_GENERIC_ONCE_ADMITTED,
     description=_("Generic mail that can be manually sent once the candidate is admitted"),
-    tokens=admission_common_tokens,
+    tokens=admission_common_tokens
+    + [
+        Token(
+            name='sender_name',
+            description=_('Name of the manager sending the email'),
+            example="John Doe",
+        ),
+        Token(
+            name='doctoral_commission',
+            description=_('Name of the doctoral commission'),
+            example="Commission CD1",
+        ),
+    ],
+    tag=DOCTORATE_ADMISSION_TAG,
 )
