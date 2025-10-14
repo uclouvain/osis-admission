@@ -80,7 +80,7 @@ msgctxt "admission"
 msgid "(Expected) date of graduation"
 msgstr ""
 
-msgid "(Expected) graduation date"
+msgid "(Expected) graduation date (signed diploma)"
 msgstr ""
 
 msgid ", on"
