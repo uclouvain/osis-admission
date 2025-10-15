@@ -28,6 +28,7 @@ __all__ = [
     "OutilDeComparaisonEtFusionView",
     "RefuserPropositionFusionHtmxView",
     "ParcoursAnterieurHtmxView",
+    "IgnorerValidationInformationsInjectionSignaletiqueView",
 ]
 
 from django.urls import reverse
@@ -36,7 +37,9 @@ from admission.utils import get_cached_general_education_admission_perm_obj
 from gestion_des_comptes.views.outil_de_comparaison_et_fusion import \
     RefuserPropositionFusionHtmxView as RefuserPropositionFusionHtmxMixinView, \
     OutilDeComparaisonEtFusionView as OutilDeComparaisonEtFusionMixinView, \
-    ParcoursAnterieurHtmxView as ParcoursAnterieurHtmxMixinView
+    ParcoursAnterieurHtmxView as ParcoursAnterieurHtmxMixinView, \
+    IgnorerValidationInformationsInjectionSignaletiqueView as \
+        IgnorerValidationInformationsInjectionSignaletiqueMixinView
 
 
 class OutilDeComparaisonEtFusionView(OutilDeComparaisonEtFusionMixinView):
@@ -81,6 +84,23 @@ class RefuserPropositionFusionHtmxView(RefuserPropositionFusionHtmxMixinView):
         'refuser-proposition-fusion': 'refuser_proposition_fusion/<uuid:uuid>'
     }
     permission_required = "admission.merge_candidate_with_known_person"
+
+    @property
+    def matricule(self) -> str:
+        return self.get_permission_object().candidate.global_id
+
+    def get_permission_object(self):
+        return get_cached_general_education_admission_perm_obj(self.kwargs['uuid'])
+
+
+class IgnorerValidationInformationsInjectionSignaletiqueView(
+    IgnorerValidationInformationsInjectionSignaletiqueMixinView
+):
+    urlpatterns = {
+        'ignorer-validation-informations-injection-signaletique':
+            'ignore_validation_informations_injection_signaletique/<uuid:uuid>'
+    }
+    permission_required = "admission.ignorer_validation_informations_injection_signaletique"
 
     @property
     def matricule(self) -> str:

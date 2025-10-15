@@ -56,5 +56,6 @@ class AdmissionSicManagement(SicManagement):
             'admission.validate_registration': is_entity_manager,
             # Fusion
             'admission.merge_candidate_with_known_person': is_entity_manager & ~is_sent_to_epc,
+            'admission.ignorer_validation_informations_injection_signaletique': is_entity_manager & ~is_sent_to_epc,
         }
         return RuleSet(ruleset)
