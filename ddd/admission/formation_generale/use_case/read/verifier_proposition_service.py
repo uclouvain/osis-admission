@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,13 +25,29 @@
 # ##############################################################################
 import datetime
 
-from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription import ICalendrierInscription
-from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import ITitresAcces
+from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription import (
+    ICalendrierInscription,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions import (
+    IMaximumPropositionsAutorisees,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
+    IProfilCandidatTranslator,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import (
+    ITitresAcces,
+)
 from admission.ddd.admission.shared_kernel.enums.question_specifique import Onglets
-from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
-from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
+    AcademicYearIdentity,
+)
+from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import (
+    GetCurrentAcademicYear,
+)
+from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import (
+    IAcademicYearRepository,
+)
+
 from ...commands import VerifierPropositionQuery
 from ...domain.builder.proposition_identity_builder import PropositionIdentityBuilder
 from ...domain.model.proposition import PropositionIdentity
@@ -63,6 +79,10 @@ def verifier_proposition(
         )
         .year
     )
+    annee_formation = academic_year_repository.get(
+        entity_id=AcademicYearIdentity(year=proposition.annee_calculee or proposition.formation_id.annee)
+    )
+
     questions_specifiques = questions_specifiques_translator.search_by_proposition(
         cmd.uuid_proposition,
         onglets=Onglets.get_names(),
@@ -87,6 +107,7 @@ def verifier_proposition(
         maximum_propositions_service=maximum_propositions_service,
         titres=titres,
         formation=formation,
+        annee_formation=annee_formation,
     )
 
     # THEN
