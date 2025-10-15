@@ -6651,6 +6651,10 @@ msgstr "Promoteur non trouvé."
 msgid "Supervisors"
 msgstr "Promoteurs·trices"
 
+msgctxt "no_gender"
+msgid "Supervisors"
+msgstr "Promoteurs"
+
 msgid "Supervisory panel"
 msgstr "Comité d'accompagnement"
 
