@@ -35,6 +35,7 @@ from admission.auth.predicates.common import (
     is_debug,
     is_part_of_education_group,
     is_sent_to_epc,
+    no_candidate_merge_proposal_in_progress,
     past_experiences_checklist_tab_is_not_sufficient,
     workflow_injection_signaletique_en_cours,
 )
@@ -124,10 +125,12 @@ class ProgramManager(EducationGroupRoleModel):
                 (continuing.in_manager_status & ~candidate_has_other_doctorate_or_general_admissions)
                 | doctorate.in_fac_status
             )
-            & ~is_sent_to_epc,
+            & ~is_sent_to_epc
+            & no_candidate_merge_proposal_in_progress,
             'admission.delete_admission_curriculum': is_part_of_education_group
             & continuing.in_manager_status
             & ~is_sent_to_epc
+            & no_candidate_merge_proposal_in_progress
             & ~candidate_has_other_doctorate_or_general_admissions,
             # Project
             'admission.view_admission_project': is_part_of_education_group,
@@ -212,7 +215,8 @@ class ProgramManager(EducationGroupRoleModel):
             'admission.checklist_select_access_title': is_part_of_education_group
             & (general.in_fac_status | doctorate.in_fac_status)
             & past_experiences_checklist_tab_is_not_sufficient
-            & ~is_sent_to_epc,
+            & ~is_sent_to_epc
+            & no_candidate_merge_proposal_in_progress,
             'admission.checklist_change_fac_comment': is_part_of_education_group & ~is_sent_to_epc,
             'admission.checklist_financability_dispensation_fac': is_part_of_education_group
             & (general.in_fac_status | general.can_send_to_fac_faculty_decision)

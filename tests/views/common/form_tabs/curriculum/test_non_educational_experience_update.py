@@ -38,16 +38,18 @@ from rest_framework import status
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
-from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
-    EtatAuthentificationParcours,
-)
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
     ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
+    EtatAuthentificationParcours,
+)
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    OngletsDemande,
 )
 from admission.models import ContinuingEducationAdmission, DoctorateAdmission
 from admission.models import EPCInjection as AdmissionEPCInjection
@@ -72,6 +74,7 @@ from admission.tests.factories.roles import (
 )
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.file_field import PDF_MIME_TYPE
+from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from osis_profile.models import ProfessionalExperience
@@ -147,7 +150,9 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
         )
 
         # Mock osis document api
-        patcher = mock.patch("osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value)
+        patcher = mock.patch(
+            "osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
@@ -250,6 +255,18 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
         )
 
         response = self.client.get(self.general_form_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_general_update_curriculum_is_not_allowed_if_person_merge_proposal_in_progress(self):
+        self.client.force_login(self.sic_manager_user)
+
+        PersonMergeProposal.objects.create(
+            original_person=self.general_admission.candidate,
+            status=PersonMergeStatus.PENDING.name,
+            last_similarity_result_update=datetime.datetime.now(),
+        )
+        response = self.client.get(self.general_form_url)
+
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_general_form_initialization(self):
@@ -571,6 +588,19 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+        general_admission.delete()
+
+        proposal = PersonMergeProposal.objects.create(
+            original_person=self.other_continuing_admission.candidate,
+            status=PersonMergeStatus.PENDING.name,
+            last_similarity_result_update=datetime.datetime.now(),
+        )
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        proposal.delete()
+
     def test_continuing_update_curriculum_for_sic_users(self):
         self.client.force_login(self.sic_manager_user)
 
@@ -608,6 +638,19 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
 
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        general_admission.delete()
+
+        proposal = PersonMergeProposal.objects.create(
+            original_person=self.other_continuing_admission.candidate,
+            status=PersonMergeStatus.PENDING.name,
+            last_similarity_result_update=datetime.datetime.now(),
+        )
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        proposal.delete()
 
     def test_continuing_submit_form(self):
         self.client.force_login(self.sic_manager_user)
@@ -674,6 +717,27 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    def test_doctorate_update_curriculum_is_not_allowed_for_fac_users_if_merge_proposal_person_in_progress(self):
+        other_admission = DoctorateAdmissionFactory(
+            training=self.doctorate_admission.training,
+            candidate=self.doctorate_admission.candidate,
+            status=ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name,
+        )
+        PersonMergeProposal.objects.create(
+            original_person=self.general_admission.candidate,
+            status=PersonMergeStatus.PENDING.name,
+            last_similarity_result_update=datetime.datetime.now(),
+        )
+        self.client.force_login(self.doctorate_program_manager_user)
+        response = self.client.post(
+            resolve_url(
+                'admission:doctorate:update:curriculum:non_educational',
+                uuid=other_admission.uuid,
+                experience_uuid=self.experience.uuid,
+            ),
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
     def test_doctorate_update_curriculum_is_allowed_for_sic_users(self):
         self.client.force_login(self.sic_manager_user)
         response = self.client.get(self.doctorate_form_url)
@@ -681,6 +745,16 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
 
         form = response.context['form']
         self.assertEqual(form.fields['certificate'].disabled, False)
+
+    def test_doctorate_update_curriculum_is_not_allowed_for_sic_users_if_person_merge_proposal_in_progress(self):
+        self.client.force_login(self.sic_manager_user)
+        PersonMergeProposal.objects.create(
+            original_person=self.general_admission.candidate,
+            status=PersonMergeStatus.PENDING.name,
+            last_similarity_result_update=datetime.datetime.now(),
+        )
+        response = self.client.get(self.doctorate_form_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_doctorate_submit_form(self):
         self.client.force_login(self.sic_manager_user)

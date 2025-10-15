@@ -80,7 +80,7 @@ msgctxt "admission"
 msgid "(Expected) date of graduation"
 msgstr ""
 
-msgid "(Expected) graduation date (signed diploma)"
+msgid "(Expected) graduation date"
 msgstr ""
 
 msgid ", on"
@@ -155,6 +155,11 @@ msgstr ""
 msgid ""
 "A candidate is considered as VIP if he/she is in double degree or if he/she "
 "benefits from an international scholarship or if he/she is Erasmus Mundus."
+msgstr ""
+
+msgid ""
+"A candidate merge proposal must not be in progress in order to do this "
+"action."
 msgstr ""
 
 msgid "A card"

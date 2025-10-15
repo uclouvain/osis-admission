@@ -69,6 +69,7 @@ from admission.tests.factories.roles import (
 from base.models.enums.community import CommunityEnum
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.enums.teaching_type import TeachingTypeEnum
+from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -225,7 +226,9 @@ class CurriculumEducationalExperienceDuplicateViewTestCase(TestCase):
         )
 
         # Mock osis document api
-        self.get_several_remote_metadata_patcher = mock.patch('osis_document_components.services.get_several_remote_metadata')
+        self.get_several_remote_metadata_patcher = mock.patch(
+            'osis_document_components.services.get_several_remote_metadata'
+        )
         self.get_several_remote_metadata_patched = self.get_several_remote_metadata_patcher.start()
         self.get_several_remote_metadata_patched.return_value = {
             f'token{index}': {
@@ -243,7 +246,9 @@ class CurriculumEducationalExperienceDuplicateViewTestCase(TestCase):
         }
         self.addCleanup(self.get_remote_tokens_patcher.stop)
 
-        self.documents_remote_duplicate_patcher = mock.patch('osis_document_components.services.documents_remote_duplicate')
+        self.documents_remote_duplicate_patcher = mock.patch(
+            'osis_document_components.services.documents_remote_duplicate'
+        )
         self.documents_remote_duplicate_patched = self.documents_remote_duplicate_patcher.start()
         self.documents_remote_duplicate_patched.return_value = {
             self.files_uuids_str[index]: self.duplicate_files_uuids_str[index] for index in range(len(self.files_uuids))
@@ -259,6 +264,17 @@ class CurriculumEducationalExperienceDuplicateViewTestCase(TestCase):
         self.client.force_login(self.sic_manager_user)
         response = self.client.post(self.duplicate_url)
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+    def test_duplicate_experience_from_curriculum_is_not_allowed_if_person_merge_proposal_in_progress(self):
+        PersonMergeProposal.objects.create(
+            original_person=self.general_admission.candidate,
+            status=PersonMergeStatus.PENDING.name,
+            last_similarity_result_update=datetime.datetime.now(),
+        )
+
+        self.client.force_login(self.sic_manager_user)
+        response = self.client.post(self.duplicate_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_duplicate_experience_from_curriculum_and_redirect(self):
         self.client.force_login(self.sic_manager_user)
@@ -597,6 +613,17 @@ class CurriculumEducationalExperienceDuplicateViewTestCase(TestCase):
 
         general_admission.delete()
 
+        proposal = PersonMergeProposal.objects.create(
+            original_person=self.other_continuing_admission.candidate,
+            status=PersonMergeStatus.PENDING.name,
+            last_similarity_result_update=datetime.datetime.now(),
+        )
+
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        proposal.delete()
+
         response = self.client.post(url)
 
         base_curriculum_url = resolve_url(
@@ -642,6 +669,17 @@ class CurriculumEducationalExperienceDuplicateViewTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         general_admission.delete()
+
+        proposal = PersonMergeProposal.objects.create(
+            original_person=self.other_continuing_admission.candidate,
+            status=PersonMergeStatus.PENDING.name,
+            last_similarity_result_update=datetime.datetime.now(),
+        )
+
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        proposal.delete()
 
         response = self.client.post(url)
 

@@ -54,6 +54,7 @@ from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.campus import Campus
 from base.models.enums.community import CommunityEnum
 from base.models.enums.establishment_type import EstablishmentTypeEnum
+from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.campus import CampusFactory
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -188,7 +189,9 @@ class CurriculumEducationalExperienceFormViewForContinuingTestCase(TestCase):
         )
 
         # Mock osis document api
-        patcher = mock.patch("osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value)
+        patcher = mock.patch(
+            "osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
@@ -239,6 +242,16 @@ class CurriculumEducationalExperienceFormViewForContinuingTestCase(TestCase):
         response = self.client.get(self.form_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+        general_admission.delete()
+
+        PersonMergeProposal.objects.create(
+            original_person=self.continuing_admission.candidate,
+            status=PersonMergeStatus.PENDING.name,
+            last_similarity_result_update=datetime.datetime.now(),
+        )
+        response = self.client.get(self.form_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
     def test_update_curriculum_is_allowed_for_sic_users(self):
         self.client.force_login(self.sic_manager_user)
 
@@ -257,6 +270,16 @@ class CurriculumEducationalExperienceFormViewForContinuingTestCase(TestCase):
         general_admission = GeneralEducationAdmissionFactory(
             candidate=self.continuing_admission.candidate,
             status=ChoixStatutPropositionContinue.CONFIRMEE.name,
+        )
+        response = self.client.get(self.form_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        general_admission.delete()
+
+        PersonMergeProposal.objects.create(
+            original_person=self.continuing_admission.candidate,
+            status=PersonMergeStatus.PENDING.name,
+            last_similarity_result_update=datetime.datetime.now(),
         )
         response = self.client.get(self.form_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

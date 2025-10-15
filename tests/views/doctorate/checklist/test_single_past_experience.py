@@ -61,16 +61,13 @@ from admission.tests.factories.roles import (
 )
 from admission.tests.views.doctorate.checklist.sic_decision.base import SicPatchMixin
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
-from base.models.enums.community import CommunityEnum
+from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.hops import HopsFactory
-from base.tests.factories.organization import OrganizationFactory
 from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
-from osis_profile.models.enums.curriculum import EvaluationSystem, Result
-from reference.models.enums.cycle import Cycle
-from reference.tests.factories.diploma_title import DiplomaTitleFactory
+from osis_profile.models.enums.curriculum import Result
 
 
 @freezegun.freeze_time('2023-01-01')
@@ -132,6 +129,19 @@ class SinglePastExperienceChangeStatusViewTestCase(SicPatchMixin, TestCase):
 
     def test_change_the_checklist_status_is_forbidden_with_fac_user(self):
         self.client.force_login(user=self.fac_manager_user)
+
+        response = self.client.post(self.url, **self.default_headers)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_change_the_checklist_status_is_forbidden_with_a_person_merge_proposal_in_progress(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        PersonMergeProposal.objects.create(
+            original_person=self.admission.candidate,
+            status=PersonMergeStatus.PENDING.name,
+            last_similarity_result_update=datetime.datetime.now(),
+        )
 
         response = self.client.post(self.url, **self.default_headers)
 
@@ -420,6 +430,19 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(SicPatchMixin, TestCa
 
     def test_change_the_authentication_is_forbidden_with_fac_user(self):
         self.client.force_login(user=self.fac_manager_user)
+
+        response = self.client.post(self.url, **self.default_headers)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_change_the_checklist_status_is_forbidden_with_a_person_merge_proposal_in_progress(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        PersonMergeProposal.objects.create(
+            original_person=self.admission.candidate,
+            status=PersonMergeStatus.PENDING.name,
+            last_similarity_result_update=datetime.datetime.now(),
+        )
 
         response = self.client.post(self.url, **self.default_headers)
 

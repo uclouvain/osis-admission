@@ -82,6 +82,7 @@ from admission.tests.factories.roles import (
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.enums.community import CommunityEnum
 from base.models.enums.establishment_type import EstablishmentTypeEnum
+from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -204,7 +205,9 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
         )
 
         # Mock osis document api
-        patcher = mock.patch("osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value)
+        patcher = mock.patch(
+            "osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
@@ -291,6 +294,17 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
         )
 
         response = self.client.get(self.delete_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_delete_experience_from_curriculum_is_not_allowed_if_person_merge_proposal_in_progress(self):
+        PersonMergeProposal.objects.create(
+            original_person=self.general_admission.candidate,
+            status=PersonMergeStatus.PENDING.name,
+            last_similarity_result_update=datetime.datetime.now(),
+        )
+
+        self.client.force_login(self.sic_manager_user)
+        response = self.client.delete(self.delete_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_delete_experience_from_curriculum_and_redirect(self):
@@ -495,6 +509,17 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
 
         general_admission.delete()
 
+        proposal = PersonMergeProposal.objects.create(
+            original_person=self.other_continuing_admission.candidate,
+            status=PersonMergeStatus.PENDING.name,
+            last_similarity_result_update=datetime.datetime.now(),
+        )
+
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        proposal.delete()
+
         response = self.client.delete(url)
 
         base_curriculum_url = resolve_url(
@@ -542,6 +567,17 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         general_admission.delete()
+
+        proposal = PersonMergeProposal.objects.create(
+            original_person=self.other_continuing_admission.candidate,
+            status=PersonMergeStatus.PENDING.name,
+            last_similarity_result_update=datetime.datetime.now(),
+        )
+
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        proposal.delete()
 
         response = self.client.delete(url)
 

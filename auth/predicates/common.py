@@ -26,6 +26,7 @@
 from typing import Union
 
 from django.contrib.auth.models import User
+from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 from gestion_des_comptes.models import (
     InjectionSignaletiqueOrchtestrator,
@@ -38,6 +39,7 @@ from admission.auth.scope import Scope
 from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
 from admission.models import DoctorateAdmission, GeneralEducationAdmission
 from admission.models.base import BaseAdmission
+from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from osis_role.errors import predicate_failed_msg
 
 
@@ -195,6 +197,22 @@ def is_sent_to_epc(self, user: User, obj: BaseAdmission):
     cache_key = f'admission_{obj.pk}_sent_to_epc'
     if not hasattr(user, cache_key):
         setattr(user, cache_key, obj.sent_to_epc)
+    return getattr(user, cache_key)
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("A candidate merge proposal must not be in progress in order to do this action."))
+def no_candidate_merge_proposal_in_progress(self, user: User, obj: BaseAdmission):
+    cache_key = f'admission_{obj.pk}_person_merge_proposal_in_progress'
+    if not hasattr(user, cache_key):
+        has_person_merge_proposal_in_progress = (
+            PersonMergeProposal.objects.filter(
+                status__in=[PersonMergeStatus.IN_PROGRESS.name, PersonMergeStatus.PENDING.name]
+            )
+            .filter(Q(original_person_id=obj.candidate_id) | Q(proposal_merge_person_id=obj.candidate_id))
+            .exists()
+        )
+        setattr(user, cache_key, not has_person_merge_proposal_in_progress)
     return getattr(user, cache_key)
 
 

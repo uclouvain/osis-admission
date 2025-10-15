@@ -3448,6 +3448,7 @@ class ChecklistView(
                     'admission.checklist_change_sic_comment',
                     original_admission,
                 ),
+                'admission.checklist_change_past_experiences': can_change_past_experiences,
             }
 
             disable_unavailable_forms(
@@ -3459,7 +3460,7 @@ class ChecklistView(
                     context['past_experiences_admission_access_title_equivalency_form']: can_change_access_title,
                     context['financabilite_approval_form']: can_change_checklist,
                     **{
-                        authentication_form: can_change_checklist
+                        authentication_form: can_change_past_experiences
                         for authentication_form in context['authentication_forms'].values()
                     },
                     **{

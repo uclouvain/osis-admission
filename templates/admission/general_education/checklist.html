@@ -849,7 +849,7 @@
 
               if (elt.classList.contains('checklist-state-button')) {
                   {# Click on checklist state button #}
-                  if(!event.originalEvent.detail.successful){
+                  if(!event.originalEvent.detail.successful && event.originalEvent.detail.xhr.status !== 403){
                     location.reload();
                   }
 
@@ -862,7 +862,7 @@
 
                   {# Change the state icon in the list of the tabs #}
                   const currentTabHref = $('#checklist-menu').find('.active').attr('href');
-                  const currentItem = $('#checklist-menu').find('div[href="' + currentTabHref + '"] i');
+                  const currentItem = $('#checklist-menu').find('[href="' + currentTabHref + '"] i');
                   currentItem[0].className = buttonClassByState[buttonToSelect.dataset.status];
               } else {
                   if (formGroup) formGroup.classList.remove("saving");

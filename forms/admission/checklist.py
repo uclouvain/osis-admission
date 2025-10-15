@@ -170,6 +170,7 @@ class CommentForm(forms.Form):
             COMMENT_TAG_CDD_FOR_SIC: 'admission.checklist_change_fac_comment',
             COMMENT_TAG_IUFC_FOR_FAC: 'admission.continuing_checklist_change_iufc_comment',
             COMMENT_TAG_FAC_FOR_IUFC: 'admission.continuing_checklist_change_fac_comment',
+            'authentication': 'admission.checklist_change_past_experiences',
         }
 
         if self.prefix in labels_from_prefix:

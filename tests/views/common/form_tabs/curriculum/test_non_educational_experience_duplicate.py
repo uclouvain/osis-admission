@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -63,6 +63,7 @@ from admission.tests.factories.roles import (
     ProgramManagerRoleFactory,
     SicManagementRoleFactory,
 )
+from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -148,7 +149,9 @@ class CurriculumNonEducationalExperienceDuplicateViewTestCase(TestCase):
         )
 
         # Mock osis document api
-        self.get_several_remote_metadata_patcher = mock.patch('osis_document_components.services.get_several_remote_metadata')
+        self.get_several_remote_metadata_patcher = mock.patch(
+            'osis_document_components.services.get_several_remote_metadata'
+        )
         self.get_several_remote_metadata_patched = self.get_several_remote_metadata_patcher.start()
         self.get_several_remote_metadata_patched.return_value = {'foobar': {'name': 'certificate.pdf', 'size': 1}}
         self.addCleanup(self.get_several_remote_metadata_patcher.stop)
@@ -158,7 +161,9 @@ class CurriculumNonEducationalExperienceDuplicateViewTestCase(TestCase):
         self.get_remote_tokens_patched.return_value = {self.file_uuid_str: 'foobar'}
         self.addCleanup(self.get_remote_tokens_patcher.stop)
 
-        self.documents_remote_duplicate_patcher = mock.patch('osis_document_components.services.documents_remote_duplicate')
+        self.documents_remote_duplicate_patcher = mock.patch(
+            'osis_document_components.services.documents_remote_duplicate'
+        )
         self.documents_remote_duplicate_patched = self.documents_remote_duplicate_patcher.start()
         self.documents_remote_duplicate_patched.return_value = {self.file_uuid_str: self.duplicate_uuid_str}
         self.addCleanup(self.documents_remote_duplicate_patcher.stop)
@@ -172,6 +177,17 @@ class CurriculumNonEducationalExperienceDuplicateViewTestCase(TestCase):
         self.client.force_login(self.sic_manager_user)
         response = self.client.post(self.duplicate_url)
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+    def test_duplicate_experience_from_curriculum_is_not_allowed_if_person_merge_proposal_in_progress(self):
+        PersonMergeProposal.objects.create(
+            original_person=self.general_admission.candidate,
+            status=PersonMergeStatus.PENDING.name,
+            last_similarity_result_update=datetime.datetime.now(),
+        )
+
+        self.client.force_login(self.sic_manager_user)
+        response = self.client.post(self.duplicate_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_duplicate_experience_from_curriculum_and_redirect(self):
         self.client.force_login(self.sic_manager_user)
@@ -430,6 +446,17 @@ class CurriculumNonEducationalExperienceDuplicateViewTestCase(TestCase):
 
         general_admission.delete()
 
+        proposal = PersonMergeProposal.objects.create(
+            original_person=self.other_continuing_admission.candidate,
+            status=PersonMergeStatus.PENDING.name,
+            last_similarity_result_update=datetime.datetime.now(),
+        )
+
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        proposal.delete()
+
         response = self.client.post(url)
 
         base_curriculum_url = resolve_url(
@@ -475,6 +502,17 @@ class CurriculumNonEducationalExperienceDuplicateViewTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         general_admission.delete()
+
+        proposal = PersonMergeProposal.objects.create(
+            original_person=self.other_continuing_admission.candidate,
+            status=PersonMergeStatus.PENDING.name,
+            last_similarity_result_update=datetime.datetime.now(),
+        )
+
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        proposal.delete()
 
         response = self.client.post(url)
 

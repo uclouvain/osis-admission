@@ -43,6 +43,7 @@ from admission.auth.predicates.common import (
 from admission.auth.predicates.common import (
     is_scoped_entity_manager,
     is_sent_to_epc,
+    no_candidate_merge_proposal_in_progress,
     past_experiences_checklist_tab_is_not_sufficient,
     workflow_injection_signaletique_en_cours,
 )
@@ -143,14 +144,16 @@ class CentralManager(EntityRoleModel):
                 | (continuing.in_manager_status & ~candidate_has_other_doctorate_or_general_admissions)
                 | doctorate.in_sic_status
             )
-            & ~is_sent_to_epc,
+            & ~is_sent_to_epc
+            & no_candidate_merge_proposal_in_progress,
             'admission.delete_admission_curriculum': is_entity_manager
             & (
                 general.in_sic_status
                 | (continuing.in_manager_status & ~candidate_has_other_doctorate_or_general_admissions)
                 | (doctorate.in_sic_status & ~candidate_has_other_doctorate_general_or_iufc_admissions)
             )
-            & ~is_sent_to_epc,
+            & ~is_sent_to_epc
+            & no_candidate_merge_proposal_in_progress,
             'admission.view_admission_project': is_entity_manager,
             'admission.change_admission_project': is_entity_manager
             & doctorate.signing_in_progress_before_submition
@@ -212,11 +215,13 @@ class CentralManager(EntityRoleModel):
             & ~is_sent_to_epc,
             'admission.checklist_change_past_experiences': is_entity_manager
             & (general.in_sic_status | doctorate.in_sic_status)
-            & ~is_sent_to_epc,
+            & ~is_sent_to_epc
+            & no_candidate_merge_proposal_in_progress,
             'admission.checklist_select_access_title': is_entity_manager
             & (general.in_sic_status | doctorate.in_sic_status)
             & past_experiences_checklist_tab_is_not_sufficient
-            & ~is_sent_to_epc,
+            & ~is_sent_to_epc
+            & no_candidate_merge_proposal_in_progress,
             'admission.checklist_change_training_choice': is_entity_manager & doctorate.in_sic_status & ~is_sent_to_epc,
             'admission.checklist_change_sic_comment': is_entity_manager
             & (general.is_submitted | doctorate.is_submitted)

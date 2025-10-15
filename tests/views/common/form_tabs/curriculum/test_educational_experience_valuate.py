@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -57,6 +57,7 @@ from admission.tests.factories.roles import (
     ProgramManagerRoleFactory,
     SicManagementRoleFactory,
 )
+from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from osis_profile.models import EducationalExperience
@@ -132,6 +133,20 @@ class CurriculumEducationalExperienceValuateViewTestCase(TestCase):
         response = self.client.post(self.valuate_url)
 
         self.assertRedirects(response=response, fetch_redirect_response=False, expected_url=expected_url)
+
+    def test_valuate_experience_from_curriculum_is_not_allowed_if_person_merge_proposal_in_progress(self):
+        PersonMergeProposal.objects.create(
+            original_person=self.general_admission.candidate,
+            status=PersonMergeStatus.PENDING.name,
+            last_similarity_result_update=datetime.datetime.now(),
+        )
+
+        self.client.force_login(self.sic_manager_user)
+        response = self.client.post(self.valuate_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        response = self.client.post(self.doctorate_valuate_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_valuate_experience_from_curriculum_and_redirect(self):
         self.client.force_login(self.sic_manager_user)
@@ -278,6 +293,17 @@ class CurriculumEducationalExperienceValuateViewTestCase(TestCase):
 
         general_admission.delete()
 
+        proposal = PersonMergeProposal.objects.create(
+            original_person=self.other_continuing_admission.candidate,
+            status=PersonMergeStatus.PENDING.name,
+            last_similarity_result_update=datetime.datetime.now(),
+        )
+
+        response = self.client.post(self.doctorate_valuate_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        proposal.delete()
+
         response = self.client.post(url)
 
         base_curriculum_url = resolve_url(
@@ -323,6 +349,17 @@ class CurriculumEducationalExperienceValuateViewTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         general_admission.delete()
+
+        proposal = PersonMergeProposal.objects.create(
+            original_person=self.other_continuing_admission.candidate,
+            status=PersonMergeStatus.PENDING.name,
+            last_similarity_result_update=datetime.datetime.now(),
+        )
+
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        proposal.delete()
 
         response = self.client.post(url)
 

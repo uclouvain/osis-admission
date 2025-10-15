@@ -41,12 +41,12 @@ from rest_framework import status
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
     ENTITY_CDE,
 )
-from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
-    EtatAuthentificationParcours,
-)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
     ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
+    EtatAuthentificationParcours,
 )
 from admission.models import GeneralEducationAdmission
 from admission.tests.factories.curriculum import (
@@ -63,12 +63,13 @@ from admission.tests.factories.roles import (
     SicManagementRoleFactory,
 )
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
+from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.hops import HopsFactory
 from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
-from osis_profile.models.enums.curriculum import EvaluationSystem, Result
+from osis_profile.models.enums.curriculum import Result
 
 
 @freezegun.freeze_time('2023-01-01')
@@ -127,6 +128,19 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
 
     def test_change_the_checklist_status_is_forbidden_with_fac_user(self):
         self.client.force_login(user=self.fac_manager_user)
+
+        response = self.client.post(self.url, **self.default_headers)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_change_the_checklist_status_is_forbidden_with_a_person_merge_proposal_in_progress(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        PersonMergeProposal.objects.create(
+            original_person=self.general_admission.candidate,
+            status=PersonMergeStatus.PENDING.name,
+            last_similarity_result_update=datetime.datetime.now(),
+        )
 
         response = self.client.post(self.url, **self.default_headers)
 
@@ -453,6 +467,19 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
 
     def test_change_the_authentication_is_forbidden_with_fac_user(self):
         self.client.force_login(user=self.fac_manager_user)
+
+        response = self.client.post(self.url, **self.default_headers)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_change_the_authentication_is_forbidden_with_a_person_merge_proposal_in_progress(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        PersonMergeProposal.objects.create(
+            original_person=self.general_admission.candidate,
+            status=PersonMergeStatus.PENDING.name,
+            last_similarity_result_update=datetime.datetime.now(),
+        )
 
         response = self.client.post(self.url, **self.default_headers)
 

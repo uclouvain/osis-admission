@@ -51,6 +51,7 @@ from admission.views.common.detail_tabs.comments import (
     COMMENT_TAG_SIC_FOR_CDD,
 )
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
+from base.utils.htmx import HtmxPermissionRequiredMixin
 
 __all__ = [
     'ChangeStatusView',
@@ -141,7 +142,7 @@ class ChangeStatusView(LoadDossierViewMixin, APIView):
         return Response(serializer_data, status=status.HTTP_200_OK)
 
 
-class SaveCommentView(AdmissionFormMixin, FormView):
+class SaveCommentView(HtmxPermissionRequiredMixin, AdmissionFormMixin, FormView):
     urlpatterns = {'save-comment': 'save-comment/<str:tab>'}
     form_class = CommentForm
     template_name = 'admission/forms/default_form.html'

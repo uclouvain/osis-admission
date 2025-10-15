@@ -195,6 +195,13 @@ msgstr ""
 "Un candidat est considéré VIP s'il est en double diplomation ou s'il "
 "bénéficie d'une bourse internationale ou s'il est Erasmus Mundus."
 
+msgid ""
+"A candidate merge proposal must not be in progress in order to do this "
+"action."
+msgstr ""
+"Une proposition de fusion du candidat ne doit pas être en cours pour pouvoir "
+"effectuer cette action."
+
 msgid "A card"
 msgstr "Carte A"
 

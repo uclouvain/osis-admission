@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,24 +23,31 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 from unittest import mock
 
 from django.contrib.auth.models import User
 from django.test import TestCase
-from pytz.reference import Central
 
 from admission.auth.predicates import common
-from admission.auth.predicates.common import is_scoped_entity_manager
+from admission.auth.predicates.common import (
+    is_scoped_entity_manager,
+    no_candidate_merge_proposal_in_progress,
+)
 from admission.auth.roles.central_manager import CentralManager
+from admission.auth.scope import Scope
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from admission.tests.factories.continuing_education import (
+    ContinuingEducationAdmissionFactory,
+)
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory, CentralManagerRoleFactory
+from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from base.tests.factories.entity_version import EntityVersionFactory
-from admission.auth.scope import Scope
+from base.tests.factories.person import PersonFactory
 
 
-class PredicatesTestCase(TestCase):
+class BasePredicatesTestCase(TestCase):
     def setUp(self):
         self.predicate_context_patcher = mock.patch(
             "rules.Predicate.context",
@@ -50,6 +57,8 @@ class PredicatesTestCase(TestCase):
         self.predicate_context_patcher.start()
         self.addCleanup(self.predicate_context_patcher.stop)
 
+
+class PredicatesTestCase(BasePredicatesTestCase):
     def test_is_admission_request_author(self):
         candidate1 = CandidateFactory().person
         candidate2 = CandidateFactory().person
@@ -211,3 +220,62 @@ class TestIsEntityManager(TestCase):
         entity_manager.save(update_fields=['scopes'])
         entity_manager_user = User.objects.get(pk=entity_manager_user.pk)
         self.assertTrue(is_scoped_entity_manager(entity_manager_user, admission))
+
+
+class NoCandidateMergeProposalInProgressTestCase(BasePredicatesTestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.admission = GeneralEducationAdmissionFactory()
+        cls.user_id = cls.admission.candidate.user.pk
+        cls.other_person = PersonFactory()
+
+        cls.default_params = dict(
+            status=PersonMergeStatus.PENDING.name,
+            last_similarity_result_update=datetime.datetime.now(),
+            original_person=cls.admission.candidate,
+        )
+
+    def setUp(self):
+        super().setUp()
+        self.user = User.objects.get(pk=self.user_id)
+
+    def test_without_person_merge_proposal(self):
+        result = no_candidate_merge_proposal_in_progress(user_obj=self.user, obj=self.admission)
+        self.assertTrue(result)
+
+    def test_with_a_person_merge_proposal_with_the_candidate_as_the_original_person(self):
+        PersonMergeProposal.objects.create(**self.default_params)
+        result = no_candidate_merge_proposal_in_progress(user_obj=self.user, obj=self.admission)
+
+        self.assertFalse(result)
+
+    def test_with_a_person_merge_proposal_with_the_candidate_as_the_proposal_merge_person(self):
+        params = self.default_params.copy()
+        params['original_person'] = self.other_person
+        params['proposal_merge_person'] = self.admission.candidate
+
+        PersonMergeProposal.objects.create(**params)
+
+        result = no_candidate_merge_proposal_in_progress(user_obj=self.user, obj=self.admission)
+        self.assertFalse(result)
+
+    def test_with_various_person_merge_statuses(self):
+        merge_proposal = PersonMergeProposal.objects.create(**self.default_params)
+
+        in_progress_statuses = {
+            PersonMergeStatus.PENDING,
+            PersonMergeStatus.IN_PROGRESS,
+        }
+
+        for status in PersonMergeStatus:
+            with self.subTest(status=status.value):
+                self.user = User.objects.get(pk=self.user_id)
+                merge_proposal.status = status.name
+                merge_proposal.save(update_fields=['status'])
+
+                result = no_candidate_merge_proposal_in_progress(user_obj=self.user, obj=self.admission)
+
+                if status in in_progress_statuses:
+                    self.assertFalse(result)
+                else:
+                    self.assertTrue(result)

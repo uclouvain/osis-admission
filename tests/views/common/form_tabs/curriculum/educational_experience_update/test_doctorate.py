@@ -40,7 +40,9 @@ from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formatio
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    OngletsDemande,
+)
 from admission.models import DoctorateAdmission
 from admission.models.base import AdmissionEducationalValuatedExperiences
 from admission.tests.factories import DoctorateAdmissionFactory
@@ -59,6 +61,7 @@ from base.models.academic_year import AcademicYear
 from base.models.campus import Campus
 from base.models.enums.community import CommunityEnum
 from base.models.enums.establishment_type import EstablishmentTypeEnum
+from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.campus import CampusFactory
 from base.tests.factories.entity import EntityWithVersionFactory
@@ -159,7 +162,9 @@ class CurriculumEducationalExperienceFormViewForDoctorateTestCase(TestCase):
         )
 
         # Mock osis document api
-        patcher = mock.patch("osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value)
+        patcher = mock.patch(
+            "osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
@@ -201,11 +206,46 @@ class CurriculumEducationalExperienceFormViewForDoctorateTestCase(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    def test_update_curriculum_is_not_allowed_for_fac_users_is_person_merge_proposal_in_progress(self):
+        self.client.force_login(self.program_manager_user)
+
+        other_admission = DoctorateAdmissionFactory(
+            training=self.doctorate_admission.training,
+            candidate=self.doctorate_admission.candidate,
+            status=ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name,
+        )
+        PersonMergeProposal.objects.create(
+            original_person=self.doctorate_admission.candidate,
+            status=PersonMergeStatus.PENDING.name,
+            last_similarity_result_update=datetime.datetime.now(),
+        )
+
+        response = self.client.get(
+            resolve_url(
+                'admission:doctorate:update:curriculum:educational',
+                uuid=other_admission.uuid,
+                experience_uuid=self.experience.uuid,
+            )
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
     def test_update_curriculum_is_allowed_for_sic_users(self):
         self.client.force_login(self.sic_manager_user)
         response = self.client.get(self.form_url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_update_curriculum_is_not_allowed_for_sic_users_if_person_merge_proposal_in_progress(self):
+        self.client.force_login(self.sic_manager_user)
+
+        PersonMergeProposal.objects.create(
+            original_person=self.doctorate_admission.candidate,
+            status=PersonMergeStatus.PENDING.name,
+            last_similarity_result_update=datetime.datetime.now(),
+        )
+        response = self.client.get(self.form_url)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_form_initialization(self):
         self.client.force_login(self.sic_manager_user)
