@@ -577,3 +577,13 @@ i.deleted-learning-unit-icon::after {
   content: 'S';
   background: #ff7979;
 }
+
+.school-address {
+    font-size: 0.75em;
+    color: #888;
+    margin-left: 0.5em;
+}
+
+.select2-results__option--highlighted[aria-selected] .school-address {
+    color: #eee;
+}
