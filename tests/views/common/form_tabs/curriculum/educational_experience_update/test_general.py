@@ -47,7 +47,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
 from admission.models import EPCInjection as AdmissionEPCInjection
-from admission.models.base import AdmissionEducationalValuatedExperiences
+from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences
 from admission.models.epc_injection import (
     EPCInjectionStatus as AdmissionEPCInjectionStatus,
 )

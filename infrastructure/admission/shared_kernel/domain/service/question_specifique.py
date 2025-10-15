@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,19 +25,30 @@
 ##############################################################################
 from typing import List
 
+from django.db.models import Prefetch
 from django.utils.translation import get_language
 
-from admission.models import AdmissionFormItemInstantiation
-from admission.models.base import BaseAdmission
-from admission.ddd.admission.shared_kernel.domain.model.question_specifique import QuestionSpecifique, QuestionSpecifiqueIdentity
-from admission.ddd.admission.shared_kernel.domain.service.i_question_specifique import ISuperQuestionSpecifiqueTranslator
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import PropositionNonTrouveeException
-from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
+from admission.ddd.admission.shared_kernel.domain.model.question_specifique import (
+    QuestionSpecifique,
+    QuestionSpecifiqueIdentity,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_question_specifique import (
+    ISuperQuestionSpecifiqueTranslator,
+)
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
+    PropositionNonTrouveeException,
+)
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import (
+    QuestionSpecifiqueDTO,
+)
 from admission.ddd.admission.shared_kernel.enums import TYPES_ITEMS_LECTURE_SEULE
 from admission.ddd.admission.shared_kernel.enums.question_specifique import (
     Onglets,
     TypeItemFormulaire,
 )
+from admission.models import AdmissionFormItemInstantiation
+from admission.models.base import BaseAdmission
+from admission.models.specific_question import SpecificQuestionAnswer
 from admission.utils import get_uuid_value
 
 
@@ -47,12 +58,20 @@ class SuperQuestionSpecifiqueTranslator(ISuperQuestionSpecifiqueTranslator):
     @classmethod
     def get_admission(cls, proposition_uuid):
         try:
-            return cls.admission_model.objects.select_related(
-                'training',
-                'candidate__country_of_citizenship',
-                'candidate__belgianhighschooldiploma',
-                'candidate__foreignhighschooldiploma__linguistic_regime',
-            ).get(uuid=proposition_uuid)
+            return (
+                cls.admission_model.objects.select_related(
+                    'training',
+                    'candidate__country_of_citizenship',
+                    'candidate__belgianhighschooldiploma',
+                    'candidate__foreignhighschooldiploma__linguistic_regime',
+                )
+                .prefetch_related(
+                    Prefetch(
+                        'specific_question_answers', queryset=SpecificQuestionAnswer.objects.select_related('form_item')
+                    )
+                )
+                .get(uuid=proposition_uuid)
+            )
         except cls.admission_model.DoesNotExist:
             raise PropositionNonTrouveeException
 
@@ -91,7 +110,7 @@ class SuperQuestionSpecifiqueTranslator(ISuperQuestionSpecifiqueTranslator):
         if question_type in TYPES_ITEMS_LECTURE_SEULE:
             formatted_value = question.form_item.text.get(language, '')
         elif question_type == TypeItemFormulaire.DOCUMENT.name:
-            formatted_value = [get_uuid_value(token) for token in answers.get(question_uuid, [])]
+            formatted_value = [get_uuid_value(str(token)) for token in answers.get(question_uuid, [])]
         elif question_type == TypeItemFormulaire.SELECTION.name:
             current_value = answers.get(question_uuid)
             selected_options = set(current_value) if isinstance(current_value, list) else {current_value}
@@ -135,7 +154,9 @@ class SuperQuestionSpecifiqueTranslator(ISuperQuestionSpecifiqueTranslator):
         current_language = get_language()
         admission = cls.get_admission(proposition_uuid)
         return [
-            cls.build_dto(question, admission.specific_question_answers, current_language, admission.candidate.language)
+            cls.build_dto(
+                question, admission.get_specific_question_answers_dict(), current_language, admission.candidate.language
+            )
             for question in AdmissionFormItemInstantiation.objects.form_items_by_admission(
                 admission=admission,
                 tabs=onglets,

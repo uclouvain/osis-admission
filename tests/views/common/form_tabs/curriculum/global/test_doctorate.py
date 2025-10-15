@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -30,14 +30,22 @@ from django.shortcuts import resolve_url
 from django.test import TestCase, override_settings
 from rest_framework import status
 
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
 from admission.ddd.admission.shared_kernel.enums import Onglets
 from admission.forms import REQUIRED_FIELD_CLASS
 from admission.models import DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.doctorate import DoctorateFactory
-from admission.tests.factories.form_item import TextAdmissionFormItemFactory, AdmissionFormItemInstantiationFactory
-from admission.tests.factories.roles import ProgramManagerRoleFactory, CentralManagerRoleFactory
+from admission.tests.factories.form_item import (
+    AdmissionFormItemInstantiationFactory,
+    TextAdmissionFormItemFactory,
+)
+from admission.tests.factories.roles import (
+    CentralManagerRoleFactory,
+    ProgramManagerRoleFactory,
+)
 from base.tests.factories.academic_year import AcademicYearFactory
 from osis_profile import BE_ISO_CODE, FR_ISO_CODE
 from reference.tests.factories.country import CountryFactory
@@ -174,6 +182,6 @@ class AdmissionCurriculumGlobalFormViewForDoctorateTestCase(TestCase):
         self.doctorate_admission.refresh_from_db()
 
         self.assertEqual(
-            self.doctorate_admission.specific_question_answers.get(self.text_question_uuid), 'My new answer'
+            self.doctorate_admission.get_specific_question_answers_dict().get(self.text_question_uuid), 'My new answer'
         )
         self.assertEqual(self.doctorate_admission.last_update_author, self.sic_manager_user.person)

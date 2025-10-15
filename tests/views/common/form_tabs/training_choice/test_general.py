@@ -34,11 +34,13 @@ from rest_framework import status
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
     ENTITY_CDE,
 )
-from admission.ddd.admission.shared_kernel.domain.enums import TypeFormation
-from admission.ddd.admission.shared_kernel.enums import Onglets
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.shared_kernel.domain.enums import TypeFormation
+from admission.ddd.admission.shared_kernel.enums import Onglets
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    OngletsDemande,
 )
 from admission.forms import EMPTY_CHOICE_AS_LIST
 from admission.models import GeneralEducationAdmission
@@ -344,7 +346,7 @@ class GeneralTrainingChoiceFormViewTestCase(TestCase):
         self.assertEqual(self.master_admission.international_scholarship, self.scholarships[2])
         self.assertEqual(self.master_admission.erasmus_mundus_scholarship, self.scholarships[5])
         self.assertEqual(
-            self.master_admission.specific_question_answers,
+            self.master_admission.get_specific_question_answers_dict(),
             {
                 str(self.specific_questions[0].form_item.uuid): 'Answer',
             },
@@ -497,7 +499,7 @@ class GeneralTrainingChoiceFormViewTestCase(TestCase):
         self.assertEqual(self.certificate_admission.international_scholarship, self.scholarships[2])
         self.assertEqual(self.certificate_admission.erasmus_mundus_scholarship, self.scholarships[5])
         self.assertEqual(
-            self.certificate_admission.specific_question_answers,
+            self.certificate_admission.get_specific_question_answers_dict(),
             {
                 str(self.specific_questions[0].form_item.uuid): 'Answer',
             },
@@ -614,7 +616,7 @@ class GeneralTrainingChoiceFormViewTestCase(TestCase):
         self.assertEqual(self.bachelor_admission.international_scholarship, None)
         self.assertEqual(self.bachelor_admission.erasmus_mundus_scholarship, None)
         self.assertEqual(
-            self.bachelor_admission.specific_question_answers,
+            self.bachelor_admission.get_specific_question_answers_dict(),
             {
                 str(self.specific_questions[0].form_item.uuid): 'Answer',
             },

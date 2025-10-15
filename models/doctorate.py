@@ -75,7 +75,12 @@ from ddd.logic.financabilite.domain.model.enums.situation import SituationFinanc
 from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd.interface import BusinessException
 
-from .base import BaseAdmission, BaseAdmissionQuerySet, admission_directory_path
+from .base import (
+    BaseAdmission,
+    BaseAdmissionQuerySet,
+    admission_directory_path,
+)
+from .specific_question import SpecificQuestionAnswer
 from .checklist import DoctorateRefusalReason, RefusalReason
 from .mixins import DocumentCopyModelMixin
 
@@ -828,6 +833,9 @@ class PropositionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
             .prefetch_related(
                 "refusal_reasons",
                 "prerequisite_courses",
+                Prefetch(
+                    'specific_question_answers', queryset=SpecificQuestionAnswer.objects.select_related('form_item')
+                ),
             )
         )
 
@@ -836,6 +844,11 @@ class PropositionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
             self.get_queryset()
             .select_related(
                 'training__enrollment_campus__country',
+            )
+            .prefetch_related(
+                Prefetch(
+                    'specific_question_answers', queryset=SpecificQuestionAnswer.objects.select_related('form_item')
+                )
             )
             .annotate_campus_info()
             .annotate_training_management_entity()

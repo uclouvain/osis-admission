@@ -239,7 +239,9 @@ class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = patch("osis_document_components.services.get_remote_metadata", return_value={"name": "myfile", "size": 1})
+        patcher = patch(
+            "osis_document_components.services.get_remote_metadata", return_value={"name": "myfile", "size": 1}
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
 
@@ -1039,7 +1041,9 @@ class GeneralEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = patch('osis_document_components.services.get_remote_metadata', return_value={'name': 'myfile', 'size': 1})
+        patcher = patch(
+            'osis_document_components.services.get_remote_metadata', return_value={'name': 'myfile', 'size': 1}
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
 
@@ -1050,7 +1054,9 @@ class GeneralEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
 
         patcher = patch('osis_document_components.fields.FileField._confirm_multiple_upload')
         patched = patcher.start()
-        patched.side_effect = lambda _, value, __: ['550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'] if value else []
+        patched.side_effect = lambda _, value, __: (
+            [self.file_uuid, '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'] if value else []
+        )
         self.addCleanup(patcher.stop)
 
     def test_training_choice_update_using_api_candidate(self):
@@ -1076,7 +1082,7 @@ class GeneralEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
             'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
             'fe254203-17c7-47d6-95e4-3c5c532da552': [self.file_uuid, '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'],
         }
-        self.assertEqual(admission.specific_question_answers, expected)
+        self.assertEqual(admission.get_specific_question_answers_dict(), expected)
         self.assertEqual(admission.modified_at, datetime.datetime.now())
         self.assertEqual(admission.last_update_author, self.candidate.user.person)
 
@@ -1172,7 +1178,9 @@ class ContinuingEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = patch('osis_document_components.services.get_remote_metadata', return_value={'name': 'myfile', 'size': 1})
+        patcher = patch(
+            'osis_document_components.services.get_remote_metadata', return_value={'name': 'myfile', 'size': 1}
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
 
@@ -1183,7 +1191,9 @@ class ContinuingEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
 
         patcher = patch('osis_document_components.fields.FileField._confirm_multiple_upload')
         patched = patcher.start()
-        patched.side_effect = lambda _, value, __: ['550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'] if value else []
+        patched.side_effect = lambda _, value, __: (
+            [self.file_uuid, '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'] if value else []
+        )
         self.addCleanup(patcher.stop)
 
     def test_training_choice_update_using_api_candidate(self):
@@ -1203,7 +1213,7 @@ class ContinuingEducationAdmissionTrainingChoiceUpdateApiTestCase(APITestCase):
             'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
             'fe254203-17c7-47d6-95e4-3c5c532da552': [self.file_uuid, '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'],
         }
-        self.assertEqual(admission.specific_question_answers, expected)
+        self.assertEqual(admission.get_specific_question_answers_dict(), expected)
         self.assertEqual(admission.motivations, 'Motivation')
         self.assertEqual(
             admission.ways_to_find_out_about_the_course,
@@ -1263,11 +1273,16 @@ class DoctorateEducationAdmissionTypeUpdateApiTestCase(QueriesAssertionsMixin, A
             entity_type=EntityType.DOCTORAL_COMMISSION.name,
             acronym='CDA',
         ).entity
-        cls.admission = DoctorateAdmissionFactory(
-            training__management_entity=cls.commission,
-            supervision_group=promoter.process,
-            with_answers_to_specific_questions=True,
-        )
+        with patch("osis_document_components.fields.FileField._confirm_multiple_upload") as confirm_upload:
+            confirm_upload.side_effect = lambda _, value, __: ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
+            cls.admission = DoctorateAdmissionFactory(
+                training__management_entity=cls.commission,
+                supervision_group=promoter.process,
+                specific_question_answers={
+                    'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
+                    'fe254203-17c7-47d6-95e4-3c5c532da552': ['ae254203-17c7-47d6-95e4-3c5c532da550'],
+                },
+            )
         AdmissionAcademicCalendarFactory.produce_all_required()
 
         # Users
@@ -1321,7 +1336,9 @@ class DoctorateEducationAdmissionTypeUpdateApiTestCase(QueriesAssertionsMixin, A
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = patch('osis_document_components.services.get_remote_metadata', return_value={'name': 'myfile', 'size': 1})
+        patcher = patch(
+            'osis_document_components.services.get_remote_metadata', return_value={'name': 'myfile', 'size': 1}
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
 
@@ -1332,7 +1349,9 @@ class DoctorateEducationAdmissionTypeUpdateApiTestCase(QueriesAssertionsMixin, A
 
         patcher = patch('osis_document_components.fields.FileField._confirm_multiple_upload')
         patched = patcher.start()
-        patched.side_effect = lambda _, value, __: ['550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'] if value else []
+        patched.side_effect = lambda _, value, __: (
+            [self.file_uuid, '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'] if value else []
+        )
         self.addCleanup(patcher.stop)
 
     def test_admission_type_update_using_api_candidate(self):
@@ -1354,7 +1373,7 @@ class DoctorateEducationAdmissionTypeUpdateApiTestCase(QueriesAssertionsMixin, A
             'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
             'fe254203-17c7-47d6-95e4-3c5c532da552': [self.file_uuid, '550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92'],
         }
-        self.assertEqual(admission.specific_question_answers, expected)
+        self.assertEqual(admission.get_specific_question_answers_dict(), expected)
 
     def test_admission_type_update_with_admission_based_on_pre_admission(self):
         self.client.force_authenticate(user=self.candidate.user)

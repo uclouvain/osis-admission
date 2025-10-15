@@ -28,12 +28,12 @@ from contextlib import suppress
 
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
+from django.db.models import Prefetch
 from django.utils.translation import gettext_lazy as _
 from osis_document_components.fields import FileField
 from rest_framework.settings import api_settings
 
 from admission.constants import CONTEXT_CONTINUING
-from admission.ddd.admission.shared_kernel.dtos.conditions import InfosDetermineesDTO
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixEdition,
     ChoixInscriptionATitre,
@@ -43,11 +43,13 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
     ChoixTypeAdresseFacturation,
 )
+from admission.ddd.admission.shared_kernel.dtos.conditions import InfosDetermineesDTO
 from admission.models.base import (
     BaseAdmission,
     BaseAdmissionQuerySet,
     admission_directory_path,
 )
+from admission.models.specific_question import SpecificQuestionAnswer
 from base.models.academic_year import AcademicYear
 from base.models.person import Person
 from osis_common.ddd.interface import BusinessException
@@ -386,6 +388,11 @@ class ContinuingEducationAdmissionManager(models.Manager.from_queryset(BaseAdmis
                 "training__main_domain",
                 "training__enrollment_campus",
                 "billing_address_country",
+            )
+            .prefetch_related(
+                Prefetch(
+                    'specific_question_answers', queryset=SpecificQuestionAnswer.objects.select_related('form_item')
+                )
             )
             .annotate_campus()
             .annotate_training_management_entity()

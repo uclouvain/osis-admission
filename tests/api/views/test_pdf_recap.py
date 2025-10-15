@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -33,7 +33,9 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from admission.tests.factories.continuing_education import (
+    ContinuingEducationAdmissionFactory,
+)
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory
 from base.forms.utils.file_field import PDF_MIME_TYPE
@@ -98,9 +100,9 @@ class PDFRecapApiTestCase(APITestCase, QueriesAssertionsMixin):
         patcher = mock.patch('admission.exports.admission_recap.admission_recap.Pdf')
         patched = patcher.start()
         patched.new.return_value = mock.MagicMock(pdf_version=1)
-        self.outline_root = (
-            patched.new.return_value.open_outline.return_value.__enter__.return_value.root
-        ) = mock.MagicMock()
+        self.outline_root = patched.new.return_value.open_outline.return_value.__enter__.return_value.root = (
+            mock.MagicMock()
+        )
         patched.open.return_value.__enter__.return_value = mock.Mock(pdf_version=1, pages=[None])
         self.addCleanup(patcher.stop)
 
@@ -116,7 +118,7 @@ class PDFRecapApiTestCase(APITestCase, QueriesAssertionsMixin):
 
     def test_doctorate_admission_doctorate_pdf_recap_using_api_candidate(self):
         self.client.force_authenticate(user=self.candidate)
-        with self.assertNumQueriesLessThan(22):
+        with self.assertNumQueriesLessThan(24):
             response = self.client.get(self.doctorate_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), {'token': 'pdf-token'})
@@ -133,14 +135,14 @@ class PDFRecapApiTestCase(APITestCase, QueriesAssertionsMixin):
 
     def test_admission_master_general_education_pdf_recap_using_api_candidate(self):
         self.client.force_authenticate(user=self.candidate)
-        with self.assertNumQueriesLessThan(18):
+        with self.assertNumQueriesLessThan(19):
             response = self.client.get(self.master_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), {'token': 'pdf-token'})
 
     def test_admission_bachelor_general_education_pdf_recap_using_api_candidate(self):
         self.client.force_authenticate(user=self.candidate)
-        with self.assertNumQueriesLessThan(20):
+        with self.assertNumQueriesLessThan(21):
             response = self.client.get(self.bachelor_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), {'token': 'pdf-token'})
@@ -163,7 +165,7 @@ class PDFRecapApiTestCase(APITestCase, QueriesAssertionsMixin):
 
     def test_admission_continuing_education_pdf_recap_using_api_candidate(self):
         self.client.force_authenticate(user=self.candidate)
-        with self.assertNumQueriesLessThan(17):
+        with self.assertNumQueriesLessThan(19):
             response = self.client.get(self.continuing_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), {'token': 'pdf-token'})
