@@ -86,6 +86,9 @@ class ElementsConfirmationTestCase(TestCase):
         super().setUpClass()
         ProfilCandidatInMemoryTranslator.reset()
         FinancabiliteInMemoryFetcher.reset()
+        PropositionDoctoraleRepository.reset()
+        PropositionContinueRepository.reset()
+        PropositionGeneraleRepository.reset()
 
     def setUp(self):
         # Mock publish
