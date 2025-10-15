@@ -91,14 +91,13 @@ class ProjetRechercheContextMixin(CheckListDefaultContextMixin):
 
         form_kwargs = {
             'prefix': 'projet-recherche-demander-modification-ca',
-        }
-        if self.request.method == 'POST' and 'projet-recherche-demander-modification-ca-body' in self.request.POST:
-            form_kwargs['data'] = self.request.POST
-        else:
-            form_kwargs['initial'] = {
+            'initial': {
                 'subject': subject,
                 'body': body,
             }
+        }
+        if self.request.method == 'POST' and 'projet-recherche-demander-modification-ca-body' in self.request.POST:
+            form_kwargs['data'] = self.request.POST
 
         return ProjetRechercheDemanderModificationCAForm(**form_kwargs)
 

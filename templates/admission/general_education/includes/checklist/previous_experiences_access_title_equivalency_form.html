@@ -67,6 +67,7 @@
         hx-swap="outerHTML"
         action="{% url view.base_namespace|add:':past-experiences-access-title-equivalency' uuid=view.kwargs.uuid %}"
         method="post"
+        data-init-function="pastExperiencesAccessTitleEquivalencyForm"
     >
       {% bootstrap_form_errors past_experiences_admission_access_title_equivalency_form %}
       {% csrf_token %}
@@ -102,6 +103,7 @@
 
   {{ past_experiences_admission_access_title_equivalency_form.media }}
   <script>
+      window.admission.pastExperiencesAccessTitleEquivalencyForm = function() {
       $(document).ready(function() {
           const form = $('#previous-experiences-access-title-equivalency-form');
           const details = $('#previous-experiences-access-title-equivalency-details');
@@ -150,6 +152,10 @@
           $('#id_foreign_access_title_equivalency_effective_date').dependsOn({
               '#id_foreign_access_title_equivalency_state': { values: ['DEFINITIVE', 'PROVISOIRE'] },
           }, { duration: 0, valueOnDisable: '', });
-      })
+      });
+      };
+      {% if not request.htmx %}
+        window.admission.pastExperiencesAccessTitleEquivalencyForm();
+      {% endif %}
   </script>
 </div>

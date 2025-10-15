@@ -23,14 +23,14 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from dal import autocomplete, forward
+from dal import forward
 from django import forms
 from django.db.models import F
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext_lazy
 from osis_document_components.fields import FileUploadField
 
-from base.forms.utils import EMPTY_CHOICE, FIELD_REQUIRED_MESSAGE
+from base.forms.utils import EMPTY_CHOICE, FIELD_REQUIRED_MESSAGE, autocomplete
 from base.models.entity_version import EntityVersion
 from osis_profile.utils.utils import format_school_title
 

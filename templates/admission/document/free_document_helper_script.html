@@ -22,6 +22,7 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 <script>
+    window.admission.freeDocumentHelper{{ script_index }} = function() {
     $(document).ready(function () {
         const document_type_input = $('#{{form.document_type.id_for_label}}');
         const academic_year_input = $('#{{form.academic_year.id_for_label}}');
@@ -83,4 +84,5 @@
             );
         });
     });
+    };
 </script>

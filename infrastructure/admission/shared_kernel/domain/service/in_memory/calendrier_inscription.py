@@ -110,7 +110,10 @@ class CalendrierInscriptionInMemory(ICalendrierInscription):
         )
 
     @classmethod
-    def recuperer_periode_inscription_specifique_medecine_dentisterie(cls) -> Optional[PeriodeDTO]:
+    def recuperer_periode_inscription_specifique_medecine_dentisterie(
+        cls,
+        annee: Optional[int],
+    ) -> Optional[PeriodeDTO]:
         return None
 
     @classmethod

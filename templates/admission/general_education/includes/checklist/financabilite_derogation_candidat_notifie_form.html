@@ -31,6 +31,7 @@
     style="overflow: auto;"
     id="financability-derogation-notification-form"
     class="ckeditor-form"
+    data-init-function="financabilityDispensationNotificationForm"
 >
   <div class="modal-body" style="overflow:auto;">
 
@@ -66,6 +67,7 @@
   {{ financability_dispensation_notification_form.initial.body|json_script:"financability_dispensation_notification_form_body" }}
 
   <script>
+    window.admission.financabilityDispensationNotificationForm = function () {
       $('#financability-dispensation-notification-reset-subject').click((event) => {
           event.preventDefault();
           const value = JSON.parse(document.getElementById('financability_dispensation_notification_form_subject').textContent);
@@ -82,6 +84,10 @@
       $(document).ready(() => {
           initializeCKEditor('id_financability-dispensation-notification-body');
       });
+    };
+    {% if not request.htmx %}
+      window.admission.financabilityDispensationNotificationForm();
+    {% endif %}
   </script>
 
   {% if request.htmx %}

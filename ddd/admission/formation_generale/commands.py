@@ -727,4 +727,4 @@ class RetyperDocumentCommand(interface.CommandRequest):
 
 @attr.dataclass(frozen=True, slots=True)
 class RecupererPeriodeInscriptionSpecifiqueBachelierMedecineDentisterieQuery(interface.QueryRequest):
-    pass
+    annee: Optional[int]

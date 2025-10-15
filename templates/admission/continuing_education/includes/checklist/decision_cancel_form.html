@@ -31,6 +31,7 @@
     style="overflow: auto;"
     id="decision-cancel-form"
     class="ckeditor-form"
+    data-init-function="decisionCancelForm"
 >
   <div class="modal-body" style="overflow:auto;">
 
@@ -92,6 +93,7 @@
   {{ decision_cancel_form.media }}
 
   <script>
+      window.admission.decisionCancelForm = function() {
       $(document).ready(() => {
         {# Reset / Set mail templates values #}
         const defaultMessage = JSON.parse(document.getElementById('decision_cancel_form_body').textContent);
@@ -153,13 +155,9 @@
 
         initializeCKEditor('id_decision-cancel-body');
       });
+    };
+    {% if not request.htmx %}
+      window.admission.decisionCancelForm();
+    {% endif %}
   </script>
-
-  {% if request.htmx %}
-    <script>
-      $(document).ready(function(){
-          $('#decision-cancel-form *[data-toggle=popover]').popover();
-      });
-    </script>
-  {% endif %}
 </form>
