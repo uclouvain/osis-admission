@@ -80,7 +80,6 @@ from admission.ddd.admission.shared_kernel.dtos.resume import ResumeCandidatDTO
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     OngletsDemande,
 )
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
     ExperiencesCVRecuperees,
 )
@@ -834,7 +833,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             formation_annee=admission['training__academic_year__year'],
         )
         if exam.requis:
-            exams_uuids.append(OngletsDemande.EXAMS.name)
+            exams_uuids.append(exam.uuid or OngletsDemande.EXAMS.name)
 
         alternative_secondary_study = (
             Exam.objects.filter(
