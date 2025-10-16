@@ -38,8 +38,8 @@ from gestion_des_comptes.views.outil_de_comparaison_et_fusion import \
     RefuserPropositionFusionHtmxView as RefuserPropositionFusionHtmxMixinView, \
     OutilDeComparaisonEtFusionView as OutilDeComparaisonEtFusionMixinView, \
     ParcoursAnterieurHtmxView as ParcoursAnterieurHtmxMixinView, \
-    IgnorerValidationInformationsInjectionSignaletiqueView as \
-        IgnorerValidationInformationsInjectionSignaletiqueMixinView
+    DoubleCheckDecisionInformationsInjectionSignaletiqueView as \
+        DoubleCheckDecisionInformationsInjectionSignaletiqueMixinView
 
 
 class OutilDeComparaisonEtFusionView(OutilDeComparaisonEtFusionMixinView):
@@ -93,8 +93,8 @@ class RefuserPropositionFusionHtmxView(RefuserPropositionFusionHtmxMixinView):
         return get_cached_general_education_admission_perm_obj(self.kwargs['uuid'])
 
 
-class IgnorerValidationInformationsInjectionSignaletiqueView(
-    IgnorerValidationInformationsInjectionSignaletiqueMixinView
+class DoubleCheckDecisionInformationsInjectionSignaletiqueView(
+    DoubleCheckDecisionInformationsInjectionSignaletiqueMixinView
 ):
     urlpatterns = {
         'ignorer-validation-informations-injection-signaletique':
