@@ -80,7 +80,7 @@ msgctxt "admission"
 msgid "(Expected) date of graduation"
 msgstr ""
 
-msgid "(Expected) graduation date (signed diploma)"
+msgid "(Expected) graduation date"
 msgstr ""
 
 msgid ", on"
@@ -184,6 +184,9 @@ msgstr ""
 
 msgid ""
 "A member should be either internal or external, please check the fields."
+msgstr ""
+
+msgid "A merger proposal is currently being resolved."
 msgstr ""
 
 msgid "A new version of the analysis folder has been generated."
@@ -832,6 +835,11 @@ msgid "Are you sure your want to reset the object of the message?"
 msgstr ""
 
 msgid "Are you the child of a UCLouvain or Martin V staff member?"
+msgstr ""
+
+msgid ""
+"As a merger proposal is currently being resolved, doing it will cause a "
+"merge reset."
 msgstr ""
 
 msgid ""
@@ -5646,6 +5654,9 @@ msgstr ""
 msgid "Save and transfer to SIC"
 msgstr ""
 
+msgid "Saving the tab will cause a merge reset."
+msgstr ""
+
 msgid "Scholarship"
 msgstr ""
 
@@ -7091,6 +7102,11 @@ msgid "Update experience"
 msgstr ""
 
 msgid "Update member"
+msgstr ""
+
+msgid ""
+"Updating, deleting, creating or duplicating an experience will cause a merge "
+"reset."
 msgstr ""
 
 msgctxt "admission"

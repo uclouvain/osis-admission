@@ -38,6 +38,16 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
 
 from admission.admission_utils.copy_documents import copy_documents
+from admission.ddd.admission.events import (
+    ExperienceAcademiqueCandidatDupliqueeEvent,
+    ExperienceAcademiqueCandidatIntegreeDansDemandeEvent,
+    ExperienceAcademiqueCandidatCreeeOuModifieeEvent,
+    ExperienceAcademiqueCandidatSupprimeeEvent,
+    ExperienceNonAcademiqueCandidatDupliqueeEvent,
+    ExperienceNonAcademiqueCandidatIntegreeDansDemandeEvent,
+    ExperienceNonAcademiqueCandidatCreeeOuModifieeEvent,
+    ExperienceNonAcademiqueCandidatSupprimeeEvent,
+)
 from admission.ddd.admission.formation_generale.domain.service.checklist import (
     Checklist,
 )
@@ -56,6 +66,7 @@ from admission.models.epc_injection import (
 )
 from admission.models.epc_injection import EPCInjectionType
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
+from infrastructure.messages_bus import message_bus_instance
 from osis_profile.models import (
     EducationalExperience,
     EducationalExperienceYear,
@@ -117,7 +128,9 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
         }
 
     def traitement_specifique(self, experience_uuid: UUID, experiences_supprimees: List[UUID] = None):
-        pass
+        message_bus_instance.publish(
+            ExperienceAcademiqueCandidatCreeeOuModifieeEvent(matricule=self.admission.candidate.global_id),
+        )
 
     @property
     def educational_experience_filter_uuid(self):
@@ -235,7 +248,9 @@ class CurriculumNonEducationalExperienceFormView(
         )
 
     def traitement_specifique(self, experience_uuid: UUID, experiences_supprimees: List[UUID] = None):
-        pass
+        message_bus_instance.publish(
+            ExperienceNonAcademiqueCandidatCreeeOuModifieeEvent(matricule=self.admission.candidate.global_id),
+        )
 
     @property
     def person(self):
@@ -387,7 +402,9 @@ class CurriculumEducationalExperienceDeleteView(CurriculumBaseDeleteView, Delete
         )
 
     def traitement_specifique(self, experience_uuid: UUID, experiences_supprimees: List[UUID]):
-        pass
+        message_bus_instance.publish(
+            ExperienceAcademiqueCandidatSupprimeeEvent(matricule=self.admission.candidate.global_id),
+        )
 
     def get_failure_url(self):
         return reverse(
@@ -418,7 +435,9 @@ class CurriculumNonEducationalExperienceDeleteView(CurriculumBaseDeleteView, Del
         )
 
     def traitement_specifique(self, experience_uuid: UUID, experiences_supprimees: List[UUID]):
-        pass
+        message_bus_instance.publish(
+            ExperienceNonAcademiqueCandidatSupprimeeEvent(matricule=self.admission.candidate.global_id),
+        )
 
     def get_failure_url(self):
         return reverse(
@@ -463,6 +482,9 @@ class CurriculumBaseExperienceDuplicateView(AdmissionFormMixin, LoadDossierViewM
         Save additional objects that must be duplicated in addition to the duplicated experience.
         :param duplicated_objects: The list of additional objects returned by the 'additional_duplications' method.
         """
+        pass
+
+    def traitement_specifique(self):
         pass
 
     def form_valid(self, form):
@@ -538,6 +560,8 @@ class CurriculumBaseExperienceDuplicateView(AdmissionFormMixin, LoadDossierViewM
         if admissions_to_update:
             BaseAdmission.objects.bulk_update(admissions_to_update, ['checklist'])
 
+        self.traitement_specifique()
+
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -560,6 +584,11 @@ class CurriculumNonEducationalExperienceDuplicateView(CurriculumBaseExperienceDu
     experience_model = ProfessionalExperience
     valuated_experience_model = AdmissionProfessionalValuatedExperiences
     valuated_experience_field_id_name = 'professionalexperience_id'
+
+    def traitement_specifique(self):
+        message_bus_instance.publish(
+            ExperienceNonAcademiqueCandidatDupliqueeEvent(matricule=self.admission.candidate.global_id),
+        )
 
 
 class CurriculumEducationalExperienceDuplicateView(CurriculumBaseExperienceDuplicateView):
@@ -589,6 +618,11 @@ class CurriculumEducationalExperienceDuplicateView(CurriculumBaseExperienceDupli
     def additional_duplications_save(self, duplicated_objects):
         EducationalExperienceYear.objects.bulk_create(duplicated_objects)
 
+    def traitement_specifique(self):
+        message_bus_instance.publish(
+            ExperienceAcademiqueCandidatDupliqueeEvent(matricule=self.admission.candidate.global_id),
+        )
+
 
 class CurriculumBaseExperienceValuateView(AdmissionFormMixin, LoadDossierViewMixin, FormView):
     permission_required = 'admission.change_admission_curriculum'
@@ -610,11 +644,15 @@ class CurriculumBaseExperienceValuateView(AdmissionFormMixin, LoadDossierViewMix
     def get_success_url(self):
         return self.next_url or reverse(self.base_namespace + ':checklist', kwargs={'uuid': self.admission_uuid})
 
+    def traitement_specifique(self):
+        pass
+
     def form_valid(self, form):
         self.valuated_experience_model.objects.create(
             baseadmission=self.admission,
             **{self.valuated_experience_field_id_name: self.experience.uuid},
         )
+        self.traitement_specifique()
         return super().form_valid(form)
 
     def update_current_admission_on_form_valid(self, form, admission):
@@ -638,9 +676,19 @@ class CurriculumNonEducationalExperienceValuateView(CurriculumBaseExperienceValu
     valuated_experience_model = AdmissionProfessionalValuatedExperiences
     valuated_experience_field_id_name = 'professionalexperience_id'
 
+    def traitement_specifique(self):
+        message_bus_instance.publish(
+            ExperienceNonAcademiqueCandidatIntegreeDansDemandeEvent(matricule=self.admission.candidate.global_id),
+        )
+
 
 class CurriculumEducationalExperienceValuateView(CurriculumBaseExperienceValuateView):
     urlpatterns = {'educational_valuate': 'educational/<uuid:experience_uuid>/valuate'}
     experience_model = EducationalExperience
     valuated_experience_model = AdmissionEducationalValuatedExperiences
     valuated_experience_field_id_name = 'educationalexperience_id'
+
+    def traitement_specifique(self):
+        message_bus_instance.publish(
+            ExperienceAcademiqueCandidatIntegreeDansDemandeEvent(matricule=self.admission.candidate.global_id),
+        )

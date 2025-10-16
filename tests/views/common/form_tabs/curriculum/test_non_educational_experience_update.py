@@ -38,16 +38,19 @@ from rest_framework import status
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
-from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
-    EtatAuthentificationParcours,
-)
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
+from admission.ddd.admission.events import ExperienceNonAcademiqueCandidatCreeeOuModifieeEvent
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
     ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
+    EtatAuthentificationParcours,
+)
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    OngletsDemande,
 )
 from admission.models import ContinuingEducationAdmission, DoctorateAdmission
 from admission.models import EPCInjection as AdmissionEPCInjection
@@ -147,7 +150,9 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
         )
 
         # Mock osis document api
-        patcher = mock.patch("osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value)
+        patcher = mock.patch(
+            "osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
@@ -179,6 +184,15 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
             'admission:doctorate:update:curriculum:non_educational_create',
             uuid=self.doctorate_admission.uuid,
         )
+
+        # Mock publish
+        patcher = mock.patch('infrastructure.utils.MessageBus.publish')
+        self.mock_publish = patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch('django.db.transaction.on_commit', side_effect=lambda f: f())
+        self.mock_on_commit = patcher.start()
+        self.addCleanup(patcher.stop)
 
     def test_general_update_curriculum_is_not_allowed_for_fac_users(self):
         self.client.force_login(self.general_program_manager_user)
@@ -432,6 +446,15 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
         self.assertNotIn(
             f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',
             self.general_admission.requested_documents,
+        )
+
+        # Check that an event has been sent
+        self.mock_publish.assert_called_once_with(
+            ExperienceNonAcademiqueCandidatCreeeOuModifieeEvent(
+                matricule=self.general_admission.candidate.global_id,
+                transaction_id=mock.ANY,
+                entity_id=mock.ANY,
+            )
         )
 
     def test_general_submit_valid_form_for_other_activity_and_redirect(self):

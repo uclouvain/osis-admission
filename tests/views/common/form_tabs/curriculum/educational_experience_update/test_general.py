@@ -38,13 +38,16 @@ from rest_framework import status
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
     ENTITY_CDE,
 )
-from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
-    EtatAuthentificationParcours,
-)
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
+from admission.ddd.admission.events import ExperienceAcademiqueCandidatCreeeOuModifieeEvent
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
     ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
+    EtatAuthentificationParcours,
+)
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    OngletsDemande,
 )
 from admission.models import EPCInjection as AdmissionEPCInjection
 from admission.models.base import AdmissionEducationalValuatedExperiences
@@ -177,7 +180,9 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
         )
 
         # Mock osis document api
-        patcher = mock.patch("osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value)
+        patcher = mock.patch(
+            "osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
@@ -189,6 +194,15 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
         patcher = mock.patch('osis_document_components.fields.FileField._confirm_multiple_upload')
         patched = patcher.start()
         patched.side_effect = lambda _, value, __: value
+        self.addCleanup(patcher.stop)
+
+        # Mock publish
+        patcher = mock.patch('infrastructure.utils.MessageBus.publish')
+        self.mock_publish = patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch('django.db.transaction.on_commit', side_effect=lambda f: f())
+        self.mock_on_commit = patcher.start()
         self.addCleanup(patcher.stop)
 
         # Targeted url
@@ -1821,6 +1835,15 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
             self.general_admission.requested_documents,
         )
 
+        # Check that an event has been sent
+        self.mock_publish.assert_called_once_with(
+            ExperienceAcademiqueCandidatCreeeOuModifieeEvent(
+                matricule=self.general_admission.candidate.global_id,
+                transaction_id=mock.ANY,
+                entity_id=mock.ANY,
+            )
+        )
+
     def test_post_form_with_created_and_deleted_years_and_redirect(self):
         self.client.force_login(self.sic_manager_user)
 
@@ -1962,6 +1985,15 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
                 },
                 'enfants': [],
             },
+        )
+
+        # Check that an event has been sent
+        self.mock_publish.assert_called_once_with(
+            ExperienceAcademiqueCandidatCreeeOuModifieeEvent(
+                matricule=self.general_admission.candidate.global_id,
+                transaction_id=mock.ANY,
+                entity_id=mock.ANY,
+            )
         )
 
     @mock.patch('admission.views.common.form_tabs.curriculum.CurriculumEducationalExperienceFormView.delete_url')

@@ -329,6 +329,9 @@
                         {% endblocktranslate %}
                         {% if can_update_curriculum %}
                           {% translate 'You have the option to integrate it in the current application.' %}
+                          {% if proposition_fusion and proposition_fusion.status == 'PENDING' %}
+                            {% translate 'As a merger proposal is currently being resolved, doing it will cause a merge reset.' %}
+                          {% endif %}
                         {% endif %}
                       {% else %}
                         {% translate 'Please note that this experience was not part of the application when it was submitted.' %}

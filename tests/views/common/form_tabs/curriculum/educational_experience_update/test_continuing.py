@@ -33,6 +33,7 @@ from django.test import TestCase
 from rest_framework import status
 
 from admission.constants import CONTEXT_CONTINUING
+from admission.ddd.admission.events import ExperienceAcademiqueCandidatCreeeOuModifieeEvent
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
 )
@@ -188,7 +189,10 @@ class CurriculumEducationalExperienceFormViewForContinuingTestCase(TestCase):
         )
 
         # Mock osis document api
-        patcher = mock.patch("osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value)
+        patcher = mock.patch(
+            "osis_document_components.services.get_remote_token",
+            side_effect=lambda value, **kwargs: value,
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
@@ -216,6 +220,15 @@ class CurriculumEducationalExperienceFormViewForContinuingTestCase(TestCase):
             'admission:continuing-education:update:curriculum:educational_create',
             uuid=self.continuing_admission.uuid,
         )
+
+        # Mock publish
+        patcher = mock.patch('infrastructure.utils.MessageBus.publish')
+        self.mock_publish = patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch('django.db.transaction.on_commit', side_effect=lambda f: f())
+        self.mock_on_commit = patcher.start()
+        self.addCleanup(patcher.stop)
 
     def test_update_curriculum_for_fac_users(self):
         self.client.force_login(self.program_manager_user)
@@ -392,6 +405,15 @@ class CurriculumEducationalExperienceFormViewForContinuingTestCase(TestCase):
         self.assertEqual(years[1].reduction, '')
         self.assertEqual(years[1].is_102_change_of_course, None)
 
+        # Check that an event has been sent
+        self.mock_publish.assert_called_once_with(
+            ExperienceAcademiqueCandidatCreeeOuModifieeEvent(
+                matricule=self.continuing_admission.candidate.global_id,
+                transaction_id=mock.ANY,
+                entity_id=mock.ANY,
+            )
+        )
+
     def test_form_submission_to_update_an_experience(self):
         self.client.force_login(self.sic_manager_user)
 
@@ -494,3 +516,12 @@ class CurriculumEducationalExperienceFormViewForContinuingTestCase(TestCase):
         self.assertEqual(years[1].transcript_translation, [])
         self.assertEqual(years[1].reduction, '')
         self.assertEqual(years[1].is_102_change_of_course, None)
+
+        # Check that an event has been sent
+        self.mock_publish.assert_called_once_with(
+            ExperienceAcademiqueCandidatCreeeOuModifieeEvent(
+                matricule=self.continuing_admission.candidate.global_id,
+                transaction_id=mock.ANY,
+                entity_id=mock.ANY,
+            )
+        )
