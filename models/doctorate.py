@@ -747,7 +747,16 @@ class DoctorateAdmission(DocumentCopyModelMixin, BaseAdmission):
         from infrastructure.messages_bus import message_bus_instance
 
         error_key = api_settings.NON_FIELD_ERRORS_KEY
-        project_errors = gather_business_exceptions(VerifierProjetQuery(self.uuid)).get(error_key, [])
+        # Some checks are required to request the signatures
+        project_errors = (
+            gather_business_exceptions(VerifierProjetQuery(self.uuid)).get(error_key, [])
+            if self.status
+            not in {
+                ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
+                ChoixStatutPropositionDoctorale.CA_EN_ATTENTE_DE_SIGNATURE.name,
+            }
+            else []
+        )
         submission_errors = gather_business_exceptions(VerifierPropositionQuery(self.uuid)).get(error_key, [])
         self.detailed_status = project_errors + submission_errors
         self.last_update_author = author
