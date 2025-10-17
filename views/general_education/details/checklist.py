@@ -3391,7 +3391,10 @@ class ChecklistView(
             for admission_document in admission_documents:
                 document_tab_identifier = admission_document.onglet.split('.')
 
-                if document_tab_identifier[0] == OngletsDemande.CURRICULUM.name and len(document_tab_identifier) > 1:
+                if (
+                    document_tab_identifier[0] in {OngletsDemande.CURRICULUM.name, OngletsDemande.EXAMS.name}
+                    and len(document_tab_identifier) > 1
+                ):
                     tab_identifier = f'parcours_anterieur__{document_tab_identifier[1]}'
 
                     if document_tab_identifier[1] in not_valuated_by_current_admission_experiences_uuids:
