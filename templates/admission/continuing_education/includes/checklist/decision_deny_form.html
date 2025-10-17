@@ -31,6 +31,7 @@
     style="overflow: auto;"
     id="decision-deny-form"
     class="ckeditor-form"
+    data-init-function="decisionDenyForm"
 >
   <div class="modal-body" style="overflow:auto;">
 
@@ -93,6 +94,7 @@
   {{ decision_deny_form.media }}
 
   <script>
+      window.admission.decisionDenyForm = function() {
       $(document).ready(() => {
         {# Reset / Set mail templates values #}
         const defaultMessage = JSON.parse(document.getElementById('decision_deny_form_body').textContent);
@@ -166,13 +168,9 @@
             },
         }, {duration: 0,});
       });
+      };
+      {% if not request.htmx %}
+        window.admission.decisionDenyForm();
+      {% endif %}
   </script>
-
-  {% if request.htmx %}
-    <script>
-      $(document).ready(function(){
-          $('#decision-deny-form *[data-toggle=popover]').popover();
-      });
-    </script>
-  {% endif %}
 </form>

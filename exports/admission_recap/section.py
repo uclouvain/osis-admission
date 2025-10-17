@@ -32,6 +32,9 @@ from admission.calendar.admission_calendar import (
     AdmissionPoolExternalEnrollmentChangeCalendar,
     AdmissionPoolExternalReorientationCalendar,
 )
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    STATUTS_PROPOSITION_GENERALE_NON_SOUMISE,
+)
 from admission.ddd.admission.shared_kernel.domain.model.formation import (
     est_formation_medecine_ou_dentisterie,
 )
@@ -41,15 +44,17 @@ from admission.ddd.admission.shared_kernel.domain.service.i_elements_confirmatio
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
-from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import (
+    QuestionSpecifiqueDTO,
+)
 from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
-from admission.ddd.admission.shared_kernel.enums import CHOIX_AFFILIATION_SPORT_SELON_SITE, Onglets
+from admission.ddd.admission.shared_kernel.enums import (
+    CHOIX_AFFILIATION_SPORT_SELON_SITE,
+    Onglets,
+)
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     IdentifiantBaseEmplacementDocument,
     OngletsDemande,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    STATUTS_PROPOSITION_GENERALE_NON_SOUMISE,
 )
 from admission.exports.admission_recap.attachments import (
     Attachment,
@@ -247,6 +252,7 @@ def get_exams_section(
     }
     return Section(
         identifier=OngletsDemande.EXAMS,
+        sub_identifier=context.examens.uuid,
         content_template='admission/exports/recap/includes/exams.html',
         extra_context=extra_context,
         context=context,
@@ -597,7 +603,7 @@ def get_sections(
     with_free_requestable_documents=False,
     hide_curriculum=False,
     with_additional_documents=True,
-    education_group_year_exam: Optional[EducationGroupYearExam]=None,
+    education_group_year_exam: Optional[EducationGroupYearExam] = None,
 ):
     specific_questions_by_tab = get_dynamic_questions_by_tab(specific_questions)
 

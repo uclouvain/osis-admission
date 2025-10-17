@@ -29,6 +29,7 @@
     hx-target="this"
     hx-swap="outerHTML"
     style="overflow: auto;"
+    data-init-function="facDecisionRefusalForm"
 >
   <div class="modal-body" style="overflow:auto;">
 
@@ -85,12 +86,17 @@
       {% include 'admission/general_education/includes/checklist/fac_decision.html' %}
     {% endif %}
     <script>
+        window.admission.facDecisionRefusalForm = function () {
         $(document).ready(function(){
             AdmissionSelectFilter.init('id_fac-decision-refusal-reasons');
             {% if fac_decision_refusal_form.is_valid %}
                 $('#fac-decision-refusal-modal').modal('hide');
             {% endif %}
         });
+        };
+        {% if not request.htmx %}
+          window.admission.facDecisionRefusalForm();
+        {% endif %}
     </script>
   {% endif %}
 </form>

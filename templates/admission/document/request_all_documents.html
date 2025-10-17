@@ -22,7 +22,7 @@
   * at the root of the source code of this program.  If not,
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
-<div>
+<div data-init-function="requestAllDocumentsForm">
   {% bootstrap_form_errors form %}
   {% csrf_token %}
   {% bootstrap_field form.deadline %}
@@ -97,6 +97,7 @@
   {% include 'admission/document/message_content_reset_confirm_modal.html' %}
   {% include 'admission/document/message_object_reset_confirm_modal.html' %}
   <script>
+      window.admission.requestAllDocumentsForm = function() {
       $(document).ready(function () {
           const requestedDocuments = {{ requested_documents|safe }};
           const defaultMessage = `{{ form.initial.message_content|safe }}`;
@@ -319,6 +320,10 @@
               }
           });
       });
+      };
+      {% if not request.htmx %}
+        window.admission.requestAllDocumentsForm();
+      {% endif %}
   </script>
 </div>
 

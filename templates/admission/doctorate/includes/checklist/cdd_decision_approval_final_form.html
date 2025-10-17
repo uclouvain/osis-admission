@@ -29,6 +29,7 @@
   hx-swap="outerHTML"
   style="overflow: auto;"
   class="ckeditor-form"
+  data-init-function="cddDecisionApprovalFinalForm"
 >
   <div class="modal-body" style="overflow:auto;">
     {% bootstrap_form_errors cdd_decision_approval_final_form %}
@@ -57,14 +58,16 @@
       {# Update the content of the tab #}
       {% include 'admission/doctorate/includes/checklist/cdd_decision.html' %}
     {% endif %}
-
-    <script src="{% static "admission/ckeditor.js" %}"></script>
-
   {% endif %}
 
   <script>
+      window.admission.cddDecisionApprovalFinalForm = function () {
       $(document).ready(function(){
           initializeCKEditor('id_cdd-decision-approval-final-body');
       });
+      };
+      {% if not request.htmx %}
+        window.admission.cddDecisionApprovalFinalForm();
+      {% endif %}
   </script>
 </form>

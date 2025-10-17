@@ -23,29 +23,20 @@
  * see http://www.gnu.org/licenses/.
  *
  */
-/**
- * Initialize a ckeditor field for a specific textarea.
- */
-function initializeCKEditor(textareaId) {
-    const textarea = document.getElementById(textareaId);
-    return CKEDITOR.replace(textarea.id, JSON.parse(textarea.getAttribute('data-config')));
-}
-
-/**
- * Remove the editor of a specific textarea.
- */
-function removeEditor(textareaId) {
-    const instance = CKEDITOR.instances[textareaId];
-    if (instance) {
-        instance.destroy();
-    }
-}
-
-/**
- * Initialize, in a container, all the textarea whose the type is "ckeditortype" (django-ckeditor).
- */
-function initializeCKEditors(container) {
-  container.querySelectorAll('textarea[data-type="ckeditortype"]').forEach(function (textarea) {
-    initializeCKEditor(textarea.id);
-  });
-}
+/*
+With htmx 1.9, inline scripts ($.ready) could be executed but with htmx 2.0, this no longer works very well so
+the old scripts are embedded in a function that is trigger after the dom is updated.
+The function name must be specified in the data-init-function property of the elements and the associated functions
+must be specified in the window.admission namespace.
+*/
+document.body.addEventListener('htmx:afterSettle', function (event) {
+    const originalElt = event.detail.elt;
+    const elementsToInitialize = Array.from(originalElt.querySelectorAll('[data-init-function]'));
+    elementsToInitialize.push(originalElt);
+    elementsToInitialize.forEach(function(elt) {
+      const currentFunctionName = elt.dataset.initFunction;
+      if (currentFunctionName && window.admission[currentFunctionName]) {
+        window.admission[currentFunctionName](elt);
+      }
+    });
+});

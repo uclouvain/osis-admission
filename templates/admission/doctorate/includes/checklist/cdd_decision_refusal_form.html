@@ -29,6 +29,7 @@
   hx-target="this"
   hx-swap="outerHTML"
   style="overflow: auto;"
+  data-init-function="cddDecisionRefusalForm"
 >
   <div class="modal-body" style="overflow:auto;">
 
@@ -85,12 +86,17 @@
       {% include 'admission/doctorate/includes/checklist/cdd_decision.html' %}
     {% endif %}
     <script>
+        window.admission.cddDecisionRefusalForm = function () {
         $(document).ready(function(){
             AdmissionSelectFilter.init('id_cdd-decision-refusal-reasons');
             {% if cdd_decision_refusal_form.is_valid %}
                 $('#cdd-decision-refusal-modal').modal('hide');
             {% endif %}
         });
+        };
+        {% if not request.htmx %}
+          window.admission.cddDecisionRefusalForm();
+        {% endif %}
     </script>
   {% endif %}
 </form>

@@ -30,6 +30,7 @@
     hx-swap="outerHTML"
     style="overflow: auto;"
     id="sic-decision-approval-final-form"
+    data-init-function="sicDecisionApprovalFinalForm"
 >
   <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -101,22 +102,20 @@
   </div>
 
   <script>
+    window.admission.sicDecisionApprovalFinalForm = function () {
     $(document).ready(() => {
-        initializeCKEditor('id_sic-decision-approval-final-body');
+      initializeCKEditor('id_sic-decision-approval-final-body');
+      {% if sic_decision_approval_final_form.is_valid %}
+        $('#sic-decision-approval-final-modal').modal('hide');
+        $('.modal-backdrop').hide();
+      {% endif %}
+      $('#sic-decision-approval-final-form *[data-toggle=popover]').popover();
     });
+    };
+    {% if not request.htmx %}
+      window.admission.sicDecisionApprovalFinalForm();
+    {% endif %}
   </script>
-
-  {% if request.htmx %}
-    <script>
-      $(document).ready(function(){
-          {% if sic_decision_approval_final_form.is_valid %}
-            $('#sic-decision-approval-final-modal').modal('hide');
-            $('.modal-backdrop').hide();
-          {% endif %}
-          $('#sic-decision-approval-final-form *[data-toggle=popover]').popover();
-      });
-    </script>
-  {% endif %}
 </form>
 
 {% if request.htmx %}

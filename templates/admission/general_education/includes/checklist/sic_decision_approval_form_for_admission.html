@@ -68,23 +68,14 @@
 {% endblock %}
 
 {% block additional_scripts %}
-  <script>
-      $(document).ready(function() {
-          {% if request.htmx %}
-              {# Initialize rich editors #}
-              initializeCKEditor('id_sic-decision-approval-communication_to_the_candidate');
-          {% endif %}
+  {# Display fields depending on other fields #}
+  $('#id_sic-decision-approval-tuition_fees_amount_other').dependsOn({
+  '#id_sic-decision-approval-tuition_fees_amount': {values: ['AUTRE']},
+  }, {duration: 0, valueOnDisable: '',});
 
-          {# Display fields depending on other fields #}
-          $('#id_sic-decision-approval-tuition_fees_amount_other').dependsOn({
-              '#id_sic-decision-approval-tuition_fees_amount': {values: ['AUTRE']},
-          }, {duration: 0, valueOnDisable: '',});
-
-          {% if sic_decision_approval_form.is_hue %}
-              $('#id_sic-decision-approval-mobility_months_amount').dependsOn({
-                  '#id_sic-decision-approval-is_mobility': {values: ['True']},
-              }, {duration: 0, valueOnDisable: '',});
-          {% endif %}
-      });
-  </script>
+  {% if sic_decision_approval_form.is_hue %}
+    $('#id_sic-decision-approval-mobility_months_amount').dependsOn({
+    '#id_sic-decision-approval-is_mobility': {values: ['True']},
+    }, {duration: 0, valueOnDisable: '',});
+  {% endif %}
 {% endblock %}
