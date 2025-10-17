@@ -90,7 +90,6 @@ from admission.templatetags.admission import (
     get_image_file_url,
     get_item,
     get_item_or_default,
-    get_item_or_none,
     has_value,
     interpolate,
     is_list,
@@ -437,12 +436,6 @@ class DisplayTagTestCase(TestCase):
         )
         self.assertEqual(component, {'template': 'admission/image.html', 'url': 'url', 'alt': 'name'})
 
-    def test_get_item_or_none(self):
-        dictionary = {
-            'a': 1,
-        }
-        self.assertEqual(get_item_or_none(dictionary, 'a'), 1)
-        self.assertEqual(get_item_or_none(dictionary, 'b'), None)
 
     def test_experience_details_template_with_an_educational_experience(self):
         general_admission = GeneralEducationAdmissionFactory()

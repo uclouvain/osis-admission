@@ -618,12 +618,6 @@ def get_item(dictionary, value):
 
 
 @register.filter
-def get_item_or_none(dictionary, value):
-    """Returns the value of a key in a dictionary if it exists else None"""
-    return dictionary.get(value)
-
-
-@register.filter
 def get_bound_field(form, field_name):
     """Returns the bound field of a form"""
     return form[field_name]
