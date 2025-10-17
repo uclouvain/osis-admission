@@ -41,6 +41,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formatio
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
+from admission.ddd.admission.events import ExperienceAcademiqueCandidatSupprimeeEvent
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
 )
@@ -204,7 +205,9 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
         )
 
         # Mock osis document api
-        patcher = mock.patch("osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value)
+        patcher = mock.patch(
+            "osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
@@ -216,6 +219,15 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
         patcher = mock.patch('osis_document_components.fields.FileField._confirm_multiple_upload')
         patched = patcher.start()
         patched.side_effect = lambda _, value, __: value
+        self.addCleanup(patcher.stop)
+
+        # Mock publish
+        patcher = mock.patch('infrastructure.utils.MessageBus.publish')
+        self.mock_publish = patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch('django.db.transaction.on_commit', side_effect=lambda f: f())
+        self.mock_on_commit = patcher.start()
         self.addCleanup(patcher.stop)
 
     def test_delete_experience_from_curriculum_is_not_allowed_for_fac_users(self):
@@ -384,6 +396,15 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+        # Check that an event has been sent
+        self.mock_publish.assert_called_once_with(
+            ExperienceAcademiqueCandidatSupprimeeEvent(
+                matricule=self.general_admission.candidate.global_id,
+                transaction_id=mock.ANY,
+                entity_id=mock.ANY,
+            )
+        )
 
     def test_delete_experience_from_doctorate_curriculum_is_not_allowed_for_fac_users(self):
         self.client.force_login(self.doctorate_program_manager_user)

@@ -41,6 +41,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formatio
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
+from admission.ddd.admission.events import ExperienceAcademiqueCandidatDupliqueeEvent
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
 )
@@ -225,7 +226,9 @@ class CurriculumEducationalExperienceDuplicateViewTestCase(TestCase):
         )
 
         # Mock osis document api
-        self.get_several_remote_metadata_patcher = mock.patch('osis_document_components.services.get_several_remote_metadata')
+        self.get_several_remote_metadata_patcher = mock.patch(
+            'osis_document_components.services.get_several_remote_metadata'
+        )
         self.get_several_remote_metadata_patched = self.get_several_remote_metadata_patcher.start()
         self.get_several_remote_metadata_patched.return_value = {
             f'token{index}': {
@@ -243,12 +246,19 @@ class CurriculumEducationalExperienceDuplicateViewTestCase(TestCase):
         }
         self.addCleanup(self.get_remote_tokens_patcher.stop)
 
-        self.documents_remote_duplicate_patcher = mock.patch('osis_document_components.services.documents_remote_duplicate')
+        self.documents_remote_duplicate_patcher = mock.patch(
+            'osis_document_components.services.documents_remote_duplicate'
+        )
         self.documents_remote_duplicate_patched = self.documents_remote_duplicate_patcher.start()
         self.documents_remote_duplicate_patched.return_value = {
             self.files_uuids_str[index]: self.duplicate_files_uuids_str[index] for index in range(len(self.files_uuids))
         }
         self.addCleanup(self.documents_remote_duplicate_patcher.stop)
+
+        # Mock publish
+        patcher = mock.patch('infrastructure.utils.MessageBus.publish')
+        self.mock_publish = patcher.start()
+        self.addCleanup(patcher.stop)
 
     def test_duplicate_experience_from_curriculum_is_not_allowed_for_fac_users(self):
         self.client.force_login(self.program_manager_user)
@@ -434,6 +444,15 @@ class CurriculumEducationalExperienceDuplicateViewTestCase(TestCase):
 
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
         self.assertEqual(self.general_admission.modified_at, datetime.datetime(2022, 2, 2, 0, 0))
+
+        # Check that an event has been sent
+        self.mock_publish.assert_called_once_with(
+            ExperienceAcademiqueCandidatDupliqueeEvent(
+                matricule=self.general_admission.candidate.global_id,
+                transaction_id=mock.ANY,
+                entity_id=mock.ANY,
+            )
+        )
 
     def test_duplicate_known_valuated_experience(self):
         self.client.force_login(self.sic_manager_user)

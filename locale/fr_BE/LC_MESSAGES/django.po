@@ -229,6 +229,9 @@ msgid ""
 msgstr ""
 "Un membre doit être soit interne, soit externe, veuillez vérifier les champs."
 
+msgid "A merger proposal is currently being resolved."
+msgstr "Une proposition de fusion est en cours de résolution."
+
 msgid "A new version of the analysis folder has been generated."
 msgstr "Une nouvelle version du dossier d'analyse a été générée."
 
@@ -921,6 +924,11 @@ msgid "Are you the child of a UCLouvain or Martin V staff member?"
 msgstr ""
 "Êtes-vous l'enfant d'un membre du personnel de l'UCLouvain ou de l'entité "
 "Martin V ?"
+
+msgid ""
+"As a merger proposal is currently being resolved, doing it will cause a "
+"merge reset."
+msgstr "Étant donné qu'une proposition de fusion est en cours de résolution, déclencher cette action entraînera une réinitialisation de la fusion."
 
 msgid ""
 "As the email address of the faculty recipient is not defined, no email will "
@@ -6225,6 +6233,9 @@ msgstr "Enregistrer"
 msgid "Save and transfer to SIC"
 msgstr "Enregistrer et transmettre en SIC"
 
+msgid "Saving the tab will cause a merge reset."
+msgstr "La sauvegarde de l'onglet entraînera une réinitialisation de la fusion."
+
 msgid "Scholarship"
 msgstr "Boursier"
 
@@ -7893,6 +7904,11 @@ msgstr "Mettre à jour l'expérience"
 
 msgid "Update member"
 msgstr "Modifier le membre"
+
+msgid ""
+"Updating, deleting, creating or duplicating an experience will cause a merge "
+"reset."
+msgstr "Mettre à jour, supprimer, créer ou dupliquer une expérience entraînera une réinitialisation de la fusion."
 
 msgctxt "admission"
 msgid "Upload"

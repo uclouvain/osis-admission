@@ -1525,3 +1525,12 @@ def epc_injection_status_display(value):
         'epc_injection_status_value': value,
         'epc_injection_status_label': EPCInjectionStatus.get_value(value),
     }
+
+
+@register.inclusion_tag('admission/includes/person_merge_proposal_in_progress_message.html', takes_context=True)
+def person_merge_proposal_in_progress_message(context, message=''):
+    person_merge_proposal = context['view'].proposition_fusion
+    return {
+        'proposition_fusion': person_merge_proposal,
+        'person_merge_proposal_alert_message': message,
+    }

@@ -40,13 +40,16 @@ from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formatio
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
-from admission.ddd.admission.shared_kernel.enums import Onglets
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
+from admission.ddd.admission.events import EtudesSecondairesCandidatModifieesEvent
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.shared_kernel.enums import Onglets
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    OngletsDemande,
 )
 from admission.models import ContinuingEducationAdmission
 from admission.models import EPCInjection as AdmissionEPCInjection
@@ -89,11 +92,7 @@ from base.tests.factories.education_group_year import (
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
-from osis_profile.models import (
-    BelgianHighSchoolDiploma,
-    Exam,
-    ForeignHighSchoolDiploma,
-)
+from osis_profile.models import BelgianHighSchoolDiploma, Exam, ForeignHighSchoolDiploma
 from osis_profile.models.enums.education import (
     EducationalType,
     Equivalence,
@@ -101,14 +100,15 @@ from osis_profile.models.enums.education import (
     HighSchoolDiplomaTypes,
 )
 from osis_profile.models.enums.exam import ExamTypes
+from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection
 from osis_profile.models.epc_injection import (
-    EPCInjection as CurriculumEPCInjection,
     EPCInjectionStatus as CurriculumEPCInjectionStatus,
 )
 from osis_profile.models.epc_injection import ExperienceType
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.domain import DomainFactory
 from reference.tests.factories.language import FrenchLanguageFactory, LanguageFactory
+
 
 @freezegun.freeze_time("2022-01-01")
 class AdmissionEducationFormViewForMasterTestCase(TestCase):
@@ -144,7 +144,9 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         self.form_url = resolve_url('admission:general-education:update:education', uuid=self.general_admission.uuid)
 
         # Mock osis document api
-        patcher = mock.patch("osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value)
+        patcher = mock.patch(
+            "osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
@@ -156,6 +158,15 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         patcher = mock.patch('osis_document_components.fields.FileField._confirm_multiple_upload')
         patched = patcher.start()
         patched.side_effect = lambda _, value, __: value
+
+        # Mock publish
+        patcher = mock.patch('infrastructure.utils.MessageBus.publish')
+        self.mock_publish = patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch('django.db.transaction.on_commit', side_effect=lambda f: f())
+        self.mock_on_commit = patcher.start()
+        self.addCleanup(patcher.stop)
 
     def test_update_education_is_not_allowed_for_fac_users(self):
         self.client.force_login(self.program_manager_user)
@@ -300,6 +311,15 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         self.assertNotIn(
             f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',
             self.general_admission.requested_documents,
+        )
+
+        # Check that an event has been sent
+        self.mock_publish.assert_called_once_with(
+            EtudesSecondairesCandidatModifieesEvent(
+                matricule=self.general_admission.candidate.global_id,
+                transaction_id=mock.ANY,
+                entity_id=mock.ANY,
+            )
         )
 
     def test_submit_valid_data_when_the_candidate_has_a_diploma_with_existing_belgian_diploma(self):
@@ -760,7 +780,9 @@ class AdmissionEducationFormViewForContinuingTestCase(TestCase):
         )
 
         # Mock osis document api
-        patcher = mock.patch("osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value)
+        patcher = mock.patch(
+            "osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
@@ -772,6 +794,15 @@ class AdmissionEducationFormViewForContinuingTestCase(TestCase):
         patcher = mock.patch('osis_document_components.fields.FileField._confirm_multiple_upload')
         patched = patcher.start()
         patched.side_effect = lambda _, value, __: value
+
+        # Mock publish
+        patcher = mock.patch('infrastructure.utils.MessageBus.publish')
+        self.mock_publish = patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch('django.db.transaction.on_commit', side_effect=lambda f: f())
+        self.mock_on_commit = patcher.start()
+        self.addCleanup(patcher.stop)
 
     def test_update_education_for_fac_users(self):
         self.client.force_login(self.program_manager_user)
@@ -941,7 +972,9 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         self.form_url = resolve_url('admission:general-education:update:education', uuid=self.general_admission.uuid)
 
         # Mock osis document api
-        patcher = mock.patch("osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value)
+        patcher = mock.patch(
+            "osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
@@ -953,6 +986,15 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         patcher = mock.patch('osis_document_components.fields.FileField._confirm_multiple_upload')
         patched = patcher.start()
         patched.side_effect = lambda _, value, __: value
+
+        # Mock publish
+        patcher = mock.patch('infrastructure.utils.MessageBus.publish')
+        self.mock_publish = patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch('django.db.transaction.on_commit', side_effect=lambda f: f())
+        self.mock_on_commit = patcher.start()
+        self.addCleanup(patcher.stop)
 
     def test_update_education_is_not_allowed_for_fac_users(self):
         self.client.force_login(self.program_manager_user)

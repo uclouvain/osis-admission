@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 
 import datetime
 import uuid
+from unittest.mock import ANY, patch
 
 import freezegun
 from django.shortcuts import resolve_url
@@ -34,6 +35,9 @@ from rest_framework import status
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
+)
+from admission.ddd.admission.events import (
+    ExperienceAcademiqueCandidatIntegreeDansDemandeEvent,
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
@@ -118,6 +122,11 @@ class CurriculumEducationalExperienceValuateViewTestCase(TestCase):
             experience_uuid=self.experience.uuid,
         )
 
+        # Mock publish
+        patcher = patch('infrastructure.utils.MessageBus.publish')
+        self.mock_publish = patcher.start()
+        self.addCleanup(patcher.stop)
+
     def test_valuate_experience_from_curriculum_is_not_allowed_for_fac_users(self):
         self.client.force_login(self.program_manager_user)
         response = self.client.post(self.valuate_url)
@@ -191,6 +200,15 @@ class CurriculumEducationalExperienceValuateViewTestCase(TestCase):
         # Keep the experience checklist if one is already there
         saved_experience_checklist[0]['extra']['custom'] = 'custom value'
         self.general_admission.save(update_fields=['checklist'])
+
+        # Check that an event has been sent
+        self.mock_publish.assert_called_once_with(
+            ExperienceAcademiqueCandidatIntegreeDansDemandeEvent(
+                matricule=self.general_admission.candidate.global_id,
+                transaction_id=ANY,
+                entity_id=ANY,
+            )
+        )
 
         valuation.delete()
 

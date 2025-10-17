@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -29,18 +29,27 @@ from uuid import UUID
 from django.urls import reverse
 from django.utils.functional import cached_property
 
-from admission.models import EPCInjection as AdmissionEPCInjection
-from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
+from admission.ddd.admission.events import EtudesSecondairesCandidatModifieesEvent
 from admission.ddd.admission.shared_kernel.enums import Onglets
-from admission.forms.admission.education import AdmissionBachelorEducationForeignDiplomaForm
-from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidatTranslator
-from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
+from admission.forms.admission.education import (
+    AdmissionBachelorEducationForeignDiplomaForm,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import (
+    ProfilCandidatTranslator,
+)
+from admission.models import EPCInjection as AdmissionEPCInjection
+from admission.models.epc_injection import (
+    EPCInjectionStatus as AdmissionEPCInjectionStatus,
+)
+from admission.models.epc_injection import EPCInjectionType
+from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from base.models.enums.education_group_types import TrainingType
+from infrastructure.messages_bus import message_bus_instance
+from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection
 from osis_profile.models.epc_injection import (
-    EPCInjection as CurriculumEPCInjection,
-    ExperienceType,
     EPCInjectionStatus as CurriculumEPCInjectionStatus,
 )
+from osis_profile.models.epc_injection import ExperienceType
 from osis_profile.views.edit_etudes_secondaires import EditEtudesSecondairesView
 
 __all__ = [
@@ -61,7 +70,9 @@ class AdmissionEducationFormView(AdmissionFormMixin, LoadDossierViewMixin, EditE
         return super().has_permission() and self.can_be_updated
 
     def traitement_specifique(self, experience_uuid: UUID, experiences_supprimees: List[UUID] = None):
-        pass
+        message_bus_instance.publish(
+            EtudesSecondairesCandidatModifieesEvent(matricule=self.person.global_id),
+        )
 
     @cached_property
     def is_bachelor(self):

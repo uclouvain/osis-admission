@@ -40,7 +40,13 @@ from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formatio
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
+from admission.ddd.admission.events import (
+    ExperienceAcademiqueCandidatCreeeEvent,
+    ExperienceAcademiqueCandidatModifieeEvent,
+)
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    OngletsDemande,
+)
 from admission.models import DoctorateAdmission
 from admission.models.base import AdmissionEducationalValuatedExperiences
 from admission.tests.factories import DoctorateAdmissionFactory
@@ -159,7 +165,9 @@ class CurriculumEducationalExperienceFormViewForDoctorateTestCase(TestCase):
         )
 
         # Mock osis document api
-        patcher = mock.patch("osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value)
+        patcher = mock.patch(
+            "osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
@@ -171,6 +179,15 @@ class CurriculumEducationalExperienceFormViewForDoctorateTestCase(TestCase):
         patcher = mock.patch('osis_document_components.fields.FileField._confirm_multiple_upload')
         patched = patcher.start()
         patched.side_effect = lambda _, value, __: value
+        self.addCleanup(patcher.stop)
+
+        # Mock publish
+        patcher = mock.patch('infrastructure.utils.MessageBus.publish')
+        self.mock_publish = patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch('django.db.transaction.on_commit', side_effect=lambda f: f())
+        self.mock_on_commit = patcher.start()
         self.addCleanup(patcher.stop)
 
         # Targeted url
@@ -528,6 +545,15 @@ class CurriculumEducationalExperienceFormViewForDoctorateTestCase(TestCase):
             ).exists()
         )
 
+        # Check that an event has been sent
+        self.mock_publish.assert_called_once_with(
+            ExperienceAcademiqueCandidatCreeeEvent(
+                matricule=self.doctorate_admission.candidate.global_id,
+                transaction_id=mock.ANY,
+                entity_id=mock.ANY,
+            )
+        )
+
     @freezegun.freeze_time('2023-01-01')
     def test_post_form_with_updated_experience(self):
         self.client.force_login(self.sic_manager_user)
@@ -598,4 +624,13 @@ class CurriculumEducationalExperienceFormViewForDoctorateTestCase(TestCase):
         self.assertNotIn(
             f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',
             self.doctorate_admission.requested_documents,
+        )
+
+        # Check that an event has been sent
+        self.mock_publish.assert_called_once_with(
+            ExperienceAcademiqueCandidatModifieeEvent(
+                matricule=self.doctorate_admission.candidate.global_id,
+                transaction_id=mock.ANY,
+                entity_id=mock.ANY,
+            )
         )
