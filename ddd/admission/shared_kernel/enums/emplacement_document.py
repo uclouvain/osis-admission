@@ -240,6 +240,7 @@ DocumentsAssimilation = {
     'ANNEXE_25_26_REFUGIES_APATRIDES': _(
         'Copy of Annex 25 or 26 completed by the Office of the Commissioner General for Refugees and Stateless Persons'
     ),
+    'ATTESTATION_IMMATRICULATION': _('Copy of "orange card" enrolment certificate'),
     'PREUVE_STATUT_APATRIDE': _(
         'Copy of official document from the local authority or Foreign Nationals Office proving stateless status'
     ),
