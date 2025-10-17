@@ -35,7 +35,6 @@ from django.shortcuts import resolve_url
 from django.test import RequestFactory, TestCase
 from django.test.utils import override_settings
 from django.urls import path, reverse
-from django.utils import translation
 from django.utils.translation import gettext as _
 from django.utils.translation import pgettext
 from django.views import View
@@ -111,7 +110,6 @@ from base.models.entity import Entity
 from base.models.entity_version import EntityVersion
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
-from base.templatetags.field_data import get_country_name
 from base.templatetags.format import strip
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import (
@@ -126,7 +124,6 @@ from osis_profile.models.enums.curriculum import (
     EvaluationSystem,
 )
 from osis_profile.tests.factories.curriculum import ExperienceParcoursInterneDTOFactory
-from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.university import UniversityFactory
 
 
@@ -1208,19 +1205,6 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
             admission_training_type(TrainingType.PHD.name),
             TypeFormation.DOCTORAT.name,
         )
-
-    def test_get_country_name_with_no_country(self):
-        self.assertEqual(get_country_name(None), '')
-
-    def test_get_country_name_with_country_fr(self):
-        with translation.override(settings.LANGUAGE_CODE_FR):
-            country = CountryFactory(name='Belgique', name_en='Belgium')
-            self.assertEqual(get_country_name(country), 'Belgique')
-
-    def test_get_country_name_with_country_en(self):
-        with translation.override(settings.LANGUAGE_CODE_EN):
-            country = CountryFactory(name='Belgique', name_en='Belgium')
-            self.assertEqual(get_country_name(country), 'Belgium')
 
     def test_formatted_language_with_fr_be(self):
         self.assertEqual(
