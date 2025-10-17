@@ -33,7 +33,6 @@ from urllib.parse import urlencode
 import attr
 from django import template
 from django.conf import settings
-from django.core.validators import EMPTY_VALUES
 from django.shortcuts import resolve_url
 from django.template.defaultfilters import unordered_list
 from django.urls import NoReverseMatch, reverse
@@ -478,57 +477,6 @@ def detail_tab_path_from_update(context, admission_uuid):
     )
 
 
-@register.inclusion_tag('admission/includes/field_data.html', takes_context=True)
-def field_data(
-    context,
-    name,
-    data=None,
-    css_class=None,
-    hide_empty=False,
-    translate_data=False,
-    inline=False,
-    html_tag='',
-    tooltip=None,
-):
-    if context.get('all_inline') is True:
-        inline = True
-
-    if isinstance(data, list):
-        if context.get('hide_files') is True:
-            data = None
-            hide_empty = True
-        elif context.get('load_files') is False:
-            data = _('Specified') if data else _('Incomplete field')
-        elif data:
-            template_string = (
-                "{% load osis_document_components %}"
-                "{% document_visualizer files wanted_post_process='ORIGINAL' for_modified_upload=True %}"
-            )
-            template_context = {'files': data}
-            data = template.Template(template_string).render(template.Context(template_context))
-        else:
-            data = ''
-    elif type(data) == bool:
-        data = _('Yes') if data else _('No')
-    elif translate_data is True:
-        data = _(data)
-
-    if inline is True:
-        if name and name[-1] not in ':?!.':
-            name = _("%(label)s:") % {'label': name}
-        css_class = (css_class + ' inline-field-data') if css_class else 'inline-field-data'
-
-    return {
-        'name': name,
-        'data': data,
-        'css_class': css_class,
-        'hide_empty': hide_empty,
-        'html_tag': html_tag,
-        'inline': inline,
-        'tooltip': tooltip,
-    }
-
-
 @register.simple_tag
 def get_image_file_url(file_uuid):
     """Returns the url of the file, if it is an image."""
@@ -637,12 +585,6 @@ def formatted_language(language: str):
 def get_last_inscription_date(year: Union[int, str, float]):
     """Return the academic year related to a specific year."""
     return datetime.date(year, 9, 30)
-
-
-@register.filter(is_safe=False)
-def default_if_none_or_empty(value, arg):
-    """If value is None or empty, use given default."""
-    return value if value not in EMPTY_VALUES else arg
 
 
 @register.inclusion_tag('admission/includes/multiple_field_data.html', takes_context=True)
@@ -765,14 +707,6 @@ def admission_status(status: str, osis_education_type: str):
         .get(admission_context)
         .get_value(status)
     )
-
-
-@register.simple_tag
-def get_country_name(country: Optional[Country]):
-    """Return the country name."""
-    if not country:
-        return ''
-    return getattr(country, 'name' if get_language() == settings.LANGUAGE_CODE_FR else 'name_en')
 
 
 @register.filter

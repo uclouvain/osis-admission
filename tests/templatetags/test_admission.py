@@ -35,7 +35,6 @@ from django.shortcuts import resolve_url
 from django.test import RequestFactory, TestCase
 from django.test.utils import override_settings
 from django.urls import path, reverse
-from django.utils import translation
 from django.utils.translation import gettext as _
 from django.utils.translation import pgettext
 from django.views import View
@@ -82,12 +81,10 @@ from admission.templatetags.admission import (
     document_component,
     experience_details_template,
     experience_valuation_url,
-    field_data,
     format_ways_to_find_out_about_the_course,
     formatted_language,
     formatted_reference,
     get_active_parent,
-    get_country_name,
     get_document_details_url,
     get_first_truthy_value,
     get_image_file_url,
@@ -127,7 +124,6 @@ from osis_profile.models.enums.curriculum import (
     EvaluationSystem,
 )
 from osis_profile.tests.factories.curriculum import ExperienceParcoursInterneDTOFactory
-from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.university import UniversityFactory
 
 
@@ -308,78 +304,6 @@ class AdmissionTabsTestCase(TestCase):
             result['subtabs'],
             TAB_TREES['doctorate'][Tab('doctorate', pgettext('tab', 'Research'), 'graduation-cap')],
         )
-
-
-class AdmissionFieldsDataTestCase(TestCase):
-    def test_field_data_with_string_value_default_params(self):
-        result = field_data(
-            context={},
-            name='My field label',
-            data='value',
-        )
-        self.assertEqual(result['name'], 'My field label')
-        self.assertEqual(result['data'], 'value')
-        self.assertIsNone(result['css_class'])
-        self.assertFalse(result['hide_empty'])
-
-    def test_field_data_with_translated_string_value(self):
-        result = field_data(
-            context={},
-            name='My field label',
-            data='From',
-            translate_data=True,
-        )
-        self.assertEqual(result['name'], 'My field label')
-        self.assertEqual(result['data'], 'De')
-
-    def test_field_data_with_empty_list_value(self):
-        result = field_data(
-            context={},
-            name='My field label',
-            data=[],
-        )
-        self.assertEqual(result['name'], 'My field label')
-        self.assertEqual(result['data'], '')
-
-    def test_field_data_with_all_inline(self):
-        result = field_data(
-            context={'all_inline': True},
-            name='My field label',
-            data='value',
-        )
-        self.assertEqual(result['inline'], True)
-
-        result = field_data(
-            context={'all_inline': True},
-            name='My field label',
-            data='value',
-            inline=False,
-        )
-        self.assertEqual(result['inline'], True)
-
-    def test_field_data_without_files(self):
-        result = field_data(
-            context={'hide_files': True},
-            name='My field label',
-            data=['my_file'],
-        )
-        self.assertEqual(result['data'], None)
-        self.assertEqual(result['hide_empty'], True)
-
-    def test_field_data_without_files_load(self):
-        result = field_data(
-            context={'load_files': False},
-            name='My field label',
-            data=['my_file'],
-        )
-        self.assertEqual(result['data'], _('Specified'))
-
-        result = field_data(
-            context={'load_files': False},
-            name='My field label',
-            data=[],
-        )
-        self.assertEqual(result['data'], _('Incomplete field'))
 
 
 class DisplayTagTestCase(TestCase):
@@ -1281,19 +1205,6 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
             admission_training_type(TrainingType.PHD.name),
             TypeFormation.DOCTORAT.name,
         )
-
-    def test_get_country_name_with_no_country(self):
-        self.assertEqual(get_country_name(None), '')
-
-    def test_get_country_name_with_country_fr(self):
-        with translation.override(settings.LANGUAGE_CODE_FR):
-            country = CountryFactory(name='Belgique', name_en='Belgium')
-            self.assertEqual(get_country_name(country), 'Belgique')
-
-    def test_get_country_name_with_country_en(self):
-        with translation.override(settings.LANGUAGE_CODE_EN):
-            country = CountryFactory(name='Belgique', name_en='Belgium')
-            self.assertEqual(get_country_name(country), 'Belgium')
 
     def test_formatted_language_with_fr_be(self):
         self.assertEqual(
