@@ -529,18 +529,6 @@ def phone_spaced(phone, with_optional_zero=False):
     return re.sub('(\\d{3})(\\d{2})(\\d{2})(\\d{2})', '\\1 \\2 \\3 \\4', phone)
 
 
-@register.inclusion_tag('admission/includes/bootstrap_field_with_tooltip.html')
-def bootstrap_field_with_tooltip(field, classes='', show_help=False, html_tooltip=False, label=None, label_class=''):
-    return {
-        'field': field,
-        'classes': classes,
-        'show_help': show_help,
-        'html_tooltip': html_tooltip,
-        'label': label,
-        'label_class': label_class,
-    }
-
-
 @register.simple_tag(takes_context=True)
 def has_perm(context, perm, obj=None):
     if not obj:
