@@ -616,8 +616,13 @@
               const selectedTab = tabPanelId;
               const currentSelect = $(`${selectedTab}-documents-select`);
               $('.documents-tab').addClass('hidden').filter(`${selectedTab}-documents`).removeClass('hidden');
-              currentSelect.prop("selectedIndex", 0);
-              currentSelect[0].dispatchEvent(new Event('select2:select'));
+              if (currentSelect.length > 0) {
+                currentSelect.prop("selectedIndex", 0);
+                currentSelect[0].dispatchEvent(new Event('select2:select'));
+                $('#document-details').show();
+              } else {
+                $('#document-details').hide();
+              }
           }
 
           const readOnlyDocumentsIdentifiers = JSON.parse(document.getElementById('read-only-documents').textContent);
