@@ -24,10 +24,6 @@
 #
 # ##############################################################################
 
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
-    IProfilCandidatTranslator,
-)
-from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidat
 from admission.ddd.admission.formation_generale.commands import (
     VerifierCurriculumApresSoumissionQuery,
 )
@@ -43,6 +39,18 @@ from admission.ddd.admission.formation_generale.domain.service.i_formation impor
 from admission.ddd.admission.formation_generale.repository.i_proposition import (
     IPropositionRepository,
 )
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
+    IProfilCandidatTranslator,
+)
+from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import (
+    ProfilCandidat,
+)
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
+    AcademicYearIdentity,
+)
+from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import (
+    IAcademicYearRepository,
+)
 from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
     IExperienceParcoursInterneTranslator,
 )
@@ -54,12 +62,15 @@ def verifier_curriculum_apres_soumission(
     profil_candidat_translator: 'IProfilCandidatTranslator',
     experience_parcours_interne_translator: 'IExperienceParcoursInterneTranslator',
     formation_translator: 'IFormationGeneraleTranslator',
+    academic_year_repository: 'IAcademicYearRepository',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition = proposition_repository.get(entity_id=proposition_id)
 
     formation = formation_translator.get(entity_id=proposition.formation_id)
+
+    annee_formation = academic_year_repository.get(entity_id=AcademicYearIdentity(year=proposition.formation_id.annee))
 
     # WHEN
     ProfilCandidat.verifier_curriculum_formation_generale_apres_soumission(
@@ -68,6 +79,7 @@ def verifier_curriculum_apres_soumission(
         experience_parcours_interne_translator=experience_parcours_interne_translator,
         verification_experiences_completees=True,
         grade_academique_formation_proposition=formation.grade_academique,
+        annee_formation=annee_formation,
     )
 
     # THEN

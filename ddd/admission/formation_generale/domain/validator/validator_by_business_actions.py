@@ -28,36 +28,6 @@ from typing import Dict, List, Optional
 
 import attr
 
-from admission.ddd.admission.shared_kernel.domain.model.complement_formation import (
-    ComplementFormationIdentity,
-)
-from admission.ddd.admission.shared_kernel.domain.model.condition_complementaire_approbation import (
-    ConditionComplementaireApprobationIdentity,
-    ConditionComplementaireLibreApprobation,
-)
-from admission.ddd.admission.shared_kernel.domain.model.formation import Formation
-from admission.ddd.admission.shared_kernel.domain.model.motif_refus import MotifRefusIdentity
-from admission.ddd.admission.shared_kernel.domain.model.poste_diplomatique import (
-    PosteDiplomatiqueIdentity,
-)
-from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import (
-    TitreAccesSelectionnable,
-)
-from admission.ddd.admission.shared_kernel.domain.validator import (
-    ShouldAbsenceDeDetteEtreCompletee,
-    ShouldAnneesCVRequisesCompletees,
-    ShouldAssimilationEtreCompletee,
-    ShouldAutreFormatCarteBancaireRemboursementEtreCompletee,
-    ShouldExperiencesAcademiquesEtreCompletees,
-    ShouldExperiencesAcademiquesEtreCompleteesApresSoumission,
-    ShouldIBANCarteBancaireRemboursementEtreCompletee,
-    ShouldTypeCompteBancaireRemboursementEtreComplete,
-)
-from admission.ddd.admission.shared_kernel.domain.validator._should_curriculum_etre_complete import (
-    ShouldExperiencesNonAcademiquesAvoirUnCertificat,
-)
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
-from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model._comptabilite import (
     Comptabilite,
 )
@@ -110,11 +80,48 @@ from admission.ddd.admission.formation_generale.domain.validator._should_informa
     ShouldParcoursAnterieurEtreSuffisant,
     ShouldSicPeutDonnerDecision,
 )
+from admission.ddd.admission.shared_kernel.domain.model.complement_formation import (
+    ComplementFormationIdentity,
+)
+from admission.ddd.admission.shared_kernel.domain.model.condition_complementaire_approbation import (
+    ConditionComplementaireApprobationIdentity,
+    ConditionComplementaireLibreApprobation,
+)
+from admission.ddd.admission.shared_kernel.domain.model.formation import Formation
+from admission.ddd.admission.shared_kernel.domain.model.motif_refus import (
+    MotifRefusIdentity,
+)
+from admission.ddd.admission.shared_kernel.domain.model.poste_diplomatique import (
+    PosteDiplomatiqueIdentity,
+)
+from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import (
+    TitreAccesSelectionnable,
+)
+from admission.ddd.admission.shared_kernel.domain.validator import (
+    ShouldAbsenceDeDetteEtreCompletee,
+    ShouldAnneesCVRequisesCompletees,
+    ShouldAssimilationEtreCompletee,
+    ShouldAutreFormatCarteBancaireRemboursementEtreCompletee,
+    ShouldExperiencesAcademiquesEtreCompletees,
+    ShouldExperiencesAcademiquesEtreCompleteesApresSoumission,
+    ShouldIBANCarteBancaireRemboursementEtreCompletee,
+    ShouldTypeCompteBancaireRemboursementEtreComplete,
+)
+from admission.ddd.admission.shared_kernel.domain.validator._should_curriculum_etre_complete import (
+    ShouldExperiencesNonAcademiquesAvoirUnCertificat,
+)
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
+    EmplacementDocumentDTO,
+)
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from base.ddd.utils.business_validator import (
     BusinessValidator,
     TwoStepsMultipleBusinessExceptionListValidator,
 )
 from base.models.enums.education_group_types import TrainingType
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
+    AcademicYear,
+)
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     AlternativeSecondairesDTO,
     DiplomeBelgeEtudesSecondairesDTO,
@@ -142,6 +149,7 @@ class FormationGeneraleCurriculumValidatorList(TwoStepsMultipleBusinessException
     type_formation: TrainingType
     equivalence_diplome: List[str]
     sigle_formation: str
+    annee_formation: AcademicYear
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -159,7 +167,7 @@ class FormationGeneraleCurriculumValidatorList(TwoStepsMultipleBusinessException
                 annee_derniere_inscription_ucl=self.annee_derniere_inscription_ucl,
                 annee_diplome_etudes_secondaires=self.annee_diplome_etudes_secondaires,
                 experiences_non_academiques=self.experiences_non_academiques,
-                mois_debut_annee_academique_courante_facultatif=True,
+                annee_formation=self.annee_formation,
             ),
             ShouldExperiencesAcademiquesEtreCompletees(
                 experiences_academiques_incompletes=self.experiences_academiques_incompletes,
@@ -185,6 +193,7 @@ class FormationGeneraleCurriculumPostSoumissionValidatorList(TwoStepsMultipleBus
     experiences_parcours_interne: List[ExperienceParcoursInterneDTO]
     verification_experiences_completees: bool
     grade_academique_formation_proposition: str
+    annee_formation: AcademicYear
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -199,8 +208,8 @@ class FormationGeneraleCurriculumPostSoumissionValidatorList(TwoStepsMultipleBus
                 annee_diplome_etudes_secondaires=self.annee_diplome_etudes_secondaires,
                 experiences_non_academiques=self.experiences_non_academiques,
                 date_soumission=self.date_soumission,
-                mois_debut_annee_academique_courante_facultatif=True,
                 experiences_parcours_interne=self.experiences_parcours_interne,
+                annee_formation=self.annee_formation,
             ),
         ]
 
