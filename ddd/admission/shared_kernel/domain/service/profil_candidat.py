@@ -39,7 +39,23 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     CurriculumAdmissionDTO,
 )
-from admission.ddd.admission.shared_kernel.domain.model._candidat_adresse import CandidatAdresse
+from admission.ddd.admission.formation_continue.domain.validator.validator_by_business_actions import (
+    FormationContinueCurriculumValidatorList,
+)
+from admission.ddd.admission.formation_generale.domain.validator.validator_by_business_actions import (
+    BachelierEtudesSecondairesValidatorList,
+    ChoixFormationValidatorList,
+    EtudesSecondairesValidatorList,
+    ExamenValidatorList,
+    FormationGeneraleComptabiliteValidatorList,
+    FormationGeneraleCurriculumPostSoumissionValidatorList,
+    FormationGeneraleCurriculumValidatorList,
+    FormationGeneraleExperienceAcademiquePostSoumissionValidatorList,
+    FormationGeneraleInformationsComplementairesValidatorList,
+)
+from admission.ddd.admission.shared_kernel.domain.model._candidat_adresse import (
+    CandidatAdresse,
+)
 from admission.ddd.admission.shared_kernel.domain.model._candidat_signaletique import (
     CandidatSignaletique,
 )
@@ -58,21 +74,10 @@ from admission.ddd.admission.shared_kernel.domain.validator.validator_by_busines
 from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
     ExperiencesCVRecuperees,
 )
-from admission.ddd.admission.formation_continue.domain.validator.validator_by_business_actions import (
-    FormationContinueCurriculumValidatorList,
-)
-from admission.ddd.admission.formation_generale.domain.validator.validator_by_business_actions import (
-    BachelierEtudesSecondairesValidatorList,
-    ChoixFormationValidatorList,
-    EtudesSecondairesValidatorList,
-    ExamenValidatorList,
-    FormationGeneraleComptabiliteValidatorList,
-    FormationGeneraleCurriculumPostSoumissionValidatorList,
-    FormationGeneraleCurriculumValidatorList,
-    FormationGeneraleExperienceAcademiquePostSoumissionValidatorList,
-    FormationGeneraleInformationsComplementairesValidatorList,
-)
 from base.models.enums.education_group_types import TrainingType
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
+    AcademicYear,
+)
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import (
     GetCurrentAcademicYear,
 )
@@ -218,6 +223,7 @@ class ProfilCandidat(interface.DomainService):
         annee_courante: int,
         curriculum_pdf: List[str],
         uuid_proposition: str,
+        annee_formation: AcademicYear,
     ) -> None:
         curriculum = profil_candidat_translator.get_curriculum(
             matricule=matricule,
@@ -237,6 +243,7 @@ class ProfilCandidat(interface.DomainService):
             annee_derniere_inscription_ucl=curriculum.annee_derniere_inscription_ucl,
             fichier_pdf=curriculum_pdf,
             experiences_non_academiques=curriculum.experiences_non_academiques,
+            annee_formation=annee_formation,
         ).validate()
 
     @classmethod
@@ -246,6 +253,7 @@ class ProfilCandidat(interface.DomainService):
         type_formation: TrainingType,
         profil_candidat_translator: 'IProfilCandidatTranslator',
         annee_courante: int,
+        annee_formation: AcademicYear,
     ) -> None:
         curriculum = profil_candidat_translator.get_curriculum(
             matricule=proposition.matricule_candidat,
@@ -267,6 +275,7 @@ class ProfilCandidat(interface.DomainService):
             type_formation=type_formation,
             equivalence_diplome=proposition.equivalence_diplome,
             sigle_formation=proposition.formation_id.sigle,
+            annee_formation=annee_formation,
         ).validate()
 
     @classmethod
@@ -277,6 +286,7 @@ class ProfilCandidat(interface.DomainService):
         experience_parcours_interne_translator: 'IExperienceParcoursInterneTranslator',
         verification_experiences_completees: bool,
         grade_academique_formation_proposition: str,
+        annee_formation: AcademicYear,
         curriculum_dto: Optional[CurriculumAdmissionDTO] = None,
     ) -> None:
         date_soumission = proposition.soumise_le.date()
@@ -307,6 +317,7 @@ class ProfilCandidat(interface.DomainService):
             experiences_parcours_interne=experiences_parcours_interne,
             verification_experiences_completees=verification_experiences_completees,
             grade_academique_formation_proposition=grade_academique_formation_proposition,
+            annee_formation=annee_formation,
         ).validate()
 
     @classmethod
@@ -359,6 +370,7 @@ class ProfilCandidat(interface.DomainService):
         experience_parcours_interne_translator: 'IExperienceParcoursInterneTranslator',
         verification_experiences_completees: bool,
         grade_academique_formation_proposition: str,
+        annee_formation: AcademicYear,
         curriculum_dto: Optional[CurriculumAdmissionDTO] = None,
     ) -> None:
         # Le CV est soumis lors de l'envoi de la demande des signatures
@@ -391,6 +403,7 @@ class ProfilCandidat(interface.DomainService):
             experiences_parcours_interne=experiences_parcours_interne,
             verification_experiences_completees=verification_experiences_completees,
             grade_academique_formation_proposition=grade_academique_formation_proposition,
+            annee_formation=annee_formation,
         ).validate()
 
     @classmethod

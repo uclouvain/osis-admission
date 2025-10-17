@@ -27,8 +27,16 @@ from functools import partial
 from typing import List
 
 from admission.calendar.admission_calendar import DIPLOMES_ACCES_BELGE
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    Proposition,
+)
+from admission.ddd.admission.formation_generale.domain.service.i_formation import (
+    IFormationGeneraleTranslator,
+)
 from admission.ddd.admission.shared_kernel.domain.model.formation import Formation
-from admission.ddd.admission.shared_kernel.domain.model.question_specifique import QuestionSpecifique
+from admission.ddd.admission.shared_kernel.domain.model.question_specifique import (
+    QuestionSpecifique,
+)
 from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription import (
     ICalendrierInscription,
 )
@@ -38,20 +46,22 @@ from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
-from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import ITitresAcces, Titres
-from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidat
+from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import (
+    ITitresAcces,
+    Titres,
+)
+from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import (
+    ProfilCandidat,
+)
 from admission.ddd.admission.shared_kernel.domain.service.verifier_questions_specifiques import (
     VerifierQuestionsSpecifiques,
 )
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
-from admission.ddd.admission.formation_generale.domain.model.proposition import (
-    Proposition,
-)
-from admission.ddd.admission.formation_generale.domain.service.i_formation import (
-    IFormationGeneraleTranslator,
-)
 from base.ddd.utils.business_validator import execute_functions_and_aggregate_exceptions
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
+    AcademicYear,
+)
 from osis_common.ddd import interface
 
 
@@ -69,6 +79,7 @@ class VerifierProposition(interface.DomainService):
         maximum_propositions_service: 'IMaximumPropositionsAutorisees',
         titres: 'Titres',
         formation: 'Formation',
+        annee_formation: AcademicYear,
         annee_soumise: int = None,
         pool_soumis: 'AcademicCalendarTypes' = None,
     ) -> None:
@@ -102,6 +113,7 @@ class VerifierProposition(interface.DomainService):
                 formation.type,
                 profil_candidat_translator,
                 annee_courante,
+                annee_formation=annee_formation,
             ),
             partial(
                 VerifierQuestionsSpecifiques.verifier_onglet_curriculum,
