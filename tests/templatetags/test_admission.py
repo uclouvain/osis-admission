@@ -82,7 +82,6 @@ from admission.templatetags.admission import (
     document_component,
     experience_details_template,
     experience_valuation_url,
-    field_data,
     format_ways_to_find_out_about_the_course,
     formatted_language,
     formatted_reference,
@@ -308,78 +307,6 @@ class AdmissionTabsTestCase(TestCase):
             result['subtabs'],
             TAB_TREES['doctorate'][Tab('doctorate', pgettext('tab', 'Research'), 'graduation-cap')],
         )
-
-
-class AdmissionFieldsDataTestCase(TestCase):
-    def test_field_data_with_string_value_default_params(self):
-        result = field_data(
-            context={},
-            name='My field label',
-            data='value',
-        )
-        self.assertEqual(result['name'], 'My field label')
-        self.assertEqual(result['data'], 'value')
-        self.assertIsNone(result['css_class'])
-        self.assertFalse(result['hide_empty'])
-
-    def test_field_data_with_translated_string_value(self):
-        result = field_data(
-            context={},
-            name='My field label',
-            data='From',
-            translate_data=True,
-        )
-        self.assertEqual(result['name'], 'My field label')
-        self.assertEqual(result['data'], 'De')
-
-    def test_field_data_with_empty_list_value(self):
-        result = field_data(
-            context={},
-            name='My field label',
-            data=[],
-        )
-        self.assertEqual(result['name'], 'My field label')
-        self.assertEqual(result['data'], '')
-
-    def test_field_data_with_all_inline(self):
-        result = field_data(
-            context={'all_inline': True},
-            name='My field label',
-            data='value',
-        )
-        self.assertEqual(result['inline'], True)
-
-        result = field_data(
-            context={'all_inline': True},
-            name='My field label',
-            data='value',
-            inline=False,
-        )
-        self.assertEqual(result['inline'], True)
-
-    def test_field_data_without_files(self):
-        result = field_data(
-            context={'hide_files': True},
-            name='My field label',
-            data=['my_file'],
-        )
-        self.assertEqual(result['data'], None)
-        self.assertEqual(result['hide_empty'], True)
-
-    def test_field_data_without_files_load(self):
-        result = field_data(
-            context={'load_files': False},
-            name='My field label',
-            data=['my_file'],
-        )
-        self.assertEqual(result['data'], _('Specified'))
-
-        result = field_data(
-            context={'load_files': False},
-            name='My field label',
-            data=[],
-        )
-        self.assertEqual(result['data'], _('Incomplete field'))
 
 
 class DisplayTagTestCase(TestCase):
