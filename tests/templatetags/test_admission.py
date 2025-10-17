@@ -77,7 +77,6 @@ from admission.templatetags.admission import (
     cotutelle_institute,
     current_subtabs,
     detail_tab_path_from_update,
-    display,
     document_component,
     experience_details_template,
     experience_valuation_url,
@@ -109,7 +108,6 @@ from base.models.entity import Entity
 from base.models.entity_version import EntityVersion
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
-from base.templatetags.format import strip
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import (
     EntityVersionFactory,
@@ -306,46 +304,6 @@ class AdmissionTabsTestCase(TestCase):
 
 
 class DisplayTagTestCase(TestCase):
-    def test_comma(self):
-        self.assertEqual(display('', ',', None), '')
-        self.assertEqual(display('', ',', 0), '')
-        self.assertEqual(display('', ',', ''), '')
-        self.assertEqual(display('Foo', ',', []), 'Foo')
-        self.assertEqual(display('', ',', "bar"), 'bar')
-        self.assertEqual(display('foo', '-', "", '-', ''), 'foo')
-        self.assertEqual(display('foo', '-', "bar", '-', ''), 'foo - bar')
-        self.assertEqual(display('foo', '-', None, '-', ''), 'foo')
-        self.assertEqual(display('foo', '-', None, '-', 'baz'), 'foo - baz')
-        self.assertEqual(display('foo', '-', "bar", '-', 'baz'), 'foo - bar - baz')
-        self.assertEqual(display('-'), '')
-        self.assertEqual(display('', '-', ''), '')
-        self.assertEqual(display('-', '-'), '-')
-        self.assertEqual(display('-', '-', '-'), '-')
-
-    def test_parenthesis(self):
-        self.assertEqual(display('(', '', ")"), '')
-        self.assertEqual(display('(', None, ")"), '')
-        self.assertEqual(display('(', 0, ")"), '')
-        self.assertEqual(display('(', 'lol', ")"), '(lol)')
-
-    def test_suffix(self):
-        self.assertEqual(display('', ' grammes'), '')
-        self.assertEqual(display(5, ' grammes'), '5 grammes')
-        self.assertEqual(display(5, ' grammes'), '5 grammes')
-        self.assertEqual(display(0.0, ' g'), '')
-
-    def test_both(self):
-        self.assertEqual(display('(', '', ")", '-', 0), '')
-        self.assertEqual(display('(', '', ",", "", ")", '-', 0), '')
-        self.assertEqual(display('(', 'jean', ",", "", ")", '-', 0), '(jean)')
-        self.assertEqual(display('(', 'jean', ",", "michel", ")", '-', 0), '(jean, michel)')
-        self.assertEqual(display('(', 'jean', ",", "michel", ")", '-', 100), '(jean, michel) - 100')
-
-    def test_strip(self):
-        self.assertEqual(strip(' coucou '), 'coucou')
-        self.assertEqual(strip(0), 0)
-        self.assertEqual(strip(None), None)
-
     @freezegun.freeze_time('2023-01-01')
     def test_formatted_reference(self):
         root = MainEntityVersionFactory(parent=None, entity_type='')
