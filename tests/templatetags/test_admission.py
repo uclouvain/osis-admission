@@ -86,7 +86,6 @@ from admission.templatetags.admission import (
     formatted_language,
     formatted_reference,
     get_active_parent,
-    get_country_name,
     get_document_details_url,
     get_first_truthy_value,
     get_image_file_url,
@@ -112,6 +111,7 @@ from base.models.entity import Entity
 from base.models.entity_version import EntityVersion
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
+from base.templatetags.field_data import get_country_name
 from base.templatetags.format import strip
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import (

@@ -33,7 +33,6 @@ from urllib.parse import urlencode
 import attr
 from django import template
 from django.conf import settings
-from django.core.validators import EMPTY_VALUES
 from django.shortcuts import resolve_url
 from django.template.defaultfilters import unordered_list
 from django.urls import NoReverseMatch, reverse
@@ -588,12 +587,6 @@ def get_last_inscription_date(year: Union[int, str, float]):
     return datetime.date(year, 9, 30)
 
 
-@register.filter(is_safe=False)
-def default_if_none_or_empty(value, arg):
-    """If value is None or empty, use given default."""
-    return value if value not in EMPTY_VALUES else arg
-
-
 @register.inclusion_tag('admission/includes/multiple_field_data.html', takes_context=True)
 def multiple_field_data(context, configurations: List[QuestionSpecifiqueDTO], title=_('Specific aspects'), **kwargs):
     """Display the answers of the specific questions based on a list of configurations."""
@@ -714,14 +707,6 @@ def admission_status(status: str, osis_education_type: str):
         .get(admission_context)
         .get_value(status)
     )
-
-
-@register.simple_tag
-def get_country_name(country: Optional[Country]):
-    """Return the country name."""
-    if not country:
-        return ''
-    return getattr(country, 'name' if get_language() == settings.LANGUAGE_CODE_FR else 'name_en')
 
 
 @register.filter
