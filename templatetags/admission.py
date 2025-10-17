@@ -36,7 +36,7 @@ from django.conf import settings
 from django.shortcuts import resolve_url
 from django.template.defaultfilters import unordered_list
 from django.urls import NoReverseMatch, reverse
-from django.utils.safestring import SafeString, mark_safe
+from django.utils.safestring import mark_safe
 from django.utils.translation import get_language, gettext
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext, pgettext_lazy
@@ -170,54 +170,6 @@ SAINT_LOUIS = 'Bruxelles Saint-Louis'
 SAINT_GILLES = 'Bruxelles Saint-Gilles'
 
 register = template.Library()
-
-
-@register.simple_tag
-def display(*args):
-    """Display args if their value is not empty, can be wrapped by parenthesis, or separated by comma or dash"""
-    ret = []
-    iterargs = iter(args)
-    nextarg = next(iterargs)
-    while nextarg != StopIteration:
-        if nextarg == "(":
-            reduce_wrapping = [next(iterargs, None)]
-            while reduce_wrapping[-1] != ")":
-                reduce_wrapping.append(next(iterargs, None))
-            ret.append(reduce_wrapping_parenthesis(*reduce_wrapping[:-1]))
-        elif nextarg == ",":
-            ret, val = ret[:-1], next(iter(ret[-1:]), '')
-            ret.append(reduce_list_separated(val, next(iterargs, None)))
-        elif nextarg in ["-", ':', ' - ']:
-            ret, val = ret[:-1], next(iter(ret[-1:]), '')
-            ret.append(reduce_list_separated(val, next(iterargs, None), separator=f" {nextarg} "))
-        elif isinstance(nextarg, str) and len(nextarg) > 1 and re.match(r'\s', nextarg[0]):
-            ret, suffixed_val = ret[:-1], next(iter(ret[-1:]), '')
-            ret.append(f"{suffixed_val}{nextarg}" if suffixed_val else "")
-        else:
-            ret.append(SafeString(nextarg) if nextarg else '')
-        nextarg = next(iterargs, StopIteration)
-    return SafeString("".join(ret))
-
-
-@register.simple_tag
-def reduce_wrapping_parenthesis(*args):
-    """Display args given their value, wrapped by parenthesis"""
-    ret = display(*args)
-    if ret:
-        return SafeString(f"({ret})")
-    return ret
-
-
-@register.simple_tag
-def reduce_list_separated(arg1, arg2, separator=", "):
-    """Display args given their value, joined by separator"""
-    if arg1 and arg2:
-        return separator.join([SafeString(arg1), SafeString(arg2)])
-    elif arg1:
-        return SafeString(arg1)
-    elif arg2:
-        return SafeString(arg2)
-    return ""
 
 
 @register.inclusion_tag('admission/includes/sortable_header_div.html', takes_context=True)
