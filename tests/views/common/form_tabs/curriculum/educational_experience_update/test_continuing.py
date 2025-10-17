@@ -33,7 +33,10 @@ from django.test import TestCase
 from rest_framework import status
 
 from admission.constants import CONTEXT_CONTINUING
-from admission.ddd.admission.events import ExperienceAcademiqueCandidatCreeeOuModifieeEvent
+from admission.ddd.admission.events import (
+    ExperienceAcademiqueCandidatCreeeEvent,
+    ExperienceAcademiqueCandidatModifieeEvent,
+)
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
 )
@@ -407,7 +410,7 @@ class CurriculumEducationalExperienceFormViewForContinuingTestCase(TestCase):
 
         # Check that an event has been sent
         self.mock_publish.assert_called_once_with(
-            ExperienceAcademiqueCandidatCreeeOuModifieeEvent(
+            ExperienceAcademiqueCandidatCreeeEvent(
                 matricule=self.continuing_admission.candidate.global_id,
                 transaction_id=mock.ANY,
                 entity_id=mock.ANY,
@@ -519,7 +522,7 @@ class CurriculumEducationalExperienceFormViewForContinuingTestCase(TestCase):
 
         # Check that an event has been sent
         self.mock_publish.assert_called_once_with(
-            ExperienceAcademiqueCandidatCreeeOuModifieeEvent(
+            ExperienceAcademiqueCandidatModifieeEvent(
                 matricule=self.continuing_admission.candidate.global_id,
                 transaction_id=mock.ANY,
                 entity_id=mock.ANY,

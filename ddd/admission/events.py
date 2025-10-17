@@ -29,7 +29,13 @@ from osis_common.ddd.interface import EntityIdentity, Event
 
 
 @attr.dataclass(frozen=True, slots=True, kw_only=True)
-class ExperienceAcademiqueCandidatCreeeOuModifieeEvent(Event):
+class ExperienceAcademiqueCandidatModifieeEvent(Event):
+    entity_id: EntityIdentity = None
+    matricule: str
+
+
+@attr.dataclass(frozen=True, slots=True, kw_only=True)
+class ExperienceAcademiqueCandidatCreeeEvent(Event):
     entity_id: EntityIdentity = None
     matricule: str
 
@@ -53,7 +59,13 @@ class ExperienceAcademiqueCandidatDupliqueeEvent(Event):
 
 
 @attr.dataclass(frozen=True, slots=True, kw_only=True)
-class ExperienceNonAcademiqueCandidatCreeeOuModifieeEvent(Event):
+class ExperienceNonAcademiqueCandidatModifieeEvent(Event):
+    entity_id: EntityIdentity = None
+    matricule: str
+
+
+@attr.dataclass(frozen=True, slots=True, kw_only=True)
+class ExperienceNonAcademiqueCandidatCreeeEvent(Event):
     entity_id: EntityIdentity = None
     matricule: str
 

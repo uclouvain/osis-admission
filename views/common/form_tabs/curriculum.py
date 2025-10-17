@@ -39,13 +39,15 @@ from django.views.generic import FormView
 
 from admission.admission_utils.copy_documents import copy_documents
 from admission.ddd.admission.events import (
+    ExperienceAcademiqueCandidatCreeeEvent,
     ExperienceAcademiqueCandidatDupliqueeEvent,
     ExperienceAcademiqueCandidatIntegreeDansDemandeEvent,
-    ExperienceAcademiqueCandidatCreeeOuModifieeEvent,
+    ExperienceAcademiqueCandidatModifieeEvent,
     ExperienceAcademiqueCandidatSupprimeeEvent,
+    ExperienceNonAcademiqueCandidatCreeeEvent,
     ExperienceNonAcademiqueCandidatDupliqueeEvent,
     ExperienceNonAcademiqueCandidatIntegreeDansDemandeEvent,
-    ExperienceNonAcademiqueCandidatCreeeOuModifieeEvent,
+    ExperienceNonAcademiqueCandidatModifieeEvent,
     ExperienceNonAcademiqueCandidatSupprimeeEvent,
 )
 from admission.ddd.admission.formation_generale.domain.service.checklist import (
@@ -128,9 +130,12 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
         }
 
     def traitement_specifique(self, experience_uuid: UUID, experiences_supprimees: List[UUID] = None):
-        message_bus_instance.publish(
-            ExperienceAcademiqueCandidatCreeeOuModifieeEvent(matricule=self.admission.candidate.global_id),
+        event = (
+            ExperienceAcademiqueCandidatModifieeEvent(matricule=self.admission.candidate.global_id)
+            if self.existing_experience
+            else ExperienceAcademiqueCandidatCreeeEvent(matricule=self.admission.candidate.global_id)
         )
+        message_bus_instance.publish(event)
 
     @property
     def educational_experience_filter_uuid(self):
@@ -248,9 +253,12 @@ class CurriculumNonEducationalExperienceFormView(
         )
 
     def traitement_specifique(self, experience_uuid: UUID, experiences_supprimees: List[UUID] = None):
-        message_bus_instance.publish(
-            ExperienceNonAcademiqueCandidatCreeeOuModifieeEvent(matricule=self.admission.candidate.global_id),
+        event = (
+            ExperienceNonAcademiqueCandidatModifieeEvent(matricule=self.admission.candidate.global_id)
+            if self.existing_experience
+            else ExperienceNonAcademiqueCandidatCreeeEvent(matricule=self.admission.candidate.global_id)
         )
+        message_bus_instance.publish(event)
 
     @property
     def person(self):

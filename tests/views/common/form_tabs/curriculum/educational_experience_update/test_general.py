@@ -38,7 +38,10 @@ from rest_framework import status
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
     ENTITY_CDE,
 )
-from admission.ddd.admission.events import ExperienceAcademiqueCandidatCreeeOuModifieeEvent
+from admission.ddd.admission.events import (
+    ExperienceAcademiqueCandidatCreeeEvent,
+    ExperienceAcademiqueCandidatModifieeEvent,
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
     ChoixStatutPropositionGenerale,
@@ -1837,7 +1840,7 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
 
         # Check that an event has been sent
         self.mock_publish.assert_called_once_with(
-            ExperienceAcademiqueCandidatCreeeOuModifieeEvent(
+            ExperienceAcademiqueCandidatModifieeEvent(
                 matricule=self.general_admission.candidate.global_id,
                 transaction_id=mock.ANY,
                 entity_id=mock.ANY,
@@ -1989,7 +1992,7 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
 
         # Check that an event has been sent
         self.mock_publish.assert_called_once_with(
-            ExperienceAcademiqueCandidatCreeeOuModifieeEvent(
+            ExperienceAcademiqueCandidatCreeeEvent(
                 matricule=self.general_admission.candidate.global_id,
                 transaction_id=mock.ANY,
                 entity_id=mock.ANY,

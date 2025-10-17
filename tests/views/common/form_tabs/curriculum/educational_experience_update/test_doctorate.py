@@ -40,7 +40,10 @@ from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formatio
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
-from admission.ddd.admission.events import ExperienceAcademiqueCandidatCreeeOuModifieeEvent
+from admission.ddd.admission.events import (
+    ExperienceAcademiqueCandidatCreeeEvent,
+    ExperienceAcademiqueCandidatModifieeEvent,
+)
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     OngletsDemande,
 )
@@ -544,7 +547,7 @@ class CurriculumEducationalExperienceFormViewForDoctorateTestCase(TestCase):
 
         # Check that an event has been sent
         self.mock_publish.assert_called_once_with(
-            ExperienceAcademiqueCandidatCreeeOuModifieeEvent(
+            ExperienceAcademiqueCandidatCreeeEvent(
                 matricule=self.doctorate_admission.candidate.global_id,
                 transaction_id=mock.ANY,
                 entity_id=mock.ANY,
@@ -625,7 +628,7 @@ class CurriculumEducationalExperienceFormViewForDoctorateTestCase(TestCase):
 
         # Check that an event has been sent
         self.mock_publish.assert_called_once_with(
-            ExperienceAcademiqueCandidatCreeeOuModifieeEvent(
+            ExperienceAcademiqueCandidatModifieeEvent(
                 matricule=self.doctorate_admission.candidate.global_id,
                 transaction_id=mock.ANY,
                 entity_id=mock.ANY,

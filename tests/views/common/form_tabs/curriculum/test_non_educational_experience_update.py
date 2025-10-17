@@ -38,7 +38,10 @@ from rest_framework import status
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
-from admission.ddd.admission.events import ExperienceNonAcademiqueCandidatCreeeOuModifieeEvent
+from admission.ddd.admission.events import (
+    ExperienceNonAcademiqueCandidatCreeeEvent,
+    ExperienceNonAcademiqueCandidatModifieeEvent,
+)
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
 )
@@ -450,7 +453,7 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
 
         # Check that an event has been sent
         self.mock_publish.assert_called_once_with(
-            ExperienceNonAcademiqueCandidatCreeeOuModifieeEvent(
+            ExperienceNonAcademiqueCandidatModifieeEvent(
                 matricule=self.general_admission.candidate.global_id,
                 transaction_id=mock.ANY,
                 entity_id=mock.ANY,
@@ -558,6 +561,15 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
                 },
                 'enfants': [],
             },
+        )
+
+        # Check that an event has been sent
+        self.mock_publish.assert_called_once_with(
+            ExperienceNonAcademiqueCandidatCreeeEvent(
+                matricule=self.general_admission.candidate.global_id,
+                transaction_id=mock.ANY,
+                entity_id=mock.ANY,
+            )
         )
 
     def test_continuing_update_curriculum_for_fac_users(self):
