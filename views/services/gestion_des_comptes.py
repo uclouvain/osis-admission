@@ -28,7 +28,7 @@ __all__ = [
     "OutilDeComparaisonEtFusionView",
     "RefuserPropositionFusionHtmxView",
     "ParcoursAnterieurHtmxView",
-    "IgnorerValidationInformationsInjectionSignaletiqueView",
+    "DoubleCheckDecisionInformationsInjectionSignaletiqueView",
 ]
 
 from django.urls import reverse
@@ -97,10 +97,10 @@ class DoubleCheckDecisionInformationsInjectionSignaletiqueView(
     DoubleCheckDecisionInformationsInjectionSignaletiqueMixinView
 ):
     urlpatterns = {
-        'ignorer-validation-informations-injection-signaletique':
-            'ignore_validation_informations_injection_signaletique/<uuid:uuid>'
+        'double-check-decision-informations-injection-signaletique':
+            'double-check-decision-informations-injection-signaletique/<uuid:uuid>'
     }
-    permission_required = "admission.ignorer_validation_informations_injection_signaletique"
+    permission_required = "admission.double_check_decision_informations_signaletique"
 
     @property
     def matricule(self) -> str:
