@@ -23,12 +23,13 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from unittest.mock import PropertyMock, MagicMock
+from unittest.mock import MagicMock, PropertyMock
 
 import freezegun
 import mock
 from django.test import TestCase
 
+from admission.ddd import CODE_BACHELIER_VETERINAIRE
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AdresseDomicileLegalNonCompleteeException,
     IdentificationNonCompleteeException,
@@ -36,7 +37,19 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
     PropositionAdmissionECGE3DPMinimaleFactory,
 )
-from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import ITitresAcces, Titres
+from admission.ddd.admission.formation_continue.test.factory.proposition import (
+    PropositionFactory as PropositionContinueFactory,
+)
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    PropositionIdentity,
+)
+from admission.ddd.admission.formation_generale.test.factory.proposition import (
+    PropositionFactory,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import (
+    ITitresAcces,
+    Titres,
+)
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     AucunPoolCorrespondantException,
     FormationNonTrouveeException,
@@ -46,25 +59,21 @@ from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     ResidenceAuSensDuDecretNonRenseigneeException,
 )
 from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation
-from admission.ddd.admission.formation_continue.test.factory.proposition import (
-    PropositionFactory as PropositionContinueFactory,
-)
-from admission.ddd.admission.formation_generale.test.factory.proposition import (
-    PropositionFactory,
-)
 from admission.ddd.admission.shared_kernel.tests.factory.formation import (
     FormationFactory,
     FormationIdentityFactory,
 )
-from admission.ddd.admission.shared_kernel.tests.factory.profil import ProfilCandidatFactory
+from admission.ddd.admission.shared_kernel.tests.factory.profil import (
+    ProfilCandidatFactory,
+)
+from admission.infrastructure.admission.formation_generale.domain.service.in_memory.formation import (
+    FormationGeneraleInMemoryTranslator,
+)
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.calendrier_inscription import (
     CalendrierInscriptionInMemory,
 )
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
-)
-from admission.infrastructure.admission.formation_generale.domain.service.in_memory.formation import (
-    FormationGeneraleInMemoryTranslator,
 )
 from admission.tests.factories.conditions import AdmissionConditionsDTOFactory
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
@@ -515,6 +524,24 @@ class CalendrierInscriptionTestCase(TestCase):
             profil_candidat_translator=self.profil_candidat_translator,
         )
         self.assertEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_INSTITUT_CHANGE)
+
+    @freezegun.freeze_time('22/09/2022')
+    def test_pot_medecine_dentisterie(self):
+        proposition = PropositionFactory(
+            matricule_candidat='0000000001',
+            formation_id=FormationIdentityFactory(sigle=CODE_BACHELIER_VETERINAIRE, annee=2020),
+            est_non_resident_au_sens_decret=False,
+        )
+        formation = FormationGeneraleInMemoryTranslator.get(entity_id=proposition.formation_id)
+        dto = CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
+            formation_id=proposition.formation_id,
+            proposition=proposition,
+            matricule_candidat=proposition.matricule_candidat,
+            titres_acces=Titres(AdmissionConditionsDTOFactory(diplomation_secondaire_belge=True)),
+            formation=formation,
+            profil_candidat_translator=self.profil_candidat_translator,
+        )
+        self.assertEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_PREFERENTIAL_FOR_MEDICINE_DENTISTRY)
 
     @freezegun.freeze_time('22/10/2022')
     def test_changement_filiere(self):

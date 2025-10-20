@@ -27,10 +27,17 @@ import datetime
 from abc import ABC
 from typing import Dict, List, Optional
 
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
+    DoctoratFormation,
+)
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AdresseDomicileLegalNonCompleteeException,
 )
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    Proposition as PropositionGenerale,
+)
 from admission.ddd.admission.shared_kernel.domain.enums import TypeFormation
+from admission.ddd.admission.shared_kernel.domain.model.formation import Formation
 from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import (
     Date,
     IAnneeInscriptionFormationTranslator,
@@ -43,9 +50,6 @@ from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import 
     ITitresAcces,
 )
 from admission.ddd.admission.shared_kernel.dtos import AdressePersonnelleDTO
-from admission.ddd.admission.formation_generale.domain.model.proposition import (
-    Proposition as PropositionGenerale,
-)
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
@@ -71,6 +75,7 @@ __all__ = [
     "GeneralEducationAdmissionCalendar",
     "AdmissionAccessConditionsUrl",
     "AdmissionMedicineDentistryEnrollmentCalendar",
+    "AdmissionPoolMedicineDentistryStandardPeriodCalendar",
     "SIGLES_WITH_QUOTA",
     "est_formation_contingentee_et_non_resident",
     "PoolCalendar",
@@ -155,7 +160,7 @@ class AdmissionMedicineDentistryEnrollmentCalendar(AcademicEventSessionCalendarH
             event_reference=cls.event_reference,
             cutover_date=cls.cutover_date,
             end_date=cls.end_date,
-            title="Admission - Périodes d'inscription en médecine et dentisterie",
+            title="Admission - Période d'envoi ouvert pour les bacheliers en médecine et dentisterie",
         )
 
 
@@ -562,4 +567,33 @@ class AdmissionPoolNonResidentQuotaCalendar(PoolCalendar):
         return isinstance(proposition, PropositionGenerale) and est_formation_contingentee_et_non_resident(
             sigle,
             proposition,
+        )
+
+
+class AdmissionPoolMedicineDentistryStandardPeriodCalendar(PoolCalendar):
+    event_reference = AcademicCalendarTypes.ADMISSION_POOL_PREFERENTIAL_FOR_MEDICINE_DENTISTRY.name
+    cutover_date = Date(jour=6, mois=9, annee=0)
+    end_date = Date(jour=30, mois=9, annee=0)
+
+    @classmethod
+    def ensure_consistency_until_n_plus_6(cls):
+        ensure_consistency_until_n_plus_6(
+            event_reference=cls.event_reference,
+            cutover_date=cls.cutover_date,
+            end_date=cls.end_date,
+            title="Admission - Pot préférentiel des bacheliers en médecine et dentisterie",
+        )
+
+    @classmethod
+    def matches_criteria(
+        cls,
+        proposition: 'PropositionGenerale',
+        formation: Formation | DoctoratFormation,
+        **kwargs,
+    ) -> bool:
+        """Candidat souhaitant s'inscrire à un bachelier en médecine ou dentisterie"""
+        return (
+            isinstance(proposition, PropositionGenerale)
+            and formation.type == TrainingType.BACHELOR
+            and formation.est_formation_medecine_ou_dentisterie is True
         )
