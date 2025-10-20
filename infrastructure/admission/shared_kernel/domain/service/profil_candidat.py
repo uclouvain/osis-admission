@@ -833,22 +833,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             formation_annee=admission['training__academic_year__year'],
         )
         if exam.requis:
-            exams_uuids.append(OngletsDemande.EXAMS.name)
-
-        alternative_secondary_study = (
-            Exam.objects.filter(
-                person__global_id=admission['candidate__global_id'],
-                type=ExamTypes.PREMIER_CYCLE.name,
-                education_group_year_exam__education_group_year__acronym=admission['training__acronym'],
-                education_group_year_exam__education_group_year__academic_year__year=admission[
-                    'training__academic_year__year'
-                ],
-            )
-            .values('uuid')
-            .first()
-        )
-        if alternative_secondary_study is not None:
-            exams_uuids.append(OngletsDemande.ETUDES_SECONDAIRES.name)
+            exams_uuids.append(exam.uuid or OngletsDemande.EXAMS.name)
 
         return set(
             str(uuid_experience)

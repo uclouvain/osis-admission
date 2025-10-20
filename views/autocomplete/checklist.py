@@ -66,11 +66,12 @@ class AdditionalApprovalConditionAutocomplete(TranslatedAutocompleteMixin, autoc
     def get_results(self, context):
         results = super().get_results(context)
         if not results:
+            free_condition = gettext("Free condition")
             # Allow to add a free condition
             results.append(
                 {
                     'id': self.q,
-                    'text': f'[{gettext("Free condition")}] {self.q}',
+                    'text': f'[{free_condition}] {self.q}',
                     'selected_text': self.q,
                 }
             )

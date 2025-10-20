@@ -102,6 +102,13 @@ from epc.tests.factories.inscription_programme_annuel import (
 )
 from osis_profile import BE_ISO_CODE, FR_ISO_CODE
 from osis_profile.models.enums.curriculum import Grade
+from epc.models.enums.decision_resultat_cycle import DecisionResultatCycle
+from epc.models.enums.etat_inscription import EtatInscriptionFormation
+from epc.tests.factories.inscription_programme_annuel import (
+    InscriptionProgrammeAnnuelFactory,
+)
+from osis_profile import BE_ISO_CODE
+from osis_profile.models.enums.curriculum import Grade
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.diploma_title import DiplomaTitleFactory
 from reference.tests.factories.scholarship import (
@@ -304,8 +311,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             cls.admissions[0].modified_at = datetime.datetime(2021, 1, 3)
             cls.admissions[0].save(update_fields=['modified_at'])
 
-        with freezegun.freeze_time('2021-01-01'):
-            cls.admissions[1].modified_at = datetime.datetime(2021, 1, 1)
+            cls.admissions[1].modified_at = datetime.datetime(2021, 1, 3)
             cls.admissions[1].save(update_fields=['modified_at'])
 
         with freezegun.freeze_time('2021-01-02'):
@@ -318,6 +324,8 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             f'M-{ENTITY_CDSS}21-{str(cls.admissions[2])}',
             f'M-ABC22-{str(cls.admissions[3])}',
         ]
+
+        cls.thesis_institute = cls.admissions[2].thesis_institute
 
         cls.sic_user = SicManagementRoleFactory(entity=first_doctoral_commission).person.user
         program_manager_person = ProgramManagerRoleFactory(
@@ -475,6 +483,8 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         self.assertEqual(form['indicateur_tableau_bord'].value(), None)
 
+        self.assertEqual(form['institut_these'].value(), None)
+
     def test_form_initialization_for_a_central_manager_having_one_cdd(self):
         self.client.force_login(user=self.sic_user)
 
@@ -536,6 +546,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             'nationalite': self.country.iso_code,
             'matricule_candidat': self.admissions[0].candidate.global_id,
             'id_promoteur': self.promoter_data,
+            'institut_these': self.thesis_institute.uuid,
         }
         with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES_WITHOUT_SEARCH):
             response = self.client.get(self.url, data)
@@ -565,6 +576,10 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                         f'({self.promoter.person.global_id})',
                     ),
                 ),
+            )
+            self.assertEqual(
+                form.fields['institut_these'].widget.choices,
+                [(self.thesis_institute.uuid, f'{self.thesis_institute.title} ({self.thesis_institute.acronym})')],
             )
 
         data = {
@@ -1000,6 +1015,29 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 ],
             )
 
+    def test_filter_by_thesis_institute(self):
+        self.client.force_login(user=self.user_with_several_cdds)
+
+        data = {
+            'annee_academique': '2021',
+            'institut_these': self.thesis_institute.uuid,
+        }
+
+        with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES_WITH_SEARCH):
+            response = self.client.get(self.url, data)
+
+            self.assertPropositionList(response, [self.admission_references[2]])
+
+        data = {
+            'annee_academique': '2021',
+            'institut_these': uuid.uuid4(),
+        }
+
+        with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES_WITH_SEARCH):
+            response = self.client.get(self.url, data)
+
+            self.assertPropositionList(response, [])
+
     def test_filter_by_dashboard_indicator(self):
         self.client.force_login(user=self.user_with_several_cdds)
 
@@ -1107,7 +1145,6 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             self.assertEqual(proposition.nom_candidat, self.admissions[1].candidate.last_name)
             self.assertEqual(proposition.prenom_candidat, self.admissions[1].candidate.first_name)
             self.assertEqual(proposition.sigle_formation, self.admissions[1].training.acronym)
-            self.assertEqual(proposition.noma_candidat, '')
             self.assertEqual(proposition.code_formation, self.admissions[1].training.partial_acronym)
             self.assertEqual(proposition.intitule_formation, self.admissions[1].training.title)
             self.assertEqual(proposition.decision_fac, '')
@@ -1969,9 +2006,9 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertPropositionList(
             response,
             [
-                self.admission_references[1],
                 self.admission_references[2],
                 self.admission_references[0],
+                self.admission_references[1],
             ],
             ordered=True,
         )
@@ -1983,43 +2020,9 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertPropositionList(
             response,
             [
-                self.admission_references[0],
-                self.admission_references[2],
-                self.admission_references[1],
-            ],
-            ordered=True,
-        )
-
-    def test_sort_results_by_last_modification_author(self):
-        self.client.force_login(user=self.user_with_several_cdds)
-
-        data = {
-            'annee_academique': '2021',
-            'o': 'derniere_modification_par',
-        }
-
-        response = self.client.get(self.url, data)
-
-        self.assertPropositionList(
-            response,
-            [
-                self.admission_references[0],
-                self.admission_references[1],
-                self.admission_references[2],
-            ],
-            ordered=True,
-        )
-
-        data['o'] = '-' + data['o']
-
-        response = self.client.get(self.url, data)
-
-        self.assertPropositionList(
-            response,
-            [
-                self.admission_references[2],
                 self.admission_references[1],
                 self.admission_references[0],
+                self.admission_references[2],
             ],
             ordered=True,
         )

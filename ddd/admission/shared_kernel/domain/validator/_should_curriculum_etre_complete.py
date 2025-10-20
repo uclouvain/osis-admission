@@ -41,6 +41,9 @@ from base.ddd.utils.business_validator import (
     BusinessValidator,
     MultipleBusinessExceptions,
 )
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
+    AcademicYear,
+)
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
@@ -58,9 +61,9 @@ class ShouldAnneesCVRequisesCompletees(BusinessValidator):
     experiences_non_academiques: List[ExperienceNonAcademiqueDTO]
     experiences_academiques: List[ExperienceAcademiqueDTO]
     experiences_academiques_incompletes: Dict[str, str]
+    annee_formation: AcademicYear
     experiences_parcours_interne: Optional[List[ExperienceParcoursInterneDTO]] = None
     date_soumission: Optional[datetime.date] = None
-    mois_debut_annee_academique_courante_facultatif: bool = False
 
     def validate(self, *args, **kwargs):
         annee_minimale = IProfilCandidatTranslator.get_annee_minimale_a_completer_cv(
@@ -88,7 +91,7 @@ class ShouldAnneesCVRequisesCompletees(BusinessValidator):
 
         dernier_mois_a_valoriser = IProfilCandidatTranslator.get_date_maximale_curriculum(
             date_soumission=self.date_soumission,
-            mois_debut_annee_academique_courante_facultatif=self.mois_debut_annee_academique_courante_facultatif,
+            annee_formation=self.annee_formation,
         )
 
         mois_a_valoriser = self._recuperer_tous_les_mois_restant_a_valoriser(
@@ -175,7 +178,8 @@ class ShouldAnneesCVRequisesCompletees(BusinessValidator):
     ) -> rruleset:
         """Renvoie la suite des mois qui restent à valoriser après prise en compte des expériences académiques."""
         mois_a_valoriser = rruleset()
-        for annee in range(annee_minimale, self.annee_courante + 1):
+        derniere_annee = dernier_mois_a_valoriser.year
+        for annee in range(annee_minimale, derniere_annee + 1):
             if annee not in annees_deja_valorisees:
                 mois_a_valoriser.rrule(
                     rrule(

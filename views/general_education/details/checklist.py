@@ -1429,7 +1429,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
                         else:
                             prerequisite_courses_detail_paragraph += complement_formation.full_title
                         if complement_formation.credits:
-                            prerequisite_courses_detail_paragraph += f"({complement_formation.full_title} ECTS)"
+                            prerequisite_courses_detail_paragraph += f" ({complement_formation.credits} ECTS)"
                         prerequisite_courses_detail_paragraph += '</li>'
                     prerequisite_courses_detail_paragraph += "</ul>"
                 if self.proposition.commentaire_complements_formation:
@@ -3391,7 +3391,10 @@ class ChecklistView(
             for admission_document in admission_documents:
                 document_tab_identifier = admission_document.onglet.split('.')
 
-                if document_tab_identifier[0] == OngletsDemande.CURRICULUM.name and len(document_tab_identifier) > 1:
+                if (
+                    document_tab_identifier[0] in {OngletsDemande.CURRICULUM.name, OngletsDemande.EXAMS.name}
+                    and len(document_tab_identifier) > 1
+                ):
                     tab_identifier = f'parcours_anterieur__{document_tab_identifier[1]}'
 
                     if document_tab_identifier[1] in not_valuated_by_current_admission_experiences_uuids:

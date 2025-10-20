@@ -56,18 +56,27 @@ from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervi
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
     IPropositionRepository,
 )
-from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.shared_kernel.domain.model.proposition import (
+    PropositionIdentity,
+)
 from admission.ddd.admission.shared_kernel.domain.service.i_emplacements_documents_proposition import (
     IEmplacementsDocumentsPropositionTranslator,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import (
+    IMatriculeEtudiantService,
 )
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
-from admission.ddd.admission.shared_kernel.domain.service.resume_proposition import ResumeProposition
+from admission.ddd.admission.shared_kernel.domain.service.resume_proposition import (
+    ResumeProposition,
+)
 from admission.ddd.admission.shared_kernel.repository.i_emplacement_document import (
     IEmplacementDocumentRepository,
 )
-from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import IMatriculeEtudiantService
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
+    AcademicYearIdentity,
+)
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import (
     IAcademicYearRepository,
 )
@@ -116,6 +125,8 @@ def approuver_admission_par_sic(
         avec_documents_libres=False,
     )
 
+    annee_formation = academic_year_repository.get(entity_id=AcademicYearIdentity(year=proposition.formation_id.annee))
+
     # WHEN
     proposition.approuver_par_sic(
         auteur_modification=cmd.auteur,
@@ -125,6 +136,7 @@ def approuver_admission_par_sic(
         profil_candidat_translator=profil_candidat_translator,
         experience_parcours_interne_translator=experience_parcours_interne_translator,
         grade_academique_formation_proposition=resume_dto.proposition.doctorat.grade_academique,
+        annee_formation=annee_formation,
     )
 
     # THEN

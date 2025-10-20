@@ -169,6 +169,9 @@ from ddd.logic.financabilite.domain.model.enums.situation import (
     SituationFinancabilite,
 )
 from ddd.logic.reference.domain.model.bourse import BourseIdentity
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
+    AcademicYear,
+)
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import (
     IAcademicYearRepository,
 )
@@ -1043,6 +1046,7 @@ class Proposition(interface.RootEntity):
         profil_candidat_translator: IProfilCandidatTranslator,
         experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
         grade_academique_formation_proposition: str,
+        annee_formation: AcademicYear,
     ):
         if self.type_demande == TypeDemande.INSCRIPTION:
             ApprouverInscriptionParSicValidatorList(
@@ -1069,6 +1073,7 @@ class Proposition(interface.RootEntity):
                 experience_parcours_interne_translator=experience_parcours_interne_translator,
                 verification_experiences_completees=False,
                 grade_academique_formation_proposition=grade_academique_formation_proposition,
+                annee_formation=annee_formation,
             )
         except MultipleBusinessExceptions:
             raise MultipleBusinessExceptions(exceptions=[CurriculumNonCompletePourAcceptationException()])

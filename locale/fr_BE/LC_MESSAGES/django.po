@@ -27,6 +27,14 @@ msgid "%(added)s ECTS added with %(validated)s validated by the CDD."
 msgstr "%(added)s ECTS ajoutés dont %(validated)s validés par la CDD."
 
 #, python-format
+msgid ""
+"%(current_mimetype)s is not a valid mimetype for the field "
+"\"%(field)s\" (%(field_mimetypes_as_str)s)"
+msgstr ""
+"%(current_mimetype)s n'est pas un type mime valide pour le champ "
+"\"%(field)s\" (%(field_mimetypes_as_str)s)"
+
+#, python-format
 msgid "%(label)s:"
 msgstr "%(label)s :"
 
@@ -228,6 +236,13 @@ msgid ""
 "A member should be either internal or external, please check the fields."
 msgstr ""
 "Un membre doit être soit interne, soit externe, veuillez vérifier les champs."
+
+msgid ""
+"A merger proposal is currently being resolved. Saving the tab will cause a "
+"merge reset"
+msgstr ""
+"Une proposition de fusion est en cours de résolution. La sauvegarde de "
+"l’onglet entraînera une réinitialisation de la fusion"
 
 msgid "A new version of the analysis folder has been generated."
 msgstr "Une nouvelle version du dossier d'analyse a été générée."
@@ -1343,6 +1358,9 @@ msgstr "Candidat non trouvé."
 
 msgid "Candidate of the admission"
 msgstr "Candidat de la proposition"
+
+msgid "Candidate on portal"
+msgstr "Candidat sur le portail"
 
 msgid "Candidate withdrawal"
 msgstr "Abandon du candidat"
@@ -3308,6 +3326,9 @@ msgstr "Libre et téléversé par SIC pour les gestionnaires"
 
 msgid "Free comment for the candidate"
 msgstr "Commentaire libre à destination du·de la candidat·e"
+
+msgid "Free condition"
+msgstr "Condition libre"
 
 msgid "Free documents"
 msgstr "Documents libres"
@@ -6651,6 +6672,10 @@ msgstr "Promoteur non trouvé."
 msgid "Supervisors"
 msgstr "Promoteurs·trices"
 
+msgctxt "no_gender"
+msgid "Supervisors"
+msgstr "Promoteurs"
+
 msgid "Supervisory panel"
 msgstr "Comité d'accompagnement"
 
@@ -7198,12 +7223,12 @@ msgstr ""
 "Le mail de mise en attente a été envoyé au candidat le %(date)s par "
 "%(sender)s."
 
-#, python-brace-format
+#, python-format
 msgid ""
-"The option {index} must have an identifier and a translation for each "
+"The option %(index)s must have an identifier and a translation for each "
 "required language."
 msgstr ""
-"L'option {index} doit avoir un identifiant et une traduction pour chaque "
+"L'option %(index)s doit avoir un identifiant et une traduction pour chaque "
 "langue requise."
 
 msgid "The other given names must be less than 40 characters long."
@@ -8772,14 +8797,6 @@ msgstr "votre mère"
 
 msgid "your partner"
 msgstr "votre conjoint"
-
-#, python-brace-format
-msgid ""
-"{current_mimetype} is not a valid mimetype for the field "
-"\"{field}\" ({field_mimetypes_as_str})"
-msgstr ""
-"{current_mimetype} n'est pas un type mime valide pour le champ "
-"\"{field}\" ({field_mimetypes_as_str})"
 
 #, python-brace-format
 msgid "{items} types out of {total}"

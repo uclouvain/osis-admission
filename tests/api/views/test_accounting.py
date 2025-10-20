@@ -35,8 +35,15 @@ from rest_framework import status
 from rest_framework.status import HTTP_200_OK, HTTP_403_FORBIDDEN
 from rest_framework.test import APITestCase
 
-from admission.models import Accounting
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    CoordonneesNonCompleteesException,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
 from admission.ddd.admission.shared_kernel.enums import (
     ChoixAffiliationSport,
     ChoixAssimilation1,
@@ -48,7 +55,7 @@ from admission.ddd.admission.shared_kernel.enums import (
     LienParente,
     TypeSituationAssimilation,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.models import Accounting
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.accounting import AccountingFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
@@ -61,7 +68,10 @@ from base.tests.factories.academic_year import AcademicYearFactory, get_current_
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
 from base.tests.factories.person import PersonFactory
-from osis_profile.tests.factories.curriculum import EducationalExperienceFactory, EducationalExperienceYearFactory
+from osis_profile.tests.factories.curriculum import (
+    EducationalExperienceFactory,
+    EducationalExperienceYearFactory,
+)
 from reference.tests.factories.country import CountryFactory
 
 doctorate_file_fields = [
@@ -193,7 +203,9 @@ class DoctorateAccountingAPIViewTestCase(APITestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = patch("osis_document_components.services.get_remote_metadata", return_value={"name": "myfile", "size": 1})
+        patcher = patch(
+            "osis_document_components.services.get_remote_metadata", return_value={"name": "myfile", "size": 1}
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
 
@@ -425,6 +437,51 @@ class DoctorateAccountingAPIViewTestCase(APITestCase):
 
         self.assertEqual(response.json(), expected_response_data)
 
+    def test_checks_depend_on_the_admission_status(self):
+        admission = DoctorateAdmissionFactory(
+            training=self.admission.training,
+            candidate=PersonFactory(phone_mobile=''),
+        )
+
+        self.client.force_authenticate(user=admission.candidate.user)
+
+        admission_url = resolve_url('admission_api_v1:doctorate_accounting', uuid=admission.uuid)
+
+        response = self.client.put(admission_url, data=self.default_api_data)
+        self.assertEqual(response.status_code, HTTP_200_OK)
+
+        admission.refresh_from_db()
+
+        phone_mobile_exception = next(
+            (
+                error
+                for error in admission.detailed_status
+                if error['status_code'] == CoordonneesNonCompleteesException.status_code
+            ),
+            None,
+        )
+
+        self.assertIsNotNone(phone_mobile_exception)
+
+        admission.status = ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name
+        admission.save()
+
+        response = self.client.put(admission_url, data=self.default_api_data)
+        self.assertEqual(response.status_code, HTTP_200_OK)
+
+        admission.refresh_from_db()
+
+        phone_mobile_exception = next(
+            (
+                error
+                for error in admission.detailed_status
+                if error['status_code'] == CoordonneesNonCompleteesException.status_code
+            ),
+            None,
+        )
+
+        self.assertIsNone(phone_mobile_exception)
+
 
 @freezegun.freeze_time('2023-01-01')
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
@@ -490,7 +547,10 @@ class GeneralAccountingAPIViewTestCase(APITestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = patch("osis_document_components.services.get_remote_metadata", return_value={"name": "myfile", "size": 1})
+        patcher = patch(
+            "osis_document_components.services.get_remote_metadata",
+            return_value={"name": "myfile", "size": 1},
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
 

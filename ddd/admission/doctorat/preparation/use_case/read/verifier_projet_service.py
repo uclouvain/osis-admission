@@ -51,6 +51,9 @@ from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat impo
     IProfilCandidatTranslator,
 )
 from admission.ddd.admission.shared_kernel.enums.question_specifique import Onglets
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
+    AcademicYearIdentity,
+)
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import (
     GetCurrentAcademicYear,
 )
@@ -84,6 +87,11 @@ def verifier_projet(
         )
         .year
     )
+    annee_formation = academic_year_repository.get(
+        entity_id=AcademicYearIdentity(
+            year=proposition_candidat.annee_calculee or proposition_candidat.formation_id.annee
+        )
+    )
 
     # WHEN
     VerifierPropositionProjetDoctoral.verifier(
@@ -93,6 +101,7 @@ def verifier_projet(
         promoteur_translator=promoteur_translator,
         profil_candidat_translator=profil_candidat_translator,
         annee_courante=annee_courante,
+        annee_formation=annee_formation,
     )
 
     # THEN

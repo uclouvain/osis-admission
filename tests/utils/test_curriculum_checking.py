@@ -112,7 +112,8 @@ class GetMissingCurriculumPeriodsTestCase(TestCase):
         )
 
     def test_with_submission_date(self):
-        self.admission.determined_academic_year = self.academic_years[2015]
+        self.admission.training.academic_year = self.academic_years[2015]
+        self.admission.training.save()
         self.admission.submitted_at = datetime.date(2014, 11, 1)
         self.admission.save()
 
@@ -141,6 +142,7 @@ class GetMissingCurriculumPeriodsTestCase(TestCase):
                 'De Septembre 2011 à Février 2012',
                 'De Septembre 2012 à Février 2013',
                 'De Septembre 2013 à Février 2014',
+                'Septembre 2014',
             ],
         )
 

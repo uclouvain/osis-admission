@@ -30,6 +30,7 @@ from admission.infrastructure.admission.shared_kernel.domain.service.profil_cand
 )
 from admission.tests.factories.curriculum import (
     AdmissionEducationalValuatedExperiencesFactory,
+    AdmissionProfessionalValuatedExperiencesFactory,
     EducationalExperienceFactory,
     ProfessionalExperienceFactory,
 )
@@ -40,7 +41,6 @@ from admission.tests.factories.secondary_studies import (
     HighSchoolDiplomaAlternativeFactory,
 )
 from base.tests.factories.person import PersonFactory
-from osis_profile.models.enums.exam import ExamTypes
 from osis_profile.tests.factories.exam import ExamFactory
 
 
@@ -274,12 +274,12 @@ class RecupererUuidsExperiencesCurriculumValoriseesParAdmissionTestCase(TestCase
         cls.admission = GeneralEducationAdmissionFactory(candidate=cls.candidate)
         cls.other_admission = GeneralEducationAdmissionFactory(candidate=cls.candidate)
 
-    def retrieve_valuated_academic_experiences(self):
+    def test_retrieve_valuated_academic_experiences(self):
         educational_experience = EducationalExperienceFactory(person=self.candidate)
         other_educational_experience = EducationalExperienceFactory(person=self.candidate)
         AdmissionEducationalValuatedExperiencesFactory(
-            baseadmission=self.other_admission.baseadmission,
-            educationalexperience=other_educational_experience,
+            baseadmission_id=self.other_admission.uuid,
+            educationalexperience_id=other_educational_experience.uuid,
         )
 
         uuids = ProfilCandidatTranslator.get_uuids_experiences_curriculum_valorisees_par_admission(self.admission.uuid)
@@ -296,9 +296,9 @@ class RecupererUuidsExperiencesCurriculumValoriseesParAdmissionTestCase(TestCase
 
         professional_experience = ProfessionalExperienceFactory(person=self.candidate)
         other_professional_experience = ProfessionalExperienceFactory(person=self.candidate)
-        AdmissionEducationalValuatedExperiencesFactory(
-            baseadmission=self.other_admission.baseadmission,
-            professionalexperience=other_professional_experience,
+        AdmissionProfessionalValuatedExperiencesFactory(
+            baseadmission_id=self.other_admission.uuid,
+            professionalexperience_id=other_professional_experience.uuid,
         )
 
         uuids = ProfilCandidatTranslator.get_uuids_experiences_curriculum_valorisees_par_admission(self.admission.uuid)
@@ -312,14 +312,14 @@ class RecupererUuidsExperiencesCurriculumValoriseesParAdmissionTestCase(TestCase
             [str(other_educational_experience.uuid), str(other_professional_experience.uuid)],
         )
 
-    def retrieve_valuated_exam_requis(self):
-        ExamFactory(
-            person=self.admission.candidate, education_group_year_exam__education_group_year=self.admission.training
+    def test_retrieve_valuated_exam_requis(self):
+        exam = ExamFactory(
+            person=self.admission.candidate,
+            education_group_year_exam__education_group_year=self.admission.training,
         )
         uuids = ProfilCandidatTranslator.get_uuids_experiences_curriculum_valorisees_par_admission(self.admission.uuid)
-        self.assertEqual(uuids, ['EXAMS'])
+        self.assertCountEqual(uuids, [str(exam.uuid)])
 
-    def retrieve_valuated_alternative_secondary_study_exam(self):
-        ExamFactory(person=self.admission.candidate, type=ExamTypes.PREMIER_CYCLE.name)
+        exam.delete()
         uuids = ProfilCandidatTranslator.get_uuids_experiences_curriculum_valorisees_par_admission(self.admission.uuid)
-        self.assertEqual(uuids, ['ETUDES_SECONDAIRES'])
+        self.assertEqual(uuids, {'EXAMS'})

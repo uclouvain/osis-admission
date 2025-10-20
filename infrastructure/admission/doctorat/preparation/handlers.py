@@ -58,8 +58,35 @@ from admission.ddd.admission.shared_kernel.use_case.write import (
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from admission.infrastructure.admission.shared_kernel.domain.service.calendrier_inscription import (
+    CalendrierInscription,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.elements_confirmation import (
+    ElementsConfirmation,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.emplacements_documents_proposition import (
+    EmplacementsDocumentsPropositionTranslator,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.historique import (
+    Historique as HistoriqueGlobal,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.maximum_propositions import (
+    MaximumPropositionsAutorisees,
+)
 from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import (
     ProfilCandidatTranslator,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.raccrocher_experiences_curriculum import (
+    RaccrocherExperiencesCurriculum,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.titres_acces import (
+    TitresAcces,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.unites_enseignement_translator import (
+    UnitesEnseignementTranslator,
+)
+from admission.infrastructure.admission.shared_kernel.repository.titre_acces_selectionnable import (
+    TitreAccesSelectionnableRepository,
 )
 from infrastructure.financabilite.domain.service.financabilite import (
     FinancabiliteFetcher,
@@ -76,6 +103,9 @@ from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import
 from infrastructure.shared_kernel.profil.domain.service.parcours_interne import (
     ExperienceParcoursInterneTranslator,
 )
+
+from ...shared_kernel.domain.service.matricule_etudiant import MatriculeEtudiantService
+from ..validation.repository.demande import DemandeRepository
 from .domain.service.comptabilite import ComptabiliteTranslator
 from .domain.service.doctorat import DoctoratTranslator
 from .domain.service.historique import Historique
@@ -89,23 +119,6 @@ from .repository.doctorat import DoctoratRepository
 from .repository.emplacement_document import EmplacementDocumentRepository
 from .repository.groupe_de_supervision import GroupeDeSupervisionRepository
 from .repository.proposition import PropositionRepository
-from ..validation.repository.demande import DemandeRepository
-from admission.infrastructure.admission.shared_kernel.domain.service.calendrier_inscription import CalendrierInscription
-from admission.infrastructure.admission.shared_kernel.domain.service.elements_confirmation import ElementsConfirmation
-from admission.infrastructure.admission.shared_kernel.domain.service.emplacements_documents_proposition import (
-    EmplacementsDocumentsPropositionTranslator,
-)
-from admission.infrastructure.admission.shared_kernel.domain.service.historique import Historique as HistoriqueGlobal
-from admission.infrastructure.admission.shared_kernel.domain.service.maximum_propositions import MaximumPropositionsAutorisees
-from admission.infrastructure.admission.shared_kernel.domain.service.raccrocher_experiences_curriculum import (
-    RaccrocherExperiencesCurriculum,
-)
-from admission.infrastructure.admission.shared_kernel.domain.service.titres_acces import TitresAcces
-from admission.infrastructure.admission.shared_kernel.domain.service.unites_enseignement_translator import (
-    UnitesEnseignementTranslator,
-)
-from admission.infrastructure.admission.shared_kernel.repository.titre_acces_selectionnable import TitreAccesSelectionnableRepository
-from ...shared_kernel.domain.service.matricule_etudiant import MatriculeEtudiantService
 
 COMMAND_HANDLERS = {
     InitierPropositionCommand: lambda msg_bus, cmd: initier_proposition(
@@ -711,6 +724,7 @@ COMMAND_HANDLERS = {
             profil_candidat_translator=ProfilCandidatTranslator(),
             experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
             doctorat_translator=DoctoratTranslator(),
+            academic_year_repository=AcademicYearRepository(),
         )
     ),
     VerifierExperienceCurriculumApresSoumissionQuery: (
