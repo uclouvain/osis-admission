@@ -207,7 +207,10 @@ class IdentifiedTranslatedListsValueFieldTestCase(SimpleTestCase):
         index = 2
         self.assertFalse(form.is_valid())
         self.assertIn(
-            gettext_lazy(f'The option {index} must have an identifier and a translation for each required language.'),
+            gettext_lazy('The option %(index)s must have an identifier and a translation for each required language.')
+            % {
+                'index': index,
+            },
             form.errors.get('identified_translated_lists_value', []),
         )
 
@@ -222,6 +225,9 @@ class IdentifiedTranslatedListsValueFieldTestCase(SimpleTestCase):
         index = 3
         self.assertFalse(form.is_valid())
         self.assertIn(
-            gettext_lazy(f'The option {index} must have an identifier and a translation for each required language.'),
+            gettext_lazy('The option %(index)s must have an identifier and a translation for each required language.')
+            % {
+                'index': index,
+            },
             form.errors.get('identified_translated_lists_value', []),
         )

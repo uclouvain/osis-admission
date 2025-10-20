@@ -206,7 +206,8 @@ class AdmissionAdminMixin(ReadOnlyFilesMixin, admin.ModelAdmin):
     @admin.display(description=_('Search on portal'))
     def view_on_portal(self, obj):
         url = f"{settings.OSIS_PORTAL_URL}admin/auth/user/?q={obj.candidate.global_id}"
-        return mark_safe(f'<a class="button" href="{url}" target="_blank">{_("Candidate on portal")}</a>')
+        candidate_on_portal_label = _('Candidate on portal')
+        return mark_safe(f'<a class="button" href="{url}" target="_blank">{candidate_on_portal_label}</a>')
 
 
 @admin.register(DoctorateAdmission)

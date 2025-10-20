@@ -71,9 +71,11 @@ from admission.models import EntityProxy
 from base.forms.utils import EMPTY_CHOICE, FIELD_REQUIRED_MESSAGE, autocomplete
 from base.forms.utils.datefield import DatePickerInput
 from base.models.education_group_year import EducationGroupYear
+from base.models.entity_version import EntityVersion
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
+from base.models.enums.organization_type import MAIN
 from education_group.contrib.models import EducationGroupRoleModel
 from osis_profile.forms import DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS
 from osis_role.contrib.models import EntityRoleModel
@@ -165,6 +167,18 @@ class DoctorateListFilterForm(BaseAdmissionFilterForm):
     fnrs_fria_fresh = forms.BooleanField(
         label=_("FNRS, FRIA, FRESH, CSC"),
         required=False,
+    )
+    institut_these = forms.CharField(
+        label=_('Research institute'),
+        required=False,
+        widget=autocomplete.ListSelect2(
+            url='admission:autocomplete:entities',
+            forward=[
+                forward.Const(MAIN, 'organization_type'),
+                forward.Const(EntityType.INSTITUTE.name, 'entity_type'),
+            ],
+            attrs=DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
+        ),
     )
     mode_filtres_etats_checklist = forms.ChoiceField(
         choices=ModeFiltrageChecklist.choices(),
@@ -328,6 +342,20 @@ class DoctorateListFilterForm(BaseAdmissionFilterForm):
                 promoter_as_dict = json.loads(promoter_id)
                 promoter_option = get_actor_option_text(promoter_as_dict)
                 self.fields['id_promoteur'].widget.choices = ((promoter_id, promoter_option),)
+
+            thesis_institute = self.data.get(self.add_prefix('institut_these'))
+            if thesis_institute:
+                institute_obj = (
+                    EntityVersion.objects.filter(uuid=thesis_institute).values('uuid', 'acronym', 'title').first()
+                )
+
+                if institute_obj:
+                    self.fields['institut_these'].widget.choices = [
+                        (
+                            institute_obj['uuid'],
+                            '%(title)s (%(acronym)s)' % institute_obj,
+                        ),
+                    ]
 
     def clean(self):
         cleaned_data = super().clean()

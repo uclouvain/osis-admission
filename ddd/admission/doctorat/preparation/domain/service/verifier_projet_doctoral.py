@@ -44,15 +44,22 @@ from admission.ddd.admission.doctorat.preparation.domain.service.verifier_cotute
 from admission.ddd.admission.doctorat.preparation.domain.service.verifier_promoteur import (
     GroupeDeSupervisionPossedeUnPromoteurMinimum,
 )
-from admission.ddd.admission.shared_kernel.domain.model.question_specifique import QuestionSpecifique
+from admission.ddd.admission.shared_kernel.domain.model.question_specifique import (
+    QuestionSpecifique,
+)
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
-from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidat
+from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import (
+    ProfilCandidat,
+)
 from admission.ddd.admission.shared_kernel.domain.service.verifier_questions_specifiques import (
     VerifierQuestionsSpecifiques,
 )
 from base.ddd.utils.business_validator import execute_functions_and_aggregate_exceptions
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
+    AcademicYear,
+)
 from osis_common.ddd import interface
 
 
@@ -66,6 +73,7 @@ class VerifierPropositionProjetDoctoral(interface.DomainService):
         promoteur_translator: IPromoteurTranslator,
         profil_candidat_translator: 'IProfilCandidatTranslator',
         annee_courante: int,
+        annee_formation: AcademicYear,
     ) -> None:
         profil_candidat_service = ProfilCandidat()
         if proposition_candidat.type_admission == ChoixTypeAdmission.PRE_ADMISSION:
@@ -105,6 +113,7 @@ class VerifierPropositionProjetDoctoral(interface.DomainService):
                 annee_courante=annee_courante,
                 curriculum_pdf=proposition_candidat.curriculum,
                 uuid_proposition=proposition_candidat.entity_id.uuid,
+                annee_formation=annee_formation,
             ),
             proposition_candidat.verifier_projet_doctoral,
             partial(GroupeDeSupervisionPossedeUnPromoteurMinimum.verifier, groupe_de_supervision, promoteur_translator),

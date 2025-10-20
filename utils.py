@@ -126,6 +126,7 @@ def get_cached_continuing_education_admission_perm_obj(admission_uuid):
         'candidate__personmergeproposal',
         'training__academic_year',
         'training__specificiufcinformations',
+        'determined_academic_year',
     )
     return cache.get_or_set(
         'admission_permission_{}'.format(admission_uuid),
@@ -625,6 +626,7 @@ def get_experience_urls(
         )
 
     return res_context
+
 
 def get_thesis_location_initial_choices(value):
     return EMPTY_CHOICE if not value else EMPTY_CHOICE + ((value, value),)

@@ -1,0 +1,93 @@
+{% extends 'osis_profile/includes/personne.html' %}
+{% load i18n static index enums academic_year_display field_data %}
+
+{% comment "License" %}
+* OSIS stands for Open Student Information System. It's an application
+* designed to manage the core business of higher education institutions,
+* such as universities, faculties, institutes and professional schools.
+* The core business involves the administration of students, teachers,
+* courses, programs and so on.
+*
+* Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* A copy of this license - GNU General Public License - is available
+* at the root of the source code of this program.  If not,
+* see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+{% block specific_header %}
+    {% if proposition_fusion.status == "IN_PROGRESS" %}
+        <div class="alert alert-warning">
+            Données originales fournies par le candidat
+        </div>
+    {% endif %}
+{% endblock %}
+
+
+
+{% block specific_signaletique_content %}
+    {% if proposition_fusion.status == "IN_PROGRESS" %}
+
+        <div class="divider" style="border: 1px solid #ddd; margin: 0 15px;"></div>
+
+        <div class="proposition-fusion-data" style="flex:1;">
+
+            <div class="alert alert-warning">
+                Proposition de fusion avec personne déjà connue
+            </div>
+
+            <div class="row">
+                {% field_data _("Surname") proposition_fusion.last_name "col-md-4" %}
+                {% field_data _("First name") proposition_fusion.first_name "col-md-4" %}
+                {% field_data _("Other given names") proposition_fusion.middle_name "col-md-4" hide_empty=True %}
+            </div>
+            <div class="row">
+                {% field_data _("Sex") proposition_fusion.sex|enum_display:'ChoixSexe' "col-md-4" %}
+                {% field_data _("Gender") proposition_fusion.gender|enum_display:'ChoixGenre' "col-md-4" %}
+            </div>
+            <div class="row">
+                {% if person.birth_date %}
+                    {% field_data _("Date of birth") proposition_fusion.birth_date|date:'d/m/Y' "col-md-4" %}
+                {% endif %}
+                {% field_data _("Place of birth") proposition_fusion.birth_place "col-md-4" %}
+            </div>
+            <div class="row">
+                {% field_data _("Civil status") proposition_fusion.civil_state|enum_display:'CivilState' "col-md-4" %}
+                {% field_data _("Country of citizenship") proposition_fusion.country_of_citizenship "col-md-4" %}
+            </div>
+
+        </div>
+
+    {% endif %}
+{% endblock %}
+
+
+{% block specific_identity_document_content %}
+    {% if proposition_fusion.status == "IN_PROGRESS" %}
+
+        <div class="divider" style="border: 1px solid #ddd; margin: 0 15px;"></div>
+
+        <div class="proposition-fusion-data" style="flex:1;">
+
+            {% if proposition_fusion.national_number or proposition_fusion.id_card_number %}
+                {% field_data _("Belgian national registry number (NISS)") proposition_fusion.national_number hide_empty=True %}
+                {% field_data _("Identity card number") proposition_fusion.id_card_number hide_empty=True %}
+            {% elif proposition_fusion.passport_number %}
+                {% field_data _("Passport number") proposition_fusion.passport_number %}
+            {% else %}
+                {% translate 'Incomplete field' %}
+            {% endif %}
+
+        </div>
+    {% endif %}
+{% endblock %}

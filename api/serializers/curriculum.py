@@ -318,8 +318,5 @@ class CurriculumDetailsSerializer(serializers.Serializer):
     @extend_schema_field(OpenApiTypes.DATE)
     def get_maximal_date(self, _):
         return ProfilCandidatTranslator.get_date_maximale_curriculum(
-            mois_debut_annee_academique_courante_facultatif=self.context.get(
-                'current_academic_year_start_month_is_facultative',
-                False,
-            )
+            annee_formation=self.context['training_academic_year'],
         )
