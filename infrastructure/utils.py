@@ -40,7 +40,9 @@ from admission.constants import SUPPORTED_MIME_TYPES
 from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import (
     EmplacementDocument,
 )
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
+    EmplacementDocumentDTO,
+)
 from admission.ddd.admission.shared_kernel.enums import CleConfigurationItemFormulaire
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     IdentifiantBaseEmplacementDocument,
@@ -297,7 +299,10 @@ def get_document_from_identifier(
         max_documents_number = 1
 
         if document_uuids:
-            from osis_document_components.services import get_remote_metadata, get_remote_token
+            from osis_document_components.services import (
+                get_remote_metadata,
+                get_remote_token,
+            )
 
             token = get_remote_token(
                 uuid=document_uuids[0],
@@ -636,6 +641,7 @@ CORRESPONDANCE_CHAMPS_SYSTEME = {
     'ATTESTATION_ACCORD_SIC': 'sic_approval_certificate',
     'ATTESTATION_ACCORD_ANNEXE_SIC': 'sic_annexe_approval_certificate',
     'ATTESTATION_REFUS_SIC': 'sic_refusal_certificate',
+    'FICHE_ARCHIVE_SIGNATURE_ENVOYEES': 'archived_record_signatures_sent',
 }
 
 

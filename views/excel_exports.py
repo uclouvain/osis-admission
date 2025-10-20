@@ -123,6 +123,7 @@ from admission.templatetags.admission import admission_status
 from admission.utils import add_messages_into_htmx_response
 from admission.views import PaginatedList
 from base.models.campus import Campus
+from base.models.entity_version import EntityVersion
 from base.models.enums.civil_state import CivilState
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import GotDiploma
@@ -879,6 +880,8 @@ class DoctorateAdmissionListExcelExportView(BaseAdmissionExcelExportView):
         formatted_filters.pop('demandeur', None)
         formatted_filters.pop('tri_inverse', None)
         formatted_filters.pop('champ_tri', None)
+        formatted_filters.pop('avec_experiences_academiques_reussies', None)
+        formatted_filters.pop('avec_acteurs_groupe_supervision', None)
 
         # Formatting of the names of the filters
         base_fields = DoctorateListFilterForm.base_fields
@@ -926,6 +929,14 @@ class DoctorateAdmissionListExcelExportView(BaseAdmissionExcelExportView):
 
             if scholarship:
                 mapping_filter_key_value['bourse_recherche'] = scholarship.short_name
+
+        # Retrieve the name of the thesis institute
+        thesis_institute_uuid = formatted_filters.get('institut_these')
+        if thesis_institute_uuid:
+            institute_obj = EntityVersion.objects.filter(uuid=thesis_institute_uuid).values('acronym', 'title').first()
+
+            if institute_obj:
+                mapping_filter_key_value['institut_these'] = '%(title)s (%(acronym)s)' % institute_obj
 
         # Format the checklist filters
         mapping_filter_key_value['filtres_etats_checklist'] = {}

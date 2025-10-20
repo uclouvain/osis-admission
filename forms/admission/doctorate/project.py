@@ -49,6 +49,7 @@ from base.models.entity_version import EntityVersion
 from base.models.enums.entity_type import EntityType
 from base.models.enums.organization_type import MAIN
 from base.utils.mark_safe_lazy import mark_safe_lazy
+from osis_profile.forms import DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS
 from reference.models.enums.scholarship_type import ScholarshipType
 
 LANGUAGE_UNDECIDED = 'XX'
@@ -223,6 +224,7 @@ class DoctorateAdmissionProjectForm(forms.Form):
                 forward.Const(MAIN, 'organization_type'),
                 forward.Const(EntityType.INSTITUTE.name, 'entity_type'),
             ],
+            attrs=DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS,
         ),
     )
 

@@ -41,7 +41,12 @@ class InvalidMimeTypeException(Exception):
     def __init__(self, field, field_mimetypes: List[str], current_mimetype: str):
         field_mimetypes_as_str = ', '.join(field_mimetypes)
         super().__init__(
-            _(f'{current_mimetype} is not a valid mimetype for the field "{field}" ({field_mimetypes_as_str})')
+            _('%(current_mimetype)s is not a valid mimetype for the field "%(field)s" (%(field_mimetypes_as_str)s)')
+            % {
+                'current_mimetype': current_mimetype,
+                'field': field,
+                'field_mimetypes_as_str': field_mimetypes_as_str,
+            }
         )
 
 

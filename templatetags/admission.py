@@ -33,11 +33,10 @@ from urllib.parse import urlencode
 import attr
 from django import template
 from django.conf import settings
-from django.core.validators import EMPTY_VALUES
 from django.shortcuts import resolve_url
 from django.template.defaultfilters import unordered_list
 from django.urls import NoReverseMatch, reverse
-from django.utils.safestring import SafeString, mark_safe
+from django.utils.safestring import mark_safe
 from django.utils.translation import get_language, gettext
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext, pgettext_lazy
@@ -171,54 +170,6 @@ SAINT_LOUIS = 'Bruxelles Saint-Louis'
 SAINT_GILLES = 'Bruxelles Saint-Gilles'
 
 register = template.Library()
-
-
-@register.simple_tag
-def display(*args):
-    """Display args if their value is not empty, can be wrapped by parenthesis, or separated by comma or dash"""
-    ret = []
-    iterargs = iter(args)
-    nextarg = next(iterargs)
-    while nextarg != StopIteration:
-        if nextarg == "(":
-            reduce_wrapping = [next(iterargs, None)]
-            while reduce_wrapping[-1] != ")":
-                reduce_wrapping.append(next(iterargs, None))
-            ret.append(reduce_wrapping_parenthesis(*reduce_wrapping[:-1]))
-        elif nextarg == ",":
-            ret, val = ret[:-1], next(iter(ret[-1:]), '')
-            ret.append(reduce_list_separated(val, next(iterargs, None)))
-        elif nextarg in ["-", ':', ' - ']:
-            ret, val = ret[:-1], next(iter(ret[-1:]), '')
-            ret.append(reduce_list_separated(val, next(iterargs, None), separator=f" {nextarg} "))
-        elif isinstance(nextarg, str) and len(nextarg) > 1 and re.match(r'\s', nextarg[0]):
-            ret, suffixed_val = ret[:-1], next(iter(ret[-1:]), '')
-            ret.append(f"{suffixed_val}{nextarg}" if suffixed_val else "")
-        else:
-            ret.append(SafeString(nextarg) if nextarg else '')
-        nextarg = next(iterargs, StopIteration)
-    return SafeString("".join(ret))
-
-
-@register.simple_tag
-def reduce_wrapping_parenthesis(*args):
-    """Display args given their value, wrapped by parenthesis"""
-    ret = display(*args)
-    if ret:
-        return SafeString(f"({ret})")
-    return ret
-
-
-@register.simple_tag
-def reduce_list_separated(arg1, arg2, separator=", "):
-    """Display args given their value, joined by separator"""
-    if arg1 and arg2:
-        return separator.join([SafeString(arg1), SafeString(arg2)])
-    elif arg1:
-        return SafeString(arg1)
-    elif arg2:
-        return SafeString(arg2)
-    return ""
 
 
 @register.inclusion_tag('admission/includes/sortable_header_div.html', takes_context=True)
@@ -478,57 +429,6 @@ def detail_tab_path_from_update(context, admission_uuid):
     )
 
 
-@register.inclusion_tag('admission/includes/field_data.html', takes_context=True)
-def field_data(
-    context,
-    name,
-    data=None,
-    css_class=None,
-    hide_empty=False,
-    translate_data=False,
-    inline=False,
-    html_tag='',
-    tooltip=None,
-):
-    if context.get('all_inline') is True:
-        inline = True
-
-    if isinstance(data, list):
-        if context.get('hide_files') is True:
-            data = None
-            hide_empty = True
-        elif context.get('load_files') is False:
-            data = _('Specified') if data else _('Incomplete field')
-        elif data:
-            template_string = (
-                "{% load osis_document_components %}"
-                "{% document_visualizer files wanted_post_process='ORIGINAL' for_modified_upload=True %}"
-            )
-            template_context = {'files': data}
-            data = template.Template(template_string).render(template.Context(template_context))
-        else:
-            data = ''
-    elif type(data) == bool:
-        data = _('Yes') if data else _('No')
-    elif translate_data is True:
-        data = _(data)
-
-    if inline is True:
-        if name and name[-1] not in ':?!.':
-            name = _("%(label)s:") % {'label': name}
-        css_class = (css_class + ' inline-field-data') if css_class else 'inline-field-data'
-
-    return {
-        'name': name,
-        'data': data,
-        'css_class': css_class,
-        'hide_empty': hide_empty,
-        'html_tag': html_tag,
-        'inline': inline,
-        'tooltip': tooltip,
-    }
-
-
 @register.simple_tag
 def get_image_file_url(file_uuid):
     """Returns the url of the file, if it is an image."""
@@ -581,18 +481,6 @@ def phone_spaced(phone, with_optional_zero=False):
     return re.sub('(\\d{3})(\\d{2})(\\d{2})(\\d{2})', '\\1 \\2 \\3 \\4', phone)
 
 
-@register.inclusion_tag('admission/includes/bootstrap_field_with_tooltip.html')
-def bootstrap_field_with_tooltip(field, classes='', show_help=False, html_tooltip=False, label=None, label_class=''):
-    return {
-        'field': field,
-        'classes': classes,
-        'show_help': show_help,
-        'html_tooltip': html_tooltip,
-        'label': label,
-        'label_class': label_class,
-    }
-
-
 @register.simple_tag(takes_context=True)
 def has_perm(context, perm, obj=None):
     if not obj:
@@ -639,12 +527,6 @@ def get_last_inscription_date(year: Union[int, str, float]):
     return datetime.date(year, 9, 30)
 
 
-@register.filter(is_safe=False)
-def default_if_none_or_empty(value, arg):
-    """If value is None or empty, use given default."""
-    return value if value not in EMPTY_VALUES else arg
-
-
 @register.inclusion_tag('admission/includes/multiple_field_data.html', takes_context=True)
 def multiple_field_data(context, configurations: List[QuestionSpecifiqueDTO], title=_('Specific aspects'), **kwargs):
     """Display the answers of the specific questions based on a list of configurations."""
@@ -685,12 +567,6 @@ def get_first_truthy_value(*args):
 def get_item(dictionary, value):
     """Returns the value of a key in a dictionary if it exists else the value itself"""
     return dictionary.get(value, value)
-
-
-@register.filter
-def get_item_or_none(dictionary, value):
-    """Returns the value of a key in a dictionary if it exists else None"""
-    return dictionary.get(value)
 
 
 @register.filter
@@ -765,14 +641,6 @@ def admission_status(status: str, osis_education_type: str):
         .get(admission_context)
         .get_value(status)
     )
-
-
-@register.simple_tag
-def get_country_name(country: Optional[Country]):
-    """Return the country name."""
-    if not country:
-        return ''
-    return getattr(country, 'name' if get_language() == settings.LANGUAGE_CODE_FR else 'name_en')
 
 
 @register.filter

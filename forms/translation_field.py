@@ -56,7 +56,6 @@ class TranslatedValueWidget(forms.MultiWidget):
 
 
 class TranslatedHiddenInput(forms.HiddenInput):
-
     def format_value(self, value):
         return json.dumps(value)
 
@@ -171,7 +170,10 @@ class IdentifiedTranslatedListsValueField(forms.Field):
             else:
                 errors.append(
                     ValidationError(
-                        _(f'The option {index} must have an identifier and a translation for each required language.')
+                        _('The option %(index)s must have an identifier and a translation for each required language.')
+                        % {
+                            'index': index,
+                        }
                     )
                 )
 

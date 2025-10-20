@@ -1,5 +1,5 @@
 {% extends base_template %}
-{% load i18n static admission index enums academic_year_display panel %}
+{% load i18n static admission index enums academic_year_display panel field_data %}
 
 {% comment "License" %}
 * OSIS stands for Open Student Information System. It's an application
@@ -26,7 +26,7 @@
 {% endcomment %}
 
 {% block tab_content %}
-    {% include 'osis_profile/includes/personne.html' %}
+    {% include 'admission/includes/person.html' %}
 
     {% panel _("Former UCLouvain student") %}
         {% if person.last_registration_year %}

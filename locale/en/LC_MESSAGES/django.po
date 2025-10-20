@@ -26,6 +26,12 @@ msgid "%(added)s ECTS added with %(validated)s validated by the CDD."
 msgstr ""
 
 #, python-format
+msgid ""
+"%(current_mimetype)s is not a valid mimetype for the field "
+"\"%(field)s\" (%(field_mimetypes_as_str)s)"
+msgstr ""
+
+#, python-format
 msgid "%(label)s:"
 msgstr ""
 
@@ -184,6 +190,11 @@ msgstr ""
 
 msgid ""
 "A member should be either internal or external, please check the fields."
+msgstr ""
+
+msgid ""
+"A merger proposal is currently being resolved. Saving the tab will cause a "
+"merge reset"
 msgstr ""
 
 msgid "A new version of the analysis folder has been generated."
@@ -1241,6 +1252,9 @@ msgid "Candidate not found."
 msgstr ""
 
 msgid "Candidate of the admission"
+msgstr ""
+
+msgid "Candidate on portal"
 msgstr ""
 
 msgid "Candidate withdrawal"
@@ -3021,6 +3035,9 @@ msgid "Free and uploaded by SIC for the managers"
 msgstr ""
 
 msgid "Free comment for the candidate"
+msgstr ""
+
+msgid "Free condition"
 msgstr ""
 
 msgid "Free documents"
@@ -6043,6 +6060,10 @@ msgstr ""
 msgid "Supervisors"
 msgstr ""
 
+msgctxt "no_gender"
+msgid "Supervisors"
+msgstr ""
+
 msgid "Supervisory panel"
 msgstr ""
 
@@ -6505,9 +6526,9 @@ msgid ""
 "The on hold mail has been sent to the candidate the %(date)s by %(sender)s."
 msgstr ""
 
-#, python-brace-format
+#, python-format
 msgid ""
-"The option {index} must have an identifier and a translation for each "
+"The option %(index)s must have an identifier and a translation for each "
 "required language."
 msgstr ""
 
@@ -7850,12 +7871,6 @@ msgid "your mother"
 msgstr ""
 
 msgid "your partner"
-msgstr ""
-
-#, python-brace-format
-msgid ""
-"{current_mimetype} is not a valid mimetype for the field "
-"\"{field}\" ({field_mimetypes_as_str})"
 msgstr ""
 
 #, python-brace-format
