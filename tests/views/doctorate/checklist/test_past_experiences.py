@@ -363,19 +363,23 @@ class PastExperiencesAdmissionRequirementViewTestCase(SicPatchMixin, TestCase):
 
         form = response.context['past_experiences_admission_requirement_form']
 
-        doctorate_choices = [
+        admission_choices = [
             (ConditionAcces.MASTER.name, ConditionAcces.MASTER.label),
             (ConditionAcces.UNI_SNU_AUTRE.name, ConditionAcces.UNI_SNU_AUTRE.label),
             (ConditionAcces.VALORISATION_300_ECTS.name, ConditionAcces.VALORISATION_300_ECTS.label),
-            (ConditionAcces.PARCOURS.name, ConditionAcces.PARCOURS.label),
         ]
-        self.assertEqual(form.fields['admission_requirement'].choices, BLANK_CHOICE + doctorate_choices)
+        self.assertEqual(form.fields['admission_requirement'].choices, BLANK_CHOICE + admission_choices)
         self.assertFalse(form.fields['admission_requirement'].disabled)
         self.assertFalse(form.fields['admission_requirement_year'].disabled)
 
         self.assertEqual(
             recuperer_conditions_acces_par_formation(TrainingType.PHD.name),
-            doctorate_choices,
+            [
+                (ConditionAcces.MASTER.name, ConditionAcces.MASTER.label),
+                (ConditionAcces.UNI_SNU_AUTRE.name, ConditionAcces.UNI_SNU_AUTRE.label),
+                (ConditionAcces.VALORISATION_300_ECTS.name, ConditionAcces.VALORISATION_300_ECTS.label),
+                (ConditionAcces.PARCOURS.name, ConditionAcces.PARCOURS.label),
+            ],
         )
 
         self.admission.checklist['current']['parcours_anterieur']['statut'] = 'GEST_REUSSITE'
