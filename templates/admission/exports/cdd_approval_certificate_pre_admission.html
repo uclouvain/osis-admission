@@ -108,6 +108,7 @@
 
   <div id="signature">
     <p>
+      {% now "d/m/Y" as today_date %}
       Pour le·la président·e de CDD : {{ gestionnaire.prenom }} {{ gestionnaire.nom }} le {{ today_date }}
     </p>
   </div>
