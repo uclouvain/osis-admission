@@ -401,7 +401,7 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_delete_experience_from_doctorate_curriculum_is_not_allowed_for_sic_users(self):
+    def test_delete_experience_from_doctorate_curriculum_is_allowed_for_sic_users(self):
         self.client.force_login(self.sic_manager_user)
 
         experience = EducationalExperienceFactory(
@@ -414,45 +414,25 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
             experience_uuid=experience.uuid,
         )
 
-        # Another doctorate admission
-        doctorate_admission = DoctorateAdmissionFactory(
+        base_curriculum_url = resolve_url(
+            'admission:doctorate:checklist',
+            uuid=self.other_doctorate_admission.uuid,
+        )
+
+        DoctorateAdmissionFactory(
             candidate=experience.person,
             submitted=True,
         )
-
-        response = self.client.delete(url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-        doctorate_admission.delete()
-
-        # Another general admission
-        general_admission = GeneralEducationAdmissionFactory(
+        GeneralEducationAdmissionFactory(
             candidate=experience.person,
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
-
-        response = self.client.delete(url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-        general_admission.delete()
-
-        # Another iufc admission
-        iufc_admission = GeneralEducationAdmissionFactory(
+        ContinuingEducationAdmissionFactory(
             candidate=experience.person,
             status=ChoixStatutPropositionContinue.CONFIRMEE.name,
         )
 
         response = self.client.delete(url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
-        iufc_admission.delete()
-
-        response = self.client.delete(url)
-
-        base_curriculum_url = resolve_url(
-            'admission:doctorate:checklist',
-            uuid=self.other_doctorate_admission.uuid,
-        )
 
         self.assertRedirects(
             response=response,
