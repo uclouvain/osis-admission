@@ -40,6 +40,11 @@ from rest_framework import status
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
     ENTITY_CDE,
 )
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutChecklist,
+    ChoixStatutPropositionGenerale,
+    OngletsChecklist,
+)
 from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import (
     TypeTitreAccesSelectionnable,
     recuperer_conditions_acces_par_formation,
@@ -49,11 +54,8 @@ from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import
     StatutEquivalenceTitreAcces,
     TypeEquivalenceTitreAcces,
 )
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutChecklist,
-    ChoixStatutPropositionGenerale,
-    OngletsChecklist,
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    OngletsDemande,
 )
 from admission.forms.admission.checklist import PastExperiencesAdmissionAccessTitleForm
 from admission.models import GeneralEducationAdmission
@@ -529,6 +531,56 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+    def test_with_temporary_value_removal(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        removed_option = (ConditionAcces.PARCOURS.name, ConditionAcces.PARCOURS.label)
+
+        # On get > the removed option is not selected so we don't keep it
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        form = response.context['past_experiences_admission_requirement_form']
+        self.assertNotIn(removed_option, form.fields['admission_requirement'].choices)
+
+        # On get > the removed option is selected so we keep it
+        self.general_admission.admission_requirement = removed_option[0]
+        self.general_admission.save(update_fields=['admission_requirement'])
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        form = response.context['past_experiences_admission_requirement_form']
+        self.assertIn(removed_option, form.fields['admission_requirement'].choices)
+
+        # On post > the removed option was selected and is selected again so we keep it
+        response = self.client.post(
+            self.url,
+            data={'admission_requirement': removed_option[0]},
+            **self.default_headers,
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        form = response.context['past_experiences_admission_requirement_form']
+        self.assertIn(removed_option, form.fields['admission_requirement'].choices)
+
+        # On post > the removed option was selected but is not selected again so we don't keep it
+        response = self.client.post(
+            self.url,
+            data={'admission_requirement': ConditionAcces.SECONDAIRE.name},
+            **self.default_headers,
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        form = response.context['past_experiences_admission_requirement_form']
+        self.assertNotIn(removed_option, form.fields['admission_requirement'].choices)
+
+        # On post > the removed option was not selected but is selected now so we don't keep it (impossible)
+        response = self.client.post(
+            self.url,
+            data={'admission_requirement': removed_option[0]},
+            **self.default_headers,
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        form = response.context['past_experiences_admission_requirement_form']
+        self.assertNotIn(removed_option, form.fields['admission_requirement'].choices)
+
     def test_initialization_of_the_form(self):
         self.client.force_login(user=self.sic_manager_user)
 
@@ -538,23 +590,30 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
 
         form = response.context['past_experiences_admission_requirement_form']
 
-        bachelor_choices = [
+        admission_choices = [
             (ConditionAcces.SECONDAIRE.name, ConditionAcces.SECONDAIRE.label),
             (ConditionAcces.EXAMEN_ADMISSION.name, ConditionAcces.EXAMEN_ADMISSION.label),
-            (ConditionAcces.PARCOURS.name, ConditionAcces.PARCOURS.label),
             (ConditionAcces.VAE.name, ConditionAcces.VAE.label),
             (ConditionAcces.MASTER.name, ConditionAcces.MASTER.label),
             (ConditionAcces.BAC.name, ConditionAcces.BAC.label),
             (ConditionAcces.UNI_SNU_AUTRE.name, ConditionAcces.UNI_SNU_AUTRE.label),
         ]
-        self.assertEqual(form.fields['admission_requirement'].choices, BLANK_CHOICE + bachelor_choices)
+        self.assertEqual(form.fields['admission_requirement'].choices, BLANK_CHOICE + admission_choices)
         self.assertFalse(form.fields['admission_requirement'].disabled)
         self.assertFalse(form.fields['admission_requirement_year'].disabled)
         self.assertFalse(form.fields['with_prerequisite_courses'].disabled)
 
         self.assertEqual(
             recuperer_conditions_acces_par_formation(TrainingType.BACHELOR.name),
-            bachelor_choices,
+            [
+                (ConditionAcces.SECONDAIRE.name, ConditionAcces.SECONDAIRE.label),
+                (ConditionAcces.EXAMEN_ADMISSION.name, ConditionAcces.EXAMEN_ADMISSION.label),
+                (ConditionAcces.PARCOURS.name, ConditionAcces.PARCOURS.label),
+                (ConditionAcces.VAE.name, ConditionAcces.VAE.label),
+                (ConditionAcces.MASTER.name, ConditionAcces.MASTER.label),
+                (ConditionAcces.BAC.name, ConditionAcces.BAC.label),
+                (ConditionAcces.UNI_SNU_AUTRE.name, ConditionAcces.UNI_SNU_AUTRE.label),
+            ],
         )
 
         self.assertEqual(
