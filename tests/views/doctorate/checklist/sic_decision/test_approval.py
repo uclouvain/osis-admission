@@ -133,7 +133,7 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.admission.mobility_months_amount = ''
         self.admission.must_report_to_sic = None
         self.admission.communication_to_the_candidate = ''
-        self.admission.must_provide_student_visa_d = False
+        self.admission.must_provide_student_visa_d = None
         self.admission.save()
 
         response = self.client.get(self.url, **self.default_headers)
@@ -154,29 +154,6 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.assertEqual(form.initial.get('mobility_months_amount'), '')
         self.assertEqual(form.initial.get('must_report_to_sic'), False)
         self.assertEqual(form.initial.get('communication_to_the_candidate'), '')
-        self.assertEqual(form.initial.get('must_provide_student_visa_d'), False)
-
-        # By default, candidate who are not from UE+5 must not provide a student visa
-        self.admission.must_provide_student_visa_d = None
-        self.admission.save()
-        self.admission.candidate.country_of_citizenship = CountryFactory(european_union=False, iso_code='ZB')
-        self.admission.candidate.save()
-
-        response = self.client.get(self.url, **self.default_headers)
-
-        self.assertEqual(response.status_code, 200)
-
-        form = response.context['sic_decision_approval_form']
-        self.assertEqual(form.initial.get('must_provide_student_visa_d'), False)
-
-        self.admission.candidate.country_of_citizenship = CountryFactory(european_union=False, iso_code='CH')
-        self.admission.candidate.save()
-
-        response = self.client.get(self.url, **self.default_headers)
-
-        self.assertEqual(response.status_code, 200)
-
-        form = response.context['sic_decision_approval_form']
         self.assertEqual(form.initial.get('must_provide_student_visa_d'), None)
 
     def test_approval_decision_form_initialization_other_training(self):
@@ -282,7 +259,7 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
             'sic-decision-approval-tuition_fees_amount': 'NOUVEAUX_DROITS_MAJORES',
             'sic-decision-approval-tuition_fees_dispensation': 'DISPENSE_OFFRE',
             'sic-decision-approval-communication_to_the_candidate': 'Communication',
-            'sic-decision-approval-must_provide_student_visa_d': 'on',
+            'sic-decision-approval-must_provide_student_visa_d': 'True',
         }
 
         response = self.client.post(self.url, data=data, **self.default_headers)
@@ -384,7 +361,7 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
                 'sic-decision-approval-tuition_fees_amount': 'NOUVEAUX_DROITS_MAJORES',
                 'sic-decision-approval-tuition_fees_dispensation': 'DISPENSE_OFFRE',
                 'sic-decision-approval-communication_to_the_candidate': 'Communication',
-                'sic-decision-approval-must_provide_student_visa_d': 'on',
+                'sic-decision-approval-must_provide_student_visa_d': 'True',
             },
             **self.default_headers,
         )
