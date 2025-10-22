@@ -31,6 +31,7 @@
     style="overflow: auto;"
     id="decision-hold-form"
     class="ckeditor-form"
+    data-init-function="decisionHoldForm"
 >
   <div class="modal-body" style="overflow:auto;">
 
@@ -93,6 +94,7 @@
   {{ decision_hold_form.media }}
 
   <script>
+      window.admission.decisionHoldForm = function () {
       $(document).ready(() => {
         {# Reset / Set mail templates values #}
         const defaultMessage = JSON.parse(document.getElementById('decision_hold_form_body').textContent);
@@ -166,13 +168,9 @@
             },
         }, {duration: 0,});
       });
+      };
+      {% if not request.htmx %}
+        window.admission.decisionHoldForm();
+      {% endif %}
   </script>
-
-  {% if request.htmx %}
-    <script>
-      $(document).ready(function(){
-          $('#decision-hold-form *[data-toggle=popover]').popover();
-      });
-    </script>
-  {% endif %}
 </form>

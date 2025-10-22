@@ -31,6 +31,7 @@
     style="overflow: auto;"
     id="decision-send-to-fac-form"
     class="ckeditor-form"
+    data-init-function="sendToFacForm"
 >
   <div class="modal-body" style="overflow:auto;">
 
@@ -75,6 +76,7 @@
   {{ decision_send_to_fac_form.media }}
 
   <script>
+      window.admission.sendToFacForm = function() {
       $(document).ready(() => {
         {# Reset / Set mail templates values #}
         const defaultMessage = JSON.parse(document.getElementById('decision_send_to_fac_form_body').textContent);
@@ -134,18 +136,18 @@
         {# / #}
 
         initializeCKEditor('id_decision-send-to-fac-body');
-      });
-  </script>
 
-  {% if request.htmx %}
-    <script>
-      $(document).ready(function(){
+        {% if request.htmx %}
           {% if decision_send_to_fac_form.is_valid %}
             $('#decision-send-to-fac-modal').modal('hide');
             $('.modal-backdrop').hide();
           {% endif %}
           $('#decision-send_to_fac-form *[data-toggle=popover]').popover();
+        {% endif %}
       });
-    </script>
-  {% endif %}
+      };
+      {% if not request.htmx %}
+        window.admission.sendToFacForm();
+      {% endif %}
+  </script>
 </form>
