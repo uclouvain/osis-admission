@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,12 +23,21 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.models.enums.actor_type import ActorType
-from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
-from admission.ddd.admission.doctorat.preparation.commands import IdentifierPromoteurCommand
-from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
-from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
-from admission.ddd.admission.doctorat.preparation.domain.service.i_promoteur import IPromoteurTranslator
+from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import (
+    PropositionIdentityBuilder,
+)
+from admission.ddd.admission.doctorat.preparation.commands import (
+    IdentifierPromoteurCommand,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import (
+    PromoteurIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import (
+    IHistorique,
+)
+from admission.ddd.admission.doctorat.preparation.domain.service.i_promoteur import (
+    IPromoteurTranslator,
+)
 from admission.ddd.admission.doctorat.preparation.domain.service.membres_groupe_de_supervision import (
     MembresGroupeDeSupervision,
 )
@@ -38,7 +47,10 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
 from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
     IGroupeDeSupervisionRepository,
 )
-from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
+    IPropositionRepository,
+)
+from admission.models.enums.actor_type import ActorType
 
 
 def identifier_promoteur(
@@ -87,6 +99,7 @@ def identifier_promoteur(
         city=cmd.ville,
         country_code=cmd.pays,
         language=cmd.langue,
+        invited_by_default=cmd.invite_par_defaut,
     )
     historique.historiser_ajout_membre(proposition, groupe_de_supervision, promoteur_id, cmd.matricule_auteur)
 

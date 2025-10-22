@@ -313,6 +313,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
         city: Optional[str] = '',
         country_code: Optional[str] = '',
         language: Optional[str] = '',
+        invited_by_default: Optional[bool] = False,
     ) -> 'SignataireIdentity':
         groupe = Process.objects.get(uuid=groupe_id.uuid)
         person = Person.objects.get(global_id=matricule) if matricule else None
@@ -335,7 +336,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
         else:
             group_name, model = 'committee_members', CommitteeMember
             signataire_id = MembreCAIdentity(str(new_actor.uuid))
-        if proposition_status != ChoixStatutPropositionDoctorale.EN_BROUILLON:
+        if invited_by_default:
             new_actor.switch_state(SignatureState.INVITED)
         # Make sure the person has relevant role
         if person:

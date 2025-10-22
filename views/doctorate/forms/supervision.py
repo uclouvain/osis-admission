@@ -46,6 +46,7 @@ from admission.ddd.admission.doctorat.preparation.commands import (
     SupprimerPromoteurCommand,
     VerifierProjetQuery,
 )
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.forms.admission.doctorate.supervision import (
     ACTOR_EXTERNAL,
     EXTERNAL_FIELDS,
@@ -113,6 +114,7 @@ class DoctorateAdmissionAddActorFormView(LoadDossierViewMixin, BusinessException
             'matricule_auteur': self.request.user.person.global_id,
             'type': data['type'],
             'matricule': matricule,
+            'invite_par_defaut': self.proposition.statut != ChoixStatutPropositionDoctorale.EN_BROUILLON.name,
             **data,
         }
 
