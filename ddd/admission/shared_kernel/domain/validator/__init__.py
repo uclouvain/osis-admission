@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -41,7 +41,10 @@ from ._should_curriculum_etre_complete import (
     ShouldExperiencesAcademiquesEtreCompletees,
     ShouldExperiencesAcademiquesEtreCompleteesApresSoumission,
 )
-from ._should_documents_etre_completes import ShouldCompleterTousLesDocumentsReclames
+from ._should_documents_etre_completes import (
+    ShouldAvoirAucunDocumentReclame,
+    ShouldCompleterTousLesDocumentsReclames,
+)
 from ._should_identification_candidat_etre_completee import (
     ShouldCandidatAuthentiquerIdentite,
     ShouldCandidatAuthentiquerPasseport,
@@ -54,6 +57,7 @@ from ._should_identification_candidat_etre_completee import (
 )
 
 __all__ = [
+    "ShouldAvoirAucunDocumentReclame",
     "ShouldSignaletiqueCandidatEtreCompletee",
     "ShouldCandidatSpecifierNumeroIdentite",
     "ShouldCandidatBelgeSpecifierNumeroRegistreNationalBelge",

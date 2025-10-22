@@ -38,16 +38,18 @@ from admission.api import serializers
 from admission.ddd.admission.doctorat.preparation import (
     commands as doctorate_education_commands,
 )
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
-    DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION,
-    StatutReclamationEmplacementDocument,
-)
 from admission.ddd.admission.formation_continue import (
     commands as continuing_education_commands,
 )
 from admission.ddd.admission.formation_generale import (
     commands as general_education_commands,
+)
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
+    EmplacementDocumentDTO,
+)
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION,
+    StatutReclamationEmplacementDocument,
 )
 from admission.exceptions import DocumentPostProcessingException
 from admission.utils import (
@@ -67,6 +69,7 @@ class RequestedDocumentListView(APIPermissionRequiredMixin, generics.ListCreateA
     filter_backends = []
     get_documents_command = None
     complete_documents_commands = None
+    give_control_back_to_manager_command = None
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -185,6 +188,15 @@ class RequestedDocumentListView(APIPermissionRequiredMixin, generics.ListCreateA
 
         return Response(output_serializer.data)
 
+    def put(self, request, *args, **kwargs):
+        command_result = message_bus_instance.invoke(
+            self.give_control_back_to_manager_command(uuid_proposition=self.kwargs['uuid']),
+        )
+
+        output_serializer = serializers.PropositionIdentityDTOSerializer(instance=command_result)
+
+        return Response(output_serializer.data)
+
 
 @extend_schema_view(
     get=extend_schema(
@@ -196,16 +208,25 @@ class RequestedDocumentListView(APIPermissionRequiredMixin, generics.ListCreateA
         responses=serializers.PropositionIdentityDTOSerializer,
         operation_id="create_general_documents",
     ),
+    put=extend_schema(
+        request=None,
+        responses=serializers.PropositionIdentityDTOSerializer,
+        operation_id="give_control_back_to_general_manager_during_document_request",
+    ),
 )
 class GeneralRequestedDocumentListView(RequestedDocumentListView):
     name = "general_documents"
     permission_mapping = {
         'GET': 'admission.view_generaleducationadmission_documents',
         'POST': 'admission.change_generaleducationadmission_documents',
+        'PUT': 'admission.change_generaleducationadmission_documents',
     }
 
     get_documents_command = general_education_commands.RecupererDocumentsReclamesPropositionQuery
     complete_documents_commands = general_education_commands.CompleterEmplacementsDocumentsParCandidatCommand
+    give_control_back_to_manager_command = (
+        general_education_commands.RedonnerMainAuGestionnaireLorsDeLaReclamationDocumentsCommand
+    )
 
     def get_permission_object(self):
         return get_cached_general_education_admission_perm_obj(self.kwargs['uuid'])
@@ -221,16 +242,25 @@ class GeneralRequestedDocumentListView(RequestedDocumentListView):
         responses=serializers.PropositionIdentityDTOSerializer,
         operation_id="create_continuing_documents",
     ),
+    put=extend_schema(
+        request=None,
+        responses=serializers.PropositionIdentityDTOSerializer,
+        operation_id="give_control_back_to_continuing_manager_during_document_request",
+    ),
 )
 class ContinuingRequestedDocumentListView(RequestedDocumentListView):
     name = "continuing_documents"
     permission_mapping = {
         'GET': 'admission.view_continuingeducationadmission_documents',
         'POST': 'admission.change_continuingeducationadmission_documents',
+        'PUT': 'admission.change_continuingeducationadmission_documents',
     }
 
     get_documents_command = continuing_education_commands.RecupererDocumentsReclamesPropositionQuery
     complete_documents_commands = continuing_education_commands.CompleterEmplacementsDocumentsParCandidatCommand
+    give_control_back_to_manager_command = (
+        continuing_education_commands.RedonnerMainAuGestionnaireLorsDeLaReclamationDocumentsCommand
+    )
 
     def get_permission_object(self):
         return get_cached_continuing_education_admission_perm_obj(self.kwargs['uuid'])
@@ -246,16 +276,25 @@ class ContinuingRequestedDocumentListView(RequestedDocumentListView):
         responses=serializers.PropositionIdentityDTOSerializer,
         operation_id="create_doctorate_documents",
     ),
+    put=extend_schema(
+        request=None,
+        responses=serializers.PropositionIdentityDTOSerializer,
+        operation_id="give_control_back_to_doctorate_manager_during_document_request",
+    ),
 )
 class DoctorateRequestedDocumentListView(RequestedDocumentListView):
     name = "doctorate_documents"
     permission_mapping = {
         'GET': 'admission.api_view_admission_documents',
         'POST': 'admission.api_change_admission_documents',
+        'PUT': 'admission.api_change_admission_documents',
     }
 
     get_documents_command = doctorate_education_commands.RecupererDocumentsReclamesPropositionQuery
     complete_documents_commands = doctorate_education_commands.CompleterEmplacementsDocumentsParCandidatCommand
+    give_control_back_to_manager_command = (
+        doctorate_education_commands.RedonnerMainAuGestionnaireLorsDeLaReclamationDocumentsCommand
+    )
 
     def get_permission_object(self):
         return get_cached_admission_perm_obj(self.kwargs['uuid'])

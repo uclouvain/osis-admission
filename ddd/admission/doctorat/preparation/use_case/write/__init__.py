@@ -91,6 +91,9 @@ from .recalculer_emplacements_documents_non_libres_proposition_service import (
     recalculer_emplacements_documents_non_libres_proposition,
 )
 from .reclamer_documents_au_candidat_service import reclamer_documents_au_candidat
+from .redonner_main_au_gestionnaire_lors_de_la_reclamation_documents_service import (
+    redonner_main_au_gestionnaire_lors_de_la_reclamation_documents,
+)
 from .refuser_proposition_par_faculte_service import refuser_proposition_par_cdd
 from .refuser_proposition_par_sic_service import refuser_proposition_par_sic
 from .refuser_proposition_service import refuser_proposition

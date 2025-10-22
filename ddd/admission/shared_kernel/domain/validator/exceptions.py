@@ -257,3 +257,11 @@ class InformationsDestinatairePasTrouvee(BusinessException):
     def __init__(self, **kwargs):
         message = _("Ressource not found.")
         super().__init__(message, **kwargs)
+
+
+class DocumentsReclamesException(BusinessException):
+    status_code = "ADMISSION-25"
+
+    def __init__(self, **kwargs):
+        message = _("Some documents are still requested.")
+        super().__init__(message, **kwargs)
