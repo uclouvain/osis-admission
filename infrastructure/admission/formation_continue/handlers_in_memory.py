@@ -43,6 +43,24 @@ from admission.ddd.admission.shared_kernel.use_case.write import (
     remplir_emplacement_document_par_gestionnaire,
     supprimer_emplacement_document,
 )
+from admission.infrastructure.admission.formation_continue.domain.service.in_memory.formation import (
+    FormationContinueInMemoryTranslator,
+)
+from admission.infrastructure.admission.formation_continue.domain.service.in_memory.historique import (
+    HistoriqueInMemory,
+)
+from admission.infrastructure.admission.formation_continue.domain.service.in_memory.lister_demandes import (
+    ListerDemandesInMemory,
+)
+from admission.infrastructure.admission.formation_continue.domain.service.in_memory.notification import (
+    NotificationInMemory,
+)
+from admission.infrastructure.admission.formation_continue.domain.service.in_memory.question_specifique import (
+    QuestionSpecifiqueInMemoryTranslator,
+)
+from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
+    PropositionInMemoryRepository,
+)
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.annee_inscription_formation import (
     AnneeInscriptionFormationInMemoryTranslator,
 )
@@ -69,24 +87,6 @@ from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.r
 )
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.titres_acces import (
     TitresAccesInMemory,
-)
-from admission.infrastructure.admission.formation_continue.domain.service.in_memory.formation import (
-    FormationContinueInMemoryTranslator,
-)
-from admission.infrastructure.admission.formation_continue.domain.service.in_memory.historique import (
-    HistoriqueInMemory,
-)
-from admission.infrastructure.admission.formation_continue.domain.service.in_memory.lister_demandes import (
-    ListerDemandesInMemory,
-)
-from admission.infrastructure.admission.formation_continue.domain.service.in_memory.notification import (
-    NotificationInMemory,
-)
-from admission.infrastructure.admission.formation_continue.domain.service.in_memory.question_specifique import (
-    QuestionSpecifiqueInMemoryTranslator,
-)
-from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
-    PropositionInMemoryRepository,
 )
 from admission.infrastructure.admission.shared_kernel.repository.in_memory.emplacement_document import (
     emplacement_document_in_memory_repository,
@@ -381,5 +381,13 @@ COMMAND_HANDLERS = {
     RetyperDocumentCommand: lambda msg_bus, cmd: retyper_document(
         cmd,
         emplacement_document_repository=_emplacement_document_repository,
+    ),
+    RedonnerMainAuGestionnaireLorsDeLaReclamationDocumentsCommand: (
+        lambda msg_bus, cmd: redonner_main_au_gestionnaire_lors_de_la_reclamation_documents(
+            msg_bus=msg_bus,
+            cmd=cmd,
+            proposition_repository=_proposition_repository,
+            historique=_historique_global,
+        )
     ),
 }
