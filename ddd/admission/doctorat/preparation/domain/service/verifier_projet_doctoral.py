@@ -27,6 +27,7 @@ from functools import partial
 from typing import List
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
     ChoixTypeAdmission,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import (
@@ -75,6 +76,23 @@ class VerifierPropositionProjetDoctoral(interface.DomainService):
         annee_courante: int,
         annee_formation: AcademicYear,
     ) -> None:
+        # Les vérifications sont limitées à ce qui est modifiable par le candidat dans ce statut
+        if proposition_candidat.statut in {
+            ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE,
+            ChoixStatutPropositionDoctorale.CA_EN_ATTENTE_DE_SIGNATURE,
+        }:
+            return
+
+        if proposition_candidat.statut == ChoixStatutPropositionDoctorale.CA_A_COMPLETER:
+            fonctions_verification = []
+
+            if proposition_candidat.type_admission == ChoixTypeAdmission.ADMISSION:
+                fonctions_verification.append(groupe_de_supervision.verifier_signataires_membres_ca)
+
+            execute_functions_and_aggregate_exceptions(*fonctions_verification)
+
+            return
+
         profil_candidat_service = ProfilCandidat()
         if proposition_candidat.type_admission == ChoixTypeAdmission.PRE_ADMISSION:
             fonctions_personnalisees = [

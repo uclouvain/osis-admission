@@ -38,6 +38,9 @@ from admission.ddd.admission.doctorat.preparation.domain.model._cotutelle import
 from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import (
     DetailProjet,
 )
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
     PropositionIdentity,
 )
@@ -383,6 +386,17 @@ class TestVerifierPropositionService(AdmissionTestMixin, TestCase):
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(cmd)
         self.assertIsInstance(context.exception.exceptions.pop(), MembreCAManquantException)
+
+    def test_should_verifier_uniquement_certains_elements_dans_statut_ca_a_completer(self):
+        proposition = self.proposition_repository.get(entity_id=PropositionIdentity(uuid='uuid-SC3DP-sans-membre_CA'))
+        cmd = attr.evolve(self.cmd, uuid_proposition=proposition.entity_id.uuid)
+
+        with mock.patch.multiple(self.candidat, pays_naissance=''):
+            with mock.patch.multiple(proposition, statut=ChoixStatutPropositionDoctorale.CA_A_COMPLETER):
+                with self.assertRaises(MultipleBusinessExceptions) as context:
+                    self.message_bus.invoke(cmd)
+                self.assertHasInstance(context.exception.exceptions, MembreCAManquantException)
+                self.assertHasNoInstance(context.exception.exceptions, IdentificationNonCompleteeException)
 
     def test_should_retourner_erreur_si_questions_specifiques_pas_completees(self):
         proposition = next(

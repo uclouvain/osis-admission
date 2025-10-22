@@ -43,6 +43,7 @@ from admission.forms.admission.doctorate.supervision import (
     ACTOR_EXTERNAL,
     EXTERNAL_FIELDS,
 )
+from admission.models import SupervisionActor
 from admission.models.enums.actor_type import ActorType
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.curriculum import (
@@ -52,11 +53,11 @@ from admission.tests.factories.curriculum import (
     EducationalExperienceYearFactory,
     ProfessionalExperienceFactory,
 )
+from admission.tests.factories.person import InternalPersonFactory
 from admission.tests.factories.roles import (
     DoctorateCommitteeMemberRoleFactory,
     ProgramManagerRoleFactory,
 )
-from admission.tests.factories.person import InternalPersonFactory
 from admission.tests.factories.supervision import (
     CaMemberFactory,
     ExternalPromoterFactory,
@@ -200,6 +201,10 @@ class SupervisionTestCase(TestCase):
         response = self.client.post(self.update_url, data)
         self.assertEqual(response.status_code, 302)
 
+        created_actor = SupervisionActor.objects.filter(person=self.person).first()
+        self.assertIsNotNone(created_actor)
+        self.assertEqual(created_actor.state, SignatureState.INVITED.name)
+
     def test_should_add_supervision_member_error_already_in(self):
         self.client.force_login(user=self.program_manager_user)
         response = self.client.post(self.update_url, {'type': ActorType.PROMOTER.name})
@@ -217,6 +222,10 @@ class SupervisionTestCase(TestCase):
         }
         response = self.client.post(self.update_url, data)
         self.assertEqual(response.status_code, 302)
+
+        created_actor = SupervisionActor.objects.filter(person=self.person).first()
+        self.assertIsNotNone(created_actor)
+        self.assertEqual(created_actor.state, SignatureState.INVITED.name)
 
     def test_should_add_promoter_external_error(self):
         self.client.force_login(user=self.program_manager_user)

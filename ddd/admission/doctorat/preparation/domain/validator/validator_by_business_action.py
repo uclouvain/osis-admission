@@ -506,6 +506,19 @@ class SignatairesValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
 
 
 @attr.dataclass(frozen=True, slots=True)
+class SignatairesMembresCAValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    groupe_de_supervision: 'GroupeDeSupervision'
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldGroupeDeSupervisionAvoirAuMoinsDeuxMembreCA(self.groupe_de_supervision.signatures_membres_CA),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
 class SignatairesPreAdmissionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     groupe_de_supervision: 'GroupeDeSupervision'
 
