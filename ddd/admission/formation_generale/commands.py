@@ -350,6 +350,11 @@ class CompleterEmplacementsDocumentsParCandidatCommand(interface.CommandRequest)
 
 
 @attr.dataclass(frozen=True, slots=True)
+class RedonnerMainAuGestionnaireLorsDeLaReclamationDocumentsCommand(interface.CommandRequest):
+    uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
 class InitialiserEmplacementDocumentLibreNonReclamableCommand(
     commands.InitialiserEmplacementDocumentLibreNonReclamableCommand
 ):

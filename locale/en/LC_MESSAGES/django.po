@@ -5855,6 +5855,9 @@ msgstr ""
 msgid "Solidarity student"
 msgstr ""
 
+msgid "Some documents are still requested."
+msgstr ""
+
 msgid "Some errors have been encountered."
 msgstr ""
 

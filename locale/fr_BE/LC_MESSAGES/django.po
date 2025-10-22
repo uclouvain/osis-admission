@@ -6440,6 +6440,9 @@ msgstr "Madame, Monsieur"
 msgid "Solidarity student"
 msgstr "Étudiant solidaire"
 
+msgid "Some documents are still requested."
+msgstr "Des documents sont encore réclamés."
+
 msgid "Some errors have been encountered."
 msgstr "Des erreurs ont été rencontrées."
 
