@@ -378,11 +378,18 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         context['raison_injection_impossible'] = self.injection_possible[1]
         context['demande_est_en_quarantaine'] = self.demande_est_en_quarantaine
         context['outil_de_comparaison_et_fusion_url'] = self.get_outil_de_comparaison_et_fusion_url()
+        context['double_check_decision_url'] = self.get_double_check_decision_url()
         return context
 
     def get_outil_de_comparaison_et_fusion_url(self) -> str:
         return resolve_url(
             'admission:services:gestion-des-comptes:outil-comparaison-et-fusion', uuid=self.admission_uuid
+        )
+
+    def get_double_check_decision_url(self) -> str:
+        return resolve_url(
+            'admission:services:gestion-des-comptes:double-check-decision-informations-injection-signaletique',
+            uuid=self.admission_uuid
         )
 
     def dispatch(self, request, *args, **kwargs):

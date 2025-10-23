@@ -133,7 +133,9 @@
       {% with initial=original_admission.checklist.initial.donnees_personnelles current=original_admission.checklist.current.donnees_personnelles next_url=next_base_url|add:'donnees_personnelles' %}
         <div role="tabpanel" class="tab-pane" id="donnees_personnelles">
           {% has_perm 'admission.merge_candidate_with_known_person' as can_merge_candidate %}
-          {% resultat_workflow_gestion_des_comptes_alert matricule=original_admission.candidate.global_id has_permission_to_merge=can_merge_candidate outil_de_comparaison_et_fusion_url=outil_de_comparaison_et_fusion_url %}
+          {% has_perm 'admission.double_check_decision_informations_signaletique' as can_give_decision_double_check %}
+
+          {% resultat_workflow_gestion_des_comptes_alert matricule=original_admission.candidate.global_id has_permission_to_merge=can_merge_candidate outil_de_comparaison_et_fusion_url=outil_de_comparaison_et_fusion_url has_permission_to_give_decision_double_check=can_give_decision_double_check double_check_decision_url=double_check_decision_url%}
 
           {% if injection_signaletique %}
               <div class="panel panel-{% if injection_signaletique.in_error %}danger{% else %}warning{% endif %}">

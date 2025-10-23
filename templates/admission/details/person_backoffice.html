@@ -26,7 +26,8 @@
 {% endcomment %}
 {% block tab_content %}
   {% has_perm 'admission.merge_candidate_with_known_person' as can_merge_candidate %}
-  {% resultat_workflow_gestion_des_comptes_alert matricule=admission.matricule_candidat has_permission_to_merge=can_merge_candidate outil_de_comparaison_et_fusion_url=outil_de_comparaison_et_fusion_url %}
+  {% has_perm 'admission.double_check_decision_informations_signaletique' as can_give_decision_double_check %}
+  {% resultat_workflow_gestion_des_comptes_alert matricule=admission.matricule_candidat has_permission_to_merge=can_merge_candidate outil_de_comparaison_et_fusion_url=outil_de_comparaison_et_fusion_url has_permission_to_give_decision_double_check=can_give_decision_double_check double_check_decision_url=double_check_decision_url %}
   {% if profil_candidat|is_profile_identification_different:person %}
     <p class="alert alert-info" role="alert">
       <i class="fa fa-question-circle" style="margin-right: 0.5em"></i>
