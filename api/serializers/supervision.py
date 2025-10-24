@@ -111,6 +111,8 @@ class SupervisionActorReferenceSerializer(serializers.Serializer):
 
 
 class IdentifierPromoteurCommandSerializer(DTOSerializer):
+    invite_par_defaut = None
+
     class Meta:
         source = IdentifierPromoteurCommand
         extra_kwargs = {
@@ -124,6 +126,7 @@ class IdentifierPromoteurCommandSerializer(DTOSerializer):
 
 class IdentifierMembreCACommandSerializer(DTOSerializer):
     matricule_auteur = None
+    invite_par_defaut = None
 
     class Meta:
         source = IdentifierMembreCACommand
