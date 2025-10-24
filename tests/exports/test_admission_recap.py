@@ -33,11 +33,11 @@ import attr
 import freezegun
 import img2pdf
 import mock
-from PIL import Image
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import override_settings
 from osis_async.models import AsyncTask
+from PIL import Image
 from rest_framework import status
 
 from admission.calendar.admission_calendar import (
@@ -95,7 +95,9 @@ from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import (
     EtudesSecondairesAdmissionDTO,
 )
 from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
-from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import (
+    QuestionSpecifiqueDTO,
+)
 from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.shared_kernel.enums import (
     ChoixAffiliationSport,
@@ -968,7 +970,9 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
     @classmethod
     def setUpTestData(cls):
         # Mock osis-document
-        cls.get_remote_token_patcher = mock.patch("osis_document_components.services.get_remote_token", return_value="foobar")
+        cls.get_remote_token_patcher = mock.patch(
+            "osis_document_components.services.get_remote_token", return_value="foobar"
+        )
         cls.get_remote_token_patcher.start()
 
         cls.get_remote_metadata_patcher = mock.patch(
@@ -1278,8 +1282,10 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 traduction_diplome=['uuid-traduction-diplome'],
                 equivalence=Equivalence.YES.name,
                 decision_final_equivalence_ue=['uuid-decision-final-equivalence-ue'],
+                a_daes_ue=True,
                 daes_ue=['uuid-access-diploma-to-higher-education-ue'],
                 decision_final_equivalence_hors_ue=['uuid-decision-final-equivalence-hors-ue'],
+                a_daes_hors_ue=True,
                 daes_hors_ue=['uuid-access-diploma-to-higher-education-hors-ue'],
                 preuve_decision_equivalence=['uuid-preuve-decision-equivalence'],
             ),

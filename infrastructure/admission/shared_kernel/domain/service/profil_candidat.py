@@ -353,8 +353,10 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                     equivalence=foreign_high_school_diploma.equivalence,
                     decision_final_equivalence_ue=foreign_high_school_diploma.final_equivalence_decision_ue,
                     daes_ue=foreign_high_school_diploma.access_diploma_to_higher_education_ue,
+                    a_daes_ue=foreign_high_school_diploma.has_access_diploma_to_higher_education_ue,
                     decision_final_equivalence_hors_ue=foreign_high_school_diploma.final_equivalence_decision_not_ue,
                     daes_hors_ue=foreign_high_school_diploma.access_diploma_to_higher_education_not_ue,
+                    a_daes_hors_ue=foreign_high_school_diploma.has_access_diploma_to_higher_education_not_ue,
                     preuve_decision_equivalence=foreign_high_school_diploma.equivalence_decision_proof,
                 )
                 if foreign_high_school_diploma
