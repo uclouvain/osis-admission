@@ -37,24 +37,31 @@ from django.views.generic import FormView, TemplateView
 from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
 
-from admission.ddd.admission.shared_kernel.commands import RechercherParcoursAnterieurQuery
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     OngletsChecklist,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     message_candidat_avec_pae_avant_2015,
 )
-from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
-from admission.ddd.admission.shared_kernel.dtos.resume import ResumeCandidatDTO, ResumePropositionDTO
+from admission.ddd.admission.shared_kernel.commands import (
+    RechercherParcoursAnterieurQuery,
+)
+from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
+    EtatAuthentificationParcours,
+)
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import (
+    QuestionSpecifiqueDTO,
+)
+from admission.ddd.admission.shared_kernel.dtos.resume import (
+    ResumeCandidatDTO,
+    ResumePropositionDTO,
+)
 from admission.ddd.admission.shared_kernel.enums import Onglets, TypeItemFormulaire
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     DocumentsAssimilation,
     DocumentsCotutelle,
     DocumentsProjetRecherche,
     OngletsDemande,
-)
-from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
-    EtatAuthentificationParcours,
 )
 from admission.ddd.admission.shared_kernel.utils import initialiser_checklist_experience
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
@@ -315,9 +322,6 @@ class ChecklistView(
             context['access_titles'] = self.selectable_access_titles
 
             context['past_experiences_admission_requirement_form'] = self.past_experiences_admission_requirement_form
-            context['past_experiences_admission_access_title_equivalency_form'] = (
-                self.past_experiences_admission_access_title_equivalency_form
-            )
 
             # Financabilité
             context['financabilite'] = self._get_financabilite()
@@ -533,7 +537,6 @@ class ChecklistView(
                     context['cdd_decision_refusal_form']: can_change_cdd_decision,
                     context['financabilite_approval_form']: can_change_checklist,
                     context['past_experiences_admission_requirement_form']: can_change_past_experiences,
-                    context['past_experiences_admission_access_title_equivalency_form']: can_change_access_title,
                     context['financabilite_approval_form']: can_change_checklist,
                     **{
                         authentication_form: can_change_checklist
