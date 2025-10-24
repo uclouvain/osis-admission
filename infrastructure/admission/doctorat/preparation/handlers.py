@@ -569,12 +569,6 @@ COMMAND_HANDLERS = {
         titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
         experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
     ),
-    SpecifierEquivalenceTitreAccesEtrangerPropositionCommand: (
-        lambda msg_bus, cmd: specifier_equivalence_titre_acces_etranger_proposition(
-            cmd,
-            proposition_repository=PropositionRepository(),
-        )
-    ),
     SpecifierBesoinDeDerogationSicCommand: (
         lambda msg_bus, cmd: specifier_besoin_de_derogation(
             cmd,

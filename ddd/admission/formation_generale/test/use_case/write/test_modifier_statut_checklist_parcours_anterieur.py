@@ -26,6 +26,8 @@
 
 from django.test import SimpleTestCase
 
+from admission.ddd.admission.formation_generale.test.factory.proposition import PropositionFactory
+from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import TypeEquivalenceTitreAcces
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_generale.commands import (
     ModifierStatutChecklistParcoursAnterieurCommand,
@@ -44,10 +46,12 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
     PropositionNonTrouveeException,
     StatutsChecklistExperiencesEtreValidesException,
     TitreAccesEtreSelectionneException,
+    InformationsEquivalenceNonSpecifieesChecklistException,
 )
 from admission.ddd.admission.formation_generale.test.factory.titre_acces import (
     TitreAccesSelectionnableFactory,
 )
+from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationIdentityFactory
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
 )
@@ -61,12 +65,18 @@ from admission.infrastructure.message_bus_in_memory import (
     message_bus_in_memory_instance,
 )
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import DiplomeEtrangerEtudesSecondairesDTO
 from epc.models.enums.condition_acces import ConditionAcces
+from osis_profile.models.enums.education import ForeignDiplomaTypes
 
 
 class TestModifierStatutChecklistParcoursAnterieurService(SimpleTestCase):
     def assertHasInstance(self, container, cls, msg=None):
         if not any(isinstance(obj, cls) for obj in container):
+            self.fail(msg or f"No instance of '{cls}' has been found")
+
+    def assertHasNoInstance(self, container, cls, msg=None):
+        if any(isinstance(obj, cls) for obj in container):
             self.fail(msg or f"No instance of '{cls}' has been found")
 
     @classmethod
@@ -246,6 +256,80 @@ class TestModifierStatutChecklistParcoursAnterieurService(SimpleTestCase):
 
             self.assertHasInstance(context.exception.exceptions, ConditionAccesEtreSelectionneException)
             self.assertHasInstance(context.exception.exceptions, TitreAccesEtreSelectionneException)
+
+    def test_should_renvoyer_erreur_si_statut_cible_est_gestionnaire_reussite_et_incomplet_pour_bachelier(self):
+        proposition = PropositionFactory(
+            est_confirmee=True,
+            matricule_candidat='0123456789',
+            formation_id=FormationIdentityFactory(sigle="BACHELIER-ECO", annee=2020),
+        )
+        self.proposition_repository.save(proposition)
+        self.profil_candidat_translator.etudes_secondaires["0123456789"].diplome_belge = None
+        self.profil_candidat_translator.etudes_secondaires[
+            "0123456789"
+        ].diplome_etranger = DiplomeEtrangerEtudesSecondairesDTO(
+            type_diplome=ForeignDiplomaTypes.NATIONAL_BACHELOR.name
+        )
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(
+                ModifierStatutChecklistParcoursAnterieurCommand(
+                    uuid_proposition=proposition.entity_id.uuid,
+                    statut=ChoixStatutChecklist.GEST_REUSSITE.name,
+                    gestionnaire='0123456789',
+                )
+            )
+
+            self.assertCountEqual(
+                context.exception.exceptions,
+                [
+                    ConditionAccesEtreSelectionneException,
+                    TitreAccesEtreSelectionneException,
+                    InformationsEquivalenceNonSpecifieesChecklistException,
+                ],
+            )
+
+        proposition.type_equivalence_titre_acces = TypeEquivalenceTitreAcces.EQUIVALENCE_CESS
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(
+                ModifierStatutChecklistParcoursAnterieurCommand(
+                    uuid_proposition=proposition.entity_id.uuid,
+                    statut=ChoixStatutChecklist.GEST_REUSSITE.name,
+                    gestionnaire='0123456789',
+                )
+            )
+
+            self.assertCountEqual(
+                context.exception.exceptions,
+                [
+                    ConditionAccesEtreSelectionneException,
+                    TitreAccesEtreSelectionneException,
+                ],
+            )
+
+        proposition.type_equivalence_titre_acces = None
+        self.profil_candidat_translator.etudes_secondaires[
+            "0123456789"
+        ].diplome_etranger = DiplomeEtrangerEtudesSecondairesDTO(
+            type_diplome=ForeignDiplomaTypes.INTERNATIONAL_BACCALAUREATE.name
+        )
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(
+                ModifierStatutChecklistParcoursAnterieurCommand(
+                    uuid_proposition=proposition.entity_id.uuid,
+                    statut=ChoixStatutChecklist.GEST_REUSSITE.name,
+                    gestionnaire='0123456789',
+                )
+            )
+
+            self.assertCountEqual(
+                context.exception.exceptions,
+                [
+                    ConditionAccesEtreSelectionneException,
+                    TitreAccesEtreSelectionneException,
+                ],
+            )
 
     def test_should_empecher_si_proposition_non_trouvee(self):
         with self.assertRaises(PropositionNonTrouveeException):
