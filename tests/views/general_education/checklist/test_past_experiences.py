@@ -40,6 +40,11 @@ from rest_framework import status
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
     ENTITY_CDE,
 )
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutChecklist,
+    ChoixStatutPropositionGenerale,
+    OngletsChecklist,
+)
 from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import (
     TypeTitreAccesSelectionnable,
     recuperer_conditions_acces_par_formation,
@@ -49,11 +54,8 @@ from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import
     StatutEquivalenceTitreAcces,
     TypeEquivalenceTitreAcces,
 )
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutChecklist,
-    ChoixStatutPropositionGenerale,
-    OngletsChecklist,
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    OngletsDemande,
 )
 from admission.forms.admission.checklist import PastExperiencesAdmissionAccessTitleForm
 from admission.models import GeneralEducationAdmission
@@ -81,10 +83,9 @@ from admission.tests.views.general_education.checklist.sic_decision.base import 
 )
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.choice_field import BLANK_CHOICE
-from base.models.enums.community import CommunityEnum
 from base.models.enums.education_group_types import TrainingType
-from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.enums.got_diploma import GotDiploma
+from base.models.person import Person
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -139,6 +140,9 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
         cls.fac_manager_user = ProgramManagerRoleFactory(education_group=cls.training.education_group).person.user
         cls.default_headers = {'HTTP_HX-Request': 'true'}
         cls.url_name = 'admission:general-education:past-experiences-change-status'
+
+        cls.error_message_if_missing_data = gettext("Some errors have been encountered.")
+        cls.success_message = gettext('Your data have been saved.')
 
     def setUp(self) -> None:
         super().setUp()
@@ -344,6 +348,76 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
             ),
         )
 
+    def test_change_the_checklist_status_to_success_for_a_bachelor_with_national_secondary_studies(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        foreign_high_school_diploma = ForeignHighSchoolDiplomaFactory(
+            foreign_diploma_type=ForeignDiplomaTypes.NATIONAL_BACHELOR.name,
+        )
+
+        self.general_admission.candidate = foreign_high_school_diploma.person
+
+        # Set the admission requirement
+        self.general_admission.admission_requirement = ConditionAcces.BAC.name
+        self.general_admission.admission_requirement_year = self.academic_years[1]
+
+        # Set the checklists of the experiences
+        self.general_admission.checklist['current'][OngletsChecklist.parcours_anterieur.name] = {
+            'statut': ChoixStatutChecklist.GEST_BLOCAGE.name,
+            'enfants': [
+                {
+                    'statut': ChoixStatutChecklist.GEST_REUSSITE.name,
+                    'extra': {
+                        'identifiant': OngletsDemande.ETUDES_SECONDAIRES.name,
+                    },
+                },
+            ],
+        }
+
+        # Set the access title
+        self.general_admission.are_secondary_studies_access_title = True
+        self.general_admission.save()
+
+        success_url = resolve_url(
+            self.url_name,
+            uuid=self.general_admission.uuid,
+            status=ChoixStatutChecklist.GEST_REUSSITE.name,
+        )
+
+        # The success status requires the equivalence information
+        response = self.client.post(success_url, **self.default_headers)
+
+        # Check response
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        messages = [m.message for m in response.context['messages']]
+        self.assertIn(self.error_message_if_missing_data, messages)
+        self.assertNotIn(self.success_message, messages)
+
+        # Check admission
+        self.general_admission.refresh_from_db()
+        self.assertNotEqual(
+            self.general_admission.checklist['current']['parcours_anterieur']['statut'],
+            ChoixStatutChecklist.GEST_REUSSITE.name,
+        )
+
+        self.general_admission.foreign_access_title_equivalency_type = TypeEquivalenceTitreAcces.NON_CONCERNE.name
+        self.general_admission.save()
+
+        response = self.client.post(success_url, **self.default_headers)
+
+        # Check response
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        messages = [m.message for m in response.context['messages']]
+        self.assertNotIn(self.error_message_if_missing_data, messages)
+        self.assertIn(self.success_message, messages)
+
+        # Check admission
+        self.general_admission.refresh_from_db()
+        self.assertEqual(
+            self.general_admission.checklist['current']['parcours_anterieur']['statut'],
+            ChoixStatutChecklist.GEST_REUSSITE.name,
+        )
+
     def test_change_the_checklist_status_to_success_for_a_certificate(self):
         self.client.force_login(user=self.sic_manager_user)
 
@@ -375,15 +449,13 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
         self.general_admission.save()
 
         # The success status requires at least one access title and an admission requirement
-        error_message_if_missing_data = gettext("Some errors have been encountered.")
-
         response = self.client.post(success_url, **self.default_headers)
 
         # Check response
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         messages = [m.message for m in response.context['messages']]
-        self.assertIn(error_message_if_missing_data, messages)
-        self.assertNotIn(gettext('Your data have been saved.'), messages)
+        self.assertIn(self.error_message_if_missing_data, messages)
+        self.assertNotIn(self.success_message, messages)
 
         # Check admission
         self.general_admission.refresh_from_db()
@@ -410,8 +482,8 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
         # Check response
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         messages = [m.message for m in response.context['messages']]
-        self.assertIn(error_message_if_missing_data, messages)
-        self.assertNotIn(gettext('Your data have been saved.'), messages)
+        self.assertIn(self.error_message_if_missing_data, messages)
+        self.assertNotIn(self.success_message, messages)
 
         # Check admission
         self.general_admission.refresh_from_db()
@@ -436,8 +508,8 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
         # Check response
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         messages = [m.message for m in response.context['messages']]
-        self.assertIn(error_message_if_missing_data, messages)
-        self.assertNotIn(gettext('Your data have been saved.'), messages)
+        self.assertIn(self.error_message_if_missing_data, messages)
+        self.assertNotIn(self.success_message, messages)
 
         # Check admission
         self.general_admission.refresh_from_db()
@@ -457,8 +529,8 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
         # Check response
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         messages = [m.message for m in response.context['messages']]
-        self.assertNotIn(error_message_if_missing_data, messages)
-        self.assertIn(gettext('Your data have been saved.'), messages)
+        self.assertNotIn(self.error_message_if_missing_data, messages)
+        self.assertIn(self.success_message, messages)
 
         # Check admission
         self.general_admission.refresh_from_db()

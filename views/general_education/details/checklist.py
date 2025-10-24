@@ -3459,7 +3459,7 @@ class ChecklistView(
                     context['fac_decision_refusal_form']: can_change_faculty_decision,
                     context['financabilite_approval_form']: can_change_checklist,
                     context['past_experiences_admission_requirement_form']: can_change_past_experiences,
-                    context['past_experiences_admission_access_title_equivalency_form']: can_change_access_title,
+                    context['past_experiences_admission_access_title_equivalency_form']: can_change_checklist,
                     context['financabilite_approval_form']: can_change_checklist,
                     **{
                         authentication_form: can_change_checklist

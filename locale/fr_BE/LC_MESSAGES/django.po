@@ -6766,6 +6766,11 @@ msgid "Text size"
 msgstr "Taille du texte"
 
 msgid ""
+"The \"Sufficient\" status requires the equivalence information to be "
+"specified."
+msgstr "Le passage à l'état \"Suffisant\" nécessite que les informations sur l'équivalence soient remplies."
+
+msgid ""
 "The \"doctoral training\" must be completed before submitting the defense "
 "preparation and the jury proposition."
 msgstr ""
