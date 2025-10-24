@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,18 +23,24 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import uuid
+from typing import Dict, List, Union
+
 import factory
 
-from admission.models import ContinuingEducationAdmission
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixInscriptionATitre,
+    ChoixMoyensDecouverteFormation,
     ChoixStatutChecklist,
     ChoixStatutPropositionContinue,
-    ChoixMoyensDecouverteFormation,
 )
+from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from admission.models import ContinuingEducationAdmission
+from admission.models.specific_question import SpecificQuestionAnswer
+from admission.tests.factories.form_item import AdmissionFormItemFactory
 from admission.tests.factories.person import CompletePersonForIUFCFactory
 from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.utils import generate_proposition_reference
@@ -43,8 +49,12 @@ from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group_year import EducationGroupYearFactory
 from base.tests.factories.person import PersonFactory
-from base.tests.factories.specific_iufc_informations import SpecificIUFCInformationsFactory
-from program_management.tests.factories.education_group_version import EducationGroupVersionFactory
+from base.tests.factories.specific_iufc_informations import (
+    SpecificIUFCInformationsFactory,
+)
+from program_management.tests.factories.education_group_version import (
+    EducationGroupVersionFactory,
+)
 
 
 class ContinuingEducationTrainingFactory(EducationGroupYearFactory):
@@ -124,6 +134,24 @@ class ContinuingEducationAdmissionFactory(factory.django.DjangoModelFactory):
                 'current': get_checklist(),
             }
         )
+
+    @factory.post_generation
+    def specific_question_answers(self, create, extracted: Dict[str, Union[str, List[str]]], **kwargs):
+        if extracted is not None:
+            for form_item_uuid, answer in extracted.items():
+                SpecificQuestionAnswer.objects.create(
+                    admission=self,
+                    form_item=AdmissionFormItemFactory(
+                        uuid=form_item_uuid,
+                        type=(
+                            TypeItemFormulaire.DOCUMENT.name
+                            if isinstance(answer, list)
+                            else TypeItemFormulaire.TEXTE.name
+                        ),
+                    ),
+                    file=answer if isinstance(answer, list) else None,
+                    answer=answer if not isinstance(answer, list) else None,
+                )
 
 
 def get_checklist():

@@ -39,8 +39,6 @@ from admission.calendar.admission_calendar import SIGLES_WITH_QUOTA
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
     ENTITY_CDE,
 )
-from admission.ddd.admission.shared_kernel.enums import Onglets
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixInscriptionATitre,
     ChoixStatutPropositionContinue,
@@ -48,6 +46,10 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.shared_kernel.enums import Onglets
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    OngletsDemande,
 )
 from admission.models import ContinuingEducationAdmission, GeneralEducationAdmission
 from admission.tests.factories.continuing_education import (
@@ -320,7 +322,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
         general_admission.refresh_from_db()
 
         self.assertEqual(
-            general_admission.specific_question_answers.get(str(self.specific_questions[0].form_item.uuid)),
+            general_admission.get_specific_question_answers_dict().get(str(self.specific_questions[0].form_item.uuid)),
             '',
         )
         self.assertEqual(general_admission.diplomatic_post, None)
@@ -366,7 +368,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
         general_admission.refresh_from_db()
 
         self.assertEqual(
-            general_admission.specific_question_answers.get(str(self.specific_questions[0].form_item.uuid)),
+            general_admission.get_specific_question_answers_dict().get(str(self.specific_questions[0].form_item.uuid)),
             'My answer',
         )
         self.assertEqual(general_admission.diplomatic_post, None)
@@ -1135,7 +1137,7 @@ class ContinuingSpecificQuestionsFormViewTestCase(TestCase):
         self.assertEqual(self.continuing_admission.billing_address_recipient, '')
         self.assertEqual(self.continuing_admission.billing_address_postal_box, '')
         self.assertEqual(
-            self.continuing_admission.specific_question_answers,
+            self.continuing_admission.get_specific_question_answers_dict(),
             {
                 str(self.specific_questions[0].form_item.uuid): 'my answer',
             },
@@ -1190,7 +1192,7 @@ class ContinuingSpecificQuestionsFormViewTestCase(TestCase):
         self.assertEqual(self.continuing_admission.billing_address_recipient, '')
         self.assertEqual(self.continuing_admission.billing_address_postal_box, '')
         self.assertEqual(
-            self.continuing_admission.specific_question_answers,
+            self.continuing_admission.get_specific_question_answers_dict(),
             {
                 str(self.specific_questions[0].form_item.uuid): 'my answer',
             },
@@ -1237,7 +1239,7 @@ class ContinuingSpecificQuestionsFormViewTestCase(TestCase):
         self.assertEqual(self.continuing_admission.billing_address_recipient, 'other.recipient@example.be')
         self.assertEqual(self.continuing_admission.billing_address_postal_box, 'BP7')
         self.assertEqual(
-            self.continuing_admission.specific_question_answers,
+            self.continuing_admission.get_specific_question_answers_dict(),
             {
                 str(self.specific_questions[0].form_item.uuid): '',
             },
@@ -1284,7 +1286,7 @@ class ContinuingSpecificQuestionsFormViewTestCase(TestCase):
         self.assertEqual(self.continuing_admission.billing_address_recipient, 'other.recipient@example.be')
         self.assertEqual(self.continuing_admission.billing_address_postal_box, 'BP7')
         self.assertEqual(
-            self.continuing_admission.specific_question_answers,
+            self.continuing_admission.get_specific_question_answers_dict(),
             {
                 str(self.specific_questions[0].form_item.uuid): '',
             },

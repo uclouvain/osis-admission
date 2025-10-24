@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,14 +23,15 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.db.models import Prefetch
 
+from admission.exports.admission_recap.admission_recap import admission_pdf_recap
 from admission.models import (
     AdmissionTask,
-    GeneralEducationAdmission,
     ContinuingEducationAdmission,
     DoctorateAdmission,
+    GeneralEducationAdmission,
 )
-from admission.exports.admission_recap.admission_recap import admission_pdf_recap
 
 
 def _base_education_admission_pdf_recap_from_task(task_uuid: str, admission_class):

@@ -39,14 +39,17 @@ from osis_notification.models import EmailNotification
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     StatutEmplacementDocument,
     StatutReclamationEmplacementDocument,
     TypeEmplacementDocument,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
-)
+from admission.models.specific_question import SpecificQuestionAnswer
+from admission.tests.factories.form_item import AdmissionFormItemFactory
 from admission.tests.factories.roles import DoctorateCommitteeMemberRoleFactory
 from admission.tests.views.common.detail_tabs.test_document import (
     BaseDocumentViewTestCase,
@@ -326,8 +329,14 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
         # Simulate that the field is not missing but still requested
         self.general_admission.refresh_from_db()
         specific_question_uuid = str(uuid.UUID(self.fac_free_requestable_document.split('.')[-1]))
-        self.general_admission.specific_question_answers[specific_question_uuid] = [uuid.uuid4()]
-        self.general_admission.save(update_fields=['specific_question_answers'])
+        SpecificQuestionAnswer.objects.create(
+            admission=self.general_admission,
+            form_item=AdmissionFormItemFactory(
+                uuid=specific_question_uuid,
+                type=TypeItemFormulaire.DOCUMENT.name,
+            ),
+            file=[uuid.uuid4()],
+        )
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, 200)
@@ -352,8 +361,9 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
             'My file name',
         )
 
-        self.general_admission.specific_question_answers.pop(specific_question_uuid)
-        self.general_admission.save(update_fields=['specific_question_answers'])
+        SpecificQuestionAnswer.objects.filter(
+            admission=self.general_admission, form_item__uuid=specific_question_uuid
+        ).delete()
 
         # Post an invalid form -> missing fields
         response = self.client.post(
@@ -555,8 +565,14 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
         # Filled document
         file_uuid = uuid.uuid4()
         specific_question_uuid = str(uuid.UUID(self.sic_free_requestable_document.split('.')[-1]))
-        self.general_admission.specific_question_answers[specific_question_uuid] = [file_uuid]
-        self.general_admission.save(update_fields=['specific_question_answers'])
+        SpecificQuestionAnswer.objects.create(
+            admission=self.general_admission,
+            form_item=AdmissionFormItemFactory(
+                uuid=specific_question_uuid,
+                type=TypeItemFormulaire.DOCUMENT.name,
+            ),
+            file=[file_uuid],
+        )
 
         response = self.client.get(url)
 
@@ -839,8 +855,14 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
         # Simulate that the field is not missing but still requested
         self.doctorate_admission.refresh_from_db()
         specific_question_uuid = str(uuid.UUID(self.fac_free_requestable_document.split('.')[-1]))
-        self.doctorate_admission.specific_question_answers[specific_question_uuid] = [uuid.uuid4()]
-        self.doctorate_admission.save(update_fields=['specific_question_answers'])
+        SpecificQuestionAnswer.objects.create(
+            admission=self.doctorate_admission,
+            form_item=AdmissionFormItemFactory(
+                uuid=specific_question_uuid,
+                type=TypeItemFormulaire.DOCUMENT.name,
+            ),
+            file=[uuid.uuid4()],
+        )
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, 200)
@@ -865,8 +887,9 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
             'My file name',
         )
 
-        self.doctorate_admission.specific_question_answers.pop(specific_question_uuid)
-        self.doctorate_admission.save(update_fields=['specific_question_answers'])
+        SpecificQuestionAnswer.objects.filter(
+            admission=self.doctorate_admission, form_item__uuid=specific_question_uuid
+        ).delete()
 
         # Post an invalid form -> missing fields
         response = self.client.post(
@@ -1092,8 +1115,14 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
         # Filled document
         file_uuid = uuid.uuid4()
         specific_question_uuid = str(uuid.UUID(self.sic_free_requestable_document.split('.')[-1]))
-        self.doctorate_admission.specific_question_answers[specific_question_uuid] = [file_uuid]
-        self.doctorate_admission.save(update_fields=['specific_question_answers'])
+        SpecificQuestionAnswer.objects.create(
+            admission=self.doctorate_admission,
+            form_item=AdmissionFormItemFactory(
+                uuid=specific_question_uuid,
+                type=TypeItemFormulaire.DOCUMENT.name,
+            ),
+            file=[file_uuid],
+        )
 
         response = self.client.get(url)
 

@@ -42,7 +42,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 )
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from admission.models import DoctorateAdmission
-from admission.models.base import AdmissionEducationalValuatedExperiences
+from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.curriculum import (
     EducationalExperienceFactory,

@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+import uuid
 from enum import Enum
 from typing import List, Optional, Union
 
@@ -34,40 +34,10 @@ from django.db.models import OuterRef, Prefetch, Subquery
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language, pgettext
+from osis_document_components.utils import is_uuid
 from osis_history.models import HistoryEntry
 
 from admission.auth.roles.candidate import Candidate
-from admission.ddd.admission.shared_kernel.domain.builder.formation_identity import (
-    FormationIdentityBuilder,
-)
-from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import ProfilCandidat
-from admission.ddd.admission.shared_kernel.domain.model.complement_formation import (
-    ComplementFormationIdentity,
-)
-from admission.ddd.admission.shared_kernel.domain.model.condition_complementaire_approbation import (
-    ConditionComplementaireApprobationIdentity,
-    ConditionComplementaireLibreApprobation,
-)
-from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import (
-    EtatEquivalenceTitreAcces,
-    StatutEquivalenceTitreAcces,
-    TypeEquivalenceTitreAcces,
-)
-from admission.ddd.admission.shared_kernel.domain.model.motif_refus import MotifRefusIdentity
-from admission.ddd.admission.shared_kernel.domain.model.poste_diplomatique import (
-    PosteDiplomatiqueIdentity,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_unites_enseignement_translator import (
-    IUnitesEnseignementTranslator,
-)
-from admission.ddd.admission.shared_kernel.dtos.formation import (
-    BaseFormationDTO,
-    CampusDTO,
-    FormationDTO,
-)
-from admission.ddd.admission.shared_kernel.dtos.profil_candidat import ProfilCandidatDTO
-from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation
-from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
@@ -101,17 +71,60 @@ from admission.ddd.admission.formation_generale.dtos.proposition import (
 from admission.ddd.admission.formation_generale.repository.i_proposition import (
     IPropositionRepository,
 )
-from admission.infrastructure.admission.shared_kernel.domain.service.poste_diplomatique import (
-    PosteDiplomatiqueTranslator,
+from admission.ddd.admission.shared_kernel.domain.builder.formation_identity import (
+    FormationIdentityBuilder,
 )
+from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import (
+    ProfilCandidat,
+)
+from admission.ddd.admission.shared_kernel.domain.model.complement_formation import (
+    ComplementFormationIdentity,
+)
+from admission.ddd.admission.shared_kernel.domain.model.condition_complementaire_approbation import (
+    ConditionComplementaireApprobationIdentity,
+    ConditionComplementaireLibreApprobation,
+)
+from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import (
+    EtatEquivalenceTitreAcces,
+    StatutEquivalenceTitreAcces,
+    TypeEquivalenceTitreAcces,
+)
+from admission.ddd.admission.shared_kernel.domain.model.motif_refus import (
+    MotifRefusIdentity,
+)
+from admission.ddd.admission.shared_kernel.domain.model.poste_diplomatique import (
+    PosteDiplomatiqueIdentity,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_unites_enseignement_translator import (
+    IUnitesEnseignementTranslator,
+)
+from admission.ddd.admission.shared_kernel.dtos.formation import (
+    BaseFormationDTO,
+    CampusDTO,
+    FormationDTO,
+)
+from admission.ddd.admission.shared_kernel.dtos.profil_candidat import ProfilCandidatDTO
+from admission.ddd.admission.shared_kernel.enums import (
+    TypeItemFormulaire,
+    TypeSituationAssimilation,
+)
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.infrastructure.admission.formation_generale.repository._comptabilite import (
     get_accounting_from_admission,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.poste_diplomatique import (
+    PosteDiplomatiqueTranslator,
 )
 from admission.infrastructure.admission.shared_kernel.repository.proposition import (
     GlobalPropositionRepository,
 )
 from admission.infrastructure.utils import dto_to_dict
-from admission.models import Accounting, GeneralEducationAdmissionProxy
+from admission.models import (
+    Accounting,
+    AdmissionFormItem,
+    GeneralEducationAdmissionProxy,
+)
+from admission.models.specific_question import SpecificQuestionAnswer
 from admission.models.checklist import FreeAdditionalApprovalCondition, RefusalReason
 from admission.models.general_education import GeneralEducationAdmission
 from base.models.academic_year import AcademicYear
@@ -171,6 +184,11 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                     'other_training_accepted_by_fac__academic_year',
                     'admission_requirement_year',
                     'last_update_author',
+                )
+                .prefetch_related(
+                    Prefetch(
+                        'specific_question_answers', queryset=SpecificQuestionAnswer.objects.select_related('form_item')
+                    ),
                 )
                 .get(uuid=entity_id.uuid)
             )
@@ -300,7 +318,6 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 ),
                 'is_non_resident': entity.est_non_resident_au_sens_decret,
                 'status': entity.statut.name,
-                'specific_question_answers': entity.reponses_questions_specifiques,
                 'curriculum': entity.curriculum,
                 'diploma_equivalence': entity.equivalence_diplome,
                 'confirmation_elements': entity.elements_confirmation,
@@ -417,6 +434,39 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                     for condition in entity.conditions_complementaires_libres
                 ],
             )
+
+        form_items = {
+            str(form_item.uuid): form_item
+            for form_item in AdmissionFormItem.objects.filter(uuid__in=entity.reponses_questions_specifiques.keys())
+        }
+        answers_not_documents = []
+        for form_item_uuid, reponse in entity.reponses_questions_specifiques.items():
+            if form_items[form_item_uuid].type == TypeItemFormulaire.DOCUMENT.name:
+                # Documents need to be saved individually for pre_save to be called on FileField
+                SpecificQuestionAnswer.objects.update_or_create(
+                    admission=admission,
+                    form_item=form_items[form_item_uuid],
+                    defaults={
+                        'file': [uuid.UUID(value) if is_uuid(value) else value for value in reponse],
+                    },
+                )
+            else:
+                answers_not_documents.append(
+                    SpecificQuestionAnswer(
+                        admission=admission,
+                        form_item=form_items[form_item_uuid],
+                        answer=reponse,
+                    )
+                )
+        SpecificQuestionAnswer.objects.bulk_create(
+            answers_not_documents,
+            update_conflicts=True,
+            update_fields=['file', 'answer'],
+            unique_fields=['admission', 'form_item'],
+        )
+        SpecificQuestionAnswer.objects.filter(admission=admission).exclude(
+            form_item__uuid__in=form_items.keys()
+        ).delete()
 
     @classmethod
     def _sauvegarder_comptabilite(cls, admission, entity):
@@ -555,7 +605,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 if admission.erasmus_mundus_scholarship
                 else None
             ),
-            reponses_questions_specifiques=admission.specific_question_answers,
+            reponses_questions_specifiques=admission.get_specific_question_answers_dict(),
             est_bachelier_belge=admission.is_belgian_bachelor,
             est_reorientation_inscription_externe=admission.is_external_reorientation,
             attestation_inscription_reguliere=admission.regular_registration_proof,
@@ -820,7 +870,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 if admission.erasmus_mundus_scholarship
                 else None
             ),
-            reponses_questions_specifiques=admission.specific_question_answers,
+            reponses_questions_specifiques=admission.get_specific_question_answers_dict(),
             curriculum=admission.curriculum,
             equivalence_diplome=admission.diploma_equivalence,
             est_bachelier_belge=admission.is_belgian_bachelor,

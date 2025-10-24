@@ -31,7 +31,10 @@ import freezegun
 from django.shortcuts import resolve_url
 from django.test import override_settings
 
+from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire
 from admission.models import AdmissionFormItem
+from admission.models.specific_question import SpecificQuestionAnswer
+from admission.tests.factories.form_item import AdmissionFormItemFactory
 from admission.tests.views.common.detail_tabs.test_document import (
     BaseDocumentViewTestCase,
 )
@@ -60,8 +63,14 @@ class RetypeDocumentTestCase(BaseDocumentViewTestCase):
 
         with self.subTest('Post a valid form'):
             other_doc = self.sic_free_requestable_document.split('.')[-1]
-            self.general_admission.specific_question_answers[other_doc] = ['uuid-doc']
-            self.general_admission.save()
+            SpecificQuestionAnswer.objects.create(
+                admission=self.general_admission,
+                form_item=AdmissionFormItemFactory(
+                    uuid=other_doc,
+                    type=TypeItemFormulaire.DOCUMENT.name,
+                ),
+                file=['uuid-doc'],
+            )
 
             response = self.client.post(
                 resolve_url(
@@ -89,8 +98,13 @@ class RetypeDocumentTestCase(BaseDocumentViewTestCase):
 
         with self.subTest('Post a valid form to empty doc'):
             other_doc = self.sic_free_requestable_document.split('.')[-1]
-            self.general_admission.specific_question_answers[other_doc] = []
-            self.general_admission.save()
+            SpecificQuestionAnswer.objects.filter(
+                admission=self.general_admission,
+                form_item=AdmissionFormItemFactory(
+                    uuid=other_doc,
+                    type=TypeItemFormulaire.DOCUMENT.name,
+                ),
+            ).update(file=[])
 
             response = self.client.post(
                 resolve_url(
@@ -137,8 +151,14 @@ class RetypeDocumentTestCase(BaseDocumentViewTestCase):
 
         with self.subTest('Post a valid form'):
             other_doc = self.sic_free_requestable_document.split('.')[-1]
-            self.doctorate_admission.specific_question_answers[other_doc] = ['uuid-doc']
-            self.doctorate_admission.save()
+            SpecificQuestionAnswer.objects.create(
+                admission=self.doctorate_admission,
+                form_item=AdmissionFormItemFactory(
+                    uuid=other_doc,
+                    type=TypeItemFormulaire.DOCUMENT.name,
+                ),
+                file=['uuid-doc'],
+            )
 
             response = self.client.post(
                 resolve_url(
@@ -166,8 +186,13 @@ class RetypeDocumentTestCase(BaseDocumentViewTestCase):
 
         with self.subTest('Post a valid form to empty doc'):
             other_doc = self.sic_free_requestable_document.split('.')[-1]
-            self.doctorate_admission.specific_question_answers[other_doc] = []
-            self.doctorate_admission.save()
+            SpecificQuestionAnswer.objects.filter(
+                admission=self.doctorate_admission,
+                form_item=AdmissionFormItemFactory(
+                    uuid=other_doc,
+                    type=TypeItemFormulaire.DOCUMENT.name,
+                ),
+            ).update(file=[])
 
             response = self.client.post(
                 resolve_url(
