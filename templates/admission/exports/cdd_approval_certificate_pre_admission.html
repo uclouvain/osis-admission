@@ -1,4 +1,4 @@
-{% load i18n static admission strings %}
+{% load i18n static admission strings field_data %}
 <!doctype html>{% get_current_language as LANGUAGE_CODE %}
 <html lang="{{ LANGUAGE_CODE }}">
 {% comment "License" %}
@@ -108,6 +108,7 @@
 
   <div id="signature">
     <p>
+      {% now "d/m/Y" as today_date %}
       Pour le·la président·e de CDD : {{ gestionnaire.prenom }} {{ gestionnaire.nom }} le {{ today_date }}
     </p>
   </div>

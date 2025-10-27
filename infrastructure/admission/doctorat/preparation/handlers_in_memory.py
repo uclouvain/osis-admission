@@ -58,8 +58,35 @@ from admission.ddd.admission.shared_kernel.use_case.write import (
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.annee_inscription_formation import (
     AnneeInscriptionFormationInMemoryTranslator,
 )
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.calendrier_inscription import (
+    CalendrierInscriptionInMemory,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.elements_confirmation import (
+    ElementsConfirmationInMemory,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.historique import (
+    HistoriqueInMemory as HistoriqueGlobalInMemory,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.maximum_propositions import (
+    MaximumPropositionsAutoriseesInMemory,
+)
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.titres_acces import (
+    TitresAccesInMemory,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.unites_enseignement_translator import (
+    UnitesEnseignementInMemoryTranslator,
+)
+from admission.infrastructure.admission.shared_kernel.repository.in_memory.email_destinataire import (
+    EmailDestinataireInMemoryRepository,
+)
+from admission.infrastructure.admission.shared_kernel.repository.in_memory.emplacement_document import (
+    emplacement_document_in_memory_repository,
+)
+from admission.infrastructure.admission.shared_kernel.repository.in_memory.titre_acces_selectionnable import (
+    TitreAccesSelectionnableInMemoryRepositoryFactory,
 )
 from infrastructure.financabilite.domain.service.in_memory.financabilite import (
     FinancabiliteInMemoryFetcher,
@@ -79,6 +106,15 @@ from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_
 from infrastructure.shared_kernel.profil.domain.service.in_memory.parcours_interne import (
     ExperienceParcoursInterneInMemoryTranslator,
 )
+
+from ...shared_kernel.domain.service.in_memory.raccrocher_experiences_curriculum import (
+    RaccrocherExperiencesCurriculumInMemory,
+)
+from ...shared_kernel.domain.service.in_memory.recuperer_documents_proposition import (
+    EmplacementsDocumentsPropositionInMemoryTranslator,
+)
+from ...shared_kernel.domain.service.matricule_etudiant import MatriculeEtudiantService
+from ..validation.repository.in_memory.demande import DemandeInMemoryRepository
 from .domain.service.in_memory.comptabilite import ComptabiliteInMemoryTranslator
 from .domain.service.in_memory.doctorat import DoctoratInMemoryTranslator
 from .domain.service.in_memory.historique import HistoriqueInMemory
@@ -95,38 +131,6 @@ from .repository.in_memory.groupe_de_supervision import (
     GroupeDeSupervisionInMemoryRepository,
 )
 from .repository.in_memory.proposition import PropositionInMemoryRepository
-from ..validation.repository.in_memory.demande import DemandeInMemoryRepository
-from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.calendrier_inscription import (
-    CalendrierInscriptionInMemory,
-)
-from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.elements_confirmation import (
-    ElementsConfirmationInMemory,
-)
-from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.historique import (
-    HistoriqueInMemory as HistoriqueGlobalInMemory,
-)
-from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.maximum_propositions import (
-    MaximumPropositionsAutoriseesInMemory,
-)
-from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.raccrocher_experiences_curriculum import (
-    RaccrocherExperiencesCurriculumInMemory,
-)
-from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.recuperer_documents_proposition import (
-    EmplacementsDocumentsPropositionInMemoryTranslator,
-)
-from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.titres_acces import TitresAccesInMemory
-from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.unites_enseignement_translator import (
-    UnitesEnseignementInMemoryTranslator,
-)
-from admission.infrastructure.admission.shared_kernel.repository.in_memory.email_destinataire import \
-    EmailDestinataireInMemoryRepository
-from admission.infrastructure.admission.shared_kernel.repository.in_memory.emplacement_document import (
-    emplacement_document_in_memory_repository,
-)
-from admission.infrastructure.admission.shared_kernel.repository.in_memory.titre_acces_selectionnable import (
-    TitreAccesSelectionnableInMemoryRepositoryFactory,
-)
-from ...shared_kernel.domain.service.matricule_etudiant import MatriculeEtudiantService
 
 _proposition_repository = PropositionInMemoryRepository()
 _groupe_supervision_repository = GroupeDeSupervisionInMemoryRepository()
@@ -755,6 +759,7 @@ COMMAND_HANDLERS = {
             profil_candidat_translator=_profil_candidat_translator,
             experience_parcours_interne_translator=_experience_parcours_interne_translator,
             doctorat_translator=_doctorat_translator,
+            academic_year_repository=_academic_year_repository,
         )
     ),
     VerifierExperienceCurriculumApresSoumissionQuery: (

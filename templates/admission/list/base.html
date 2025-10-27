@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% load bootstrap3 i18n osis_role pagination static enums admission %}
+{% load bootstrap3 i18n osis_role pagination static enums admission field_data %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -156,6 +156,9 @@
 
     #search_form .select2-selection__rendered {
       white-space: break-spaces;
+    }
+    #search_form .select2-selection.select2-selection--single {
+      height: fit-content;
     }
 
     /* Customize input and buttons above the list */

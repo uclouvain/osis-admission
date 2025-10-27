@@ -38,6 +38,9 @@ from admission.ddd.admission.doctorat.preparation.domain.model._cotutelle import
 from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import (
     DetailProjet,
 )
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
     PropositionIdentity,
 )
@@ -73,6 +76,9 @@ from admission.ddd.admission.doctorat.preparation.test.factory.person import (
 )
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
     PropositionPreAdmissionSC3DPMinimaleFactory,
+)
+from admission.ddd.admission.shared_kernel.domain.model.formation import (
+    FormationIdentity,
 )
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     QuestionsSpecifiquesChoixFormationNonCompleteesException,
@@ -149,7 +155,6 @@ class TestVerifierPropositionService(AdmissionTestMixin, TestCase):
         self.addCleanup(self.proposition_repository.reset)
 
         self.candidat_translator = ProfilCandidatInMemoryTranslator()
-        self.proposition_repository = PropositionInMemoryRepository()
         self.candidat = self.candidat_translator.profil_candidats[0]
         self.adresse_domicile_legal = self.candidat_translator.adresses_candidats[0]
         self.adresse_correspondance = self.candidat_translator.adresses_candidats[1]
@@ -382,6 +387,17 @@ class TestVerifierPropositionService(AdmissionTestMixin, TestCase):
             self.message_bus.invoke(cmd)
         self.assertIsInstance(context.exception.exceptions.pop(), MembreCAManquantException)
 
+    def test_should_verifier_uniquement_certains_elements_dans_statut_ca_a_completer(self):
+        proposition = self.proposition_repository.get(entity_id=PropositionIdentity(uuid='uuid-SC3DP-sans-membre_CA'))
+        cmd = attr.evolve(self.cmd, uuid_proposition=proposition.entity_id.uuid)
+
+        with mock.patch.multiple(self.candidat, pays_naissance=''):
+            with mock.patch.multiple(proposition, statut=ChoixStatutPropositionDoctorale.CA_A_COMPLETER):
+                with self.assertRaises(MultipleBusinessExceptions) as context:
+                    self.message_bus.invoke(cmd)
+                self.assertHasInstance(context.exception.exceptions, MembreCAManquantException)
+                self.assertHasNoInstance(context.exception.exceptions, IdentificationNonCompleteeException)
+
     def test_should_retourner_erreur_si_questions_specifiques_pas_completees(self):
         proposition = next(
             (p for p in PropositionInMemoryRepository.entities if p.entity_id.uuid == self.uuid_proposition),
@@ -469,7 +485,7 @@ class TestVerifierPropositionServicePourAnneesCurriculum(AdmissionTestMixin, Tes
         self.addCleanup(self.proposition_repository.reset)
 
         self.candidat_translator = ProfilCandidatInMemoryTranslator()
-        self.proposition_repository = PropositionInMemoryRepository()
+        self.proposition = self.proposition_repository.get(PropositionIdentity(uuid=self.uuid_proposition))
         self.candidat = self.candidat_translator.profil_candidats[0]
 
         self.message_bus = message_bus_in_memory_instance
@@ -607,7 +623,6 @@ class TestVerifierPropositionServicePourAnneesCurriculum(AdmissionTestMixin, Tes
                 'De Septembre 2017 à Février 2018',
                 'De Septembre 2018 à Février 2019',
                 'De Septembre 2019 à Février 2020',
-                'De Septembre 2020 à Octobre 2020',
             ],
         )
 
@@ -625,7 +640,6 @@ class TestVerifierPropositionServicePourAnneesCurriculum(AdmissionTestMixin, Tes
                 'De Septembre 2017 à Février 2018',
                 'De Septembre 2018 à Février 2019',
                 'De Septembre 2019 à Février 2020',
-                'De Septembre 2020 à Octobre 2020',
             ],
         )
 
@@ -639,7 +653,6 @@ class TestVerifierPropositionServicePourAnneesCurriculum(AdmissionTestMixin, Tes
             context.exception.exceptions,
             [
                 'De Septembre 2019 à Février 2020',
-                'De Septembre 2020 à Octobre 2020',
             ],
         )
 
@@ -654,11 +667,12 @@ class TestVerifierPropositionServicePourAnneesCurriculum(AdmissionTestMixin, Tes
             [
                 'De Septembre 2018 à Février 2019',
                 'De Septembre 2019 à Février 2020',
-                'De Septembre 2020 à Octobre 2020',
             ],
         )
 
     def test_should_retourner_erreur_si_dernieres_annees_curriculum_non_saisies_avec_ancienne_inscription_ucl(self):
+        self.proposition.annee_calculee = 2025
+        self.proposition.formation_id = FormationIdentity(annee=2025, sigle=self.proposition.formation_id.sigle)
         with mock.patch.multiple(
             self.candidat,
             annee_derniere_inscription_ucl=2019,
@@ -684,7 +698,6 @@ class TestVerifierPropositionServicePourAnneesCurriculum(AdmissionTestMixin, Tes
             context.exception.exceptions,
             [
                 'De Septembre 2019 à Février 2020',
-                'De Septembre 2020 à Octobre 2020',
             ],
         )
 
@@ -758,7 +771,7 @@ class TestVerifierPropositionServicePourAnneesCurriculum(AdmissionTestMixin, Tes
             ExperienceNonAcademique(
                 personne=self.candidat.matricule,
                 date_debut=datetime.date(2018, 9, 1),
-                date_fin=datetime.date(2020, 9, 30),
+                date_fin=datetime.date(2020, 1, 30),
                 **self.params_default_experience_non_academique,
             )
         )
@@ -766,7 +779,7 @@ class TestVerifierPropositionServicePourAnneesCurriculum(AdmissionTestMixin, Tes
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
 
-        self.assertAnneesCurriculum(context.exception.exceptions, ['Octobre 2020'])
+        self.assertAnneesCurriculum(context.exception.exceptions, ['Février 2020'])
 
     def test_should_verification_etre_ok_si_experiences_professionnelles_couvrent_en_se_suivant_ou_chevauchant(self):
         self.etudes_secondaires.annee_diplome_etudes_secondaires = 2017
@@ -853,7 +866,6 @@ class TestVerifierPropositionServicePourAnneesCurriculum(AdmissionTestMixin, Tes
             context.exception.exceptions,
             [
                 'De Septembre 2019 à Février 2020',
-                'De Septembre 2020 à Octobre 2020',
             ],
         )
 
@@ -961,7 +973,6 @@ class TestVerifierPropositionServicePourAnneesCurriculum(AdmissionTestMixin, Tes
                 'De Septembre 2017 à Février 2018',
                 'De Septembre 2018 à Février 2019',
                 'De Septembre 2019 à Février 2020',
-                'De Septembre 2020 à Octobre 2020',
             ],
         )
 

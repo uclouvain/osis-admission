@@ -97,6 +97,7 @@ class ListerDemandesService(IListerDemandesService):
         filtres_etats_checklist: Optional[Dict[str, List[str]]] = None,
         demandeur: Optional[str] = '',
         fnrs_fria_fresh: Optional[bool] = None,
+        institut_these: Optional[str] = '',
         indicateur_tableau_bord: Optional[str] = '',
         tri_inverse: bool = False,
         champ_tri: Optional[str] = None,
@@ -244,6 +245,9 @@ class ListerDemandesService(IListerDemandesService):
         if fnrs_fria_fresh:
             qs = qs.filter(is_fnrs_fria_fresh_csc_linked=fnrs_fria_fresh)
 
+        if institut_these:
+            qs = qs.filter(thesis_institute__uuid=institut_these)
+
         if indicateur_tableau_bord:
             dashboard_filter = TableauBordRepositoryAdmissionMixin.ADMISSION_DJANGO_FILTER_BY_INDICATOR.get(
                 indicateur_tableau_bord,
@@ -333,9 +337,13 @@ class ListerDemandesService(IListerDemandesService):
                 'etat_demande': ['ordered_status'],
                 'fac_decision': [],
                 'sic_decision': [],
+                'promoteurs': [],
                 'date_confirmation': ['submitted_at'],
-                'derniere_modification': ['modified_at'],
-                'derniere_modification_par': ['last_update_author__last_name', 'last_update_author__first_name'],
+                'derniere_modification': [
+                    'modified_at',
+                    'last_update_author__last_name',
+                    'last_update_author__first_name',
+                ],
                 'pre_admission': ['type'],
                 'cotutelle': ['cotutelle'],
                 'signatures_completees': ['signatures_are_completed'],
@@ -444,7 +452,7 @@ class ListerDemandesService(IListerDemandesService):
 
         supervisors: Optional[List[ActeurDTO]] = None
         supervision_committee_members: Optional[List[ActeurDTO]] = None
-        if avec_acteurs_groupe_supervision:
+        if avec_acteurs_groupe_supervision and admission.supervision_group:
             supervisors = []
             supervision_committee_members = []
             for actor in admission.supervision_group.actors.all():

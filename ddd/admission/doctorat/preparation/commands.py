@@ -116,6 +116,7 @@ class IdentifierPromoteurCommand(interface.CommandRequest):
     ville: Optional[str]
     pays: Optional[str]
     langue: Optional[str]
+    invite_par_defaut: bool = False
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -131,6 +132,7 @@ class IdentifierMembreCACommand(interface.CommandRequest):
     ville: Optional[str]
     pays: Optional[str]
     langue: Optional[str]
+    invite_par_defaut: bool = False
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -512,6 +514,7 @@ class ListerDemandesQuery(SortedQueryRequest):
     demandeur: Optional[str] = ''
     fnrs_fria_fresh: Optional[bool] = None
     indicateur_tableau_bord: Optional[str] = ''
+    institut_these: Optional[str] = ''
     avec_experiences_academiques_reussies: bool = False
     avec_acteurs_groupe_supervision: bool = False
 
