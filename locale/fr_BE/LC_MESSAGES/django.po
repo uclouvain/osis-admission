@@ -1208,6 +1208,12 @@ msgstr "Chimie"
 msgid "CIRE, unlimited stay or foreigner`s card"
 msgstr "Carte CIRE, séjour illimité ou d'étranger"
 
+msgid "CO_DIPLOMATION_132"
+msgstr "132 € - Codiplômation"
+
+msgid "CO_DIPLOMATION_901"
+msgstr "901 € - Codiplômation"
+
 msgid "CSS class"
 msgstr "Classe CSS"
 
