@@ -191,7 +191,7 @@ class IProfilCandidatTranslator(interface.DomainService):
     @classmethod
     def get_changements_etablissement(cls, matricule: str, annees: List[int]) -> Dict[int, bool]:
         """Inscrit à un autre établissement Belge en N-1
-        (informatiquement : curriculum / en N-1 supérieur belge non-diplômé)"""
+        (informatiquement : curriculum / en N-1 supérieur belge)"""
         raise NotImplementedError
 
     @classmethod
