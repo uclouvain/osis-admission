@@ -223,14 +223,15 @@ def get_secondary_studies_attachments(
                                 candidate_language=context.identification.langue_contact,
                             )
                         )
-                        attachments.append(
-                            Attachment(
-                                identifier='DAES_UE',
-                                label=DocumentsEtudesSecondaires['DAES_UE'],
-                                uuids=context.etudes_secondaires.diplome_etranger.daes_ue,
-                                candidate_language=context.identification.langue_contact,
+                        if context.etudes_secondaires.diplome_etranger.a_daes_ue:
+                            attachments.append(
+                                Attachment(
+                                    identifier='DAES_UE',
+                                    label=DocumentsEtudesSecondaires['DAES_UE'],
+                                    uuids=context.etudes_secondaires.diplome_etranger.daes_ue,
+                                    candidate_language=context.identification.langue_contact,
+                                )
                             )
-                        )
                     elif context.etudes_secondaires.diplome_etranger.equivalence == Equivalence.PENDING.name:
                         attachments.append(
                             Attachment(
@@ -251,14 +252,15 @@ def get_secondary_studies_attachments(
                             candidate_language=context.identification.langue_contact,
                         )
                     )
-                    attachments.append(
-                        Attachment(
-                            identifier='DAES_HORS_UE',
-                            label=DocumentsEtudesSecondaires['DAES_HORS_UE'],
-                            uuids=context.etudes_secondaires.diplome_etranger.daes_hors_ue,
-                            candidate_language=context.identification.langue_contact,
+                    if context.etudes_secondaires.diplome_etranger.a_daes_hors_ue:
+                        attachments.append(
+                            Attachment(
+                                identifier='DAES_HORS_UE',
+                                label=DocumentsEtudesSecondaires['DAES_HORS_UE'],
+                                uuids=context.etudes_secondaires.diplome_etranger.daes_hors_ue,
+                                candidate_language=context.identification.langue_contact,
+                            )
                         )
-                    )
 
             if got_diploma in CHOIX_DIPLOME_OBTENU:
                 attachments.append(

@@ -3545,6 +3545,11 @@ msgid ""
 "application to the SIC by selecting the appropriate button below."
 msgstr ""
 
+msgid ""
+"If your equivalency decision does not give access to the desired training, "
+"do you hold your diploma of aptitude for access to higher education (DAES)?"
+msgstr ""
+
 msgid "Immediately"
 msgstr ""
 

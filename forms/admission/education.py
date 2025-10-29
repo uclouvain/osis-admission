@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,22 +24,8 @@
 #
 # ##############################################################################
 
-from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from osis_profile.forms.etudes_secondaires import BachelorEducationForeignDiplomaForm
-from osis_profile.models.enums.education import (
-    ForeignDiplomaTypes,
-)
 
 
 class AdmissionBachelorEducationForeignDiplomaForm(BachelorEducationForeignDiplomaForm):
-    def clean(self):
-        cleaned_data = super().clean()
-
-        if cleaned_data.get('foreign_diploma_type') == ForeignDiplomaTypes.NATIONAL_BACHELOR.name:
-            # Equivalence
-            if (
-                getattr(self.fields['country'], 'is_ue_country', False) or self.is_med_dent_training
-            ) and not cleaned_data.get('equivalence'):
-                self.add_error('equivalence', FIELD_REQUIRED_MESSAGE)
-
-        return cleaned_data
+    pass

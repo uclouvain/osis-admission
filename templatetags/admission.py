@@ -907,6 +907,7 @@ def access_title_checkbox(context, experience_uuid, experience_type, current_yea
             'can_choose_access_title': context['can_choose_access_title'],
             'can_choose_access_title_tooltip': context.get('can_choose_access_title_tooltip'),
         }
+    return {}
 
 
 @register.filter

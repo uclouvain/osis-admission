@@ -67,13 +67,19 @@
           {% field_data _('Has this diploma been recognised as equivalent by the French Community of Belgium?') etudes_secondaires.diplome_etranger.equivalence|enum_display:'Equivalence' %}
           {% if etudes_secondaires.diplome_etranger.equivalence == 'YES' %}
             {% field_data _("Copy of both sides of the equivalency decision by the Ministry of the French-speaking Community of Belgium") etudes_secondaires.diplome_etranger.decision_final_equivalence_ue %}
-            {% field_data _("Diploma of aptitude for access to higher education (DAES)") etudes_secondaires.diplome_etranger.daes_ue %}
+            {% field_data _("If your equivalency decision does not give access to the desired training, do you hold your diploma of aptitude for access to higher education (DAES)?") etudes_secondaires.diplome_etranger.a_daes_ue %}
+            {% if etudes_secondaires.diplome_etranger.a_daes_ue %}
+              {% field_data _("Diploma of aptitude for access to higher education (DAES)") etudes_secondaires.diplome_etranger.daes_ue %}
+            {% endif %}
           {% elif etudes_secondaires.diplome_etranger.equivalence == 'PENDING' %}
             {% field_data _('Proof of equivalency request') etudes_secondaires.diplome_etranger.preuve_decision_equivalence %}
           {% endif %}
         {% else %}
           {% field_data _("Copy of both sides of the equivalency decision by the Ministry of the French-speaking Community of Belgium") etudes_secondaires.diplome_etranger.decision_final_equivalence_hors_ue %}
-          {% field_data _("Diploma of aptitude for access to higher education (DAES)") etudes_secondaires.diplome_etranger.daes_hors_ue %}
+          {% field_data _("If your equivalency decision does not give access to the desired training, do you hold your diploma of aptitude for access to higher education (DAES)?") etudes_secondaires.diplome_etranger.a_daes_hors_ue %}
+          {% if etudes_secondaires.diplome_etranger.a_daes_hors_ue %}
+            {% field_data _("Diploma of aptitude for access to higher education (DAES)") etudes_secondaires.diplome_etranger.daes_hors_ue %}
+          {% endif %}
         {% endif %}
       {% endif %}
 
