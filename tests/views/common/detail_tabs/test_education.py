@@ -31,10 +31,10 @@ from django.test import TestCase
 from django.urls import resolve, reverse
 from rest_framework import status
 
-from admission.ddd.admission.shared_kernel.dtos import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
 )
+from admission.ddd.admission.shared_kernel.dtos import EtudesSecondairesAdmissionDTO
 from admission.tests.factories.continuing_education import (
     ContinuingEducationAdmissionFactory,
     ContinuingEducationTrainingFactory,
@@ -62,10 +62,7 @@ from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     ValorisationEtudesSecondairesDTO,
 )
 from osis_profile import BE_ISO_CODE
-from osis_profile.models import (
-    BelgianHighSchoolDiploma,
-    ForeignHighSchoolDiploma,
-)
+from osis_profile.models import BelgianHighSchoolDiploma, ForeignHighSchoolDiploma
 from osis_profile.models.enums.education import Equivalence, ForeignDiplomaTypes
 from reference.tests.factories.country import CountryFactory
 
@@ -236,8 +233,10 @@ class AdmissionEducationDetailViewForContinuingEducationTestCase(TestCase):
             high_school_diploma_translation=[uuid.uuid4()],
             equivalence=Equivalence.YES.name,
             final_equivalence_decision_ue=[uuid.uuid4()],
+            has_access_diploma_to_higher_education_ue=True,
             access_diploma_to_higher_education_ue=[uuid.uuid4()],
             final_equivalence_decision_not_ue=[uuid.uuid4()],
+            has_access_diploma_to_higher_education_not_ue=True,
             access_diploma_to_higher_education_not_ue=[uuid.uuid4()],
             equivalence_decision_proof=[uuid.uuid4()],
             restrictive_equivalence_daes=[uuid.uuid4()],
@@ -273,8 +272,10 @@ class AdmissionEducationDetailViewForContinuingEducationTestCase(TestCase):
                 traduction_diplome=diploma.high_school_diploma_translation,
                 equivalence=diploma.equivalence,
                 decision_final_equivalence_ue=diploma.final_equivalence_decision_ue,
+                a_daes_ue=diploma.has_access_diploma_to_higher_education_ue,
                 daes_ue=diploma.access_diploma_to_higher_education_ue,
                 decision_final_equivalence_hors_ue=diploma.final_equivalence_decision_not_ue,
+                a_daes_hors_ue=diploma.has_access_diploma_to_higher_education_not_ue,
                 daes_hors_ue=diploma.access_diploma_to_higher_education_not_ue,
                 preuve_decision_equivalence=diploma.equivalence_decision_proof,
             ),

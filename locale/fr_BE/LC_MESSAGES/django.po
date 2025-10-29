@@ -2230,7 +2230,7 @@ msgid "Diploma nationality"
 msgstr "Nationalité du diplôme"
 
 msgid "Diploma of aptitude for access to higher education (DAES)"
-msgstr "Diplôme d'Aptitude à accéder à l'Enseignement supérieur (DAES)"
+msgstr "Diplôme d'Aptitude à accéder à l'Enseignement Supérieur (DAES)"
 
 msgid "Diploma translation"
 msgstr "Traduction du diplôme"
@@ -3942,6 +3942,13 @@ msgstr ""
 "Si vous le souhaitez, vous pouvez sauvegarder ces informations et "
 "directement transmettre le dossier à SIC en sélectionnant le bouton "
 "approprié ci-dessous."
+
+msgid ""
+"If your equivalency decision does not give access to the desired training, "
+"do you hold your diploma of aptitude for access to higher education (DAES)?"
+msgstr ""
+"Si votre équivalence ne donne pas accès à la formation souhaitée, "
+"êtes-vous en possession d'un Diplôme d'Aptitude à accéder à l'Enseignement Supérieur (DAES) ?"
 
 msgid "Immediately"
 msgstr "Immédiatement"
