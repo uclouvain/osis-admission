@@ -374,3 +374,11 @@ class EtatChecklistDonneesPersonnellesNonValidePourApprouverDemande(BusinessExce
     def __init__(self, **kwargs):
         message = _('The status of the checklist for the personal data must be "Validated".')
         super().__init__(message, **kwargs)
+
+
+class InformationsEquivalenceNonSpecifieesChecklistException(BusinessException):
+    status_code = "FORMATION-GENERALE-41"
+
+    def __init__(self, **kwargs):
+        message = _('The "Sufficient" status requires the equivalence information to be specified.')
+        super().__init__(message, **kwargs)
