@@ -817,4 +817,17 @@ COMMAND_HANDLERS = {
             formation_translator=_formation_generale_translator,
         )
     ),
+    RedonnerMainAuGestionnaireLorsDeLaReclamationDocumentsCommand: (
+        lambda msg_bus, cmd: redonner_main_au_gestionnaire_lors_de_la_reclamation_documents(
+            cmd=cmd,
+            proposition_repository=_proposition_repository,
+            historique=_historique_global,
+            profil_candidat_translator=_profil_candidat_translator,
+            comptabilite_translator=_comptabilite_translator,
+            question_specifique_translator=_question_specific_translator,
+            academic_year_repository=_academic_year_repository,
+            personne_connue_translator=_personne_connue_ucl_translator,
+            emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
+        )
+    ),
 }

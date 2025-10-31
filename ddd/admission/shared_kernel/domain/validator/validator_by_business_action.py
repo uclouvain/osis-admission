@@ -29,17 +29,31 @@ from typing import Dict, List, Optional
 
 import attr
 
-from admission.ddd.admission.shared_kernel.domain.model._candidat_adresse import CandidatAdresse
-from admission.ddd.admission.shared_kernel.domain.model._candidat_signaletique import CandidatSignaletique
-from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import EmplacementDocument
+from admission.ddd.admission.shared_kernel.domain.model._candidat_adresse import (
+    CandidatAdresse,
+)
+from admission.ddd.admission.shared_kernel.domain.model._candidat_signaletique import (
+    CandidatSignaletique,
+)
+from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import (
+    EmplacementDocument,
+)
 from admission.ddd.admission.shared_kernel.domain.validator import *
 from admission.ddd.admission.shared_kernel.domain.validator._should_identification_candidat_etre_completee import (
     ShouldCandidatAutresPrenomsEtreSuffisammentCourt,
     ShouldCandidatPrenomEtreSuffisammentCourt,
 )
-from admission.ddd.admission.shared_kernel.domain.validator._should_ne_pas_etre_en_quarantaine import ShouldNePasEtreEnQuarantaine
+from admission.ddd.admission.shared_kernel.domain.validator._should_ne_pas_etre_en_quarantaine import (
+    ShouldNePasEtreEnQuarantaine,
+)
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
+    EmplacementDocumentDTO,
+)
 from admission.ddd.admission.shared_kernel.dtos.merge_proposal import MergeProposalDTO
-from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
+from base.ddd.utils.business_validator import (
+    BusinessValidator,
+    TwoStepsMultipleBusinessExceptionListValidator,
+)
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -141,6 +155,21 @@ class DocumentsDemandesCompletesValidatorList(TwoStepsMultipleBusinessExceptionL
             ShouldCompleterTousLesDocumentsReclames(
                 documents_reclames=self.documents_reclames,
                 reponses_documents_a_completer=self.reponses_documents_a_completer,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RendreMainGestionnaireLorsReclamationDocumentsValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    documents_reclames: List[EmplacementDocumentDTO]
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldAvoirAucunDocumentReclame(
+                documents_reclames=self.documents_reclames,
             ),
         ]
 
