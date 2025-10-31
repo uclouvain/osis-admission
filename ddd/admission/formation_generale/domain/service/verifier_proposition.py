@@ -103,6 +103,7 @@ class VerifierProposition(interface.DomainService):
             ),
             partial(
                 profil_candidat_service.verifier_examens,
+                uuid_proposition=proposition_candidat.entity_id.uuid,
                 matricule=proposition_candidat.matricule_candidat,
                 formation=formation,
                 profil_candidat_translator=profil_candidat_translator,

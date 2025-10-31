@@ -1056,7 +1056,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         )
 
     @classmethod
-    def get_examen(cls, matricule: str, formation_sigle: str, formation_annee: int) -> 'ExamenDTO':
+    def get_examen(cls, uuid_proposition: str, matricule: str, formation_sigle: str, formation_annee: int) -> 'ExamenDTO':
         return ExamenDTO(
             uuid='',
             requis=False,
