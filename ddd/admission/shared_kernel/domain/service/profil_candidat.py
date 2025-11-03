@@ -203,11 +203,12 @@ class ProfilCandidat(interface.DomainService):
     @classmethod
     def verifier_examens(
         cls,
+        uuid_proposition: str,
         matricule: str,
         profil_candidat_translator: 'IProfilCandidatTranslator',
         formation: Formation,
     ) -> None:
-        examen = profil_candidat_translator.get_examen(matricule, formation.entity_id.sigle, formation.entity_id.annee)
+        examen = profil_candidat_translator.get_examen(uuid_proposition, matricule, formation.entity_id.sigle, formation.entity_id.annee)
 
         ExamenValidatorList(
             requis=examen.requis,

@@ -2871,6 +2871,9 @@ msgstr "Système d'évaluation"
 msgid "Every education"
 msgstr "Toutes les formations"
 
+msgid "Exam"
+msgstr "Examen"
+
 msgid "Exam must be completed for this training."
 msgstr "L'examen est nécessaire pour cette formation."
 
@@ -8808,3 +8811,6 @@ msgstr "{items} types sur {total}"
 #, python-brace-format
 msgid "{obj.dates_formatees} : {obj.fonction} at {obj.employeur}"
 msgstr "{obj.dates_formatees} : {obj.fonction} à {obj.employeur}"
+
+#~ msgid "(Expected) graduation date (signed diploma)"
+#~ msgstr "Date (prévue) de délivrance du diplôme (diplôme signé)"
