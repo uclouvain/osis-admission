@@ -7,7 +7,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -24,10 +24,19 @@
 * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-<div id="sic-decision-sic-fraud-status" hx-swap-oob="true">
-  {% if original_admission.checklist.current.donnees_personnelles.statut == 'GEST_BLOCAGE' and original_admission.checklist.current.donnees_personnelles.extra.fraud == '1' %}
-    {% field_data _('Fraudster status from SIC') _('Fraudster') css_class='bg-danger' html_tag='span' %}
-  {% else %}
-    {% field_data _('Fraudster status from SIC') _('No fraud identified') %}
-  {% endif %}
-</div>
+{% if is_fraudster_from_ares is True %}
+  <div class="alert alert-danger">
+    {% blocktranslate %}<strong>Warning</strong> the candidate is reported as <strong>fraudster</strong> by the ARES{% endblocktranslate %}
+  </div>
+{% elif is_fraudster_from_ares is False %}
+{% else %}
+  <div hx-post="{% url view.base_namespace|add:':fraudster-check' uuid=view.kwargs.uuid %}"
+     hx-trigger="fraudAresResult"
+     hx-swap="outerHTML"
+     id="ares-fraudster-result-{{ container_id }}"
+  >
+    <div class="alert alert-info">
+      <i class="fas fa-spinner fa-spin-pulse"></i> {% blocktranslate %}Requesting fraud status from the ARES{% endblocktranslate %}
+    </div>
+  </div>
+{% endif %}
