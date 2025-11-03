@@ -54,7 +54,7 @@ def admission_accounting_directory_path(accounting, filename: str):
 
 class Accounting(DocumentCopyModelMixin, models.Model):
     ID_ATTRIBUTE = 'pk'  # Used by the DocumentCopyModelMixin
-    changed = models.DateTimeField(auto_now=True) # Field used for technical api for sielsup
+    changed = models.DateTimeField(auto_now=True)  # Field used for technical api for sielsup
 
     admission = models.OneToOneField(
         BaseAdmission,
