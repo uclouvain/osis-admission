@@ -12,7 +12,7 @@ def populate_changed(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0271_doctorate_manager_submission_mail_template'),
+        ('admission', '0272_admissionexam'),
     ]
 
     operations = [
