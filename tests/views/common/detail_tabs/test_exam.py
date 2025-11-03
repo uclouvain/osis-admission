@@ -29,15 +29,17 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
-from admission.tests.factories.general_education import GeneralEducationAdmissionFactory, \
-    GeneralEducationTrainingFactory
-from admission.tests.factories.roles import (
-    SicManagementRoleFactory,
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
 )
+from admission.tests.factories.general_education import (
+    GeneralEducationAdmissionFactory,
+    GeneralEducationTrainingFactory,
+)
+from admission.tests.factories.roles import SicManagementRoleFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity_version import EntityVersionFactory
-from osis_profile.tests.factories.exam import EducationGroupYearExamFactory, ExamFactory
+from osis_profile.tests.factories.exam import ExamFactory, ExamTypeFactory
 
 
 @freezegun.freeze_time('2022-01-01')
@@ -55,8 +57,8 @@ class ExamDetailViewTestCase(TestCase):
             entity=cls.training.management_entity,
         ).person.user
 
-        cls.education_group_year_exam = EducationGroupYearExamFactory(
-            education_group_year=cls.training,
+        cls.exam_type = ExamTypeFactory(
+            education_group_years=[cls.training],
         )
 
         cls.general_admission = GeneralEducationAdmissionFactory(
@@ -77,7 +79,7 @@ class ExamDetailViewTestCase(TestCase):
         self.client.force_login(self.sic_manager_user)
         ExamFactory(
             person=self.general_admission.candidate,
-            education_group_year_exam=self.education_group_year_exam,
+            type=self.exam_type,
             year=self.academic_years[0],
         )
         response = self.client.get(self.url)
