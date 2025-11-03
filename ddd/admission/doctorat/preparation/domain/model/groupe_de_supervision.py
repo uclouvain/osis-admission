@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -28,21 +28,34 @@ from typing import List, Optional, Union
 
 import attr
 
-from admission.ddd.admission.doctorat.preparation.domain.model._cotutelle import Cotutelle
-from admission.ddd.admission.doctorat.preparation.domain.model._institut import InstitutIdentity
-from admission.ddd.admission.doctorat.preparation.domain.model._membre_CA import MembreCAIdentity
-from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
-from admission.ddd.admission.doctorat.preparation.domain.model._signature_membre_CA import SignatureMembreCA
+from admission.ddd.admission.doctorat.preparation.domain.model._cotutelle import (
+    Cotutelle,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model._institut import (
+    InstitutIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model._membre_CA import (
+    MembreCAIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import (
+    PromoteurIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model._signature_membre_CA import (
+    SignatureMembreCA,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model._signature_promoteur import (
     SignaturePromoteur,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixEtatSignature,
     ChoixStatutSignatureGroupeDeSupervision,
-    ChoixTypeAdmission,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.doctorat.preparation.domain.validator import ShouldSignaturesPasEtreEnvoyees
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    PropositionIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.domain.validator import (
+    ShouldSignaturesPasEtreEnvoyees,
+)
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     MembreCANonTrouveException,
     PromoteurNonTrouveException,
@@ -55,10 +68,9 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
     CotutelleValidatorList,
     DesignerPromoteurReferenceValidatorList,
     InviterASignerValidatorList,
-    SignatairesValidatorList,
-    SupprimerMembreCAValidatorList,
-    SupprimerPromoteurValidatorList,
+    SignatairesMembresCAValidatorList,
     SignatairesPreAdmissionValidatorList,
+    SignatairesValidatorList,
 )
 from osis_common.ddd import interface
 
@@ -256,6 +268,9 @@ class GroupeDeSupervision(interface.RootEntity):
 
     def verifier_signataires(self):
         SignatairesValidatorList(groupe_de_supervision=self).validate()
+
+    def verifier_signataires_membres_ca(self):
+        SignatairesMembresCAValidatorList(groupe_de_supervision=self).validate()
 
     def verifier_signataires_pre_admission(self):
         SignatairesPreAdmissionValidatorList(groupe_de_supervision=self).validate()

@@ -28,7 +28,9 @@ import datetime
 from django import forms
 from django.forms import ModelChoiceField
 
-from base.forms.utils.academic_year_field import AcademicYearEndYearLabelModelChoiceField
+from base.forms.utils.academic_year_field import (
+    AcademicYearEndYearLabelModelChoiceField,
+)
 from base.models.academic_year import AcademicYear
 from osis_profile.models import Exam
 
@@ -44,9 +46,10 @@ class ExamForm(forms.ModelForm):
             'year': AcademicYearEndYearLabelModelChoiceField,
         }
 
-    def __init__(self, certificate_title, certificate_help_text, *args, **kwargs):
+    def __init__(self, certificate_title, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.fields['certificate'].label = certificate_title
-        self.fields['certificate'].help_text = certificate_help_text
-        self.fields['year'].queryset = AcademicYear.objects.filter(start_date__lte=datetime.date.today()).order_by('-year')
+        self.fields['year'].queryset = AcademicYear.objects.filter(start_date__lte=datetime.date.today()).order_by(
+            '-year'
+        )

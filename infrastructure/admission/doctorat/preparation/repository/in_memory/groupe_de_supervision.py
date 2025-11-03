@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,31 +27,53 @@
 import uuid
 from typing import List, Optional, Union
 
-from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
-from admission.ddd.admission.doctorat.preparation.domain.model._cotutelle import pas_de_cotutelle
-from admission.ddd.admission.doctorat.preparation.domain.model._membre_CA import MembreCAIdentity
-from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
-from admission.ddd.admission.doctorat.preparation.domain.model._signature_membre_CA import SignatureMembreCA
-from admission.ddd.admission.doctorat.preparation.domain.model._signature_promoteur import SignaturePromoteur
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import DoctoratIdentity
+from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import (
+    PropositionIdentityBuilder,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model._cotutelle import (
+    pas_de_cotutelle,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model._membre_CA import (
+    MembreCAIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import (
+    PromoteurIdentity,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model._signature_membre_CA import (
+    SignatureMembreCA,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model._signature_promoteur import (
+    SignaturePromoteur,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat import (
+    DoctoratIdentity,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixStatutPropositionDoctorale,
     ChoixEtatSignature,
+    ChoixStatutPropositionDoctorale,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import (
     GroupeDeSupervision,
     GroupeDeSupervisionIdentity,
     SignataireIdentity,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity, Proposition
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    Proposition,
+    PropositionIdentity,
+)
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     GroupeDeSupervisionNonTrouveException,
 )
-from admission.ddd.admission.doctorat.preparation.dtos import CotutelleDTO, MembreCADTO, PromoteurDTO
+from admission.ddd.admission.doctorat.preparation.dtos import (
+    CotutelleDTO,
+    MembreCADTO,
+    PromoteurDTO,
+)
 from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
     IGroupeDeSupervisionRepository,
 )
 from admission.ddd.admission.doctorat.preparation.test.factory.groupe_de_supervision import (
+    GroupeDeSupervisionConfirmeeSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
     GroupeDeSupervisionPreSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
     GroupeDeSupervisionSC3DPAvecMembresInvitesFactory,
     GroupeDeSupervisionSC3DPAvecPromoteurDejaApprouveEtAutrePromoteurFactory,
@@ -69,7 +91,6 @@ from admission.ddd.admission.doctorat.preparation.test.factory.groupe_de_supervi
     GroupeDeSupervisionSC3DPSansMembresCAFactory,
     GroupeDeSupervisionSC3DPSansPromoteurFactory,
     GroupeDeSupervisionSC3DPSansPromoteurReferenceFactory,
-    GroupeDeSupervisionConfirmeeSC3DPAvecPromoteursEtMembresCADejaApprouvesFactory,
 )
 from admission.infrastructure.admission.doctorat.preparation.domain.service.in_memory.membre_CA import (
     MembreCA,
@@ -165,10 +186,11 @@ class GroupeDeSupervisionInMemoryRepository(InMemoryGenericRepository, IGroupeDe
         city: Optional[str] = '',
         country_code: Optional[str] = '',
         language: Optional[str] = '',
+        invited_by_default: Optional[bool] = False,
     ) -> 'SignataireIdentity':
         groupe: GroupeDeSupervision = cls.get(groupe_id)
         signature_etat = ChoixEtatSignature.NOT_INVITED
-        if proposition_status != ChoixStatutPropositionDoctorale.EN_BROUILLON:
+        if invited_by_default:
             signature_etat = ChoixEtatSignature.INVITED
         if type == ActorType.PROMOTER:
             signataire_id = PromoteurIdentity(str(uuid.uuid4()))

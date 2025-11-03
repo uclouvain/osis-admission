@@ -748,15 +748,7 @@ class DoctorateAdmission(DocumentCopyModelMixin, BaseAdmission):
 
         error_key = api_settings.NON_FIELD_ERRORS_KEY
         # Some checks are required to request the signatures
-        project_errors = (
-            gather_business_exceptions(VerifierProjetQuery(self.uuid)).get(error_key, [])
-            if self.status
-            not in {
-                ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
-                ChoixStatutPropositionDoctorale.CA_EN_ATTENTE_DE_SIGNATURE.name,
-            }
-            else []
-        )
+        project_errors = gather_business_exceptions(VerifierProjetQuery(self.uuid)).get(error_key, [])
         submission_errors = gather_business_exceptions(VerifierPropositionQuery(self.uuid)).get(error_key, [])
         self.detailed_status = project_errors + submission_errors
         self.last_update_author = author

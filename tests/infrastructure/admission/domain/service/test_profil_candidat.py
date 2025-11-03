@@ -315,7 +315,7 @@ class RecupererUuidsExperiencesCurriculumValoriseesParAdmissionTestCase(TestCase
     def test_retrieve_valuated_exam_requis(self):
         exam = ExamFactory(
             person=self.admission.candidate,
-            education_group_year_exam__education_group_year=self.admission.training,
+            type__education_group_years=[self.admission.training],
         )
         uuids = ProfilCandidatTranslator.get_uuids_experiences_curriculum_valorisees_par_admission(self.admission.uuid)
         self.assertCountEqual(uuids, [str(exam.uuid)])

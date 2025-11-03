@@ -419,12 +419,15 @@ class InjectionEPCAdmission:
         elif cls.__contient_uuid_valide(parties_type_document[-1]):
             # type_document_compose = ONGLET.TYPE_DOCUMENT.uuid (Questions spécifiques)
             _, type_document, uuid_question = parties_type_document
-        elif len(parties_type_document) == 3:
+        elif len(parties_type_document) == 3 and cls.__contient_uuid_valide(parties_type_document[1]):
             # type_document_compose = ONGLET.uuid.TYPE_DOCUMENT
             _, uuid_experience, type_document = parties_type_document
-        else:
+        elif len(parties_type_document) == 4 and cls.__contient_uuid_valide(parties_type_document[1]):
             # type_document_compose = ONGLET.uuid.annee.TYPE_DOCUMENT (Annuel)
             _, uuid_experience, annee, type_document = parties_type_document
+        else:
+            # type_document_compose = 'ONGLET.language_iso_code.TYPE_DOCUMENT (Certificat connaissance langue)
+            type_document = f"{parties_type_document[2]}_{parties_type_document[1]}"
         if uuid_experience and type_document not in CORRESPONDANCE_CHAMPS_CURRICULUM_EXPERIENCE_NON_ACADEMIQUE:
             uuid_experience = (
                 EducationalExperienceYear.objects.filter(

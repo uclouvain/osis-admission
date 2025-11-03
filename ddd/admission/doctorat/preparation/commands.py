@@ -116,6 +116,7 @@ class IdentifierPromoteurCommand(interface.CommandRequest):
     ville: Optional[str]
     pays: Optional[str]
     langue: Optional[str]
+    invite_par_defaut: bool = False
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -131,6 +132,7 @@ class IdentifierMembreCACommand(interface.CommandRequest):
     ville: Optional[str]
     pays: Optional[str]
     langue: Optional[str]
+    invite_par_defaut: bool = False
 
 
 @attr.dataclass(frozen=True, slots=True)
