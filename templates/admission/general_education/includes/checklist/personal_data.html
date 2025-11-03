@@ -24,6 +24,7 @@
 {% endcomment %}
 
 {% with initial=original_admission.checklist.initial.donnees_personnelles current=original_admission.checklist.current.donnees_personnelles %}
+  {% include 'admission/general_education/includes/checklist/fraud_ares_status.html' with container_id="donnees_personnelles" %}
   <div
     id="personal-data-statuses"
     class="form-group btn-group status-group"
@@ -32,11 +33,13 @@
   >
     {% concat view.base_namespace ':personal-data-change-status' as personal_data_base_url %}
     {% url personal_data_base_url view.kwargs.uuid initial.statut as initial_status_url %}
+    {% url personal_data_base_url view.kwargs.uuid 'GEST_EN_COURS' as ongoing_status_url %}
     {% url personal_data_base_url view.kwargs.uuid 'GEST_BLOCAGE' as blocking_status_url %}
     {% url personal_data_base_url view.kwargs.uuid 'GEST_REUSSITE' as success_status_url %}
     {% translate initial.libelle as initial_state_label %}
     {% checklist_state_button tab='donnees_personnelles' label=initial_state_label icon='user' state=initial.statut class='muted' htmx_post=initial_status_url %}
     {% checklist_state_button tab='donnees_personnelles' label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' class='danger' fraud='0' htmx_post=blocking_status_url %}
+    {% checklist_state_button tab='donnees_personnelles' label=_("Expert opinion") icon='pencil' state='GEST_EN_COURS' class='warning' htmx_post=ongoing_status_url %}
     {% checklist_state_button tab='donnees_personnelles' label=_("Fraudster") icon='circle-stop' state='GEST_BLOCAGE' class='danger' fraud='1' htmx_post=blocking_status_url %}
     {% checklist_state_button tab='donnees_personnelles' label=_("Validated") icon='check' state='GEST_REUSSITE' class='success' htmx_post=success_status_url %}
   </div>
