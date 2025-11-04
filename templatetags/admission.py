@@ -952,6 +952,7 @@ def bg_class_by_checklist_experience(experience):
     return {
         ExperienceAcademiqueDTO: 'bg-info',
         EtudesSecondairesAdmissionDTO: 'bg-warning',
+        ExamenDTO: 'bg-warning',
     }.get(experience.__class__, '')
 
 
