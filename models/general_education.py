@@ -45,7 +45,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     DroitsInscriptionMontant,
     MobiliteNombreDeMois,
     PoursuiteDeCycle,
-    TypeDeRefus,
+    TypeDeRefus, ResidentConcoursDAcces,
 )
 from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import (
     EtatEquivalenceTitreAcces,
@@ -156,9 +156,43 @@ class GeneralEducationAdmission(BaseAdmission):
         upload_to=admission_directory_path,
         blank=True,
     )
+
+    # Contingenté
     is_non_resident = models.BooleanField(
         verbose_name=_("Is non-resident (as defined in decree)"),
         null=True,
+    )
+    # Resident
+    residence_certificate = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('Residence certificate'),
+    )
+    resident_competitive_entrance_examination = models.CharField(
+        choices=ResidentConcoursDAcces.choices(),
+        max_length=30,
+        default='',
+    )
+    residence_student_form = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('Resident student form'),
+    )
+    # Non-resident
+    non_resident_file = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('Non-resident file'),
+    )
+    non_resident_with_second_year_enrolment = models.BooleanField(
+        _("Do you intend to make an enrolment directly for the second year ?"),
+        blank=True,
+        null=True,
+    )
+    non_resident_with_second_year_enrolment_form = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('Non-resident enrolment form for an enrolment beyond the first 60 credits'),
     )
 
     diploma_equivalence = FileField(

@@ -31,9 +31,6 @@ from rest_framework import serializers
 from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription import (
     ICalendrierInscription,
 )
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
-    ResidenceAuSensDuDecretNonDisponiblePourInscriptionException,
-)
 from admission.models import GeneralEducationAdmission
 
 
@@ -42,26 +39,6 @@ class PoolQuestionsSerializer(serializers.ModelSerializer):
     reorientation_pool_academic_year = serializers.IntegerField(read_only=True, allow_null=True)
     modification_pool_end_date = serializers.DateTimeField(read_only=True, allow_null=True)
     modification_pool_academic_year = serializers.IntegerField(read_only=True, allow_null=True)
-    forbid_enrolment_limited_course_for_non_resident = serializers.SerializerMethodField()
-
-    @extend_schema_field(OpenApiTypes.STR)
-    def get_forbid_enrolment_limited_course_for_non_resident(self, obj):
-        return ResidenceAuSensDuDecretNonDisponiblePourInscriptionException.get_message(
-            nom_formation_fr=obj.training.title,
-            nom_formation_en=obj.training.title_english,
-        )
-
-    def get_field_names(self, *args, **kwargs):
-        field_names = super().get_field_names(*args, **kwargs)
-
-        # Add or remove the forbid enrolment limited course for non resident message depending of what is desired
-        if 'forbid_enrolment_limited_course_for_non_resident' in field_names:
-            if not ICalendrierInscription.INTERDIRE_INSCRIPTION_ETUDES_CONTINGENTES_POUR_NON_RESIDENT:
-                field_names.remove('forbid_enrolment_limited_course_for_non_resident')
-        elif ICalendrierInscription.INTERDIRE_INSCRIPTION_ETUDES_CONTINGENTES_POUR_NON_RESIDENT:
-            field_names.append('forbid_enrolment_limited_course_for_non_resident')
-
-        return field_names
 
     class Meta:
         model = GeneralEducationAdmission
@@ -78,5 +55,4 @@ class PoolQuestionsSerializer(serializers.ModelSerializer):
             'reorientation_pool_academic_year',
             'modification_pool_end_date',
             'modification_pool_academic_year',
-            'forbid_enrolment_limited_course_for_non_resident',
         ]

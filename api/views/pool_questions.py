@@ -49,6 +49,8 @@ from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
+VETE_SIGLE = 'VETE1BA'
+
 
 class PoolQuestionsView(APIPermissionRequiredMixin, RetrieveAPIView):
     name = "pool-questions"
@@ -130,7 +132,19 @@ class PoolQuestionsView(APIPermissionRequiredMixin, RetrieveAPIView):
 
         # Build relevant field list
         if self.get_permission_object().training.acronym in SIGLES_WITH_QUOTA:
-            field_questions_to_display.append('is_non_resident')
+            field_questions_to_display += [
+                'is_non_resident',
+                'residence_certificate',
+                'resident_competitive_entrance_examination',
+                'residence_student_form',
+                'non_resident_file',
+            ]
+            if self.get_permission_object().training.acronym not in VETE_SIGLE:
+                field_questions_to_display += [
+                    'non_resident_with_second_year_enrolment',
+                    'non_resident_with_second_year_enrolment_form',
+                ]
+
         if admission.reorientation_pool_end_date is not None:
             field_questions_to_display += [
                 'is_belgian_bachelor',

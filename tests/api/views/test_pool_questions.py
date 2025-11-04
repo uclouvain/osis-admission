@@ -31,9 +31,6 @@ from django.shortcuts import resolve_url
 from rest_framework.test import APITestCase
 
 from admission.calendar.admission_calendar import *
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
-    ResidenceAuSensDuDecretNonDisponiblePourInscriptionException,
-)
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from base.models.enums.education_group_types import TrainingType
@@ -114,12 +111,6 @@ class PoolQuestionApiTestCase(APITestCase):
             'modification_pool_academic_year': None,
             'reorientation_pool_academic_year': None,
             'is_non_resident': None,
-            'forbid_enrolment_limited_course_for_non_resident': (
-                ResidenceAuSensDuDecretNonDisponiblePourInscriptionException.get_message(
-                    nom_formation_fr=admission.training.title,
-                    nom_formation_en=admission.training.title_english,
-                )
-            ),
         }
         self.assertDictEqual(expected, response.json())
 

@@ -55,7 +55,6 @@ from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     HorsPeriodeSpecifiqueInscription,
     NombrePropositionsSoumisesDepasseException,
     QuestionsSpecifiquesInformationsComplementairesNonCompleteesException,
-    ResidenceAuSensDuDecretNonDisponiblePourInscriptionException,
 )
 from admission.ddd.admission.shared_kernel.enums import (
     CritereItemFormulaireFormation,
@@ -277,38 +276,6 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
             professional_experience.uuid,
         )
 
-    @mock.patch(
-        'admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription.ICalendrierInscription.'
-        'INTERDIRE_INSCRIPTION_ETUDES_CONTINGENTES_POUR_NON_RESIDENT',
-        new_callable=PropertyMock,
-        return_value=False,
-    )
-    def test_general_proposition_verification_contingent_non_ouvert(self, _):
-        admission = GeneralEducationAdmissionFactory(
-            is_non_resident=True,
-            candidate=IncompletePersonForBachelorFactory(),
-            training__education_group_type__name=TrainingType.BACHELOR.name,
-            training__acronym="VETE1BA",
-        )
-        url = resolve_url("admission_api_v1:submit-general-proposition", uuid=admission.uuid)
-        self.client.force_authenticate(user=admission.candidate.user)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        ret = response.json()
-        self.assertIsNotNone(ret['pool_start_date'])
-        self.assertIsNotNone(ret['pool_end_date'])
-        admission.refresh_from_db()
-        self.assertNotIn(
-            {
-                'status_code': ResidenceAuSensDuDecretNonDisponiblePourInscriptionException.status_code,
-                'detail': ResidenceAuSensDuDecretNonDisponiblePourInscriptionException.get_message(
-                    nom_formation_fr=admission.training.title,
-                    nom_formation_en=admission.training.title_english,
-                ),
-            },
-            admission.detailed_status,
-        )
-
     def test_general_proposition_verification_specific_enrolment_period_for_medicine_dentistry_bachelor(self):
         self.client.force_authenticate(user=self.candidate_ok.user)
 
@@ -405,29 +372,6 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
                 "Dans l'attente de la publication des résultats du concours d'entrée en médecine et dentisterie, "
                 "votre demande ne pourra être soumise qu'à partir du 1 février 1980.",
             )
-
-    def test_general_proposition_verification_contingent_est_interdite(self):
-        admission = GeneralEducationAdmissionFactory(
-            is_non_resident=True,
-            candidate=IncompletePersonForBachelorFactory(),
-            training__education_group_type__name=TrainingType.BACHELOR.name,
-            training__acronym="VETE1BA",
-        )
-        url = resolve_url("admission_api_v1:submit-general-proposition", uuid=admission.uuid)
-        self.client.force_authenticate(user=admission.candidate.user)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        admission.refresh_from_db()
-        self.assertIn(
-            {
-                'status_code': ResidenceAuSensDuDecretNonDisponiblePourInscriptionException.status_code,
-                'detail': ResidenceAuSensDuDecretNonDisponiblePourInscriptionException.get_message(
-                    nom_formation_fr=admission.training.title,
-                    nom_formation_en=admission.training.title_english,
-                ),
-            },
-            admission.detailed_status,
-        )
 
     def test_general_proposition_submission_ok(self):
         self.client.force_authenticate(user=self.candidate_ok.user)
