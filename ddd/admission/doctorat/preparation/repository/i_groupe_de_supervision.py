@@ -114,6 +114,7 @@ class IGroupeDeSupervisionRepository(interface.AbstractRepository):
         city: Optional[str] = '',
         country_code: Optional[str] = '',
         language: Optional[str] = '',
+        invited_by_default: bool = False,
     ) -> 'SignataireIdentity':
         raise NotImplementedError
 

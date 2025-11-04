@@ -313,6 +313,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
         city: Optional[str] = '',
         country_code: Optional[str] = '',
         language: Optional[str] = '',
+        invited_by_default: Optional[bool] = False,
     ) -> 'SignataireIdentity':
         groupe = Process.objects.get(uuid=groupe_id.uuid)
         person = Person.objects.get(global_id=matricule) if matricule else None
@@ -335,7 +336,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
         else:
             group_name, model = 'committee_members', CommitteeMember
             signataire_id = MembreCAIdentity(str(new_actor.uuid))
-        if proposition_status != ChoixStatutPropositionDoctorale.EN_BROUILLON:
+        if invited_by_default:
             new_actor.switch_state(SignatureState.INVITED)
         # Make sure the person has relevant role
         if person:
@@ -420,12 +421,22 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
         if not uuid_proposition_originale or not apps.is_installed('parcours_doctoral'):
             return
 
-        from parcours_doctoral.models import ParcoursDoctoralSupervisionActor
+        from parcours_doctoral.models import (
+            ParcoursDoctoral,
+            ParcoursDoctoralSupervisionActor,
+        )
 
         # Copy members of the supervision group of the doctorate of the original proposition
-        for doctorate_actor in ParcoursDoctoralSupervisionActor.objects.filter(
-            process__parcoursdoctoral__admission__uuid=uuid_proposition_originale,
-        ):
+        supervision_group_id = (
+            ParcoursDoctoral.objects.filter(admission__uuid=uuid_proposition_originale)
+            .values_list('supervision_group_id', flat=True)
+            .first()
+        )
+
+        if not supervision_group_id:
+            return
+
+        for doctorate_actor in ParcoursDoctoralSupervisionActor.objects.filter(process_id=supervision_group_id):
             SupervisionActor.objects.create(
                 process=proposition.supervision_group,
                 type=doctorate_actor.type,

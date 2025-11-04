@@ -40,6 +40,11 @@ from rest_framework import status
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
     ENTITY_CDE,
 )
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutChecklist,
+    ChoixStatutPropositionGenerale,
+    OngletsChecklist,
+)
 from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import (
     TypeTitreAccesSelectionnable,
     recuperer_conditions_acces_par_formation,
@@ -49,11 +54,8 @@ from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import
     StatutEquivalenceTitreAcces,
     TypeEquivalenceTitreAcces,
 )
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutChecklist,
-    ChoixStatutPropositionGenerale,
-    OngletsChecklist,
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    OngletsDemande,
 )
 from admission.forms.admission.checklist import PastExperiencesAdmissionAccessTitleForm
 from admission.models import GeneralEducationAdmission
@@ -105,7 +107,7 @@ from epc.tests.factories.inscription_programme_cycle import (
 )
 from osis_profile.models import BelgianHighSchoolDiploma, Exam, ForeignHighSchoolDiploma
 from osis_profile.models.enums.education import ForeignDiplomaTypes
-from osis_profile.models.enums.exam import ExamTypes
+from osis_profile.models.exam import EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
 from reference.tests.factories.diploma_title import DiplomaTitleFactory
 
 
@@ -1653,7 +1655,7 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
         self.assertTrue(self.general_admission.are_secondary_studies_access_title)
 
         # The candidate specified that he has secondary education but without more information
-        Exam.objects.filter(person=self.candidate, type=ExamTypes.PREMIER_CYCLE.name).delete()
+        Exam.objects.filter(person=self.candidate, type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR).delete()
 
         self.general_admission.are_secondary_studies_access_title = False
         self.general_admission.save()

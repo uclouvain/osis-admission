@@ -89,8 +89,8 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceNonAcademiqueDTO,
 )
 from osis_profile import BE_ISO_CODE, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
-from osis_profile.models import EducationGroupYearExam
 from osis_profile.models.enums.curriculum import CURRICULUM_ACTIVITY_LABEL
+from osis_profile.models.exam import ExamType
 from osis_profile.views.edit_experience_academique import (
     SYSTEMES_EVALUATION_AVEC_CREDITS,
 )
@@ -136,7 +136,7 @@ class Section:
                     'coordonnees': context.coordonnees,
                     'curriculum': context.curriculum,
                     'etudes_secondaires': context.etudes_secondaires,
-                    'examen': context.examens,
+                    'examen': context.examen_formation,
                     'connaissances_langues': context.connaissances_langues,
                     'proposition': context.proposition,
                     'comptabilite': context.comptabilite,
@@ -243,16 +243,16 @@ def get_secondary_studies_section(
 
 def get_exams_section(
     context: ResumePropositionDTO,
-    education_group_year_exam: EducationGroupYearExam,
+    exam_type: ExamType,
     load_content: bool,
 ) -> Section:
     """Returns the exams section."""
     extra_context = {
-        'education_group_year_exam': education_group_year_exam,
+        'exam_type': exam_type,
     }
     return Section(
         identifier=OngletsDemande.EXAMS,
-        sub_identifier=context.examens.uuid,
+        sub_identifier=context.examen_formation.uuid,
         content_template='admission/exports/recap/includes/exams.html',
         extra_context=extra_context,
         context=context,
@@ -603,7 +603,7 @@ def get_sections(
     with_free_requestable_documents=False,
     hide_curriculum=False,
     with_additional_documents=True,
-    education_group_year_exam: Optional[EducationGroupYearExam] = None,
+    exam_type: Optional[ExamType] = None,
 ):
     specific_questions_by_tab = get_dynamic_questions_by_tab(specific_questions)
 
@@ -637,7 +637,7 @@ def get_sections(
         pdf_sections.append(get_curriculum_specific_questions_section(context, specific_questions_by_tab, load_content))
 
     if context.est_proposition_generale:
-        pdf_sections.append(get_exams_section(context, education_group_year_exam, load_content))
+        pdf_sections.append(get_exams_section(context, exam_type, load_content))
 
     if context.est_proposition_generale or context.est_proposition_continue:
         pdf_sections.append(get_specific_questions_section(context, specific_questions_by_tab, load_content))

@@ -37,6 +37,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     MembreCANonTrouveException,
     PromoteurNonTrouveException,
 )
+from admission.models import SupervisionActor
 from admission.models.enums.actor_type import ActorType
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
@@ -219,6 +220,10 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         membres_ca = response.json()['signatures_membres_CA']
         self.assertEqual(membres_ca[0]['membre_CA']['prenom'], 'Jim')
 
+        created_actor = SupervisionActor.objects.filter(person=person).first()
+        self.assertIsNotNone(created_actor)
+        self.assertEqual(created_actor.state, SignatureState.NOT_INVITED.name)
+
     def test_supervision_ajouter_membre_ca_externe(self):
         self.client.force_authenticate(user=self.candidate.user)
 
@@ -304,6 +309,10 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         promoteurs = response.json()['signatures_promoteurs']
         self.assertEqual(len(promoteurs), 2)
         self.assertIn('Jim', [promoteur['promoteur']['prenom'] for promoteur in promoteurs])
+
+        created_actor = SupervisionActor.objects.filter(person=person).first()
+        self.assertIsNotNone(created_actor)
+        self.assertEqual(created_actor.state, SignatureState.NOT_INVITED.name)
 
     def test_supervision_ajouter_promoteur_externe(self):
         self.client.force_authenticate(user=self.candidate.user)
