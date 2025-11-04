@@ -3102,7 +3102,6 @@ class ChecklistView(
                 'DIPLOME_EQUIVALENCE',
                 'CURRICULUM',
                 'ADDITIONAL_DOCUMENTS',
-                'ATTESTATION_DE_REUSSITE_CONCOURS_D_ENTREE_OU_D_ADMISSION',
                 *secondary_studies_attachments,
             },
             'donnees_personnelles': assimilation_documents,
@@ -3405,13 +3404,17 @@ class ChecklistView(
                     else:
                         context['documents'][tab_identifier].append(admission_document)
 
+                    if document_tab_identifier[0] == OngletsDemande.EXAMS.name:
+                        libelle = context['checklist_tabs'].get(tab_identifier, admission_document.libelle)
+                    else:
+                        libelle = '{experience_name} > {document_name}'.format(
+                            experience_name=context['checklist_tabs'].get(tab_identifier, ''),  # Experience name
+                            document_name=admission_document.libelle,  # Document name
+                        )
                     prefixed_past_experiences_documents.append(
                         attr.evolve(
                             admission_document,
-                            libelle='{experience_name} > {document_name}'.format(
-                                experience_name=context['checklist_tabs'].get(tab_identifier, ''),  # Experience name
-                                document_name=admission_document.libelle,  # Document name
-                            ),
+                            libelle=libelle,
                         )
                     )
 
@@ -3533,5 +3536,5 @@ class ChecklistView(
             experiences[str(experience_non_academique.uuid)] = experience_non_academique
         experiences[OngletsDemande.ETUDES_SECONDAIRES.name] = resume.etudes_secondaires
         if resume.examen_formation.requis:
-            experiences[str(resume.examens.uuid)] = resume.examen_formation
+            experiences[str(resume.examen_formation.uuid)] = resume.examen_formation
         return experiences
