@@ -3,6 +3,7 @@
 from django.db import migrations, models
 import osis_document_components.fields
 from django.db.models import Subquery, F, OuterRef, Case, When, Value
+from django.db.models.functions import Coalesce
 
 RESIDENT_STUDENT_FORM = "Dossier résident - contingentement"
 RESIDENCE_CERTIFICATE = "Certificat de résidence"
@@ -17,10 +18,10 @@ def migrate_specific_questions(apps, schema_editor):
     SpecificQuestionAnswer = apps.get_model("admission", "SpecificQuestionAnswer")
 
     internal_labels = [RESIDENT_STUDENT_FORM, RESIDENCE_CERTIFICATE, PASS_LAS]
-    AdmissionFormItem.objects.filter(form_item__internal_label__in=internal_labels).update(active=False)
+    AdmissionFormItem.objects.filter(internal_label__in=internal_labels).update(active=False)
 
-    GeneralEducationAdmission.objects.filter(
-        training__acronym__in=SIGLES_WITH_QUOTA,
+    GeneralEducationAdmission.objects.order_by().filter(
+        baseadmission_ptr__training__acronym__in=SIGLES_WITH_QUOTA,
     ).annotate(
         residence_certificate_answer=Subquery(SpecificQuestionAnswer.objects.filter(
             admission=OuterRef("pk"),
@@ -35,21 +36,21 @@ def migrate_specific_questions(apps, schema_editor):
             form_item__internal_label=RESIDENT_STUDENT_FORM,
         ).values('file')[:1]),
     ).update(
-        residence_certificate=F('residence_certificate_answer'),
+        residence_certificate=Coalesce(F('residence_certificate_answer'), Value([])),
         resident_competitive_entrance_examination=Case(
             When(resident_competitive_entrance_examination_answer=0, then=Value('JAMAIS')),
             When(resident_competitive_entrance_examination_answer=1, then=Value('UNE_FOIS')),
             When(resident_competitive_entrance_examination_answer=2, then=Value('DEUX_FOIS_OU_PLUS')),
-            default=None,
+            default=Value(''),
         ),
-        residence_student_form=F('residence_student_form_answer'),
+        residence_student_form=Coalesce(F('residence_student_form_answer'), Value([])),
     )
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("admission", "0273_accounting_changed"),
+        ("admission", "0274_remove_baseadmission_specific_question_answers_and_more"),
     ]
 
     operations = [
