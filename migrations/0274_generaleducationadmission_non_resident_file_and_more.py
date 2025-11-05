@@ -9,7 +9,12 @@ PASS_LAS = "PASS et LAS"
 
 
 def migrate_specific_questions(apps, schema_editor):
-    pass
+    AdmissionFormItem = apps.get_model("admission", "AdmissionFormItem")
+
+    internal_labels = [RESIDENT_STUDENT_FORM, RESIDENCE_CERTIFICATE, PASS_LAS]
+    AdmissionFormItem.objects.filter(form_item__internal_label__in=internal_labels).update(active=False)
+
+
 
 
 class Migration(migrations.Migration):
