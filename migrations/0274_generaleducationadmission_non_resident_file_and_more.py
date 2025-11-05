@@ -2,19 +2,48 @@
 
 from django.db import migrations, models
 import osis_document_components.fields
+from django.db.models import Subquery, F, OuterRef, Case, When, Value
 
 RESIDENT_STUDENT_FORM = "Dossier résident - contingentement"
 RESIDENCE_CERTIFICATE = "Certificat de résidence"
 PASS_LAS = "PASS et LAS"
 
+SIGLES_WITH_QUOTA = ['KINE1BA', 'VETE1BA', 'LOGO1BA']
+
 
 def migrate_specific_questions(apps, schema_editor):
     AdmissionFormItem = apps.get_model("admission", "AdmissionFormItem")
+    GeneralEducationAdmission = apps.get_model("admission", "GeneralEducationAdmission")
+    SpecificQuestionAnswer = apps.get_model("admission", "SpecificQuestionAnswer")
 
     internal_labels = [RESIDENT_STUDENT_FORM, RESIDENCE_CERTIFICATE, PASS_LAS]
     AdmissionFormItem.objects.filter(form_item__internal_label__in=internal_labels).update(active=False)
 
-    # TODO migrate answers from specific questions into new fields
+    GeneralEducationAdmission.objects.filter(
+        training__acronym__in=SIGLES_WITH_QUOTA,
+    ).annotate(
+        residence_certificate_answer=Subquery(SpecificQuestionAnswer.objects.filter(
+            admission=OuterRef("pk"),
+            form_item__internal_label=RESIDENCE_CERTIFICATE,
+        ).values('file')[:1]),
+        resident_competitive_entrance_examination_answer=Subquery(SpecificQuestionAnswer.objects.filter(
+            admission=OuterRef("pk"),
+            form_item__internal_label=PASS_LAS,
+        ).values('answer')[:1]),
+        residence_student_form_answer=Subquery(SpecificQuestionAnswer.objects.filter(
+            admission=OuterRef("pk"),
+            form_item__internal_label=RESIDENT_STUDENT_FORM,
+        ).values('file')[:1]),
+    ).update(
+        residence_certificate=F('residence_certificate_answer'),
+        resident_competitive_entrance_examination=Case(
+            When(resident_competitive_entrance_examination_answer=0, then=Value('JAMAIS')),
+            When(resident_competitive_entrance_examination_answer=1, then=Value('UNE_FOIS')),
+            When(resident_competitive_entrance_examination_answer=2, then=Value('DEUX_FOIS_OU_PLUS')),
+            default=None,
+        ),
+        residence_student_form=F('residence_student_form_answer'),
+    )
 
 
 class Migration(migrations.Migration):
