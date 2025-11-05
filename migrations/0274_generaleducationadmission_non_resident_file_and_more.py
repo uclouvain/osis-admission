@@ -3,6 +3,14 @@
 from django.db import migrations, models
 import osis_document_components.fields
 
+RESIDENT_STUDENT_FORM = "Dossier résident - contingentement"
+RESIDENCE_CERTIFICATE = "Certificat de résidence"
+PASS_LAS = "PASS et LAS"
+
+
+def migrate_specific_questions(apps, schema_editor):
+    pass
+
 
 class Migration(migrations.Migration):
 
@@ -77,4 +85,5 @@ class Migration(migrations.Migration):
                 max_length=30,
             ),
         ),
+        migrations.RunPython(migrate_specific_questions)
     ]
