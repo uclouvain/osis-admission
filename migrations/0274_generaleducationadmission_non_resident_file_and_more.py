@@ -14,7 +14,7 @@ def migrate_specific_questions(apps, schema_editor):
     internal_labels = [RESIDENT_STUDENT_FORM, RESIDENCE_CERTIFICATE, PASS_LAS]
     AdmissionFormItem.objects.filter(form_item__internal_label__in=internal_labels).update(active=False)
 
-
+    # TODO migrate answers from specific questions into new fields
 
 
 class Migration(migrations.Migration):
