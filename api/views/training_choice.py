@@ -44,6 +44,7 @@ from admission.ddd.admission.formation_generale import (
 from admission.ddd.admission.formation_generale.commands import (
     RecupererPeriodeInscriptionSpecifiqueBachelierMedecineDentisterieQuery,
 )
+from admission.models.exam import AdmissionExam
 from admission.utils import (
     get_cached_admission_perm_obj,
     get_cached_continuing_education_admission_perm_obj,
@@ -53,6 +54,7 @@ from backoffice.settings.rest_framework.common_views import (
     DisplayExceptionsByFieldNameAPIMixin,
 )
 from infrastructure.messages_bus import message_bus_instance
+from osis_profile.models import Exam
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
@@ -194,7 +196,12 @@ class GeneralUpdateTrainingChoiceAPIView(
                 **serializer.data,
             )
         )
-        self.get_permission_object().update_detailed_status(request.user.person)
+
+        # Remove exam if already specified
+        admission = self.get_permission_object()
+        Exam.objects.filter(admissions__admission=admission).delete()
+
+        admission.update_detailed_status(request.user.person)
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
