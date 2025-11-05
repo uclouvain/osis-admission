@@ -55,7 +55,7 @@ class ExamDetailView(LoadDossierViewMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
         try:
-            exam = Exam.objects.get(admissions_admission=self.admission)
+            exam = Exam.objects.get(admissions__admission=self.admission)
             titre = '' if self.exam_type is None else self.exam_type.title
             context_data['examen'] = ExamenDTO(
                 uuid=str(exam.uuid),
