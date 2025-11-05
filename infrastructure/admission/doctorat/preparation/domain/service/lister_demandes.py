@@ -213,11 +213,15 @@ class ListerDemandesService(IListerDemandesService):
             promoter = json.loads(id_promoteur)
 
             if promoter.get('global_id'):
-                qs = qs.filter(supervision_group__actors__person__global_id=promoter.get('global_id'))
+                qs = qs.filter(
+                    supervision_group__actors__person__global_id=promoter.get('global_id'),
+                    supervision_group__actors__supervisionactor__type=ActorType.PROMOTER.name,
+                )
             else:
                 qs = qs.filter(
                     supervision_group__actors__last_name=promoter.get('last_name'),
                     supervision_group__actors__first_name=promoter.get('first_name'),
+                    supervision_group__actors__supervisionactor__type=ActorType.PROMOTER.name,
                 )
                 with_distinct = True
 

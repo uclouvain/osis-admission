@@ -195,6 +195,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             last_name='Collins',
             process=cls.promoter.process,
         )
+        cls.first_ca_member = CaMemberFactory(process=cls.promoter.process)
 
         # Create admissions
         admission = DoctorateAdmissionFactory(
@@ -352,6 +353,14 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 'global_id': cls.promoter.person.global_id,
                 'last_name': cls.promoter.person.last_name,
                 'first_name': cls.promoter.person.first_name,
+            }
+        )
+
+        cls.first_ca_member_data = json.dumps(
+            {
+                'global_id': cls.first_ca_member.person.global_id,
+                'last_name': cls.first_ca_member.person.last_name,
+                'first_name': cls.first_ca_member.person.first_name,
             }
         )
 
@@ -858,6 +867,19 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 [
                     self.admission_references[0],
                 ],
+            )
+
+        data = {
+            'annee_academique': '2021',
+            'id_promoteur': self.first_ca_member_data,
+        }
+
+        with self.assertNumQueriesLessThan(self.NB_MAX_QUERIES_WITH_SEARCH):
+            response = self.client.get(self.url, data)
+
+            self.assertPropositionList(
+                response,
+                [],
             )
 
     def test_filter_by_external_promoter(self):
