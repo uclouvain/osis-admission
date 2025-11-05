@@ -72,7 +72,7 @@ from admission.tests.factories.secondary_studies import (
 from admission.tests.factories.supervision import PromoterFactory
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.tests import TestCaseWithQueriesAssertions
-from osis_profile.constants import PNG_MIME_TYPE
+from osis_profile.constants import JPEG_MIME_TYPE, PNG_MIME_TYPE
 from osis_profile.tests.factories.exam import ExamFactory
 from reference.tests.factories.language import FrenchLanguageFactory
 

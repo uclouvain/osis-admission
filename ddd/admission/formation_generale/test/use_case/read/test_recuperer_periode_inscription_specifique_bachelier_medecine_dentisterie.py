@@ -26,10 +26,10 @@
 import datetime
 from unittest import TestCase, mock
 
-from admission.ddd.admission.shared_kernel.dtos.periode import PeriodeDTO
 from admission.ddd.admission.formation_generale.commands import (
     RecupererPeriodeInscriptionSpecifiqueBachelierMedecineDentisterieQuery,
 )
+from admission.ddd.admission.shared_kernel.dtos.periode import PeriodeDTO
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.calendrier_inscription import (
     CalendrierInscriptionInMemory,
 )
@@ -42,7 +42,7 @@ class RecupererPeriodeInscriptionSpecifiqueBachelierMedecineDentisterieTestCase(
     @classmethod
     def setUpClass(cls):
         cls.message_bus = message_bus_in_memory_instance
-        cls.cmd = RecupererPeriodeInscriptionSpecifiqueBachelierMedecineDentisterieQuery()
+        cls.cmd = RecupererPeriodeInscriptionSpecifiqueBachelierMedecineDentisterieQuery(annee=None)
 
     def test_sans_periode_inscription(self):
         periode = self.message_bus.invoke(self.cmd)

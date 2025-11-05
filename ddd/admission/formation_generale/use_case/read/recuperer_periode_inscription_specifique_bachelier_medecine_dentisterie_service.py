@@ -23,11 +23,11 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription import (
-    ICalendrierInscription,
-)
 from admission.ddd.admission.formation_generale.commands import (
     RecupererPeriodeInscriptionSpecifiqueBachelierMedecineDentisterieQuery,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription import (
+    ICalendrierInscription,
 )
 
 
@@ -35,4 +35,4 @@ def recuperer_periode_inscription_specifique_bachelier_medecine_dentisterie(
     cmd: RecupererPeriodeInscriptionSpecifiqueBachelierMedecineDentisterieQuery,
     calendrier_inscription: 'ICalendrierInscription',
 ):
-    return calendrier_inscription.recuperer_periode_inscription_specifique_medecine_dentisterie()
+    return calendrier_inscription.recuperer_periode_inscription_specifique_medecine_dentisterie(annee=cmd.annee)
