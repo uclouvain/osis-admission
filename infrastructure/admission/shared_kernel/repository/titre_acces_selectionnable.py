@@ -221,8 +221,7 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
 
         exam = (
             Exam.objects.filter(
-                person=admission.candidate,
-                type__education_group_years=admission.training,
+                admissions__admission=admission,
             )
             .select_related('year')
             .first()
