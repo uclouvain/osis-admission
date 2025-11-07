@@ -88,10 +88,10 @@ from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscr
 )
 from admission.models import EPCInjection as AdmissionEPCInjection
 from admission.models.base import (
-    AdmissionEducationalValuatedExperiences,
-    AdmissionProfessionalValuatedExperiences,
     BaseAdmission,
 )
+from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences, \
+    AdmissionProfessionalValuatedExperiences
 from admission.models.epc_injection import (
     EPCInjectionStatus as AdmissionEPCInjectionStatus,
 )

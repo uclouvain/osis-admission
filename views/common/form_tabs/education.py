@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,21 +26,31 @@
 from typing import List
 from uuid import UUID
 
+from django.db import transaction
 from django.urls import reverse
 from django.utils.functional import cached_property
 
+from admission.ddd.admission.shared_kernel.enums import Onglets, TypeItemFormulaire
+from admission.forms.admission.education import (
+    AdmissionBachelorEducationForeignDiplomaForm,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import (
+    ProfilCandidatTranslator,
+)
+from admission.models import AdmissionFormItem
 from admission.models import EPCInjection as AdmissionEPCInjection
-from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
-from admission.ddd.admission.shared_kernel.enums import Onglets
-from admission.forms.admission.education import AdmissionBachelorEducationForeignDiplomaForm
-from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidatTranslator
-from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
+from admission.models.specific_question import SpecificQuestionAnswer
+from admission.models.epc_injection import (
+    EPCInjectionStatus as AdmissionEPCInjectionStatus,
+)
+from admission.models.epc_injection import EPCInjectionType
+from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from base.models.enums.education_group_types import TrainingType
+from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection
 from osis_profile.models.epc_injection import (
-    EPCInjection as CurriculumEPCInjection,
-    ExperienceType,
     EPCInjectionStatus as CurriculumEPCInjectionStatus,
 )
+from osis_profile.models.epc_injection import ExperienceType
 from osis_profile.views.edit_etudes_secondaires import EditEtudesSecondairesView
 
 __all__ = [
@@ -75,7 +85,7 @@ class AdmissionEducationFormView(AdmissionFormMixin, LoadDossierViewMixin, EditE
     def high_school_diploma(self):
         return {
             **super().high_school_diploma,
-            'specific_question_answers': self.admission.specific_question_answers,
+            'specific_question_answers': self.admission.get_specific_question_answers_dict(),
             'is_vae_potential': ProfilCandidatTranslator.est_potentiel_vae(self.person.global_id),
         }
 
@@ -111,7 +121,30 @@ class AdmissionEducationFormView(AdmissionFormMixin, LoadDossierViewMixin, EditE
         )
 
     def update_current_admission_on_form_valid(self, form, admission):
-        admission.specific_question_answers = form.cleaned_data['specific_question_answers'] or {}
+        with transaction.atomic():
+            specific_question_answers = form.cleaned_data['specific_question_answers'] or {}
+
+            form_items = {
+                str(form_item.uuid): form_item
+                for form_item in AdmissionFormItem.objects.filter(uuid__in=specific_question_answers.keys())
+            }
+            SpecificQuestionAnswer.objects.bulk_create(
+                [
+                    SpecificQuestionAnswer(
+                        admission=admission,
+                        form_item=form_items[form_item_uuid],
+                        file=reponse if form_items[form_item_uuid].type == TypeItemFormulaire.DOCUMENT.name else None,
+                        answer=reponse if form_items[form_item_uuid].type != TypeItemFormulaire.DOCUMENT.name else None,
+                    )
+                    for form_item_uuid, reponse in specific_question_answers.items()
+                ],
+                update_conflicts=True,
+                update_fields=['file', 'answer'],
+                unique_fields=['admission', 'form_item'],
+            )
+            SpecificQuestionAnswer.objects.filter(admission=admission).exclude(
+                form_item__uuid__in=form_items.keys()
+            ).delete()
 
     @property
     def can_be_updated(self):
