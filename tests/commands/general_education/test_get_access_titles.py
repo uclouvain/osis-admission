@@ -48,8 +48,11 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     OngletsDemande,
 )
 from admission.models import GeneralEducationAdmission
-from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences, \
-    AdmissionProfessionalValuatedExperiences
+from admission.models.valuated_epxeriences import (
+    AdmissionEducationalValuatedExperiences,
+    AdmissionProfessionalValuatedExperiences,
+)
+from admission.models.exam import AdmissionExam
 from admission.tests.factories.curriculum import (
     EducationalExperienceFactory,
     EducationalExperienceYearFactory,
@@ -556,6 +559,8 @@ class GetAccessTitlesViewTestCase(TestCase):
             year=self.academic_years[1],
             type__education_group_years=[general_admission.training],
         )
+
+        AdmissionExam.objects.create(exam=exam, admission=general_admission)
 
         access_titles = message_bus_instance.invoke(
             RecupererTitresAccesSelectionnablesPropositionQuery(
