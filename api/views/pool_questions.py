@@ -175,6 +175,12 @@ class PoolQuestionsView(APIPermissionRequiredMixin, RetrieveAPIView):
         data = {
             # Reset to default if not defined
             'is_non_resident': None,
+            'residence_certificate': [],
+            'resident_competitive_entrance_examination': '',
+            'residence_student_form': [],
+            'non_resident_file': [],
+            'non_resident_with_second_year_enrolment': None,
+            'non_resident_with_second_year_enrolment_form': [],
             'is_belgian_bachelor': None,
             'is_external_modification': None,
             'is_external_reorientation': None,

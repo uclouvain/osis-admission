@@ -169,6 +169,7 @@ class GeneralEducationAdmission(BaseAdmission):
         verbose_name=_('Residence certificate'),
     )
     resident_competitive_entrance_examination = models.CharField(
+        blank=True,
         choices=ResidentConcoursDAcces.choices(),
         max_length=30,
         default='',
