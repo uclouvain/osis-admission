@@ -559,6 +559,8 @@ class GetAccessTitlesViewTestCase(TestCase):
             type__education_group_years=[general_admission.training],
         )
 
+        AdmissionExam.objects.create(exam=exam, admission=general_admission)
+
         access_titles = message_bus_instance.invoke(
             RecupererTitresAccesSelectionnablesPropositionQuery(
                 uuid_proposition=general_admission.uuid,
