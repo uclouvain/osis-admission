@@ -32,14 +32,18 @@ from admission.ddd.admission.doctorat.preparation import dtos as dtos_doctorat
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     CurriculumAdmissionDTO,
 )
+from admission.ddd.admission.formation_continue import dtos as dtos_formation_continue
+from admission.ddd.admission.formation_generale import dtos as dtos_formation_generale
 from admission.ddd.admission.shared_kernel.dtos import CoordonneesDTO, IdentificationDTO
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
+    EmplacementDocumentDTO,
+)
 from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import (
     EtudesSecondairesAdmissionDTO,
 )
-from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
-from admission.ddd.admission.formation_continue import dtos as dtos_formation_continue
-from admission.ddd.admission.formation_generale import dtos as dtos_formation_generale
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import (
+    QuestionSpecifiqueDTO,
+)
 from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
 from osis_common.ddd import interface
 
@@ -72,7 +76,7 @@ class ResumeCandidatDTO(interface.DTO):
     curriculum: CurriculumAdmissionDTO
     etudes_secondaires: Optional[EtudesSecondairesAdmissionDTO]
     connaissances_langues: Optional[List[dtos_doctorat.ConnaissanceLangueDTO]]
-    examens: ExamenDTO
+    examen_formation: ExamenDTO
 
 
 @attr.dataclass(frozen=True, slots=True)

@@ -1056,7 +1056,9 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         )
 
     @classmethod
-    def get_examen(cls, matricule: str, formation_sigle: str, formation_annee: int) -> 'ExamenDTO':
+    def get_examen(
+        cls, uuid_proposition: str, matricule: str, formation_sigle: str, formation_annee: int
+    ) -> 'ExamenDTO':
         return ExamenDTO(
             uuid='',
             requis=False,
@@ -1253,7 +1255,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             curriculum=cls.get_curriculum(matricule, annee_courante, uuid_proposition),
             etudes_secondaires=cls.get_etudes_secondaires(matricule),
             connaissances_langues=cls.get_connaissances_langues(matricule),
-            examens=cls.get_examen(matricule, formation.sigle, formation.annee),
+            examen_formation=cls.get_examen(uuid_proposition, matricule, formation.sigle, formation.annee),
         )
 
     @classmethod

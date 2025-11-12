@@ -421,12 +421,22 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
         if not uuid_proposition_originale or not apps.is_installed('parcours_doctoral'):
             return
 
-        from parcours_doctoral.models import ParcoursDoctoralSupervisionActor
+        from parcours_doctoral.models import (
+            ParcoursDoctoral,
+            ParcoursDoctoralSupervisionActor,
+        )
 
         # Copy members of the supervision group of the doctorate of the original proposition
-        for doctorate_actor in ParcoursDoctoralSupervisionActor.objects.filter(
-            process__parcoursdoctoral__admission__uuid=uuid_proposition_originale,
-        ):
+        supervision_group_id = (
+            ParcoursDoctoral.objects.filter(admission__uuid=uuid_proposition_originale)
+            .values_list('supervision_group_id', flat=True)
+            .first()
+        )
+
+        if not supervision_group_id:
+            return
+
+        for doctorate_actor in ParcoursDoctoralSupervisionActor.objects.filter(process_id=supervision_group_id):
             SupervisionActor.objects.create(
                 process=proposition.supervision_group,
                 type=doctorate_actor.type,
