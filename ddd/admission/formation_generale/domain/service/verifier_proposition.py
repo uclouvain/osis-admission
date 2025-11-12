@@ -181,9 +181,14 @@ class VerifierProposition(interface.DomainService):
         cls,
         proposition: 'Proposition',
         titres: 'Titres',
+        pool: 'AcademicCalendarTypes',
         calendrier_inscription: 'ICalendrierInscription',
         profil_candidat_translator: 'IProfilCandidatTranslator',
     ) -> 'TypeDemande':
+        # Contingenté non-résident = admission
+        if (proposition.est_non_resident_au_sens_decret
+                and pool == AcademicCalendarTypes.ADMISSION_POOL_NON_RESIDENT_QUOTA):
+            return TypeDemande.ADMISSION
         # (Nationalité UE+5)
         #   ET (tous les diplômes belges (y compris secondaires si déclaré dans le détail)) = inscription
         est_ue_plus_5 = calendrier_inscription.est_ue_plus_5(

@@ -111,6 +111,7 @@ class Migration(migrations.Migration):
             model_name="generaleducationadmission",
             name="resident_competitive_entrance_examination",
             field=models.CharField(
+                blank=True,
                 choices=[
                     ("JAMAIS", "JAMAIS"),
                     ("UNE_FOIS", "UNE"),

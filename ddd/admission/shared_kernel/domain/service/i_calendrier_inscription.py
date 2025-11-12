@@ -68,7 +68,6 @@ from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
 from admission.ddd.admission.shared_kernel.dtos import IdentificationDTO
 from admission.ddd.admission.shared_kernel.dtos.conditions import InfosDetermineesDTO
 from admission.ddd.admission.shared_kernel.dtos.periode import PeriodeDTO
-from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from osis_common.ddd import interface
@@ -80,6 +79,7 @@ class ICalendrierInscription(interface.DomainService):
     pools = [
         DoctorateAdmissionCalendar(),
         ContinuingEducationAdmissionCalendar(),
+        AdmissionPoolNonResidentQuotaCalendar(),
         AdmissionPoolExternalEnrollmentChangeCalendar(),
         AdmissionPoolVipCalendar(),
         AdmissionPoolHueUclPathwayChangeCalendar(),
@@ -88,7 +88,6 @@ class ICalendrierInscription(interface.DomainService):
         AdmissionPoolUe5NonBelgianCalendar(),
         AdmissionPoolHue5BelgiumResidencyCalendar(),
         AdmissionPoolHue5ForeignResidencyCalendar(),
-        AdmissionPoolNonResidentQuotaCalendar(),
     ]
     priority_pools = [
         AdmissionPoolExternalReorientationCalendar(),

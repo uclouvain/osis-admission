@@ -144,13 +144,14 @@ def soumettre_proposition(
         formation.type,
         proposition.equivalence_diplome,
     )
+    pool = AcademicCalendarTypes[cmd.pool]
     type_demande = VerifierProposition.determiner_type_demande(
         proposition,
         titres,
+        pool,
         calendrier_inscription,
         profil_candidat_translator,
     )
-    pool = AcademicCalendarTypes[cmd.pool]
 
     identification = profil_candidat_translator.get_identification(proposition.matricule_candidat)
 

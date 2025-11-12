@@ -35,6 +35,7 @@ from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.c
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.titres_acces import TitresAccesInMemory
 from admission.tests.factories.conditions import AdmissionConditionsDTOFactory
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 
 
@@ -55,6 +56,7 @@ class TypeDemandeTestCase(TestCase):
         type_demande = VerifierProposition.determiner_type_demande(
             PropositionFactory(matricule_candidat='0000000001'),
             titres,
+            AcademicCalendarTypes.ADMISSION_POOL_UE5_BELGIAN,
             self.calendrier_inscription,
             self.profil_candidat_translator,
         )
@@ -69,6 +71,7 @@ class TypeDemandeTestCase(TestCase):
         type_demande = VerifierProposition.determiner_type_demande(
             PropositionFactory(matricule_candidat='0000000001'),
             titres,
+            AcademicCalendarTypes.ADMISSION_POOL_UE5_BELGIAN,
             self.calendrier_inscription,
             self.profil_candidat_translator,
         )
@@ -83,6 +86,7 @@ class TypeDemandeTestCase(TestCase):
         type_demande = VerifierProposition.determiner_type_demande(
             PropositionFactory(matricule_candidat='0000000001'),
             titres,
+            AcademicCalendarTypes.ADMISSION_POOL_UE5_BELGIAN,
             self.calendrier_inscription,
             self.profil_candidat_translator,
         )
@@ -96,6 +100,22 @@ class TypeDemandeTestCase(TestCase):
         type_demande = VerifierProposition.determiner_type_demande(
             PropositionFactory(matricule_candidat='0000000003'),
             titres,
+            AcademicCalendarTypes.ADMISSION_POOL_UE5_BELGIAN,
+            self.calendrier_inscription,
+            self.profil_candidat_translator,
+        )
+        self.assertEqual(type_demande, TypeDemande.ADMISSION)
+
+    def test_type_demande_etranger_pool_contingente(self):
+        self.titres_acces_in_memory.results['0000000001'] = AdmissionConditionsDTOFactory(
+            diplomation_secondaire_etranger=True,
+            diplomation_potentiel_master_belge=True,
+        )
+        titres = self.titres_acces_in_memory.recuperer_titres_access('0000000001', TrainingType.CAPAES)
+        type_demande = VerifierProposition.determiner_type_demande(
+            PropositionFactory(matricule_candidat='0000000001', est_non_resident_au_sens_decret=True),
+            titres,
+            AcademicCalendarTypes.ADMISSION_POOL_NON_RESIDENT_QUOTA,
             self.calendrier_inscription,
             self.profil_candidat_translator,
         )

@@ -552,7 +552,7 @@ class AdmissionPoolNonResidentQuotaCalendar(PoolCalendar):
         ensure_consistency_until_n_plus_6(
             event_reference=cls.event_reference,
             cutover_date=cls.cutover_date,
-            end_date=cls.end_date,
+            end_date=None,
             title="Admission - Contingenté non-résident (au sens du décret)",
         )
 
