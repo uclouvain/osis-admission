@@ -6150,6 +6150,11 @@ msgid "Text size"
 msgstr ""
 
 msgid ""
+"The \"Sufficient\" status requires the equivalence information to be "
+"specified."
+msgstr ""
+
+msgid ""
 "The \"doctoral training\" must be completed before submitting the defense "
 "preparation and the jury proposition."
 msgstr ""

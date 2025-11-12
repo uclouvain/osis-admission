@@ -116,6 +116,7 @@ from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     ExperienceNonTrouveeException,
 )
+from admission.ddd.admission.shared_kernel.dtos import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
     EmplacementDocumentDTO,
 )
@@ -744,6 +745,7 @@ class Proposition(interface.RootEntity):
         auteur_modification: str,
         uuids_experiences_valorisees: set[str],
         type_formation: TrainingType,
+        etudes_secondaires: EtudesSecondairesAdmissionDTO,
     ):
         ModifierStatutChecklistParcoursAnterieurValidatorList(
             checklist=self.checklist_actuelle,
@@ -753,6 +755,8 @@ class Proposition(interface.RootEntity):
             condition_acces=self.condition_acces,
             millesime_condition_acces=self.millesime_condition_acces,
             type_formation=type_formation,
+            type_equivalence_titre_acces=self.type_equivalence_titre_acces,
+            etudes_secondaires=etudes_secondaires,
         ).validate()
 
         self.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist[statut_checklist_cible]
