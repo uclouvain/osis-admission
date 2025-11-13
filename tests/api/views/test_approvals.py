@@ -23,9 +23,10 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+import datetime
 from unittest.mock import patch
 
+import freezegun
 from django.shortcuts import resolve_url
 from osis_history.models import HistoryEntry
 from osis_signature.enums import SignatureState
@@ -229,6 +230,7 @@ class ApprovalsApiTestCase(ApprovalMixin, APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
+@freezegun.freeze_time('2025-01-01')
 class ExternalAprovalApiTestCase(ApprovalMixin, APITestCase):
     def setUp(self):
         self.external_user = UserFactory()
@@ -273,6 +275,19 @@ class ExternalAprovalApiTestCase(ApprovalMixin, APITestCase):
         response = self.client.put(self.url, {"uuid_membre": "unsused", **self.refused_data})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), {'uuid': str(self.admission.uuid)})
+
+    def test_supervision_access_limited_to_15_days(self):
+        self.client.force_authenticate(user=self.external_user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        with freezegun.freeze_time(datetime.datetime(2025, 1, 16, 0, 0, 0)):
+            response = self.client.get(self.url)
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        with freezegun.freeze_time(datetime.datetime(2025, 1, 16, 0, 0, 1)):
+            response = self.client.get(self.url)
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
 class ApproveByPdfApiTestCase(ApprovalMixin, APITestCase):
