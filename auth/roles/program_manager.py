@@ -185,7 +185,7 @@ class ProgramManager(EducationGroupRoleModel):
             )
             & ~is_sent_to_epc,
             'admission.generate_in_progress_analysis_folder': is_part_of_education_group
-            & (continuing.in_progress | doctorate.in_progress),
+            & (continuing.in_progress | doctorate.in_progress | doctorate.signing_in_progress_before_submition),
             'admission.view_checklist': is_part_of_education_group
             & (general.is_submitted | continuing.is_submitted | doctorate.is_submitted),
             'admission.change_checklist': is_part_of_education_group
