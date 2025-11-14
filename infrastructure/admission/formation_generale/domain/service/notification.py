@@ -39,6 +39,7 @@ from osis_mail_template.utils import transform_html_to_text
 from osis_notification.contrib.handlers import EmailNotificationHandler
 from osis_notification.contrib.notification import EmailNotification
 
+from admission.calendar.admission_calendar import SIGLES_WITH_QUOTA
 from admission.ddd import MAIL_INSCRIPTION_DEFAUT, MAIL_VERIFICATEUR_CURSUS
 from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import EmplacementDocument
 from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
@@ -114,14 +115,19 @@ class Notification(INotification):
         }
 
     @classmethod
+    def _confirmer_soumission_contingente(cls, proposition: Proposition, admission: GeneralEducationAdmission):
+        # TODO Create PDF
+        # TODO send mail
+
+    @classmethod
     def confirmer_soumission(cls, proposition: Proposition) -> None:
         # The candidate will be notified only when the proposition is confirmed
         if proposition.statut != ChoixStatutPropositionGenerale.CONFIRMEE:
             return
 
         admission = (
-            BaseAdmission.objects.with_training_management_and_reference()
-            .select_related('candidate')
+            GeneralEducationAdmission.objects.with_training_management_and_reference()
+            .select_related('candidate', 'training')
             .get(uuid=proposition.entity_id.uuid)
         )
 
@@ -148,6 +154,11 @@ class Notification(INotification):
             admission=admission,
             type=AdmissionTask.TaskType.GENERAL_MERGE.name,
         )
+
+        # There is a special mail for training with quota
+        if admission.is_non_resident and admission.training.acronym in SIGLES_WITH_QUOTA:
+            cls._confirmer_soumission_contingente(proposition, admission)
+            return
 
         # Notifier le candidat via mail
         with translation.override(admission.candidate.language):

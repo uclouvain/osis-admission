@@ -88,6 +88,7 @@ class PropositionDTO(interface.DTO):
     attestation_inscription_reguliere_pour_modification_inscription: List[str]
 
     est_non_resident_au_sens_decret: Optional[bool]
+    numero_dossier_ares: str
 
     poste_diplomatique: Optional[PosteDiplomatiqueDTO]
 

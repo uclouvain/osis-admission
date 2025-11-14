@@ -330,6 +330,7 @@ class PropositionInMemoryRepository(
             curriculum=proposition.curriculum,
             est_bachelier_belge=proposition.est_bachelier_belge,
             est_non_resident_au_sens_decret=proposition.est_non_resident_au_sens_decret,
+            numero_dossier_ares=proposition.numero_dossier_ares,
             elements_confirmation=proposition.elements_confirmation,
             est_modification_inscription_externe=proposition.est_modification_inscription_externe,
             formulaire_modification_inscription=proposition.formulaire_modification_inscription,

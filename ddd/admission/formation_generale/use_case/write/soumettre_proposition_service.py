@@ -113,6 +113,7 @@ def soumettre_proposition(
     maximum_propositions_service: 'IMaximumPropositionsAutorisees',
     inscription_tardive_service: 'IInscriptionTardive',
     paiement_frais_dossier_service: 'IPaiementFraisDossier',
+    contingente_service: 'IContingente',
     historique: 'IHistorique',
     financabilite_fetcher: 'IFinancabiliteFetcher',
 ) -> 'PropositionIdentity':
@@ -199,6 +200,10 @@ def soumettre_proposition(
 
     est_inscription_tardive = inscription_tardive_service.est_inscription_tardive(pool)
 
+    numero_dossier_ares = contingente_service.generer_numero_de_dossier_ares_si_necessaire(
+        proposition=proposition,
+    )
+
     # THEN
     financabilite = Financabilite(
         parcours=parcours,
@@ -218,6 +223,7 @@ def soumettre_proposition(
         est_inscription_tardive=est_inscription_tardive,
         profil_candidat_soumis=profil_candidat_soumis,
         doit_payer_frais_dossier=doit_payer_frais_dossier,
+        numero_dossier_ares=numero_dossier_ares,
     )
 
     proposition.specifier_financabilite_resultat_calcul(

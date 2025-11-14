@@ -93,6 +93,7 @@ from admission.ddd.admission.shared_kernel.use_case.write import (
 from admission.infrastructure.admission.formation_generale.domain.service.comptabilite import (
     ComptabiliteTranslator,
 )
+from admission.infrastructure.admission.formation_generale.domain.service.contingente import Contingente
 from admission.infrastructure.admission.formation_generale.domain.service.formation import (
     FormationGeneraleTranslator,
 )
@@ -262,6 +263,7 @@ COMMAND_HANDLERS = {
         paiement_frais_dossier_service=PaiementFraisDossier(),
         historique=HistoriqueGlobal(),
         financabilite_fetcher=FinancabiliteFetcher(),
+        contingente_service=Contingente(),
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,

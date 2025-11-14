@@ -158,6 +158,13 @@ class GeneralEducationAdmission(BaseAdmission):
     )
 
     # Contingenté
+    ares_application_number = models.CharField(
+        verbose_name=_("Ares application number for trainings with quota"),
+        default="",
+        max_length=30,
+        editable=False,
+        unique=True,
+    )
     is_non_resident = models.BooleanField(
         verbose_name=_("Is non-resident (as defined in decree)"),
         null=True,
