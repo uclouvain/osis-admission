@@ -126,3 +126,13 @@ class IPDFGeneration(DomainService):
         temporaire: bool = False,
     ) -> Optional[str]:
         raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def generer_accuse_de_reception_contingente(
+        cls,
+        proposition_repository: IPropositionRepository,
+        profil_candidat_translator: IProfilCandidatTranslator,
+        proposition: Proposition,
+    ) -> Optional[str]:
+        raise NotImplementedError

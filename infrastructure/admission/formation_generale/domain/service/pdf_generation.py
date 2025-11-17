@@ -526,3 +526,29 @@ class PDFGeneration(IPDFGeneration):
         if temporaire:
             return token
         proposition.certificat_refus_sic = [token]
+
+    @classmethod
+    def generer_accuse_de_reception_contingente(
+        cls,
+        proposition_repository: IPropositionRepository,
+        profil_candidat_translator: IProfilCandidatTranslator,
+        proposition: Proposition,
+    ) -> Optional[str]:
+        with translation.override(settings.LANGUAGE_CODE_FR):
+            proposition_dto = proposition_repository.get_dto_for_gestionnaire(
+                proposition.entity_id, UnitesEnseignementTranslator
+            )
+            profil_candidat_identification = profil_candidat_translator.get_identification(
+                proposition.matricule_candidat
+            )
+            token = admission_generate_pdf(
+                admission=None,
+                template='admission/exports/contingente_inscription.html',
+                filename=f'UCLouvain_contingente_accuse_de_reception_{proposition_dto.reference}.pdf',
+                context={
+                    'proposition': proposition_dto,
+                    'profil_candidat_identification': profil_candidat_identification,
+                    'director': cls._get_sic_director(proposition_dto),
+                },
+            )
+        proposition.quota_admission_receipt = [token]

@@ -121,3 +121,12 @@ class PDFGenerationInMemory(IPDFGeneration):
         temporaire: bool = False,
     ) -> Optional[str]:
         pass
+
+    @classmethod
+    def generer_accuse_de_reception_contingente(
+        cls,
+        proposition_repository: IPropositionRepository,
+        profil_candidat_translator: IProfilCandidatTranslator,
+        proposition: Proposition,
+    ) -> Optional[str]:
+        pass

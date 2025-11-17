@@ -58,6 +58,9 @@ from admission.ddd.admission.shared_kernel.repository.i_email_destinataire impor
     IEmailDestinataireRepository,
 )
 from admission.infrastructure.admission.formation_generale.domain.service.formation import FormationGeneraleTranslator
+from admission.infrastructure.admission.formation_generale.domain.service.pdf_generation import PDFGeneration
+from admission.infrastructure.admission.formation_generale.repository.proposition import PropositionRepository
+from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.infrastructure.utils import get_requested_documents_html_lists
 from admission.mail_templates import (
     ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL,
@@ -116,7 +119,8 @@ class Notification(INotification):
 
     @classmethod
     def _confirmer_soumission_contingente(cls, proposition: Proposition, admission: GeneralEducationAdmission):
-        # TODO Create PDF
+        PDFGeneration.generer_accuse_de_reception_contingente(PropositionRepository, ProfilCandidatTranslator, proposition)
+        proposition.save(update_fields=['quota_admission_receipt'])
         # TODO send mail
 
     @classmethod

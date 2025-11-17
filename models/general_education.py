@@ -165,6 +165,11 @@ class GeneralEducationAdmission(BaseAdmission):
         editable=False,
         unique=True,
     )
+    quota_admission_receipt = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('Quota admission receipt'),
+    )
     is_non_resident = models.BooleanField(
         verbose_name=_("Is non-resident (as defined in decree)"),
         null=True,
