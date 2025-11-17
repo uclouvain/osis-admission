@@ -136,7 +136,9 @@
 
     <div id="guillemet-droite"></div>
 
-    <p>{{ 'TODO' }} {{ 'TODO' }} a validé le {{ 'TODO' }} le dépôt d'un dossier de demande d'inscription au programme de {{ 'TODO' }}.</p>
+    <p>{% if profil_candidat_identification.genre == 'H' %}Monsieur{% elif profil_candidat_identification.genre == 'F' %}Madame{% endif %}
+      {{ profil_candidat_identification.prenom }} {{ profil_candidat_identification.nom }} a validé le
+      {% now "j F Y H:i" %} le dépôt d'un dossier de demande d'inscription au programme de {{ proposition.formation.intitule_fr }}.</p>
     <p>Ce dossier s'est vu attribuer le numéro de référence suivant : {{ 'TODO' }}</p>
     <p>Après avoir lu les modalités relatives aux études contingentées disponibles à l'adresse :
       https://uclouvain.be/fr/etudier/inscriptions/etudes-contingentees.html,
@@ -145,7 +147,7 @@
       <li>Le nombre de places disponibles pour des étudiant·e·s non-résident·e·s ;</li>
       <li>Les modalités de confirmation d'inscription ;</li>
       <li>Les conséquences liées au dépôt d'une demande d'inscription dans plusieurs institutions ou pour différents cursus visés par le décret du 16 juin 2006 (*) (c'est-à-dire cursus visés aux articles 3, 1°, 2°, 3° et 7) durant la période d'inscription (20, 21 et 22 août 2024) ;</li>
-      <li>La publication des résultats du tirage au sort se fera le 2 septembre 2024 au plus tard à 18 heures sur le site : https://uclouvain.be/fr/etudier/inscriptions/etudes-contingentees.html ;</li>
+      <li>La publication des résultats du tirage au sort se fera le {{ 'TODO' }} au plus tard à {{ 'TODO' }} sur le site : https://uclouvain.be/fr/etudier/inscriptions/etudes-contingentees.html ;</li>
       <li>La notification d'acceptation ou de refus d'inscription sera envoyée par mail aux seul·e·s étudiant·e·s non-résident·e·s classé·e·s en ordre utile ;</li>
       <li>Les voies de recours.</li>
     </ul>
