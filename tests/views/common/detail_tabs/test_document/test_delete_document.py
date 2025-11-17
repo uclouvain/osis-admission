@@ -32,10 +32,13 @@ import freezegun
 from django.shortcuts import resolve_url
 from django.test import override_settings
 
+from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     IdentifiantBaseEmplacementDocument,
 )
 from admission.models import AdmissionFormItem
+from admission.models.specific_question import SpecificQuestionAnswer
+from admission.tests.factories.form_item import AdmissionFormItemFactory
 from admission.tests.views.common.detail_tabs.test_document import (
     BaseDocumentViewTestCase,
 )
@@ -114,10 +117,17 @@ class DeleteDocumentTestCase(BaseDocumentViewTestCase):
 
         # Requestable document
         specific_question_uuid = str(uuid.UUID(self.sic_free_requestable_document.split('.')[-1]))
-        self.general_admission.specific_question_answers[specific_question_uuid] = [uuid.uuid4()]
+        SpecificQuestionAnswer.objects.create(
+            admission=self.general_admission,
+            form_item=AdmissionFormItemFactory(
+                uuid=specific_question_uuid,
+                type=TypeItemFormulaire.DOCUMENT.name,
+            ),
+            file=[uuid.uuid4()],
+        )
         frozen_time.move_to('2022-01-04')
         self.general_admission.last_update_author = None
-        self.general_admission.save(update_fields=['specific_question_answers', 'last_update_author'])
+        self.general_admission.save(update_fields=['last_update_author'])
 
         self.assertIsNotNone(self.general_admission.requested_documents.get(self.sic_free_requestable_document))
 
@@ -139,7 +149,7 @@ class DeleteDocumentTestCase(BaseDocumentViewTestCase):
 
         self.general_admission.refresh_from_db()
         self.assertIsNone(self.general_admission.requested_documents.get(self.sic_free_requestable_document))
-        self.assertIsNone(self.general_admission.specific_question_answers.get(specific_question_uuid))
+        self.assertIsNone(self.general_admission.get_specific_question_answers_dict().get(specific_question_uuid))
         self.assertFalse(AdmissionFormItem.objects.filter(uuid=specific_question_uuid).exists())
 
         # Check last modification data
@@ -244,10 +254,17 @@ class DeleteDocumentTestCase(BaseDocumentViewTestCase):
 
         # Requestable document
         specific_question_uuid = str(uuid.UUID(self.fac_free_requestable_document.split('.')[-1]))
-        self.general_admission.specific_question_answers[specific_question_uuid] = [uuid.uuid4()]
+        SpecificQuestionAnswer.objects.create(
+            admission=self.general_admission,
+            form_item=AdmissionFormItemFactory(
+                uuid=specific_question_uuid,
+                type=TypeItemFormulaire.DOCUMENT.name,
+            ),
+            file=[uuid.uuid4()],
+        )
         frozen_time.move_to('2022-01-04')
         self.general_admission.last_update_author = None
-        self.general_admission.save(update_fields=['specific_question_answers', 'last_update_author'])
+        self.general_admission.save(update_fields=['last_update_author'])
 
         self.assertIsNotNone(self.general_admission.requested_documents.get(self.fac_free_requestable_document))
 
@@ -269,7 +286,7 @@ class DeleteDocumentTestCase(BaseDocumentViewTestCase):
 
         self.general_admission.refresh_from_db()
         self.assertIsNone(self.general_admission.requested_documents.get(self.fac_free_requestable_document))
-        self.assertIsNone(self.general_admission.specific_question_answers.get(specific_question_uuid))
+        self.assertIsNone(self.general_admission.get_specific_question_answers_dict().get(specific_question_uuid))
         self.assertFalse(AdmissionFormItem.objects.filter(uuid=specific_question_uuid).exists())
 
         # Check last modification data
@@ -466,10 +483,17 @@ class DeleteDocumentTestCase(BaseDocumentViewTestCase):
 
         # Requestable document
         specific_question_uuid = str(uuid.UUID(self.sic_free_requestable_document.split('.')[-1]))
-        self.doctorate_admission.specific_question_answers[specific_question_uuid] = [uuid.uuid4()]
+        SpecificQuestionAnswer.objects.create(
+            admission=self.general_admission,
+            form_item=AdmissionFormItemFactory(
+                uuid=specific_question_uuid,
+                type=TypeItemFormulaire.DOCUMENT.name,
+            ),
+            file=[uuid.uuid4()],
+        )
         frozen_time.move_to('2022-01-04')
         self.doctorate_admission.last_update_author = None
-        self.doctorate_admission.save(update_fields=['specific_question_answers', 'last_update_author'])
+        self.doctorate_admission.save(update_fields=['last_update_author'])
 
         self.assertIsNotNone(self.doctorate_admission.requested_documents.get(self.sic_free_requestable_document))
 
@@ -485,7 +509,7 @@ class DeleteDocumentTestCase(BaseDocumentViewTestCase):
         self.assertEqual(response.status_code, 204)
         self.doctorate_admission.refresh_from_db()
         self.assertIsNone(self.doctorate_admission.requested_documents.get(self.sic_free_requestable_document))
-        self.assertIsNone(self.doctorate_admission.specific_question_answers.get(specific_question_uuid))
+        self.assertIsNone(self.doctorate_admission.get_specific_question_answers_dict().get(specific_question_uuid))
         self.assertFalse(AdmissionFormItem.objects.filter(uuid=specific_question_uuid).exists())
 
         # Check last modification data
@@ -591,10 +615,17 @@ class DeleteDocumentTestCase(BaseDocumentViewTestCase):
 
         # Requestable document
         specific_question_uuid = str(uuid.UUID(self.fac_free_requestable_document.split('.')[-1]))
-        self.doctorate_admission.specific_question_answers[specific_question_uuid] = [uuid.uuid4()]
+        SpecificQuestionAnswer.objects.create(
+            admission=self.general_admission,
+            form_item=AdmissionFormItemFactory(
+                uuid=specific_question_uuid,
+                type=TypeItemFormulaire.DOCUMENT.name,
+            ),
+            file=[uuid.uuid4()],
+        )
         frozen_time.move_to('2022-01-04')
         self.doctorate_admission.last_update_author = None
-        self.doctorate_admission.save(update_fields=['specific_question_answers', 'last_update_author'])
+        self.doctorate_admission.save(update_fields=['last_update_author'])
 
         self.assertIsNotNone(self.doctorate_admission.requested_documents.get(self.fac_free_requestable_document))
 
@@ -610,7 +641,7 @@ class DeleteDocumentTestCase(BaseDocumentViewTestCase):
         self.assertEqual(response.status_code, 204)
         self.doctorate_admission.refresh_from_db()
         self.assertIsNone(self.doctorate_admission.requested_documents.get(self.fac_free_requestable_document))
-        self.assertIsNone(self.doctorate_admission.specific_question_answers.get(specific_question_uuid))
+        self.assertIsNone(self.doctorate_admission.get_specific_question_answers_dict().get(specific_question_uuid))
         self.assertFalse(AdmissionFormItem.objects.filter(uuid=specific_question_uuid).exists())
 
         # Check last modification data

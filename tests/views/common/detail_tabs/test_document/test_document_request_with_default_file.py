@@ -37,6 +37,12 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     OngletsChecklist as OngletsChecklistDoctorale,
 )
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    OngletsChecklist as OngletsChecklistGenerale,
+)
 from admission.ddd.admission.shared_kernel.enums import (
     CritereItemFormulaireFormation,
     Onglets,
@@ -47,12 +53,6 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     StatutEmplacementDocument,
     StatutReclamationEmplacementDocument,
     TypeEmplacementDocument,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    OngletsChecklist as OngletsChecklistGenerale,
 )
 from admission.models import AdmissionFormItemInstantiation
 from admission.tests.factories.categorized_free_document import (
@@ -149,7 +149,7 @@ class DocumentRequestWithDefaultFileTestCase(BaseDocumentViewTestCase):
         # Check that a default answer to the specific question has been specified
         self.assertEqual(
             len(
-                form_item_instantiation.admission.specific_question_answers.get(
+                form_item_instantiation.admission.get_specific_question_answers_dict().get(
                     str(form_item_instantiation.form_item.uuid), []
                 ),
             ),
@@ -269,7 +269,7 @@ class DocumentRequestWithDefaultFileTestCase(BaseDocumentViewTestCase):
         # Check that a default answer to the specific question has been specified
         self.assertEqual(
             len(
-                form_item_instantiation.admission.specific_question_answers.get(
+                form_item_instantiation.admission.get_specific_question_answers_dict().get(
                     str(form_item_instantiation.form_item.uuid), []
                 ),
             ),
@@ -362,7 +362,7 @@ class DocumentRequestWithDefaultFileTestCase(BaseDocumentViewTestCase):
         # Check that a default answer to the specific question has been specified
         self.assertEqual(
             len(
-                form_item_instantiation.admission.specific_question_answers.get(
+                form_item_instantiation.admission.get_specific_question_answers_dict().get(
                     str(form_item_instantiation.form_item.uuid), []
                 ),
             ),
@@ -455,7 +455,7 @@ class DocumentRequestWithDefaultFileTestCase(BaseDocumentViewTestCase):
         # Check that a default answer to the specific question has been specified
         self.assertEqual(
             len(
-                form_item_instantiation.admission.specific_question_answers.get(
+                form_item_instantiation.admission.get_specific_question_answers_dict().get(
                     str(form_item_instantiation.form_item.uuid), []
                 ),
             ),
@@ -575,7 +575,7 @@ class DocumentRequestWithDefaultFileTestCase(BaseDocumentViewTestCase):
         # Check that a default answer to the specific question has been specified
         self.assertEqual(
             len(
-                form_item_instantiation.admission.specific_question_answers.get(
+                form_item_instantiation.admission.get_specific_question_answers_dict().get(
                     str(form_item_instantiation.form_item.uuid), []
                 ),
             ),
@@ -668,7 +668,7 @@ class DocumentRequestWithDefaultFileTestCase(BaseDocumentViewTestCase):
         # Check that a default answer to the specific question has been specified
         self.assertEqual(
             len(
-                form_item_instantiation.admission.specific_question_answers.get(
+                form_item_instantiation.admission.get_specific_question_answers_dict().get(
                     str(form_item_instantiation.form_item.uuid), []
                 ),
             ),

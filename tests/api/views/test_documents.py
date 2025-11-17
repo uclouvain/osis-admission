@@ -572,7 +572,9 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedDoc
         self.assertFalse(EmailNotification.objects.filter(person=self.admission.candidate).exists())
 
         # > Some files must be converted
-        with mock.patch('osis_document_components.services.get_several_remote_metadata') as get_several_remote_metadata_patcher:
+        with mock.patch(
+            'osis_document_components.services.get_several_remote_metadata'
+        ) as get_several_remote_metadata_patcher:
             get_several_remote_metadata_patcher.side_effect = lambda tokens: {
                 token: {
                     **self.file_metadata,
@@ -643,7 +645,9 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedDoc
                 async_post_processing=False,
             )
 
-        with mock.patch('osis_document_components.services.get_several_remote_metadata') as get_several_remote_metadata_patcher:
+        with mock.patch(
+            'osis_document_components.services.get_several_remote_metadata'
+        ) as get_several_remote_metadata_patcher:
             get_several_remote_metadata_patcher.side_effect = lambda tokens: {
                 token: {
                     **self.file_metadata,
@@ -781,7 +785,7 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedDoc
         # Check the updates of the files
         self.assertEqual(self.admission.curriculum, [self.uuid_documents_by_token[curriculum_file[0]]])
         self.assertEqual(
-            self.admission.specific_question_answers,
+            self.admission.get_specific_question_answers_dict(),
             {
                 str(self.non_free_document.form_item.uuid): [
                     str(self.uuid_documents_by_token[non_free_specific_question_file[0]]),
@@ -905,7 +909,7 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedDoc
         # Check the updates of the files
         self.assertEqual(self.admission.curriculum, [self.uuid_documents_by_token[curriculum_file[0]]])
         self.assertEqual(
-            self.admission.specific_question_answers,
+            self.admission.get_specific_question_answers_dict(),
             {
                 str(self.non_free_document.form_item.uuid): [
                     str(self.uuid_documents_by_token[non_free_specific_question_file[0]]),
@@ -1170,7 +1174,9 @@ class ContinuingAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequested
         self.assertFalse(EmailNotification.objects.filter(person=self.admission.candidate).exists())
 
         # > Some files must be converted
-        with mock.patch('osis_document_components.services.get_several_remote_metadata') as get_several_remote_metadata_patcher:
+        with mock.patch(
+            'osis_document_components.services.get_several_remote_metadata'
+        ) as get_several_remote_metadata_patcher:
             get_several_remote_metadata_patcher.side_effect = lambda tokens: {
                 token: {
                     **self.file_metadata,
@@ -1241,7 +1247,9 @@ class ContinuingAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequested
                 async_post_processing=False,
             )
 
-        with mock.patch('osis_document_components.services.get_several_remote_metadata') as get_several_remote_metadata_patcher:
+        with mock.patch(
+            'osis_document_components.services.get_several_remote_metadata'
+        ) as get_several_remote_metadata_patcher:
             get_several_remote_metadata_patcher.side_effect = lambda tokens: {
                 token: {
                     **self.file_metadata,
@@ -1379,7 +1387,7 @@ class ContinuingAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequested
         # Check the updates of the files
         self.assertEqual(self.admission.curriculum, [self.uuid_documents_by_token[curriculum_file[0]]])
         self.assertEqual(
-            self.admission.specific_question_answers,
+            self.admission.get_specific_question_answers_dict(),
             {
                 str(self.non_free_document.form_item.uuid): [
                     str(self.uuid_documents_by_token[non_free_specific_question_file[0]]),
@@ -1503,7 +1511,7 @@ class ContinuingAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequested
         # Check the updates of the files
         self.assertEqual(self.admission.curriculum, [self.uuid_documents_by_token[curriculum_file[0]]])
         self.assertEqual(
-            self.admission.specific_question_answers,
+            self.admission.get_specific_question_answers_dict(),
             {
                 str(self.non_free_document.form_item.uuid): [
                     str(self.uuid_documents_by_token[non_free_specific_question_file[0]]),
@@ -1837,7 +1845,9 @@ class DoctorateAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedD
         self.assertFalse(EmailNotification.objects.filter(person=self.admission.candidate).exists())
 
         # > Some files must be converted
-        with mock.patch('osis_document_components.services.get_several_remote_metadata') as get_several_remote_metadata_patcher:
+        with mock.patch(
+            'osis_document_components.services.get_several_remote_metadata'
+        ) as get_several_remote_metadata_patcher:
             get_several_remote_metadata_patcher.side_effect = lambda tokens: {
                 token: {
                     **self.file_metadata,
@@ -1908,7 +1918,9 @@ class DoctorateAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedD
                 async_post_processing=False,
             )
 
-        with mock.patch('osis_document_components.services.get_several_remote_metadata') as get_several_remote_metadata_patcher:
+        with mock.patch(
+            'osis_document_components.services.get_several_remote_metadata'
+        ) as get_several_remote_metadata_patcher:
             get_several_remote_metadata_patcher.side_effect = lambda tokens: {
                 token: {
                     **self.file_metadata,
@@ -2046,7 +2058,7 @@ class DoctorateAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedD
         # Check the updates of the files
         self.assertEqual(self.admission.curriculum, [self.uuid_documents_by_token[curriculum_file[0]]])
         self.assertEqual(
-            self.admission.specific_question_answers,
+            self.admission.get_specific_question_answers_dict(),
             {
                 str(self.non_free_document.form_item.uuid): [
                     str(self.uuid_documents_by_token[non_free_specific_question_file[0]]),
@@ -2170,7 +2182,7 @@ class DoctorateAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedD
         # Check the updates of the files
         self.assertEqual(self.admission.curriculum, [self.uuid_documents_by_token[curriculum_file[0]]])
         self.assertEqual(
-            self.admission.specific_question_answers,
+            self.admission.get_specific_question_answers_dict(),
             {
                 str(self.non_free_document.form_item.uuid): [
                     str(self.uuid_documents_by_token[non_free_specific_question_file[0]]),

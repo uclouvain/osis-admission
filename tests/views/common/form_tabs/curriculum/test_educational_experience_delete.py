@@ -55,7 +55,7 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
 )
 from admission.models import DoctorateAdmission
 from admission.models import EPCInjection as AdmissionEPCInjection
-from admission.models.base import AdmissionEducationalValuatedExperiences
+from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences
 from admission.models.continuing_education import ContinuingEducationAdmission
 from admission.models.epc_injection import (
     EPCInjectionStatus as AdmissionEPCInjectionStatus,

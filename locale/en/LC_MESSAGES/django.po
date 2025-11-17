@@ -643,6 +643,9 @@ msgstr ""
 msgid "Another admission has been submitted."
 msgstr ""
 
+msgid "Answer"
+msgstr ""
+
 msgid ""
 "Answer according to the European Framework of Reference for Languages (CEFR) "
 "classification. Detailed explanations of this framework can be found at <a "
