@@ -25,7 +25,7 @@
 ##############################################################################
 import itertools
 import uuid
-from typing import Dict, Set
+from typing import Dict, List, Set, Union
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -78,7 +78,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE,
     STATUTS_PROPOSITION_DOCTORALE_PEU_AVANCEE,
 )
-from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE,
 )
@@ -86,7 +85,11 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_NON_SOUMISE,
     STATUTS_PROPOSITION_GENERALE_NON_SOUMISE_OU_FRAIS_DOSSIER_EN_ATTENTE,
 )
-from admission.ddd.admission.shared_kernel.repository.i_proposition import CAMPUS_LETTRE_DOSSIER
+from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
+from admission.ddd.admission.shared_kernel.repository.i_proposition import (
+    CAMPUS_LETTRE_DOSSIER,
+)
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     ADMISSION_CONTEXT_BY_ALL_OSIS_EDUCATION_TYPE,
     AnneeInscriptionFormationTranslator,
@@ -96,7 +99,6 @@ from admission.models.epc_injection import (
     EPCInjectionStatus,
     EPCInjectionType,
 )
-from admission.models.form_item import ConfigurableModelFormItemField
 from admission.models.functions import ToChar
 from base.models.academic_calendar import AcademicCalendar
 from base.models.education_group_year import EducationGroupYear
@@ -546,14 +548,6 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         blank=True,
     )
 
-    specific_question_answers = ConfigurableModelFormItemField(
-        blank=True,
-        default=dict,
-        encoder=DjangoJSONEncoder,
-        upload_to=admission_directory_path,
-        education_field_name='training',
-    )
-
     curriculum = FileField(
         blank=True,
         upload_to=admission_directory_path,
@@ -745,45 +739,16 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
 
         return other_admissions
 
-
-class AdmissionEducationalValuatedExperiences(models.Model):
-    baseadmission = models.ForeignKey(
-        BaseAdmission,
-        on_delete=models.CASCADE,
-        to_field='uuid',
-    )
-
-    educationalexperience = models.ForeignKey(
-        'osis_profile.EducationalExperience',
-        on_delete=models.CASCADE,
-        to_field='uuid',
-        related_name='educational_valuated_experiences',
-    )
-
-    is_access_title = models.BooleanField(
-        default=False,
-        verbose_name=_('Is access title of the proposition?'),
-    )
-
-
-class AdmissionProfessionalValuatedExperiences(models.Model):
-    baseadmission = models.ForeignKey(
-        BaseAdmission,
-        on_delete=models.CASCADE,
-        to_field='uuid',
-    )
-
-    professionalexperience = models.ForeignKey(
-        'osis_profile.ProfessionalExperience',
-        on_delete=models.CASCADE,
-        to_field='uuid',
-        related_name='professional_valuated_experiences',
-    )
-
-    is_access_title = models.BooleanField(
-        default=False,
-        verbose_name=_('Is access title of the proposition?'),
-    )
+    def get_specific_question_answers_dict(self) -> Dict[str, Union[str, List[str]]]:
+        """Return a dict of form item uuid to answers, as the old format was."""
+        return {
+            str(answer.form_item.uuid): (
+                list(map(str, answer.file))
+                if answer.form_item.type == TypeItemFormulaire.DOCUMENT.name
+                else answer.answer
+            )
+            for answer in self.specific_question_answers.all()
+        }
 
 
 @receiver(post_save, sender=EducationGroupYear)

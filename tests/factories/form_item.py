@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,25 +24,27 @@
 #
 # ##############################################################################
 import factory
-from factory import fuzzy, Faker
+from factory import Faker, fuzzy
 
-from admission.models import AdmissionFormItem, AdmissionFormItemInstantiation
 from admission.ddd.admission.shared_kernel.enums.question_specifique import (
-    TypeItemFormulaire,
     CritereItemFormulaireFormation,
-    CritereItemFormulaireNationaliteCandidat,
     CritereItemFormulaireLangueEtudes,
+    CritereItemFormulaireNationaliteCandidat,
     CritereItemFormulaireVIP,
     Onglets,
+    TypeItemFormulaire,
 )
+from admission.models import AdmissionFormItem, AdmissionFormItemInstantiation
 from base.tests.factories.academic_year import AcademicYearFactory
 
 
 class AdmissionFormItemFactory(factory.django.DjangoModelFactory):
+    uuid = Faker('uuid4')
     internal_label = Faker('uuid4')
 
     class Meta:
         model = AdmissionFormItem
+        django_get_or_create = ['uuid']
 
     configuration = {}
 

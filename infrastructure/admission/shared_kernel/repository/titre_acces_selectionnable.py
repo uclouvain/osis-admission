@@ -51,10 +51,10 @@ from admission.ddd.admission.shared_kernel.repository.i_titre_acces_selectionnab
     ITitreAccesSelectionnableRepository,
 )
 from admission.models.base import (
-    AdmissionEducationalValuatedExperiences,
-    AdmissionProfessionalValuatedExperiences,
     BaseAdmission,
 )
+from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences, \
+    AdmissionProfessionalValuatedExperiences
 from base.utils.utils import format_academic_year
 from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
     IExperienceParcoursInterneTranslator,
@@ -221,8 +221,7 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
 
         exam = (
             Exam.objects.filter(
-                person=admission.candidate,
-                type__education_group_years=admission.training,
+                admissions__admission=admission,
             )
             .select_related('year')
             .first()

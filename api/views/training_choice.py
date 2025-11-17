@@ -23,7 +23,8 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from drf_spectacular.utils import extend_schema, extend_schema_view
+from django.utils.translation import gettext_lazy as _
+from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
 from rest_framework import status
 from rest_framework.generics import CreateAPIView, RetrieveAPIView, UpdateAPIView
 from rest_framework.response import Response
@@ -43,6 +44,7 @@ from admission.ddd.admission.formation_generale import (
 from admission.ddd.admission.formation_generale.commands import (
     RecupererPeriodeInscriptionSpecifiqueBachelierMedecineDentisterieQuery,
 )
+from admission.models.exam import AdmissionExam
 from admission.utils import (
     get_cached_admission_perm_obj,
     get_cached_continuing_education_admission_perm_obj,
@@ -52,11 +54,17 @@ from backoffice.settings.rest_framework.common_views import (
     DisplayExceptionsByFieldNameAPIMixin,
 )
 from infrastructure.messages_bus import message_bus_instance
+from osis_profile.models import Exam
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 
 @extend_schema_view(
-    get=extend_schema(operation_id='retrieveSpecificEnrolmentPeriods'),
+    get=extend_schema(
+        operation_id='retrieveSpecificEnrolmentPeriods',
+        parameters=[
+            OpenApiParameter(name='year', description=_('The academic year of the period'), type=int),
+        ],
+    ),
 )
 class SpecificEnrolmentPeriodsApiView(APIPermissionRequiredMixin, RetrieveAPIView):
     name = "specific_enrolment_periods"
@@ -66,9 +74,11 @@ class SpecificEnrolmentPeriodsApiView(APIPermissionRequiredMixin, RetrieveAPIVie
     filter_backends = []
 
     def get_object(self):
+        year_param = self.request.query_params.get('year')
+        year = int(year_param) if year_param else None
         return {
             'medicine_dentistry_bachelor': message_bus_instance.invoke(
-                RecupererPeriodeInscriptionSpecifiqueBachelierMedecineDentisterieQuery(),
+                RecupererPeriodeInscriptionSpecifiqueBachelierMedecineDentisterieQuery(annee=year),
             ),
         }
 
@@ -186,7 +196,12 @@ class GeneralUpdateTrainingChoiceAPIView(
                 **serializer.data,
             )
         )
-        self.get_permission_object().update_detailed_status(request.user.person)
+
+        # Remove exam if already specified
+        admission = self.get_permission_object()
+        Exam.objects.filter(admissions__admission=admission).delete()
+
+        admission.update_detailed_status(request.user.person)
         serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

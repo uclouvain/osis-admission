@@ -28,6 +28,7 @@ __all__ = [
     "OutilDeComparaisonEtFusionView",
     "RefuserPropositionFusionHtmxView",
     "ParcoursAnterieurHtmxView",
+    "DoubleCheckDecisionInformationsInjectionSignaletiqueView",
 ]
 
 from django.urls import reverse
@@ -36,7 +37,9 @@ from admission.utils import get_cached_general_education_admission_perm_obj
 from gestion_des_comptes.views.outil_de_comparaison_et_fusion import \
     RefuserPropositionFusionHtmxView as RefuserPropositionFusionHtmxMixinView, \
     OutilDeComparaisonEtFusionView as OutilDeComparaisonEtFusionMixinView, \
-    ParcoursAnterieurHtmxView as ParcoursAnterieurHtmxMixinView
+    ParcoursAnterieurHtmxView as ParcoursAnterieurHtmxMixinView, \
+    DoubleCheckDecisionInformationsInjectionSignaletiqueView as \
+        DoubleCheckDecisionInformationsInjectionSignaletiqueMixinView
 
 
 class OutilDeComparaisonEtFusionView(OutilDeComparaisonEtFusionMixinView):
@@ -81,6 +84,23 @@ class RefuserPropositionFusionHtmxView(RefuserPropositionFusionHtmxMixinView):
         'refuser-proposition-fusion': 'refuser_proposition_fusion/<uuid:uuid>'
     }
     permission_required = "admission.merge_candidate_with_known_person"
+
+    @property
+    def matricule(self) -> str:
+        return self.get_permission_object().candidate.global_id
+
+    def get_permission_object(self):
+        return get_cached_general_education_admission_perm_obj(self.kwargs['uuid'])
+
+
+class DoubleCheckDecisionInformationsInjectionSignaletiqueView(
+    DoubleCheckDecisionInformationsInjectionSignaletiqueMixinView
+):
+    urlpatterns = {
+        'double-check-decision-informations-injection-signaletique':
+            'double-check-decision-informations-injection-signaletique/<uuid:uuid>'
+    }
+    permission_required = "admission.double_check_decision_informations_signaletique"
 
     @property
     def matricule(self) -> str:

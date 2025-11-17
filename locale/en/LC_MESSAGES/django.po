@@ -643,6 +643,9 @@ msgstr ""
 msgid "Another admission has been submitted."
 msgstr ""
 
+msgid "Answer"
+msgstr ""
+
 msgid ""
 "Answer according to the European Framework of Reference for Languages (CEFR) "
 "classification. Detailed explanations of this framework can be found at <a "
@@ -6216,6 +6219,9 @@ msgid ""
 msgstr ""
 
 msgid "The University tuition fee is EUR 0.0."
+msgstr ""
+
+msgid "The academic year of the period"
 msgstr ""
 
 msgid "The admission must be approved by the CDD."

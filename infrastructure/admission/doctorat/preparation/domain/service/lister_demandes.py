@@ -265,9 +265,9 @@ class ListerDemandesService(IListerDemandesService):
                 if not status_values:
                     continue
 
-                current_tab: Optional[Dict[str, Dict[str, ConfigurationStatutChecklist]]] = (
-                    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT.get(tab_name)
-                )
+                current_tab: Optional[
+                    Dict[str, Dict[str, ConfigurationStatutChecklist]]
+                ] = ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT.get(tab_name)
 
                 if not current_tab:
                     continue

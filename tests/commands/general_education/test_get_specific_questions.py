@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -32,17 +32,27 @@ from django.conf import settings
 from django.test import TestCase, override_settings
 from django.utils import translation
 
+from admission.ddd.admission.formation_generale.commands import (
+    RecupererQuestionsSpecifiquesQuery,
+)
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import (
+    QuestionSpecifiqueDTO,
+)
+from admission.ddd.admission.shared_kernel.enums import (
+    CritereItemFormulaireFormation,
+    Onglets,
+    TypeItemFormulaire,
+)
 from admission.models import GeneralEducationAdmission
-from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
-from admission.ddd.admission.shared_kernel.enums import CritereItemFormulaireFormation, Onglets, TypeItemFormulaire
-from admission.ddd.admission.formation_generale.commands import RecupererQuestionsSpecifiquesQuery
+from admission.models.specific_question import SpecificQuestionAnswer
 from admission.tests.factories.form_item import (
+    AdmissionFormItemFactory,
     AdmissionFormItemInstantiationFactory,
-    MessageAdmissionFormItemFactory,
-    TextAdmissionFormItemFactory,
-    DocumentAdmissionFormItemFactory,
-    RadioButtonSelectionAdmissionFormItemFactory,
     CheckboxSelectionAdmissionFormItemFactory,
+    DocumentAdmissionFormItemFactory,
+    MessageAdmissionFormItemFactory,
+    RadioButtonSelectionAdmissionFormItemFactory,
+    TextAdmissionFormItemFactory,
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from base.tests.factories.entity import EntityFactory
@@ -105,7 +115,9 @@ class GetSpecificQuestionsTestCase(TestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        patcher = patch("osis_document_components.services.get_remote_metadata", return_value={"name": "myfile", "size": 1})
+        patcher = patch(
+            "osis_document_components.services.get_remote_metadata", return_value={"name": "myfile", "size": 1}
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
 
@@ -125,13 +137,38 @@ class GetSpecificQuestionsTestCase(TestCase):
         self.document_uuid = uuid.uuid4()
 
     def test_get_specific_questions_with_answers(self):
-        self.admission.specific_question_answers = {
-            str(self.questions_configurations[1].form_item.uuid): 'My answer',
-            str(self.questions_configurations[2].form_item.uuid): [str(self.document_uuid), 'other-token'],
-            str(self.questions_configurations[3].form_item.uuid): '1',
-            str(self.questions_configurations[4].form_item.uuid): ['1', '2'],
-        }
-        self.admission.save()
+        SpecificQuestionAnswer.objects.create(
+            admission=self.admission,
+            form_item=AdmissionFormItemFactory(
+                uuid=str(self.questions_configurations[1].form_item.uuid),
+                type=TypeItemFormulaire.TEXTE.name,
+            ),
+            answer='My answer',
+        )
+        SpecificQuestionAnswer.objects.create(
+            admission=self.admission,
+            form_item=AdmissionFormItemFactory(
+                uuid=str(self.questions_configurations[2].form_item.uuid),
+                type=TypeItemFormulaire.DOCUMENT.name,
+            ),
+            file=[str(self.document_uuid), 'a9eba09d-ff97-4b3a-8924-dc370cffac44'],
+        )
+        SpecificQuestionAnswer.objects.create(
+            admission=self.admission,
+            form_item=AdmissionFormItemFactory(
+                uuid=str(self.questions_configurations[3].form_item.uuid),
+                type=TypeItemFormulaire.TEXTE.name,
+            ),
+            answer='1',
+        )
+        SpecificQuestionAnswer.objects.create(
+            admission=self.admission,
+            form_item=AdmissionFormItemFactory(
+                uuid=str(self.questions_configurations[4].form_item.uuid),
+                type=TypeItemFormulaire.TEXTE.name,
+            ),
+            answer=['1', '2'],
+        )
 
         with translation.override(settings.LANGUAGE_CODE_FR):
             specific_questions: List[QuestionSpecifiqueDTO] = message_bus_instance.invoke(
@@ -180,10 +217,12 @@ class GetSpecificQuestionsTestCase(TestCase):
         self.assertEqual(document_field.onglet, Onglets.CHOIX_FORMATION.name)
         self.assertEqual(document_field.label, 'Champ document')
         self.assertEqual(document_field.label_langue_candidat, 'Document field')
-        self.assertEqual(document_field.valeur_formatee, [self.document_uuid, 'other-token'])
+        self.assertEqual(
+            document_field.valeur_formatee, [self.document_uuid, uuid.UUID('a9eba09d-ff97-4b3a-8924-dc370cffac44')]
+        )
         self.assertEqual(document_field.texte, 'Données détaillées.')
         self.assertEqual(document_field.texte_aide, '')
-        self.assertEqual(document_field.valeur, [str(self.document_uuid), 'other-token'])
+        self.assertEqual(document_field.valeur, [str(self.document_uuid), 'a9eba09d-ff97-4b3a-8924-dc370cffac44'])
 
         # Check properties for a multiple selection field
         self.assertEqual(multiple_selection_field.type, TypeItemFormulaire.SELECTION.name)
