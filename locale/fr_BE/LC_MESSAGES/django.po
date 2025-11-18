@@ -4026,23 +4026,24 @@ msgstr "En brouillon"
 #, python-format
 msgid ""
 "In order to proceed with your enrolment at the university, please go to the "
-"Enrolment Office (see address below) between 1 June and 30 September "
-"%(year)s with the following documents:"
+"Enrolment Office (see address below) between %(documents_start_date)s and "
+"%(documents_end_date)s with the following documents:"
 msgstr ""
 "Afin de finaliser votre inscription à l'Université, veuillez-vous présenter "
-"au Service des inscriptions (voir adresse ci-dessous) entre le 1 juin et le "
-"30 septembre %(year)s muni·e des documents ci-dessous :"
+"au Service des inscriptions (voir adresse ci-dessous) entre le "
+"%(documents_start_date)s et le %(documents_end_date)s muni·e des documents "
+"ci-dessous :"
 
 #, python-format
 msgid ""
 "In order to proceed with your enrolment at the university, please send the "
-"document(s) listed below between 1 June and 30 September %(year)s to <a "
-"href=\"mailto:%(email)s\">%(email)s</a>:"
+"document(s) listed below between %(documents_start_date)s and "
+"%(documents_end_date)s to <a href=\"mailto:%(email)s\">%(email)s</a>:"
 msgstr ""
 "Afin de finaliser votre inscription à l'Université, nous vous remercions de "
-"nous transmettre entre le 1 juin et le 30 septembre %(year)s au plus tard à "
-"l'adresse <a href=\"mailto:%(email)s\">%(email)s</a> le/les document.s "
-"repris ci-dessous :"
+"nous transmettre entre le %(documents_start_date)s et le "
+"%(documents_end_date)s au plus tard à l'adresse <a href=\"mailto:"
+"%(email)s\">%(email)s</a> le/les document.s repris ci-dessous :"
 
 msgid "In payement order"
 msgstr "En ordre de paiement"
@@ -5500,6 +5501,12 @@ msgid ""
 msgstr ""
 "Veuillez consulter le site de votre commission doctorale de domaine pour les "
 "modalités de téléchargement du document."
+
+#, python-format
+msgid ""
+"Please note that the academic year %(year)s begins on %(start_date)s and "
+"ends on %(end_date)s."
+msgstr "Veuillez noter que l'année académique %(year)s débute le %(start_date)s et se termine le %(end_date)s."
 
 #, python-format
 msgid "Please note that the first term begins on %(date)s."
@@ -7431,6 +7438,10 @@ msgstr ""
 #, python-format
 msgid "The type of the admission form item is unknown (%(type)s)."
 msgstr "Le type de l'élément du formulaire d'admission est inconnu (%(type)s)."
+
+#, python-format
+msgid "The university tuition fee is EURO %(montant)s."
+msgstr "Les droits d'inscription à l'Université s'élèvent à %(montant)s EUR."
 
 #, python-format
 msgid ""

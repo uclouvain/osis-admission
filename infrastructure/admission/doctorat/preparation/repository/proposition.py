@@ -124,8 +124,8 @@ from admission.infrastructure.admission.shared_kernel.repository.proposition imp
 )
 from admission.infrastructure.utils import dto_to_dict
 from admission.models import Accounting, AdmissionFormItem, DoctorateAdmission
-from admission.models.specific_question import SpecificQuestionAnswer
 from admission.models.doctorate import PropositionProxy
+from admission.models.specific_question import SpecificQuestionAnswer
 from base.models.academic_year import AcademicYear
 from base.models.education_group_year import EducationGroupYear
 from base.models.entity_version import EntityVersion
@@ -795,6 +795,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 code=admission.doctorate.partial_acronym,
                 annee=admission.doctorate.academic_year.year,
                 date_debut=admission.doctorate.academic_year.start_date,
+                date_fin=admission.doctorate.academic_year.end_date,
                 intitule=(
                     admission.doctorate.title_english
                     if get_language() == settings.LANGUAGE_CODE_EN
