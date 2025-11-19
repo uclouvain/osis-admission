@@ -26,8 +26,8 @@
 import json
 from gettext import gettext
 
-from django.contrib.auth.models import AnonymousUser, User
-from django.test import RequestFactory, TestCase
+from django.contrib.auth.models import User
+from django.test import TestCase
 from django.urls import reverse
 
 from admission.models import SupervisionActor
@@ -36,10 +36,6 @@ from admission.tests.factories.supervision import (
     CaMemberFactory,
     ExternalPromoterFactory,
     PromoterFactory,
-)
-from admission.views.autocomplete.persons import (
-    CandidatesAutocomplete,
-    PromotersAutocomplete,
 )
 from base.models.person import Person
 from base.tests.factories.person import PersonFactory
@@ -60,7 +56,6 @@ class PersonsAutocompleteTestCase(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.factory = RequestFactory()
         cls.user = User.objects.create_user(
             username='jacob',
             password='top_secret',
@@ -87,11 +82,13 @@ class PersonsAutocompleteTestCase(TestCase):
         # Create promoters
         cls.first_promoter = PromoterFactory().person
 
-    def test_candidates_without_query(self):
-        request = self.factory.get(reverse('admission:autocomplete:candidates'))
-        request.user = self.user
+    def test_candidates_redirects_with_anonymous_user(self):
+        response = self.client.get(reverse('admission:autocomplete:candidates'))
+        self.assertEqual(response.status_code, 302)
 
-        response = CandidatesAutocomplete.as_view()(request)
+    def test_candidates_without_query(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('admission:autocomplete:candidates'))
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(
             response.content,
@@ -102,10 +99,8 @@ class PersonsAutocompleteTestCase(TestCase):
         )
 
     def test_candidates_with_name(self):
-        request = self.factory.get(reverse('admission:autocomplete:candidates'), data={'q': 'Poe'})
-        request.user = self.user
-
-        response = CandidatesAutocomplete.as_view()(request)
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('admission:autocomplete:candidates'), data={'q': 'Poe'})
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(
             response.content,
@@ -119,15 +114,8 @@ class PersonsAutocompleteTestCase(TestCase):
         )
 
     def test_candidates_with_registration_id(self):
-        request = self.factory.get(
-            reverse('admission:autocomplete:candidates'),
-            data={
-                'q': '0001',
-            },
-        )
-        request.user = self.user
-
-        response = CandidatesAutocomplete.as_view()(request)
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('admission:autocomplete:candidates'), data={'q': '0001'})
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(
             response.content,
@@ -160,7 +148,6 @@ class PromotersAutocompleteTestCase(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.factory = RequestFactory()
         cls.user = User.objects.create_user(
             username='jacob',
             password='top_secret',
@@ -184,11 +171,13 @@ class PromotersAutocompleteTestCase(TestCase):
 
         cls.url = reverse('admission:autocomplete:promoters')
 
-    def test_without_query(self):
-        request = self.factory.get(self.url)
-        request.user = self.user
+    def test_redirects_with_anonymous_user(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
 
-        response = PromotersAutocomplete.as_view()(request)
+    def test_without_query(self):
+        self.client.force_login(self.user)
+        response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(
             response.content,
@@ -198,10 +187,8 @@ class PromotersAutocompleteTestCase(TestCase):
         )
 
     def test_with_name_for_an_internal_actor(self):
-        request = self.factory.get(self.url, data={'q': 'Poe'})
-        request.user = self.user
-
-        response = PromotersAutocomplete.as_view()(request)
+        self.client.force_login(self.user)
+        response = self.client.get(self.url, data={'q': 'Poe'})
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(
             response.content,
@@ -213,10 +200,8 @@ class PromotersAutocompleteTestCase(TestCase):
         )
 
     def test_with_name_for_an_external_actor(self):
-        request = self.factory.get(self.url, data={'q': 'Doe'})
-        request.user = self.user
-
-        response = PromotersAutocomplete.as_view()(request)
+        self.client.force_login(self.user)
+        response = self.client.get(self.url, data={'q': 'Doe'})
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(
             response.content,
@@ -228,10 +213,8 @@ class PromotersAutocompleteTestCase(TestCase):
         )
 
     def test_with_global_id(self):
-        request = self.factory.get(self.url, data={'q': self.promoter.person.global_id})
-        request.user = self.user
-
-        response = PromotersAutocomplete.as_view()(request)
+        self.client.force_login(self.user)
+        response = self.client.get(self.url, data={'q': self.promoter.person.global_id})
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(
             response.content,
