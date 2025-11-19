@@ -27,8 +27,10 @@ import json
 
 from dal import autocomplete
 from django.conf import settings
+from django.contrib.auth.decorators import login_not_required
 from django.contrib.postgres.search import SearchVector
 from django.db.models import Exists, F, OuterRef, Q
+from django.utils.decorators import method_decorator
 
 from admission.admission_utils.get_actor_option_text import get_actor_option_text
 from admission.auth.roles.candidate import Candidate
@@ -63,6 +65,7 @@ class PersonsAutocomplete:
         ]
 
 
+@method_decorator(login_not_required, name='dispatch')
 class CandidatesAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetView):
     urlpatterns = 'candidates'
 
@@ -185,6 +188,7 @@ class TutorAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetView):
         return qs
 
 
+@method_decorator(login_not_required, name='dispatch')
 class PromotersAutocomplete(autocomplete.Select2ListView):
     urlpatterns = 'promoters'
 

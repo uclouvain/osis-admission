@@ -100,14 +100,8 @@ from epc.models.enums.etat_inscription import EtatInscriptionFormation
 from epc.tests.factories.inscription_programme_annuel import (
     InscriptionProgrammeAnnuelFactory,
 )
-from osis_profile import BE_ISO_CODE, FR_ISO_CODE
-from osis_profile.models.enums.curriculum import Grade
-from epc.models.enums.decision_resultat_cycle import DecisionResultatCycle
-from epc.models.enums.etat_inscription import EtatInscriptionFormation
-from epc.tests.factories.inscription_programme_annuel import (
-    InscriptionProgrammeAnnuelFactory,
-)
 from osis_profile import BE_ISO_CODE
+from osis_profile import FR_ISO_CODE
 from osis_profile.models.enums.curriculum import Grade
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.diploma_title import DiplomaTitleFactory
@@ -499,7 +493,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             form.fields['commission_proximite'].choices,
             [
                 ALL_FEMININE_EMPTY_CHOICE[0],
-                ['{} / {}'.format(ENTITY_CDE, ENTITY_CLSM), ChoixCommissionProximiteCDEouCLSM.choices()],
+                ('{} / {}'.format(ENTITY_CDE, ENTITY_CLSM), ChoixCommissionProximiteCDEouCLSM.choices()),
             ],
         )
 
@@ -555,7 +549,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
             form = response.context['form']
 
-            self.assertEqual(form.fields['nationalite'].widget.choices, ((self.country.iso_code, self.country.name),))
+            self.assertEqual(form.fields['nationalite'].widget.choices, [(self.country.iso_code, self.country.name)])
             self.assertEqual(
                 form.fields['matricule_candidat'].widget.choices,
                 (
