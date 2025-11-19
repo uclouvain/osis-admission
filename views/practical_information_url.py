@@ -25,7 +25,6 @@
 # ##############################################################################
 from urllib.parse import unquote
 
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import RedirectView
 
 from admission.utils import get_practical_information_url
@@ -35,7 +34,7 @@ __all__ = [
 ]
 
 
-class PracticalInformationURL(LoginRequiredMixin, RedirectView):
+class PracticalInformationURL(RedirectView):
     urlpatterns = {
         'practical-information-url': (
             'practical-information-url/<str:training_type>/<str:training_acronym>/<str:partial_training_acronym>/'

@@ -71,7 +71,7 @@ class SpecificQuestionAnswer(models.Model):
                 fields=['admission', 'form_item'], name='admission_specific_question_answers_unique'
             ),
             models.CheckConstraint(
-                check=Q(file__isnull=False) | Q(answer__isnull=False),
+                condition=Q(file__isnull=False) | Q(answer__isnull=False),
                 name='admission_specific_question_answers_file_or_answer',
             ),
         ]

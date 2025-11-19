@@ -25,12 +25,12 @@
 # ##############################################################################
 import datetime
 from contextlib import suppress
+from datetime import date
 
 from django.contrib.postgres.fields import ArrayField
 from django.core.cache import cache
 from django.db import models
 from django.db.models import OuterRef, Prefetch
-from django.utils.datetime_safe import date
 from django.utils.translation import gettext_lazy as _
 from osis_document_components.fields import FileField
 from osis_signature.contrib.fields import SignatureProcessField
@@ -62,26 +62,23 @@ from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import
     StatutEquivalenceTitreAcces,
     TypeEquivalenceTitreAcces,
 )
-from admission.ddd.admission.shared_kernel.dtos.conditions import InfosDetermineesDTO
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.academic_year import AcademicYear
 from base.models.entity_version import EntityVersion
 from base.models.enums.entity_type import SECTOR
-from base.models.person import Person
 from base.utils.cte import CTESubquery
 from ddd.logic.financabilite.commands import DeterminerSiCandidatEstFinancableQuery
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
 from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd.interface import BusinessException
-
 from .base import (
     BaseAdmission,
     BaseAdmissionQuerySet,
     admission_directory_path,
 )
 from .specific_question import SpecificQuestionAnswer
-from .checklist import DoctorateRefusalReason, RefusalReason
+from .checklist import DoctorateRefusalReason
 from .mixins import DocumentCopyModelMixin
 
 __all__ = [

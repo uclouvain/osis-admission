@@ -87,9 +87,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 )
 from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
-from admission.ddd.admission.shared_kernel.repository.i_proposition import (
-    CAMPUS_LETTRE_DOSSIER,
-)
+from admission.ddd.admission.shared_kernel.repository.i_proposition import CAMPUS_LETTRE_DOSSIER
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     ADMISSION_CONTEXT_BY_ALL_OSIS_EDUCATION_TYPE,
     AnneeInscriptionFormationTranslator,
@@ -142,6 +140,7 @@ def training_campus_subquery(training_field: str):
                 'root_group__main_teaching_campus__name',
                 delimiter=',',
                 distinct=True,
+                default=Value('')
             )
         )
         .values('campus_name')[:1]
@@ -647,7 +646,7 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
     class Meta:
         constraints = [
             models.CheckConstraint(
-                check=models.Q(
+                condition=models.Q(
                     # Only the candidate can be valuated
                     valuated_secondary_studies_person_id=models.F("candidate_id"),
                 ),

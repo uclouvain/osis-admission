@@ -25,7 +25,6 @@
 # ##############################################################################
 
 from dal import autocomplete
-from rules.contrib.views import LoginRequiredMixin
 
 __all__ = [
     'CitiesAutocomplete',
@@ -34,7 +33,7 @@ __all__ = [
 from reference.models.zipcode import ZipCode
 
 
-class CitiesAutocomplete(LoginRequiredMixin, autocomplete.Select2QuerySetView):
+class CitiesAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         qs = ZipCode.objects.all()
 
