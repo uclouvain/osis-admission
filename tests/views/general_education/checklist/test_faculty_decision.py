@@ -1290,10 +1290,10 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
 
         # The choices are sorted by category order and then by reason order
         self.assertEqual(choices[0][0], first_refusal_reason.category.name)
-        self.assertEqual(choices[0][1][0], [first_refusal_reason.uuid, first_refusal_reason.name])
-        self.assertEqual(choices[0][1][1], [second_refusal_reason.uuid, second_refusal_reason.name])
+        self.assertEqual(choices[0][1][0], (first_refusal_reason.uuid, first_refusal_reason.name))
+        self.assertEqual(choices[0][1][1], (second_refusal_reason.uuid, second_refusal_reason.name))
         self.assertEqual(choices[1][0], third_refusal_reason.category.name)
-        self.assertEqual(choices[1][1][0], [third_refusal_reason.uuid, third_refusal_reason.name])
+        self.assertEqual(choices[1][1][0], (third_refusal_reason.uuid, third_refusal_reason.name))
 
         # One existing reason is selected
         self.general_admission.refusal_reasons.add(first_refusal_reason)

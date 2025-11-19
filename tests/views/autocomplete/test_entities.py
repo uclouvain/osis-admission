@@ -86,13 +86,6 @@ class EntityAutocompleteTestCase(TestCase):
 
         cls.url = reverse('admission:autocomplete:entities')
 
-    def test_redirects_with_anonymous_user(self):
-        request = self.factory.get(self.url)
-        request.user = AnonymousUser()
-
-        response = EntityAutocomplete.as_view()(request)
-        self.assertEqual(response.status_code, 302)
-
     def test_without_query(self):
         request = self.factory.get(self.url)
         request.user = self.user

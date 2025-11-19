@@ -141,7 +141,6 @@ class ContinuingManagedEducationTrainingsAutocomplete(Select2QuerySetView):
                 state=F('specificiufcinformations__state'),
                 registration_required=F('specificiufcinformations__registration_required'),
             )
-            .select_related('specificiufcinformations')
             .only('acronym')
             .order_by('acronym')
         )
