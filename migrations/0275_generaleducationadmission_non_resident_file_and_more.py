@@ -4,6 +4,7 @@ from django.db import migrations, models
 import osis_document_components.fields
 from django.db.models import Subquery, F, OuterRef, Case, When, Value
 from django.db.models.functions import Coalesce
+from osis_mail_template import MailTemplateMigration
 
 RESIDENT_STUDENT_FORM = "Dossier résident - contingentement"
 RESIDENCE_CERTIFICATE = "Certificat de résidence"
@@ -120,6 +121,58 @@ class Migration(migrations.Migration):
                 default="",
                 max_length=30,
             ),
+        ),
+        migrations.AddField(
+            model_name="generaleducationadmission",
+            name="ares_application_number",
+            field=models.CharField(
+                default="",
+                editable=False,
+                max_length=30,
+                verbose_name="Ares application number for trainings with quota",
+            ),
+        ),
+        migrations.AddConstraint(
+            model_name="generaleducationadmission",
+            constraint=models.UniqueConstraint(
+                condition=models.Q(("ares_application_number", ""), _negated=True),
+                fields=("ares_application_number",),
+                name="unique_admission_general_education_ares_application_number",
+            ),
+        ),
+        migrations.AddField(
+            model_name="generaleducationadmission",
+            name="quota_admission_receipt",
+            field=osis_document_components.fields.FileField(
+                base_field=models.UUIDField(),
+                blank=True,
+                default=list,
+                size=None,
+                verbose_name="Quota admission receipt",
+            ),
+        ),
+        MailTemplateMigration(
+            'osis-admission-contingente-soumission',
+            {
+                'en': '',
+                'fr-be': "[OSIS] Dépôt d'un dossier non-résident pour une formation contingentée {ares_application_number}",
+            },
+            {
+                'en': '',
+                'fr-be': '''<p>Madame, Monsieur,</p>
+<p>Nous accusons bonne réception du dépôt de votre dossier « non-résident » en version digitale,
+pour l'une des formations contingentées : {training_title}.</p>
+<p>Vous trouverez en annexe l'accusé de réception officiel.</p>
+<p>Cet accusé reprend votre numéro de dossier qui sera utilisé pour le tirage au sort.</p>
+<p>Veillez donc à le conserver précieusement.</p>
+<p>Pour plus d'informations sur les modalités qui encadrent ces études contingentées (dates du tirage au sort,
+communication des résultats, ...), nous vous invitons à consulter la page
+<a href="https://uclouvain.be/fr/etudier/inscriptions/etudes-contingentees.html">https://uclouvain.be/fr/etudier/inscriptions/etudes-contingentees.html</a>
+qui sera mise à jour à chaque nouvelle étape de la procédure.</p>
+<p>Nous vous remercions d'avoir choisi notre Institution.</p>
+<p>Le Service des inscriptions de l'UCLouvain</p>
+                    ''',
+            },
         ),
         migrations.RunPython(migrate_specific_questions)
     ]

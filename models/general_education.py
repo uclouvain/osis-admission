@@ -163,7 +163,6 @@ class GeneralEducationAdmission(BaseAdmission):
         default="",
         max_length=30,
         editable=False,
-        unique=True,
     )
     quota_admission_receipt = FileField(
         blank=True,
@@ -573,6 +572,13 @@ class GeneralEducationAdmission(BaseAdmission):
         verbose_name = _("General education admission")
         ordering = ('-created_at',)
         permissions = []
+        constraints = [
+            models.UniqueConstraint(
+                fields=('ares_application_number',),
+                condition=~models.Q(ares_application_number=""),
+                name='unique_admission_general_education_ares_application_number',
+            ),
+        ]
 
     def get_admission_context(self):
         return CONTEXT_GENERAL
