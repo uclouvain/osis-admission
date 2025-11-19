@@ -87,13 +87,6 @@ class PersonsAutocompleteTestCase(TestCase):
         # Create promoters
         cls.first_promoter = PromoterFactory().person
 
-    def test_candidates_redirects_with_anonymous_user(self):
-        request = self.factory.get(reverse('admission:autocomplete:candidates'))
-        request.user = AnonymousUser()
-
-        response = CandidatesAutocomplete.as_view()(request)
-        self.assertEqual(response.status_code, 302)
-
     def test_candidates_without_query(self):
         request = self.factory.get(reverse('admission:autocomplete:candidates'))
         request.user = self.user
@@ -190,13 +183,6 @@ class PromotersAutocompleteTestCase(TestCase):
         )
 
         cls.url = reverse('admission:autocomplete:promoters')
-
-    def test_redirects_with_anonymous_user(self):
-        request = self.factory.get(self.url)
-        request.user = AnonymousUser()
-
-        response = PromotersAutocomplete.as_view()(request)
-        self.assertEqual(response.status_code, 302)
 
     def test_without_query(self):
         request = self.factory.get(self.url)

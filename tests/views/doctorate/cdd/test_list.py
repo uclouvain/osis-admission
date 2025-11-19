@@ -120,6 +120,8 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
     NB_MAX_QUERIES_WITHOUT_SEARCH = 26
     NB_MAX_QUERIES_WITH_SEARCH = 32
 
+    maxDiff = None
+
     @classmethod
     def setUpTestData(cls):
         cls.factory = RequestFactory()
@@ -435,8 +437,8 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             form.fields['commission_proximite'].choices,
             [
                 ALL_FEMININE_EMPTY_CHOICE[0],
-                ['{} / {}'.format(ENTITY_CDE, ENTITY_CLSM), ChoixCommissionProximiteCDEouCLSM.choices()],
-                [ENTITY_CDSS, ChoixCommissionProximiteCDSS.choices()],
+                ('{} / {}'.format(ENTITY_CDE, ENTITY_CLSM), list(ChoixCommissionProximiteCDEouCLSM.choices())),
+                (ENTITY_CDSS, list(ChoixCommissionProximiteCDSS.choices())),
             ],
         )
 
@@ -493,7 +495,7 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             form.fields['commission_proximite'].choices,
             [
                 ALL_FEMININE_EMPTY_CHOICE[0],
-                ('{} / {}'.format(ENTITY_CDE, ENTITY_CLSM), ChoixCommissionProximiteCDEouCLSM.choices()),
+                ('{} / {}'.format(ENTITY_CDE, ENTITY_CLSM), list(ChoixCommissionProximiteCDEouCLSM.choices())),
             ],
         )
 
@@ -522,9 +524,9 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             form.fields['commission_proximite'].choices,
             [
                 ALL_FEMININE_EMPTY_CHOICE[0],
-                ['{} / {}'.format(ENTITY_CDE, ENTITY_CLSM), ChoixCommissionProximiteCDEouCLSM.choices()],
-                [ENTITY_CDSS, ChoixCommissionProximiteCDSS.choices()],
-                [ENTITY_SCIENCES, ChoixSousDomaineSciences.choices()],
+                ('{} / {}'.format(ENTITY_CDE, ENTITY_CLSM), list(ChoixCommissionProximiteCDEouCLSM.choices())),
+                (ENTITY_CDSS, list(ChoixCommissionProximiteCDSS.choices())),
+                (ENTITY_SCIENCES, list(ChoixSousDomaineSciences.choices())),
             ],
         )
 
@@ -552,24 +554,24 @@ class DoctorateAdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             self.assertEqual(form.fields['nationalite'].widget.choices, [(self.country.iso_code, self.country.name)])
             self.assertEqual(
                 form.fields['matricule_candidat'].widget.choices,
-                (
+                [
                     (
                         self.admissions[0].candidate.global_id,
                         '{}, {}'.format(
                             self.admissions[0].candidate.last_name, self.admissions[0].candidate.first_name
                         ),
                     ),
-                ),
+                ],
             )
             self.assertEqual(
                 form.fields['id_promoteur'].widget.choices,
-                (
+                [
                     (
                         self.promoter_data,
                         f'{self.promoter.person.last_name}, {self.promoter.person.first_name} '
                         f'({self.promoter.person.global_id})',
                     ),
-                ),
+                ],
             )
             self.assertEqual(
                 form.fields['institut_these'].widget.choices,

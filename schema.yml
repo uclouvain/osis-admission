@@ -8157,8 +8157,8 @@ components:
       - NON_EUROPEAN_CREDITS
       - NO_CREDIT_SYSTEM
       type: string
-      description: "* `ECTS_CREDITS` - Crédits ECTS\n* `NON_EUROPEAN_CREDITS` - Crédits\
-        \ non-européens\n* `NO_CREDIT_SYSTEM` - Pas de système de crédits "
+      description: "* `ECTS_CREDITS` - Crédits ECTS\n* `NON_EUROPEAN_CREDITS` - Crédits
+        non-européens\n* `NO_CREDIT_SYSTEM` - Pas de système de crédits "
     Exam:
       type: object
       properties:
