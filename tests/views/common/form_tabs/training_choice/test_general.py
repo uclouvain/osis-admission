@@ -59,7 +59,6 @@ from base.forms.utils.choice_field import BLANK_CHOICE_DISPLAY
 from base.models.campus import Campus
 from base.models.enums.education_group_categories import Categories
 from base.models.enums.education_group_types import (
-    EducationGroupTypesEnum,
     TrainingType,
 )
 from base.models.enums.organization_type import MAIN
@@ -67,7 +66,6 @@ from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.campus import CampusFactory
 from base.tests.factories.education_group_year import (
     EducationGroupYearBachelorFactory,
-    EducationGroupYearFactory,
     Master120TrainingFactory,
 )
 from base.tests.factories.entity import EntityWithVersionFactory
@@ -273,14 +271,14 @@ class GeneralTrainingChoiceFormViewTestCase(TestCase):
         self.assertEqual(
             form.fields['general_education_training'].choices,
             [
-                [
+                (
                     self.master_admission.training.acronym,
                     '{} ({}) <span class="training-acronym">{}</span>'.format(
                         self.master_admission.training.title,
                         self.first_campus.name,
                         self.master_admission.training.acronym,
                     ),
-                ]
+                )
             ],
         )
         self.assertEqual(form.fields['general_education_training'].disabled, True)
@@ -565,14 +563,14 @@ class GeneralTrainingChoiceFormViewTestCase(TestCase):
         self.assertEqual(
             form.fields['general_education_training'].choices,
             [
-                [
+                (
                     self.bachelor_admission.training.acronym,
                     '{} ({}) <span class="training-acronym">{}</span>'.format(
                         self.bachelor_admission.training.title,
                         self.first_campus.name,
                         self.bachelor_admission.training.acronym,
                     ),
-                ]
+                )
             ],
         )
         self.assertEqual(form.fields['general_education_training'].disabled, True)

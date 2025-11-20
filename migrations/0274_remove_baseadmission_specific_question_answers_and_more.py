@@ -115,7 +115,7 @@ class Migration(migrations.Migration):
         migrations.AddConstraint(
             model_name="specificquestionanswer",
             constraint=models.CheckConstraint(
-                check=models.Q(("file__isnull", False), ("answer__isnull", False), _connector="OR"),
+                condition=models.Q(("file__isnull", False), ("answer__isnull", False), _connector="OR"),
                 name="admission_specific_question_answers_file_or_answer",
             ),
         ),

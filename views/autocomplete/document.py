@@ -26,7 +26,6 @@
 from typing import Dict, List
 
 from dal_select2.views import Select2ListView
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 
@@ -34,17 +33,17 @@ from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_G
 from admission.ddd.admission.doctorat.preparation import (
     commands as doctorate_education_commands,
 )
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
-    DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION,
-    EMPLACEMENTS_DOCUMENTS_INTERNES,
-    IdentifiantBaseEmplacementDocument,
-)
 from admission.ddd.admission.formation_continue import (
     commands as continuing_education_commands,
 )
 from admission.ddd.admission.formation_generale import (
     commands as general_education_commands,
+)
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION,
+    EMPLACEMENTS_DOCUMENTS_INTERNES,
+    IdentifiantBaseEmplacementDocument,
 )
 from admission.models.base import BaseAdmission
 from infrastructure.messages_bus import message_bus_instance
@@ -57,7 +56,7 @@ __all__ = [
 ]
 
 
-class DocumentTypesForSwappingAutocomplete(LoginRequiredMixin, Select2ListView):
+class DocumentTypesForSwappingAutocomplete(Select2ListView):
     urlpatterns = 'document-types-swap'
     retrieve_documents_command = {
         CONTEXT_GENERAL: general_education_commands.RecupererDocumentsPropositionQuery,

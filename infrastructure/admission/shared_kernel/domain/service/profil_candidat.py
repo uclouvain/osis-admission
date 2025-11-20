@@ -52,7 +52,6 @@ from django.utils.translation import get_language
 from admission.ddd import LANGUES_OBLIGATOIRES_DOCTORAT, NB_MOIS_MIN_VAE
 from admission.ddd.admission.doctorat.preparation.dtos import (
     ConditionsComptabiliteDTO,
-    DoctoratFormationDTO,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.connaissance_langue import (
     ConnaissanceLangueDTO,
@@ -74,7 +73,6 @@ from admission.ddd.admission.shared_kernel.dtos import (
 from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import (
     EtudesSecondairesAdmissionDTO,
 )
-from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from admission.ddd.admission.shared_kernel.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.shared_kernel.dtos.resume import ResumeCandidatDTO
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
@@ -442,6 +440,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             valuated_from_admissions=ArrayAgg(
                 'educational_experience__valuated_from_admission__uuid',
                 filter=Q(educational_experience__valuated_from_admission__isnull=False),
+                default=Value([])
             ),
         )
 
@@ -658,6 +657,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             valuated_training_types=ArrayAgg(
                 'baseadmissions__training__education_group_type__name',
                 filter=Q(baseadmissions__valuated_secondary_studies_person_id=F('pk')),
+                default=Value([])
             ),
         )
 
@@ -758,6 +758,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 valuated_from_admissions=ArrayAgg(
                     'valuated_from_admission__uuid',
                     filter=Q(valuated_from_admission__isnull=False),
+                    default=Value([])
                 ),
                 injecte_par_admission=Exists(
                     AdmissionEPCInjection.objects.filter(
