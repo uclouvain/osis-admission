@@ -100,7 +100,6 @@ from osis_profile.models.enums.education import (
     ForeignDiplomaTypes,
     HighSchoolDiplomaTypes,
 )
-from osis_profile.models.enums.exam import ExamTypes
 from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection
 from osis_profile.models.epc_injection import (
     EPCInjectionStatus as CurriculumEPCInjectionStatus,
