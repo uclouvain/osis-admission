@@ -52,7 +52,7 @@ __all__ = [
     "ExternalApprovalPropositionAPIView",
     "ApproveByPdfPropositionAPIView",
 ]
-EXTERNAL_ACTOR_TOKEN_EXPIRATION_DAYS = 7
+EXTERNAL_ACTOR_TOKEN_EXPIRATION_DAYS = 15
 
 
 class ApprovePropositionMixin:
@@ -154,7 +154,7 @@ class ExternalApprovalPropositionAPIView(ApprovePropositionMixin, APIView):
             not self.actor
             # must be part of supervision group
             or self.actor.process_id != self.get_permission_object().supervision_group_id
-            # must be not older than 7 days
+            # must be not older than 15 days
             or self.actor.states.last().created_at < now() - timedelta(days=EXTERNAL_ACTOR_TOKEN_EXPIRATION_DAYS)
         ):
             raise PermissionDenied
