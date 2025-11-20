@@ -31,10 +31,12 @@ from unittest.mock import call, patch
 
 import freezegun
 from django.conf import settings
+from django.db.models import QuerySet
 from django.shortcuts import resolve_url
 from django.test import override_settings
 from django.utils.translation import gettext
 from osis_document_components.enums import PostProcessingType
+from osis_history.models import HistoryEntry
 from osis_notification.models import EmailNotification
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -282,6 +284,9 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedDoc
         response = self.client.post(self.url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+        response = self.client.put(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
         json_response = response.json()
 
         self.assertEqual(json_response.get('detail'), gettext('You must be invited to complete this admission.'))
@@ -298,6 +303,9 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedDoc
         response = self.client.post(self.url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+        response = self.client.put(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
         json_response = response.json()
 
         self.assertEqual(json_response.get('detail'), gettext('You must be invited to complete this admission.'))
@@ -312,6 +320,9 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedDoc
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         response = self.client.post(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        response = self.client.put(self.url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         json_response = response.json()
@@ -811,6 +822,69 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedDoc
         admission_tasks = AdmissionTask.objects.filter(admission=self.admission)
         self.assertEqual(len(admission_tasks), 1)
         self.assertEqual(admission_tasks[0].type, AdmissionTask.TaskType.GENERAL_FOLDER.name)
+
+    @freezegun.freeze_time('2020-01-02')
+    def test_give_control_back_to_sic_manager_if_there_is_no_requested_document(self):
+        self.client.force_authenticate(user=self.admission.candidate.user)
+
+        self.admission.requested_documents = {
+            'CURRICULUM.CURRICULUM': {
+                **self.manuel_required_params,
+                'status': StatutEmplacementDocument.A_RECLAMER.name,
+            },
+        }
+        self.admission.save()
+
+        response = self.client.put(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()['uuid'], str(self.admission.uuid))
+
+        # Check admission status and request deadline and last modification data
+        self.admission.refresh_from_db()
+        self.assertEqual(self.admission.status, ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC.name)
+        self.assertIsNone(self.admission.requested_documents_deadline)
+        self.assertEqual(self.admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.admission.last_update_author, self.admission.candidate)
+
+        # Check that an history entry is created
+        entries: QuerySet[HistoryEntry] = HistoryEntry.objects.filter(
+            object_uuid=self.admission.uuid,
+        )
+
+        self.assertEqual(len(entries), 1)
+        self.assertCountEqual(entries[0].tags, ['status-changed', 'proposition'])
+
+    @freezegun.freeze_time('2020-01-02')
+    def test_give_control_back_to_fac_manager_if_there_is_no_requested_document(self):
+        self.client.force_authenticate(user=self.admission.candidate.user)
+
+        self.admission.requested_documents = {
+            'CURRICULUM.CURRICULUM': {
+                **self.manuel_required_params,
+                'status': StatutEmplacementDocument.A_RECLAMER.name,
+            },
+        }
+        self.admission.status = ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC.name
+        self.admission.save()
+
+        response = self.client.put(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()['uuid'], str(self.admission.uuid))
+
+        # Check admission status and request deadline and last modification data
+        self.admission.refresh_from_db()
+        self.assertEqual(self.admission.status, ChoixStatutPropositionGenerale.COMPLETEE_POUR_FAC.name)
+        self.assertIsNone(self.admission.requested_documents_deadline)
+        self.assertEqual(self.admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.admission.last_update_author, self.admission.candidate)
+
+        # Check that an history entry is created
+        entries: QuerySet[HistoryEntry] = HistoryEntry.objects.filter(
+            object_uuid=self.admission.uuid,
+        )
+
+        self.assertEqual(len(entries), 1)
+        self.assertCountEqual(entries[0].tags, ['status-changed', 'proposition'])
 
     @freezegun.freeze_time('2020-01-02')
     def test_submit_a_part_of_the_documents(self):
@@ -1413,6 +1487,37 @@ class ContinuingAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequested
         admission_tasks = AdmissionTask.objects.filter(admission=self.admission)
         self.assertEqual(len(admission_tasks), 1)
         self.assertEqual(admission_tasks[0].type, AdmissionTask.TaskType.CONTINUING_FOLDER.name)
+
+    @freezegun.freeze_time('2020-01-02')
+    def test_give_control_back_to_manager_if_there_is_no_requested_document(self):
+        self.client.force_authenticate(user=self.admission.candidate.user)
+
+        self.admission.requested_documents = {
+            'CURRICULUM.CURRICULUM': {
+                **self.manuel_required_params,
+                'status': StatutEmplacementDocument.A_RECLAMER.name,
+            },
+        }
+        self.admission.save()
+
+        response = self.client.put(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()['uuid'], str(self.admission.uuid))
+
+        # Check admission status and request deadline and last modification data
+        self.admission.refresh_from_db()
+        self.assertEqual(self.admission.status, ChoixStatutPropositionContinue.COMPLETEE_POUR_FAC.name)
+        self.assertIsNone(self.admission.requested_documents_deadline)
+        self.assertEqual(self.admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.admission.last_update_author, self.admission.candidate)
+
+        # Check that an history entry is created
+        entries: QuerySet[HistoryEntry] = HistoryEntry.objects.filter(
+            object_uuid=self.admission.uuid,
+        )
+
+        self.assertEqual(len(entries), 1)
+        self.assertCountEqual(entries[0].tags, ['status-changed', 'proposition'])
 
     @freezegun.freeze_time('2020-01-02')
     def test_submit_a_part_of_the_documents(self):
@@ -2084,6 +2189,69 @@ class DoctorateAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedD
         admission_tasks = AdmissionTask.objects.filter(admission=self.admission)
         self.assertEqual(len(admission_tasks), 1)
         self.assertEqual(admission_tasks[0].type, AdmissionTask.TaskType.DOCTORATE_FOLDER.name)
+
+    @freezegun.freeze_time('2020-01-02')
+    def test_give_control_back_to_sic_manager_if_there_is_no_requested_document(self):
+        self.client.force_authenticate(user=self.admission.candidate.user)
+
+        self.admission.requested_documents = {
+            'CURRICULUM.CURRICULUM': {
+                **self.manuel_required_params,
+                'status': StatutEmplacementDocument.A_RECLAMER.name,
+            },
+        }
+        self.admission.save()
+
+        response = self.client.put(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()['uuid'], str(self.admission.uuid))
+
+        # Check admission status and request deadline and last modification data
+        self.admission.refresh_from_db()
+        self.assertEqual(self.admission.status, ChoixStatutPropositionDoctorale.COMPLETEE_POUR_SIC.name)
+        self.assertIsNone(self.admission.requested_documents_deadline)
+        self.assertEqual(self.admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.admission.last_update_author, self.admission.candidate)
+
+        # Check that an history entry is created
+        entries: QuerySet[HistoryEntry] = HistoryEntry.objects.filter(
+            object_uuid=self.admission.uuid,
+        )
+
+        self.assertEqual(len(entries), 1)
+        self.assertCountEqual(entries[0].tags, ['status-changed', 'proposition'])
+
+    @freezegun.freeze_time('2020-01-02')
+    def test_give_control_back_to_fac_manager_if_there_is_no_requested_document(self):
+        self.client.force_authenticate(user=self.admission.candidate.user)
+
+        self.admission.requested_documents = {
+            'CURRICULUM.CURRICULUM': {
+                **self.manuel_required_params,
+                'status': StatutEmplacementDocument.A_RECLAMER.name,
+            },
+        }
+        self.admission.status = ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_FAC.name
+        self.admission.save()
+
+        response = self.client.put(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()['uuid'], str(self.admission.uuid))
+
+        # Check admission status and request deadline and last modification data
+        self.admission.refresh_from_db()
+        self.assertEqual(self.admission.status, ChoixStatutPropositionDoctorale.COMPLETEE_POUR_FAC.name)
+        self.assertIsNone(self.admission.requested_documents_deadline)
+        self.assertEqual(self.admission.modified_at, datetime.datetime.now())
+        self.assertEqual(self.admission.last_update_author, self.admission.candidate)
+
+        # Check that an history entry is created
+        entries: QuerySet[HistoryEntry] = HistoryEntry.objects.filter(
+            object_uuid=self.admission.uuid,
+        )
+
+        self.assertEqual(len(entries), 1)
+        self.assertCountEqual(entries[0].tags, ['status-changed', 'proposition'])
 
     @freezegun.freeze_time('2020-01-02')
     def test_submit_a_part_of_the_documents(self):

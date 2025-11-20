@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,16 +23,24 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List, Dict
+from typing import Dict, List
 
 import attr
 
-from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import EmplacementDocument
+from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import (
+    EmplacementDocument,
+)
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     DocumentsCompletesDifferentsDesReclamesException,
+    DocumentsReclamesException,
     DocumentsReclamesImmediatementNonCompletesException,
 )
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import StatutReclamationEmplacementDocument
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
+    EmplacementDocumentDTO,
+)
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    StatutReclamationEmplacementDocument,
+)
 from base.ddd.utils.business_validator import BusinessValidator
 
 
@@ -56,3 +64,12 @@ class ShouldCompleterTousLesDocumentsReclames(BusinessValidator):
         if len(identifiants_documents_reponses) > 0:
             # The user cannot complete documents that are not requested
             raise DocumentsCompletesDifferentsDesReclamesException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldAvoirAucunDocumentReclame(BusinessValidator):
+    documents_reclames: List[EmplacementDocumentDTO]
+
+    def validate(self, *args, **kwargs):
+        if self.documents_reclames:
+            raise DocumentsReclamesException
