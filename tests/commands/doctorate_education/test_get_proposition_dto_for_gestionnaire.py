@@ -56,13 +56,13 @@ from admission.ddd.admission.doctorat.preparation.dtos import DoctoratFormationD
 from admission.ddd.admission.doctorat.preparation.dtos.proposition import (
     PropositionGestionnaireDTO,
 )
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    DROITS_INSCRIPTION_MONTANT_VALEURS,
+)
 from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import (
     EtatEquivalenceTitreAcces,
     StatutEquivalenceTitreAcces,
     TypeEquivalenceTitreAcces,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    DROITS_INSCRIPTION_MONTANT_VALEURS,
 )
 from admission.models import DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
@@ -157,7 +157,9 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         patcher = patch("osis_document_components.services.get_remote_token", return_value="foobar")
         patcher.start()
         self.addCleanup(patcher.stop)
-        patcher = patch("osis_document_components.services.get_remote_metadata", return_value={"name": "myfile", "size": 1})
+        patcher = patch(
+            "osis_document_components.services.get_remote_metadata", return_value={"name": "myfile", "size": 1}
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
         patcher = patch("osis_document_components.services.confirm_remote_upload", return_value=str(uuid.uuid4()))
@@ -195,6 +197,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
                 intitule_entite_gestion='School entity',
                 credits=self.admission.training.credits,
                 date_debut=self.admission.training.academic_year.start_date,
+                date_fin=self.admission.training.academic_year.end_date,
                 grade_academique='15',
             ),
         )

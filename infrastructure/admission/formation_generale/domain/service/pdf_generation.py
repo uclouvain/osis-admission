@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 import itertools
 from typing import Dict, List, Optional, Union
 
@@ -33,22 +34,6 @@ from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
 
 from admission.constants import ORDERED_CAMPUSES_UUIDS
-from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import (
-    TypeTitreAccesSelectionnable,
-)
-from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import (
-    TitreAccesSelectionnable,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
-    IProfilCandidatTranslator,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_unites_enseignement_translator import (
-    IUnitesEnseignementTranslator,
-)
-from admission.ddd.admission.shared_kernel.dtos.resume import (
-    ResumeEtEmplacementsDocumentsPropositionDTO,
-)
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_generale.commands import (
     RecupererResumeEtEmplacementsDocumentsPropositionQuery,
 )
@@ -68,6 +53,24 @@ from admission.ddd.admission.formation_generale.dtos.proposition import (
 )
 from admission.ddd.admission.formation_generale.repository.i_proposition import (
     IPropositionRepository,
+)
+from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import (
+    TypeTitreAccesSelectionnable,
+)
+from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import (
+    TitreAccesSelectionnable,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
+    IProfilCandidatTranslator,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_unites_enseignement_translator import (
+    IUnitesEnseignementTranslator,
+)
+from admission.ddd.admission.shared_kernel.dtos.resume import (
+    ResumeEtEmplacementsDocumentsPropositionDTO,
+)
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    OngletsDemande,
 )
 from admission.exports.utils import admission_generate_pdf
 from admission.infrastructure.admission.shared_kernel.domain.service.unites_enseignement_translator import (
@@ -433,6 +436,8 @@ class PDFGeneration(IPDFGeneration):
                 'documents_names': documents_names,
                 'director': cls._get_sic_director(proposition_dto),
                 'ORDERED_CAMPUSES_UUIDS': ORDERED_CAMPUSES_UUIDS,
+                'date_debut_documents': datetime.date(proposition_dto.formation.annee, 6, 1),
+                'date_fin_documents': datetime.date(proposition_dto.formation.annee, 9, 30),
             },
             author=gestionnaire,
             language=proposition_dto.langue_contact_candidat,
@@ -481,6 +486,7 @@ class PDFGeneration(IPDFGeneration):
                     'profil_candidat_identification': profil_candidat_identification,
                     'rector': cls._get_sic_rector(),
                     'nombre_credits_formation': nombre_credits_formation,
+                    'date_derniere_inscription': datetime.date(proposition_dto.formation.annee, 9, 30),
                 },
                 author=gestionnaire,
             )

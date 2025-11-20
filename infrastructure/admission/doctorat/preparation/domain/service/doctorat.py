@@ -39,7 +39,9 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     DoctoratNonTrouveException,
 )
 from admission.ddd.admission.doctorat.preparation.dtos import DoctoratFormationDTO
-from admission.ddd.admission.shared_kernel.domain.model.formation import FormationIdentity
+from admission.ddd.admission.shared_kernel.domain.model.formation import (
+    FormationIdentity,
+)
 from admission.ddd.admission.shared_kernel.dtos.campus import CampusDTO
 from base.models.enums.active_status import ActiveStatusEnum
 from base.models.enums.education_group_types import TrainingType
@@ -103,6 +105,7 @@ class DoctoratTranslator(IDoctoratTranslator):
             code=dto.code,
             annee=dto.year,
             date_debut=academic_year.start_date,
+            date_fin=academic_year.end_date,
             intitule=dto.title_fr if get_language() == settings.LANGUAGE_CODE_FR else dto.title_en,
             intitule_fr=dto.title_fr,
             intitule_en=dto.title_en,

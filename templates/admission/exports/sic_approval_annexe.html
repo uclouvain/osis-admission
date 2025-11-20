@@ -6,7 +6,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -142,7 +142,7 @@
     </li>
     <li class="mb-3">☐ <strong>Est inscrit·e à une année préparatoire</strong> durant l'année académique 20... - 20... .</li>
     <li class="mb-3">☑ <strong>Est admis·e aux études</strong> en vue de suivre des études supérieures à temps plein, durant
-      l’année académique {{ proposition.formation.annee|get_academic_year }} avec comme date ultime d’inscription le {{ proposition.formation.annee|get_last_inscription_date|date:"d/m/Y" }}
+      l’année académique {{ proposition.formation.annee|get_academic_year }} avec comme date ultime d’inscription le {{ date_derniere_inscription|date:"d/m/Y" }}
     </li>
     <li class="mb-3">☐ <strong>Est admis·e à une année préparatoire</strong> durant l'année académique {{ proposition.formation.annee|get_academic_year }} avec
       comme date ultime d’inscription le .../.../20... .
