@@ -952,7 +952,7 @@ class CommonSicDecisionApprovalForm(forms.ModelForm):
             'is_mobility': forms.Select(choices=[(None, '-'), (True, _('Yes')), (False, _('No'))]),
             'must_report_to_sic': forms.RadioSelect(choices=[(True, _('Yes')), (False, _('No'))]),
             'communication_to_the_candidate': CKEditorWidget(config_name='comment_link_only'),
-            'must_provide_student_visa_d': forms.CheckboxInput,
+            'must_provide_student_visa_d': forms.RadioSelect(choices=[(True, _('Yes')), (False, _('No'))]),
         }
 
     def __init__(
@@ -1013,8 +1013,7 @@ class CommonSicDecisionApprovalForm(forms.ModelForm):
             self.fields['mobility_months_amount'].required = False
 
         if self.is_admission and candidate_nationality_is_no_ue_5:
-            if self.instance.must_provide_student_visa_d is None:
-                self.initial['must_provide_student_visa_d'] = self.is_general
+            self.fields['must_provide_student_visa_d'].required = True
         else:
             del self.fields['must_provide_student_visa_d']
 

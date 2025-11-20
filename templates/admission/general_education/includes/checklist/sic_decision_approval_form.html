@@ -95,15 +95,7 @@
     </div>
 
     {% if sic_decision_approval_form.must_provide_student_visa_d %}
-      <div class="form-group">
-        <label for="{{ sic_decision_approval_form.must_provide_student_visa_d.id_for_label }}" class="control-label">
-          {{ sic_decision_approval_form.must_provide_student_visa_d.label }}
-        </label>
-        <label style="display: block" class="switch" for="{{ sic_decision_approval_form.must_provide_student_visa_d.id_for_label }}">
-          {{ sic_decision_approval_form.must_provide_student_visa_d }}
-          <span class="slider round"></span>
-        </label>
-      </div>
+      {% bootstrap_field sic_decision_approval_form.must_provide_student_visa_d %}
     {% endif %}
 
     {% if view.is_general %}
