@@ -990,7 +990,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
     @classmethod
     def get_changements_etablissement(cls, matricule: str, annees: List[int]) -> Dict[int, bool]:
         """Inscrit à un autre établissement Belge en N-1
-        (informatiquement : curriculum / en N-1 supérieur belge non-diplômé)"""
+        (informatiquement : curriculum / en N-1 supérieur belge)"""
         qs = dict(
             EducationalExperienceYear.objects.filter(academic_year__year__in=[annee - 1 for annee in annees])
             .annotate(
@@ -998,7 +998,6 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                     EducationalExperienceYear.objects.filter(
                         educational_experience__person__global_id=matricule,
                         educational_experience__country__iso_code=BE_ISO_CODE,
-                        educational_experience__obtained_diploma=False,
                         academic_year__year=OuterRef('academic_year__year'),
                     )
                 ),
