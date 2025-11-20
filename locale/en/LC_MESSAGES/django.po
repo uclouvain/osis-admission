@@ -1109,6 +1109,12 @@ msgstr "Chemistry"
 msgid "CIRE, unlimited stay or foreigner`s card"
 msgstr ""
 
+msgid "CO_DIPLOMATION_132"
+msgstr "132 € - Joint degree"
+
+msgid "CO_DIPLOMATION_901"
+msgstr "901 € - Joint degree"
+
 msgid "CSS class"
 msgstr ""
 
