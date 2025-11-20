@@ -120,6 +120,7 @@ from ddd.logic.financabilite.domain.model.enums.situation import (
     SituationFinancabilite,
 )
 from ddd.logic.learning_unit.commands import LearningUnitAndPartimSearchCommand
+from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile.forms import DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS
 
@@ -754,8 +755,20 @@ class PastExperiencesAdmissionRequirementForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        # Some options are only selectable if they were previously selected (temporary removal)
+        access_conditions_to_exclude = {
+            ConditionAcces.PARCOURS.name,
+        }
+
+        if self.instance.admission_requirement in access_conditions_to_exclude and (
+            not self.is_bound
+            or self.data.get(self.add_prefix('admission_requirement')) == self.instance.admission_requirement
+        ):
+            access_conditions_to_exclude.discard(self.instance.admission_requirement)
+
         self.fields['admission_requirement'].choices = BLANK_CHOICE + recuperer_conditions_acces_par_formation(
             type_formation=self.instance.training.education_group_type.name,
+            conditions_acces_a_exclure=access_conditions_to_exclude,
         )
 
         if self.instance.checklist.get('current', {}).get('parcours_anterieur', {}).get('statut') == 'GEST_REUSSITE':
