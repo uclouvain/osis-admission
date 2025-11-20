@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,8 +27,13 @@ from typing import Optional
 
 import attr
 
-from admission.ddd.admission.doctorat.preparation.domain.model._cotutelle import Cotutelle, pas_de_cotutelle
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import CotutelleNonCompleteException
+from admission.ddd.admission.doctorat.preparation.domain.model._cotutelle import (
+    Cotutelle,
+    pas_de_cotutelle,
+)
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    CotutelleNonCompleteException,
+)
 from base.ddd.utils.business_validator import BusinessValidator
 
 
@@ -39,7 +44,6 @@ class ShouldCotutelleEtreComplete(BusinessValidator):
     def validate(self, *args, **kwargs):
         champs_obligatoires = [
             "motivation",
-            "demande_ouverture",
         ]
         champs_obligatoires_completes = self.cotutelle and all(
             [getattr(self.cotutelle, champ_obligatoire) for champ_obligatoire in champs_obligatoires]

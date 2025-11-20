@@ -1,3 +1,4 @@
+{% load i18n %}
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
   * designed to manage the core business of higher education institutions,
@@ -21,6 +22,17 @@
   * at the root of the source code of this program.  If not,
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
-
-{% url view.base_namespace|add:':cdd-decision-approval-final' uuid=view.kwargs.uuid as cdd_approval_final_url %}
-{% include "admission/general_education/includes/checklist/modal-htmx-reload.html" with modal_id="cdd-decision-approval-final-modal" modal_classes="admission-modal-lg decision-modal" modal_url=cdd_approval_final_url modal_title=_('Approval') %}
+{% if admission.avec_complements_formation %}
+  {% get_current_language as current_language %}
+  <p>
+    <strong>{% translate _("Prerequisite courses:") %}</strong>
+    {% if not admission.complements_formation %}{% translate 'Yes' %}{% endif %}
+  </p>
+  {% if admission.complements_formation %}
+    <ul>
+      {% for formation in admission.complements_formation %}
+        <li>{{ formation.code }} - {% if current_language == "en" and formation.full_title_en %}{{ formation.full_title_en }}{% else %}{{ formation.full_title }}{% endif %}{% if formation.credits %} ({{ formation.credits|floatformat }} ECTS){% endif %}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endif %}
