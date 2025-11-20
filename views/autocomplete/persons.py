@@ -65,7 +65,6 @@ class PersonsAutocomplete:
         ]
 
 
-@method_decorator(login_not_required, name='dispatch')
 class CandidatesAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetView):
     urlpatterns = 'candidates'
 
@@ -188,7 +187,6 @@ class TutorAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetView):
         return qs
 
 
-@method_decorator(login_not_required, name='dispatch')
 class PromotersAutocomplete(autocomplete.Select2ListView):
     urlpatterns = 'promoters'
 

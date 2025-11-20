@@ -25,11 +25,10 @@
 # ##############################################################################
 import json
 
-from django.contrib.auth.models import AnonymousUser, User
-from django.test import RequestFactory, TestCase
+from django.contrib.auth.models import User
+from django.test import TestCase
 from django.urls import reverse
 
-from admission.views.autocomplete.entities import EntityAutocomplete
 from base.models.entity_version import EntityVersion
 from base.models.enums.entity_type import EntityType
 from base.models.enums.organization_type import ACADEMIC_PARTNER, MAIN
@@ -47,7 +46,6 @@ class EntityAutocompleteTestCase(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.factory = RequestFactory()
         cls.user = User.objects.create_user(
             username='jacob',
             password='top_secret',
@@ -86,11 +84,14 @@ class EntityAutocompleteTestCase(TestCase):
 
         cls.url = reverse('admission:autocomplete:entities')
 
-    def test_without_query(self):
-        request = self.factory.get(self.url)
-        request.user = self.user
+    def test_redirects_with_anonymous_user(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
 
-        response = EntityAutocomplete.as_view()(request)
+    def test_without_query(self):
+        self.client.force_login(self.user)
+
+        response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(
             response.content,
@@ -107,10 +108,9 @@ class EntityAutocompleteTestCase(TestCase):
         )
 
     def test_filter_by_entity_type(self):
-        request = self.factory.get(self.url, data={'forward': json.dumps({'entity_type': EntityType.INSTITUTE.name})})
-        request.user = self.user
+        self.client.force_login(self.user)
 
-        response = EntityAutocomplete.as_view()(request)
+        response = self.client.get(self.url, data={'forward': json.dumps({'entity_type': EntityType.INSTITUTE.name})})
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(
             response.content,
@@ -125,10 +125,9 @@ class EntityAutocompleteTestCase(TestCase):
         )
 
     def test_filter_by_organization_type(self):
-        request = self.factory.get(self.url, data={'forward': json.dumps({'organization_type': MAIN})})
-        request.user = self.user
+        self.client.force_login(self.user)
 
-        response = EntityAutocomplete.as_view()(request)
+        response = self.client.get(self.url, data={'forward': json.dumps({'organization_type': MAIN})})
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(
             response.content,
@@ -143,10 +142,9 @@ class EntityAutocompleteTestCase(TestCase):
         )
 
     def test_filter_by_acronym(self):
-        request = self.factory.get(self.url, data={'q': 'I1'})
-        request.user = self.user
+        self.client.force_login(self.user)
 
-        response = EntityAutocomplete.as_view()(request)
+        response = self.client.get(self.url, data={'q': 'I1'})
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(
             response.content,
@@ -159,10 +157,9 @@ class EntityAutocompleteTestCase(TestCase):
         )
 
     def test_filter_by_title(self):
-        request = self.factory.get(self.url, data={'q': 'School'})
-        request.user = self.user
+        self.client.force_login(self.user)
 
-        response = EntityAutocomplete.as_view()(request)
+        response = self.client.get(self.url, data={'q': 'School'})
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(
             response.content,
