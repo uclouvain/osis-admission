@@ -27,24 +27,6 @@ from typing import List, Optional
 
 import attr
 
-from admission.ddd.admission.shared_kernel.domain.model.complement_formation import (
-    ComplementFormationIdentity,
-)
-from admission.ddd.admission.shared_kernel.domain.model.condition_complementaire_approbation import (
-    ConditionComplementaireApprobationIdentity,
-    ConditionComplementaireLibreApprobation,
-)
-from admission.ddd.admission.shared_kernel.domain.model.motif_refus import MotifRefusIdentity
-from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import (
-    TitreAccesSelectionnable,
-)
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
-    STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
-    OngletsDemande,
-    StatutReclamationEmplacementDocument,
-)
-from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_ENVOYABLE_EN_FAC_POUR_DECISION,
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC,
@@ -69,6 +51,7 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
     EtatChecklistDonneesPersonnellesNonValidePourApprouverDemande,
     EtatChecklistFinancabiliteNonValidePourApprouverDemande,
     InformationsAcceptationFacultaireNonSpecifieesException,
+    InformationsEquivalenceNonSpecifieesChecklistException,
     InscriptionTardiveAvecConditionAccesException,
     MotifRefusFacultaireNonSpecifieException,
     ParcoursAnterieurNonSuffisantException,
@@ -79,9 +62,36 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
     TitreAccesEtreSelectionneException,
     TitreAccesEtreSelectionnePourEnvoyerASICException,
 )
+from admission.ddd.admission.shared_kernel.domain.model.complement_formation import (
+    ComplementFormationIdentity,
+)
+from admission.ddd.admission.shared_kernel.domain.model.condition_complementaire_approbation import (
+    ConditionComplementaireApprobationIdentity,
+    ConditionComplementaireLibreApprobation,
+)
+from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import (
+    TypeEquivalenceTitreAcces,
+)
+from admission.ddd.admission.shared_kernel.domain.model.motif_refus import (
+    MotifRefusIdentity,
+)
+from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import (
+    TitreAccesSelectionnable,
+)
+from admission.ddd.admission.shared_kernel.dtos import EtudesSecondairesAdmissionDTO
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
+    EmplacementDocumentDTO,
+)
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
+    OngletsDemande,
+    StatutReclamationEmplacementDocument,
+)
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from base.ddd.utils.business_validator import BusinessValidator
 from base.models.enums.education_group_types import TrainingType
 from epc.models.enums.condition_acces import ConditionAcces
+from osis_profile.models.enums.education import ForeignDiplomaTypes
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -310,6 +320,27 @@ class ShouldConditionAccesEtreSelectionne(BusinessValidator):
             self.condition_acces and self.millesime_condition_acces
         ):
             raise ConditionAccesEtreSelectionneException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldInformationsEquivalenceEtreRenseignees(BusinessValidator):
+    statut: ChoixStatutChecklist
+    type_equivalence_titre_acces: TypeEquivalenceTitreAcces | None
+    type_formation: TrainingType
+    etudes_secondaires: EtudesSecondairesAdmissionDTO
+
+    def validate(self, *args, **kwargs):
+        if (
+            self.statut == ChoixStatutChecklist.GEST_REUSSITE
+            and self.type_formation == TrainingType.BACHELOR
+            and self.etudes_secondaires.diplome_etranger
+            and self.etudes_secondaires.diplome_etranger.type_diplome == ForeignDiplomaTypes.NATIONAL_BACHELOR.name
+            and (
+                not self.type_equivalence_titre_acces
+                or self.type_equivalence_titre_acces == TypeEquivalenceTitreAcces.NON_RENSEIGNE
+            )
+        ):
+            raise InformationsEquivalenceNonSpecifieesChecklistException
 
 
 @attr.dataclass(frozen=True, slots=True)

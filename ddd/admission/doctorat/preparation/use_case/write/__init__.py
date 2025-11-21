@@ -107,9 +107,6 @@ from .specifier_condition_acces_proposition_service import (
 from .specifier_derogation_financabilite_service import (
     specifier_derogation_financabilite,
 )
-from .specifier_equivalence_titre_acces_etranger_proposition_service import (
-    specifier_equivalence_titre_acces_etranger_proposition,
-)
 from .specifier_financabilite_non_concernee_service import (
     specifier_financabilite_non_concernee,
 )

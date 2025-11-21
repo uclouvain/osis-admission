@@ -24,12 +24,6 @@
 #
 # ##############################################################################
 
-from admission.ddd.admission.shared_kernel.repository.i_titre_acces_selectionnable import (
-    ITitreAccesSelectionnableRepository,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
-    IProfilCandidatTranslator,
-)
 from admission.ddd.admission.formation_generale.commands import (
     ModifierStatutChecklistParcoursAnterieurCommand,
 )
@@ -44,6 +38,12 @@ from admission.ddd.admission.formation_generale.domain.service.i_formation impor
 )
 from admission.ddd.admission.formation_generale.repository.i_proposition import (
     IPropositionRepository,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
+    IProfilCandidatTranslator,
+)
+from admission.ddd.admission.shared_kernel.repository.i_titre_acces_selectionnable import (
+    ITitreAccesSelectionnableRepository,
 )
 from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
     IExperienceParcoursInterneTranslator,
@@ -72,12 +72,15 @@ def modifier_statut_checklist_parcours_anterieur(
         uuid_proposition=proposition_id.uuid,
     )
 
+    etudes_secondaires = profil_candidat_translator.get_etudes_secondaires(matricule=proposition.matricule_candidat)
+
     proposition.specifier_statut_checklist_parcours_anterieur(
         statut_checklist_cible=cmd.statut,
         titres_acces_selectionnes=titres_acces_selectionnes,
         auteur_modification=cmd.gestionnaire,
         uuids_experiences_valorisees=uuids_experiences_valorisees,
         type_formation=formation.type,
+        etudes_secondaires=etudes_secondaires,
     )
 
     proposition_repository.save(proposition)
