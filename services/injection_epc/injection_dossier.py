@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,28 +29,28 @@ import re
 import traceback
 import uuid
 from datetime import datetime
-from typing import Dict, List, Tuple, Optional, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import pika
 from django.conf import settings
 from django.db import transaction
-from django.db.models import QuerySet, Exists, OuterRef, Max
+from django.db.models import Exists, Max, OuterRef, QuerySet
 from django.db.models.query_utils import Q
 from osis_history.models.history_entry import HistoryEntry
 from unidecode import unidecode
 
 from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
 from admission.ddd.admission.doctorat.preparation.commands import (
-    RecalculerEmplacementsDocumentsNonLibresPropositionCommand
-    as RecalculerEmplacementsDocumentsNonLibresDoctoratCommand,
+    RecalculerEmplacementsDocumentsNonLibresPropositionCommand as RecalculerEmplacementsDocumentsNonLibresDoctoratCommand,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixTypeAdmission
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixTypeAdmission,
+)
 from admission.ddd.admission.formation_continue.commands import (
     RecalculerEmplacementsDocumentsNonLibresPropositionCommand as RecalculerEmplacementsDocumentsNonLibresIUFCCommand,
 )
 from admission.ddd.admission.formation_generale.commands import (
-    RecalculerEmplacementsDocumentsNonLibresPropositionCommand
-    as RecalculerEmplacementsDocumentsNonLibresGeneralCommand,
+    RecalculerEmplacementsDocumentsNonLibresPropositionCommand as RecalculerEmplacementsDocumentsNonLibresGeneralCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     DROITS_INSCRIPTION_MONTANT_VALEURS,
@@ -58,21 +58,31 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 )
 from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import TypeEquivalenceTitreAcces
 from admission.ddd.admission.shared_kernel.enums import (
-    TypeItemFormulaire, TypeSituationAssimilation,
     ChoixAffiliationSport,
+    TypeItemFormulaire,
+    TypeSituationAssimilation,
 )
-from admission.infrastructure.admission.formation_continue.domain.service.historique import TAGS_APPROBATION_PROPOSITION
-from admission.infrastructure.admission.formation_generale.domain.service.historique import TAGS_AUTORISATION_SIC
+from admission.infrastructure.admission.formation_continue.domain.service.historique import (
+    TAGS_APPROBATION_PROPOSITION,
+)
+from admission.infrastructure.admission.formation_generale.domain.service.historique import (
+    TAGS_AUTORISATION_SIC,
+)
 from admission.infrastructure.utils import (
     CORRESPONDANCE_CHAMPS_CURRICULUM_EXPERIENCE_NON_ACADEMIQUE,
 )
-from admission.models import Accounting, EPCInjection, AdmissionFormItem, DoctorateAdmission
-from admission.models import GeneralEducationAdmission
+from admission.models import (
+    Accounting,
+    AdmissionFormItem,
+    DoctorateAdmission,
+    EPCInjection,
+    GeneralEducationAdmission,
+)
 from admission.models.base import (
     BaseAdmission,
-    AdmissionEducationalValuatedExperiences,
-    AdmissionProfessionalValuatedExperiences,
 )
+from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences, \
+    AdmissionProfessionalValuatedExperiences
 from admission.models.categorized_free_document import CategorizedFreeDocument
 from admission.models.enums.actor_type import ActorType
 from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
@@ -86,12 +96,9 @@ from base.models.person_merge_proposal import PersonMergeProposal
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from education_group.models.enums.cohort_name import CohortName
 from infrastructure.messages_bus import message_bus_instance
-from osis_common.queue.queue_sender import send_message, logger
+from osis_common.queue.queue_sender import logger, send_message
 from osis_common.queue.queue_utils import get_pika_connexion_parameters
-from osis_profile.models import (
-    EducationalExperienceYear,
-    ProfessionalExperience,
-)
+from osis_profile.models import EducationalExperienceYear, ProfessionalExperience
 from osis_profile.services.injection_epc import InjectionEPCCurriculum
 
 DOCUMENT_MAPPING = {
@@ -247,7 +254,7 @@ class InjectionEPCAdmission:
                 "payload": donnees,
                 "status": statut,
                 'last_attempt_date': datetime.now(),
-                "osis_stacktrace": stacktrace
+                "osis_stacktrace": stacktrace,
             },
         )
         return donnees
@@ -306,11 +313,15 @@ class InjectionEPCAdmission:
                 admission=admission,
                 admission_specifique=admission_generale or admission_doctorat,
             ),
-            "donnees_comptables": cls._get_donnees_comptables(
-                admission=admission,
-                comptabilite=comptabilite,
-                admission_specifique=admission_generale or admission_doctorat
-            ) if admission_generale or admission_doctorat else None,
+            "donnees_comptables": (
+                cls._get_donnees_comptables(
+                    admission=admission,
+                    comptabilite=comptabilite,
+                    admission_specifique=admission_generale or admission_doctorat,
+                )
+                if admission_generale or admission_doctorat
+                else None
+            ),
             "adresses": cls._get_adresses(adresses=adresses),
             "equivalence": cls._get_equivalence(
                 admission=admission,
@@ -326,10 +337,7 @@ class InjectionEPCAdmission:
 
     @classmethod
     def _get_equivalence(
-        cls,
-        admission: BaseAdmission,
-        admission_generale: GeneralEducationAdmission,
-        etudes_secondaires: Dict[str, str]
+        cls, admission: BaseAdmission, admission_generale: GeneralEducationAdmission, etudes_secondaires: Dict[str, str]
     ):
         if admission.are_secondary_studies_access_title:
             condition_acces_uuid = etudes_secondaires['osis_uuid']
@@ -348,7 +356,8 @@ class InjectionEPCAdmission:
             "statut": admission_generale.foreign_access_title_equivalency_status,
             "date": (
                 admission_generale.foreign_access_title_equivalency_effective_date.strftime("%d/%m/%Y")
-                if admission_generale.foreign_access_title_equivalency_effective_date else None
+                if admission_generale.foreign_access_title_equivalency_effective_date
+                else None
             ),
             "etat": admission_generale.foreign_access_title_equivalency_state,
             "condition_acces_uuid": condition_acces_uuid,
@@ -357,8 +366,9 @@ class InjectionEPCAdmission:
     @classmethod
     def _recuperer_documents_specifiques(cls, admission):
         documents_specifiques = []
+        specific_question_answers = admission.get_specific_question_answers_dict()
         form_items = AdmissionFormItem.objects.filter(
-            uuid__in=admission.specific_question_answers.keys(),
+            uuid__in=specific_question_answers.keys(),
             type=TypeItemFormulaire.DOCUMENT.name,
         )
         for form_item in form_items:
@@ -369,7 +379,7 @@ class InjectionEPCAdmission:
             documents_specifiques.append(
                 {
                     "type": re.sub(r'[\W_]+', '_', unidecode(label.upper())).strip('_'),
-                    "documents": admission.specific_question_answers[str(form_item.uuid)],
+                    "documents": specific_question_answers[str(form_item.uuid)],
                 }
             )
         return documents_specifiques
@@ -646,7 +656,7 @@ class InjectionEPCAdmission:
         financabilite_checklist = admission.checklist.get('current', {}).get('financabilite', {})
         etat_financabilite = {
             'INITIAL_NON_CONCERNE': EtatFinancabilite.NON_CONCERNE.name,
-            'GEST_REUSSITE': EtatFinancabilite.FINANCABLE.name
+            'GEST_REUSSITE': EtatFinancabilite.FINANCABLE.name,
         }.get(financabilite_checklist.get('statut'))
         est_financable = etat_financabilite == EtatFinancabilite.FINANCABLE.name
         return {
@@ -671,11 +681,13 @@ class InjectionEPCAdmission:
             'situation_financabilite': admission_specifique.financability_rule if admission_specifique else None,
             'utilisateur_financabilite': (
                 admission_specifique.financability_established_by.full_name
-                if admission_specifique and est_financable else None
+                if admission_specifique and est_financable
+                else None
             ),
             'date_financabilite': (
                 admission_specifique.financability_established_on.strftime("%d/%m/%Y")
-                if admission_specifique and est_financable else None
+                if admission_specifique and est_financable
+                else None
             ),
             'derogation_financabilite': financabilite_checklist.get('extra', {}).get('reussite') == 'derogation',
             'reorientation': (
@@ -700,7 +712,9 @@ class InjectionEPCAdmission:
             est_en_bachelier and admission_specifique.cycle_pursuit != PoursuiteDeCycle.YES.name
         )
         if est_en_premiere_annee_de_bachelier:
-            validite, num_offre = formation.cohortyear_set.get(name=CohortName.FIRST_YEAR.name, ).external_id.split(
+            validite, num_offre = formation.cohortyear_set.get(
+                name=CohortName.FIRST_YEAR.name,
+            ).external_id.split(
                 '_'
             )[3:5]
         else:
@@ -718,8 +732,10 @@ class InjectionEPCAdmission:
             "annee_academique": admission.training.academic_year.year,
             "droits_majores": admission_specifique.tuition_fees_dispensation,
             "montant_droits_majores": (
-                ((str(autre_montant) if autre_montant else None)
-                 or DROITS_INSCRIPTION_MONTANT_VALEURS.get(admission_specifique.tuition_fees_amount))
+                (
+                    (str(autre_montant) if autre_montant else None)
+                    or DROITS_INSCRIPTION_MONTANT_VALEURS.get(admission_specifique.tuition_fees_amount)
+                )
             ),
             "allocation_etudes": comptabilite.french_community_study_allowance_application if comptabilite else None,
         }

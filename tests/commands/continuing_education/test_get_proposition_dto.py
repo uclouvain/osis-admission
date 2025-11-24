@@ -33,9 +33,6 @@ from django.test import TestCase, override_settings
 from django.utils.translation import override
 from osis_history.models import HistoryEntry
 
-from admission.ddd.admission.shared_kernel.dtos import AdressePersonnelleDTO
-from admission.ddd.admission.shared_kernel.dtos.campus import CampusDTO
-from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from admission.ddd.admission.formation_continue.commands import (
     RecupererPropositionQuery,
 )
@@ -49,6 +46,9 @@ from admission.ddd.admission.formation_continue.domain.validator.exceptions impo
     PropositionNonTrouveeException,
 )
 from admission.ddd.admission.formation_continue.dtos import PropositionDTO
+from admission.ddd.admission.shared_kernel.dtos import AdressePersonnelleDTO
+from admission.ddd.admission.shared_kernel.dtos.campus import CampusDTO
+from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from admission.models import ContinuingEducationAdmission
 from admission.tests.factories.continuing_education import (
     ContinuingEducationAdmissionFactory,
@@ -249,7 +249,7 @@ class GetPropositionDTOTestCase(TestCase):
         self.assertEqual(result.adresse_email_candidat, self.admission.candidate.private_email)
         self.assertEqual(result.date_changement_statut, self.history_entry.created)
         self.assertEqual(result.candidat_a_plusieurs_demandes, False)
-        self.assertEqual(result.reponses_questions_specifiques, self.admission.specific_question_answers)
+        self.assertEqual(result.reponses_questions_specifiques, self.admission.get_specific_question_answers_dict())
         self.assertEqual(result.curriculum, self.admission.curriculum)
         self.assertEqual(result.equivalence_diplome, self.admission.diploma_equivalence)
         self.assertEqual(result.copie_titre_sejour, self.admission.residence_permit)

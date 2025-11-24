@@ -46,10 +46,10 @@ from admission.forms.admission.curriculum import (
 )
 from admission.models import EPCInjection as AdmissionEPCInjection
 from admission.models.base import (
-    AdmissionEducationalValuatedExperiences,
-    AdmissionProfessionalValuatedExperiences,
     BaseAdmission,
 )
+from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences, \
+    AdmissionProfessionalValuatedExperiences
 from admission.models.checklist import FreeAdditionalApprovalCondition
 from admission.models.epc_injection import (
     EPCInjectionStatus as AdmissionEPCInjectionStatus,

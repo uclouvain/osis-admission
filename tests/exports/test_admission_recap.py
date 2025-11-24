@@ -25,6 +25,7 @@
 # ##############################################################################
 
 import datetime
+import uuid
 from io import BytesIO
 from typing import Dict, List
 from unittest.mock import MagicMock
@@ -889,7 +890,7 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
 
         self.assertEqual(len(admission.pdf_recap), 0)
 
-        with self.assertNumQueriesLessThan(16):
+        with self.assertNumQueriesLessThan(18):
             from admission.exports.admission_recap.admission_async_recap import (
                 continuing_education_admission_pdf_recap_from_task,
             )
@@ -914,7 +915,7 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
 
         self.assertEqual(len(admission.pdf_recap), 0)
 
-        with self.assertNumQueriesLessThan(18):
+        with self.assertNumQueriesLessThan(19):
             from admission.exports.admission_recap.admission_async_recap import (
                 general_education_admission_pdf_recap_from_task,
             )
@@ -1028,9 +1029,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             training__academic_year=cls.academic_year,
             specific_question_answers={
                 str(question.form_item.uuid): (
-                    f'answer-{index}'
-                    if question.form_item.type == TypeItemFormulaire.TEXTE.name
-                    else [f'uuid-file-{index}']
+                    f'answer-{index}' if question.form_item.type == TypeItemFormulaire.TEXTE.name else [uuid.uuid4()]
                 )
                 for index, tab_questions in enumerate(specific_questions.values())
                 for question in tab_questions
@@ -1422,7 +1421,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             adresse_email_candidat='john.doe@example.be',
             date_changement_statut=datetime.datetime(2023, 1, 1),
             candidat_a_plusieurs_demandes=False,
-            reponses_questions_specifiques=cls.admission.specific_question_answers,
+            reponses_questions_specifiques=cls.admission.get_specific_question_answers_dict(),
             curriculum=['uuid-curriculum'],
             equivalence_diplome=['uuid-equivalence-diplome'],
             copie_titre_sejour=['uuid-copie-titre-sejour'],
@@ -1522,7 +1521,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             matricule_candidat='MAT1',
             prenom_candidat='John',
             nom_candidat='Doe',
-            reponses_questions_specifiques=cls.admission.specific_question_answers,
+            reponses_questions_specifiques=cls.admission.get_specific_question_answers_dict(),
             curriculum=['uuid-curriculum'],
             equivalence_diplome=['uuid-equivalence-diplome'],
             elements_confirmation={},
@@ -1606,7 +1605,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             matricule_candidat='MAT1',
             prenom_candidat='John',
             nom_candidat='Doe',
-            reponses_questions_specifiques=cls.admission.specific_question_answers,
+            reponses_questions_specifiques=cls.admission.get_specific_question_answers_dict(),
             curriculum=['uuid-curriculum'],
             elements_confirmation={},
             pdf_recapitulatif=['uuid-pdf-recapitulatif'],
@@ -1893,7 +1892,9 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             f'{IdentifiantBaseEmplacementDocument.QUESTION_SPECIFIQUE.name}.{document_question.uuid}',
         )
         self.assertEqual(attachments[0].label, document_question.label)
-        self.assertEqual(attachments[0].uuids, self.admission.specific_question_answers[document_question.uuid])
+        self.assertEqual(
+            attachments[0].uuids, self.admission.get_specific_question_answers_dict()[document_question.uuid]
+        )
         self.assertFalse(attachments[0].required)
 
     def test_secondary_studies_attachments_for_bachelor_proposition_and_got_belgian_diploma(self):
@@ -2650,7 +2651,9 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             f'{IdentifiantBaseEmplacementDocument.QUESTION_SPECIFIQUE.name}.{document_question.uuid}',
         )
         self.assertEqual(attachments[1].label, document_question.label)
-        self.assertEqual(attachments[1].uuids, self.admission.specific_question_answers[document_question.uuid])
+        self.assertEqual(
+            attachments[1].uuids, self.admission.get_specific_question_answers_dict()[document_question.uuid]
+        )
         self.assertFalse(attachments[1].required)
 
     def test_curriculum_attachments_for_continuing_proposition_with_equivalence(self):
@@ -3161,7 +3164,9 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 f'{IdentifiantBaseEmplacementDocument.QUESTION_SPECIFIQUE.name}.{document_question.uuid}',
             )
             self.assertEqual(attachments[0].label, document_question.label)
-            self.assertEqual(attachments[0].uuids, self.admission.specific_question_answers[document_question.uuid])
+            self.assertEqual(
+                attachments[0].uuids, self.admission.get_specific_question_answers_dict()[document_question.uuid]
+            )
             self.assertFalse(attachments[0].required)
             self.assertEqual(
                 attachments[1].identifier,
@@ -3936,7 +3941,9 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
         document_question = self.specific_questions.get(Onglets.DOCUMENTS.name)[1]
         self.assertEqual(attachments[0].identifier, document_question.uuid)
         self.assertEqual(attachments[0].label, document_question.label)
-        self.assertEqual(attachments[0].uuids, self.admission.specific_question_answers[document_question.uuid])
+        self.assertEqual(
+            attachments[0].uuids, self.admission.get_specific_question_answers_dict()[document_question.uuid]
+        )
         self.assertFalse(attachments[0].required)
 
     def test_training_choice_attachments(self):
@@ -3955,7 +3962,9 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             f'{IdentifiantBaseEmplacementDocument.QUESTION_SPECIFIQUE.name}.{document_question.uuid}',
         )
         self.assertEqual(attachments[0].label, document_question.label)
-        self.assertEqual(attachments[0].uuids, self.admission.specific_question_answers[document_question.uuid])
+        self.assertEqual(
+            attachments[0].uuids, self.admission.get_specific_question_answers_dict()[document_question.uuid]
+        )
         self.assertFalse(attachments[0].required)
 
         with mock.patch.multiple(document_question, requis=True):

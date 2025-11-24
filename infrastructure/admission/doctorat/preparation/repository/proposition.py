@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import uuid
 from datetime import date
 from enum import Enum
 from typing import List, Optional, Union
@@ -33,6 +34,7 @@ from django.db.models import Exists, OuterRef, Subquery
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language, pgettext
+from osis_document_components.utils import is_uuid
 
 from admission.auth.roles.candidate import Candidate
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import (
@@ -90,7 +92,9 @@ from admission.ddd.admission.doctorat.preparation.dtos.motif_refus import MotifR
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
     IPropositionRepository,
 )
-from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import ProfilCandidat
+from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import (
+    ProfilCandidat,
+)
 from admission.ddd.admission.shared_kernel.domain.model.complement_formation import (
     ComplementFormationIdentity,
 )
@@ -99,13 +103,18 @@ from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import
     StatutEquivalenceTitreAcces,
     TypeEquivalenceTitreAcces,
 )
-from admission.ddd.admission.shared_kernel.domain.model.formation import FormationIdentity
-from admission.ddd.admission.shared_kernel.domain.model.motif_refus import MotifRefusIdentity
+from admission.ddd.admission.shared_kernel.domain.model.formation import (
+    FormationIdentity,
+)
+from admission.ddd.admission.shared_kernel.domain.model.motif_refus import (
+    MotifRefusIdentity,
+)
 from admission.ddd.admission.shared_kernel.domain.service.i_unites_enseignement_translator import (
     IUnitesEnseignementTranslator,
 )
 from admission.ddd.admission.shared_kernel.dtos.campus import CampusDTO
 from admission.ddd.admission.shared_kernel.dtos.profil_candidat import ProfilCandidatDTO
+from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.infrastructure.admission.doctorat.preparation.repository._comptabilite import (
     get_accounting_from_admission,
@@ -114,7 +123,8 @@ from admission.infrastructure.admission.shared_kernel.repository.proposition imp
     GlobalPropositionRepository,
 )
 from admission.infrastructure.utils import dto_to_dict
-from admission.models import Accounting, DoctorateAdmission
+from admission.models import Accounting, AdmissionFormItem, DoctorateAdmission
+from admission.models.specific_question import SpecificQuestionAnswer
 from admission.models.doctorate import PropositionProxy
 from base.models.academic_year import AcademicYear
 from base.models.education_group_year import EducationGroupYear
@@ -205,7 +215,7 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
         soumise_le=admission.submitted_at,
         derniere_demande_signature_avant_soumission_le=admission.last_signature_request_before_submission_at,
         comptabilite=get_accounting_from_admission(admission=admission),
-        reponses_questions_specifiques=admission.specific_question_answers,
+        reponses_questions_specifiques=admission.get_specific_question_answers_dict(),
         curriculum=admission.curriculum,
         elements_confirmation=admission.confirmation_elements,
         fiche_archive_signatures_envoyees=admission.archived_record_signatures_sent,
@@ -473,7 +483,6 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'phd_already_done_defense_date': entity.experience_precedente_recherche.date_soutenance,
                 'phd_already_done_no_defense_reason': entity.experience_precedente_recherche.raison_non_soutenue,
                 'archived_record_signatures_sent': entity.fiche_archive_signatures_envoyees,
-                'specific_question_answers': entity.reponses_questions_specifiques,
                 'curriculum': entity.curriculum,
                 'confirmation_elements': entity.elements_confirmation,
                 'submitted_profile': entity.profil_soumis_candidat.to_dict() if entity.profil_soumis_candidat else {},
@@ -564,6 +573,39 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
 
         admission.prerequisite_courses.set([training.uuid for training in entity.complements_formation])
         admission.refusal_reasons.set([motif.uuid for motif in entity.motifs_refus])
+
+        form_items = {
+            str(form_item.uuid): form_item
+            for form_item in AdmissionFormItem.objects.filter(uuid__in=entity.reponses_questions_specifiques.keys())
+        }
+        answers_not_documents = []
+        for form_item_uuid, reponse in entity.reponses_questions_specifiques.items():
+            if form_items[form_item_uuid].type == TypeItemFormulaire.DOCUMENT.name:
+                # Documents need to be saved individually for pre_save to be called on FileField
+                SpecificQuestionAnswer.objects.update_or_create(
+                    admission=admission,
+                    form_item=form_items[form_item_uuid],
+                    defaults={
+                        'file': [uuid.UUID(value) if is_uuid(value) else value for value in reponse],
+                    },
+                )
+            else:
+                answers_not_documents.append(
+                    SpecificQuestionAnswer(
+                        admission=admission,
+                        form_item=form_items[form_item_uuid],
+                        answer=reponse,
+                    )
+                )
+        SpecificQuestionAnswer.objects.bulk_create(
+            answers_not_documents,
+            update_conflicts=True,
+            update_fields=['file', 'answer'],
+            unique_fields=['admission', 'form_item'],
+        )
+        SpecificQuestionAnswer.objects.filter(admission=admission).exclude(
+            form_item__uuid__in=form_items.keys()
+        ).delete()
 
     @classmethod
     def _serialize(cls, inst, field, value):
@@ -834,7 +876,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             modifiee_le=admission.modified_at,
             fiche_archive_signatures_envoyees=admission.archived_record_signatures_sent,
             erreurs=admission.detailed_status or [],
-            reponses_questions_specifiques=admission.specific_question_answers,
+            reponses_questions_specifiques=admission.get_specific_question_answers_dict(),
             curriculum=admission.curriculum,
             elements_confirmation=admission.confirmation_elements,
             soumise_le=admission.submitted_at,

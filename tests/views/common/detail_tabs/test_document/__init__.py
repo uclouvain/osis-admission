@@ -39,14 +39,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formatio
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
-    EMPLACEMENTS_DOCUMENTS_LIBRES_NON_RECLAMABLES,
-    EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES,
-    IDENTIFIANT_BASE_EMPLACEMENT_DOCUMENT_LIBRE_PAR_TYPE,
-    OngletsDemande,
-    StatutReclamationEmplacementDocument,
-    TypeEmplacementDocument,
-)
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
 )
@@ -58,6 +50,14 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     OngletsChecklist as OngletsChecklistGenerale,
+)
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    EMPLACEMENTS_DOCUMENTS_LIBRES_NON_RECLAMABLES,
+    EMPLACEMENTS_DOCUMENTS_LIBRES_RECLAMABLES,
+    IDENTIFIANT_BASE_EMPLACEMENT_DOCUMENT_LIBRE_PAR_TYPE,
+    OngletsDemande,
+    StatutReclamationEmplacementDocument,
+    TypeEmplacementDocument,
 )
 from admission.infrastructure.utils import MODEL_FIELD_BY_FREE_MANAGER_DOCUMENT_TYPE
 from admission.models import (
@@ -171,7 +171,9 @@ class BaseDocumentViewTestCase(TestCase):
         self.addCleanup(patcher.stop)
         patcher = patch(
             'osis_document_components.fields.FileField._confirm_multiple_upload',
-            side_effect=lambda _, value, __: [uuid.uuid4()] if value else [],
+            side_effect=lambda _, values, __: [
+                value if isinstance(value, uuid.UUID) else uuid.uuid4() for value in values
+            ],
         )
         patcher.start()
         self.addCleanup(patcher.stop)

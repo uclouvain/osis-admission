@@ -48,10 +48,11 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     OngletsDemande,
 )
 from admission.models import GeneralEducationAdmission
-from admission.models.base import (
+from admission.models.valuated_epxeriences import (
     AdmissionEducationalValuatedExperiences,
     AdmissionProfessionalValuatedExperiences,
 )
+from admission.models.exam import AdmissionExam
 from admission.tests.factories.curriculum import (
     EducationalExperienceFactory,
     EducationalExperienceYearFactory,
