@@ -32,7 +32,6 @@ from rules import RuleSet
 from admission.auth.predicates import continuing, doctorate, general
 from admission.auth.predicates.common import (
     candidate_has_other_doctorate_or_general_admissions,
-    candidate_has_other_general_admissions,
     has_scope,
     is_debug,
 )
@@ -95,7 +94,7 @@ class CentralManager(EntityRoleModel):
                     (continuing.in_manager_status | continuing.in_progress)
                     & ~candidate_has_other_doctorate_or_general_admissions
                 )
-                | ((doctorate.in_sic_status | doctorate.in_progress) & ~candidate_has_other_general_admissions)
+                | (doctorate.in_sic_status | doctorate.in_progress)
             )
             & ~is_sent_to_epc
             & ~workflow_injection_signaletique_en_cours,

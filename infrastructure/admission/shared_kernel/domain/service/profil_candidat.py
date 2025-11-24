@@ -351,8 +351,10 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                     equivalence=foreign_high_school_diploma.equivalence,
                     decision_final_equivalence_ue=foreign_high_school_diploma.final_equivalence_decision_ue,
                     daes_ue=foreign_high_school_diploma.access_diploma_to_higher_education_ue,
+                    a_daes_ue=foreign_high_school_diploma.has_access_diploma_to_higher_education_ue,
                     decision_final_equivalence_hors_ue=foreign_high_school_diploma.final_equivalence_decision_not_ue,
                     daes_hors_ue=foreign_high_school_diploma.access_diploma_to_higher_education_not_ue,
+                    a_daes_hors_ue=foreign_high_school_diploma.has_access_diploma_to_higher_education_not_ue,
                     preuve_decision_equivalence=foreign_high_school_diploma.equivalence_decision_proof,
                 )
                 if foreign_high_school_diploma
@@ -990,7 +992,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
     @classmethod
     def get_changements_etablissement(cls, matricule: str, annees: List[int]) -> Dict[int, bool]:
         """Inscrit à un autre établissement Belge en N-1
-        (informatiquement : curriculum / en N-1 supérieur belge non-diplômé)"""
+        (informatiquement : curriculum / en N-1 supérieur belge)"""
         qs = dict(
             EducationalExperienceYear.objects.filter(academic_year__year__in=[annee - 1 for annee in annees])
             .annotate(
@@ -998,7 +1000,6 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                     EducationalExperienceYear.objects.filter(
                         educational_experience__person__global_id=matricule,
                         educational_experience__country__iso_code=BE_ISO_CODE,
-                        educational_experience__obtained_diploma=False,
                         academic_year__year=OuterRef('academic_year__year'),
                     )
                 ),

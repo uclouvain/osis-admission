@@ -1109,6 +1109,12 @@ msgstr "Chemistry"
 msgid "CIRE, unlimited stay or foreigner`s card"
 msgstr ""
 
+msgid "CO_DIPLOMATION_132"
+msgstr "132 € - Joint degree"
+
+msgid "CO_DIPLOMATION_901"
+msgstr "901 € - Joint degree"
+
 msgid "CSS class"
 msgstr ""
 
@@ -3551,6 +3557,11 @@ msgid ""
 "application to the SIC by selecting the appropriate button below."
 msgstr ""
 
+msgid ""
+"If your equivalency decision does not give access to the desired training, "
+"do you hold your diploma of aptitude for access to higher education (DAES)?"
+msgstr ""
+
 msgid "Immediately"
 msgstr ""
 
@@ -5855,6 +5866,9 @@ msgstr ""
 msgid "Solidarity student"
 msgstr ""
 
+msgid "Some documents are still requested."
+msgstr ""
+
 msgid "Some errors have been encountered."
 msgstr ""
 
@@ -7515,11 +7529,11 @@ msgstr ""
 #, python-format
 msgid ""
 "You cannot continue your application. The registration procedure for the "
-"<em>%(training_name)s</em> for non-resident students is managed on another "
-"registration platform. We invite you to consult the complete registration "
-"procedure on the following page: <a href=\"https://www.uclouvain.be/en/"
-"enrolment/limited-enrolment-courses\" target=\"_blank\">https://www."
-"uclouvain.be/en/enrolment/limited-enrolment-courses</a>"
+"<em>%(training_name)s</em> for non-resident students is not yet available. "
+"We invite you to consult the complete registration procedure on the "
+"following page: <a href=\"https://www.uclouvain.be/en/enrolment/limited-"
+"enrolment-courses\" target=\"_blank\">https://www.uclouvain.be/en/enrolment/"
+"limited-enrolment-courses</a>"
 msgstr ""
 
 msgid "You cannot enter a language more than once, please correct the form."
