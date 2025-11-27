@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Dict, Optional
+from typing import Optional
 
 from django.forms import Form
 from django.shortcuts import resolve_url
@@ -34,17 +34,11 @@ from django.views.generic import FormView, TemplateView
 from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
 
-from admission.ddd.admission.shared_kernel.commands import (
-    RecupererTitresAccesSelectionnablesPropositionQuery,
-    SpecifierExperienceEnTantQueTitreAccesCommand,
-)
 from admission.ddd.admission.doctorat.preparation.commands import (
     ModifierAuthentificationExperienceParcoursAnterieurCommand,
     ModifierStatutChecklistExperienceParcoursAnterieurCommand,
     ModifierStatutChecklistParcoursAnterieurCommand,
-    RecupererResumePropositionQuery,
     SpecifierConditionAccesPropositionCommand,
-    SpecifierEquivalenceTitreAccesEtrangerPropositionCommand,
     VerifierExperienceCurriculumApresSoumissionQuery,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
@@ -56,8 +50,8 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     ExperiencesAcademiquesNonCompleteesException,
     TitreAccesEtreSelectionneException,
 )
-from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import (
-    TypeTitreAccesSelectionnable,
+from admission.ddd.admission.shared_kernel.commands import (
+    SpecifierExperienceEnTantQueTitreAccesCommand,
 )
 from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
     EtatAuthentificationParcours,
@@ -65,13 +59,8 @@ from admission.ddd.admission.shared_kernel.domain.model.enums.authentification i
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     ExperienceNonTrouveeException,
 )
-from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
-from admission.ddd.admission.shared_kernel.dtos.titre_acces_selectionnable import (
-    TitreAccesSelectionnableDTO,
-)
 from admission.forms.admission.checklist import (
     CommentForm,
-    DoctoratePastExperiencesAdmissionAccessTitleForm,
     DoctoratePastExperiencesAdmissionRequirementForm,
     ExperienceStatusForm,
     SinglePastExperienceAuthenticationForm,
@@ -79,16 +68,11 @@ from admission.forms.admission.checklist import (
     can_edit_experience_authentication,
 )
 from admission.templatetags.admission import authentication_css_class
-from admission.utils import (
-    get_access_titles_names,
-    get_missing_curriculum_periods,
-    get_missing_curriculum_periods_for_doctorate,
-)
+from admission.utils import get_missing_curriculum_periods_for_doctorate
 from admission.views.common.detail_tabs.checklist import ChecklistTabIcon
 from admission.views.common.mixins import AdmissionFormMixin, AdmissionViewMixin
 from admission.views.doctorate.details.checklist.mixins import (
     CheckListDefaultContextMixin,
-    get_internal_experiences,
 )
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.utils.htmx import HtmxPermissionRequiredMixin
@@ -99,7 +83,6 @@ __all__ = [
     'MissingCurriculumPeriodsView',
     'PastExperiencesStatusView',
     'PastExperiencesAdmissionRequirementView',
-    'PastExperiencesAccessTitleEquivalencyView',
     'PastExperiencesAccessTitleView',
     'SinglePastExperienceChangeStatusView',
     'SinglePastExperienceChangeAuthenticationView',
@@ -113,10 +96,6 @@ class PastExperiencesMixin:
     @cached_property
     def past_experiences_admission_requirement_form(self):
         return DoctoratePastExperiencesAdmissionRequirementForm(instance=self.admission, data=self.request.POST or None)
-
-    @cached_property
-    def past_experiences_admission_access_title_equivalency_form(self):
-        return DoctoratePastExperiencesAdmissionAccessTitleForm(instance=self.admission, data=self.request.POST or None)
 
     @property
     def access_title_url(self):
@@ -304,56 +283,6 @@ class PastExperiencesAccessTitleView(
         except BusinessException as exception:
             self.message_on_failure = exception.message
             self.checked = not self.checked
-            return super().form_invalid(form)
-
-        return super().form_valid(form)
-
-
-class PastExperiencesAccessTitleEquivalencyView(
-    PastExperiencesMixin,
-    AdmissionFormMixin,
-    CheckListDefaultContextMixin,
-    HtmxPermissionRequiredMixin,
-    FormView,
-):
-    name = 'past-experiences-access-title-equivalency'
-    urlpatterns = 'past-experiences-access-title-equivalency'
-    permission_required = 'admission.change_checklist'
-    template_name = (
-        'admission/general_education/includes/checklist/previous_experiences_access_title_equivalency_form.html'
-    )
-    htmx_template_name = (
-        'admission/general_education/includes/checklist/previous_experiences_access_title_equivalency_form.html'
-    )
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['past_experiences_admission_access_title_equivalency_form'] = context['form']
-        return context
-
-    def get_form(self, form_class=None):
-        return self.past_experiences_admission_access_title_equivalency_form
-
-    def form_valid(self, form):
-        try:
-            message_bus_instance.invoke(
-                SpecifierEquivalenceTitreAccesEtrangerPropositionCommand(
-                    uuid_proposition=self.admission_uuid,
-                    gestionnaire=self.request.user.person.global_id,
-                    type_equivalence_titre_acces=form.cleaned_data['foreign_access_title_equivalency_type'],
-                    information_a_propos_de_la_restriction=form.cleaned_data[
-                        'foreign_access_title_equivalency_restriction_about'
-                    ],
-                    statut_equivalence_titre_acces=form.cleaned_data['foreign_access_title_equivalency_status'],
-                    etat_equivalence_titre_acces=form.cleaned_data['foreign_access_title_equivalency_state'],
-                    date_prise_effet_equivalence_titre_acces=form.cleaned_data[
-                        'foreign_access_title_equivalency_effective_date'
-                    ],
-                )
-            )
-
-        except MultipleBusinessExceptions as exception:
-            self.message_on_failure = exception.exceptions.pop().message
             return super().form_invalid(form)
 
         return super().form_valid(form)
