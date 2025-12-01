@@ -1040,7 +1040,7 @@ class Command(BaseCommand):
         for acronym in [
             'KINE1BA',
             'LOGO1BA',
-            'VETE1BA',
+            CODE_BACHELIER_VETERINAIRE,
         ]:
             self.instantiate_education_group_question(
                 acronym=acronym,
