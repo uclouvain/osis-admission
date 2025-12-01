@@ -82,8 +82,15 @@ from admission.ddd.admission.shared_kernel.use_case.write import (
     remplir_emplacement_document_par_gestionnaire,
     supprimer_emplacement_document,
 )
-from admission.infrastructure.admission.formation_generale.domain.service.comptabilite import ComptabiliteTranslator
-from admission.infrastructure.admission.formation_generale.domain.service.formation import FormationGeneraleTranslator
+from admission.infrastructure.admission.formation_generale.domain.service.comptabilite import (
+    ComptabiliteTranslator,
+)
+from admission.infrastructure.admission.formation_generale.domain.service.contingente import (
+    Contingente,
+)
+from admission.infrastructure.admission.formation_generale.domain.service.formation import (
+    FormationGeneraleTranslator,
+)
 from admission.infrastructure.admission.formation_generale.domain.service.historique import (
     Historique as HistoriqueFormationGenerale,
 )
@@ -201,6 +208,7 @@ COMMAND_HANDLERS = {
         academic_year_repository=AcademicYearRepository(),
         questions_specifiques_translator=QuestionSpecifiqueTranslator(),
         maximum_propositions_service=MaximumPropositionsAutorisees(),
+        contingente_service=Contingente(),
     ),
     SoumettrePropositionCommand: lambda msg_bus, cmd: soumettre_proposition(
         msg_bus,
@@ -220,6 +228,7 @@ COMMAND_HANDLERS = {
         historique=HistoriqueGlobal(),
         raccrocher_experiences_curriculum=RaccrocherExperiencesCurriculum(),
         validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
+        contingente_service=Contingente(),
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,

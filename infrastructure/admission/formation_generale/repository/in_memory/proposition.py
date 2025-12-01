@@ -68,8 +68,12 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     StatutReclamationEmplacementDocument,
     TypeEmplacementDocument,
 )
-from admission.ddd.admission.shared_kernel.repository.i_proposition import formater_reference
-from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationIdentityFactory
+from admission.ddd.admission.shared_kernel.repository.i_proposition import (
+    formater_reference,
+)
+from admission.ddd.admission.shared_kernel.tests.factory.formation import (
+    FormationIdentityFactory,
+)
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.formation import (
     FormationGeneraleInMemoryTranslator,
 )
@@ -330,6 +334,8 @@ class PropositionInMemoryRepository(
             curriculum=proposition.curriculum,
             est_bachelier_belge=proposition.est_bachelier_belge,
             est_non_resident_au_sens_decret=proposition.est_non_resident_au_sens_decret,
+            accuse_de_reception_contingente=proposition.accuse_de_reception_contingente,
+            numero_dossier_ares=proposition.numero_dossier_ares,
             elements_confirmation=proposition.elements_confirmation,
             est_modification_inscription_externe=proposition.est_modification_inscription_externe,
             formulaire_modification_inscription=proposition.formulaire_modification_inscription,

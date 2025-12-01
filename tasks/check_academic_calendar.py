@@ -45,4 +45,5 @@ def run() -> dict:  # pragma: no cover
     AdmissionAccessConditionsUrl.ensure_consistency_until_n_plus_6()
     AdmissionMedicineDentistryEnrollmentCalendar.ensure_consistency_until_n_plus_6()
     AdmissionPoolMedicineDentistryStandardPeriodCalendar.ensure_consistency_until_n_plus_6()
+    AdmissionNonResidentQuotaResultPublication.ensure_consistency_until_n_plus_6()
     return {}
