@@ -313,7 +313,9 @@
               {% multiple_field_data specific_questions_by_tab|get_item:'CURRICULUM' edit_link_button=curriculum_edit_link_button %}
             </div>
           </div>
-          {% include 'admission/general_education/includes/checklist/previous_experiences_access_title_equivalency_form.html' %}
+          {% if resume_proposition.proposition.formation.type == 'BACHELOR' and resume_proposition.etudes_secondaires.diplome_etranger.type_diplome == 'NATIONAL_BACHELOR' %}
+            {% include 'admission/general_education/includes/checklist/previous_experiences_access_title_equivalency_form.html' %}
+          {% endif %}
           {% include 'admission/general_education/includes/checklist/previous_experiences_prevent_to_choose_success_modal.html' %}
         </div>
 

@@ -569,12 +569,6 @@ COMMAND_HANDLERS = {
         titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
         experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
     ),
-    SpecifierEquivalenceTitreAccesEtrangerPropositionCommand: (
-        lambda msg_bus, cmd: specifier_equivalence_titre_acces_etranger_proposition(
-            cmd,
-            proposition_repository=PropositionRepository(),
-        )
-    ),
     SpecifierBesoinDeDerogationSicCommand: (
         lambda msg_bus, cmd: specifier_besoin_de_derogation(
             cmd,
@@ -766,5 +760,19 @@ COMMAND_HANDLERS = {
     RechercherPromoteursQuery: lambda msg_bus, cmd: rechercher_promoteurs(
         cmd,
         promoteur_translator=PromoteurTranslator(),
+    ),
+    RedonnerMainAuGestionnaireLorsDeLaReclamationDocumentsCommand: (
+        lambda msg_bus, cmd: redonner_main_au_gestionnaire_lors_de_la_reclamation_documents(
+            cmd=cmd,
+            proposition_repository=PropositionRepository(),
+            historique=HistoriqueGlobal(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
+            question_specifique_translator=QuestionSpecifiqueTranslator(),
+            academic_year_repository=AcademicYearRepository(),
+            personne_connue_translator=PersonneConnueUclTranslator(),
+            emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
+            comptabilite_translator=ComptabiliteTranslator(),
+            groupe_supervision_repository=GroupeDeSupervisionRepository(),
+        )
     ),
 }

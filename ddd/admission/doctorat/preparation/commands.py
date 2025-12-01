@@ -425,6 +425,11 @@ class CompleterEmplacementsDocumentsParCandidatCommand(interface.CommandRequest)
 
 
 @attr.dataclass(frozen=True, slots=True)
+class RedonnerMainAuGestionnaireLorsDeLaReclamationDocumentsCommand(interface.CommandRequest):
+    uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
 class AnnulerReclamationDocumentsAuCandidatCommand(interface.CommandRequest):
     uuid_proposition: str
     auteur: str
@@ -656,17 +661,6 @@ class SpecifierConditionAccesPropositionCommand(interface.CommandRequest):
     gestionnaire: str
     condition_acces: str = ''
     millesime_condition_acces: Optional[int] = None
-
-
-@attr.dataclass(frozen=True, slots=True)
-class SpecifierEquivalenceTitreAccesEtrangerPropositionCommand(interface.CommandRequest):
-    uuid_proposition: str
-    gestionnaire: str
-    type_equivalence_titre_acces: str = ''
-    statut_equivalence_titre_acces: str = ''
-    etat_equivalence_titre_acces: str = ''
-    information_a_propos_de_la_restriction: str = ''
-    date_prise_effet_equivalence_titre_acces: Optional[datetime.date] = None
 
 
 @attr.dataclass(frozen=True, slots=True)

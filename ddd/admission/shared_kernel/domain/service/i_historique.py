@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,20 +24,21 @@
 #
 # ##############################################################################
 from email.message import EmailMessage
-from typing import Union, Optional
+from typing import Optional, Union
 
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
     Proposition as PropositionFormationDoctorale,
 )
-from admission.ddd.admission.shared_kernel.domain.model.enums.type_gestionnaire import TypeGestionnaire
-from admission.ddd.admission.formation_generale.domain.model.proposition import (
-    Proposition as PropositionFormationGenerale,
-)
 from admission.ddd.admission.formation_continue.domain.model.proposition import (
     Proposition as PropositionFormationContinue,
 )
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    Proposition as PropositionFormationGenerale,
+)
+from admission.ddd.admission.shared_kernel.domain.model.enums.type_gestionnaire import (
+    TypeGestionnaire,
+)
 from osis_common.ddd import interface
-
 
 PropositionAdmission = Union[PropositionFormationDoctorale, PropositionFormationGenerale, PropositionFormationContinue]
 
@@ -71,6 +72,13 @@ class IHistorique(interface.DomainService):
 
     @classmethod
     def historiser_completion_documents_par_candidat(cls, proposition: PropositionAdmission):
+        raise NotImplementedError
+
+    @classmethod
+    def historiser_renvoi_demande_au_gestionnaire_par_candidat_lors_de_la_reclamation_documents(
+        cls,
+        proposition: PropositionAdmission,
+    ):
         raise NotImplementedError
 
     @classmethod

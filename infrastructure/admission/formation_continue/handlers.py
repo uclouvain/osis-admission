@@ -43,6 +43,27 @@ from admission.ddd.admission.shared_kernel.use_case.write import (
     remplir_emplacement_document_par_gestionnaire,
     supprimer_emplacement_document,
 )
+from admission.infrastructure.admission.formation_continue.domain.service.formation import (
+    FormationContinueTranslator,
+)
+from admission.infrastructure.admission.formation_continue.domain.service.historique import (
+    Historique,
+)
+from admission.infrastructure.admission.formation_continue.domain.service.lister_demandes import (
+    ListerDemandesService,
+)
+from admission.infrastructure.admission.formation_continue.domain.service.notification import (
+    Notification,
+)
+from admission.infrastructure.admission.formation_continue.domain.service.question_specifique import (
+    QuestionSpecifiqueTranslator,
+)
+from admission.infrastructure.admission.formation_continue.repository.emplacement_document import (
+    EmplacementDocumentRepository,
+)
+from admission.infrastructure.admission.formation_continue.repository.proposition import (
+    PropositionRepository,
+)
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
@@ -67,27 +88,8 @@ from admission.infrastructure.admission.shared_kernel.domain.service.profil_cand
 from admission.infrastructure.admission.shared_kernel.domain.service.raccrocher_experiences_curriculum import (
     RaccrocherExperiencesCurriculum,
 )
-from admission.infrastructure.admission.shared_kernel.domain.service.titres_acces import TitresAcces
-from admission.infrastructure.admission.formation_continue.domain.service.formation import (
-    FormationContinueTranslator,
-)
-from admission.infrastructure.admission.formation_continue.domain.service.historique import (
-    Historique,
-)
-from admission.infrastructure.admission.formation_continue.domain.service.lister_demandes import (
-    ListerDemandesService,
-)
-from admission.infrastructure.admission.formation_continue.domain.service.notification import (
-    Notification,
-)
-from admission.infrastructure.admission.formation_continue.domain.service.question_specifique import (
-    QuestionSpecifiqueTranslator,
-)
-from admission.infrastructure.admission.formation_continue.repository.emplacement_document import (
-    EmplacementDocumentRepository,
-)
-from admission.infrastructure.admission.formation_continue.repository.proposition import (
-    PropositionRepository,
+from admission.infrastructure.admission.shared_kernel.domain.service.titres_acces import (
+    TitresAcces,
 )
 from infrastructure.shared_kernel.academic_year.repository.academic_year import (
     AcademicYearRepository,
@@ -363,5 +365,17 @@ COMMAND_HANDLERS = {
         emplacement_document_repository=EmplacementDocumentRepository(),
         notification=Notification(),
         historique=HistoriqueGlobal(),
+    ),
+    RedonnerMainAuGestionnaireLorsDeLaReclamationDocumentsCommand: (
+        lambda msg_bus, cmd: redonner_main_au_gestionnaire_lors_de_la_reclamation_documents(
+            cmd=cmd,
+            proposition_repository=PropositionRepository(),
+            historique=HistoriqueGlobal(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
+            question_specifique_translator=QuestionSpecifiqueTranslator(),
+            academic_year_repository=AcademicYearRepository(),
+            personne_connue_translator=PersonneConnueUclTranslator(),
+            emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
+        )
     ),
 }

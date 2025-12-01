@@ -205,7 +205,7 @@ class ResidenceAuSensDuDecretNonDisponiblePourInscriptionException(BusinessExcep
     def get_message(cls, nom_formation_fr, nom_formation_en):
         return _(
             'You cannot continue your application. The registration procedure for the <em>%(training_name)s</em> '
-            'for non-resident students is managed on another registration platform. We invite '
+            'for non-resident students is not yet available. We invite '
             'you to consult the complete registration procedure on the following page: '
             '<a href="https://www.uclouvain.be/en/enrolment/limited-enrolment-courses" target="_blank">'
             'https://www.uclouvain.be/en/enrolment/limited-enrolment-courses</a>'
@@ -256,4 +256,12 @@ class HorsPeriodeSpecifiqueInscription(BusinessException):
 class InformationsDestinatairePasTrouvee(BusinessException):
     def __init__(self, **kwargs):
         message = _("Ressource not found.")
+        super().__init__(message, **kwargs)
+
+
+class DocumentsReclamesException(BusinessException):
+    status_code = "ADMISSION-25"
+
+    def __init__(self, **kwargs):
+        message = _("Some documents are still requested.")
         super().__init__(message, **kwargs)

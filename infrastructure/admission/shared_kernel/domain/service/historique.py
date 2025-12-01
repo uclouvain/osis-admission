@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -30,11 +30,20 @@ from django.conf import settings
 from django.utils.translation import gettext_lazy
 from osis_history.utilities import add_history_entry
 
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
-from admission.ddd.admission.shared_kernel.domain.model.enums.type_gestionnaire import TypeGestionnaire
-from admission.ddd.admission.shared_kernel.domain.service.i_historique import IHistorique, PropositionAdmission
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    Proposition,
+)
+from admission.ddd.admission.shared_kernel.domain.model.enums.type_gestionnaire import (
+    TypeGestionnaire,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_historique import (
+    IHistorique,
+    PropositionAdmission,
+)
 from admission.infrastructure.utils import get_message_to_historize
-from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
+from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import (
+    PersonneConnueUclTranslator,
+)
 
 
 class Historique(IHistorique):
@@ -156,6 +165,23 @@ class Historique(IHistorique):
             proposition.entity_id.uuid,
             "Les documents ont été complétés par le candidat.",
             "The documents have been completed by the candidate.",
+            f"{candidat.prenom} {candidat.nom}",
+            tags=["proposition", "status-changed"],
+        )
+
+    @classmethod
+    def historiser_renvoi_demande_au_gestionnaire_par_candidat_lors_de_la_reclamation_documents(
+        cls,
+        proposition: PropositionAdmission,
+    ):
+        candidat = PersonneConnueUclTranslator().get(proposition.matricule_candidat)
+
+        add_history_entry(
+            proposition.entity_id.uuid,
+            "La demande a été renvoyée au gestionnaire par le candidat au cours de la réclamation des documents car il "
+            "n'y avait plus de document manquant.",
+            "The application was returned to the manager by the candidate during the document request because there "
+            "were no more missing documents.",
             f"{candidat.prenom} {candidat.nom}",
             tags=["proposition", "status-changed"],
         )

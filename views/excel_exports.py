@@ -26,14 +26,13 @@
 
 import ast
 import datetime
-import itertools
 import json
 import uuid
 from typing import Dict
 
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template.defaultfilters import yesno
 from django.urls import reverse
@@ -150,7 +149,6 @@ SPECIFIC_QUESTION_SEPARATOR_REPLACEMENT = '#'
 
 
 class BaseAdmissionExcelExportView(
-    LoginRequiredMixin,
     PermissionRequiredMixin,
     ExportMixin,
     ExcelFileExportMixin,

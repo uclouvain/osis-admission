@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Admission API
-  version: 1.1.12
+  version: 1.1.14
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -1780,6 +1780,38 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+    put:
+      operationId: give_control_back_to_continuing_manager_during_document_request
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      tags:
+      - propositions
+      security:
+      - tokenAuth: []
+      - Token: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
   /propositions/continuing-education/{uuid}/pdf-recap:
     get:
       operationId: retrieve_continuing_education_proposition_pdf_recap
@@ -3053,6 +3085,38 @@ paths:
       - Token: []
       responses:
         '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      operationId: give_control_back_to_doctorate_manager_during_document_request
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      tags:
+      - propositions
+      security:
+      - tokenAuth: []
+      - Token: []
+      responses:
+        '200':
           content:
             application/json:
               schema:
@@ -4930,6 +4994,38 @@ paths:
       - Token: []
       responses:
         '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      operationId: give_control_back_to_general_manager_during_document_request
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      tags:
+      - propositions
+      security:
+      - tokenAuth: []
+      - Token: []
+      responses:
+        '200':
           content:
             application/json:
               schema:
@@ -8157,8 +8253,8 @@ components:
       - NON_EUROPEAN_CREDITS
       - NO_CREDIT_SYSTEM
       type: string
-      description: "* `ECTS_CREDITS` - Crédits ECTS\n* `NON_EUROPEAN_CREDITS` - Crédits\
-        \ non-européens\n* `NO_CREDIT_SYSTEM` - Pas de système de crédits "
+      description: "* `ECTS_CREDITS` - Crédits ECTS\n* `NON_EUROPEAN_CREDITS` - Crédits
+        non-européens\n* `NO_CREDIT_SYSTEM` - Pas de système de crédits "
     Exam:
       type: object
       properties:
@@ -8314,11 +8410,15 @@ components:
             type: string
           title: Copie recto-verso de la décision d'équivalence définitive (UE)
           maxItems: 2
+        has_access_diploma_to_higher_education_ue:
+          type: boolean
+          title: A le Diplôme d'Aptitude à accéder à l'Enseignement Supérieur (DAES)
+            (UE)
         access_diploma_to_higher_education_ue:
           type: array
           items:
             type: string
-          title: Diplôme d'Aptitude à accéder à l'Enseignement supérieur (DAES)
+          title: Diplôme d'Aptitude à accéder à l'Enseignement Supérieur (DAES)
           maxItems: 1
         final_equivalence_decision_not_ue:
           type: array
@@ -8326,11 +8426,15 @@ components:
             type: string
           title: Copie recto-verso de la décision d'équivalence définitive (non UE)
           maxItems: 2
+        has_access_diploma_to_higher_education_not_ue:
+          type: boolean
+          title: A le Diplôme d'Aptitude à accéder à l'Enseignement Supérieur (DAES)
+            (non UE)
         access_diploma_to_higher_education_not_ue:
           type: array
           items:
             type: string
-          title: Diplôme d'Aptitude à accéder à l'Enseignement supérieur (DAES)
+          title: Diplôme d'Aptitude à accéder à l'Enseignement Supérieur (DAES)
           maxItems: 1
         equivalence_decision_proof:
           type: array
