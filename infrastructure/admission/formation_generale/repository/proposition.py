@@ -124,9 +124,9 @@ from admission.models import (
     AdmissionFormItem,
     GeneralEducationAdmissionProxy,
 )
-from admission.models.specific_question import SpecificQuestionAnswer
 from admission.models.checklist import FreeAdditionalApprovalCondition, RefusalReason
 from admission.models.general_education import GeneralEducationAdmission
+from admission.models.specific_question import SpecificQuestionAnswer
 from base.models.academic_year import AcademicYear
 from base.models.campus import Campus as CampusDb
 from base.models.education_group_year import EducationGroupYear
@@ -317,6 +317,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                     entity.attestation_inscription_reguliere_pour_modification_inscription
                 ),
                 'is_non_resident': entity.est_non_resident_au_sens_decret,
+                'ares_application_number': entity.numero_dossier_ares,
                 'status': entity.statut.name,
                 'curriculum': entity.curriculum,
                 'diploma_equivalence': entity.equivalence_diplome,
@@ -616,6 +617,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             est_modification_inscription_externe=admission.is_external_modification,
             formulaire_modification_inscription=admission.registration_change_form,
             est_non_resident_au_sens_decret=admission.is_non_resident,
+            numero_dossier_ares=admission.ares_application_number,
             curriculum=admission.curriculum,
             equivalence_diplome=admission.diploma_equivalence,
             comptabilite=get_accounting_from_admission(admission=admission),
@@ -875,6 +877,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             equivalence_diplome=admission.diploma_equivalence,
             est_bachelier_belge=admission.is_belgian_bachelor,
             est_non_resident_au_sens_decret=admission.is_non_resident,
+            accuse_de_reception_contingente=admission.quota_admission_receipt,
+            numero_dossier_ares=admission.ares_application_number,
             elements_confirmation=admission.confirmation_elements,
             est_modification_inscription_externe=admission.is_external_modification,
             formulaire_modification_inscription=admission.registration_change_form,

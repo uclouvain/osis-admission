@@ -30,6 +30,7 @@ from typing import Dict, List, Optional
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
     DoctoratFormation,
 )
+from admission.ddd import CODE_BACHELIER_VETERINAIRE
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AdresseDomicileLegalNonCompleteeException,
 )
@@ -60,6 +61,7 @@ from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 
 __all__ = [
+    "AdmissionNonResidentQuotaResultPublication",
     "AdmissionPoolExternalEnrollmentChangeCalendar",
     "AdmissionPoolExternalReorientationCalendar",
     "AdmissionPoolHue5BelgiumResidencyCalendar",
@@ -94,7 +96,7 @@ DIPLOMES_ACCES_BELGE = [
     ConditionAccess.ALTERNATIVE_ETUDES_SECONDAIRES,
 ]
 
-SIGLES_WITH_QUOTA = ['KINE1BA', 'VETE1BA', 'LOGO1BA']
+SIGLES_WITH_QUOTA = ['KINE1BA', CODE_BACHELIER_VETERINAIRE, 'LOGO1BA']
 
 SECOND_CYCLE_TYPES = [
     TrainingType.AGGREGATION.name,
@@ -111,6 +113,8 @@ def ensure_consistency_until_n_plus_6(
     cutover_date: Date,
     title: str,
     end_date: Optional[Date] = DAY_BEFORE_NEXT,
+    start_time: Optional[datetime.time] = None,
+    end_time: Optional[datetime.time] = None,
 ):
     current_academic_year = AcademicYear.objects.current()
     academic_years = AcademicYear.objects.min_max_years(current_academic_year.year - 1, current_academic_year.year + 6)
@@ -129,6 +133,8 @@ def ensure_consistency_until_n_plus_6(
             defaults={
                 'start_date': datetime.date(ac_year.year + cutover_date.annee, cutover_date.mois, cutover_date.jour),
                 'end_date': ac_end_date,
+                'start_time': start_time,
+                'end_time': end_time,
                 'title': title,
             },
         )
@@ -558,6 +564,8 @@ class AdmissionPoolNonResidentQuotaCalendar(PoolCalendar):
             event_reference=cls.event_reference,
             cutover_date=cls.cutover_date,
             end_date=cls.end_date,
+            start_time=datetime.time(9, 0),
+            end_time=datetime.time(16, 0),
             title="Admission - Contingenté non-résident (au sens du décret)",
         )
 
@@ -575,6 +583,7 @@ class AdmissionPoolMedicineDentistryStandardPeriodCalendar(PoolCalendar):
     cutover_date = Date(jour=6, mois=9, annee=0)
     end_date = Date(jour=30, mois=9, annee=0)
 
+
     @classmethod
     def ensure_consistency_until_n_plus_6(cls):
         ensure_consistency_until_n_plus_6(
@@ -586,14 +595,30 @@ class AdmissionPoolMedicineDentistryStandardPeriodCalendar(PoolCalendar):
 
     @classmethod
     def matches_criteria(
-        cls,
-        proposition: 'PropositionGenerale',
-        formation: Formation | DoctoratFormation,
-        **kwargs,
+            cls,
+            proposition: 'PropositionGenerale',
+            formation: Formation | DoctoratFormation,
+            **kwargs,
     ) -> bool:
         """Candidat souhaitant s'inscrire à un bachelier en médecine ou dentisterie"""
         return (
-            isinstance(proposition, PropositionGenerale)
-            and formation.type == TrainingType.BACHELOR
-            and formation.est_formation_medecine_ou_dentisterie is True
+                isinstance(proposition, PropositionGenerale)
+                and formation.type == TrainingType.BACHELOR
+                and formation.est_formation_medecine_ou_dentisterie is True
+        )
+
+
+class AdmissionNonResidentQuotaResultPublication(AcademicEventSessionCalendarHelper):
+    event_reference = AcademicCalendarTypes.ADMISSION_NON_RESIDENT_QUOTA_RESULT_PUBLICATION.name
+    cutover_date = Date(jour=2, mois=9, annee=0)
+    end_date = None
+
+    @classmethod
+    def ensure_consistency_until_n_plus_6(cls):
+        ensure_consistency_until_n_plus_6(
+            event_reference=cls.event_reference,
+            cutover_date=cls.cutover_date,
+            start_time=datetime.time(18, 0),
+            end_date=cls.end_date,
+            title="Admission: publication of the result of the random draw for the non-resident quota holder trainings",
         )
