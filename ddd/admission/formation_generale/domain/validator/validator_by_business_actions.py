@@ -52,6 +52,7 @@ from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldEquivalenceEtreSpecifiee,
     ShouldFacPeutDonnerDecision,
     ShouldFacPeutSoumettreAuSicLorsDeLaDecisionFacultaire,
+    ShouldInformationsEquivalenceEtreRenseignees,
     ShouldPeutSpecifierInformationsDecisionFacultaire,
     ShouldPropositionEtreInscriptionTardiveAvecConditionAcces,
     ShouldPropositionEtreReorientationExterneAvecConditionAcces,
@@ -87,6 +88,9 @@ from admission.ddd.admission.shared_kernel.domain.model.condition_complementaire
     ConditionComplementaireApprobationIdentity,
     ConditionComplementaireLibreApprobation,
 )
+from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import (
+    TypeEquivalenceTitreAcces,
+)
 from admission.ddd.admission.shared_kernel.domain.model.formation import Formation
 from admission.ddd.admission.shared_kernel.domain.model.motif_refus import (
     MotifRefusIdentity,
@@ -110,6 +114,7 @@ from admission.ddd.admission.shared_kernel.domain.validator import (
 from admission.ddd.admission.shared_kernel.domain.validator._should_curriculum_etre_complete import (
     ShouldExperiencesNonAcademiquesAvoirUnCertificat,
 )
+from admission.ddd.admission.shared_kernel.dtos import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
     EmplacementDocumentDTO,
 )
@@ -645,6 +650,8 @@ class ModifierStatutChecklistParcoursAnterieurValidatorList(TwoStepsMultipleBusi
     checklist: StatutsChecklistGenerale
 
     type_formation: TrainingType
+    type_equivalence_titre_acces: TypeEquivalenceTitreAcces | None
+    etudes_secondaires: EtudesSecondairesAdmissionDTO
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -665,6 +672,12 @@ class ModifierStatutChecklistParcoursAnterieurValidatorList(TwoStepsMultipleBusi
                 checklist=self.checklist,
                 statut=self.statut,
                 type_formation=self.type_formation,
+            ),
+            ShouldInformationsEquivalenceEtreRenseignees(
+                statut=self.statut,
+                type_equivalence_titre_acces=self.type_equivalence_titre_acces,
+                type_formation=self.type_formation,
+                etudes_secondaires=self.etudes_secondaires,
             ),
         ]
 
