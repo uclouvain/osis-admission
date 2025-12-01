@@ -30,6 +30,9 @@ from typing import Dict, List, Optional
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AdresseDomicileLegalNonCompleteeException,
 )
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    Proposition as PropositionGenerale,
+)
 from admission.ddd.admission.shared_kernel.domain.enums import TypeFormation
 from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import (
     Date,
@@ -43,9 +46,6 @@ from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import 
     ITitresAcces,
 )
 from admission.ddd.admission.shared_kernel.dtos import AdressePersonnelleDTO
-from admission.ddd.admission.formation_generale.domain.model.proposition import (
-    Proposition as PropositionGenerale,
-)
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
@@ -56,6 +56,7 @@ from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 
 __all__ = [
+    "AdmissionNonResidentQuotaResultPublication",
     "AdmissionPoolExternalEnrollmentChangeCalendar",
     "AdmissionPoolExternalReorientationCalendar",
     "AdmissionPoolHue5BelgiumResidencyCalendar",
@@ -106,6 +107,8 @@ def ensure_consistency_until_n_plus_6(
     cutover_date: Date,
     title: str,
     end_date: Optional[Date] = DAY_BEFORE_NEXT,
+    start_time: Optional[datetime.time] = None,
+    end_time: Optional[datetime.time] = None,
 ):
     current_academic_year = AcademicYear.objects.current()
     academic_years = AcademicYear.objects.min_max_years(current_academic_year.year - 1, current_academic_year.year + 6)
@@ -124,6 +127,8 @@ def ensure_consistency_until_n_plus_6(
             defaults={
                 'start_date': datetime.date(ac_year.year + cutover_date.annee, cutover_date.mois, cutover_date.jour),
                 'end_date': ac_end_date,
+                'start_time': start_time,
+                'end_time': end_time,
                 'title': title,
             },
         )
@@ -553,6 +558,8 @@ class AdmissionPoolNonResidentQuotaCalendar(PoolCalendar):
             event_reference=cls.event_reference,
             cutover_date=cls.cutover_date,
             end_date=cls.end_date,
+            start_time=datetime.time(9, 0),
+            end_time=datetime.time(16, 0),
             title="Admission - Contingenté non-résident (au sens du décret)",
         )
 
@@ -562,4 +569,20 @@ class AdmissionPoolNonResidentQuotaCalendar(PoolCalendar):
         return isinstance(proposition, PropositionGenerale) and est_formation_contingentee_et_non_resident(
             sigle,
             proposition,
+        )
+
+
+class AdmissionNonResidentQuotaResultPublication(AcademicEventSessionCalendarHelper):
+    event_reference = AcademicCalendarTypes.ADMISSION_NON_RESIDENT_QUOTA_RESULT_PUBLICATION.name
+    cutover_date = Date(jour=2, mois=9, annee=0)
+    end_date = None
+
+    @classmethod
+    def ensure_consistency_until_n_plus_6(cls):
+        ensure_consistency_until_n_plus_6(
+            event_reference=cls.event_reference,
+            cutover_date=cls.cutover_date,
+            start_time=datetime.time(18, 0),
+            end_date=cls.end_date,
+            title="Admission: publication of the result of the random draw for the non-resident quota holder trainings",
         )

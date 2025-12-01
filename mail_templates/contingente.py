@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,17 +23,32 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from osis_mail_template.exceptions import DuplicateMailTemplateIdentifier
+from django.utils.translation import gettext_lazy as _
+from osis_mail_template import Token, templates
 
-# When running tests, the test runner try to import it directly, re-registrering the identifiers
-try:
-    from .checklist import *
-    from .contingente import *
-    from .document import *
-    from .signatures import *
-    from .submission import *
-except DuplicateMailTemplateIdentifier:
-    import sys
+from .tokens import GENERAL_ADMISSION_TAG, admission_common_tokens
 
-    if 'test' not in sys.argv:
-        raise
+__all__ = [
+    'ADMISSION_EMAIL_CONTINGENTE_CONFIRMATION',
+]
+
+
+ADMISSION_EMAIL_CONTINGENTE_CONFIRMATION = 'osis-admission-contingente-soumission'
+templates.register(
+    ADMISSION_EMAIL_CONTINGENTE_CONFIRMATION,
+    description=_('Mail sent to the candidate to confirm the submission of his training with quota.'),
+    tag=GENERAL_ADMISSION_TAG,
+    tokens=admission_common_tokens
+    + [
+        Token(
+            name='ares_application_number',
+            description=_("The ares application number of the admission"),
+            example="UCLouvain/K-250001",
+        ),
+        Token(
+            name='receipt_document_link',
+            description=_("The link to the receipt"),
+            example="https://...",
+        ),
+    ],
+)

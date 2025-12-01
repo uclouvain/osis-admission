@@ -276,3 +276,9 @@ class OngletsChecklist(ChoiceEnum):
     specificites_formation = _('Training specificities')
     decision_facultaire = _('Decision of the faculty')
     decision_sic = _('Decision of SIC')
+
+
+class ResidentConcoursDAcces(ChoiceEnum):
+    JAMAIS = _("JAMAIS")
+    UNE_FOIS = _("UNE")
+    DEUX_FOIS_OU_PLUS = _("DEUX_OU_PLUS")
