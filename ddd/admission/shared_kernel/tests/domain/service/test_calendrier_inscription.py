@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from unittest.mock import PropertyMock, MagicMock
+from unittest.mock import MagicMock, PropertyMock
 
 import freezegun
 import mock
@@ -36,7 +36,16 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
     PropositionAdmissionECGE3DPMinimaleFactory,
 )
-from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import ITitresAcces, Titres
+from admission.ddd.admission.formation_continue.test.factory.proposition import (
+    PropositionFactory as PropositionContinueFactory,
+)
+from admission.ddd.admission.formation_generale.test.factory.proposition import (
+    PropositionFactory,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import (
+    ITitresAcces,
+    Titres,
+)
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     AucunPoolCorrespondantException,
     FormationNonTrouveeException,
@@ -46,25 +55,21 @@ from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     ResidenceAuSensDuDecretNonRenseigneeException,
 )
 from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation
-from admission.ddd.admission.formation_continue.test.factory.proposition import (
-    PropositionFactory as PropositionContinueFactory,
-)
-from admission.ddd.admission.formation_generale.test.factory.proposition import (
-    PropositionFactory,
-)
 from admission.ddd.admission.shared_kernel.tests.factory.formation import (
     FormationFactory,
     FormationIdentityFactory,
 )
-from admission.ddd.admission.shared_kernel.tests.factory.profil import ProfilCandidatFactory
+from admission.ddd.admission.shared_kernel.tests.factory.profil import (
+    ProfilCandidatFactory,
+)
+from admission.infrastructure.admission.formation_generale.domain.service.in_memory.formation import (
+    FormationGeneraleInMemoryTranslator,
+)
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.calendrier_inscription import (
     CalendrierInscriptionInMemory,
 )
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
-)
-from admission.infrastructure.admission.formation_generale.domain.service.in_memory.formation import (
-    FormationGeneraleInMemoryTranslator,
 )
 from admission.tests.factories.conditions import AdmissionConditionsDTOFactory
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
@@ -77,14 +82,6 @@ class CalendrierInscriptionTestCase(TestCase):
         self.profil_candidat_translator = ProfilCandidatInMemoryTranslator()
         self.formation_translator = FormationGeneraleInMemoryTranslator()
         self.profil_candidat_translator.reset()
-        mock_calendrier_inscription = mock.patch(
-            'admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription.ICalendrierInscription.'
-            'INTERDIRE_INSCRIPTION_ETUDES_CONTINGENTES_POUR_NON_RESIDENT',
-            new_callable=PropertyMock,
-            return_value=False,
-        )
-        mock_calendrier_inscription.start()
-        self.addCleanup(mock_calendrier_inscription.stop)
 
     def test_verification_calendrier_inscription_doctorat(self):
         proposition = PropositionAdmissionECGE3DPMinimaleFactory()
@@ -377,7 +374,7 @@ class CalendrierInscriptionTestCase(TestCase):
         profil = ProfilCandidatFactory(matricule=proposition.matricule_candidat)
         self.profil_candidat_translator.profil_candidats.append(profil.identification)
         self.profil_candidat_translator.get_coordonnees = lambda m: profil.coordonnees
-        with self.assertRaises(PoolNonResidentContingenteNonOuvertException):
+        with self.assertRaises(AucunPoolCorrespondantException):
             CalendrierInscriptionInMemory.verifier(
                 formation_id=proposition.formation_id,
                 proposition=proposition,

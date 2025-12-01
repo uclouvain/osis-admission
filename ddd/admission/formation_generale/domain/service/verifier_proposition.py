@@ -30,6 +30,9 @@ from admission.calendar.admission_calendar import DIPLOMES_ACCES_BELGE
 from admission.ddd.admission.formation_generale.domain.model.proposition import (
     Proposition,
 )
+from admission.ddd.admission.formation_generale.domain.service.i_contingente import (
+    IContingente,
+)
 from admission.ddd.admission.formation_generale.domain.service.i_formation import (
     IFormationGeneraleTranslator,
 )
@@ -57,6 +60,9 @@ from admission.ddd.admission.shared_kernel.domain.service.verifier_questions_spe
     VerifierQuestionsSpecifiques,
 )
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
+from admission.infrastructure.admission.formation_generale.domain.service.contingente import (
+    Contingente,
+)
 from base.ddd.utils.business_validator import execute_functions_and_aggregate_exceptions
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
@@ -77,6 +83,7 @@ class VerifierProposition(interface.DomainService):
         annee_courante: int,
         questions_specifiques: List[QuestionSpecifique],
         maximum_propositions_service: 'IMaximumPropositionsAutorisees',
+        contingente_service: 'IContingente',
         titres: 'Titres',
         formation: 'Formation',
         annee_formation: AcademicYear,
@@ -149,6 +156,10 @@ class VerifierProposition(interface.DomainService):
                 questions_specifiques,
             ),
             partial(
+                contingente_service.verifier_proposition_contingente_unique,
+                proposition_candidat,
+            ),
+            partial(
                 VerifierQuestionsSpecifiques.verifier_onglet_choix_formation,
                 proposition_candidat,
                 questions_specifiques,
@@ -174,6 +185,12 @@ class VerifierProposition(interface.DomainService):
                 proposition_candidat=proposition_candidat,
                 annee_soumise=annee_soumise,
             ),
+            partial(
+                calendrier_inscription.verifier_formation_contingentee_ouvert,
+                formation=formation,
+                annee=annee_soumise or proposition_candidat.annee_calculee,
+                proposition=proposition_candidat,
+            ),
         )
 
     @classmethod
@@ -181,9 +198,16 @@ class VerifierProposition(interface.DomainService):
         cls,
         proposition: 'Proposition',
         titres: 'Titres',
+        pool: 'AcademicCalendarTypes',
         calendrier_inscription: 'ICalendrierInscription',
         profil_candidat_translator: 'IProfilCandidatTranslator',
     ) -> 'TypeDemande':
+        # Contingenté non-résident = admission
+        if (
+            proposition.est_non_resident_au_sens_decret
+            and pool == AcademicCalendarTypes.ADMISSION_POOL_NON_RESIDENT_QUOTA
+        ):
+            return TypeDemande.ADMISSION
         # (Nationalité UE+5)
         #   ET (tous les diplômes belges (y compris secondaires si déclaré dans le détail)) = inscription
         est_ue_plus_5 = calendrier_inscription.est_ue_plus_5(

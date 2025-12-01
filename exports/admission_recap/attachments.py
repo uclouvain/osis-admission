@@ -501,6 +501,7 @@ def get_specific_questions_attachments(
     specific_questions: List[QuestionSpecifiqueDTO],
     eligible_for_reorientation: bool,
     eligible_for_modification: bool,
+    est_formation_contingente: bool,
 ) -> List[Attachment]:
     """Returns the specific questions attachments."""
     attachments = []
@@ -548,6 +549,16 @@ def get_specific_questions_attachments(
                 identifier='ATTESTATION_INSCRIPTION_REGULIERE_POUR_MODIFICATION_INSCRIPTION',
                 label=DocumentsQuestionsSpecifiques['ATTESTATION_INSCRIPTION_REGULIERE_POUR_MODIFICATION_INSCRIPTION'],
                 uuids=context.proposition.attestation_inscription_reguliere_pour_modification_inscription,
+                required=True,
+                candidate_language=context.identification.langue_contact,
+            )
+        )
+    if est_formation_contingente and context.proposition.est_non_resident_au_sens_decret:
+        attachments.append(
+            Attachment(
+                identifier='ACCUSE_DE_RECEPTION_FORMATION_CONTINGENTE',
+                label=DocumentsQuestionsSpecifiques['ACCUSE_DE_RECEPTION_FORMATION_CONTINGENTE'],
+                uuids=context.proposition.accuse_de_reception_contingente,
                 required=True,
                 candidate_language=context.identification.langue_contact,
             )

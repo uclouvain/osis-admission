@@ -1539,6 +1539,8 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             est_bachelier_belge=None,
             est_modification_inscription_externe=None,
             est_non_resident_au_sens_decret=None,
+            accuse_de_reception_contingente=[],
+            numero_dossier_ares='',
             est_reorientation_inscription_externe=None,
             formulaire_modification_inscription=['uuid-formulaire-modification-inscription'],
             attestation_inscription_reguliere_pour_modification_inscription=[

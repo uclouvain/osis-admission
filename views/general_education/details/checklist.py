@@ -3106,6 +3106,7 @@ class ChecklistView(
             },
             'donnees_personnelles': assimilation_documents,
             'specificites_formation': {
+                'ACCUSE_DE_RECEPTION_FORMATION_CONTINGENTE',
                 'ADDITIONAL_DOCUMENTS',
             },
             'decision_facultaire': {

@@ -39,6 +39,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formatio
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     IdentificationNonCompleteeException,
 )
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.domain.model.proposition import (
     Proposition,
 )
@@ -63,13 +64,11 @@ from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     PoolNonResidentContingenteNonOuvertException,
     PoolOuAnneeDifferentException,
     ReorientationInscriptionExterneNonConfirmeeException,
-    ResidenceAuSensDuDecretNonDisponiblePourInscriptionException,
     ResidenceAuSensDuDecretNonRenseigneeException,
 )
 from admission.ddd.admission.shared_kernel.dtos import IdentificationDTO
 from admission.ddd.admission.shared_kernel.dtos.conditions import InfosDetermineesDTO
 from admission.ddd.admission.shared_kernel.dtos.periode import PeriodeDTO
-from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from osis_common.ddd import interface
@@ -81,6 +80,7 @@ class ICalendrierInscription(interface.DomainService):
     pools = [
         DoctorateAdmissionCalendar(),
         ContinuingEducationAdmissionCalendar(),
+        AdmissionPoolNonResidentQuotaCalendar(),
         AdmissionPoolExternalEnrollmentChangeCalendar(),
         AdmissionPoolVipCalendar(),
         AdmissionPoolHueUclPathwayChangeCalendar(),
@@ -89,16 +89,11 @@ class ICalendrierInscription(interface.DomainService):
         AdmissionPoolUe5NonBelgianCalendar(),
         AdmissionPoolHue5BelgiumResidencyCalendar(),
         AdmissionPoolHue5ForeignResidencyCalendar(),
-        AdmissionPoolNonResidentQuotaCalendar(),
     ]
     priority_pools = [
         AdmissionPoolExternalReorientationCalendar(),
     ]
     all_pools = priority_pools + pools
-
-    # Les inscriptions pour une formation contingentée pour un candidat non résident au sens du décret via osis
-    # sont interdites pour le moment
-    INTERDIRE_INSCRIPTION_ETUDES_CONTINGENTES_POUR_NON_RESIDENT = True
 
     @classmethod
     def determiner_annee_academique_et_pot(
@@ -115,7 +110,6 @@ class ICalendrierInscription(interface.DomainService):
         cls.verifier_residence_au_sens_du_decret(formation_id.sigle, proposition, formation)
         cls.verifier_reorientation_renseignee_si_eligible(type_formation, formation_id, proposition, pool_ouverts)
         cls.verifier_modification_renseignee_si_eligible(type_formation, formation_id, proposition, pool_ouverts)
-        cls.verifier_formation_contingentee_ouvert(formation_id.sigle, proposition, formation_id.annee, pool_ouverts)
 
         identification = profil_candidat_translator.get_identification(matricule_candidat)
         residential_address = profil_candidat_translator.get_coordonnees(matricule_candidat).domicile_legal
@@ -332,28 +326,34 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
         if cls.inscrit_formation_contingentee(sigle) and proposition:
             if proposition.est_non_resident_au_sens_decret is None:
                 raise ResidenceAuSensDuDecretNonRenseigneeException()
-            elif (
-                cls.INTERDIRE_INSCRIPTION_ETUDES_CONTINGENTES_POUR_NON_RESIDENT
-                and proposition.est_non_resident_au_sens_decret is True
-            ):
-                raise ResidenceAuSensDuDecretNonDisponiblePourInscriptionException(
-                    nom_formation_fr=formation.intitule_fr,
-                    nom_formation_en=formation.intitule_en,
-                )
 
     @classmethod
     def verifier_formation_contingentee_ouvert(
         cls,
-        sigle: str,
-        proposition: Optional['Proposition'],
+        formation: 'Union[Formation, DoctoratFormation]',
         annee: int,
-        pool_ouverts: List[Tuple[str, int]],
+        proposition: Optional['Proposition'],
     ):
         """Si le candidat s'inscrit dans une formation contingentée et ne tombe pas dans la bonne période."""
         if (
-            est_formation_contingentee_et_non_resident(sigle, proposition)
+            est_formation_contingentee_et_non_resident(formation.entity_id.sigle, proposition)
             # hors periode
-            and (AdmissionPoolNonResidentQuotaCalendar.event_reference, annee) not in pool_ouverts
+            and (AdmissionPoolNonResidentQuotaCalendar.event_reference, annee) not in cls.get_pool_ouverts()
+        ):
+            raise PoolNonResidentContingenteNonOuvertException()
+
+    @classmethod
+    def verifier_suppression_pour_formation_contingentee(
+        cls,
+        proposition: Optional['Proposition'],
+    ):
+        """Si le candidat s'inscrit dans une formation contingentée et ne tombe pas dans la bonne période."""
+        if (
+            proposition.statut == ChoixStatutPropositionGenerale.CONFIRMEE
+            and est_formation_contingentee_et_non_resident(proposition.formation_id.sigle, proposition)
+            # hors periode
+            and (AdmissionPoolNonResidentQuotaCalendar.event_reference, proposition.formation_id.annee)
+                not in cls.get_pool_ouverts()
         ):
             raise PoolNonResidentContingenteNonOuvertException()
 
