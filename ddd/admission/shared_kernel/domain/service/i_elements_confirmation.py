@@ -28,6 +28,7 @@ from typing import Dict, List, Optional, Union
 import attr
 from django.utils.translation import gettext_lazy as _
 
+from admission.calendar.admission_calendar import SIGLES_WITH_QUOTA
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition as PropositionDoctorale
 from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator

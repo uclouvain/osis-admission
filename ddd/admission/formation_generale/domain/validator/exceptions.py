@@ -382,3 +382,22 @@ class InformationsEquivalenceNonSpecifieesChecklistException(BusinessException):
     def __init__(self, **kwargs):
         message = _('The "Sufficient" status requires the equivalence information to be specified.')
         super().__init__(message, **kwargs)
+
+
+class UneSeuleFormationContingentePossible(BusinessException):
+    status_code = "FORMATION-GENERALE-42"
+
+    def __init__(self, **kwargs):
+        message = _(
+            'Non-resident applicants may submit only one application among the limited enrollment courses. '
+            'Any duplicate application will result in all applications being rejected.'
+        )
+        super().__init__(message, **kwargs)
+
+
+class PropositionNonEnCoursException(BusinessException):
+    status_code = "FORMATION-GENERALE-43"
+
+    def __init__(self, **kwargs):
+        message = _('The proposition is not in progress.')
+        super().__init__(message, **kwargs)
