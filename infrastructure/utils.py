@@ -632,6 +632,7 @@ CORRESPONDANCE_CHAMPS_AUTORISATION = {
 
 CORRESPONDANCE_CHAMPS_SYSTEME = {
     'DOSSIER_ANALYSE': 'pdf_recap',
+    'DOSSIER_ANALYSE_AUTORISATION': 'authorization_analysis_folder',
     'ATTESTATION_ACCORD_FACULTAIRE': 'fac_approval_certificate',
     'ATTESTATION_ACCORD_CDD': 'cdd_approval_certificate',
     'ATTESTATION_REFUS_CDD': 'cdd_refusal_certificate',

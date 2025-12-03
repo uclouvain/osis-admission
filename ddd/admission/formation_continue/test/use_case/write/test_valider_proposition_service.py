@@ -28,8 +28,6 @@ from unittest.mock import patch
 import mock
 from django.test import SimpleTestCase
 
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import EnQuarantaineException
-from admission.ddd.admission.shared_kernel.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.formation_continue.commands import (
     ValiderPropositionCommand,
 )
@@ -44,11 +42,18 @@ from admission.ddd.admission.formation_continue.domain.model.proposition import 
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
     ApprouverPropositionTransitionStatutException,
 )
-from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
-    ProfilCandidatInMemoryTranslator,
+from admission.ddd.admission.formation_continue.events import (
+    PropositionFormationContinueValideeEvent,
 )
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
+    EnQuarantaineException,
+)
+from admission.ddd.admission.shared_kernel.dtos.merge_proposal import MergeProposalDTO
 from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
+    ProfilCandidatInMemoryTranslator,
 )
 from admission.infrastructure.message_bus_in_memory import (
     message_bus_in_memory_instance,
@@ -78,6 +83,11 @@ class ValiderPropositionTestCase(SimpleTestCase):
         self.assertEqual(proposition_id, proposition.entity_id)
         self.assertEqual(proposition.statut, ChoixStatutPropositionContinue.INSCRIPTION_AUTORISEE)
         self.assertEqual(proposition.checklist_actuelle.decision.statut, ChoixStatutChecklist.GEST_REUSSITE)
+
+        event = self.mock_publish.call_args[0][0]
+        self.assertIsInstance(event, PropositionFormationContinueValideeEvent)
+        self.assertEqual(event.entity_id, proposition.entity_id)
+        self.assertEqual(event.matricule, proposition.matricule_candidat)
 
     def test_should_valider_si_statut_a_valider(self):
         proposition: Proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-USCC22'))

@@ -48,14 +48,26 @@
   </div>
   <div class="row">
     {% bootstrap_field filter_form.entites form_group_class="form-group col-md-2" %}
+    {% bootstrap_field filter_form.site_inscription form_group_class="form-group col-md-2" %}
     {% bootstrap_field filter_form.types_formation form_group_class="form-group col-md-2" %}
     {% bootstrap_field filter_form.sigles_formations form_group_class="form-group col-md-3" %}
-    {% bootstrap_field filter_form.inscription_requise form_group_class="form-group col-md-2" %}
     {% bootstrap_field filter_form.paye form_group_class="form-group col-md-1" %}
     {% bootstrap_field filter_form.injection_epc_en_erreur form_group_class="form-group col-md-2" %}
   </div>
   <div class="row">
     {% bootstrap_field filter_form.marque_d_interet form_group_class="form-group col-md-2" %}
+  </div>
+
+  <div>
+    <details>
+      <summary>{% translate "Advanced filters" %}</summary>
+      <div id="additional-filters">
+        <div class="row">
+          {% bootstrap_field filter_form.inscription_requise form_group_class="form-group col-md-2" %}
+          {% bootstrap_field filter_form.quarantaine form_group_class="form-group col-md-2" %}
+        </div>
+      </div>
+    </details>
   </div>
 
   <hr>
@@ -107,6 +119,7 @@
           {# Working lists #}
           const stateInput = $('#id_etats');
           const epcInjectionInErrorInput = $('#id_injection_epc_en_erreur');
+          const quarantineInput = $('#id_quarantaine');
           const filterModeInputs = $('input[name="mode_filtres_etats_checklist"]');
           const checklistFiltersInputs = $('#checklist-filters-container .multi-widget input[type="checkbox"]');
           const toggleChecklistFiltersButton = $('#toggle-checklist-filters');
@@ -127,7 +140,7 @@
 
           toggleChecklistFiltersButton.val(checklistFiltersInputs.filter(':checked').length > 0 ? 'off' : 'on').trigger('click');
 
-          $('#id_etats, #id_injection_epc_en_erreur, input[name="mode_filtres_etats_checklist"], #checklist-filters-container .multi-widget input[type="checkbox"]').on('change', function () {
+          $('#id_etats, #id_injection_epc_en_erreur, input[name="mode_filtres_etats_checklist"], #checklist-filters-container .multi-widget input[type="checkbox"], #id_quarantaine').on('change', function () {
               {# Reset the selected working list if the values of the dependent inputs change except if this change was triggered from the working list #}
               if (selectWorkListInProgress) return;
               $('#id_liste_travail').val('').trigger('change');
@@ -140,6 +153,7 @@
 
               stateInput.val(data.admission_statuses).trigger('change');
               epcInjectionInErrorInput.val([data.epc_injection_in_error]).trigger('change');
+              quarantineInput.val({true: 'True', false: 'False', null: ''}[data.quarantine]).trigger('change');
               if (!data.checklist_filters_mode) {
                   filterModeInputs.filter(':checked').prop('checked', false).trigger('change');
                   filterModeInputs.parents('label').removeClass('active');
@@ -191,5 +205,10 @@
       border-color: #ddd;
       color: #337ab7;
     }
+
+    #additional-filters {
+        box-sizing: border-box;
+    }
+
   </style>
 {% endblock %}

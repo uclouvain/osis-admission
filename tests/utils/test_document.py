@@ -204,8 +204,7 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
         specific_question_uuid = str(item.form_item.uuid)
 
         document_id = (
-            f'{base_identifier}.{IdentifiantBaseEmplacementDocument.QUESTION_SPECIFIQUE.name}.'
-            f'{specific_question_uuid}'
+            f'{base_identifier}.{IdentifiantBaseEmplacementDocument.QUESTION_SPECIFIQUE.name}.{specific_question_uuid}'
         )
 
         # Already requested
@@ -428,6 +427,20 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
         self.assertEqual(document.obj, doctorate_admission)
         self.assertEqual(document.field, 'archived_record_signatures_sent')
         self.assertCountEqual(document.mimetypes, [PDF_MIME_TYPE, PNG_MIME_TYPE, JPEG_MIME_TYPE])
+
+        # Authorization analysis folder
+        file_uuid = uuid.uuid4()
+        continuing_admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
+            authorization_analysis_folder=[file_uuid],
+        )
+        document = get_document_from_identifier(
+            continuing_admission,
+            f'{base_identifier}.DOSSIER_ANALYSE_AUTORISATION',
+        )
+
+        self.assertIsNotNone(document)
+        self.assertEqual(document.obj, continuing_admission)
+        self.assertEqual(document.field, 'authorization_analysis_folder')
 
     def test_get_non_free_identification_document(self):
         base_identifier = OngletsDemande.IDENTIFICATION.name

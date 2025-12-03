@@ -55,6 +55,9 @@ from admission.infrastructure.admission.formation_continue.domain.service.lister
 from admission.infrastructure.admission.formation_continue.domain.service.notification import (
     Notification,
 )
+from admission.infrastructure.admission.formation_continue.domain.service.pdf_generation import (
+    PDFGeneration,
+)
 from admission.infrastructure.admission.formation_continue.domain.service.question_specifique import (
     QuestionSpecifiqueTranslator,
 )
@@ -376,6 +379,12 @@ COMMAND_HANDLERS = {
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
             emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
+        )
+    ),
+    GenererDocumentAnalysePropositionAutorisationCommand: (
+        lambda msg_bus, cmd: generer_document_analyse_proposition_autorisation(
+            cmd=cmd,
+            pdf_generation_service=PDFGeneration(),
         )
     ),
 }

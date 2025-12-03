@@ -80,6 +80,7 @@ class PropositionDTO(interface.DTO):
     adresse_facturation: Optional[AdressePersonnelleDTO]
     elements_confirmation: Dict[str, str]
     pdf_recapitulatif: List[str]
+    dossier_analyse_autorisation: List[str]
 
     motivations: str
     moyens_decouverte_formation: List[str]
