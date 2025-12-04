@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,19 +23,22 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+from django import forms
 from django.utils.translation import gettext_lazy as _
 
-from base.models.utils.utils import ChoiceEnum
+from admission.models.contingente import ContingenteTraining
 
 
-class TardiveModificationReorientationFiltre(ChoiceEnum):
-    INSCRIPTION_TARDIVE = _('Late enrollment')
-    MODIFICATION_INSCRIPTION = _('Change of enrolment')
-    REORIENTATION = _('Change of course')
+class ContingenteTrainingForm(forms.ModelForm):
+    class Meta:
+        model = ContingenteTraining
+        fields = [
+            'places_number',
+        ]
 
 
-class ContingenteFiltre(ChoiceEnum):
-    NON_CONTINGENTE = _('Not limited-enrolment')
-    CONTINGENTE_RESIDENT = _('Resident limited-enrolment')
-    CONTINGENTE_NON_RESIDENT = _('Non-resident limited-enrolment')
+class ContingenteTrainingImportForm(forms.Form):
+    import_file = forms.FileField(
+        label=_("File to import"),
+        required=True,
+    )

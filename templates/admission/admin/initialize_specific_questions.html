@@ -39,10 +39,10 @@
 
 {% block content %}
   <h1>{% translate 'Initialization of the predefined specific questions for an academic year' %}</h1>
-  <form method="post" action="">
+  `<form method="post" action="">
     {% csrf_token %}
     {% bootstrap_form form %}
     <input type="submit" value="{% translate 'Launch' %}">
     <a href="{% url 'admin:admission_admissionformitem_changelist' %}" class="button cancel-link">{% translate "Cancel" %}</a>
-  </form>
+  </form>`
 {% endblock %}

@@ -44,6 +44,7 @@ from django.db.models import (
 from django.db.models.functions import Coalesce, NullIf
 from django.utils.translation import get_language
 
+from admission.calendar.admission_calendar import SIGLES_WITH_QUOTA
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
@@ -68,7 +69,7 @@ from admission.ddd.admission.shared_kernel.dtos.liste import (
 )
 from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.shared_kernel.enums.liste import (
-    TardiveModificationReorientationFiltre,
+    TardiveModificationReorientationFiltre, ContingenteFiltre,
 )
 from admission.ddd.admission.shared_kernel.enums.statut import (
     CHOIX_STATUT_TOUTE_PROPOSITION,
@@ -112,6 +113,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
         filtres_etats_checklist: Optional[Dict[str, List[str]]] = '',
         tardif_modif_reorientation: Optional[str] = '',
         delai_depasse_complements: Optional[bool] = None,
+        contingentes: Optional[List[str]] = None,
     ) -> PaginatedList[DemandeRechercheDTO]:
         language_is_french = get_language() == settings.LANGUAGE_CODE_FR
 
@@ -290,6 +292,16 @@ class ListerToutesDemandes(IListerToutesDemandes):
                 requested_documents_deadline__lt=today_date,
             )
 
+        if contingentes:
+            conditions = Q()
+            if ContingenteFiltre.NON_CONTINGENTE.name in contingentes:
+                conditions |= ~Q(training__acronym__in=SIGLES_WITH_QUOTA)
+            if ContingenteFiltre.CONTINGENTE_RESIDENT.name in contingentes:
+                conditions |= Q(training__acronym__in=SIGLES_WITH_QUOTA) & (Q(generaleducationadmission__is_non_resident=False) | Q(generaleducationadmission__is_non_resident__isnull=True))
+            if ContingenteFiltre.CONTINGENTE_NON_RESIDENT.name in contingentes:
+                conditions |= Q(training__acronym__in=SIGLES_WITH_QUOTA) & (Q(generaleducationadmission__is_non_resident=True) | Q(generaleducationadmission__is_non_resident__isnull=True))
+            qs = qs.filter(conditions)
+
         if mode_filtres_etats_checklist and filtres_etats_checklist:
 
             json_path_to_checks = defaultdict(set)
@@ -457,6 +469,9 @@ class ListerToutesDemandes(IListerToutesDemandes):
                 'derniere_modification_le': ['modified_at'],
                 'derniere_modification_par': ['last_update_author__user__username'],
                 'date_confirmation': ['submitted_at'],
+                'numero_demande_contingente': ['ares_application_number'],
+                'numero_tirage': ['draw_number'],
+                'etat_decision_sic': ['checklist__current__decision_sic__statut'],
             }[champ_tri]
 
             if tri_inverse:
@@ -493,6 +508,8 @@ class ListerToutesDemandes(IListerToutesDemandes):
         return DemandeRechercheDTO(
             uuid=admission.uuid,
             numero_demande=admission.formatted_reference,  # From annotation
+            numero_demande_contingente=admission.generaleducationadmission.ares_application_number if admission.generaleducationadmission else '',
+            numero_tirage=admission.generaleducationadmission.draw_number if admission.generaleducationadmission else None,
             nom_candidat=admission.candidate.last_name,
             prenom_candidat=admission.candidate.first_name,
             noma_candidat=noma_candidat,
@@ -522,6 +539,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
             vip=admission.is_vip,  # From annotation
             etat_demande=admission.status,  # From annotation
             type_demande=admission.type_demande,
+            etat_decision_sic='TODO',
             derniere_modification_le=admission.modified_at,
             derniere_modification_par=(
                 '{first_name} {last_name}'.format(

@@ -43,7 +43,7 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
 )
 from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.shared_kernel.enums.liste import (
-    TardiveModificationReorientationFiltre,
+    TardiveModificationReorientationFiltre, ContingenteFiltre,
 )
 from admission.ddd.admission.shared_kernel.enums.statut import (
     CHOIX_STATUT_TOUTE_PROPOSITION,
@@ -320,6 +320,19 @@ class AllAdmissionsFilterForm(AdmissionFilterWithEntitiesAndTrainingTypesForm):
             ),
         ),
         label=_('Deadline for complements'),
+        required=False,
+    )
+
+    contingentes = forms.MultipleChoiceField(
+        choices=ContingenteFiltre.choices(),
+        widget=Select2MultipleCheckboxesWidget(
+            attrs={
+                'data-dropdown-auto-width': True,
+                'data-selection-template': _("{items} types out of {total}"),
+            }
+        ),
+        label=_('Limited-enrolments'),
+        initial=[ContingenteFiltre.NON_CONTINGENTE.name, ContingenteFiltre.CONTINGENTE_RESIDENT.name],
         required=False,
     )
 

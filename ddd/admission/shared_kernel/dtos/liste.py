@@ -42,6 +42,8 @@ class VisualiseurAdmissionDTO(interface.DTO):
 class DemandeRechercheDTO(interface.DTO):
     uuid: str
     numero_demande: str
+    numero_demande_contingente: str
+    numero_tirage: Optional[int]
     nom_candidat: str
     prenom_candidat: str
     noma_candidat: Optional[str]
@@ -59,6 +61,7 @@ class DemandeRechercheDTO(interface.DTO):
     vip: bool
     etat_demande: str
     type_demande: str
+    etat_decision_sic: str
     derniere_modification_le: datetime.datetime
     derniere_modification_par: str
     derniere_modification_par_candidat: bool
