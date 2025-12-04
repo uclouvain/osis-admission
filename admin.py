@@ -49,6 +49,7 @@ from admission.auth.roles.ca_member import CommitteeMember
 from admission.auth.roles.candidate import Candidate
 from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.doctorate_committee_member import DoctorateCommitteeMember
+from admission.auth.roles.limited_enrolment_delegate import LimitedEnrolmentDelegate
 from admission.auth.roles.program_manager import ProgramManager
 from admission.auth.roles.promoter import Promoter
 from admission.auth.roles.sceb import Sceb
@@ -932,7 +933,7 @@ class AdmissionTaskAdmin(admin.ModelAdmin):
 # Roles
 
 
-@admin.register(Sceb)
+@admin.register(Sceb, LimitedEnrolmentDelegate)
 class HijackRoleModelAdmin(HijackUserAdminMixin, RoleModelAdmin):
     list_select_related = ['person__user']
 

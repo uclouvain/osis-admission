@@ -44,7 +44,7 @@ from osis_role.errors import predicate_failed_msg
 @predicate(bind=True)
 @predicate_failed_msg(message=_("You must be the request author to access this admission"))
 def is_admission_request_author(self, user: User, obj: BaseAdmission):
-    return obj.candidate == user.person
+    return obj is not None and obj.candidate == user.person
 
 
 @predicate(bind=True)
