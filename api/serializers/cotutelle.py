@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,7 +23,9 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.doctorat.preparation.commands import DefinirCotutelleCommand
+from admission.ddd.admission.doctorat.preparation.commands import (
+    DefinirCotutelleCommand,
+)
 from admission.ddd.admission.doctorat.preparation.dtos import CotutelleDTO
 from base.utils.serializers import DTOSerializer
 
@@ -32,7 +34,7 @@ class CotutelleDTOSerializer(DTOSerializer):
     class Meta:
         source = CotutelleDTO
         extra_kwargs = {
-            'motivation': {'max_length': 255},
+            'motivation': {'max_length': 1024},
             'institution': {'max_length': 255},
         }
 
@@ -44,6 +46,6 @@ class DefinirCotutelleCommandSerializer(DTOSerializer):
     class Meta:
         source = DefinirCotutelleCommand
         xtra_kwargs = {
-            'motivation': {'max_length': 255},
+            'motivation': {'max_length': 1024},
             'institution': {'max_length': 255},
         }
