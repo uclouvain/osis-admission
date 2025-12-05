@@ -9,7 +9,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("admission", "0277_generaleducationadmission_non_resident_file_and_more"),
-        ("base", "0722_alter_academiccalendar_reference"),
     ]
 
     operations = [

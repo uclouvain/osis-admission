@@ -375,6 +375,9 @@ class BaseAdmissionQuerySet(models.QuerySet):
         )
 
     def filter_according_to_roles(self, demandeur_uuid, permission='admission.view_enrolment_application'):
+        from admission.auth.roles.limited_enrolment_delegate import LimitedEnrolmentDelegate
+        from admission.calendar.admission_calendar import SIGLES_WITH_QUOTA
+
         demandeur_user = User.objects.filter(person__uuid=demandeur_uuid).first()
 
         roles = _get_relevant_roles(demandeur_user, permission)
@@ -397,7 +400,15 @@ class BaseAdmissionQuerySet(models.QuerySet):
                 ).values_list('education_group_id')
             )
 
-        return self.filter(entities_conditions | education_group_conditions)
+        # Filter limited enrolment for non-resident
+        limited_enrolment_condition = Q()
+        if any(isinstance(r, LimitedEnrolmentDelegate) for r in roles):
+            limited_enrolment_condition = Q(
+                training__acronym__in=SIGLES_WITH_QUOTA,
+                is_non_resident=True,
+            )
+
+        return self.filter(entities_conditions | education_group_conditions | limited_enrolment_condition)
 
     def filter_in_quarantine(self):
         return self.filter(
