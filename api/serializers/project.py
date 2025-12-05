@@ -176,6 +176,7 @@ class DoctoratDTOSerializer(DTOSerializer):
     campus_inscription = serializers.CharField(source='campus_inscription.nom', default='')
 
     date_debut = None
+    date_fin = None
     intitule_fr = None
     intitule_en = None
     credits = None
@@ -762,6 +763,7 @@ class CampusDTOSerializer(IncludedFieldsMixin, DTOSerializer):
 class DoctoratSearchDTOSerializer(IncludedFieldsMixin, DTOSerializer):
     campus = CampusDTOSerializer()
     date_debut = None
+    date_fin = None
     intitule_fr = None
     intitule_en = None
     credits = None

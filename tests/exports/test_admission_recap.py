@@ -1592,6 +1592,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 code='CFD1',
                 credits=180,
                 date_debut=datetime.date(2023, 1, 1),
+                date_fin=datetime.date(2023, 9, 13),
                 grade_academique='1',
             ),
             reference='1234',

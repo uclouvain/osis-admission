@@ -38,6 +38,7 @@ class DoctoratFormationDTO(interface.DTO):
     code: str
     annee: int
     date_debut: Optional[datetime.date]
+    date_fin: Optional[datetime.date]
     intitule: str
     intitule_fr: str
     intitule_en: str

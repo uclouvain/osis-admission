@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 import itertools
 from typing import Dict, List, Optional, Union
 
@@ -365,6 +366,9 @@ class PDFGeneration(IPDFGeneration):
                 'documents_names': documents_names,
                 'director': cls._get_sic_director(proposition_dto),
                 'ORDERED_CAMPUSES_UUIDS': ORDERED_CAMPUSES_UUIDS,
+                'est_doctorat': True,
+                'date_debut_documents': datetime.date(proposition_dto.formation.annee, 6, 1),
+                'date_fin_documents': proposition_dto.doctorat.date_fin - datetime.timedelta(days=1),
             },
             author=gestionnaire,
             language=proposition_dto.langue_contact_candidat,
@@ -413,6 +417,7 @@ class PDFGeneration(IPDFGeneration):
                     'profil_candidat_identification': profil_candidat_identification,
                     'rector': cls._get_sic_rector(),
                     'nombre_credits_formation': nombre_credits_formation,
+                    'date_derniere_inscription': proposition_dto.doctorat.date_fin - datetime.timedelta(days=1),
                 },
                 stylesheets=WeasyprintStylesheets.get_stylesheets_bootstrap_5(),
                 author=gestionnaire,
