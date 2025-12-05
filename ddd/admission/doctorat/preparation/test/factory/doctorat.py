@@ -33,8 +33,12 @@ from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formatio
 
 # FIXME import this factory from shared kernel when available
 from admission.ddd.admission.doctorat.preparation.dtos import DoctoratFormationDTO
-from admission.ddd.admission.shared_kernel.domain.model.formation import FormationIdentity
-from admission.ddd.admission.shared_kernel.repository.i_proposition import CAMPUS_LETTRE_DOSSIER
+from admission.ddd.admission.shared_kernel.domain.model.formation import (
+    FormationIdentity,
+)
+from admission.ddd.admission.shared_kernel.repository.i_proposition import (
+    CAMPUS_LETTRE_DOSSIER,
+)
 from admission.ddd.admission.shared_kernel.tests.factory.formation import (
     CampusFactory,
     FormationIdentityFactory,
@@ -94,6 +98,7 @@ class _DoctoratDTOFactory(factory.Factory):
     campus = CampusFactory()
     campus_inscription = CampusFactory()
     date_debut = factory.Faker('date')
+    date_fin = factory.Faker('date')
     type = TrainingType.PHD.name
     credits = 180
     grade_academique = '1'
