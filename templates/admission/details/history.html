@@ -111,6 +111,12 @@
     <td>${entry.author}</td>
 </tr>`;
     }
+
+    if (window.OsisHistory && typeof window.OsisHistory.mountHistoryViewer === 'function') {
+        window.OsisHistory.mountHistoryViewer();
+    } else {
+        console.warn("La fonction OsisHistory.mountHistoryViewer n'est pas définie.");
+    }
   </script>
 {% endblock %}
 
