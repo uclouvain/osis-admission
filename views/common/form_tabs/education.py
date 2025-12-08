@@ -23,12 +23,14 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import uuid
 from typing import List
 from uuid import UUID
 
 from django.db import transaction
 from django.urls import reverse
 from django.utils.functional import cached_property
+from osis_document_components.utils import is_uuid
 
 from admission.ddd.admission.shared_kernel.enums import Onglets, TypeItemFormulaire
 from admission.forms.admission.education import (
@@ -128,16 +130,27 @@ class AdmissionEducationFormView(AdmissionFormMixin, LoadDossierViewMixin, EditE
                 str(form_item.uuid): form_item
                 for form_item in AdmissionFormItem.objects.filter(uuid__in=specific_question_answers.keys())
             }
-            SpecificQuestionAnswer.objects.bulk_create(
-                [
-                    SpecificQuestionAnswer(
+            answers_not_documents = []
+            for form_item_uuid, reponse in specific_question_answers.items():
+                if form_items[form_item_uuid].type == TypeItemFormulaire.DOCUMENT.name:
+                    # Documents need to be saved individually for pre_save to be called on FileField
+                    SpecificQuestionAnswer.objects.update_or_create(
                         admission=admission,
                         form_item=form_items[form_item_uuid],
-                        file=reponse if form_items[form_item_uuid].type == TypeItemFormulaire.DOCUMENT.name else None,
-                        answer=reponse if form_items[form_item_uuid].type != TypeItemFormulaire.DOCUMENT.name else None,
+                        defaults={
+                            'file': [uuid.UUID(value) if is_uuid(value) else value for value in reponse],
+                        },
                     )
-                    for form_item_uuid, reponse in specific_question_answers.items()
-                ],
+                else:
+                    answers_not_documents.append(
+                        SpecificQuestionAnswer(
+                            admission=admission,
+                            form_item=form_items[form_item_uuid],
+                            answer=reponse,
+                        )
+                    )
+            SpecificQuestionAnswer.objects.bulk_create(
+                answers_not_documents,
                 update_conflicts=True,
                 update_fields=['file', 'answer'],
                 unique_fields=['admission', 'form_item'],
