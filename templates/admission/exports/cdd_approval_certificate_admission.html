@@ -56,6 +56,10 @@
           margin-top: 1.5em;
       }
 
+      dt p {
+          margin-top: 0;
+      }
+
       #signature {
           margin-top: 4em;
       }
@@ -120,6 +124,29 @@
       la cotutelle, contacts avec l’université partenaire, envoi de la fiche d’ouverture) doivent être réalisées dans
       les douze premiers mois suivant le démarrage de la thèse.
     </p>
+  {% endif %}
+
+  {% if proposition.avec_complements_formation %}
+    {% if proposition.complements_formation %}
+      <dl>
+        <dt>Compléments de formation :</dt>
+        <dd>
+          <ul>
+            {% for learning_unit in proposition.complements_formation %}
+              <li>
+                {{ learning_unit.code }} - {{ learning_unit.full_title }}
+                {% if learning_unit.credits %} ({{ learning_unit.credits }} ECTS){% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        </dd>
+      </dl>
+    {% else %}
+      {% field_data 'Compléments de formation' proposition.avec_complements_formation inline=True %}
+    {% endif %}
+    {% if proposition.commentaire_complements_formation %}
+      <p>{{ proposition.commentaire_complements_formation|safe }}</p>
+    {% endif %}
   {% endif %}
 
   <p class="text-danger">

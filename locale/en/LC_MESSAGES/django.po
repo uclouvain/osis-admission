@@ -1467,6 +1467,9 @@ msgstr ""
 msgid "Commitment and declaration"
 msgstr ""
 
+msgid "Communication about the prerequisite courses"
+msgstr ""
+
 #, python-brace-format
 msgid ""
 "Communication to the candidate (refusal reason), in <span class=\"label "
@@ -1474,6 +1477,9 @@ msgid ""
 msgstr ""
 
 msgid "Communication to the candidate about additional trainings"
+msgstr ""
+
+msgid "Communication to the candidate about additional trainings:"
 msgstr ""
 
 msgid "Communication with Host Hospitals"
@@ -3976,6 +3982,9 @@ msgstr ""
 msgid ""
 "List of the mandatory requested documents that must be submitted "
 "immediately, with the reason"
+msgstr ""
+
+msgid "List of the prerequisite courses"
 msgstr ""
 
 msgid ""

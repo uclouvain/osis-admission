@@ -687,7 +687,6 @@ def get_cotutelle_attachments(context: ResumePropositionDTO) -> List[Attachment]
                 identifier='DEMANDE_OUVERTURE',
                 label=DocumentsCotutelle['DEMANDE_OUVERTURE'],
                 uuids=context.groupe_supervision.cotutelle.demande_ouverture,
-                required=True,
                 candidate_language=context.identification.langue_contact,
             ),
             Attachment(

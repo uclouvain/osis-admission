@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 from django.forms import Form
+from django.template.loader import render_to_string
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
@@ -65,7 +66,10 @@ from admission.mail_templates import (
     ADMISSION_EMAIL_CDD_APPROVAL_DOCTORATE_WITH_BELGIAN_DIPLOMA,
     ADMISSION_EMAIL_CDD_APPROVAL_DOCTORATE_WITHOUT_BELGIAN_DIPLOMA,
 )
-from admission.utils import get_access_titles_names, get_salutation_prefix
+from admission.utils import (
+    get_access_titles_names,
+    get_salutation_prefix,
+)
 from admission.views.common.mixins import AdmissionFormMixin
 from admission.views.doctorate.details.checklist.mixins import (
     CheckListDefaultContextMixin,
@@ -120,7 +124,6 @@ class CddDecisionMixin(CheckListDefaultContextMixin):
         context['history_entries']['cdd_decision'] = cdd_decision_history
 
         context['cdd_decision_refusal_form'] = self.cdd_decision_refusal_form
-        context['cdd_decision_approval_final_form'] = self.cdd_decision_approval_final_form
 
         can_change_decision = self.request.user.has_perm('admission.checklist_change_faculty_decision', self.admission)
         in_cdd_decision_closed_status = self.in_cdd_decision_closed_status()
@@ -172,6 +175,15 @@ class CddDecisionMixin(CheckListDefaultContextMixin):
         }
 
         if self.request.method == 'GET':
+            prerequisite_courses_list = render_to_string(
+                'admission/includes/prerequisite_courses.html',
+                context={'admission': self.proposition},
+            )
+            prerequisite_courses_communication = render_to_string(
+                'admission/includes/prerequisite_courses_communication.html',
+                context={'admission': self.proposition},
+            )
+
             # Load the email template
             subject, body = get_email(
                 template_identifier=(
@@ -187,6 +199,8 @@ class CddDecisionMixin(CheckListDefaultContextMixin):
                     'sender_name': f'{self.request.user.person.first_name} {self.request.user.person.last_name}',
                     'management_entity_acronym': self.proposition.doctorat.sigle_entite_gestion,
                     'program_managers_names': self.admission_program_managers_names,
+                    'prerequisite_courses_list': prerequisite_courses_list,
+                    'prerequisite_courses_communication': prerequisite_courses_communication,
                 },
             )
 
@@ -391,6 +405,11 @@ class CddApprovalFinalDecisionView(
     template_name = 'admission/doctorate/includes/checklist/cdd_decision_approval_final_form.html'
     htmx_template_name = 'admission/doctorate/includes/checklist/cdd_decision_approval_final_form.html'
     permission_required = 'admission.checklist_change_faculty_decision'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        context['cdd_decision_approval_final_form'] = self.cdd_decision_approval_final_form
+        return context
 
     def get_form(self, form_class=None):
         return self.cdd_decision_approval_final_form
