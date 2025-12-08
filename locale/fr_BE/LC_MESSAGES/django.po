@@ -1211,6 +1211,12 @@ msgstr "Chimie"
 msgid "CIRE, unlimited stay or foreigner`s card"
 msgstr "Carte CIRE, séjour illimité ou d'étranger"
 
+msgid "CO_DIPLOMATION_132"
+msgstr "132 € - Codiplômation"
+
+msgid "CO_DIPLOMATION_901"
+msgstr "901 € - Codiplômation"
+
 msgid "CSS class"
 msgstr "Classe CSS"
 
@@ -2233,7 +2239,7 @@ msgid "Diploma nationality"
 msgstr "Nationalité du diplôme"
 
 msgid "Diploma of aptitude for access to higher education (DAES)"
-msgstr "Diplôme d'Aptitude à accéder à l'Enseignement supérieur (DAES)"
+msgstr "Diplôme d'Aptitude à accéder à l'Enseignement Supérieur (DAES)"
 
 msgid "Diploma translation"
 msgstr "Traduction du diplôme"
@@ -3949,6 +3955,13 @@ msgstr ""
 "directement transmettre le dossier à SIC en sélectionnant le bouton "
 "approprié ci-dessous."
 
+msgid ""
+"If your equivalency decision does not give access to the desired training, "
+"do you hold your diploma of aptitude for access to higher education (DAES)?"
+msgstr ""
+"Si votre équivalence ne donne pas accès à la formation souhaitée, "
+"êtes-vous en possession d'un Diplôme d'Aptitude à accéder à l'Enseignement Supérieur (DAES) ?"
+
 msgid "Immediately"
 msgstr "Immédiatement"
 
@@ -4026,23 +4039,24 @@ msgstr "En brouillon"
 #, python-format
 msgid ""
 "In order to proceed with your enrolment at the university, please go to the "
-"Enrolment Office (see address below) between 1 June and 30 September "
-"%(year)s with the following documents:"
+"Enrolment Office (see address below) between %(documents_start_date)s and "
+"%(documents_end_date)s with the following documents:"
 msgstr ""
 "Afin de finaliser votre inscription à l'Université, veuillez-vous présenter "
-"au Service des inscriptions (voir adresse ci-dessous) entre le 1 juin et le "
-"30 septembre %(year)s muni·e des documents ci-dessous :"
+"au Service des inscriptions (voir adresse ci-dessous) entre le "
+"%(documents_start_date)s et le %(documents_end_date)s muni·e des documents "
+"ci-dessous :"
 
 #, python-format
 msgid ""
 "In order to proceed with your enrolment at the university, please send the "
-"document(s) listed below between 1 June and 30 September %(year)s to <a "
-"href=\"mailto:%(email)s\">%(email)s</a>:"
+"document(s) listed below between %(documents_start_date)s and "
+"%(documents_end_date)s to <a href=\"mailto:%(email)s\">%(email)s</a>:"
 msgstr ""
 "Afin de finaliser votre inscription à l'Université, nous vous remercions de "
-"nous transmettre entre le 1 juin et le 30 septembre %(year)s au plus tard à "
-"l'adresse <a href=\"mailto:%(email)s\">%(email)s</a> le/les document.s "
-"repris ci-dessous :"
+"nous transmettre entre le %(documents_start_date)s et le "
+"%(documents_end_date)s au plus tard à l'adresse <a href=\"mailto:"
+"%(email)s\">%(email)s</a> le/les document.s repris ci-dessous :"
 
 msgid "In payement order"
 msgstr "En ordre de paiement"
@@ -5502,6 +5516,12 @@ msgstr ""
 "modalités de téléchargement du document."
 
 #, python-format
+msgid ""
+"Please note that the academic year %(year)s begins on %(start_date)s and "
+"ends on %(end_date)s."
+msgstr "Veuillez noter que l'année académique %(year)s débute le %(start_date)s et se termine le %(end_date)s."
+
+#, python-format
 msgid "Please note that the first term begins on %(date)s."
 msgstr "Nous vous signalons que le 1er quadrimestre débute le %(date)s."
 
@@ -6440,6 +6460,9 @@ msgstr "Madame, Monsieur"
 msgid "Solidarity student"
 msgstr "Étudiant solidaire"
 
+msgid "Some documents are still requested."
+msgstr "Des documents sont encore réclamés."
+
 msgid "Some errors have been encountered."
 msgstr "Des erreurs ont été rencontrées."
 
@@ -6770,6 +6793,11 @@ msgstr "Texte"
 
 msgid "Text size"
 msgstr "Taille du texte"
+
+msgid ""
+"The \"Sufficient\" status requires the equivalence information to be "
+"specified."
+msgstr "Le passage à l'état \"Suffisant\" nécessite que les informations sur l'équivalence soient remplies."
 
 msgid ""
 "The \"doctoral training\" must be completed before submitting the defense "
@@ -7431,6 +7459,10 @@ msgstr ""
 #, python-format
 msgid "The type of the admission form item is unknown (%(type)s)."
 msgstr "Le type de l'élément du formulaire d'admission est inconnu (%(type)s)."
+
+#, python-format
+msgid "The university tuition fee is EURO %(montant)s."
+msgstr "Les droits d'inscription à l'Université s'élèvent à %(montant)s EUR."
 
 #, python-format
 msgid ""
@@ -8383,15 +8415,15 @@ msgstr ""
 #, python-format
 msgid ""
 "You cannot continue your application. The registration procedure for the "
-"<em>%(training_name)s</em> for non-resident students is managed on another "
-"registration platform. We invite you to consult the complete registration "
-"procedure on the following page: <a href=\"https://www.uclouvain.be/en/"
-"enrolment/limited-enrolment-courses\" target=\"_blank\">https://www."
-"uclouvain.be/en/enrolment/limited-enrolment-courses</a>"
+"<em>%(training_name)s</em> for non-resident students is not yet available. "
+"We invite you to consult the complete registration procedure on the "
+"following page: <a href=\"https://www.uclouvain.be/en/enrolment/limited-"
+"enrolment-courses\" target=\"_blank\">https://www.uclouvain.be/en/enrolment/"
+"limited-enrolment-courses</a>"
 msgstr ""
 "Vous ne pouvez pas poursuivre votre demande. La procédure d’inscription au "
-"programme de <em>%(training_name)s</em> pour les étudiants non-résidents est "
-"gérée sur une autre plateforme d’inscription. Nous vous invitons à prendre "
+"programme de <em>%(training_name)s</em> pour les étudiants non-résidents n'est "
+"pas encore disponible. Nous vous invitons à prendre "
 "connaissance de la procédure d’inscription complète sur la page suivante : "
 "<a href=\"https://www.uclouvain.be/fr/inscriptions/etudes-contingentees\" "
 "target=\"_blank\">https://www.uclouvain.be/fr/inscriptions/etudes-"

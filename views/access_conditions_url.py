@@ -25,7 +25,6 @@
 # ##############################################################################
 from urllib.parse import unquote
 
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import RedirectView
 
 from admission.utils import get_access_conditions_url
@@ -35,7 +34,7 @@ __all__ = [
 ]
 
 
-class AccessConditionsURL(LoginRequiredMixin, RedirectView):
+class AccessConditionsURL(RedirectView):
     urlpatterns = {
         'access-conditions-url': (
             'access-conditions-url/<str:training_type>/<str:training_acronym>/<str:partial_training_acronym>/'

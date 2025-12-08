@@ -52,7 +52,6 @@ from django.utils.translation import get_language
 from admission.ddd import LANGUES_OBLIGATOIRES_DOCTORAT, NB_MOIS_MIN_VAE
 from admission.ddd.admission.doctorat.preparation.dtos import (
     ConditionsComptabiliteDTO,
-    DoctoratFormationDTO,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.connaissance_langue import (
     ConnaissanceLangueDTO,
@@ -74,7 +73,6 @@ from admission.ddd.admission.shared_kernel.dtos import (
 from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import (
     EtudesSecondairesAdmissionDTO,
 )
-from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from admission.ddd.admission.shared_kernel.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.shared_kernel.dtos.resume import ResumeCandidatDTO
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
@@ -353,8 +351,10 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                     equivalence=foreign_high_school_diploma.equivalence,
                     decision_final_equivalence_ue=foreign_high_school_diploma.final_equivalence_decision_ue,
                     daes_ue=foreign_high_school_diploma.access_diploma_to_higher_education_ue,
+                    a_daes_ue=foreign_high_school_diploma.has_access_diploma_to_higher_education_ue,
                     decision_final_equivalence_hors_ue=foreign_high_school_diploma.final_equivalence_decision_not_ue,
                     daes_hors_ue=foreign_high_school_diploma.access_diploma_to_higher_education_not_ue,
+                    a_daes_hors_ue=foreign_high_school_diploma.has_access_diploma_to_higher_education_not_ue,
                     preuve_decision_equivalence=foreign_high_school_diploma.equivalence_decision_proof,
                 )
                 if foreign_high_school_diploma
@@ -442,6 +442,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             valuated_from_admissions=ArrayAgg(
                 'educational_experience__valuated_from_admission__uuid',
                 filter=Q(educational_experience__valuated_from_admission__isnull=False),
+                default=Value([])
             ),
         )
 
@@ -658,6 +659,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             valuated_training_types=ArrayAgg(
                 'baseadmissions__training__education_group_type__name',
                 filter=Q(baseadmissions__valuated_secondary_studies_person_id=F('pk')),
+                default=Value([])
             ),
         )
 
@@ -758,6 +760,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 valuated_from_admissions=ArrayAgg(
                     'valuated_from_admission__uuid',
                     filter=Q(valuated_from_admission__isnull=False),
+                    default=Value([])
                 ),
                 injecte_par_admission=Exists(
                     AdmissionEPCInjection.objects.filter(
@@ -989,7 +992,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
     @classmethod
     def get_changements_etablissement(cls, matricule: str, annees: List[int]) -> Dict[int, bool]:
         """Inscrit à un autre établissement Belge en N-1
-        (informatiquement : curriculum / en N-1 supérieur belge non-diplômé)"""
+        (informatiquement : curriculum / en N-1 supérieur belge)"""
         qs = dict(
             EducationalExperienceYear.objects.filter(academic_year__year__in=[annee - 1 for annee in annees])
             .annotate(
@@ -997,7 +1000,6 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                     EducationalExperienceYear.objects.filter(
                         educational_experience__person__global_id=matricule,
                         educational_experience__country__iso_code=BE_ISO_CODE,
-                        educational_experience__obtained_diploma=False,
                         academic_year__year=OuterRef('academic_year__year'),
                     )
                 ),

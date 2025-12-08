@@ -46,6 +46,7 @@ from ._should_informations_checklist_etre_completees import (
     ShouldDemandeEtreTypeInscription,
     ShouldFacPeutDonnerDecision,
     ShouldFacPeutSoumettreAuSicLorsDeLaDecisionFacultaire,
+    ShouldInformationsEquivalenceEtreRenseignees,
     ShouldPeutSpecifierInformationsDecisionFacultaire,
     ShouldPropositionEtreInscriptionTardiveAvecConditionAcces,
     ShouldPropositionEtreReorientationExterneAvecConditionAcces,

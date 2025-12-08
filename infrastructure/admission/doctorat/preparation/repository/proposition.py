@@ -124,8 +124,8 @@ from admission.infrastructure.admission.shared_kernel.repository.proposition imp
 )
 from admission.infrastructure.utils import dto_to_dict
 from admission.models import Accounting, AdmissionFormItem, DoctorateAdmission
-from admission.models.specific_question import SpecificQuestionAnswer
 from admission.models.doctorate import PropositionProxy
+from admission.models.specific_question import SpecificQuestionAnswer
 from base.models.academic_year import AcademicYear
 from base.models.education_group_year import EducationGroupYear
 from base.models.entity_version import EntityVersion
@@ -278,23 +278,6 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
         commentaire_programme_conjoint=admission.join_program_fac_comment,
         condition_acces=ConditionAcces[admission.admission_requirement] if admission.admission_requirement else None,
         millesime_condition_acces=admission.admission_requirement_year and admission.admission_requirement_year.year,
-        information_a_propos_de_la_restriction=admission.foreign_access_title_equivalency_restriction_about,
-        type_equivalence_titre_acces=(
-            TypeEquivalenceTitreAcces[admission.foreign_access_title_equivalency_type]
-            if admission.foreign_access_title_equivalency_type
-            else None
-        ),
-        statut_equivalence_titre_acces=(
-            StatutEquivalenceTitreAcces[admission.foreign_access_title_equivalency_status]
-            if admission.foreign_access_title_equivalency_status
-            else None
-        ),
-        etat_equivalence_titre_acces=(
-            EtatEquivalenceTitreAcces[admission.foreign_access_title_equivalency_state]
-            if admission.foreign_access_title_equivalency_state
-            else None
-        ),
-        date_prise_effet_equivalence_titre_acces=admission.foreign_access_title_equivalency_effective_date,
         besoin_de_derogation=(
             BesoinDeDerogation[admission.dispensation_needed] if admission.dispensation_needed else None
         ),
@@ -535,17 +518,6 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'join_program_fac_comment': entity.commentaire_programme_conjoint,
                 'admission_requirement': entity.condition_acces.name if entity.condition_acces else '',
                 'admission_requirement_year': academic_years.get(entity.millesime_condition_acces),
-                'foreign_access_title_equivalency_type': (
-                    entity.type_equivalence_titre_acces.name if entity.type_equivalence_titre_acces else ''
-                ),
-                'foreign_access_title_equivalency_restriction_about': entity.information_a_propos_de_la_restriction,
-                'foreign_access_title_equivalency_status': (
-                    entity.statut_equivalence_titre_acces.name if entity.statut_equivalence_titre_acces else ''
-                ),
-                'foreign_access_title_equivalency_state': (
-                    entity.etat_equivalence_titre_acces.name if entity.etat_equivalence_titre_acces else ''
-                ),
-                'foreign_access_title_equivalency_effective_date': entity.date_prise_effet_equivalence_titre_acces,
                 'dispensation_needed': entity.besoin_de_derogation.name if entity.besoin_de_derogation else '',
                 'tuition_fees_amount': (
                     entity.droits_inscription_montant.name if entity.droits_inscription_montant else ''
@@ -795,6 +767,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 code=admission.doctorate.partial_acronym,
                 annee=admission.doctorate.academic_year.year,
                 date_debut=admission.doctorate.academic_year.start_date,
+                date_fin=admission.doctorate.academic_year.end_date,
                 intitule=(
                     admission.doctorate.title_english
                     if get_language() == settings.LANGUAGE_CODE_EN

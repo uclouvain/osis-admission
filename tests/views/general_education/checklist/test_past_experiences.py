@@ -81,10 +81,9 @@ from admission.tests.views.general_education.checklist.sic_decision.base import 
 )
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.choice_field import BLANK_CHOICE
-from base.models.enums.community import CommunityEnum
 from base.models.enums.education_group_types import TrainingType
-from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.enums.got_diploma import GotDiploma
+from base.models.person import Person
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -139,6 +138,9 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
         cls.fac_manager_user = ProgramManagerRoleFactory(education_group=cls.training.education_group).person.user
         cls.default_headers = {'HTTP_HX-Request': 'true'}
         cls.url_name = 'admission:general-education:past-experiences-change-status'
+
+        cls.error_message_if_missing_data = gettext("Some errors have been encountered.")
+        cls.success_message = gettext('Your data have been saved.')
 
     def setUp(self) -> None:
         super().setUp()
@@ -344,6 +346,76 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
             ),
         )
 
+    def test_change_the_checklist_status_to_success_for_a_bachelor_with_national_secondary_studies(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        foreign_high_school_diploma = ForeignHighSchoolDiplomaFactory(
+            foreign_diploma_type=ForeignDiplomaTypes.NATIONAL_BACHELOR.name,
+        )
+
+        self.general_admission.candidate = foreign_high_school_diploma.person
+
+        # Set the admission requirement
+        self.general_admission.admission_requirement = ConditionAcces.BAC.name
+        self.general_admission.admission_requirement_year = self.academic_years[1]
+
+        # Set the checklists of the experiences
+        self.general_admission.checklist['current'][OngletsChecklist.parcours_anterieur.name] = {
+            'statut': ChoixStatutChecklist.GEST_BLOCAGE.name,
+            'enfants': [
+                {
+                    'statut': ChoixStatutChecklist.GEST_REUSSITE.name,
+                    'extra': {
+                        'identifiant': OngletsDemande.ETUDES_SECONDAIRES.name,
+                    },
+                },
+            ],
+        }
+
+        # Set the access title
+        self.general_admission.are_secondary_studies_access_title = True
+        self.general_admission.save()
+
+        success_url = resolve_url(
+            self.url_name,
+            uuid=self.general_admission.uuid,
+            status=ChoixStatutChecklist.GEST_REUSSITE.name,
+        )
+
+        # The success status requires the equivalence information
+        response = self.client.post(success_url, **self.default_headers)
+
+        # Check response
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        messages = [m.message for m in response.context['messages']]
+        self.assertIn(self.error_message_if_missing_data, messages)
+        self.assertNotIn(self.success_message, messages)
+
+        # Check admission
+        self.general_admission.refresh_from_db()
+        self.assertNotEqual(
+            self.general_admission.checklist['current']['parcours_anterieur']['statut'],
+            ChoixStatutChecklist.GEST_REUSSITE.name,
+        )
+
+        self.general_admission.foreign_access_title_equivalency_type = TypeEquivalenceTitreAcces.NON_CONCERNE.name
+        self.general_admission.save()
+
+        response = self.client.post(success_url, **self.default_headers)
+
+        # Check response
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        messages = [m.message for m in response.context['messages']]
+        self.assertNotIn(self.error_message_if_missing_data, messages)
+        self.assertIn(self.success_message, messages)
+
+        # Check admission
+        self.general_admission.refresh_from_db()
+        self.assertEqual(
+            self.general_admission.checklist['current']['parcours_anterieur']['statut'],
+            ChoixStatutChecklist.GEST_REUSSITE.name,
+        )
+
     def test_change_the_checklist_status_to_success_for_a_certificate(self):
         self.client.force_login(user=self.sic_manager_user)
 
@@ -375,15 +447,13 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
         self.general_admission.save()
 
         # The success status requires at least one access title and an admission requirement
-        error_message_if_missing_data = gettext("Some errors have been encountered.")
-
         response = self.client.post(success_url, **self.default_headers)
 
         # Check response
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         messages = [m.message for m in response.context['messages']]
-        self.assertIn(error_message_if_missing_data, messages)
-        self.assertNotIn(gettext('Your data have been saved.'), messages)
+        self.assertIn(self.error_message_if_missing_data, messages)
+        self.assertNotIn(self.success_message, messages)
 
         # Check admission
         self.general_admission.refresh_from_db()
@@ -410,8 +480,8 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
         # Check response
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         messages = [m.message for m in response.context['messages']]
-        self.assertIn(error_message_if_missing_data, messages)
-        self.assertNotIn(gettext('Your data have been saved.'), messages)
+        self.assertIn(self.error_message_if_missing_data, messages)
+        self.assertNotIn(self.success_message, messages)
 
         # Check admission
         self.general_admission.refresh_from_db()
@@ -436,8 +506,8 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
         # Check response
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         messages = [m.message for m in response.context['messages']]
-        self.assertIn(error_message_if_missing_data, messages)
-        self.assertNotIn(gettext('Your data have been saved.'), messages)
+        self.assertIn(self.error_message_if_missing_data, messages)
+        self.assertNotIn(self.success_message, messages)
 
         # Check admission
         self.general_admission.refresh_from_db()
@@ -457,8 +527,8 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
         # Check response
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         messages = [m.message for m in response.context['messages']]
-        self.assertNotIn(error_message_if_missing_data, messages)
-        self.assertIn(gettext('Your data have been saved.'), messages)
+        self.assertNotIn(self.error_message_if_missing_data, messages)
+        self.assertIn(self.success_message, messages)
 
         # Check admission
         self.general_admission.refresh_from_db()
@@ -529,6 +599,56 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+    def test_with_temporary_value_removal(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        removed_option = (ConditionAcces.PARCOURS.name, ConditionAcces.PARCOURS.label)
+
+        # On get > the removed option is not selected so we don't keep it
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        form = response.context['past_experiences_admission_requirement_form']
+        self.assertNotIn(removed_option, form.fields['admission_requirement'].choices)
+
+        # On get > the removed option is selected so we keep it
+        self.general_admission.admission_requirement = removed_option[0]
+        self.general_admission.save(update_fields=['admission_requirement'])
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        form = response.context['past_experiences_admission_requirement_form']
+        self.assertIn(removed_option, form.fields['admission_requirement'].choices)
+
+        # On post > the removed option was selected and is selected again so we keep it
+        response = self.client.post(
+            self.url,
+            data={'admission_requirement': removed_option[0]},
+            **self.default_headers,
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        form = response.context['past_experiences_admission_requirement_form']
+        self.assertIn(removed_option, form.fields['admission_requirement'].choices)
+
+        # On post > the removed option was selected but is not selected again so we don't keep it
+        response = self.client.post(
+            self.url,
+            data={'admission_requirement': ConditionAcces.SECONDAIRE.name},
+            **self.default_headers,
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        form = response.context['past_experiences_admission_requirement_form']
+        self.assertNotIn(removed_option, form.fields['admission_requirement'].choices)
+
+        # On post > the removed option was not selected but is selected now so we don't keep it (impossible)
+        response = self.client.post(
+            self.url,
+            data={'admission_requirement': removed_option[0]},
+            **self.default_headers,
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        form = response.context['past_experiences_admission_requirement_form']
+        self.assertNotIn(removed_option, form.fields['admission_requirement'].choices)
+
     def test_initialization_of_the_form(self):
         self.client.force_login(user=self.sic_manager_user)
 
@@ -538,23 +658,30 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
 
         form = response.context['past_experiences_admission_requirement_form']
 
-        bachelor_choices = [
+        admission_choices = [
             (ConditionAcces.SECONDAIRE.name, ConditionAcces.SECONDAIRE.label),
             (ConditionAcces.EXAMEN_ADMISSION.name, ConditionAcces.EXAMEN_ADMISSION.label),
-            (ConditionAcces.PARCOURS.name, ConditionAcces.PARCOURS.label),
             (ConditionAcces.VAE.name, ConditionAcces.VAE.label),
             (ConditionAcces.MASTER.name, ConditionAcces.MASTER.label),
             (ConditionAcces.BAC.name, ConditionAcces.BAC.label),
             (ConditionAcces.UNI_SNU_AUTRE.name, ConditionAcces.UNI_SNU_AUTRE.label),
         ]
-        self.assertEqual(form.fields['admission_requirement'].choices, BLANK_CHOICE + bachelor_choices)
+        self.assertEqual(form.fields['admission_requirement'].choices, BLANK_CHOICE + admission_choices)
         self.assertFalse(form.fields['admission_requirement'].disabled)
         self.assertFalse(form.fields['admission_requirement_year'].disabled)
         self.assertFalse(form.fields['with_prerequisite_courses'].disabled)
 
         self.assertEqual(
             recuperer_conditions_acces_par_formation(TrainingType.BACHELOR.name),
-            bachelor_choices,
+            [
+                (ConditionAcces.SECONDAIRE.name, ConditionAcces.SECONDAIRE.label),
+                (ConditionAcces.EXAMEN_ADMISSION.name, ConditionAcces.EXAMEN_ADMISSION.label),
+                (ConditionAcces.PARCOURS.name, ConditionAcces.PARCOURS.label),
+                (ConditionAcces.VAE.name, ConditionAcces.VAE.label),
+                (ConditionAcces.MASTER.name, ConditionAcces.MASTER.label),
+                (ConditionAcces.BAC.name, ConditionAcces.BAC.label),
+                (ConditionAcces.UNI_SNU_AUTRE.name, ConditionAcces.UNI_SNU_AUTRE.label),
+            ],
         )
 
         self.assertEqual(

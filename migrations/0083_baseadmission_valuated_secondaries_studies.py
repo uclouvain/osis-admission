@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
         migrations.AddConstraint(
             model_name='baseadmission',
             constraint=models.CheckConstraint(
-                check=models.Q(
+                condition=models.Q(
                     ('valuated_secondary_studies_person_id', models.expressions.F('candidate_id'))
                 ),
                 name='only_candidate_can_be_valuated',

@@ -36,11 +36,11 @@ from osis_history.models import HistoryEntry
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
     ENTITY_CDE,
 )
-from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
     ChoixStatutPropositionGenerale,
 )
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.models import GeneralEducationAdmission
 from admission.models.checklist import (
     AdditionalApprovalCondition,
@@ -149,7 +149,7 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.general_admission.mobility_months_amount = ''
         self.general_admission.must_report_to_sic = None
         self.general_admission.communication_to_the_candidate = ''
-        self.general_admission.must_provide_student_visa_d = False
+        self.general_admission.must_provide_student_visa_d = None
         self.general_admission.save()
 
         response = self.client.get(self.url, **self.default_headers)
@@ -176,33 +176,10 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.assertEqual(form.initial.get('mobility_months_amount'), '')
         self.assertEqual(form.initial.get('must_report_to_sic'), False)
         self.assertEqual(form.initial.get('communication_to_the_candidate'), '')
-        self.assertEqual(form.initial.get('must_provide_student_visa_d'), False)
+        self.assertEqual(form.initial.get('must_provide_student_visa_d'), None)
 
         formset = response.context['sic_decision_free_approval_condition_formset']
         self.assertEqual(len(formset.forms), 0)
-
-        # By default, candidate who are not from UE+5 must provide a student visa
-        self.general_admission.must_provide_student_visa_d = None
-        self.general_admission.save()
-        self.general_admission.candidate.country_of_citizenship = CountryFactory(european_union=False, iso_code='ZB')
-        self.general_admission.candidate.save()
-
-        response = self.client.get(self.url, **self.default_headers)
-
-        self.assertEqual(response.status_code, 200)
-
-        form = response.context['sic_decision_approval_form']
-        self.assertEqual(form.initial.get('must_provide_student_visa_d'), True)
-
-        self.general_admission.candidate.country_of_citizenship = CountryFactory(european_union=False, iso_code='CH')
-        self.general_admission.candidate.save()
-
-        response = self.client.get(self.url, **self.default_headers)
-
-        self.assertEqual(response.status_code, 200)
-
-        form = response.context['sic_decision_approval_form']
-        self.assertEqual(form.initial.get('must_provide_student_visa_d'), None)
 
     def test_approval_decision_form_initialization_other_training(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -399,7 +376,7 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
             'sic-decision-approval-rebilling_or_third_party_payer': 'rebilling_or_third_party_payer',
             'sic-decision-approval-first_year_inscription_and_status': 'first_year_inscription_and_status',
             'sic-decision-approval-communication_to_the_candidate': 'Communication',
-            'sic-decision-approval-must_provide_student_visa_d': 'on',
+            'sic-decision-approval-must_provide_student_visa_d': 'True',
             'sic-decision-TOTAL_FORMS': '2',
             'sic-decision-INITIAL_FORMS': '0',
             'sic-decision-MIN_NUM_FORMS': '0',

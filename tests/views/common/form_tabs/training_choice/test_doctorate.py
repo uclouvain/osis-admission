@@ -226,17 +226,17 @@ class DoctorateTrainingChoiceFormViewTestCase(TestCase):
         self.assertCountEqual(
             form.fields['doctorate_training'].choices,
             [
-                [
+                tuple([
                     self.doctorate_admission.training.acronym,
                     '{} ({}) <span class="training-acronym">{}</span>'.format(
                         self.doctorate_admission.training.title,
                         self.first_campus.name,
                         self.doctorate_admission.training.acronym,
                     ),
-                ]
+                ])
             ],
         )
-        self.assertCountEqual(form.fields['sector'].choices, [['SST', 'Sector name']])
+        self.assertCountEqual(form.fields['sector'].choices, [('SST', 'Sector name')])
 
         # Disabled fields
         self.assertEqual(form.fields['training_type'].disabled, True)

@@ -32,9 +32,15 @@ from base.models.utils.utils import ChoiceEnum
 from epc.models.enums.condition_acces import ConditionAcces
 
 
-def recuperer_conditions_acces_par_formation(type_formation: str):
+def recuperer_conditions_acces_par_formation(type_formation: str, conditions_acces_a_exclure: set[str] | None = None):
     """Récupérer une liste des choix des conditions d'accès pour une formation donnée."""
-    return [(choice.name, choice.label) for choice in CHOIX_PAR_FORMATION.get(type_formation, [])]
+    if conditions_acces_a_exclure is None:
+        conditions_acces_a_exclure = set()
+    return [
+        (choice.name, choice.label)
+        for choice in CHOIX_PAR_FORMATION.get(type_formation, [])
+        if choice.name not in conditions_acces_a_exclure
+    ]
 
 
 CHOIX_POUR_BACHELIER = [

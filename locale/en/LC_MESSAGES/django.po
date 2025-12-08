@@ -1109,6 +1109,12 @@ msgstr "Chemistry"
 msgid "CIRE, unlimited stay or foreigner`s card"
 msgstr ""
 
+msgid "CO_DIPLOMATION_132"
+msgstr "132 € - Joint degree"
+
+msgid "CO_DIPLOMATION_901"
+msgstr "901 € - Joint degree"
+
 msgid "CSS class"
 msgstr ""
 
@@ -3551,6 +3557,11 @@ msgid ""
 "application to the SIC by selecting the appropriate button below."
 msgstr ""
 
+msgid ""
+"If your equivalency decision does not give access to the desired training, "
+"do you hold your diploma of aptitude for access to higher education (DAES)?"
+msgstr ""
+
 msgid "Immediately"
 msgstr ""
 
@@ -3610,15 +3621,15 @@ msgstr ""
 #, python-format
 msgid ""
 "In order to proceed with your enrolment at the university, please go to the "
-"Enrolment Office (see address below) between 1 June and 30 September "
-"%(year)s with the following documents:"
+"Enrolment Office (see address below) between %(documents_start_date)s and "
+"%(documents_end_date)s with the following documents:"
 msgstr ""
 
 #, python-format
 msgid ""
 "In order to proceed with your enrolment at the university, please send the "
-"document(s) listed below between 1 June and 30 September %(year)s to <a "
-"href=\"mailto:%(email)s\">%(email)s</a>:"
+"document(s) listed below between %(documents_start_date)s and "
+"%(documents_end_date)s to <a href=\"mailto:%(email)s\">%(email)s</a>:"
 msgstr ""
 
 msgid "In payement order"
@@ -4963,6 +4974,12 @@ msgid ""
 msgstr ""
 
 #, python-format
+msgid ""
+"Please note that the academic year %(year)s begins on %(start_date)s and "
+"ends on %(end_date)s."
+msgstr ""
+
+#, python-format
 msgid "Please note that the first term begins on %(date)s."
 msgstr ""
 
@@ -5855,6 +5872,9 @@ msgstr ""
 msgid "Solidarity student"
 msgstr ""
 
+msgid "Some documents are still requested."
+msgstr ""
+
 msgid "Some errors have been encountered."
 msgstr ""
 
@@ -6147,6 +6167,11 @@ msgid "Text"
 msgstr ""
 
 msgid "Text size"
+msgstr ""
+
+msgid ""
+"The \"Sufficient\" status requires the equivalence information to be "
+"specified."
 msgstr ""
 
 msgid ""
@@ -6702,6 +6727,10 @@ msgstr ""
 #, python-format
 msgid "The type of the admission form item is unknown (%(type)s)."
 msgstr ""
+
+#, python-format
+msgid "The university tuition fee is EURO %(montant)s."
+msgstr "The university tuition fee is €%(montant)s."
 
 #, python-format
 msgid ""
@@ -7515,11 +7544,11 @@ msgstr ""
 #, python-format
 msgid ""
 "You cannot continue your application. The registration procedure for the "
-"<em>%(training_name)s</em> for non-resident students is managed on another "
-"registration platform. We invite you to consult the complete registration "
-"procedure on the following page: <a href=\"https://www.uclouvain.be/en/"
-"enrolment/limited-enrolment-courses\" target=\"_blank\">https://www."
-"uclouvain.be/en/enrolment/limited-enrolment-courses</a>"
+"<em>%(training_name)s</em> for non-resident students is not yet available. "
+"We invite you to consult the complete registration procedure on the "
+"following page: <a href=\"https://www.uclouvain.be/en/enrolment/limited-"
+"enrolment-courses\" target=\"_blank\">https://www.uclouvain.be/en/enrolment/"
+"limited-enrolment-courses</a>"
 msgstr ""
 
 msgid "You cannot enter a language more than once, please correct the form."
