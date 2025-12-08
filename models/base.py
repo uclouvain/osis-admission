@@ -402,10 +402,10 @@ class BaseAdmissionQuerySet(models.QuerySet):
 
         # Filter limited enrolment for non-resident
         limited_enrolment_condition = Q()
-        if any(isinstance(r, LimitedEnrolmentDelegate) for r in roles):
+        if any(issubclass(r, LimitedEnrolmentDelegate) for r in roles):
             limited_enrolment_condition = Q(
                 training__acronym__in=SIGLES_WITH_QUOTA,
-                is_non_resident=True,
+                generaleducationadmission__is_non_resident=True,
             )
 
         return self.filter(entities_conditions | education_group_conditions | limited_enrolment_condition)
