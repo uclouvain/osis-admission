@@ -375,6 +375,7 @@ class BaseAdmissionQuerySet(models.QuerySet):
         )
 
     def filter_according_to_roles(self, demandeur_uuid, permission='admission.view_enrolment_application'):
+        from admission.auth.roles.central_manager import CentralManager
         from admission.auth.roles.limited_enrolment_delegate import LimitedEnrolmentDelegate
         from admission.calendar.admission_calendar import SIGLES_WITH_QUOTA
 
