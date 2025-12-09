@@ -48,6 +48,12 @@
           {% trans 'Enrolment applications' %}
         </a>
       </li>
+      <li class="dropdown-item">
+        <a href="{% url 'admission:contingente:index' %}">
+          <span class="fa fa-chalkboard-user"></span>
+          {% translate 'Non-resident limited-enrolment management' %}
+        </a>
+      </li>
     </ul>
   </li>
 {% endif %}
