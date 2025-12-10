@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load bootstrap3 i18n %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -24,18 +24,14 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-<div class="panel panel-default">
-    <div class="panel-heading">
-      {{ training }} {{ academic_year }}
-    </div>
-    <div class="panel-body">
-      <form hx-post="{% url "admission:contingente:training_change" training %}">
-        {% include "admission/general_education/contingente/contingente_training_form.html" %}
-      </form>
+{% if contingente_training_form_success %}
+  <div class="alert alert-success">{% translate "Update saved successfully." %}</div>
+{% endif %}
 
-      <dd>
-        <dt>{% translate "Excel export for the court bailiff" %}</dt>
-        <dl><a href="{% url "admission:contingente:training_export" training %}" class="btn btn-primary">{% translate "Export" %}</a></dl>
-      </dd>
-    </div>
+{% csrf_token %}
+<div class="row">
+  <div class="col-md-3">
+    {% bootstrap_form contingente_training_form %}
+  </div>
 </div>
+<input class="btn btn-primary" type="submit" value="{% translate 'Update' %}">

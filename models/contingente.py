@@ -32,16 +32,38 @@ class ContingenteTraining(models.Model):
         'base.EducationGroupYear',
         verbose_name=_('Training'),
         on_delete=models.CASCADE,
+        editable=False,
+        unique=True,
     )
-    last_import = models.DateTimeField(
+    places_number = models.PositiveSmallIntegerField(
+        verbose_name=_('Number of places'),
+        default=0,
+    )
+    last_import_at = models.DateTimeField(
         _("Last import at"),
         null=True,
-        blank=True,
+        editable=False,
     )
-    last_bulk_notification = models.DateTimeField(
+    last_import_by = models.ForeignKey(
+        'base.Person',
+        verbose_name=_("Last import by"),
+        related_name='+',
+        on_delete=models.SET_NULL,
+        null=True,
+        editable=False,
+    )
+    last_bulk_notification_at = models.DateTimeField(
         _("Last bulk notification at"),
         null=True,
-        blank=True,
+        editable=False,
+    )
+    last_bulk_notification_by = models.ForeignKey(
+        'base.Person',
+        verbose_name=_("Last bulk notification by"),
+        related_name='+',
+        on_delete=models.SET_NULL,
+        null=True,
+        editable=False,
     )
 
     def __str__(self):
