@@ -67,6 +67,7 @@ def verifier_proposition(
     academic_year_repository: 'IAcademicYearRepository',
     questions_specifiques_translator: 'IQuestionSpecifiqueTranslator',
     maximum_propositions_service: 'IMaximumPropositionsAutorisees',
+    contingente_service: 'IContingente',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -108,6 +109,7 @@ def verifier_proposition(
         titres=titres,
         formation=formation,
         annee_formation=annee_formation,
+        contingente_service=contingente_service,
     )
 
     # THEN

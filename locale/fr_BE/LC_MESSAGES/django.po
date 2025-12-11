@@ -940,6 +940,9 @@ msgstr ""
 "Êtes-vous l'enfant d'un membre du personnel de l'UCLouvain ou de l'entité "
 "Martin V ?"
 
+msgid "Ares application number for trainings with quota"
+msgstr "Numéro d'application Ares pour les formations contingentées"
+
 msgid ""
 "As the email address of the faculty recipient is not defined, no email will "
 "be sent. Do you still want to send the application to the faculty?"
@@ -2013,6 +2016,9 @@ msgstr "Dérogation délégué·e"
 msgid "DEROGATION_VRAE"
 msgstr "Dérogation VRAE"
 
+msgid "DEUX_OU_PLUS"
+msgstr "2x ou +"
+
 msgid "DISPENSE_BOURSE"
 msgstr "Dispense bourse"
 
@@ -2335,6 +2341,11 @@ msgstr "Avez-vous obtenu un diplôme de fin d'études secondaires ?"
 
 msgid "Do you have an international scholarship?"
 msgstr "Bénéficiez-vous d'une bourse internationale ?"
+
+msgid "Do you intend to make an enrolment directly for the second year?"
+msgstr ""
+"Désirez-vous faire une demande d’admission directement pour la deuxième "
+"année ?"
 
 msgid "Do you want to continue?"
 msgstr "Souhaitez-vous continuer ?"
@@ -3959,8 +3970,9 @@ msgid ""
 "If your equivalency decision does not give access to the desired training, "
 "do you hold your diploma of aptitude for access to higher education (DAES)?"
 msgstr ""
-"Si votre équivalence ne donne pas accès à la formation souhaitée, "
-"êtes-vous en possession d'un Diplôme d'Aptitude à accéder à l'Enseignement Supérieur (DAES) ?"
+"Si votre équivalence ne donne pas accès à la formation souhaitée, êtes-vous "
+"en possession d'un Diplôme d'Aptitude à accéder à l'Enseignement Supérieur "
+"(DAES) ?"
 
 msgid "Immediately"
 msgstr "Immédiatement"
@@ -4241,6 +4253,9 @@ msgstr ""
 
 msgid "It is not possible to go from the \"validated\" status to this status."
 msgstr "Il n'est pas possible de passer du statut \"validé\" à ce statut."
+
+msgid "JAMAIS"
+msgstr "Jamais"
 
 msgid "Joint research project (ARC)"
 msgstr "ARC - Action de Recherche Concertée"
@@ -4531,6 +4546,12 @@ msgid ""
 msgstr ""
 "E-mail envoyé au candidat pour lui confirmer la bonne prise en compte de sa "
 "demande par l'UCLouvain"
+
+msgid ""
+"Mail sent to the candidate to confirm the submission of his training with "
+"quota."
+msgstr ""
+"E-mail envoyé au candidat pour confirmer la soumission de sa formation contingenté."
 
 msgid ""
 "Mail sent to the candidate to inform him that all requested documents have "
@@ -5020,6 +5041,25 @@ msgstr "Besoin dérogation non-progression"
 
 msgid "Non-resident (as defined by government decree)"
 msgstr "Non-résident (au sens du Décret)"
+
+msgid ""
+"Non-resident applicants may submit only one application among the limited "
+"enrollment courses. Any duplicate application will result in all "
+"applications being rejected."
+msgstr ""
+"Les candidats non-résidents ne peuvent introduire qu’une seule demande parmi "
+"les programmes contingentés. Toute double demande entraînera le rejet des "
+"candidatures."
+
+msgid "Non-resident contingent training receipt"
+msgstr "Accusé de réception pour la formation contingentée non-résidente"
+
+msgid ""
+"Non-resident enrolment form for an enrolment beyond the first 60 credits"
+msgstr "Formulaire de demande d’admission au-delà des 60 premiers crédits"
+
+msgid "Non-resident file"
+msgstr "Dossier non-résident"
 
 msgid "Non-retrievable attachment"
 msgstr "Pièce jointe non récupérable"
@@ -5814,6 +5854,9 @@ msgstr ""
 "Document, Sélection et Texte. Contenu du message à afficher pour les "
 "éléments de type Message."
 
+msgid "Quota admission receipt"
+msgstr "Admission en doctorat"
+
 msgid "REDUCTION_VCRC"
 msgstr "Réduction VCRC"
 
@@ -6132,6 +6175,9 @@ msgstr ""
 "Carte de séjour permanent de membre de la famille d’un citoyen de l'Union "
 "européenne"
 
+msgid "Residence certificate"
+msgstr "Certificat de résidence"
+
 msgid "Residence permit covering the entire course"
 msgstr "Titre de séjour couvrant la totalité de la formation"
 
@@ -6150,6 +6196,9 @@ msgstr ""
 
 msgid "Resident (as defined by government decree)"
 msgstr "Résident (au sens du Décret)"
+
+msgid "Resident student form"
+msgstr "Dossier résident"
 
 msgid "Ressource not found."
 msgstr "Ressource introuvable."
@@ -6790,7 +6839,9 @@ msgstr "Taille du texte"
 msgid ""
 "The \"Sufficient\" status requires the equivalence information to be "
 "specified."
-msgstr "Le passage à l'état \"Suffisant\" nécessite que les informations sur l'équivalence soient remplies."
+msgstr ""
+"Le passage à l'état \"Suffisant\" nécessite que les informations sur "
+"l'équivalence soient remplies."
 
 msgid ""
 "The \"doctoral training\" must be completed before submitting the defense "
@@ -6933,6 +6984,9 @@ msgstr "La demande est actuellement en faculté"
 
 msgid "The application is in quarantine"
 msgstr "La demande est en quarantaine"
+
+msgid "The ares application number of the admission"
+msgstr "Le numéro d'application ares de la demande"
 
 msgid ""
 "The authorization can not be done while there is one or more documents to be "
@@ -7223,6 +7277,9 @@ msgid "The limited training you are enrolling into is not opened yet."
 msgstr ""
 "La formation contingentée à laquelle vous vous inscrivez n'est pas encore "
 "ouverte."
+
+msgid "The link to the receipt"
+msgstr "Le lien vers l'accusé de réception"
 
 msgid "The maximum number of documents must be a positive number."
 msgstr "Le nombre maximum de documents doit être un nombre positif."
@@ -7897,6 +7954,9 @@ msgstr "Par le site web de l'UCLouvain"
 msgid "UE"
 msgstr "UE"
 
+msgid "UNE"
+msgstr "x1"
+
 msgid "UUID"
 msgstr "UUID"
 
@@ -8401,23 +8461,6 @@ msgstr ""
 "Vous ne pouvez pas demander la modification et la réorientation en même "
 "temps."
 
-#, python-format
-msgid ""
-"You cannot continue your application. The registration procedure for the "
-"<em>%(training_name)s</em> for non-resident students is not yet available. "
-"We invite you to consult the complete registration procedure on the "
-"following page: <a href=\"https://www.uclouvain.be/en/enrolment/limited-"
-"enrolment-courses\" target=\"_blank\">https://www.uclouvain.be/en/enrolment/"
-"limited-enrolment-courses</a>"
-msgstr ""
-"Vous ne pouvez pas poursuivre votre demande. La procédure d’inscription au "
-"programme de <em>%(training_name)s</em> pour les étudiants non-résidents n'est "
-"pas encore disponible. Nous vous invitons à prendre "
-"connaissance de la procédure d’inscription complète sur la page suivante : "
-"<a href=\"https://www.uclouvain.be/fr/inscriptions/etudes-contingentees\" "
-"target=\"_blank\">https://www.uclouvain.be/fr/inscriptions/etudes-"
-"contingentees</a>"
-
 msgid "You cannot enter a language more than once, please correct the form."
 msgstr ""
 "Vous ne pouvez pas définir une langue plusieurs fois, merci de corriger le "
@@ -8835,6 +8878,3 @@ msgstr "{items} types sur {total}"
 #, python-brace-format
 msgid "{obj.dates_formatees} : {obj.fonction} at {obj.employeur}"
 msgstr "{obj.dates_formatees} : {obj.fonction} à {obj.employeur}"
-
-#~ msgid "(Expected) graduation date (signed diploma)"
-#~ msgstr "Date (prévue) de délivrance du diplôme (diplôme signé)"

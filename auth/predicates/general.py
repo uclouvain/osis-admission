@@ -29,6 +29,7 @@ from django.utils.translation import gettext_lazy as _
 from rules import predicate
 
 from admission.auth.predicates import not_in_general_statuses_predicate_message
+from admission.calendar.admission_calendar import SIGLES_WITH_QUOTA
 from admission.models import GeneralEducationAdmission
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
@@ -96,6 +97,12 @@ def can_view_payment(self, user: User, obj: GeneralEducationAdmission):
         ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name,
         ChoixStatutPropositionGenerale.CONFIRMEE.name,
     }
+
+
+@predicate(bind=True)
+@predicate_failed_msg(_("The proposition must be confirmed to realize this action."))
+def is_confirmed(self, user: User, obj: GeneralEducationAdmission):
+    return obj.status == ChoixStatutPropositionGenerale.CONFIRMEE.name
 
 
 @predicate(bind=True)
@@ -187,3 +194,9 @@ def is_general(self, user: User, obj: GeneralEducationAdmission):
     from admission.constants import CONTEXT_GENERAL
 
     return obj.admission_context == CONTEXT_GENERAL
+
+
+@predicate(bind=True)
+@predicate_failed_msg(_("The proposition must be for a contingent training for a non-resident candidat."))
+def is_contingent_non_resident(self, user: User, obj: GeneralEducationAdmission):
+    return obj.training.acronym in SIGLES_WITH_QUOTA and obj.is_non_resident

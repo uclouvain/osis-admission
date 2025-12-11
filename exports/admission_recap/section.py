@@ -455,6 +455,7 @@ def get_specific_questions_section(
             specific_questions=extra_context['specific_questions'],
             eligible_for_reorientation=eligible_for_reorientation,
             eligible_for_modification=eligible_for_modification,
+            est_formation_contingente=enrolled_for_contingent_training,
         ),
         load_content=load_content,
     )

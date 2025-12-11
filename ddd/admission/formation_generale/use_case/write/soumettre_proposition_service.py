@@ -113,6 +113,7 @@ def soumettre_proposition(
     maximum_propositions_service: 'IMaximumPropositionsAutorisees',
     inscription_tardive_service: 'IInscriptionTardive',
     paiement_frais_dossier_service: 'IPaiementFraisDossier',
+    contingente_service: 'IContingente',
     historique: 'IHistorique',
     financabilite_fetcher: 'IFinancabiliteFetcher',
 ) -> 'PropositionIdentity':
@@ -144,13 +145,14 @@ def soumettre_proposition(
         formation.type,
         proposition.equivalence_diplome,
     )
+    pool = AcademicCalendarTypes[cmd.pool]
     type_demande = VerifierProposition.determiner_type_demande(
         proposition,
         titres,
+        pool,
         calendrier_inscription,
         profil_candidat_translator,
     )
-    pool = AcademicCalendarTypes[cmd.pool]
 
     identification = profil_candidat_translator.get_identification(proposition.matricule_candidat)
 
@@ -178,6 +180,7 @@ def soumettre_proposition(
         formation=formation,
         titres=titres,
         annee_formation=annee_formation,
+        contingente_service=contingente_service,
     )
     element_confirmation.valider(
         soumis=cmd.elements_confirmation,
@@ -198,6 +201,11 @@ def soumettre_proposition(
 
     est_inscription_tardive = inscription_tardive_service.est_inscription_tardive(pool)
 
+    numero_dossier_ares = contingente_service.generer_numero_de_dossier_ares_si_necessaire(
+        proposition=proposition,
+        annee=cmd.annee,
+    )
+
     # THEN
     financabilite = Financabilite(
         parcours=parcours,
@@ -217,6 +225,7 @@ def soumettre_proposition(
         est_inscription_tardive=est_inscription_tardive,
         profil_candidat_soumis=profil_candidat_soumis,
         doit_payer_frais_dossier=doit_payer_frais_dossier,
+        numero_dossier_ares=numero_dossier_ares,
     )
 
     proposition.specifier_financabilite_resultat_calcul(

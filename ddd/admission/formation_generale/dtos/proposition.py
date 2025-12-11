@@ -29,10 +29,6 @@ from typing import Dict, List, Optional, Union
 
 import attr
 
-from admission.ddd.admission.shared_kernel.dtos.formation import BaseFormationDTO, FormationDTO
-from admission.ddd.admission.shared_kernel.dtos.poste_diplomatique import PosteDiplomatiqueDTO
-from admission.ddd.admission.shared_kernel.dtos.profil_candidat import ProfilCandidatDTO
-from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_NON_SOUMISE,
     DroitsInscriptionMontant,
@@ -41,13 +37,22 @@ from admission.ddd.admission.formation_generale.dtos.condition_approbation impor
     ConditionComplementaireApprobationDTO,
 )
 from admission.ddd.admission.formation_generale.dtos.motif_refus import MotifRefusDTO
+from admission.ddd.admission.shared_kernel.dtos.formation import (
+    BaseFormationDTO,
+    FormationDTO,
+)
+from admission.ddd.admission.shared_kernel.dtos.poste_diplomatique import (
+    PosteDiplomatiqueDTO,
+)
+from admission.ddd.admission.shared_kernel.dtos.profil_candidat import ProfilCandidatDTO
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from ddd.logic.learning_unit.dtos import LearningUnitSearchDTO, PartimSearchDTO
 from ddd.logic.reference.dtos.bourse import BourseDTO
 from osis_common.ddd import interface
 from osis_profile import PLUS_5_ISO_CODES
 
 
-@attr.dataclass(frozen=True, slots=True)
+@attr.dataclass(slots=True)
 class PropositionDTO(interface.DTO):
     uuid: str
     formation: FormationDTO
@@ -88,6 +93,8 @@ class PropositionDTO(interface.DTO):
     attestation_inscription_reguliere_pour_modification_inscription: List[str]
 
     est_non_resident_au_sens_decret: Optional[bool]
+    accuse_de_reception_contingente: List[str]
+    numero_dossier_ares: str
 
     poste_diplomatique: Optional[PosteDiplomatiqueDTO]
 

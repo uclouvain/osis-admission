@@ -53,6 +53,8 @@ class PropositionErrorsSerializer(serializers.Serializer):
     errors = PropositionErrorSerializer(many=True)
     pool_start_date = serializers.DateField(allow_null=True, required=False)
     pool_end_date = serializers.DateField(allow_null=True, required=False)
+    pool_start_time = serializers.TimeField(allow_null=True, required=False)
+    pool_end_time = serializers.TimeField(allow_null=True, required=False)
     access_conditions_url = serializers.CharField(allow_null=True, required=False)
     elements_confirmation = ElementConfirmationSerializer(many=True, allow_null=True, required=False)
 
