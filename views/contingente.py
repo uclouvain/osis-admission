@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import unicodedata
 
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.core.files.temp import NamedTemporaryFile
@@ -33,9 +34,12 @@ from django.utils.functional import cached_property
 from django.views import View
 from django.views.generic import TemplateView, DetailView, UpdateView
 from openpyxl import Workbook
+from openpyxl.styles import Font
 
 from admission.calendar.admission_calendar import SIGLES_WITH_QUOTA
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.forms.admission.contingente import ContingenteTrainingForm
+from admission.models import GeneralEducationAdmission
 from admission.models.contingente import ContingenteTraining
 from base.models.academic_calendar import AcademicCalendar
 from base.models.education_group_year import EducationGroupYear
@@ -50,6 +54,8 @@ __all__ = [
     "ContingenteTrainingUpdateView",
     "ContingenteTrainingExportView",
 ]
+
+INSTITUTION_UCL_EXPORT = 'UCLouvain'
 
 
 class ContingenteMixin:
@@ -135,17 +141,85 @@ class ContingenteTrainingExportView(ContingenteMixin, PermissionRequiredMixin, V
     permission_required = 'admission.view_contingente_management'
     urlpatterns = {'training_export': 'training/<str:training>/export'}
 
-    def get(self, request, *args, **kwargs):
-        contingente_training = get_object_or_404(
-            ContingenteTraining,
-            training__acronym=self.kwargs['training'],
-            training__academic_year=self.academic_year,
+    def get_export_data(self):
+        queryset = (
+            GeneralEducationAdmission.objects
+            .select_related('candidate__country_of_citizenship')
+            .filter(
+                training__acronym=self.kwargs['training'],
+                training__academic_year=self.academic_year,
+                is_non_resident=True,
+                status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+            )
         )
 
+        def format_name(name):
+            name = unicodedata.normalize('NFKD', name.upper())
+            name = u"".join([c for c in name if not unicodedata.combining(c)])
+            name = name.replace('\'', ' ')
+            name = name.replace('-', ' ')
+            return name
+
+        def format_date(date):
+            return date.strftime('%Y%m%d')
+
+        for admission in queryset:
+            yield [
+                format_name(admission.candidate.last_name),
+                format_name(admission.candidate.first_name),
+                format_name(admission.candidate.middle_name),
+                admission.candidate.sex,
+                admission.candidate.birth_place,
+                format_date(admission.candidate.birth_date),
+                admission.candidate.country_of_citizenship.name,
+                admission.candidate.id_card_number,
+                INSTITUTION_UCL_EXPORT,
+                self.kwargs['training'][:4],
+                admission.ares_application_number,
+                '',
+                '',
+            ]
+
+    def get_export_file(self):
         wb = Workbook()
         ws = wb.active
-        ws.title = "New Title"
+
+        headers = [
+            "NOM",
+            "PREMIER PRENOM",
+            "AUTRE PRENOM",
+            "SEXE",
+            "LIEU DE NAISSANCE",
+            "DATE DE NAISSANCE",
+            "NATIONALITE",
+            "NUMERO DE LA PIECE D'IDENTITE",
+            "INSTITUTION D'ENSEIGNEMENT(HAUTE ECOLE ou UNIVERSITE)",
+            "GRADE CHOISI",
+            "N° DOSSIER",
+            "N° HUISSIER",
+            "SCEAU HUISSIER",
+        ]
+
+        ws.append(headers)
+        for data in self.get_export_data():
+            ws.append(data)
+
+        # Style it a bit
+        ws.row_dimensions[1].font = Font(bold=True)
+        for column_cells in ws.columns:
+            length = max(len(str(cell.value)) for cell in column_cells)
+            ws.column_dimensions[column_cells[0].column_letter].width = length * 1.2
+
         tmp = NamedTemporaryFile()
         wb.save(tmp.name)
         tmp.seek(0)
-        return FileResponse(tmp, as_attachment=True, filename='contingente.xlsx', content_type='application/vnd.ms-excel')
+        return tmp
+
+    def get(self, request, *args, **kwargs):
+        export_file = self.get_export_file()
+        return FileResponse(
+            export_file,
+            as_attachment=True,
+            filename='contingente.xlsx',
+            content_type='application/vnd.ms-excel',
+        )
