@@ -62,4 +62,5 @@ def lister_demandes(
         filtres_etats_checklist=cmd.filtres_etats_checklist,
         tardif_modif_reorientation=cmd.tardif_modif_reorientation,
         delai_depasse_complements=cmd.delai_depasse_complements,
+        contingentes=cmd.contingentes,
     )

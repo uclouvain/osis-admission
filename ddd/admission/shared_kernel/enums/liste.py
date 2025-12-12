@@ -33,3 +33,9 @@ class TardiveModificationReorientationFiltre(ChoiceEnum):
     INSCRIPTION_TARDIVE = _('Late enrollment')
     MODIFICATION_INSCRIPTION = _('Change of enrolment')
     REORIENTATION = _('Change of course')
+
+
+class ContingenteFiltre(ChoiceEnum):
+    NON_CONTINGENTE = _('Not limited-enrolment')
+    CONTINGENTE_RESIDENT = _('Resident limited-enrolment')
+    CONTINGENTE_NON_RESIDENT = _('Non-resident limited-enrolment')

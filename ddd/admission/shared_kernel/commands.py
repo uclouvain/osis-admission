@@ -58,6 +58,7 @@ class ListerToutesDemandesQuery(SortedQueryRequest):
     mode_filtres_etats_checklist: Optional[str] = ''
     filtres_etats_checklist: Optional[Dict[str, List[str]]] = ''
     delai_depasse_complements: Optional[bool] = None
+    contingentes: Optional[List[str]] = None
 
 
 @attr.dataclass(frozen=True, slots=True)

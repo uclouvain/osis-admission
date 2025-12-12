@@ -44,6 +44,7 @@ from django.db.models import (
 from django.db.models.functions import Coalesce, NullIf
 from django.utils.translation import get_language
 
+from admission.calendar.admission_calendar import SIGLES_WITH_QUOTA
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
@@ -68,7 +69,7 @@ from admission.ddd.admission.shared_kernel.dtos.liste import (
 )
 from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.shared_kernel.enums.liste import (
-    TardiveModificationReorientationFiltre,
+    TardiveModificationReorientationFiltre, ContingenteFiltre,
 )
 from admission.ddd.admission.shared_kernel.enums.statut import (
     CHOIX_STATUT_TOUTE_PROPOSITION,
@@ -112,6 +113,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
         filtres_etats_checklist: Optional[Dict[str, List[str]]] = '',
         tardif_modif_reorientation: Optional[str] = '',
         delai_depasse_complements: Optional[bool] = None,
+        contingentes: Optional[List[str]] = None,
     ) -> PaginatedList[DemandeRechercheDTO]:
         language_is_french = get_language() == settings.LANGUAGE_CODE_FR
 
@@ -289,6 +291,16 @@ class ListerToutesDemandes(IListerToutesDemandes):
                 ],
                 requested_documents_deadline__lt=today_date,
             )
+
+        if contingentes:
+            conditions = Q()
+            if ContingenteFiltre.NON_CONTINGENTE.name in contingentes:
+                conditions |= ~Q(training__acronym__in=SIGLES_WITH_QUOTA)
+            if ContingenteFiltre.CONTINGENTE_RESIDENT.name in contingentes:
+                conditions |= Q(training__acronym__in=SIGLES_WITH_QUOTA) & (Q(generaleducationadmission__is_non_resident=False) | Q(generaleducationadmission__is_non_resident__isnull=True))
+            if ContingenteFiltre.CONTINGENTE_NON_RESIDENT.name in contingentes:
+                conditions |= Q(training__acronym__in=SIGLES_WITH_QUOTA) & (Q(generaleducationadmission__is_non_resident=True) | Q(generaleducationadmission__is_non_resident__isnull=True))
+            qs = qs.filter(conditions)
 
         if mode_filtres_etats_checklist and filtres_etats_checklist:
 

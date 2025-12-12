@@ -78,6 +78,7 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
         filtres_etats_checklist: Optional[Dict[str, List[str]]] = '',
         tardif_modif_reorientation: Optional[str] = '',
         delai_depasse_complements: Optional[bool] = None,
+        contingentes: Optional[List[str]] = None,
     ) -> PaginatedList[DemandeRechercheDTO]:
 
         result = PaginatedList(id_attribute='uuid')
