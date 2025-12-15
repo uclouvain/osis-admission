@@ -1592,6 +1592,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 code='CFD1',
                 credits=180,
                 date_debut=datetime.date(2023, 1, 1),
+                date_fin=datetime.date(2023, 9, 13),
                 grade_academique='1',
             ),
             reference='1234',
@@ -3700,7 +3701,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
         self.assertEqual(attachments[0].identifier, 'DEMANDE_OUVERTURE')
         self.assertEqual(attachments[0].label, DocumentsCotutelle['DEMANDE_OUVERTURE'])
         self.assertEqual(attachments[0].uuids, self.doctorate_context.groupe_supervision.cotutelle.demande_ouverture)
-        self.assertTrue(attachments[0].required)
+        self.assertFalse(attachments[0].required)
 
         self.assertEqual(attachments[1].identifier, 'CONVENTION')
         self.assertEqual(attachments[1].label, DocumentsCotutelle['CONVENTION'])

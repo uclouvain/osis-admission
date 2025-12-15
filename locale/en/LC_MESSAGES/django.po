@@ -1467,6 +1467,9 @@ msgstr ""
 msgid "Commitment and declaration"
 msgstr ""
 
+msgid "Communication about the prerequisite courses"
+msgstr ""
+
 #, python-brace-format
 msgid ""
 "Communication to the candidate (refusal reason), in <span class=\"label "
@@ -1474,6 +1477,9 @@ msgid ""
 msgstr ""
 
 msgid "Communication to the candidate about additional trainings"
+msgstr ""
+
+msgid "Communication to the candidate about additional trainings:"
 msgstr ""
 
 msgid "Communication with Host Hospitals"
@@ -3621,15 +3627,15 @@ msgstr ""
 #, python-format
 msgid ""
 "In order to proceed with your enrolment at the university, please go to the "
-"Enrolment Office (see address below) between 1 June and 30 September "
-"%(year)s with the following documents:"
+"Enrolment Office (see address below) between %(documents_start_date)s and "
+"%(documents_end_date)s with the following documents:"
 msgstr ""
 
 #, python-format
 msgid ""
 "In order to proceed with your enrolment at the university, please send the "
-"document(s) listed below between 1 June and 30 September %(year)s to <a "
-"href=\"mailto:%(email)s\">%(email)s</a>:"
+"document(s) listed below between %(documents_start_date)s and "
+"%(documents_end_date)s to <a href=\"mailto:%(email)s\">%(email)s</a>:"
 msgstr ""
 
 msgid "In payement order"
@@ -3976,6 +3982,9 @@ msgstr ""
 msgid ""
 "List of the mandatory requested documents that must be submitted "
 "immediately, with the reason"
+msgstr ""
+
+msgid "List of the prerequisite courses"
 msgstr ""
 
 msgid ""
@@ -4971,6 +4980,12 @@ msgstr ""
 msgid ""
 "Please look up the website of your domain doctoral committee on how to "
 "download the document."
+msgstr ""
+
+#, python-format
+msgid ""
+"Please note that the academic year %(year)s begins on %(start_date)s and "
+"ends on %(end_date)s."
 msgstr ""
 
 #, python-format
@@ -6721,6 +6736,10 @@ msgstr ""
 #, python-format
 msgid "The type of the admission form item is unknown (%(type)s)."
 msgstr ""
+
+#, python-format
+msgid "The university tuition fee is EURO %(montant)s."
+msgstr "The university tuition fee is €%(montant)s."
 
 #, python-format
 msgid ""

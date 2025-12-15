@@ -77,9 +77,9 @@ from .base import (
     BaseAdmissionQuerySet,
     admission_directory_path,
 )
-from .specific_question import SpecificQuestionAnswer
 from .checklist import DoctorateRefusalReason
 from .mixins import DocumentCopyModelMixin
+from .specific_question import SpecificQuestionAnswer
 
 __all__ = [
     "DoctorateAdmission",
@@ -275,7 +275,7 @@ class DoctorateAdmission(DocumentCopyModelMixin, BaseAdmission):
         blank=True,
     )
     cotutelle_motivation = models.CharField(
-        max_length=255,
+        max_length=1024,
         verbose_name=_("Motivation"),
         default='',
         blank=True,

@@ -233,13 +233,18 @@
   {% endif %}
 
   <p>
+    {% if date_debut_documents.year == date_fin_documents.year %}
+      {% firstof 'j F' as document_start_date_format %}
+    {% else %}
+      {% firstof 'j F Y' as document_start_date_format %}
+    {% endif %}
     {% if proposition.doit_se_presenter_en_sic %}
-      {% blocktrans with year=proposition.formation.annee trimmed %}
-        In order to proceed with your enrolment at the university, please go to the Enrolment Office (see address below) between 1 June and 30 September {{ year }} with the following documents:
+      {% blocktrans with documents_start_date=date_debut_documents|date:document_start_date_format documents_end_date=date_fin_documents|date:'j F Y' trimmed %}
+        In order to proceed with your enrolment at the university, please go to the Enrolment Office (see address below) between {{ documents_start_date }} and {{ documents_end_date }} with the following documents:
       {% endblocktrans %}
     {% else %}
-      {% blocktrans with year=proposition.formation.annee email=proposition.formation.campus_inscription.email_inscription_sic trimmed %}
-        In order to proceed with your enrolment at the university, please send the document(s) listed below between 1 June and 30 September {{ year }} to <a href="mailto:{{ email }}">{{ email }}</a>:
+      {% blocktrans with documents_start_date=date_debut_documents|date:document_start_date_format documents_end_date=date_fin_documents|date:'j F Y' email=proposition.formation.campus_inscription.email_inscription_sic trimmed %}
+        In order to proceed with your enrolment at the university, please send the document(s) listed below between {{ documents_start_date }} and {{ documents_end_date }} to <a href="mailto:{{ email }}">{{ email }}</a>:
       {% endblocktrans %}
     {% endif %}
     <ul>
@@ -267,18 +272,32 @@
   {% if proposition.communication_au_candidat %}<p>{{ proposition.communication_au_candidat|safe }}</p>{% endif %}
 
   {% if proposition.droits_inscription_montant_valeur_calculee >= 50 %}
-  <p>
-    {% blocktrans with montant=proposition.droits_inscription_montant_valeur_calculee start_year=proposition.formation.annee end_year=proposition.formation.annee|add:1 trimmed %}
-      The university tuition fee is EURO {{ montant }}. A compulsory minimum EURO 50 tuition fee deposit must be paid as
-      soon as possible and no later than 31 October {{ start_year }}. The tuition fee balance must be paid in full by
-      1 February {{ end_year }}. As soon as we receive the enrolment authorisation signed by you, we will let you know how to pay.
-    {% endblocktrans %}
-  </p>
+    <p>
+      {% if est_doctorat %}
+        {% blocktrans with montant=proposition.droits_inscription_montant_valeur_calculee trimmed %}
+          The university tuition fee is EURO {{ montant }}.
+        {% endblocktrans %}
+      {% else %}
+        {% blocktrans with montant=proposition.droits_inscription_montant_valeur_calculee start_year=proposition.formation.annee end_year=proposition.formation.annee|add:1 trimmed %}
+          The university tuition fee is EURO {{ montant }}. A compulsory minimum EURO 50 tuition fee deposit must be paid as
+          soon as possible and no later than 31 October {{ start_year }}. The tuition fee balance must be paid in full by
+          1 February {{ end_year }}. As soon as we receive the enrolment authorisation signed by you, we will let you know how to pay.
+        {% endblocktrans %}
+      {% endif %}
+    </p>
   {% else %}
   <p>{% blocktrans %}The University tuition fee is EUR 0.0.{% endblocktrans %}</p>
   {% endif %}
 
-  <p>{% blocktrans with date=proposition.formation.date_debut|date:"d/m/Y" %}Please note that the first term begins on {{ date }}.{% endblocktrans %}</p>
+  {% if est_doctorat %}
+    <p>
+      {% blocktrans with year=proposition.formation.annee|get_academic_year start_date=proposition.formation.date_debut|date:"j F Y" end_date=proposition.formation.date_fin|date:"j F Y" trimmed %}
+        Please note that the academic year {{ year }} begins on {{ start_date }} and ends on {{ end_date}}.
+      {% endblocktrans %}
+    </p>
+  {% else %}
+    <p>{% blocktrans with date=proposition.formation.date_debut|date:"d/m/Y" %}Please note that the first term begins on {{ date }}.{% endblocktrans %}</p>
+  {% endif %}
 
   <p>
     {% blocktrans trimmed %}

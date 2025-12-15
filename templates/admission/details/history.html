@@ -29,7 +29,6 @@
 
 {% block style %}
   {{ block.super }}
-  <link href="{% static 'osis_history/osis-history.css' %}" rel="stylesheet"/>
   <style>
     .history-viewer input {
       opacity: 0;
@@ -65,6 +64,12 @@
        data-on-item-render-table="renderTable"
   ></div>
   <script>
+    if (window.OsisHistory && typeof window.OsisHistory.mountHistoryViewer === 'function') {
+        window.OsisHistory.mountHistoryViewer();
+    } else {
+        console.warn("La fonction OsisHistory.mountHistoryViewer n'est pas définie.");
+    }
+
     let timelineEntryCounter = 0;
 
     function wrapWithReadMore (entry) {
@@ -105,6 +110,12 @@
     <td>${wrapWithReadMore(entry)}</td>
     <td>${entry.author}</td>
 </tr>`;
+    }
+
+    if (window.OsisHistory && typeof window.OsisHistory.mountHistoryViewer === 'function') {
+        window.OsisHistory.mountHistoryViewer();
+    } else {
+        console.warn("La fonction OsisHistory.mountHistoryViewer n'est pas définie.");
     }
   </script>
 {% endblock %}
