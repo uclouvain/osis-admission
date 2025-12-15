@@ -82,6 +82,7 @@ class ICalendrierInscription(interface.DomainService):
         DoctorateAdmissionCalendar(),
         ContinuingEducationAdmissionCalendar(),
         AdmissionPoolExternalEnrollmentChangeCalendar(),
+        AdmissionPoolMedicineDentistryStandardPeriodCalendar(),
         AdmissionPoolVipCalendar(),
         AdmissionPoolHueUclPathwayChangeCalendar(),
         AdmissionPoolInstituteChangeCalendar(),
@@ -152,6 +153,7 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
             matricule_candidat=matricule_candidat,
             changements_etablissement=changements_etablissement,
             proposition=proposition,
+            formation=formation,
         )
 
         for annee in annees_prioritaires:
@@ -190,8 +192,8 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
         for pool in pools:
             annee = kwargs['annee_academique']
             logs.append(
-                f"{str(AcademicCalendarTypes.get_value(pool.event_reference)):<70} {annee}"
-                f" pool_est_ouvert: {(pool.event_reference, annee) in pool_ouverts} \t"
+                f"{str(AcademicCalendarTypes.get_value(pool.event_reference)):<74} {annee}"
+                f" pool_est_ouvert: {str((pool.event_reference, annee) in pool_ouverts):<8} "
                 f"matches_criteria: {pool.matches_criteria(**kwargs)}"
             )
             if (pool.event_reference, annee) in pool_ouverts and pool.matches_criteria(**kwargs):

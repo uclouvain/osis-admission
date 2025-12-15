@@ -513,6 +513,19 @@ templates.register(
             description=_("List of names of the program managers."),
             example='John Doe, Jane Doe',
         ),
+        Token(
+            name='prerequisite_courses_list',
+            description=_('List of the prerequisite courses'),
+            example=(
+                'Prerequisite courses:'
+                '- BIO12 - Biology (10 ECTS)'
+            ),
+        ),
+        Token(
+            name='prerequisite_courses_communication',
+            description=_('Communication about the prerequisite courses'),
+            example='You have to complete this course.',
+        ),
     ],
 )
 
@@ -562,6 +575,19 @@ templates.register(
             name='program_managers_names',
             description=_("List of names of the program managers."),
             example='John Doe, Jane Doe',
+        ),
+        Token(
+            name='prerequisite_courses_list',
+            description=_('List of the prerequisite courses'),
+            example=(
+                'Prerequisite courses:'
+                '- BIO12 - Biology (10 ECTS)'
+            ),
+        ),
+        Token(
+            name='prerequisite_courses_communication',
+            description=_('Communication about the prerequisite courses'),
+            example='You have to complete this course.',
         ),
     ],
 )
