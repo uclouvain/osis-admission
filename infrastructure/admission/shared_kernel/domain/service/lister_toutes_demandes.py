@@ -171,6 +171,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
                 is_external_modification=F('generaleducationadmission__is_external_modification'),
             )
             .select_related(
+                'generaleducationadmission',
                 'candidate__country_of_citizenship',
                 'last_update_author',
                 'determined_academic_year',
@@ -469,6 +470,9 @@ class ListerToutesDemandes(IListerToutesDemandes):
                 'derniere_modification_le': ['modified_at'],
                 'derniere_modification_par': ['last_update_author__user__username'],
                 'date_confirmation': ['submitted_at'],
+                'numero_demande_contingente': ['ares_application_number'],
+                # 'numero_tirage': ['submitted_at'], # TODO
+                'etat_decision_sic': ['checklist__current__decision_sic__statut'],
             }[champ_tri]
 
             if tri_inverse:
@@ -505,6 +509,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
         return DemandeRechercheDTO(
             uuid=admission.uuid,
             numero_demande=admission.formatted_reference,  # From annotation
+            numero_demande_contingente=admission.generaleducationadmission.ares_application_number if admission.generaleducationadmission else '',
             nom_candidat=admission.candidate.last_name,
             prenom_candidat=admission.candidate.first_name,
             noma_candidat=noma_candidat,
@@ -534,6 +539,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
             vip=admission.is_vip,  # From annotation
             etat_demande=admission.status,  # From annotation
             type_demande=admission.type_demande,
+            etat_decision_sic='TODO',
             derniere_modification_le=admission.modified_at,
             derniere_modification_par=(
                 '{first_name} {last_name}'.format(

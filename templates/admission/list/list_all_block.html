@@ -42,11 +42,14 @@
 {% block list_block_header %}
   {% translate 'Course' context 'admission' as course_label %}
   {% sortable_header_div 'numero_demande' _('Application no.') %}
+  {% sortable_header_div 'numero_demande_contingente' _('Limited-enrolment application no.') %}
+  {% sortable_header_div 'numero_tirage' _('Draw number') %}
   {% sortable_header_div 'nom_candidat' _('Name') %}
   {% sortable_header_div 'formation' course_label %}
   {% sortable_header_div 'nationalite_candidat' _('Nationality') %}
   {% sortable_header_div 'vip' _('VIP') %}
   {% sortable_header_div 'type_demande' _('Application status') %}
+  {% sortable_header_div 'etat_decision_sic' _('SIC decision status') %}
   {% sortable_header_div 'derniere_modification_le' _('Last modif.') %}
   {% sortable_header_div 'derniere_modification_par' _('Modification author') %}
   {% sortable_header_div 'date_confirmation' _('Confirmation date') %}
@@ -82,6 +85,12 @@
         ></span>
       </div>
     {% endif %}
+  </td>
+  <td>
+    {{ admission. }}
+  </td>
+  <td>
+    TODO NUMERO TIRAGE
   </td>
   <td>
     <div class="flex-content-no-wrap">
@@ -131,6 +140,9 @@
   <td>
     {% admission_status admission.etat_demande admission.type_formation as type_demande %}
     {{ type_demande }}
+  </td>
+  <td>
+    {{ admission. }}
   </td>
   <td>{{ admission.derniere_modification_le|date:'d/m/Y H:i' }}</td>
   {% if admission.derniere_modification_par_candidat %}
