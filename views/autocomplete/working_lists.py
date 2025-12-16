@@ -75,6 +75,7 @@ class WorkingListAutocomplete(autocomplete.Select2QuerySetView):
                 ],
                 'admission_statuses': result.admission_statuses,
                 'admission_education_types': result.admission_education_types,
+                'admission_contingentes': result.admission_contingentes,
                 'admission_type': result.admission_type,
                 'quarantine': result.quarantine,
             }

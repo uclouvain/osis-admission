@@ -97,6 +97,7 @@
           {# Working lists #}
           const stateInput = $('#id_etats');
           const educationTypesInput = $('#id_types_formation');
+          const educationContingentesInput = $('#id_contingentes');
           const typeInput = $('#id_type');
           const filterModeInputs = $('input[name="mode_filtres_etats_checklist"]');
           const checklistFiltersInputs = $('#checklist-filters-container .multi-widget input[type="checkbox"]');
@@ -133,6 +134,7 @@
 
               stateInput.val(data.admission_statuses).trigger('change');
               educationTypesInput.val(data.admission_education_types).trigger('change');
+              educationContingentesInput.val(data.admission_contingentes).trigger('change');
               if (data.admission_type !== unchangedValue) typeInput.val([data.admission_type]).trigger('change');
               quarantineInput.val({
                 true: 'True',

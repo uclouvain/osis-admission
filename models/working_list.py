@@ -34,6 +34,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
 from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
+from admission.ddd.admission.shared_kernel.enums.liste import ContingenteFiltre
 from admission.ddd.admission.shared_kernel.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_continue.domain.model.enums import (
@@ -106,6 +107,16 @@ class WorkingList(CommonWorkingList):
         verbose_name=_('Admission education types'),
         base_field=models.CharField(
             choices=AnneeInscriptionFormationTranslator.EDUCATION_TYPES_CHOICES,
+            max_length=64,
+        ),
+        blank=True,
+    )
+
+    admission_contingentes = ArrayField(
+        default=[ContingenteFiltre.NON_CONTINGENTE.name, ContingenteFiltre.CONTINGENTE_RESIDENT.name],
+        verbose_name=_('Admission limited enrolment'),
+        base_field=models.CharField(
+            choices=ContingenteFiltre.choices(),
             max_length=64,
         ),
         blank=True,
