@@ -171,7 +171,6 @@ class ListerToutesDemandes(IListerToutesDemandes):
                 is_external_modification=F('generaleducationadmission__is_external_modification'),
             )
             .select_related(
-                'generaleducationadmission',
                 'candidate__country_of_citizenship',
                 'last_update_author',
                 'determined_academic_year',
