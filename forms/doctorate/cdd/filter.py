@@ -317,6 +317,7 @@ class DoctorateListFilterForm(BaseAdmissionFilterForm):
             AcademicCalendarTypes.DOCTORATE_EDUCATION_ENROLLMENT
         )
         self.fields['annee_academique'].choices.insert(0, ALL_FEMININE_EMPTY_CHOICE[0])
+        self.fields['annee_academique'].widget.choices = self.fields['annee_academique'].choices
         self.fields['annee_academique'].required = False
 
         if current_academic_year:
