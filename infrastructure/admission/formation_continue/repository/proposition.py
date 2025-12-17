@@ -79,8 +79,8 @@ from admission.infrastructure.admission.shared_kernel.repository.proposition imp
     GlobalPropositionRepository,
 )
 from admission.models import AdmissionFormItem, ContinuingEducationAdmissionProxy
-from admission.models.specific_question import SpecificQuestionAnswer
 from admission.models.continuing_education import ContinuingEducationAdmission
+from admission.models.specific_question import SpecificQuestionAnswer
 from base.models.academic_year import AcademicYear
 from base.models.campus import Campus as CampusDb
 from base.models.education_group_year import EducationGroupYear
@@ -546,6 +546,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             ),
             elements_confirmation=admission.confirmation_elements,
             pdf_recapitulatif=admission.pdf_recap,
+            dossier_analyse_autorisation=admission.authorization_analysis_folder,
             documents_additionnels=admission.additional_documents,
             motivations=admission.motivations,
             moyens_decouverte_formation=admission.ways_to_find_out_about_the_course,

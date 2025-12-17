@@ -330,6 +330,11 @@ class MettreAValiderCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
+class GenererDocumentAnalysePropositionAutorisationCommand(interface.CommandRequest):
+    uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
 class ListerDemandesQuery(SortedQueryRequest):
     annee_academique: Optional[int] = None
     edition: Optional[str] = ''
@@ -346,6 +351,8 @@ class ListerDemandesQuery(SortedQueryRequest):
     filtres_etats_checklist: Optional[Dict[str, List[str]]] = None
     demandeur: Optional[str] = ''
     marque_d_interet: Optional[bool] = None
+    site_inscription: Optional[str] = ''
+    quarantaine: Optional[bool] = None
 
 
 @attr.dataclass(frozen=True, slots=True)

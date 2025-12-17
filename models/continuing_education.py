@@ -317,6 +317,12 @@ class ContinuingEducationAdmission(BaseAdmission):
         blank=True,
     )
 
+    authorization_analysis_folder = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('Analysis folder generated when the application is validated'),
+    )
+
     class Meta:
         verbose_name = _("Continuing education admission")
         ordering = ('-created_at',)

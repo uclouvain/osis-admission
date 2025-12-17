@@ -32,7 +32,6 @@ from django.db.models.fields import CharField
 from django.db.models.functions import Coalesce, Concat
 from django.utils.translation import get_language, gettext
 
-from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixEdition,
     ChoixStatutPropositionContinue,
@@ -45,6 +44,7 @@ from admission.ddd.admission.formation_continue.domain.service.i_lister_demandes
     IListerDemandesService,
 )
 from admission.ddd.admission.formation_continue.dtos.liste import DemandeRechercheDTO
+from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
 from admission.infrastructure.utils import get_entities_with_descendants_ids
 from admission.models import ContinuingEducationAdmission, EPCInjection
 from admission.models.epc_injection import EPCInjectionStatus
@@ -67,6 +67,8 @@ class ListerDemandesService(IListerDemandesService):
         injection_epc_en_erreur: Optional[bool] = None,
         paye: Optional[bool] = None,
         marque_d_interet: Optional[bool] = None,
+        quarantaine: Optional[bool] = None,
+        site_inscription: Optional[str] = '',
         mode_filtres_etats_checklist: Optional[str] = '',
         filtres_etats_checklist: Optional[Dict[str, List[str]]] = None,
         demandeur: Optional[str] = '',
@@ -94,7 +96,10 @@ class ListerDemandesService(IListerDemandesService):
                 'training__academic_year',
                 'training__specificiufcinformations',
             )
-            .prefetch_related('candidate__student_set')
+            .prefetch_related(
+                'candidate__student_set',
+                'candidate__personmergeproposal',
+            )
         )
 
         # Filter the queryset
@@ -131,6 +136,14 @@ class ListerDemandesService(IListerDemandesService):
         if marque_d_interet:
             qs = qs.filter(interested_mark=marque_d_interet)
 
+        if site_inscription:
+            qs = qs.filter(training__enrollment_campus__uuid=site_inscription)
+
+        if quarantaine is True:
+            qs = qs.filter_in_quarantine()
+        elif quarantaine is False:
+            qs = qs.exclude_in_quarantine()
+
         if injection_epc_en_erreur is True:
             qs = qs.filter(last_epc_injection_status__in=EPCInjectionStatus.error_or_pending_statuses())
         elif injection_epc_en_erreur is False:
@@ -144,7 +157,6 @@ class ListerDemandesService(IListerDemandesService):
             qs = qs.filter_according_to_roles(demandeur, permission='admission.view_continuing_enrolment_applications')
 
         if mode_filtres_etats_checklist and filtres_etats_checklist:
-
             json_path_to_checks = defaultdict(set)
             all_checklist_filters = Q()
 

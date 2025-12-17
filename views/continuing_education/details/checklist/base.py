@@ -38,19 +38,21 @@ from osis_mail_template.exceptions import EmptyMailTemplateContent
 from osis_mail_template.models import MailTemplate
 
 from admission.auth.roles.program_manager import ProgramManager
-from admission.ddd.admission.shared_kernel.commands import ListerToutesDemandesQuery
-from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
-from admission.ddd.admission.shared_kernel.dtos.resume import (
-    ResumeEtEmplacementsDocumentsPropositionDTO,
-)
 from admission.ddd.admission.formation_continue.commands import (
     RecupererResumeEtEmplacementsDocumentsPropositionQuery,
 )
-from admission.ddd.admission.shared_kernel.enums.statut import (
-    STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER_OU_ANNULEE,
-)
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     OngletsChecklist,
+)
+from admission.ddd.admission.shared_kernel.commands import ListerToutesDemandesQuery
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import (
+    QuestionSpecifiqueDTO,
+)
+from admission.ddd.admission.shared_kernel.dtos.resume import (
+    ResumeEtEmplacementsDocumentsPropositionDTO,
+)
+from admission.ddd.admission.shared_kernel.enums.statut import (
+    STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER_OU_ANNULEE,
 )
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
 from admission.forms import disable_unavailable_forms
@@ -405,6 +407,7 @@ class ChecklistView(
                 'CURRICULUM',
                 'COPIE_TITRE_SEJOUR',
                 'DOSSIER_ANALYSE',
+                'DOSSIER_ANALYSE_AUTORISATION',
                 'DIPLOME',
             },
             'decision': {
@@ -413,6 +416,7 @@ class ChecklistView(
                 'CURRICULUM',
                 'COPIE_TITRE_SEJOUR',
                 'DOSSIER_ANALYSE',
+                'DOSSIER_ANALYSE_AUTORISATION',
                 'DIPLOME',
             },
         }

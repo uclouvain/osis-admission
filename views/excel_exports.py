@@ -39,9 +39,8 @@ from django.urls import reverse
 from django.utils.functional import cached_property
 from django.utils.html import format_html
 from django.utils.text import slugify
-from django.utils.translation import get_language
+from django.utils.translation import get_language, gettext_lazy, pgettext
 from django.utils.translation import gettext as _
-from django.utils.translation import gettext_lazy, pgettext
 from django.views import View
 from osis_async.models import AsyncTask
 from osis_comment.models import CommentEntry
@@ -509,6 +508,13 @@ class ContinuingAdmissionListExcelExportView(BaseAdmissionExcelExportView):
         # Formatting of the values of the filters
         mapping_filter_key_value = {}
 
+        # Retrieve enrolment site name
+        campus = formatted_filters.get('site_inscription')
+        if campus:
+            mapping_filter_key_value['site_inscription'] = (
+                Campus.objects.filter(uuid=campus).values_list('name', flat=True).first()
+            )
+
         # Retrieve candidate name
         candidate_global_id = formatted_filters.get('matricule_candidat')
         if candidate_global_id:
@@ -529,7 +535,7 @@ class ContinuingAdmissionListExcelExportView(BaseAdmissionExcelExportView):
 
         # Format boolean values
         # > "Yes" / "No" / ""
-        for filter_name in ['inscription_requise', 'paye', 'injection_epc_en_erreur']:
+        for filter_name in ['inscription_requise', 'paye', 'injection_epc_en_erreur', 'quarantaine']:
             formatted_filters[filter_name] = yesno(formatted_filters[filter_name], _('yes,no,'))
 
         # > "Yes" / ""

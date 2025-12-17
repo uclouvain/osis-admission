@@ -1009,7 +1009,7 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
         self.assertStrEqual(row_data[4], str(ChoixGenre.H.value))
         self.assertStrEqual(row_data[5], str(CivilState.LEGAL_COHABITANT.value))
         self.assertStrEqual(row_data[6], 'B1')
-        self.assertStrEqual(row_data[7], '2020-01-01'),
+        (self.assertStrEqual(row_data[7], '2020-01-01'),)
         self.assertStrEqual(row_data[8], 'Place 1')
         self.assertStrEqual(row_data[9], 'B2')
         self.assertStrEqual(row_data[10], 'N1')
@@ -1083,7 +1083,7 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
             ),
             obtained_diploma=True,
         )
-        new_experience_year = EducationalExperienceYearFactory(
+        EducationalExperienceYearFactory(
             academic_year__year=2010,
             educational_experience=new_experience,
         )
@@ -1283,7 +1283,7 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
         )
 
     def test_export_configuration(self):
-        candidate = PersonFactory()
+        PersonFactory()
         campus = CampusFactory()
         filters = str(
             {
@@ -1307,6 +1307,8 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
                     OngletsChecklistContinue.decision.name: ['A_TRAITER', 'A_VALIDER'],
                 },
                 'demandeur': str(self.sic_management_user.person.uuid),
+                'site_inscription': str(campus.uuid),
+                'quarantaine': True,
             }
         )
 
@@ -1321,8 +1323,8 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
         )
 
         names, values = list(worksheet.iter_cols(values_only=True))
-        self.assertEqual(len(names), 17)
-        self.assertEqual(len(values), 17)
+        self.assertEqual(len(names), 19)
+        self.assertEqual(len(values), 19)
 
         # Check the names of the parameters
         self.assertStrEqual(names[0], _('Creation date'))
@@ -1342,6 +1344,8 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
         self.assertStrEqual(names[14], _('Interested mark'))
         self.assertStrEqual(names[15], _('Include or exclude the checklist filters'))
         self.assertStrEqual(names[16], _('Checklist filters'))
+        self.assertStrEqual(names[17], _('Enrolment campus'))
+        self.assertStrEqual(names[18], _('Quarantine'))
 
         # Check the values of the parameters
         self.assertStrEqual(values[0], '3 Janvier 2023')
@@ -1375,6 +1379,8 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
                 }
             ),
         )
+        self.assertStrEqual(values[17], campus.name)
+        self.assertStrEqual(values[18], 'oui')
 
 
 @freezegun.freeze_time('2023-01-03')
@@ -1586,24 +1592,24 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
             expected_graduation_date=datetime.date(2022, 6, 30),
         )
 
-        educational_experience_year_1 = EducationalExperienceYearFactory(
+        EducationalExperienceYearFactory(
             educational_experience=educational_experience,
             acquired_credit_number=15,
             academic_year__year=2020,
         )
 
-        educational_experience_year_2 = EducationalExperienceYearFactory(
+        EducationalExperienceYearFactory(
             educational_experience=educational_experience,
             acquired_credit_number=12.5,
             academic_year__year=2021,
         )
 
-        valuation = AdmissionEducationalValuatedExperiencesFactory(
+        AdmissionEducationalValuatedExperiencesFactory(
             baseadmission=admission,
             educationalexperience=educational_experience,
         )
 
-        internal_experience = InscriptionProgrammeAnnuelFactory(
+        InscriptionProgrammeAnnuelFactory(
             programme_cycle__etudiant__person=admission.candidate,
             programme_cycle__decision=DecisionResultatCycle.GRANDE_DISTINCTION.name,
             programme_cycle__date_decision=datetime.date(2023, 6, 30),

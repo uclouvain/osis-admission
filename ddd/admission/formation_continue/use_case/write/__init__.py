@@ -37,6 +37,9 @@ from .completer_questions_specifiques_par_gestionnaire_service import (
     completer_questions_specifiques_par_gestionnaire,
 )
 from .completer_questions_specifiques_service import completer_questions_specifiques
+from .generer_document_analyse_proposition_autorisation_service import (
+    generer_document_analyse_proposition_autorisation,
+)
 from .initier_proposition_service import initier_proposition
 from .mettre_a_valider_service import mettre_a_valider
 from .mettre_en_attente_service import mettre_en_attente

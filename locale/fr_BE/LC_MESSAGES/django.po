@@ -691,6 +691,9 @@ msgstr "Dossier d'analyse pour une demande en formation doctorale"
 msgid "Analysis folder for a general education admission"
 msgstr "Dossier d'analyse pour une demande en formation générale"
 
+msgid "Analysis folder generated when the application is validated"
+msgstr "Dossier d'analyse généré quand la demande est validée"
+
 msgid "Annex 1 visa form"
 msgstr "Formulaire visa annexe 1"
 
@@ -1604,9 +1607,6 @@ msgstr ""
 
 msgid "Communication to the candidate about additional trainings"
 msgstr "Autre communication au candidat à propos des compléments"
-
-msgid "Communication to the candidate about additional trainings:"
-msgstr "Autre communication au candidat à propos des compléments :"
 
 msgid "Communication with Host Hospitals"
 msgstr "Communication avec les Hôpitaux d'Accueil"
@@ -5529,7 +5529,9 @@ msgstr ""
 msgid ""
 "Please note that the academic year %(year)s begins on %(start_date)s and "
 "ends on %(end_date)s."
-msgstr "Veuillez noter que l'année académique %(year)s débute le %(start_date)s et se termine le %(end_date)s."
+msgstr ""
+"Veuillez noter que l'année académique %(year)s débute le %(start_date)s et "
+"se termine le %(end_date)s."
 
 #, python-format
 msgid "Please note that the first term begins on %(date)s."
@@ -6807,7 +6809,9 @@ msgstr "Taille du texte"
 msgid ""
 "The \"Sufficient\" status requires the equivalence information to be "
 "specified."
-msgstr "Le passage à l'état \"Suffisant\" nécessite que les informations sur l'équivalence soient remplies."
+msgstr ""
+"Le passage à l'état \"Suffisant\" nécessite que les informations sur "
+"l'équivalence soient remplies."
 
 msgid ""
 "The \"doctoral training\" must be completed before submitting the defense "
@@ -8856,6 +8860,3 @@ msgstr "{items} types sur {total}"
 #, python-brace-format
 msgid "{obj.dates_formatees} : {obj.fonction} at {obj.employeur}"
 msgstr "{obj.dates_formatees} : {obj.fonction} à {obj.employeur}"
-
-#~ msgid "(Expected) graduation date (signed diploma)"
-#~ msgstr "Date (prévue) de délivrance du diplôme (diplôme signé)"

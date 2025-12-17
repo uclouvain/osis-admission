@@ -48,6 +48,8 @@ class IListerDemandesService(interface.DomainService):
         injection_epc_en_erreur: Optional[bool] = None,
         paye: Optional[bool] = None,
         marque_d_interet: Optional[bool] = None,
+        quarantaine: Optional[bool] = None,
+        site_inscription: Optional[str] = '',
         mode_filtres_etats_checklist: Optional[str] = '',
         filtres_etats_checklist: Optional[Dict[str, List[str]]] = None,
         demandeur: Optional[str] = '',

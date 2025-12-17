@@ -137,7 +137,10 @@ class IEmplacementsDocumentsPropositionTranslator(interface.DomainService):
                 ('ATTESTATION_REFUS_SIC', resume_dto.proposition.certificat_refus_sic),
             )
         else:
-            documents_systeme = (('DOSSIER_ANALYSE', resume_dto.proposition.pdf_recapitulatif),)
+            documents_systeme = (
+                ('DOSSIER_ANALYSE', resume_dto.proposition.pdf_recapitulatif),
+                ('DOSSIER_ANALYSE_AUTORISATION', resume_dto.proposition.dossier_analyse_autorisation),
+            )
 
         for _, uuids_document_systeme in documents_systeme:
             for uuid_document_systeme in uuids_document_systeme:
