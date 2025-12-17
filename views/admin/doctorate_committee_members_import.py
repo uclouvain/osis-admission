@@ -28,8 +28,10 @@ import io
 from collections import defaultdict
 from itertools import chain
 
+from charset_normalizer import from_bytes
 from django.contrib import messages
 from django.contrib.postgres.aggregates import ArrayAgg
+from django.core.files.uploadedfile import UploadedFile
 from django.db.models import F, Q, Value
 from django.db.models.functions import Concat
 from django.utils.translation import gettext
@@ -50,13 +52,27 @@ class DoctorateCommitteeMembersImportView(FormView):
 
     def form_valid(self, form):
         # Load data from the file
-        uploaded_file = form.cleaned_data['file']
+        uploaded_file: UploadedFile = form.cleaned_data['file']
 
-        with io.TextIOWrapper(uploaded_file.file, encoding='utf-8', newline='') as csv_file:
+        encoding_match = from_bytes(sequences=uploaded_file.read(1024)).best()
+        encoding = encoding_match.encoding if encoding_match else 'utf-8'
+
+        uploaded_file.seek(0)
+
+        with io.TextIOWrapper(uploaded_file.file, encoding=encoding, newline='') as csv_file:
+            try:
+                sample = csv_file.read(1024)
+                dialect = csv.Sniffer().sniff(sample)
+            except csv.Error:
+                dialect = csv.excel
+
+            csv_file.seek(0)
+
             reader = csv.DictReader(
                 csv_file,
                 fieldnames=['cdd'],
                 restkey='members',
+                dialect=dialect,
             )
 
             if form.cleaned_data['with_header']:

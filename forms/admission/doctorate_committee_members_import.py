@@ -34,7 +34,7 @@ class DoctorateCommitteeMembersImportForm(forms.Form):
         help_text=gettext_lazy(
             'The file must contain, line by line, the CDD acronym in the first column and the names (concatenation of '
             'the first name and the last name) or the global identifiers of the persons to be added for this CDD in '
-            'the following columns. The columns must be separated by commas.'
+            'the following columns.'
         ),
     )
     with_header = forms.BooleanField(
