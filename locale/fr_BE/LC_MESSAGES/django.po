@@ -487,6 +487,11 @@ msgctxt "admission"
 msgid "Add an academic course"
 msgstr "Ajouter une formation académique"
 
+msgid "Add the corresponding program manager roles (doctorate)"
+msgstr ""
+"Ajouter les rôles de gestionnaire de parcours étudiant correspondants "
+"(doctorat)"
+
 msgid "Add validation of prior experience (VAE)"
 msgstr "Ajouter une valorisation des acquis de l'expérience"
 
@@ -872,6 +877,14 @@ msgstr ""
 "Êtes-vous actuellement inscrit∙e en première année de bachelier dans une "
 "haute école ou une université de la Communauté française de Belgique ?"
 
+msgid ""
+"Are you sure you want to add the corresponding program managers roles in the "
+"base app based on the ones from the admission app (doctorate)?"
+msgstr ""
+"Êtes-vous sûr d'ajouter les rôles de gestionnaire de parcours étudiant "
+"correspondants dans l'application 'base' en se basant sur ceux de "
+"l'application 'admission' (doctorat) ?"
+
 msgid "Are you sure you want to change the status?"
 msgstr "Êtes-vous sûr·e de vouloir changer d'état ?"
 
@@ -1219,6 +1232,9 @@ msgstr "901 € - Codiplômation"
 
 msgid "CSS class"
 msgstr "Classe CSS"
+
+msgid "CSV file"
+msgstr "Fichier CSV"
 
 msgid "Campus"
 msgstr "Campus"
@@ -1604,9 +1620,6 @@ msgstr ""
 
 msgid "Communication to the candidate about additional trainings"
 msgstr "Autre communication au candidat à propos des compléments"
-
-msgid "Communication to the candidate about additional trainings:"
-msgstr "Autre communication au candidat à propos des compléments :"
 
 msgid "Communication with Host Hospitals"
 msgstr "Communication avec les Hôpitaux d'Accueil"
@@ -2386,6 +2399,9 @@ msgctxt "inclusive"
 msgid "Doctorate candidate"
 msgstr "Candidat.e doctorant.e"
 
+msgid "Doctorate committee members"
+msgstr "Membres de la commission doctorale"
+
 msgctxt "admission context"
 msgid "Doctorate education"
 msgstr "Formation doctorale"
@@ -3065,6 +3081,9 @@ msgstr "Retour de FAC/CDD"
 
 msgid "File"
 msgstr "Fichier"
+
+msgid "File with header"
+msgstr "Fichier avec en-tête"
 
 msgid "Filter by documents"
 msgstr "Filtrer par documents"
@@ -3971,6 +3990,15 @@ msgstr ""
 
 msgid "Immediately"
 msgstr "Immédiatement"
+
+msgid "Import from csv file"
+msgstr "Importer depuis un fichier CSV"
+
+msgid "Import of the doctorate committee members"
+msgstr "Importer des membres de la commission doctorale"
+
+msgid "Import of the doctorate committee members from a csv file"
+msgstr "Importer des membres de la commission doctorale depuis un fichier csv"
 
 msgid "Important information:"
 msgstr "Informations importantes"
@@ -4969,6 +4997,9 @@ msgid "No document is defined as requestable. At least one is required."
 msgstr ""
 "Aucun document n'est spécifié comme réclamable. Au-moins un est requis."
 
+msgid "No education group has been found for:"
+msgstr "Aucune formation n'a été trouvée pour :"
+
 msgid "No enrolment application"
 msgstr "Aucune demande d'inscription n'a été trouvée"
 
@@ -4987,6 +5018,9 @@ msgstr "Aucune connaissance des langues renseignée."
 msgid "No longer designate the document as to be requested"
 msgstr "Ne plus désigner le document comme étant à réclamer"
 
+msgid "No one has been found for:"
+msgstr "Aucune personne n'a été trouvée pour :"
+
 msgid "No one invited"
 msgstr "Aucun invité"
 
@@ -4995,6 +5029,9 @@ msgstr "Aucun paiement"
 
 msgid "No pool was found to match."
 msgstr "Aucun pot ne correspond."
+
+msgid "No role has been created."
+msgstr "Aucun rôle n'a été créé."
 
 msgid "No specific profile"
 msgstr "Pas de profil particulier"
@@ -5185,6 +5222,12 @@ msgid_plural ""
 msgstr[0] "Une demande d'inscription"
 msgstr[1] ""
 "%(start_index)s à %(end_index)s sur %(total_counts)s demandes d'inscription"
+
+#, python-format
+msgid "One role has been created."
+msgid_plural "%(nb)d roles have been created."
+msgstr[0] "Un rôle a été créé."
+msgstr[1] "%(nb)d rôles ont été créés."
 
 msgid "Online"
 msgstr "En ligne"
@@ -5529,7 +5572,9 @@ msgstr ""
 msgid ""
 "Please note that the academic year %(year)s begins on %(start_date)s and "
 "ends on %(end_date)s."
-msgstr "Veuillez noter que l'année académique %(year)s débute le %(start_date)s et se termine le %(end_date)s."
+msgstr ""
+"Veuillez noter que l'année académique %(year)s débute le %(start_date)s et "
+"se termine le %(end_date)s."
 
 #, python-format
 msgid "Please note that the first term begins on %(date)s."
@@ -6194,6 +6239,9 @@ msgstr "Retyper le document"
 msgid "Role of the signing actor"
 msgstr "Rôle du signataire"
 
+msgid "Role:"
+msgstr "Rôle :"
+
 msgid "Role: Candidate"
 msgstr "Rôle: Candidat"
 
@@ -6427,6 +6475,9 @@ msgstr "Plusieurs demandes"
 
 msgid "Several applications?"
 msgstr "Plusieurs demandes ?"
+
+msgid "Several persons have been found for:"
+msgstr "Plusieurs personnes ont été trouvées pour :"
 
 msgid "Sex"
 msgstr "Sexe"
@@ -6807,7 +6858,9 @@ msgstr "Taille du texte"
 msgid ""
 "The \"Sufficient\" status requires the equivalence information to be "
 "specified."
-msgstr "Le passage à l'état \"Suffisant\" nécessite que les informations sur l'équivalence soient remplies."
+msgstr ""
+"Le passage à l'état \"Suffisant\" nécessite que les informations sur "
+"l'équivalence soient remplies."
 
 msgid ""
 "The \"doctoral training\" must be completed before submitting the defense "
@@ -7053,6 +7106,9 @@ msgid "The current training is attached to this document."
 msgstr ""
 "La formation réalisée à ce jour se trouve en annexe à ce procès-verbal."
 
+msgid "The data import has been completed."
+msgstr "L'import des données a été réalisé."
+
 msgid "The decision of the signing actor"
 msgstr "La décision du signataire"
 
@@ -7143,6 +7199,16 @@ msgid ""
 msgstr ""
 "Le mail de la décision fac a été envoyé au candidat le %(date)s par "
 "%(sender)s."
+
+msgid ""
+"The file must contain, line by line, the CDD acronym in the first column and "
+"the names (concatenation of the first name and the last name) or the global "
+"identifiers of the persons to be added for this CDD in the following columns."
+msgstr ""
+"Le fichier doit contenir, ligne par ligne, l'acronyme de la CDD dans la "
+"première colonne et les noms (concaténation du prénom et du nom) ou les "
+"identifiants globaux des personnes à ajouter à la CDD dans les colonnes "
+"suivantes."
 
 msgid "The first name must be less than 20 characters long."
 msgstr "Le prénom ne doit pas faire plus de 20 caractères."
@@ -8856,6 +8922,3 @@ msgstr "{items} types sur {total}"
 #, python-brace-format
 msgid "{obj.dates_formatees} : {obj.fonction} at {obj.employeur}"
 msgstr "{obj.dates_formatees} : {obj.fonction} à {obj.employeur}"
-
-#~ msgid "(Expected) graduation date (signed diploma)"
-#~ msgstr "Date (prévue) de délivrance du diplôme (diplôme signé)"
