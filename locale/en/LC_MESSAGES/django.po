@@ -1479,9 +1479,6 @@ msgstr ""
 msgid "Communication to the candidate about additional trainings"
 msgstr ""
 
-msgid "Communication to the candidate about additional trainings:"
-msgstr ""
-
 msgid "Communication with Host Hospitals"
 msgstr ""
 
