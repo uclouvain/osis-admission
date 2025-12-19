@@ -470,7 +470,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
                 'derniere_modification_par': ['last_update_author__user__username'],
                 'date_confirmation': ['submitted_at'],
                 'numero_demande_contingente': ['ares_application_number'],
-                # 'numero_tirage': ['submitted_at'], # TODO
+                'numero_tirage': ['draw_number'],
                 'etat_decision_sic': ['checklist__current__decision_sic__statut'],
             }[champ_tri]
 
@@ -509,6 +509,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
             uuid=admission.uuid,
             numero_demande=admission.formatted_reference,  # From annotation
             numero_demande_contingente=admission.generaleducationadmission.ares_application_number if admission.generaleducationadmission else '',
+            numero_tirage=admission.generaleducationadmission.draw_number if admission.generaleducationadmission else None,
             nom_candidat=admission.candidate.last_name,
             prenom_candidat=admission.candidate.first_name,
             noma_candidat=noma_candidat,

@@ -87,10 +87,10 @@
     {% endif %}
   </td>
   <td>
-    {{ admission. }}
+    {{ admission.numero_demande_contingente }}
   </td>
   <td>
-    TODO NUMERO TIRAGE
+    {{ admission.numero_tirage|default_if_none:"" }}
   </td>
   <td>
     <div class="flex-content-no-wrap">

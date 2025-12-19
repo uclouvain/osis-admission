@@ -185,6 +185,11 @@ class GeneralEducationAdmission(BaseAdmission):
         verbose_name=_('Resident student form'),
     )
     # Non-resident
+    draw_number = models.PositiveIntegerField(
+        verbose_name=_('Draw number'),
+        null=True,
+        blank=True,
+    )
     non_resident_file = FileField(
         blank=True,
         upload_to=admission_directory_path,

@@ -43,6 +43,7 @@ class DemandeRechercheDTO(interface.DTO):
     uuid: str
     numero_demande: str
     numero_demande_contingente: str
+    numero_tirage: Optional[int]
     nom_candidat: str
     prenom_candidat: str
     noma_candidat: Optional[str]
