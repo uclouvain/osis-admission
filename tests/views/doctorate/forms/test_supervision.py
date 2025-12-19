@@ -142,6 +142,9 @@ class SupervisionTestCase(TestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
+        self.admission.status = ChoixStatutPropositionDoctorale.CONFIRMEE.name
+        self.admission.save(update_fields=['status'])
+
     def test_access_with_doctorate_committee_member(self):
         self.client.force_login(user=self.doctorate_committee_member)
 
@@ -374,6 +377,9 @@ class SupervisionTestCase(TestCase):
     def test_should_resend_invite(self):
         self.client.force_login(user=self.program_manager_user)
 
+        self.admission.status = ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name
+        self.admission.save(update_fields=['status'])
+
         StateHistory.objects.create(
             actor=self.external_member,
             state=SignatureState.INVITED.name,
@@ -431,7 +437,7 @@ class SupervisionTestCase(TestCase):
             "admission:doctorate:update:send-back-to-candidate",
             uuid=str(self.admission.uuid),
         )
-        response = self.client.post(url, {})
+        self.client.post(url, {})
         self.admission.refresh_from_db()
         self.assertEqual(self.admission.status, ChoixStatutPropositionDoctorale.EN_BROUILLON.name)
 
