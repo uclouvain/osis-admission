@@ -30,12 +30,11 @@ from django.conf import settings
 from django.shortcuts import resolve_url
 from django.utils import translation
 from django.utils.functional import lazy
-from django.utils.translation import get_language, gettext
+from django.utils.translation import get_language, gettext, pgettext_lazy
 from django.utils.translation import gettext_lazy as _
-from django.utils.translation import pgettext_lazy
 from osis_async.models import AsyncTask
-from osis_document_components.services import get_remote_token, get_remote_tokens
 from osis_document_components.enums import PostProcessingWanted
+from osis_document_components.services import get_remote_token, get_remote_tokens
 from osis_document_components.utils import get_file_url
 from osis_mail_template import generate_email
 from osis_mail_template.utils import transform_html_to_text
@@ -502,8 +501,14 @@ class Notification(INotification):
             "signataire_first_name": actor.first_name,
             "signataire_last_name": actor.last_name,
             "signataire_role": actor.get_type_display(),
-            "admission_link_front": cls._lien_invitation_externe(proposition, actor),
         }
+        if actor.is_external:
+            tokens["admission_link_front"] = cls._lien_invitation_externe(proposition, actor)
+        else:
+            frontend_link_for_supervision_member = get_portal_doctorate_management_url(proposition.entity_id.uuid)
+            supervision_frontend_link_for_supervision_member = f'{frontend_link_for_supervision_member}supervision'
+            tokens["admission_link_front"] = supervision_frontend_link_for_supervision_member
+            tokens["admission_link_front_supervision"] = supervision_frontend_link_for_supervision_member
         if actor.type == ActorType.PROMOTER.name:
             email_message = generate_email(
                 ADMISSION_EMAIL_SIGNATURE_REQUESTS_PROMOTER,
@@ -518,7 +523,7 @@ class Notification(INotification):
                 tokens,
                 recipients=[actor.email],
             )
-        EmailNotificationHandler.create(email_message)
+        EmailNotificationHandler.create(email_message, person=actor.person_id and actor.person)
 
     @classmethod
     def _lien_invitation_externe(cls, proposition, actor):
