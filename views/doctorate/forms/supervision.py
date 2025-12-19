@@ -25,7 +25,6 @@
 # ##############################################################################
 import attr
 from django import forms
-from django.contrib import messages
 from django.http import Http404
 from django.shortcuts import redirect, resolve_url
 from django.utils.translation import gettext_lazy as _
@@ -63,7 +62,6 @@ from admission.views.mixins.business_exceptions_form_view_mixin import (
 from base.views.common import display_error_messages, display_info_messages
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import PermissionRequiredMixin
-from reference.models.country import Country
 
 __namespace__ = None
 
@@ -289,7 +287,7 @@ class DoctorateAdmissionApprovalByPdfFormView(PermissionRequiredMixin, BusinessE
 class DoctorateAdmissionExternalResendFormView(PermissionRequiredMixin, BusinessExceptionFormViewMixin, FormView):
     urlpatterns = {'resend-invite': 'resend-invite/<uuid_membre>'}
     template_name = 'admission/doctorate/forms/external_confirm.html'
-    permission_required = 'admission.approve_proposition_by_pdf'
+    permission_required = 'admission.resend_invitation'
     form_class = forms.Form
 
     def get_permission_object(self):
