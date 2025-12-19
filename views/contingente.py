@@ -25,22 +25,26 @@
 # ##############################################################################
 import unicodedata
 
+from django.contrib import messages
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.core.files.temp import NamedTemporaryFile
 from django.http import Http404, FileResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.utils import timezone
 from django.utils.functional import cached_property
+from django.utils.translation import gettext_lazy as _
 from django.views import View
-from django.views.generic import TemplateView, DetailView, UpdateView
-from openpyxl import Workbook
+from django.views.generic import TemplateView, UpdateView, FormView
+from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Font
+from openpyxl.utils.exceptions import InvalidFileException
 
 from admission.calendar.admission_calendar import SIGLES_WITH_QUOTA
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
-from admission.forms.admission.contingente import ContingenteTrainingForm
+from admission.forms.admission.contingente import ContingenteTrainingForm, ContingenteTrainingImportForm
 from admission.models import GeneralEducationAdmission
 from admission.models.contingente import ContingenteTraining
+from admission.utils import add_close_modal_into_htmx_response, add_messages_into_htmx_response
 from base.models.academic_calendar import AcademicCalendar
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
@@ -53,6 +57,7 @@ __all__ = [
     "ContingenteTrainingManageView",
     "ContingenteTrainingUpdateView",
     "ContingenteTrainingExportView",
+    "ContingenteTrainingImportView",
 ]
 
 INSTITUTION_UCL_EXPORT = 'UCLouvain'
@@ -105,6 +110,7 @@ class ContingenteTrainingManageView(ContingenteMixin, PermissionRequiredMixin, T
         )
         context['contingente_training'] = contingente_training
         context['contingente_training_form'] = ContingenteTrainingForm(instance=contingente_training)
+        context['contingente_training_import_form'] = ContingenteTrainingImportForm()
 
         return context
 
@@ -223,3 +229,70 @@ class ContingenteTrainingExportView(ContingenteMixin, PermissionRequiredMixin, V
             filename='contingente.xlsx',
             content_type='application/vnd.ms-excel',
         )
+
+
+class ContingenteTrainingImportView(ContingenteMixin, PermissionRequiredMixin, FormView):
+    permission_required = 'admission.view_contingente_management'
+    urlpatterns = {'training_import': 'training/<str:training>/import'}
+    template_name = "admission/general_education/contingente/manage_training_import.html"
+    form_class = ContingenteTrainingImportForm
+
+    HEADERS = [
+        "NOM",
+        "PREMIER PRENOM",
+        "AUTRE PRENOM",
+        "SEXE",
+        "LIEU DE NAISSANCE",
+        "DATE DE NAISSANCE",
+        "NATIONALITE",
+        "NUMERO DE LA PIECE D'IDENTITE",
+        "INSTITUTION D'ENSEIGNEMENT(HAUTE ECOLE ou UNIVERSITE)",
+        "GRADE CHOISI",
+        "N° DOSSIER",
+        "N° HUISSIER",
+        "SCEAU HUISSIER",
+    ]
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.htmx:
+            return redirect('admission:contingente:index')
+        response = super().dispatch(request, *args, **kwargs)
+        add_close_modal_into_htmx_response(response)
+        return response
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(
+            ContingenteTraining,
+            training__acronym=self.kwargs['training'],
+            training__academic_year=self.academic_year,
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['contingente_training'] = self.get_object()
+        context['contingente_training_import_form'] = context['form']
+        return context
+
+    def import_wb(self, wb: Workbook):
+        ws = wb.active
+        # TODO Check headers are ok
+        # Clean draw number
+        # Import draw number
+        # Update last import
+        # Add confirm when there is already an import
+
+    def form_valid(self, form):
+        try:
+            tmp = NamedTemporaryFile()
+            tmp.write(form.cleaned_data['import_file'].read())
+            tmp.seek(0)
+            wb = load_workbook(tmp.name)
+            self.import_wb(wb)
+        except InvalidFileException as e:
+            messages.error(self.request, _("Invalid file format ."))
+        except Exception as e:
+            messages.error(self.request, _("There was an error while importing the file."))
+
+        response = self.render_to_response(self.get_context_data())
+        add_messages_into_htmx_response(self.request, response)
+        return response

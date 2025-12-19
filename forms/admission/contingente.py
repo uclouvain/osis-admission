@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 from django import forms
+from django.utils.translation import gettext_lazy as _
 
 from admission.models.contingente import ContingenteTraining
 
@@ -34,3 +35,10 @@ class ContingenteTrainingForm(forms.ModelForm):
         fields = [
             'places_number',
         ]
+
+
+class ContingenteTrainingImportForm(forms.Form):
+    import_file = forms.FileField(
+        label=_("File to import"),
+        required=True,
+    )
