@@ -55,6 +55,10 @@ from ._should_identification_candidat_etre_completee import (
     ShouldCandidatSpecifierNumeroIdentite,
     ShouldSignaletiqueCandidatEtreCompletee,
 )
+from ._should_verifier_titres_acces_selectionnes import (
+    ShouldSelectionnerUnSeulTitreAccesSiSelectionExperienceAcademique,
+    ShouldTitresAccesEtreExperiencesNonAcademiquesSiSelectionExperienceNonAcademique,
+)
 
 __all__ = [
     "ShouldAvoirAucunDocumentReclame",
@@ -79,4 +83,6 @@ __all__ = [
     "ShouldExperiencesAcademiquesEtreCompleteesApresSoumission",
     "ShouldTypeCompteBancaireRemboursementEtreComplete",
     "ShouldCoordonneesCandidatEtreCompletees",
+    "ShouldSelectionnerUnSeulTitreAccesSiSelectionExperienceAcademique",
+    "ShouldTitresAccesEtreExperiencesNonAcademiquesSiSelectionExperienceNonAcademique",
 ]

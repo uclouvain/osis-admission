@@ -129,3 +129,16 @@ class TypeTitreAccesSelectionnable(ChoiceEnum):
     ETUDES_SECONDAIRES = _('Secondary studies')
     EXPERIENCE_PARCOURS_INTERNE = _('Internal experience')
     EXAMENS = _('Exams')
+
+    def est_academique(self):
+        return self in {
+            self.EXPERIENCE_ACADEMIQUE,
+            self.ETUDES_SECONDAIRES,
+            self.EXPERIENCE_PARCOURS_INTERNE,
+            self.ETUDES_SECONDAIRES,
+        }
+
+    def est_non_academique(self):
+        return self in {
+            self.EXPERIENCE_NON_ACADEMIQUE,
+        }

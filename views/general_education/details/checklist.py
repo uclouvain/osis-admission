@@ -40,9 +40,8 @@ from django.urls import reverse
 from django.utils import timezone, translation
 from django.utils.formats import date_format
 from django.utils.functional import cached_property
-from django.utils.translation import gettext
+from django.utils.translation import gettext, ngettext, override, pgettext
 from django.utils.translation import gettext_lazy as _
-from django.utils.translation import ngettext, override, pgettext
 from django.views.generic import FormView, TemplateView
 from django.views.generic.base import RedirectView, View
 from django_htmx.http import HttpResponseClientRefresh
@@ -1310,10 +1309,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             tokens = {
                 "admission_reference": self.proposition.reference,
                 "candidate": (
-                    (
-                        f"{self.proposition.profil_soumis_candidat.prenom} "
-                        f"{self.proposition.profil_soumis_candidat.nom}"
-                    )
+                    (f"{self.proposition.profil_soumis_candidat.prenom} {self.proposition.profil_soumis_candidat.nom}")
                     if self.proposition.profil_soumis_candidat
                     else ""
                 ),
@@ -2201,6 +2197,11 @@ class PastExperiencesAccessTitleView(
                     type_experience=experience_type,
                 )
             )
+
+        except MultipleBusinessExceptions as exception:
+            self.message_on_failure = exception.exceptions.pop().message
+            self.checked = not self.checked
+            return super().form_invalid(form)
 
         except BusinessException as exception:
             self.message_on_failure = exception.message
@@ -3169,7 +3170,6 @@ class ChecklistView(
         }
 
     def get_context_data(self, **kwargs):
-
         context = super().get_context_data(**kwargs)
         if not self.request.htmx:
             # Retrieve data related to the proposition

@@ -265,3 +265,22 @@ class DocumentsReclamesException(BusinessException):
     def __init__(self, **kwargs):
         message = _("Some documents are still requested.")
         super().__init__(message, **kwargs)
+
+
+class SelectionnerUnSeulTitreAccesSiSelectionExperienceAcademiqueException(BusinessException):
+    status_code = "ADMISSION-26"
+
+    def __init__(self, **kwargs):
+        message = _("If an academic experience is selected as an access title, no other experience may be selected.")
+        super().__init__(message, **kwargs)
+
+
+class TitresAccesEtreExperiencesNonAcademiquesSiSelectionExperienceNonAcademiqueException(BusinessException):
+    status_code = "ADMISSION-27"
+
+    def __init__(self, **kwargs):
+        message = _(
+            "A non-academic experience may only be selected as an access title only if all access titles are "
+            "also non-academic."
+        )
+        super().__init__(message, **kwargs)

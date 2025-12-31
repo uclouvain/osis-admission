@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -31,11 +31,13 @@ from admission.ddd.admission.shared_kernel.use_case.read import *
 from admission.ddd.admission.shared_kernel.use_case.write import specifier_experience_en_tant_que_titre_acces
 from admission.infrastructure.admission.shared_kernel.domain.service.lister_toutes_demandes import ListerToutesDemandes
 from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidatTranslator
-from admission.infrastructure.admission.shared_kernel.repository.titre_acces_selectionnable import TitreAccesSelectionnableRepository
 from admission.infrastructure.admission.shared_kernel.repository.email_destinataire import (
     EmailDestinataireRepository,
 )
 from admission.infrastructure.admission.shared_kernel.repository.gestionnaire import GestionnaireRepository
+from admission.infrastructure.admission.shared_kernel.repository.titre_acces_selectionnable import (
+    TitreAccesSelectionnableRepository,
+)
 from infrastructure.shared_kernel.profil.domain.service.parcours_interne import ExperienceParcoursInterneTranslator
 
 COMMAND_HANDLERS = {
@@ -73,6 +75,7 @@ COMMAND_HANDLERS = {
     SpecifierExperienceEnTantQueTitreAccesCommand: lambda msg_bus, cmd: specifier_experience_en_tant_que_titre_acces(
         cmd,
         titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
+        experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
     ),
     RechercherFormationsGereesQuery: lambda msg_bus, cmd: rechercher_formations_gerees(
         cmd,
@@ -83,13 +86,13 @@ COMMAND_HANDLERS = {
 EVENT_HANDLERS = {}
 
 if 'admission' in settings.INSTALLED_APPS:
-    from admission.ddd.admission.formation_generale.events import (
-        InscriptionApprouveeParSicEvent,
-        AdmissionApprouveeParSicEvent,
-    )
     from admission.ddd.admission.doctorat.events import (
-        InscriptionDoctoraleApprouveeParSicEvent,
         AdmissionDoctoraleApprouveeParSicEvent,
+        InscriptionDoctoraleApprouveeParSicEvent,
+    )
+    from admission.ddd.admission.formation_generale.events import (
+        AdmissionApprouveeParSicEvent,
+        InscriptionApprouveeParSicEvent,
     )
     from admission.infrastructure.admission.event_handler.reagir_a_approuver_proposition import (
         reagir_a_approuver_proposition,

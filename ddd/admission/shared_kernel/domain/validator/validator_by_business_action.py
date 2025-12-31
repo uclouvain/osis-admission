@@ -38,6 +38,7 @@ from admission.ddd.admission.shared_kernel.domain.model._candidat_signaletique i
 from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import (
     EmplacementDocument,
 )
+from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
 from admission.ddd.admission.shared_kernel.domain.validator import *
 from admission.ddd.admission.shared_kernel.domain.validator._should_identification_candidat_etre_completee import (
     ShouldCandidatAutresPrenomsEtreSuffisammentCourt,
@@ -185,5 +186,26 @@ class QuarantaineValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
         return [
             ShouldNePasEtreEnQuarantaine(
                 merge_proposal=self.merge_proposal,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierExperienceCommeTitreAccesValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    titre_acces_modifie: TitreAccesSelectionnable
+    titre_acces_deja_selectionnes: list[TitreAccesSelectionnable]
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldSelectionnerUnSeulTitreAccesSiSelectionExperienceAcademique(
+                titre_acces_modifie=self.titre_acces_modifie,
+                titre_acces_deja_selectionnes=self.titre_acces_deja_selectionnes,
+            ),
+            ShouldTitresAccesEtreExperiencesNonAcademiquesSiSelectionExperienceNonAcademique(
+                titre_acces_modifie=self.titre_acces_modifie,
+                titre_acces_deja_selectionnes=self.titre_acces_deja_selectionnes,
             ),
         ]

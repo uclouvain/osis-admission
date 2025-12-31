@@ -200,6 +200,11 @@ msgstr ""
 msgid "A new version of the analysis folder has been generated."
 msgstr ""
 
+msgid ""
+"A non-academic experience may only be selected as an access title only if "
+"all access titles are also non-academic."
+msgstr ""
+
 msgid "A or B card"
 msgstr ""
 
@@ -1477,9 +1482,6 @@ msgid ""
 msgstr ""
 
 msgid "Communication to the candidate about additional trainings"
-msgstr ""
-
-msgid "Communication to the candidate about additional trainings:"
 msgstr ""
 
 msgid "Communication with Host Hospitals"
@@ -3523,6 +3525,11 @@ msgstr ""
 msgid ""
 "Identity document proving the long-term stay in a member state of the "
 "European Union"
+msgstr ""
+
+msgid ""
+"If an academic experience is selected as an access title, no other "
+"experience may be selected."
 msgstr ""
 
 msgid ""

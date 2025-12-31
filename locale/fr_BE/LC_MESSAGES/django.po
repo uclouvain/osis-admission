@@ -247,6 +247,11 @@ msgstr ""
 msgid "A new version of the analysis folder has been generated."
 msgstr "Une nouvelle version du dossier d'analyse a été générée."
 
+msgid ""
+"A non-academic experience may only be selected as an access title only if "
+"all access titles are also non-academic."
+msgstr "Une expérience non-académique peut être sélectionnée comme titre d'accès uniquement si tous les titres d'accès sont également non-académiques."
+
 msgid "A or B card"
 msgstr "Carte A ou B"
 
@@ -1604,9 +1609,6 @@ msgstr ""
 
 msgid "Communication to the candidate about additional trainings"
 msgstr "Autre communication au candidat à propos des compléments"
-
-msgid "Communication to the candidate about additional trainings:"
-msgstr "Autre communication au candidat à propos des compléments :"
 
 msgid "Communication with Host Hospitals"
 msgstr "Communication avec les Hôpitaux d'Accueil"
@@ -3908,6 +3910,11 @@ msgstr ""
 "l’Union européenne"
 
 msgid ""
+"If an academic experience is selected as an access title, no other "
+"experience may be selected."
+msgstr "Si une expérience académique est sélectionnée comme titre d'accès, aucune autre expérience ne peut être sélectionnée"
+
+msgid ""
 "If applicable, upload a language proficiency certificate in the format "
 "required by the specific provisions of your PhD committee."
 msgstr ""
@@ -5529,7 +5536,9 @@ msgstr ""
 msgid ""
 "Please note that the academic year %(year)s begins on %(start_date)s and "
 "ends on %(end_date)s."
-msgstr "Veuillez noter que l'année académique %(year)s débute le %(start_date)s et se termine le %(end_date)s."
+msgstr ""
+"Veuillez noter que l'année académique %(year)s débute le %(start_date)s et "
+"se termine le %(end_date)s."
 
 #, python-format
 msgid "Please note that the first term begins on %(date)s."
@@ -6807,7 +6816,9 @@ msgstr "Taille du texte"
 msgid ""
 "The \"Sufficient\" status requires the equivalence information to be "
 "specified."
-msgstr "Le passage à l'état \"Suffisant\" nécessite que les informations sur l'équivalence soient remplies."
+msgstr ""
+"Le passage à l'état \"Suffisant\" nécessite que les informations sur "
+"l'équivalence soient remplies."
 
 msgid ""
 "The \"doctoral training\" must be completed before submitting the defense "
@@ -8856,6 +8867,3 @@ msgstr "{items} types sur {total}"
 #, python-brace-format
 msgid "{obj.dates_formatees} : {obj.fonction} at {obj.employeur}"
 msgstr "{obj.dates_formatees} : {obj.fonction} à {obj.employeur}"
-
-#~ msgid "(Expected) graduation date (signed diploma)"
-#~ msgstr "Date (prévue) de délivrance du diplôme (diplôme signé)"
