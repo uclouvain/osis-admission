@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
 from typing import List, Optional
 
 from admission.ddd.admission.doctorat.preparation.domain.service.verifier_curriculum import (
@@ -77,12 +76,6 @@ from admission.ddd.admission.shared_kernel.enums.valorisation_experience import 
 from base.models.enums.education_group_types import TrainingType
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
     AcademicYear,
-)
-from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import (
-    GetCurrentAcademicYear,
-)
-from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import (
-    IAcademicYearRepository,
 )
 from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
 from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
@@ -208,7 +201,12 @@ class ProfilCandidat(interface.DomainService):
         profil_candidat_translator: 'IProfilCandidatTranslator',
         formation: Formation,
     ) -> None:
-        examen = profil_candidat_translator.get_examen(uuid_proposition, matricule, formation.entity_id.sigle, formation.entity_id.annee)
+        examen = profil_candidat_translator.get_examen(
+            uuid_proposition,
+            matricule,
+            formation.entity_id.sigle,
+            formation.entity_id.annee,
+        )
 
         ExamenValidatorList(
             requis=examen.requis,
@@ -241,6 +239,7 @@ class ProfilCandidat(interface.DomainService):
             experiences_academiques=curriculum.experiences_academiques,
             experiences_academiques_incompletes=experiences_academiques_incompletes,
             annee_diplome_etudes_secondaires=curriculum.annee_diplome_etudes_secondaires,
+            annee_alternative_diplome_etudes_secondaires=curriculum.annee_alternative_diplome_etudes_secondaires,
             annee_derniere_inscription_ucl=curriculum.annee_derniere_inscription_ucl,
             fichier_pdf=curriculum_pdf,
             experiences_non_academiques=curriculum.experiences_non_academiques,
@@ -270,6 +269,7 @@ class ProfilCandidat(interface.DomainService):
             experiences_academiques=curriculum.experiences_academiques,
             experiences_academiques_incompletes=experiences_academiques_incompletes,
             annee_diplome_etudes_secondaires=curriculum.annee_diplome_etudes_secondaires,
+            annee_alternative_diplome_etudes_secondaires=curriculum.annee_alternative_diplome_etudes_secondaires,
             annee_derniere_inscription_ucl=curriculum.annee_derniere_inscription_ucl,
             fichier_pdf=proposition.curriculum,
             experiences_non_academiques=curriculum.experiences_non_academiques,
@@ -314,6 +314,7 @@ class ProfilCandidat(interface.DomainService):
             annee_precedent_formation=annee_precedent_formation,
             experiences_academiques=curriculum.experiences_academiques,
             annee_diplome_etudes_secondaires=curriculum.annee_diplome_etudes_secondaires,
+            annee_alternative_diplome_etudes_secondaires=curriculum.annee_alternative_diplome_etudes_secondaires,
             experiences_non_academiques=curriculum.experiences_non_academiques,
             experiences_parcours_interne=experiences_parcours_interne,
             verification_experiences_completees=verification_experiences_completees,
@@ -400,6 +401,7 @@ class ProfilCandidat(interface.DomainService):
             annee_precedent_formation=annee_precedent_formation,
             experiences_academiques=curriculum.experiences_academiques,
             annee_diplome_etudes_secondaires=curriculum.annee_diplome_etudes_secondaires,
+            annee_alternative_diplome_etudes_secondaires=curriculum.annee_alternative_diplome_etudes_secondaires,
             experiences_non_academiques=curriculum.experiences_non_academiques,
             experiences_parcours_interne=experiences_parcours_interne,
             verification_experiences_completees=verification_experiences_completees,
