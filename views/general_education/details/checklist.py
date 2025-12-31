@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -40,9 +40,8 @@ from django.urls import reverse
 from django.utils import timezone, translation
 from django.utils.formats import date_format
 from django.utils.functional import cached_property
-from django.utils.translation import gettext
+from django.utils.translation import gettext, ngettext, override, pgettext
 from django.utils.translation import gettext_lazy as _
-from django.utils.translation import ngettext, override, pgettext
 from django.views.generic import FormView, TemplateView
 from django.views.generic.base import RedirectView, View
 from django_htmx.http import HttpResponseClientRefresh
@@ -1310,10 +1309,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             tokens = {
                 "admission_reference": self.proposition.reference,
                 "candidate": (
-                    (
-                        f"{self.proposition.profil_soumis_candidat.prenom} "
-                        f"{self.proposition.profil_soumis_candidat.nom}"
-                    )
+                    (f"{self.proposition.profil_soumis_candidat.prenom} {self.proposition.profil_soumis_candidat.nom}")
                     if self.proposition.profil_soumis_candidat
                     else ""
                 ),
@@ -2202,7 +2198,9 @@ class PastExperiencesAccessTitleView(
                 )
             )
 
-        except BusinessException as exception:
+        except (MultipleBusinessExceptions, BusinessException) as exception:
+            if isinstance(exception, MultipleBusinessExceptions):
+                exception = exception.exceptions.pop()
             self.message_on_failure = exception.message
             self.checked = not self.checked
             return super().form_invalid(form)
@@ -3169,7 +3167,6 @@ class ChecklistView(
         }
 
     def get_context_data(self, **kwargs):
-
         context = super().get_context_data(**kwargs)
         if not self.request.htmx:
             # Retrieve data related to the proposition

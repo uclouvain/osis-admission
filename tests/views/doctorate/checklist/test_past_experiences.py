@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
 import datetime
 import json
 import uuid
+from functools import partial
 from unittest.mock import patch
 from uuid import UUID
 
@@ -54,15 +55,17 @@ from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces im
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     OngletsDemande,
 )
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
-    OngletsDemande,
-)
-from admission.forms.admission.checklist import PastExperiencesAdmissionAccessTitleForm
 from admission.models import DoctorateAdmission
-from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences, \
-    AdmissionProfessionalValuatedExperiences
+from admission.models.valuated_epxeriences import (
+    AdmissionEducationalValuatedExperiences,
+    AdmissionProfessionalValuatedExperiences,
+)
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.curriculum import ProfessionalExperienceFactory
+from admission.tests.factories.curriculum import (
+    EducationalExperienceFactory,
+    EducationalExperienceYearFactory,
+    ProfessionalExperienceFactory,
+)
 from admission.tests.factories.doctorate import DoctorateFactory
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import (
@@ -268,9 +271,9 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
         )
 
         # Change the status of the experience checklist
-        self.admission.checklist['current'][OngletsChecklist.parcours_anterieur.name]['enfants'][-1][
-            'statut'
-        ] = ChoixStatutChecklist.GEST_REUSSITE.name
+        self.admission.checklist['current'][OngletsChecklist.parcours_anterieur.name]['enfants'][-1]['statut'] = (
+            ChoixStatutChecklist.GEST_REUSSITE.name
+        )
         self.admission.save()
 
         response = self.client.post(success_url, **self.default_headers)
@@ -705,6 +708,27 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
         valuated_experience.refresh_from_db()
         self.assertEqual(valuated_experience.is_access_title, True)
 
+        # Select another known and valuated experience
+        other_experience = ProfessionalExperienceFactory(person=self.candidate)
+        other_experience_valuation = AdmissionProfessionalValuatedExperiences.objects.create(
+            baseadmission=self.admission,
+            professionalexperience=other_experience,
+        )
+        response = self.client.post(
+            f'{self.url}?experience_uuid={other_experience_valuation.professionalexperience_id}'
+            f'&experience_type={TypeTitreAccesSelectionnable.EXPERIENCE_NON_ACADEMIQUE.name}',
+            **self.default_headers,
+            data={
+                'access-title': 'on',
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertDjangoMessage(response, gettext('Your data have been saved.'))
+
+        other_experience_valuation.refresh_from_db()
+        self.assertEqual(other_experience_valuation.is_access_title, True)
+
         # Unselect a known and valuated experience
         response = self.client.post(
             f'{self.url}?experience_uuid={valuated_experience.professionalexperience_id}'
@@ -838,8 +862,7 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
 
         # Select a known experience (be diploma)
         response = self.client.post(
-            f'{self.url}?experience_uuid={self.exam.uuid}'
-            f'&experience_type={TypeTitreAccesSelectionnable.EXAMENS.name}',
+            f'{self.url}?experience_uuid={self.exam.uuid}&experience_type={TypeTitreAccesSelectionnable.EXAMENS.name}',
             **self.default_headers,
             data={
                 'access-title': 'on',
@@ -854,8 +877,7 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
 
         # Unselect a known experience (be diploma)
         response = self.client.post(
-            f'{self.url}?experience_uuid={self.exam.uuid}'
-            f'&experience_type={TypeTitreAccesSelectionnable.EXAMENS.name}',
+            f'{self.url}?experience_uuid={self.exam.uuid}&experience_type={TypeTitreAccesSelectionnable.EXAMENS.name}',
             **self.default_headers,
             data={},
         )
@@ -879,7 +901,7 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
             sigle_formation="SF1",
         )
         pce_a_uuid = str(UUID(int=pce_a.pk))
-        pce_a_pae_a = InscriptionProgrammeAnnuelFactory(
+        InscriptionProgrammeAnnuelFactory(
             programme_cycle=pce_a,
             statut=StatutInscriptionProgrammAnnuel.ETUDIANT_UCL.name,
             etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
@@ -917,3 +939,132 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
         self.assertDjangoMessage(response, gettext('Your data have been saved.'))
 
         self.assertFalse(self.admission.internal_access_titles.exists())
+
+    def test_choose_an_access_title_depends_on_previously_selected_access_titles(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        error_message = gettext(
+            'The access titles can either be a single academic course or one or several non-academic activities.'
+        )
+
+        post_request = partial(
+            self.client.post,
+            **self.default_headers,
+            data={'access-title': 'on'},
+        )
+
+        other_experience = EducationalExperienceFactory(person=self.candidate, obtained_diploma=True)
+        EducationalExperienceYearFactory(educational_experience=other_experience, academic_year=self.academic_years[0])
+
+        cv_academic_experiences_urls = [
+            f'{self.url}?experience_uuid={experience.uuid}'
+            f'&experience_type={TypeTitreAccesSelectionnable.EXPERIENCE_ACADEMIQUE.name}'
+            for experience in self.educational_experiences
+        ]
+
+        cv_academic_experiences_valuations = [
+            AdmissionEducationalValuatedExperiences.objects.create(
+                baseadmission=self.admission,
+                educationalexperience=experience,
+            )
+            for experience in self.educational_experiences
+        ]
+
+        # Select a first curriculum academic experience
+        response = post_request(path=cv_academic_experiences_urls[0])
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertDjangoMessage(response, gettext('Your data have been saved.'))
+
+        cv_academic_experiences_valuations[0].refresh_from_db()
+        self.assertEqual(cv_academic_experiences_valuations[0].is_access_title, True)
+
+        # Select a second curriculum academic experience
+        response = post_request(path=cv_academic_experiences_urls[1])
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertDjangoMessage(response, error_message)
+
+        cv_academic_experiences_valuations[1].refresh_from_db()
+        self.assertEqual(cv_academic_experiences_valuations[1].is_access_title, False)
+
+        # Select the secondary studies
+        response = post_request(
+            path=f'{self.url}?experience_uuid={self.candidate.belgianhighschooldiploma.uuid}'
+            f'&experience_type={TypeTitreAccesSelectionnable.ETUDES_SECONDAIRES.name}',
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertDjangoMessage(response, error_message)
+
+        self.admission.refresh_from_db()
+        self.assertFalse(self.admission.are_secondary_studies_access_title)
+
+        # Select an exam
+        exam = ExamFactory(
+            person=self.admission.candidate,
+            year=self.academic_years[1],
+            type__education_group_years=[self.admission.training],
+        )
+
+        response = post_request(
+            path=f'{self.url}?experience_uuid={exam.uuid}&experience_type={TypeTitreAccesSelectionnable.EXAMENS.name}',
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertDjangoMessage(response, error_message)
+
+        self.admission.refresh_from_db()
+        self.assertIsNone(self.admission.is_exam_access_title)
+
+        # Select an internal experience
+        student = StudentFactory(person=self.admission.candidate)
+
+        pce_a = InscriptionProgrammeCycleFactory(
+            etudiant=student,
+            decision=DecisionResultatCycle.DISTINCTION.name,
+            sigle_formation="SF1",
+        )
+        pce_a_uuid = str(UUID(int=pce_a.pk))
+        InscriptionProgrammeAnnuelFactory(
+            programme_cycle=pce_a,
+            statut=StatutInscriptionProgrammAnnuel.ETUDIANT_UCL.name,
+            etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+            programme__root_group__academic_year=self.academic_years[0],
+            type_duree=TypeDuree.NORMAL.name,
+        )
+
+        response = self.client.post(
+            f'{self.url}?experience_uuid={pce_a_uuid}'
+            f'&experience_type={TypeTitreAccesSelectionnable.EXPERIENCE_PARCOURS_INTERNE.name}',
+            **self.default_headers,
+            data={
+                'access-title': 'on',
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertDjangoMessage(response, error_message)
+
+        internal_access_titles = self.admission.internal_access_titles.all()
+
+        self.assertEqual(len(internal_access_titles), 0)
+
+        # Select a curriculum non-academic experience
+        valuated_experience: AdmissionProfessionalValuatedExperiences = (
+            AdmissionProfessionalValuatedExperiences.objects.create(
+                baseadmission=self.admission,
+                professionalexperience=self.non_educational_experience,
+            )
+        )
+
+        response = post_request(
+            path=f'{self.url}?experience_uuid={self.non_educational_experience.uuid}'
+            f'&experience_type={TypeTitreAccesSelectionnable.EXPERIENCE_NON_ACADEMIQUE.name}',
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertDjangoMessage(response, error_message)
+
+        valuated_experience.refresh_from_db()
+        self.assertFalse(valuated_experience.is_access_title)
