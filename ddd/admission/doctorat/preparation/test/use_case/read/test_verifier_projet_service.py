@@ -107,6 +107,7 @@ from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
     AcademicYear,
     AcademicYearIdentity,
 )
+from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import AlternativeSecondairesDTO
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import (
     AcademicYearInMemoryRepository,
 )
@@ -658,6 +659,24 @@ class TestVerifierPropositionServicePourAnneesCurriculum(AdmissionTestMixin, Tes
 
     def test_should_retourner_erreur_si_dernieres_annees_curriculum_non_saisies_avec_diplome_secondaire_etranger(self):
         self.etudes_secondaires.annee_diplome_etudes_secondaires = 2017
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+        self.assertAnneesCurriculum(
+            context.exception.exceptions,
+            [
+                'De Septembre 2018 à Février 2019',
+                'De Septembre 2019 à Février 2020',
+            ],
+        )
+
+    def test_should_retourner_erreur_si_dernieres_annees_curriculum_non_saisies_avec_alternative_diplome_secondaire(
+        self,
+    ):
+        self.etudes_secondaires.alternative_secondaires = AlternativeSecondairesDTO(
+            examen_admission_premier_cycle_annee=2017,
+        )
 
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
