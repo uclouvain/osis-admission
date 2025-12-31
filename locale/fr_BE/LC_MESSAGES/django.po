@@ -7041,6 +7041,10 @@ msgstr ""
 msgid "The academic year of the period"
 msgstr "L'année académique de la période'"
 
+msgid ""
+"The access titles can either be a single academic course or one or several non-academic activities."
+msgstr "Les titres d'accès peuvent soit être une seule formation académique, soit une ou plusieurs activités non-académiques."
+
 msgid "The admission must be approved by the CDD."
 msgstr "La demande doit être approuvée par la CDD."
 

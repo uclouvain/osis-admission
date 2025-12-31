@@ -561,6 +561,7 @@ COMMAND_HANDLERS = {
     SpecifierExperienceEnTantQueTitreAccesCommand: lambda msg_bus, cmd: specifier_experience_en_tant_que_titre_acces(
         cmd,
         titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
+        experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
     ),
     RecupererTitresAccesSelectionnablesPropositionQuery: (
         lambda msg_bus, cmd: recuperer_titres_acces_selectionnables_proposition(

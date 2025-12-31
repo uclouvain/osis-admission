@@ -2205,7 +2205,9 @@ class PastExperiencesAccessTitleView(
                 )
             )
 
-        except BusinessException as exception:
+        except (MultipleBusinessExceptions, BusinessException) as exception:
+            if isinstance(exception, MultipleBusinessExceptions):
+                exception = exception.exceptions.pop()
             self.message_on_failure = exception.message
             self.checked = not self.checked
             return super().form_invalid(form)
