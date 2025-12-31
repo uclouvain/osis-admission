@@ -252,6 +252,12 @@
                 originalOption.scrollIntoView()
             }
 
+            const copySelectedOptions = function (event) {
+                // Copy the content of the selected options of the select into the clipboard
+                const selectedOptions = Array.from(event.target.selectedOptions, option => option.label);
+                navigator.clipboard.writeText(selectedOptions.join(' ')).then();
+            }
+
             // Add event listeners
 
             // On click
@@ -260,10 +266,12 @@
 
             // On key press
             fromSelectField.addEventListener('keydown', event => {
-                if (event.key === 'Enter' || event.key === 'ArrowRight') onSelectFromOption(event)
+                if (event.key === 'Enter' || event.key === 'ArrowRight') onSelectFromOption(event);
+                if (event.ctrlKey && event.key === 'c') copySelectedOptions(event);
             });
             originalSelectField.addEventListener('keydown', event => {
-                if (event.key === 'Enter' || event.key === 'ArrowLeft') onSelectOriginalOption(event)
+                if (event.key === 'Enter' || event.key === 'ArrowLeft') onSelectOriginalOption(event);
+                if (event.ctrlKey && event.key === 'c') copySelectedOptions(event);
             });
 
             // On focus out of the original select, select every visible option to submit its value at form submission
