@@ -433,6 +433,9 @@ msgctxt "admission"
 msgid "Add an academic course"
 msgstr ""
 
+msgid "Add the corresponding program manager roles (doctorate)"
+msgstr ""
+
 msgid "Add validation of prior experience (VAE)"
 msgstr ""
 
@@ -786,6 +789,11 @@ msgstr ""
 "Are you currently enrolled in the first year of a bachelor's degree at a "
 "French Community of Belgium haute école or university?"
 
+msgid ""
+"Are you sure you want to add the corresponding program managers roles in the "
+"base app based on the ones from the admission app (doctorate)?"
+msgstr ""
+
 msgid "Are you sure you want to change the status?"
 msgstr ""
 
@@ -1116,6 +1124,9 @@ msgid "CO_DIPLOMATION_901"
 msgstr "901 € - Joint degree"
 
 msgid "CSS class"
+msgstr ""
+
+msgid "CSV file"
 msgstr ""
 
 msgid "Campus"
@@ -1477,9 +1488,6 @@ msgid ""
 msgstr ""
 
 msgid "Communication to the candidate about additional trainings"
-msgstr ""
-
-msgid "Communication to the candidate about additional trainings:"
 msgstr ""
 
 msgid "Communication with Host Hospitals"
@@ -2204,6 +2212,9 @@ msgctxt "inclusive"
 msgid "Doctorate candidate"
 msgstr ""
 
+msgid "Doctorate committee members"
+msgstr ""
+
 msgctxt "admission context"
 msgid "Doctorate education"
 msgstr ""
@@ -2809,6 +2820,9 @@ msgid "Feedback from Fac/CDD"
 msgstr ""
 
 msgid "File"
+msgstr ""
+
+msgid "File with header"
 msgstr ""
 
 msgid "Filter by documents"
@@ -3569,6 +3583,15 @@ msgid ""
 msgstr ""
 
 msgid "Immediately"
+msgstr ""
+
+msgid "Import from csv file"
+msgstr ""
+
+msgid "Import of the doctorate committee members"
+msgstr ""
+
+msgid "Import of the doctorate committee members from a csv file"
 msgstr ""
 
 msgid "Important information:"
@@ -4459,6 +4482,9 @@ msgstr ""
 msgid "No document is defined as requestable. At least one is required."
 msgstr ""
 
+msgid "No education group has been found for:"
+msgstr ""
+
 msgid "No enrolment application"
 msgstr ""
 
@@ -4477,6 +4503,9 @@ msgstr ""
 msgid "No longer designate the document as to be requested"
 msgstr ""
 
+msgid "No one has been found for:"
+msgstr ""
+
 msgid "No one invited"
 msgstr ""
 
@@ -4484,6 +4513,9 @@ msgid "No payment"
 msgstr ""
 
 msgid "No pool was found to match."
+msgstr ""
+
+msgid "No role has been created."
 msgstr ""
 
 msgid "No specific profile"
@@ -4659,6 +4691,12 @@ msgstr[1] ""
 msgid "One enrolment application"
 msgid_plural ""
 "%(start_index)s to %(end_index)s of %(total_counts)s enrolment applications"
+msgstr[0] ""
+msgstr[1] ""
+
+#, python-format
+msgid "One role has been created."
+msgid_plural "%(nb)d roles have been created."
 msgstr[0] ""
 msgstr[1] ""
 
@@ -5607,6 +5645,9 @@ msgstr ""
 msgid "Role of the signing actor"
 msgstr ""
 
+msgid "Role:"
+msgstr ""
+
 msgid "Role: Candidate"
 msgstr ""
 
@@ -5837,6 +5878,9 @@ msgid "Several applications"
 msgstr ""
 
 msgid "Several applications?"
+msgstr ""
+
+msgid "Several persons have been found for:"
 msgstr ""
 
 msgid "Sex"
@@ -6377,6 +6421,9 @@ msgstr ""
 msgid "The current training is attached to this document."
 msgstr ""
 
+msgid "The data import has been completed."
+msgstr ""
+
 msgid "The decision of the signing actor"
 msgstr ""
 
@@ -6461,6 +6508,12 @@ msgstr ""
 msgid ""
 "The fac approval mail has been sent to the candidate the %(date)s by "
 "%(sender)s."
+msgstr ""
+
+msgid ""
+"The file must contain, line by line, the CDD acronym in the first column and "
+"the names (concatenation of the first name and the last name) or the global "
+"identifiers of the persons to be added for this CDD in the following columns."
 msgstr ""
 
 msgid "The first name must be less than 20 characters long."
