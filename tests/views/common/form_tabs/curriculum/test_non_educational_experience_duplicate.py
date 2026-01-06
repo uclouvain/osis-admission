@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -51,8 +51,8 @@ from admission.ddd.admission.formation_generale.domain.service.checklist import 
     Checklist,
 )
 from admission.models import ContinuingEducationAdmission, DoctorateAdmission
-from admission.models.valuated_epxeriences import AdmissionProfessionalValuatedExperiences
 from admission.models.general_education import GeneralEducationAdmission
+from admission.models.valuated_epxeriences import AdmissionProfessionalValuatedExperiences
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import (
     ContinuingEducationAdmissionFactory,
@@ -148,7 +148,9 @@ class CurriculumNonEducationalExperienceDuplicateViewTestCase(TestCase):
         )
 
         # Mock osis document api
-        self.get_several_remote_metadata_patcher = mock.patch('osis_document_components.services.get_several_remote_metadata')
+        self.get_several_remote_metadata_patcher = mock.patch(
+            'osis_document_components.services.get_several_remote_metadata'
+        )
         self.get_several_remote_metadata_patched = self.get_several_remote_metadata_patcher.start()
         self.get_several_remote_metadata_patched.return_value = {'foobar': {'name': 'certificate.pdf', 'size': 1}}
         self.addCleanup(self.get_several_remote_metadata_patcher.stop)
@@ -158,7 +160,9 @@ class CurriculumNonEducationalExperienceDuplicateViewTestCase(TestCase):
         self.get_remote_tokens_patched.return_value = {self.file_uuid_str: 'foobar'}
         self.addCleanup(self.get_remote_tokens_patcher.stop)
 
-        self.documents_remote_duplicate_patcher = mock.patch('osis_document_components.services.documents_remote_duplicate')
+        self.documents_remote_duplicate_patcher = mock.patch(
+            'osis_document_components.services.documents_remote_duplicate'
+        )
         self.documents_remote_duplicate_patched = self.documents_remote_duplicate_patcher.start()
         self.documents_remote_duplicate_patched.return_value = {self.file_uuid_str: self.duplicate_uuid_str}
         self.addCleanup(self.documents_remote_duplicate_patcher.stop)
@@ -176,7 +180,7 @@ class CurriculumNonEducationalExperienceDuplicateViewTestCase(TestCase):
     def test_duplicate_experience_from_curriculum_and_redirect(self):
         self.client.force_login(self.sic_manager_user)
 
-        admission_url = resolve_url('admission')
+        admission_url = resolve_url('admission:all-list')
         expected_url = f'{admission_url}#custom_hash'
 
         response = self.client.post(f'{self.duplicate_url}?next={admission_url}&next_hash_url=custom_hash')
@@ -291,7 +295,7 @@ class CurriculumNonEducationalExperienceDuplicateViewTestCase(TestCase):
 
         base_original_experience = professional_experiences.first()
 
-        valuations = [
+        [
             AdmissionProfessionalValuatedExperiences.objects.create(
                 baseadmission_id=admission.uuid,
                 professionalexperience_id=self.experience.uuid,
@@ -387,7 +391,7 @@ class CurriculumNonEducationalExperienceDuplicateViewTestCase(TestCase):
     def test_duplicate_experience_from_doctorate_curriculum_is_allowed_for_sic_users(self):
         self.client.force_login(self.sic_manager_user)
 
-        admission_url = resolve_url('admission')
+        admission_url = resolve_url('admission:all-list')
         expected_url = f'{admission_url}#custom_hash'
 
         response = self.client.post(f'{self.duplicate_url}?next={admission_url}&next_hash_url=custom_hash')
