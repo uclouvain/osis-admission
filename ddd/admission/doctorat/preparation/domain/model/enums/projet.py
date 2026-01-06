@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -136,6 +136,16 @@ STATUTS_PROPOSITION_DOCTORALE_TERMINEE = {
     ChoixStatutPropositionDoctorale.INSCRIPTION_REFUSEE.name,
     ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
 }
+
+
+# Le gestionnaire FAC ou SIC à la main hors inscription autorisée
+STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_GESTIONNAIRE = (
+    STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD
+    | STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_SIC
+    - {
+        ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
+    }
+)
 
 
 class ChoixCommissionProximiteCDEouCLSM(ChoiceEnum):

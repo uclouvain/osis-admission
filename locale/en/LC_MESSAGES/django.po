@@ -1459,6 +1459,10 @@ msgstr ""
 msgid "Cleaned"
 msgstr ""
 
+msgctxt "plural"
+msgid "Cleaned"
+msgstr ""
+
 msgid "Clear the reason"
 msgstr ""
 
@@ -6255,6 +6259,21 @@ msgid "Text size"
 msgstr ""
 
 msgid ""
+"The \"Personal data\" checklist tab must be in the \"Cleaned\" status in "
+"order to do this action."
+msgstr ""
+
+msgid ""
+"The \"Personal data\" checklist tab must be in the \"To be processed\" "
+"status in order to do this action."
+msgstr ""
+
+msgid ""
+"The \"Personal data\" checklist tab must not be in the \"Validated\" status "
+"in order to do this action."
+msgstr ""
+
+msgid ""
 "The \"Sufficient\" status requires the equivalence information to be "
 "specified."
 msgstr ""
@@ -7263,6 +7282,10 @@ msgid "Validated"
 msgstr ""
 
 msgctxt "decision-checklist"
+msgid "Validated"
+msgstr ""
+
+msgctxt "plural"
 msgid "Validated"
 msgstr ""
 

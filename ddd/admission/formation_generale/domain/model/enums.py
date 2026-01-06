@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -148,6 +148,15 @@ STATUTS_PROPOSITION_GENERALE_SOUMISE = (
 STATUTS_PROPOSITION_GENERALE_SOUMISE_HORS_FRAIS_DOSSIER = (
     set(ChoixStatutPropositionGenerale.get_names())
     - STATUTS_PROPOSITION_GENERALE_NON_SOUMISE_OU_FRAIS_DOSSIER_EN_ATTENTE
+)
+
+# Le gestionnaire FAC ou SIC à la main hors inscription autorisée
+STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_GESTIONNAIRE = (
+    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC
+    | STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC
+    - {
+        ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name,
+    }
 )
 
 

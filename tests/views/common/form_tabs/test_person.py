@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@ from django.shortcuts import resolve_url
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils.http import urlencode
+from osis_history.models import HistoryEntry
 
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
     ENTITY_CDE,
@@ -203,6 +204,11 @@ class AdmissionPersonFormTestCase(TestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
+        self.general_admission.status = ChoixStatutPropositionGenerale.CONFIRMEE.name
+        self.doctorate_admission.status = ChoixStatutPropositionDoctorale.CONFIRMEE.name
+        self.general_admission.save(update_fields=['status'])
+        self.doctorate_admission.save(update_fields=['status'])
+
     def test_already_registered_field_initialization(self):
         form = AdmissionPersonForm(
             instance=PersonFactory(
@@ -254,15 +260,22 @@ class AdmissionPersonFormTestCase(TestCase):
     def test_general_person_form_on_get_program_manager(self):
         self.client.force_login(user=self.general_program_manager_user)
 
-        response = self.client.get(self.general_url)
+        self.general_admission.status = ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC.name
+        self.general_admission.save()
 
+        response = self.client.get(self.general_url)
         self.assertEqual(response.status_code, 403)
 
-    def test_general_person_form_on_post_program_manager_is_forbidden(self):
-        self.client.force_login(user=self.general_program_manager_user)
+        self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
+        self.general_admission.save()
 
-        response = self.client.post(self.general_url, self.form_data)
+        response = self.client.get(self.general_url)
+        self.assertEqual(response.status_code, 200)
 
+        self.general_admission.checklist['current']['donnees_personnelles']['statut'] = 'GEST_REUSSITE'
+        self.general_admission.save()
+
+        response = self.client.get(self.general_url)
         self.assertEqual(response.status_code, 403)
 
     def test_general_person_form_on_get(self):
@@ -313,6 +326,11 @@ class AdmissionPersonFormTestCase(TestCase):
 
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+
+        historic_entries = HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid)
+        self.assertEqual(len(historic_entries), 1)
+
+        self.assertCountEqual(historic_entries[0].tags, ['proposition', 'identification', 'modification'])
 
     def test_general_person_form_post_without_country_of_citizenship(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -448,7 +466,7 @@ class AdmissionPersonFormTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-        continuing_admission = ContinuingEducationAdmissionFactory(
+        ContinuingEducationAdmissionFactory(
             candidate=self.continuing_admission.candidate,
             status=ChoixStatutPropositionContinue.CONFIRMEE.name,
         )
@@ -468,7 +486,7 @@ class AdmissionPersonFormTestCase(TestCase):
 
         doctorate_admission.delete()
 
-        general_admission = GeneralEducationAdmissionFactory(
+        GeneralEducationAdmissionFactory(
             candidate=self.continuing_admission.candidate,
             status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
         )
@@ -484,7 +502,7 @@ class AdmissionPersonFormTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-        continuing_admission = ContinuingEducationAdmissionFactory(
+        ContinuingEducationAdmissionFactory(
             candidate=self.continuing_admission.candidate,
             status=ChoixStatutPropositionContinue.CONFIRMEE.name,
         )
@@ -504,7 +522,7 @@ class AdmissionPersonFormTestCase(TestCase):
 
         doctorate_admission.delete()
 
-        general_admission = GeneralEducationAdmissionFactory(
+        GeneralEducationAdmissionFactory(
             candidate=self.continuing_admission.candidate,
             status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
         )
@@ -565,8 +583,22 @@ class AdmissionPersonFormTestCase(TestCase):
     def test_doctorate_person_form_on_get_program_manager(self):
         self.client.force_login(user=self.doctorate_program_manager_user)
 
-        response = self.client.get(self.doctorate_url)
+        self.doctorate_admission.status = ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_FAC.name
+        self.doctorate_admission.save()
 
+        response = self.client.get(self.doctorate_url)
+        self.assertEqual(response.status_code, 403)
+
+        self.doctorate_admission.status = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name
+        self.doctorate_admission.save()
+
+        response = self.client.get(self.doctorate_url)
+        self.assertEqual(response.status_code, 200)
+
+        self.doctorate_admission.checklist['current']['donnees_personnelles']['statut'] = 'GEST_REUSSITE'
+        self.doctorate_admission.save()
+
+        response = self.client.get(self.doctorate_url)
         self.assertEqual(response.status_code, 403)
 
     def test_doctorate_person_form_on_get_sic_manager(self):
@@ -651,12 +683,3 @@ class AdmissionPersonFormTestCase(TestCase):
         self.client.force_login(user=self.sic_manager_user)
         response = self.client.post(self.doctorate_url, {})
         self.assertEqual(response.status_code, 200)
-
-    def test_doctorate_program_manager_is_forbidden(self):
-        self.client.force_login(user=self.doctorate_program_manager_user)
-
-        response = self.client.get(self.doctorate_url)
-        self.assertEqual(response.status_code, 403)
-
-        response = self.client.post(self.doctorate_url)
-        self.assertEqual(response.status_code, 403)

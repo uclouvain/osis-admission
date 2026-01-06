@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -36,6 +36,9 @@ from admission.auth.predicates.common import (
     is_part_of_education_group,
     is_sent_to_epc,
     past_experiences_checklist_tab_is_not_sufficient,
+    personal_data_checklist_status_is_cleaned,
+    personal_data_checklist_status_is_not_validated,
+    personal_data_checklist_status_is_to_be_processed,
     workflow_injection_signaletique_en_cours,
 )
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
@@ -87,13 +90,20 @@ class ProgramManager(EducationGroupRoleModel):
             # Profile
             'admission.view_admission_person': is_part_of_education_group,
             'admission.change_admission_person': is_part_of_education_group
-            & continuing.in_manager_status
+            & (
+                general.in_manager_status & personal_data_checklist_status_is_not_validated
+                | continuing.in_manager_status & ~candidate_has_other_doctorate_or_general_admissions
+                | doctorate.in_manager_status & personal_data_checklist_status_is_not_validated
+            )
             & ~is_sent_to_epc
-            & ~workflow_injection_signaletique_en_cours
-            & ~candidate_has_other_doctorate_or_general_admissions,
+            & ~workflow_injection_signaletique_en_cours,
             'admission.view_admission_coordinates': is_part_of_education_group,
             'admission.change_admission_coordinates': is_part_of_education_group
-            & continuing.in_manager_status
+            & (
+                general.in_manager_status & personal_data_checklist_status_is_not_validated
+                | continuing.in_manager_status
+                | doctorate.in_manager_status & personal_data_checklist_status_is_not_validated
+            )
             & ~is_sent_to_epc
             & ~workflow_injection_signaletique_en_cours,
             'admission.view_admission_secondary_studies': is_part_of_education_group,
@@ -187,6 +197,14 @@ class ProgramManager(EducationGroupRoleModel):
             'admission.change_checklist': is_part_of_education_group
             & continuing.is_continuing
             & continuing.is_submitted
+            & ~is_sent_to_epc,
+            'admission.change_personal_data_checklist_status_to_be_processed': is_part_of_education_group
+            & (general.in_manager_status | doctorate.in_manager_status)
+            & personal_data_checklist_status_is_cleaned
+            & ~is_sent_to_epc,
+            'admission.change_personal_data_checklist_status_cleaned': is_part_of_education_group
+            & (general.in_manager_status | doctorate.in_manager_status)
+            & personal_data_checklist_status_is_to_be_processed
             & ~is_sent_to_epc,
             'admission.cancel_admission_iufc': is_part_of_education_group
             & continuing.is_submitted
