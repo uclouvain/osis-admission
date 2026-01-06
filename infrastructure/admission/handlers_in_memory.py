@@ -43,7 +43,7 @@ from admission.infrastructure.admission.shared_kernel.repository.in_memory.gesti
     GestionnaireInMemoryRepository,
 )
 from admission.infrastructure.admission.shared_kernel.repository.in_memory.titre_acces_selectionnable import (
-    TitreAccesSelectionnableInMemoryRepository,
+    TitreAccesSelectionnableInMemoryRepositoryFactory,
 )
 from infrastructure.shared_kernel.profil.domain.service.in_memory.parcours_interne import (
     ExperienceParcoursInterneInMemoryTranslator,
@@ -51,7 +51,7 @@ from infrastructure.shared_kernel.profil.domain.service.in_memory.parcours_inter
 
 _emplacement_document_repository = emplacement_document_in_memory_repository
 _profil_candidat_translator = ProfilCandidatInMemoryTranslator()
-_titre_acces_selectionnable_repository = TitreAccesSelectionnableInMemoryRepository()
+_titre_acces_selectionnable_repository = TitreAccesSelectionnableInMemoryRepositoryFactory()
 _experience_parcours_interne_translator = ExperienceParcoursInterneInMemoryTranslator()
 _gestionnaire_repository = GestionnaireInMemoryRepository()
 

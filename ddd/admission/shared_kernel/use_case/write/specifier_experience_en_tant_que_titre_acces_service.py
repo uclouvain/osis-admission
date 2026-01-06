@@ -23,11 +23,11 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.shared_kernel.commands import SpecifierExperienceEnTantQueTitreAccesCommand
 from admission.ddd.admission.shared_kernel.domain.builder.titre_acces_selectionnable_builder import (
     TitreAccesSelectionnableBuilder,
 )
+from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import (
     TitreAccesSelectionnableIdentity,
 )

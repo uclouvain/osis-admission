@@ -7,7 +7,13 @@ from django.db import migrations
 def ajout_au_group_program_manager(apps, schema_editor):
     if settings.TESTING:
         return
-    ContinuingEducationTrainingManager = apps.get_model('continuing_education', 'ContinuingEducationTrainingManager')
+    try:
+        ContinuingEducationTrainingManager = apps.get_model(
+            'continuing_education',
+            'ContinuingEducationTrainingManager',
+        )
+    except LookupError:
+        return
     Group = apps.get_model('auth', 'Group')
     group, _ = Group.objects.get_or_create(name='admission_program_managers')
     gestionnaires_iufc = ContinuingEducationTrainingManager.objects.all().select_related(
@@ -18,8 +24,8 @@ def ajout_au_group_program_manager(apps, schema_editor):
     for gestionnaire in gestionnaires_iufc:
         gestionnaire.person.user.groups.add(group)
 
-class Migration(migrations.Migration):
 
+class Migration(migrations.Migration):
     dependencies = [
         ('admission', '0226_initialize_iufc_specific_questions'),
     ]

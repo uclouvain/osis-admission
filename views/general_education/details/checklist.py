@@ -87,7 +87,6 @@ from admission.ddd.admission.formation_generale.commands import (
     SpecifierDerogationFinancabiliteCommand,
     SpecifierDerogationVraeFinancabiliteCommand,
     SpecifierEquivalenceTitreAccesEtrangerPropositionCommand,
-    SpecifierExperienceEnTantQueTitreAccesCommand,
     SpecifierFinancabiliteNonConcerneeCommand,
     SpecifierFinancabiliteRegleCommand,
     SpecifierInformationsAcceptationInscriptionParSicCommand,
@@ -131,6 +130,7 @@ from admission.ddd.admission.shared_kernel.commands import (
     ListerToutesDemandesQuery,
     RechercherParcoursAnterieurQuery,
     RecupererInformationsDestinataireQuery,
+    SpecifierExperienceEnTantQueTitreAccesCommand,
 )
 from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
     EtatAuthentificationParcours,
