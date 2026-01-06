@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -32,11 +32,11 @@ import freezegun
 from django.test import TestCase
 from django.utils.translation import gettext
 
-from admission.ddd.admission.formation_generale.commands import (
-    RecupererTitresAccesSelectionnablesPropositionQuery,
-)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.shared_kernel.commands import (
+    RecupererTitresAccesSelectionnablesPropositionQuery,
 )
 from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import (
     TypeTitreAccesSelectionnable,
@@ -48,11 +48,11 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     OngletsDemande,
 )
 from admission.models import GeneralEducationAdmission
+from admission.models.exam import AdmissionExam
 from admission.models.valuated_epxeriences import (
     AdmissionEducationalValuatedExperiences,
     AdmissionProfessionalValuatedExperiences,
 )
-from admission.models.exam import AdmissionExam
 from admission.tests.factories.curriculum import (
     EducationalExperienceFactory,
     EducationalExperienceYearFactory,
@@ -618,7 +618,7 @@ class GetAccessTitlesViewTestCase(TestCase):
             sigle_formation="SF1",
         )
         pce_a_uuid = str(UUID(int=pce_a.pk))
-        pce_a_pae_a = InscriptionProgrammeAnnuelFactory(
+        InscriptionProgrammeAnnuelFactory(
             programme_cycle=pce_a,
             statut=StatutInscriptionProgrammAnnuel.ETUDIANT_UCL.name,
             etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
@@ -655,15 +655,15 @@ class GetAccessTitlesViewTestCase(TestCase):
             decision='',
             sigle_formation="SF3",
         )
-        pce_c_uuid = str(UUID(int=pce_c.pk))
-        pce_c_pae_a = InscriptionProgrammeAnnuelFactory(
+        str(UUID(int=pce_c.pk))
+        InscriptionProgrammeAnnuelFactory(
             programme_cycle=pce_c,
             statut='',
             etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
             programme__root_group__academic_year=self.academic_years[0],
             type_duree=TypeDuree.NORMAL.name,
         )
-        pce_c_pae_b = InscriptionProgrammeAnnuelFactory(
+        InscriptionProgrammeAnnuelFactory(
             programme_cycle=pce_c,
             statut=StatutInscriptionProgrammAnnuel.INTERUNIVERSITAIRE.name,
             etat_inscription=EtatInscriptionFormation.FIN_DE_CYCLE.name,
@@ -678,7 +678,7 @@ class GetAccessTitlesViewTestCase(TestCase):
             sigle_formation="SF4",
         )
         pce_d_uuid = str(UUID(int=pce_d.pk))
-        pce_d_pae_a = InscriptionProgrammeAnnuelFactory(
+        InscriptionProgrammeAnnuelFactory(
             programme_cycle=pce_d,
             statut='',
             etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
@@ -693,7 +693,7 @@ class GetAccessTitlesViewTestCase(TestCase):
             sigle_formation="SF5",
         )
         pce_e_uuid = str(UUID(int=pce_e.pk))
-        pce_e_pae_a = InscriptionProgrammeAnnuelFactory(
+        InscriptionProgrammeAnnuelFactory(
             programme_cycle=pce_e,
             statut='',
             etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
@@ -708,8 +708,8 @@ class GetAccessTitlesViewTestCase(TestCase):
             decision='',
             sigle_formation="SF6",
         )
-        pce_f_uuid = str(UUID(int=pce_f.pk))
-        pce_f_pae_a = InscriptionProgrammeAnnuelFactory(
+        str(UUID(int=pce_f.pk))
+        InscriptionProgrammeAnnuelFactory(
             programme_cycle=pce_f,
             statut='',
             etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,

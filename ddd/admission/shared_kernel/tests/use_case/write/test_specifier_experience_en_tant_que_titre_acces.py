@@ -26,10 +26,10 @@
 
 from django.test import SimpleTestCase
 
-from admission.ddd.admission.formation_generale.commands import (
+from admission.ddd.admission.formation_generale.test.factory.titre_acces import TitreAccesSelectionnableFactory
+from admission.ddd.admission.shared_kernel.commands import (
     SpecifierExperienceEnTantQueTitreAccesCommand,
 )
-from admission.ddd.admission.formation_generale.test.factory.titre_acces import TitreAccesSelectionnableFactory
 from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import TypeTitreAccesSelectionnable
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     TitresAccesEtreExperiencesNonAcademiquesOuUneExperienceAcademiqueException,
