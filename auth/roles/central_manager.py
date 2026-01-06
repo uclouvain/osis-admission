@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -34,15 +34,13 @@ from admission.auth.predicates.common import (
     candidate_has_other_doctorate_or_general_admissions,
     has_scope,
     is_debug,
-)
-from admission.auth.predicates.common import (
-    is_entity_manager as is_entity_manager_without_scope,
-)
-from admission.auth.predicates.common import (
     is_scoped_entity_manager,
     is_sent_to_epc,
     past_experiences_checklist_tab_is_not_sufficient,
     workflow_injection_signaletique_en_cours,
+)
+from admission.auth.predicates.common import (
+    is_entity_manager as is_entity_manager_without_scope,
 )
 from admission.auth.scope import Scope
 from osis_role.contrib.models import EntityRoleModel
@@ -198,6 +196,12 @@ class CentralManager(EntityRoleModel):
             & (general.is_submitted | continuing.is_submitted | doctorate.is_submitted),
             'admission.change_checklist': is_entity_manager
             & (general.in_sic_status | continuing.is_submitted | doctorate.in_sic_status)
+            & ~is_sent_to_epc,
+            'admission.change_personal_data_checklist_status_to_be_processed': is_entity_manager
+            & (general.in_sic_status | doctorate.in_sic_status)
+            & ~is_sent_to_epc,
+            'admission.change_personal_data_checklist_status_cleaned': is_entity_manager
+            & (general.in_sic_status | doctorate.in_sic_status)
             & ~is_sent_to_epc,
             'admission.change_checklist_iufc': is_entity_manager & continuing.is_submitted & ~is_sent_to_epc,
             'admission.cancel_admission_iufc': is_entity_manager & continuing.is_submitted,

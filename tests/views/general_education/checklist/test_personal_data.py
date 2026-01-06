@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -64,13 +64,67 @@ class PersonalDataChangeStatusViewTestCase(TestCase):
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
 
-    def test_change_the_checklist_status_is_forbidden_with_program_manager_user(self):
+    def test_change_the_checklist_status_with_program_manager_user(self):
         self.client.force_login(user=self.program_manager.user)
 
         url = resolve_url(self.base_url, uuid=self.admission.uuid, status=ChoixStatutChecklist.INITIAL_CANDIDAT.name)
 
         response = self.client.post(url, **self.default_headers)
         self.assertEqual(response.status_code, 403)
+
+        self.admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
+        self.admission.save()
+
+        # Cleaned
+        status = self.checklist_statuses['TOILETTEES']
+        url = resolve_url(self.base_url, uuid=self.admission.uuid, status=status.statut.name)
+
+        response = self.client.post(
+            url,
+            data=status.extra,
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.admission.refresh_from_db()
+
+        self.assertEqual(
+            self.admission.checklist['current'][OngletsChecklist.donnees_personnelles.name]['statut'],
+            ChoixStatutChecklist.GEST_EN_COURS.name,
+        )
+        self.assertEqual(self.admission.checklist['current'][OngletsChecklist.donnees_personnelles.name]['extra'], {})
+
+        # To be processed
+        status = self.checklist_statuses['A_TRAITER']
+        url = resolve_url(self.base_url, uuid=self.admission.uuid, status=status.statut.name)
+
+        response = self.client.post(
+            url,
+            data=status.extra,
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.admission.refresh_from_db()
+
+        self.assertEqual(
+            self.admission.checklist['current'][OngletsChecklist.donnees_personnelles.name]['statut'],
+            ChoixStatutChecklist.INITIAL_CANDIDAT.name,
+        )
+        self.assertEqual(self.admission.checklist['current'][OngletsChecklist.donnees_personnelles.name]['extra'], {})
+
+        # Unauthorized statuses
+        for status_name in ['A_COMPLETER', 'FRAUDEUR', 'VALIDEES']:
+            status = self.checklist_statuses[status_name]
+            url = resolve_url(self.base_url, uuid=self.admission.uuid, status=status.statut.name)
+
+            response = self.client.post(
+                url,
+                data=status.extra,
+                **self.default_headers,
+            )
+
+            self.assertEqual(response.status_code, 403)
 
     def test_change_the_checklist_status_with_central_manager_user(self):
         self.client.force_login(user=self.central_manager.user)
@@ -91,6 +145,25 @@ class PersonalDataChangeStatusViewTestCase(TestCase):
         self.assertEqual(
             self.admission.checklist['current'][OngletsChecklist.donnees_personnelles.name]['statut'],
             ChoixStatutChecklist.INITIAL_CANDIDAT.name,
+        )
+        self.assertEqual(self.admission.checklist['current'][OngletsChecklist.donnees_personnelles.name]['extra'], {})
+
+        # Cleaned
+        status = self.checklist_statuses['TOILETTEES']
+        url = resolve_url(self.base_url, uuid=self.admission.uuid, status=status.statut.name)
+
+        response = self.client.post(
+            url,
+            data=status.extra,
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.admission.refresh_from_db()
+
+        self.assertEqual(
+            self.admission.checklist['current'][OngletsChecklist.donnees_personnelles.name]['statut'],
+            ChoixStatutChecklist.GEST_EN_COURS.name,
         )
         self.assertEqual(self.admission.checklist['current'][OngletsChecklist.donnees_personnelles.name]['extra'], {})
 
