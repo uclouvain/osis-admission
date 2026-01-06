@@ -126,7 +126,6 @@ class ValorisationEtudesSecondairesDTOFactory(factory.Factory):
 
 
 class EtudesSecondairesDTOFactory(factory.Factory):
-
     valorisation = factory.SubFactory(ValorisationEtudesSecondairesDTOFactory)
 
     class Meta:
@@ -216,6 +215,7 @@ class CurriculumDTOFactory(factory.Factory):
     experiences_academiques: List[ExperienceAcademiqueDTOFactory] = []
     annee_derniere_inscription_ucl = factory.Faker('year')
     annee_diplome_etudes_secondaires = factory.Faker('year')
+    annee_alternative_diplome_etudes_secondaires = factory.Faker('year')
     annee_minimum_a_remplir = factory.Faker('year')
 
 
