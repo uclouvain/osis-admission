@@ -62,14 +62,8 @@
   gap: 0.5em;
 }
 
-.admissionselectfilter-add-option input[type="text"] {
+.admissionselectfilter-add-option div:first-child {
   flex: 1;
-}
-
-.admissionselectfilter-add-option input[type="button"] {
-  border: 1px solid #ccc;
-  background: white;
-  color: black;
 }
 
 .hidden-option-when-filtering {

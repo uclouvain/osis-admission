@@ -436,6 +436,9 @@ msgstr ""
 msgid "Add the corresponding program manager roles (doctorate)"
 msgstr ""
 
+msgid "Add this reason"
+msgstr ""
+
 msgid "Add validation of prior experience (VAE)"
 msgstr ""
 
@@ -1437,6 +1440,9 @@ msgid "Claim cancelled on"
 msgstr ""
 
 msgid "Cleaned"
+msgstr ""
+
+msgid "Clear the reason"
 msgstr ""
 
 msgid "Clinical Research Fund (FRC)"
