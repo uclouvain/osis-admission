@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -81,19 +81,21 @@
 <body>
 <div>
   <div id="title">
-    <h1>Document annexe à l'autorisation d'inscription</h1>
+    <h1>{% translate "Appendix to enrolment authorization" %}</h1>
   </div>
 
   {% concat proposition.nom_candidat " " proposition.prenom_candidat as full_name %}
-  {% field_data "Doctorant·e" full_name inline=True %}
-  {% field_data "Noma" proposition.noma_candidat inline=True %}
+  {% field_data _("PhD student") full_name inline=True %}
+  {% field_data _("Noma") proposition.noma_candidat inline=True %}
   {% now "d/m/Y" as today_date %}
-  {% field_data "Date d'admission définitive au doctorat" today_date inline=True %}
-  {% field_data "Titre provisoire de la thèse" proposition.titre_projet inline=True %}
+  {% field_data _("Definitive PhD admission date") today_date inline=True %}
+  {% field_data _("Provisional thesis title") proposition.titre_projet inline=True %}
 
   <p>
-    La Commission doctorale de domaine a approuvé votre proposition de <span class="bold-text">promoteur·trice</span>
-    et de <span class="bold-text">comité d’accompagnement</span> constitué de la manière suivante :
+    {% blocktranslate trimmed %}
+      The PhD Field Committee has approved your proposal for a <span class="bold-text">supervisor</span> and
+      <span class="bold-text">supervisory committee</span>, composed as follows:
+    {% endblocktranslate %}
   </p>
 
   <ul>
@@ -103,7 +105,7 @@
         {% if signature.promoteur.est_externe %}
           {% display ' - ' signature.promoteur.institution ' - ' signature.promoteur.ville ' - ' signature.promoteur.pays %}
         {% endif %}
-        - Promoteur·trice
+        - {% translate "Supervisor" context "gender" %}
       </li>
     {% endfor %}
     {% for signature in groupe_supervision.signatures_membres_CA %}
@@ -112,29 +114,36 @@
         {% if signature.membre_CA.est_externe %}
           {% display ' - ' signature.membre_CA.institution ' - ' signature.membre_CA.ville ' - ' signature.membre_CA.pays %}
         {% endif %}
-        - Membre du comité d’accompagnement
+        - {% translate "CA Member" %}
       </li>
     {% endfor %}
   </ul>
 
   {% if proposition.cotutelle.cotutelle %}
     <p>
-      Vous faites votre thèse dans le cadre d’une <span class="bold-text">cotutelle</span>.
-      Veuillez noter que les procédures liées à l’établissement d’une cotutelle (accord de la CDD sur le principe de
-      la cotutelle, contacts avec l’université partenaire, envoi de la fiche d’ouverture) doivent être réalisées dans
-      les douze premiers mois suivant le démarrage de la thèse.
+    {% blocktranslate trimmed %}
+      You are writing your thesis under <span class="bold-text">joint supervision</span>.
+      Please note that the procedures involved in establishing joint supervision (CDD approval of joint supervision,
+      contact with the partner university, submission of application form) must be completed within the first 12 months
+      of starting your thesis.
+    {% endblocktranslate %}
     </p>
   {% endif %}
 
   {% if proposition.avec_complements_formation %}
     {% if proposition.complements_formation %}
       <dl>
-        <dt>Compléments de formation :</dt>
+        <dt>{% translate "Prerequisite courses:" %}</dt>
         <dd>
           <ul>
             {% for learning_unit in proposition.complements_formation %}
               <li>
-                {{ learning_unit.code }} - {{ learning_unit.full_title }}
+                {{ learning_unit.code }} -
+                {% if LANGUAGE_CODE == 'fr-be' or not learning_unit.full_title_en %}
+                  {{ learning_unit.full_title }}
+                {% else %}
+                  {{ learning_unit.full_title_en }}
+                {% endif %}
                 {% if learning_unit.credits %} ({{ learning_unit.credits }} ECTS){% endif %}
               </li>
             {% endfor %}
@@ -142,7 +151,7 @@
         </dd>
       </dl>
     {% else %}
-      {% field_data 'Compléments de formation' proposition.avec_complements_formation inline=True %}
+      {% field_data _("Prerequisite courses") proposition.avec_complements_formation inline=True %}
     {% endif %}
     {% if proposition.commentaire_complements_formation %}
       <p>{{ proposition.commentaire_complements_formation|safe }}</p>
@@ -150,23 +159,20 @@
   {% endif %}
 
   <p class="text-danger">
-    Le montant des droits d’inscription communiqué par le Service des inscriptions est déterminé en fonction de
-    votre statut.
+    {% translate "The tuition fee communicated by the Enrolment Office is based on your status." %}
   </p>
 
   <p>
-    Nous attirons votre attention sur la nécessite de respecter le délai prévu par le règlement doctoral pour la
-    présentation de votre épreuve de confirmation.
+    {% translate "We would like to draw your attention to the need to meet the deadline set out in the PhD regulations for the submission of your mid-term evaluation." %}
   </p>
 
   <p>
-    Vous trouverez sur le site de votre Commission doctorale de domaine le règlement doctoral, les dispositions
-    particulières de votre domaine, les étapes du parcours doctoral ainsi que toute autre information utile.
+    {% translate "You will find the PhD regulations, specific provisions for your field, the stages of the PhD programme and more helpful information on the website of your PhD Field Committee." %}
   </p>
 
   <div id="signature">
     <p>
-      Pour le·la président·e de CDD : {{ gestionnaire.prenom }} {{ gestionnaire.nom }} le {{ today_date }}
+      {% translate 'For the CDD Chair:' %} {{ gestionnaire.prenom }} {{ gestionnaire.nom }} {% translate 'on' %} {{ today_date }}
     </p>
   </div>
 </div>
