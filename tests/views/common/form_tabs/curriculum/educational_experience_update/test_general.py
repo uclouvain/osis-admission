@@ -1824,7 +1824,7 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
     def test_post_form_with_created_and_deleted_years_and_redirect(self):
         self.client.force_login(self.sic_manager_user)
 
-        admission_url = resolve_url('admission')
+        admission_url = resolve_url('admission:all-list')
         expected_url = f'{admission_url}#custom_hash'
         file_uuid = uuid.uuid4()
         response = self.client.post(
