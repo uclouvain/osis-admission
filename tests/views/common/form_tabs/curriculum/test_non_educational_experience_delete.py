@@ -211,7 +211,7 @@ class CurriculumNonEducationalExperienceDeleteViewTestCase(TestCase):
     def test_delete_experience_from_curriculum_and_redirect(self):
         self.client.force_login(self.sic_manager_user)
 
-        admission_url = resolve_url('admission')
+        admission_url = resolve_url('admission:all-list')
         expected_url = f'{admission_url}#custom_hash'
 
         response = self.client.delete(f'{self.delete_url}?next={admission_url}&next_hash_url=custom_hash')

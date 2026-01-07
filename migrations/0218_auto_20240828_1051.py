@@ -3,7 +3,13 @@
 from django.db import migrations
 
 def copier_gestionnaires_iufc(apps, schema_editor):
-    ContinuingEducationTrainingManager = apps.get_model('continuing_education', 'ContinuingEducationTrainingManager')
+    try:
+        ContinuingEducationTrainingManager = apps.get_model(
+            'continuing_education',
+            'ContinuingEducationTrainingManager',
+        )
+    except LookupError:
+        return
     ProgramManager = apps.get_model('admission', 'ProgramManager')
     gestionnaires_iufc = ContinuingEducationTrainingManager.objects.all().select_related(
         'training__education_group',

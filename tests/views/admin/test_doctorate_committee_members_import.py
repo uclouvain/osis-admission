@@ -70,6 +70,7 @@ class DoctorateCommitteeMembersImportViewTestCase(TestCase):
             management_entity=cls.entity_version_2a.entity,
             education_group=education_group_year_2a1.education_group,
             education_group_type__name=TrainingType.PHD.name,
+            academic_year__year=education_group_year_2a1.academic_year.year + 1,
         )
         education_group_year_2b = EducationGroupYearFactory(
             management_entity=cls.entity_version_2b.entity,

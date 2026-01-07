@@ -136,7 +136,7 @@ class CurriculumEducationalExperienceValuateViewTestCase(TestCase):
     def test_valuate_experience_from_curriculum_and_redirect(self):
         self.client.force_login(self.sic_manager_user)
 
-        admission_url = resolve_url('admission')
+        admission_url = resolve_url('admission:all-list')
         expected_url = f'{admission_url}#custom_hash'
 
         response = self.client.post(f'{self.valuate_url}?next={admission_url}&next_hash_url=custom_hash')
@@ -231,14 +231,14 @@ class CurriculumEducationalExperienceValuateViewTestCase(TestCase):
                 experience_uuid=self.experience.uuid,
             )
             + '?next='
-            + resolve_url('admission'),
+            + resolve_url('admission:all-list'),
         )
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
 
     def test_valuate_experience_from_doctorate_curriculum_is_allowed_for_sic_users(self):
         self.client.force_login(self.sic_manager_user)
 
-        admission_url = resolve_url('admission')
+        admission_url = resolve_url('admission:all-list')
         expected_url = f'{admission_url}#custom_hash'
 
         response = self.client.post(f'{self.doctorate_valuate_url}?next={admission_url}&next_hash_url=custom_hash')
