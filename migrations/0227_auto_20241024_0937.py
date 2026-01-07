@@ -7,7 +7,13 @@ from django.db import migrations
 def ajout_au_group_program_manager(apps, schema_editor):
     if settings.TESTING:
         return
-    ContinuingEducationTrainingManager = apps.get_model('continuing_education', 'ContinuingEducationTrainingManager')
+    try:
+        ContinuingEducationTrainingManager = apps.get_model(
+            'continuing_education',
+            'ContinuingEducationTrainingManager',
+        )
+    except LookupError:
+        return
     Group = apps.get_model('auth', 'Group')
     group, _ = Group.objects.get_or_create(name='admission_program_managers')
     gestionnaires_iufc = ContinuingEducationTrainingManager.objects.all().select_related(
