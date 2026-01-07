@@ -437,7 +437,7 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
     def test_general_submit_valid_form_for_other_activity_and_redirect(self):
         self.client.force_login(self.sic_manager_user)
 
-        admission_url = resolve_url('admission')
+        admission_url = resolve_url('admission:all-list')
         expected_url = f'{admission_url}#custom_hash'
 
         response = self.client.post(
