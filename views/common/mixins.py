@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,12 +24,10 @@
 #
 # ##############################################################################
 import json
-from typing import Dict, Optional, Union, List
+from typing import Dict, Optional, Union
 
 from django.contrib import messages
 from django.core.cache import cache
-from django.db.models import Value
-from django.db.models.functions import Concat
 from django.shortcuts import resolve_url
 from django.template.loader import render_to_string
 from django.utils.functional import cached_property
@@ -37,7 +35,6 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from django.views.generic.base import ContextMixin
 
-from admission.auth.roles.program_manager import ProgramManager
 from admission.constants import (
     COMMENT_TAG_FAC,
     COMMENT_TAG_GLOBAL,
@@ -71,12 +68,10 @@ from admission.ddd.admission.formation_continue.dtos.proposition import (
 )
 from admission.ddd.admission.formation_generale.commands import (
     RecupererPropositionGestionnaireQuery,
+    RecupererTitresAccesSelectionnablesPropositionQuery,
 )
 from admission.ddd.admission.formation_generale.commands import (
     RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionGeneraleQuery,
-)
-from admission.ddd.admission.formation_generale.commands import (
-    RecupererTitresAccesSelectionnablesPropositionQuery,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
@@ -112,8 +107,7 @@ from admission.utils import (
 from admission.views.list import BaseAdmissionList
 from base.models.person_merge_proposal import PersonMergeStatus
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
-from ddd.logic.gestion_des_comptes.dto.periode_soumission_ticket import PeriodeSoumissionTicketDigitDTO
-from ddd.logic.gestion_des_comptes.queries import GetPropositionFusionQuery, GetPeriodeActiveSoumissionTicketQuery
+from ddd.logic.gestion_des_comptes.queries import GetPeriodeActiveSoumissionTicketQuery, GetPropositionFusionQuery
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import PermissionRequiredMixin
 
@@ -198,18 +192,6 @@ class AdmissionViewMixin(PermissionRequiredMixin, ContextMixin):
     def current_user_name(self):
         return f'{self.request.user.person.first_name} {self.request.user.person.last_name}'
 
-    @cached_property
-    def admission_program_managers_names(self):
-        return ', '.join(
-            ProgramManager.objects.filter(
-                education_group_id=self.admission.training.education_group_id,
-            )
-            .annotate(
-                person_name=Concat('person__first_name', Value(' '), 'person__last_name'),
-            )
-            .values_list('person_name', flat=True)
-        )
-
 
 class LoadDossierViewMixin(AdmissionViewMixin):
     specific_questions_tab: Optional[Onglets] = None
@@ -281,9 +263,9 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         # Leave this test first so we are sure the other information are available.
         if self.admission.status != ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name:
             return False, "Le dossier doit être en 'Inscription autorisée'"
-        periodes_actives = message_bus_instance.invoke(
+        periodes_actives: list[PeriodeSoumissionTicketDigitDTO] = message_bus_instance.invoke(
             GetPeriodeActiveSoumissionTicketQuery()
-        )  # type: List[PeriodeSoumissionTicketDigitDTO]
+        )
         annees_ouvertes = [p.annee for p in periodes_actives]
         if annees_ouvertes and self.admission.determined_academic_year.year not in annees_ouvertes:
             return False, f"Seules les inscriptions en {annees_ouvertes} sont autorisées"
@@ -382,7 +364,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
     def get_double_check_decision_url(self) -> str:
         return resolve_url(
             'admission:services:gestion-des-comptes:double-check-decision-informations-injection-signaletique',
-            uuid=self.admission_uuid
+            uuid=self.admission_uuid,
         )
 
     def dispatch(self, request, *args, **kwargs):

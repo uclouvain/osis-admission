@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 
 import datetime
 import uuid
+from email import message_from_string
 from unittest import mock
 from unittest.mock import patch
 
@@ -35,7 +36,7 @@ from django.test import override_settings
 from django.utils.translation import gettext_lazy as _
 from gestion_des_comptes.models import HistoriqueMatriculeCompte
 from osis_history.models import HistoryEntry
-from osis_notification.models import EmailNotification, WebNotification
+from osis_notification.models import EmailNotification
 from osis_signature.enums import SignatureState
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -64,9 +65,7 @@ from admission.ddd.admission.shared_kernel.domain.service.i_elements_confirmatio
     IElementsConfirmation,
 )
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
-    NombrePropositionsSoumisesDepasseException,
     QuestionsSpecifiquesChoixFormationNonCompleteesException,
-    QuestionsSpecifiquesCurriculumNonCompleteesException,
 )
 from admission.ddd.admission.shared_kernel.enums.question_specifique import (
     Onglets,
@@ -109,6 +108,8 @@ from base.tests.factories.academic_year import AcademicYearFactory, get_current_
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
 from base.tests.factories.person import PersonFactory
+from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
+from epc.tests.factories.email_fonction_programme import EmailFonctionProgrammeFactory
 from infrastructure.financabilite.domain.service.financabilite import PASS_ET_LAS_LABEL
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.language import FrenchLanguageFactory
@@ -159,9 +160,7 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
             candidate=cls.admission.candidate,
             training__management_entity=cls.other_commission.entity,
         )
-        cls.continuing_campus = (
-            cls.continuing_education_admission.training.educationgroupversion_set.first().root_group.main_teaching_campus
-        )
+        cls.continuing_campus = cls.continuing_education_admission.training.educationgroupversion_set.first().root_group.main_teaching_campus
 
         # Users
         cls.candidate = cls.admission.candidate
@@ -969,7 +968,11 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
             status=ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
             supervision_group=self.first_invited_promoter.actor_ptr.process,
         )
-        manager = ProgramManagerRoleFactory(education_group_id=admission.training.education_group_id)
+        training_email = EmailFonctionProgrammeFactory(
+            type=TypeEmailFonctionProgramme.DESTINATAIRE_ADMISSION.name,
+            programme=admission.training.education_group,
+        )
+        ProgramManagerRoleFactory(education_group_id=admission.training.education_group_id)
 
         self.client.force_authenticate(user=self.first_candidate.user)
 
@@ -1008,7 +1011,10 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
             },
         )
         self.assertEqual(EmailNotification.objects.filter(person=admission.candidate).count(), 1)
-        self.assertEqual(EmailNotification.objects.filter(person=manager.person).count(), 1)
+        email_notification_to_manager = EmailNotification.objects.filter(person=None)
+        self.assertEqual(len(email_notification_to_manager), 1)
+        email_object = message_from_string(email_notification_to_manager[0].payload)
+        self.assertEqual(email_object['To'], training_email.email)
 
         admission_tasks = AdmissionTask.objects.filter(admission=admission).order_by('type')
         self.assertEqual(len(admission_tasks), 2)
@@ -1219,7 +1225,7 @@ class DoctoratePreAdmissionListTestCase(QueriesAssertionsMixin, CheckActionLinks
         self.assertEqual(results[0]['code_secteur_formation'], self.sector.acronym)
         self.assertEqual(results[0]['intitule_secteur_formation'], self.sector.title)
 
-        other_admission = DoctorateAdmissionFactory(
+        DoctorateAdmissionFactory(
             candidate=self.candidate,
             training=admission.training,
             status=ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -47,9 +47,6 @@ from osis_signature.enums import SignatureState
 from osis_signature.models import Actor
 from osis_signature.utils import get_signing_token
 
-from admission.admission_utils.admission_program_managers_names import (
-    get_admission_program_managers_names,
-)
 from admission.ddd import MAIL_INSCRIPTION_DEFAUT, MAIL_VERIFICATEUR_CURSUS
 from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import (
     PromoteurIdentity,
@@ -80,12 +77,14 @@ from admission.ddd.admission.shared_kernel.domain.model.formation import (
 from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import (
     IMatriculeEtudiantService,
 )
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import InformationsDestinatairePasTrouvee
 from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
     EmplacementDocumentDTO,
 )
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     StatutEmplacementDocument,
 )
+from admission.ddd.admission.shared_kernel.repository.i_email_destinataire import IEmailDestinataireRepository
 from admission.infrastructure.admission.doctorat.preparation.domain.service.doctorat import (
     DoctoratTranslator,
 )
@@ -211,9 +210,6 @@ class Notification(INotification):
         )
         common_tokens['management_entity_name'] = admission.title_entite_gestion
         common_tokens['management_entity_acronym'] = admission.sigle_entite_gestion
-        common_tokens['program_managers_names'] = get_admission_program_managers_names(
-            admission.training.education_group_id
-        )
 
         # Envoyer au doctorant
         with translation.override(candidat.language):
@@ -305,7 +301,6 @@ class Notification(INotification):
             "signataire_role": actor_role,
             'management_entity_name': admission.title_entite_gestion,
             'management_entity_acronym': admission.sigle_entite_gestion,
-            'program_managers_names': get_admission_program_managers_names(admission.training.education_group_id),
         }
         if avis.etat == ChoixEtatSignature.DECLINED.name:
             email_message = generate_email(
@@ -368,7 +363,11 @@ class Notification(INotification):
                 )
 
     @classmethod
-    def notifier_soumission(cls, proposition: Proposition) -> None:
+    def notifier_soumission(
+        cls,
+        proposition: Proposition,
+        email_destinataire_repository: IEmailDestinataireRepository,
+    ) -> None:
         admission = (
             PropositionProxy.objects.annotate_training_management_faculty()
             .annotate_with_reference()
@@ -407,9 +406,6 @@ class Notification(INotification):
         common_tokens['salutation'] = get_salutation_prefix(person=admission.candidate)
         common_tokens['management_entity_name'] = admission.title_entite_gestion
         common_tokens['management_entity_acronym'] = admission.sigle_entite_gestion
-        common_tokens['program_managers_names'] = get_admission_program_managers_names(
-            admission.training.education_group_id
-        )
 
         actors_invited = admission.supervision_group.actors.select_related('person')
         email_message = generate_email(
@@ -421,19 +417,29 @@ class Notification(INotification):
         )
         EmailNotificationHandler.create(email_message, person=admission.candidate)
 
-        # Envoyer aux gestionnaires CDD
-        for manager in get_admission_cdd_managers(admission.training.education_group_id):
-            email_message = generate_email(
-                ADMISSION_EMAIL_CONFIRM_SUBMISSION_FOR_MANAGER_DOCTORATE,
-                manager.person.language,
-                {
-                    **common_tokens,
-                    'manager_first_name': manager.person.first_name,
-                    'manager_last_name': manager.person.last_name,
-                },
-                recipients=[manager.person.email],
+        # Envoyer une notification à la CDD
+        try:
+            recipient = email_destinataire_repository.get_informations_destinataire_dto(
+                sigle_programme=proposition.formation_id.sigle,
+                annee=proposition.formation_id.annee,
+                pour_premiere_annee=False,
             )
-            EmailNotificationHandler.create(email_message, person=manager.person)
+            if not recipient.email:
+                raise InformationsDestinatairePasTrouvee
+        except InformationsDestinatairePasTrouvee:
+            return
+
+        email_message = generate_email(
+            ADMISSION_EMAIL_CONFIRM_SUBMISSION_FOR_MANAGER_DOCTORATE,
+            settings.LANGUAGE_CODE,
+            {
+                **common_tokens,
+                'manager_first_name': '',
+                'manager_last_name': '',
+            },
+            recipients=[recipient.email],
+        )
+        EmailNotificationHandler.create(email_message)
 
     @classmethod
     def notifier_suppression_membre(cls, proposition: Proposition, signataire_id: 'SignataireIdentity') -> None:
@@ -458,9 +464,6 @@ class Notification(INotification):
                     'salutation': get_ca_member_salutation_prefix(actor),
                     'management_entity_name': admission.title_entite_gestion,
                     'management_entity_acronym': admission.sigle_entite_gestion,
-                    'program_managers_names': get_admission_program_managers_names(
-                        admission.training.education_group_id
-                    ),
                     'admission_link_front': frontend_link_for_supervision_member,
                 },
                 recipients=[actor.email],
@@ -490,9 +493,6 @@ class Notification(INotification):
         common_tokens = cls.get_common_tokens(proposition, admission.candidate)
         common_tokens['management_entity_name'] = admission.title_entite_gestion
         common_tokens['management_entity_acronym'] = admission.sigle_entite_gestion
-        common_tokens['program_managers_names'] = get_admission_program_managers_names(
-            admission.training.education_group_id
-        )
         common_tokens['salutation'] = get_ca_member_salutation_prefix(actor)
 
         # Envoyer aux acteurs n'ayant pas répondu
@@ -588,8 +588,6 @@ class Notification(INotification):
 
         html_list_by_status = get_requested_documents_html_lists(liste_documents_reclames, liste_documents_dto)
 
-        program_managers_names = get_admission_program_managers_names(admission.training.education_group_id)
-
         tokens = {
             'admission_reference': proposition.reference,
             'candidate_first_name': proposition.prenom_candidat,
@@ -611,7 +609,6 @@ class Notification(INotification):
             'admission_link_back': get_backoffice_admission_url('doctorate', proposition.uuid),
             'management_entity_name': proposition.doctorat.intitule_entite_gestion,
             'management_entity_acronym': proposition.doctorat.sigle_entite_gestion,
-            'program_managers_names': program_managers_names,
         }
 
         email_message = generate_email(
@@ -700,7 +697,6 @@ class Notification(INotification):
                 'sender_name': f'{gestionnaire.prenom} {gestionnaire.nom}',
                 'management_entity_acronym': admission.sigle_entite_gestion,
                 'management_entity_name': admission.title_entite_gestion,
-                'program_managers_names': get_admission_program_managers_names(admission.training.education_group_id),
             }
 
             email_message = generate_email(
@@ -744,7 +740,6 @@ class Notification(INotification):
                 'sender_name': f'{gestionnaire.prenom} {gestionnaire.nom}',
                 'management_entity_acronym': admission.sigle_entite_gestion,
                 'management_entity_name': admission.title_entite_gestion,
-                'program_managers_names': get_admission_program_managers_names(admission.training.education_group_id),
                 'salutation': get_salutation_prefix(admission.candidate),
             }
 

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -32,7 +32,6 @@ from django.shortcuts import resolve_url
 from django.template.defaultfilters import truncatechars
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
-from django.utils.translation import pgettext_lazy
 from django.views.generic import FormView, TemplateView
 from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
@@ -350,7 +349,6 @@ class ChecklistView(
                 'sender_name': self.current_user_name,
                 'management_entity_acronym': self.proposition.doctorat.sigle_entite_gestion,
                 'management_entity_name': self.proposition.doctorat.intitule_entite_gestion,
-                'program_managers_names': self.admission_program_managers_names,
                 'salutation': get_salutation_prefix(self.admission.candidate),
             }
 

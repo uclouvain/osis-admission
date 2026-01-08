@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -30,21 +30,15 @@ from django.conf import settings
 from django.shortcuts import resolve_url
 from django.utils.translation import gettext as _
 from osis_async.models import AsyncTask
-from osis_document_components.services import get_remote_token
 from osis_document_components.enums import PostProcessingWanted
+from osis_document_components.services import get_remote_token
 from osis_document_components.utils import get_file_url
 from osis_mail_template import generate_email
 from osis_mail_template.utils import transform_html_to_text
 from osis_notification.contrib.handlers import EmailNotificationHandler
 from osis_notification.contrib.notification import EmailNotification
 
-from admission.auth.roles.program_manager import ProgramManager
 from admission.ddd import MAIL_INSCRIPTION_DEFAUT
-from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import (
-    EmplacementDocument,
-)
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import StatutEmplacementDocument
 from admission.ddd.admission.formation_continue.domain.model.proposition import (
     Proposition,
 )
@@ -52,6 +46,13 @@ from admission.ddd.admission.formation_continue.domain.service.i_notification im
     INotification,
 )
 from admission.ddd.admission.formation_continue.dtos import PropositionDTO
+from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import (
+    EmplacementDocument,
+)
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import InformationsDestinatairePasTrouvee
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import StatutEmplacementDocument
+from admission.ddd.admission.shared_kernel.repository.i_email_destinataire import IEmailDestinataireRepository
 from admission.infrastructure.utils import get_requested_documents_html_lists
 from admission.mail_templates import (
     ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_CONTINUING,
@@ -117,7 +118,11 @@ class Notification(INotification):
         }
 
     @classmethod
-    def confirmer_soumission(cls, proposition: Proposition) -> None:
+    def confirmer_soumission(
+        cls,
+        proposition: Proposition,
+        email_destinataire_repository: IEmailDestinataireRepository,
+    ) -> None:
         from admission.exports.admission_recap.admission_recap import (
             admission_pdf_recap,
         )
@@ -151,21 +156,24 @@ class Notification(INotification):
         )
 
         # Notify the candidate via email and the program managers in cc
-        program_managers = ProgramManager.objects.filter(
-            education_group=admission.training.education_group,
-        ).select_related('person')
-
         common_tokens = cls.get_common_tokens(admission)
         common_tokens['recap_link'] = get_file_url(token=read_token)
-        common_tokens['program_managers_emails'] = (' ' + _('or') + ' ').join(
-            [
-                f'<a href="mailto:{program_manager.person.email}">{program_manager.person.email}</a>'
-                for program_manager in program_managers
-            ]
-        )
-        common_tokens['program_managers_names'] = ', '.join(
-            f'{manager.person.first_name} {manager.person.last_name}' for manager in program_managers
-        )
+
+        try:
+            recipient = email_destinataire_repository.get_informations_destinataire_dto(
+                sigle_programme=proposition.formation_id.sigle,
+                annee=proposition.formation_id.annee,
+                pour_premiere_annee=False,
+            )
+            if not recipient.email:
+                raise InformationsDestinatairePasTrouvee
+            program_manager_email = recipient.email
+            common_tokens['program_managers_emails'] = (
+                f'<a href="mailto:{program_manager_email}">{program_manager_email}</a>'
+            )
+        except InformationsDestinatairePasTrouvee:
+            program_manager_email = ''
+            common_tokens['program_managers_emails'] = ''
 
         email_message = generate_email(
             ADMISSION_EMAIL_CONFIRM_SUBMISSION_CONTINUING,
@@ -174,8 +182,7 @@ class Notification(INotification):
             recipients=[admission.candidate.private_email],
         )
 
-        if program_managers:
-            email_message['Cc'] = ','.join([program_manager.person.email for program_manager in program_managers])
+        email_message['Cc'] = program_manager_email
 
         EmailNotificationHandler.create(email_message, person=admission.candidate)
 

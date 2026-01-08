@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,14 +27,15 @@ from abc import abstractmethod
 from email.message import EmailMessage
 from typing import List
 
-from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import (
-    EmplacementDocument,
-)
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.formation_continue.domain.model.proposition import (
     Proposition,
 )
 from admission.ddd.admission.formation_continue.dtos import PropositionDTO
+from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import (
+    EmplacementDocument,
+)
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.shared_kernel.repository.i_email_destinataire import IEmailDestinataireRepository
 from osis_common.ddd import interface
 
 
@@ -43,7 +44,11 @@ class INotification(interface.DomainService):
 
     @classmethod
     @abstractmethod
-    def confirmer_soumission(cls, proposition: Proposition) -> None:
+    def confirmer_soumission(
+        cls,
+        proposition: Proposition,
+        email_destinataire_repository: IEmailDestinataireRepository,
+    ) -> None:
         raise NotImplementedError
 
     @classmethod

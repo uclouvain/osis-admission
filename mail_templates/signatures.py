@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -69,11 +69,6 @@ templates.register(
                 description=_("Greetings depending on the gender of the candidate"),
                 example="Cher·ère",
             ),
-            Token(
-                name='program_managers_names',
-                description=_("List of names of the program managers."),
-                example='John Doe, Jane Doe',
-            ),
         ]
     ),
     tag=DOCTORATE_ADMISSION_TAG,
@@ -114,11 +109,6 @@ signataire_tokens = [
         name='salutation',
         description=_("Greetings depending on the gender of the recipient"),
         example="Cher·ère",
-    ),
-    Token(
-        name='program_managers_names',
-        description=_("List of names of the program managers."),
-        example='John Doe, Jane Doe',
     ),
 ]
 

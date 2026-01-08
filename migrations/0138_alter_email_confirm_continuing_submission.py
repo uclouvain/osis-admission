@@ -25,12 +25,12 @@ class Migration(migrations.Migration):
     <p>{salutation} {candidate_first_name} {candidate_last_name},</p>
 
     <p>
-        Thank you for submitting your application for admission to the {training_acronym} - {training_title} course. 
+        Thank you for submitting your application for admission to the {training_acronym} - {training_title} course.
         Your application reference number is {admission_reference}.
     </p>
 
     <p>
-        We will get back to you as soon as possible. If you wish to modify your application or have any further 
+        We will get back to you as soon as possible. If you wish to modify your application or have any further
         questions, please contact the course administrator: {program_managers_emails}.
     </p>
 
@@ -39,12 +39,12 @@ class Migration(migrations.Migration):
     </p>
 
     <p>
-        Your application file can be accessed at the following address: 
+        Your application file can be accessed at the following address:
         <a href="{recap_link}" target="_blank">{recap_link}</a>.
     </p>
 
     <p>
-        {program_managers_names}
+        Your continuing education manager
     </p>
 
                 ''',
@@ -69,12 +69,12 @@ class Migration(migrations.Migration):
     </p>
 
     <p>
-        Votre dossier est accessible via l'adresse suivante : 
+        Votre dossier est accessible via l'adresse suivante :
         <a href="{recap_link}" target="_blank">{recap_link}</a>.
     </p>
 
     <p>
-        {program_managers_names}
+        Votre gestionnaire de formation continue
     </p>
                 ''',
             },

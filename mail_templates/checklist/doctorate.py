@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -84,11 +84,6 @@ templates.register(
             description=_('Acronym of the management entity'),
             example='ESPO',
         ),
-        Token(
-            name='program_managers_names',
-            description=_("List of names of the program managers."),
-            example='John Doe, Jane Doe',
-        ),
     ],
 )
 
@@ -153,11 +148,6 @@ ADMISSION_EMAIL_SIC_APPROVAL_TOKENS = CHECKLIST_TOKENS + [
         name='management_entity_acronym',
         description=_('Acronym of the management entity'),
         example='ESPO',
-    ),
-    Token(
-        name='program_managers_names',
-        description=_("List of names of the program managers."),
-        example='John Doe, Jane Doe',
     ),
     Token(
         name='sender_name',
@@ -281,11 +271,6 @@ INSCRIPTION_EMAIL_SIC_APPROVAL_TOKENS = CHECKLIST_TOKENS + [
         example='ESPO',
     ),
     Token(
-        name='program_managers_names',
-        description=_("List of names of the program managers."),
-        example='John Doe, Jane Doe',
-    ),
-    Token(
         name='sender_name',
         description=_('Name of the manager sending the email'),
         example="John Doe",
@@ -333,11 +318,6 @@ templates.register(
             example='ESPO',
         ),
         Token(
-            name='program_managers_names',
-            description=_("List of names of the program managers."),
-            example='John Doe, Jane Doe',
-        ),
-        Token(
             name='sender_name',
             description=_('Name of the manager sending the email'),
             example="John Doe",
@@ -381,11 +361,6 @@ templates.register(
             name='salutation',
             description=_("Greetings depending on the gender of the candidate"),
             example="Cher·ère",
-        ),
-        Token(
-            name='program_managers_names',
-            description=_("List of names of the program managers."),
-            example='John Doe, Jane Doe',
         ),
         Token(
             name='sender_name',
@@ -453,11 +428,6 @@ templates.register(
             example="Cher·ère",
         ),
         Token(
-            name='program_managers_names',
-            description=_("List of names of the program managers."),
-            example='John Doe, Jane Doe',
-        ),
-        Token(
             name='sender_name',
             description=_('Name of the manager sending the email'),
             example="John Doe",
@@ -472,8 +442,7 @@ ADMISSION_EMAIL_CDD_APPROVAL_DOCTORATE_WITH_BELGIAN_DIPLOMA = (
 templates.register(
     ADMISSION_EMAIL_CDD_APPROVAL_DOCTORATE_WITH_BELGIAN_DIPLOMA,
     description=_(
-        'Email sent to the candidate when the CDD approves a doctorate admission of a candidate with a '
-        'Belgian diploma.'
+        'Email sent to the candidate when the CDD approves a doctorate admission of a candidate with a Belgian diploma.'
     ),
     tag=DOCTORATE_ADMISSION_TAG,
     tokens=CHECKLIST_TOKENS
@@ -509,17 +478,9 @@ templates.register(
             example='ESPO',
         ),
         Token(
-            name='program_managers_names',
-            description=_("List of names of the program managers."),
-            example='John Doe, Jane Doe',
-        ),
-        Token(
             name='prerequisite_courses_list',
             description=_('List of the prerequisite courses'),
-            example=(
-                'Prerequisite courses:'
-                '- BIO12 - Biology (10 ECTS)'
-            ),
+            example=('Prerequisite courses:- BIO12 - Biology (10 ECTS)'),
         ),
         Token(
             name='prerequisite_courses_communication',
@@ -572,17 +533,9 @@ templates.register(
             example='ESPO',
         ),
         Token(
-            name='program_managers_names',
-            description=_("List of names of the program managers."),
-            example='John Doe, Jane Doe',
-        ),
-        Token(
             name='prerequisite_courses_list',
             description=_('List of the prerequisite courses'),
-            example=(
-                'Prerequisite courses:'
-                '- BIO12 - Biology (10 ECTS)'
-            ),
+            example=('Prerequisite courses:- BIO12 - Biology (10 ECTS)'),
         ),
         Token(
             name='prerequisite_courses_communication',
@@ -596,8 +549,7 @@ ADMISSION_EMAIL_SUPERVISION_MODIFICATION_DOCTORATE = 'osis-admission-supervision
 templates.register(
     ADMISSION_EMAIL_SUPERVISION_MODIFICATION_DOCTORATE,
     description=_(
-        'Email sent to the candidate to inform him that a supervision modification is needed for a '
-        'doctorate admission.'
+        'Email sent to the candidate to inform him that a supervision modification is needed for a doctorate admission.'
     ),
     tag=DOCTORATE_ADMISSION_TAG,
     tokens=CHECKLIST_TOKENS
@@ -641,11 +593,6 @@ templates.register(
             name='salutation',
             description=_("Greetings depending on the gender of the candidate"),
             example="Cher·ère",
-        ),
-        Token(
-            name='program_managers_names',
-            description=_("List of names of the program managers."),
-            example='John Doe, Jane Doe',
         ),
     ],
 )

@@ -333,9 +333,6 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
             'sender_name': self.current_user_name,
         }
 
-        if self.is_doctorate:
-            tokens['program_managers_names'] = self.admission_program_managers_names
-
         return mail_template.render_subject(tokens=tokens), mail_template.body_as_html(tokens=tokens)
 
     def form_valid(self, form):
