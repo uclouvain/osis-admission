@@ -215,6 +215,20 @@ msgstr "Un commentaire de la CDD pour le SIC est présent "
 msgid "A comment from the faculty for the SIC is specified"
 msgstr "Un commentaire de la faculté pour le SIC est présent"
 
+#, python-format
+msgid ""
+"A compulsory minimum EURO 50 tuition fee deposit must be paid as soon as "
+"possible and no later than 31 October %(start_year)s. The tuition fee "
+"balance must be paid in full by 1 February %(end_year)s. As soon as we "
+"receive the enrolment authorisation signed by you, we will let you know how "
+"to pay."
+msgstr ""
+"Un acompte obligatoire minimum de 50 EUR devra être payé dans les meilleurs "
+"délais et au plus tard le 31/10/%(start_year)s. Le solde du montant des "
+"droits d'inscription devra être payé intégralement au plus tard pour le "
+"01/02/%(end_year)s. Dès réception de ce document signé par vos soins, les "
+"modalités de payement vous seront communiquées."
+
 msgid "A deny mail has already been sent to the candidate."
 msgstr "Un courrier de refus a été envoyé au candidat."
 
@@ -1604,9 +1618,6 @@ msgstr ""
 
 msgid "Communication to the candidate about additional trainings"
 msgstr "Autre communication au candidat à propos des compléments"
-
-msgid "Communication to the candidate about additional trainings:"
-msgstr "Autre communication au candidat à propos des compléments :"
 
 msgid "Communication with Host Hospitals"
 msgstr "Communication avec les Hôpitaux d'Accueil"
@@ -5529,7 +5540,9 @@ msgstr ""
 msgid ""
 "Please note that the academic year %(year)s begins on %(start_date)s and "
 "ends on %(end_date)s."
-msgstr "Veuillez noter que l'année académique %(year)s débute le %(start_date)s et se termine le %(end_date)s."
+msgstr ""
+"Veuillez noter que l'année académique %(year)s débute le %(start_date)s et "
+"se termine le %(end_date)s."
 
 #, python-format
 msgid "Please note that the first term begins on %(date)s."
@@ -6807,7 +6820,9 @@ msgstr "Taille du texte"
 msgid ""
 "The \"Sufficient\" status requires the equivalence information to be "
 "specified."
-msgstr "Le passage à l'état \"Suffisant\" nécessite que les informations sur l'équivalence soient remplies."
+msgstr ""
+"Le passage à l'état \"Suffisant\" nécessite que les informations sur "
+"l'équivalence soient remplies."
 
 msgid ""
 "The \"doctoral training\" must be completed before submitting the defense "
@@ -6902,9 +6917,6 @@ msgid ""
 msgstr ""
 "Le mail de la décision SIC a été envoyé au candidat le %(date)s par "
 "%(author)s."
-
-msgid "The University tuition fee is EUR 0.0."
-msgstr "Les droits d'inscription à l'Université s'élèvent à 0.0 EUR."
 
 msgid "The academic year of the period"
 msgstr "L'année académique de la période'"
@@ -7474,21 +7486,6 @@ msgstr "Le type de l'élément du formulaire d'admission est inconnu (%(type)s).
 msgid "The university tuition fee is EURO %(montant)s."
 msgstr "Les droits d'inscription à l'Université s'élèvent à %(montant)s EUR."
 
-#, python-format
-msgid ""
-"The university tuition fee is EURO %(montant)s. A compulsory minimum EURO 50 "
-"tuition fee deposit must be paid as soon as possible and no later than 31 "
-"October %(start_year)s. The tuition fee balance must be paid in full by 1 "
-"February %(end_year)s. As soon as we receive the enrolment authorisation "
-"signed by you, we will let you know how to pay."
-msgstr ""
-"Les droits d'inscription à l'Université s'élèvent à %(montant)s EUR. Un "
-"acompte obligatoire minimum de 50 EUR devra être payé dans les meilleurs "
-"délais et au plus tard le 31/10/%(start_year)s. Le solde du montant des "
-"droits d'inscription devra être payé intégralement au plus tard pour le "
-"01/02/%(end_year)s. Dès réception de ce document signé par vos soins, les "
-"modalités de payement vous seront communiquées."
-
 msgid "There can be no more CA members in the supervision group."
 msgstr ""
 "Il ne peut y avoir davantage de membres du comité d'accompagnement dans le "
@@ -7605,6 +7602,13 @@ msgstr "Cette activité sera refusée"
 
 msgid "This activity will be restored"
 msgstr "Cette activité sera remise au statut soumise"
+
+msgid ""
+"This amount is subject to change pending the adoption and publication of the "
+"decree setting it."
+msgstr ""
+"Ce montant est susceptible d'être adapté sous réserve de l'adoption et de la "
+"publication du décret fixant celui-ci."
 
 msgid ""
 "This course is closed. The candidate can express its interest by ticking the "
@@ -8856,6 +8860,3 @@ msgstr "{items} types sur {total}"
 #, python-brace-format
 msgid "{obj.dates_formatees} : {obj.fonction} at {obj.employeur}"
 msgstr "{obj.dates_formatees} : {obj.fonction} à {obj.employeur}"
-
-#~ msgid "(Expected) graduation date (signed diploma)"
-#~ msgstr "Date (prévue) de délivrance du diplôme (diplôme signé)"

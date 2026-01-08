@@ -175,6 +175,19 @@ msgstr ""
 msgid "A comment from the faculty for the SIC is specified"
 msgstr ""
 
+#, python-format
+msgid ""
+"A compulsory minimum EURO 50 tuition fee deposit must be paid as soon as "
+"possible and no later than 31 October %(start_year)s. The tuition fee "
+"balance must be paid in full by 1 February %(end_year)s. As soon as we "
+"receive the enrolment authorisation signed by you, we will let you know how "
+"to pay."
+msgstr ""
+"A compulsory minimum €50 tuition fee deposit must be paid as soon as possible and no later than 31 October "
+"%(start_year)s. The tuition fee balance must be paid in full by 1 February "
+"%(end_year)s. As soon as we receive the enrolment authorisation signed by "
+"you, we will let you know how to pay."
+
 msgid "A deny mail has already been sent to the candidate."
 msgstr ""
 
@@ -1477,9 +1490,6 @@ msgid ""
 msgstr ""
 
 msgid "Communication to the candidate about additional trainings"
-msgstr ""
-
-msgid "Communication to the candidate about additional trainings:"
 msgstr ""
 
 msgid "Communication with Host Hospitals"
@@ -6252,9 +6262,6 @@ msgid ""
 "The SIC decision mail was sent to the candidate the %(date)s by %(author)s."
 msgstr ""
 
-msgid "The University tuition fee is EUR 0.0."
-msgstr ""
-
 msgid "The academic year of the period"
 msgstr ""
 
@@ -6741,20 +6748,6 @@ msgstr ""
 msgid "The university tuition fee is EURO %(montant)s."
 msgstr "The university tuition fee is €%(montant)s."
 
-#, python-format
-msgid ""
-"The university tuition fee is EURO %(montant)s. A compulsory minimum EURO 50 "
-"tuition fee deposit must be paid as soon as possible and no later than 31 "
-"October %(start_year)s. The tuition fee balance must be paid in full by 1 "
-"February %(end_year)s. As soon as we receive the enrolment authorisation "
-"signed by you, we will let you know how to pay."
-msgstr ""
-"The university tuition fee is €%(montant)s. A compulsory minimum €50 tuition "
-"fee deposit must be paid as soon as possible and no later than 31 October "
-"%(start_year)s. The tuition fee balance must be paid in full by 1 February "
-"%(end_year)s. As soon as we receive the enrolment authorisation signed by "
-"you, we will let you know how to pay."
-
 msgid "There can be no more CA members in the supervision group."
 msgstr ""
 "There can be no more supervision committee members in the supervision group."
@@ -6849,6 +6842,11 @@ msgid "This activity will be refused"
 msgstr ""
 
 msgid "This activity will be restored"
+msgstr ""
+
+msgid ""
+"This amount is subject to change pending the adoption and publication of the "
+"decree setting it."
 msgstr ""
 
 msgid ""
