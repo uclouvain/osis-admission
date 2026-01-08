@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -88,6 +88,9 @@ from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.r
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.titres_acces import (
     TitresAccesInMemory,
 )
+from admission.infrastructure.admission.shared_kernel.repository.in_memory.email_destinataire import (
+    EmailDestinataireInMemoryRepository,
+)
 from admission.infrastructure.admission.shared_kernel.repository.in_memory.emplacement_document import (
     emplacement_document_in_memory_repository,
 )
@@ -114,6 +117,7 @@ _notification = NotificationInMemory()
 _lister_demandes_service = ListerDemandesInMemory()
 _emplacement_document_repository = emplacement_document_in_memory_repository
 _raccrocher_experiences_curriculum = RaccrocherExperiencesCurriculumInMemory()
+_email_destinataire_repository = EmailDestinataireInMemoryRepository()
 
 
 COMMAND_HANDLERS = {
@@ -175,6 +179,7 @@ COMMAND_HANDLERS = {
         questions_specifiques_translator=_question_specific_translator,
         historique=_historique_global,
         raccrocher_experiences_curriculum=_raccrocher_experiences_curriculum,
+        email_destinataire_repository=_email_destinataire_repository,
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,

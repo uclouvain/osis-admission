@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -79,6 +79,8 @@ from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
+from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
+from epc.tests.factories.email_fonction_programme import EmailFonctionProgrammeFactory
 
 
 class ChecklistViewTestCase(TestCase):
@@ -785,7 +787,12 @@ class ChecklistViewTestCase(TestCase):
     def test_post_send_to_fac_iufc(self):
         self.client.force_login(user=self.iufc_manager_user)
 
-        self.assertFalse(EmailNotification.objects.filter(person=self.fac_manager_user.person).exists())
+        self.assertFalse(EmailNotification.objects.filter(person=None).exists())
+
+        training_email = EmailFonctionProgrammeFactory(
+            type=TypeEmailFonctionProgramme.DESTINATAIRE_ADMISSION.name,
+            programme=self.continuing_admission.training.education_group,
+        )
 
         url = resolve_url(
             'admission:continuing-education:decision-send-to-fac',
@@ -804,10 +811,10 @@ class ChecklistViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context['decision_send_to_fac_form'].is_valid())
 
-        notifications = EmailNotification.objects.filter(person=self.fac_manager_user.person)
+        notifications = EmailNotification.objects.filter(person=None)
         self.assertEqual(len(notifications), 1)
         email_object = message_from_string(notifications[0].payload)
-        self.assertEqual(email_object['To'], self.fac_manager_user.person.email)
+        self.assertEqual(email_object['To'], training_email.email)
 
     #### FAC MANAGER
 
