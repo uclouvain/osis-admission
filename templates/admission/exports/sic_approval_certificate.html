@@ -6,7 +6,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -271,23 +271,23 @@
 
   {% if proposition.communication_au_candidat %}<p>{{ proposition.communication_au_candidat|safe }}</p>{% endif %}
 
-  {% if proposition.droits_inscription_montant_valeur_calculee >= 50 %}
+  {% with montant=proposition.droits_inscription_montant_valeur_calculee %}
     <p>
-      {% if est_doctorat %}
-        {% blocktrans with montant=proposition.droits_inscription_montant_valeur_calculee trimmed %}
-          The university tuition fee is EURO {{ montant }}.
-        {% endblocktrans %}
-      {% else %}
-        {% blocktrans with montant=proposition.droits_inscription_montant_valeur_calculee start_year=proposition.formation.annee end_year=proposition.formation.annee|add:1 trimmed %}
-          The university tuition fee is EURO {{ montant }}. A compulsory minimum EURO 50 tuition fee deposit must be paid as
+      {% blocktrans with montant=montant trimmed %}
+        The university tuition fee is EURO {{ montant }}.
+      {% endblocktrans %}
+      {% if montant > 0 %}
+        {% translate 'This amount is subject to change pending the adoption and publication of the decree setting it.' %}
+      {% endif %}
+      {% if not est_doctorat and montant >= 50 %}
+        {% blocktrans with start_year=proposition.formation.annee end_year=proposition.formation.annee|add:1 trimmed %}
+          A compulsory minimum EURO 50 tuition fee deposit must be paid as
           soon as possible and no later than 31 October {{ start_year }}. The tuition fee balance must be paid in full by
           1 February {{ end_year }}. As soon as we receive the enrolment authorisation signed by you, we will let you know how to pay.
         {% endblocktrans %}
       {% endif %}
     </p>
-  {% else %}
-  <p>{% blocktrans %}The University tuition fee is EUR 0.0.{% endblocktrans %}</p>
-  {% endif %}
+  {% endwith %}
 
   {% if est_doctorat %}
     <p>
