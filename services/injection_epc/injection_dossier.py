@@ -598,8 +598,7 @@ class InjectionEPCAdmission:
 
     @classmethod
     def _get_examens(cls, candidat: Person) -> List[Dict]:
-        _, examens = InjectionEPCCurriculum._get_examens(personne=candidat)
-        return examens or []
+        return InjectionEPCCurriculum._get_examens(personne=candidat)
 
     @classmethod
     def _get_curriculum_academique(cls, candidat: Person, admission: BaseAdmission) -> List[Dict]:
