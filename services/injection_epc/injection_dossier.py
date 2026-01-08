@@ -81,11 +81,13 @@ from admission.models import (
 from admission.models.base import (
     BaseAdmission,
 )
-from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences, \
-    AdmissionProfessionalValuatedExperiences
 from admission.models.categorized_free_document import CategorizedFreeDocument
 from admission.models.enums.actor_type import ActorType
 from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
+from admission.models.valuated_epxeriences import (
+    AdmissionEducationalValuatedExperiences,
+    AdmissionProfessionalValuatedExperiences,
+)
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.person_address_type import PersonAddressType
@@ -277,7 +279,8 @@ class InjectionEPCAdmission:
         comptabilite = getattr(admission, "accounting", None)  # type: Accounting
         adresses = candidat.personaddress_set.select_related("country")
         adresse_domicile = adresses.filter(label=PersonAddressType.RESIDENTIAL.name).first()  # type: PersonAddress
-        etudes_secondaires, alternative = cls._get_etudes_secondaires(candidat=candidat, admission=admission)
+        etudes_secondaires, alternative = cls._get_etudes_secondaires(candidat=candidat)
+        examens = cls._get_examens(candidat=candidat)
         admission_generale = getattr(admission, 'generaleducationadmission', None)
         admission_iufc = getattr(admission, 'continuingeducationadmission', None)
         admission_doctorat = getattr(admission, 'doctorateadmission', None)
@@ -299,6 +302,7 @@ class InjectionEPCAdmission:
             ),
             "comptabilite": cls._get_comptabilite(candidat=candidat, comptabilite=comptabilite),
             "etudes_secondaires": etudes_secondaires,
+            "examens": examens,
             "curriculum_academique": cls._get_curriculum_academique(candidat=candidat, admission=admission),
             "curriculum_autres": (
                 cls._get_curriculum_autres_activites(candidat=candidat, admission=admission)
@@ -587,10 +591,14 @@ class InjectionEPCAdmission:
         return {}
 
     @classmethod
-    def _get_etudes_secondaires(cls, candidat: Person, admission: BaseAdmission) -> Tuple[Dict, Dict]:
+    def _get_etudes_secondaires(cls, candidat: Person) -> Tuple[Dict, Dict]:
         _, etudes_secondaires = InjectionEPCCurriculum._get_etudes_secondaires(personne=candidat)
         _, alternative = InjectionEPCCurriculum._get_alternative_etudes_secondaires(personne=candidat)
         return etudes_secondaires or None, alternative or None
+
+    @classmethod
+    def _get_examens(cls, candidat: Person) -> List[Dict]:
+        return InjectionEPCCurriculum._get_examens(personne=candidat)
 
     @classmethod
     def _get_curriculum_academique(cls, candidat: Person, admission: BaseAdmission) -> List[Dict]:
