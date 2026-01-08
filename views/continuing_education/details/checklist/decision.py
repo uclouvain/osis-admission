@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -32,7 +32,6 @@ from osis_mail_template.utils import transform_html_to_text
 from osis_notification.contrib.handlers import EmailNotificationHandler
 from osis_notification.contrib.notification import EmailNotification
 
-from admission.auth.roles.program_manager import ProgramManager
 from admission.ddd.admission.formation_continue.commands import (
     AnnulerPropositionCommand,
     AnnulerReclamationDocumentsAuCandidatCommand,
@@ -48,13 +47,15 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutChecklist,
     ChoixStatutPropositionContinue,
 )
+from admission.ddd.admission.shared_kernel.commands import RecupererInformationsDestinataireQuery
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import InformationsDestinatairePasTrouvee
+from admission.ddd.admission.shared_kernel.dtos.destinataire import InformationsDestinataireDTO
 from admission.forms.admission.continuing_education.checklist import (
     CloseForm,
     DecisionCancelForm,
     DecisionDenyForm,
     DecisionFacApprovalForm,
     DecisionHoldForm,
-    DecisionValidationForm,
     SendToFacForm,
 )
 from admission.infrastructure.utils import get_message_to_historize
@@ -378,20 +379,27 @@ class SendToFacFormView(CheckListDefaultContextMixin, AdmissionFormMixin, HtmxPe
         subject = form.cleaned_data['subject']
         body = form.cleaned_data['body']
 
-        recipients_managers = ProgramManager.objects.filter(
-            education_group=self.admission.training.education_group,
-        ).select_related('person')
+        try:
+            recipient: InformationsDestinataireDTO = message_bus_instance.invoke(
+                RecupererInformationsDestinataireQuery(
+                    sigle_formation=self.admission.training.acronym,
+                    annee=self.admission.training.academic_year.year,
+                    est_premiere_annee=False,
+                )
+            )
 
-        for manager in recipients_managers:
+            if not recipient.email:
+                raise InformationsDestinatairePasTrouvee
+
             email_notification = EmailNotification(
-                recipient=manager.person.email,
+                recipient=recipient.email,
                 subject=subject,
                 html_content=body,
                 plain_text_content=transform_html_to_text(body),
             )
 
             email_message = EmailNotificationHandler.build(email_notification)
-            EmailNotificationHandler.create(email_message, person=manager.person)
+            EmailNotificationHandler.create(email_message)
 
             message_a_historiser = get_message_to_historize(email_message)
 
@@ -402,5 +410,7 @@ class SendToFacFormView(CheckListDefaultContextMixin, AdmissionFormMixin, HtmxPe
                 f'{self.request.user.person.first_name} {self.request.user.person.last_name}',
                 tags=['proposition', 'email-to-fac', 'message'],
             )
+        except InformationsDestinatairePasTrouvee:
+            pass
 
         return super().form_valid(form)
