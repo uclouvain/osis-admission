@@ -198,10 +198,10 @@ class CentralManager(EntityRoleModel):
             & (general.in_sic_status | continuing.is_submitted | doctorate.in_sic_status)
             & ~is_sent_to_epc,
             'admission.change_personal_data_checklist_status_to_be_processed': is_entity_manager
-            & (general.in_sic_status | doctorate.in_sic_status)
+            & (general.in_sic_status | continuing.is_submitted | doctorate.in_sic_status)
             & ~is_sent_to_epc,
             'admission.change_personal_data_checklist_status_cleaned': is_entity_manager
-            & (general.in_sic_status | doctorate.in_sic_status)
+            & (general.in_sic_status | continuing.is_submitted | doctorate.in_sic_status)
             & ~is_sent_to_epc,
             'admission.change_checklist_iufc': is_entity_manager & continuing.is_submitted & ~is_sent_to_epc,
             'admission.cancel_admission_iufc': is_entity_manager & continuing.is_submitted,

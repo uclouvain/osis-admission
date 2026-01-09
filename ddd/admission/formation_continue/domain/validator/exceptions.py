@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -127,4 +127,12 @@ class MettreAValiderTransitionStatutException(BusinessException):
 
     def __init__(self, **kwargs):
         message = _('You can only transition to the "To validate IUFC" status from the "Approved" status.')
+        super().__init__(message, **kwargs)
+
+
+class EtatChecklistDonneesPersonnellesNonValidePourApprouverDemande(BusinessException):
+    status_code = "FORMATION-CONTINUE-13"
+
+    def __init__(self, **kwargs):
+        message = _('The status of the checklist for the personal data must be "Validated".')
         super().__init__(message, **kwargs)

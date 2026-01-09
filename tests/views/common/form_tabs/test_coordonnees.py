@@ -518,6 +518,21 @@ class CoordonneesFormTestCase(TestCase):
         response = self.client.get(self.continuing_url)
         self.assertEqual(response.status_code, 200)
 
+        other_continuing_admission = ContinuingEducationAdmissionFactory(
+            training=self.continuing_admission.training,
+            candidate=self.continuing_admission.candidate,
+            status=ChoixStatutPropositionContinue.CONFIRMEE.name,
+        )
+
+        other_continuing_admission.checklist['current']['donnees_personnelles']['statut'] = 'GEST_REUSSITE'
+        other_continuing_admission.save()
+
+        url = resolve_url('admission:continuing-education:update:person', uuid=other_continuing_admission.uuid)
+
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 403)
+
     def test_continuing_coordinates_form_on_get(self):
         self.client.force_login(user=self.sic_manager_user)
 
