@@ -30,6 +30,7 @@ from typing import Dict, List, Optional, Set, Union
 
 import attr
 from django.conf import settings
+from django.core.cache import cache
 from django.db.models import QuerySet
 from django.forms import Form
 from django.forms.formsets import formset_factory
@@ -238,6 +239,7 @@ from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
+from base.services.fraudeurs import FraudeursService
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from base.utils.utils import format_academic_year
 from ddd.logic.shared_kernel.profil.commands import (
@@ -260,6 +262,7 @@ from osis_role.templatetags.osis_role import has_perm
 from parcours_interne import etudiants_PCE_avant_2015
 
 __all__ = [
+    'FraudsterCheckView',
     'ChecklistView',
     'ChangeExtraView',
     'ApplicationFeesView',
@@ -540,6 +543,38 @@ def get_email(template_identifier, language, proposition_dto: PropositionGestion
         )
 
 
+class FraudsterCheckView(AdmissionViewMixin, HtmxPermissionRequiredMixin, TemplateView):
+    urlpatterns = {'fraudster-check': 'fraudster-check'}
+    template_name = 'admission/general_education/includes/checklist/fraud_ares_status.html'
+    permission_required = 'admission.change_checklist'
+    http_method_names = ['post']
+
+    WEBSERVICE_UNAVAILABLE_CACHE_KEY = 'admission-checklist-fraudster-webservice-unavailable'
+    WEBSERVICE_UNAVAILABLE_TIMEOUT = 7200
+
+    def post(self, request, *args, **kwargs):
+        if cache.get(self.WEBSERVICE_UNAVAILABLE_CACHE_KEY):
+            is_fraudster_from_ares = None
+        else:
+            admission = self.get_permission_object()
+            is_fraudster_from_ares = FraudeursService.verifier(
+                niss=admission.candidate.national_number,
+                nom=admission.candidate.last_name,
+                prenom=admission.candidate.first_name,
+                date_naissance=admission.candidate.birth_date,
+            )
+            if is_fraudster_from_ares is None:
+                cache.set(
+                    self.WEBSERVICE_UNAVAILABLE_CACHE_KEY,
+                    True,
+                    timeout=self.WEBSERVICE_UNAVAILABLE_TIMEOUT,
+                )
+        return self.render_to_response(self.get_context_data(
+            is_fraudster_from_ares_error=is_fraudster_from_ares is None,
+            is_fraudster_from_ares=is_fraudster_from_ares,
+        ))
+
+
 class PersonalDataChangeStatusView(
     AdmissionFormMixin,
     LoadDossierViewMixin,
@@ -557,6 +592,14 @@ class PersonalDataChangeStatusView(
         extra = {}
         if 'fraud' in self.request.POST:
             extra['fraud'] = self.request.POST['fraud']
+
+        checklist_actuelle = admission.checklist.get('current')
+        if self.request.POST.get('fraud') == '1' or (
+            checklist_actuelle
+            and checklist_actuelle['donnees_personnelles']['statut'] == ChoixStatutChecklist.GEST_BLOCAGE.name
+            and checklist_actuelle['donnees_personnelles']['extra'].get('fraud') == '1'
+        ):
+            self.htmx_refresh = True
 
         change_admission_status(
             tab=OngletsChecklist.donnees_personnelles.name,
