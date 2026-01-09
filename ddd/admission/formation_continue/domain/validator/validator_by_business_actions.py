@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,18 +27,22 @@ from typing import List
 
 import attr
 
-from admission.ddd.admission.formation_continue.domain.model.statut_checklist import StatutChecklist
+from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
+    StatutChecklist,
+    StatutsChecklistContinue,
+)
 from admission.ddd.admission.formation_continue.domain.validator import (
     ShouldRenseignerExperiencesCurriculum,
 )
 from admission.ddd.admission.formation_continue.domain.validator._should_informations_checklist_etre_completees import (
-    ShouldPeutMettreEnAttente,
-    ShouldPeutApprouverParFac,
-    ShouldPeutRefuserProposition,
+    ShouldDonneesPersonnellesEtreDansEtatCorrectPourApprouverDemande,
     ShouldPeutAnnulerProposition,
+    ShouldPeutApprouverParFac,
     ShouldPeutApprouverProposition,
     ShouldPeutCloturerProposition,
     ShouldPeutMettreAValider,
+    ShouldPeutMettreEnAttente,
+    ShouldPeutRefuserProposition,
 )
 from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
 
@@ -122,7 +126,7 @@ class AnnulerPropositionValidatorList(TwoStepsMultipleBusinessExceptionListValid
 
 @attr.dataclass(frozen=True, slots=True)
 class ApprouverPropositionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
-    checklist_statut: StatutChecklist
+    checklist_actuelle: StatutsChecklistContinue
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -130,7 +134,10 @@ class ApprouverPropositionValidatorList(TwoStepsMultipleBusinessExceptionListVal
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
             ShouldPeutApprouverProposition(
-                checklist_statut=self.checklist_statut,
+                checklist_statut=self.checklist_actuelle.decision,
+            ),
+            ShouldDonneesPersonnellesEtreDansEtatCorrectPourApprouverDemande(
+                checklist_actuelle=self.checklist_actuelle,
             ),
         ]
 

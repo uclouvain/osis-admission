@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -54,7 +54,6 @@ from admission.forms.admission.continuing_education.checklist import (
     DecisionDenyForm,
     DecisionFacApprovalForm,
     DecisionHoldForm,
-    DecisionValidationForm,
     SendToFacForm,
 )
 from admission.infrastructure.utils import get_message_to_historize
@@ -63,6 +62,7 @@ from admission.views.common.mixins import AdmissionFormMixin
 from admission.views.continuing_education.details.checklist.base import (
     CheckListDefaultContextMixin,
 )
+from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
@@ -250,7 +250,9 @@ class ValidationFormView(CheckListDefaultContextMixin, AdmissionFormMixin, HtmxP
                     gestionnaire=self.request.user.person.global_id,
                 )
             )
-        except BusinessException as exception:
+        except (BusinessException, MultipleBusinessExceptions) as exception:
+            if isinstance(exception, MultipleBusinessExceptions):
+                exception = exception.exceptions.pop()
             self.message_on_failure = exception.message
             return super().form_invalid(form)
 

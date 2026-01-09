@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -28,8 +28,6 @@ from unittest.mock import patch
 import mock
 from django.test import SimpleTestCase
 
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import EnQuarantaineException
-from admission.ddd.admission.shared_kernel.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.formation_continue.commands import (
     ValiderPropositionCommand,
 )
@@ -43,12 +41,15 @@ from admission.ddd.admission.formation_continue.domain.model.proposition import 
 )
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
     ApprouverPropositionTransitionStatutException,
+    EtatChecklistDonneesPersonnellesNonValidePourApprouverDemande,
+)
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import EnQuarantaineException
+from admission.ddd.admission.shared_kernel.dtos.merge_proposal import MergeProposalDTO
+from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
+    PropositionInMemoryRepository,
 )
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
-)
-from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
-    PropositionInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import (
     message_bus_in_memory_instance,
@@ -99,6 +100,19 @@ class ValiderPropositionTestCase(SimpleTestCase):
             self.message_bus.invoke(self.cmd)
 
         self.assertIsInstance(context.exception.exceptions.pop(), ApprouverPropositionTransitionStatutException)
+
+    def test_should_renvoyer_erreur_si_donnees_personnelles_non_validees(self):
+        proposition: Proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-USCC22'))
+        proposition.checklist_actuelle.donnees_personnelles.statut = ChoixStatutChecklist.GEST_EN_COURS
+        proposition.checklist_actuelle.donnees_personnelles.extra = {}
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+        self.assertIsInstance(
+            context.exception.exceptions.pop(),
+            EtatChecklistDonneesPersonnellesNonValidePourApprouverDemande,
+        )
 
     def test_should_renvoyer_erreur_si_statut_valide(self):
         proposition: Proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-USCC22'))
