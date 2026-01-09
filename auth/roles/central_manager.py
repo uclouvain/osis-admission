@@ -248,5 +248,7 @@ class CentralManager(EntityRoleModel):
             'reference.view_scholarship': rules.always_allow,
             'reference.view_reference_choice': rules.always_allow,
             'base.view_organization': rules.always_allow,
+            # Contingente
+            'admission.view_contingente_management': has_scope(Scope.CONTINGENTE_NON_RESIDENT),
         }
         return RuleSet(ruleset)
