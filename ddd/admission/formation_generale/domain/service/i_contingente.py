@@ -1,4 +1,4 @@
-# ##############################################################################
+##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -22,18 +22,15 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-# ##############################################################################
-from osis_mail_template.exceptions import DuplicateMailTemplateIdentifier
+##############################################################################
+from osis_common.ddd import interface
 
-# When running tests, the test runner try to import it directly, re-registrering the identifiers
-try:
-    from .checklist import *
-    from .contingente import *
-    from .document import *
-    from .signatures import *
-    from .submission import *
-except DuplicateMailTemplateIdentifier:
-    import sys
 
-    if 'test' not in sys.argv:
-        raise
+class IContingente(interface.DomainService):
+    @classmethod
+    def generer_numero_de_dossier_ares_si_necessaire(cls, proposition: 'Proposition', annee: int) -> str:
+        raise NotImplementedError
+
+    @classmethod
+    def verifier_proposition_contingente_unique(cls, proposition_candidat: 'PropositionFormationGenerale'):
+        raise NotImplementedError

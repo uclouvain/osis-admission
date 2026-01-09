@@ -856,6 +856,9 @@ msgstr ""
 msgid "Are you the child of a UCLouvain or Martin V staff member?"
 msgstr ""
 
+msgid "Ares application number for trainings with quota"
+msgstr ""
+
 msgid ""
 "As the email address of the faculty recipient is not defined, no email will "
 "be sent. Do you still want to send the application to the faculty?"
@@ -1852,6 +1855,9 @@ msgstr "Delegate dispensation"
 msgid "DEROGATION_VRAE"
 msgstr "VRAE dispensation"
 
+msgid "DEUX_OU_PLUS"
+msgstr "Twice or more"
+
 msgid "DISPENSE_BOURSE"
 msgstr ""
 
@@ -2166,6 +2172,9 @@ msgid "Do you have a secondary school diploma?"
 msgstr ""
 
 msgid "Do you have an international scholarship?"
+msgstr ""
+
+msgid "Do you intend to make an enrolment directly for the second year?"
 msgstr ""
 
 msgid "Do you want to continue?"
@@ -3837,6 +3846,9 @@ msgstr ""
 msgid "It is not possible to go from the \"validated\" status to this status."
 msgstr ""
 
+msgid "JAMAIS"
+msgstr "Never"
+
 msgid "Joint research project (ARC)"
 msgstr ""
 
@@ -4102,6 +4114,11 @@ msgstr ""
 msgid ""
 "Mail sent to the candidate to confirm that his application has been taken "
 "into account by UCLouvain"
+msgstr ""
+
+msgid ""
+"Mail sent to the candidate to confirm the submission of his training with "
+"quota."
 msgstr ""
 
 msgid ""
@@ -4552,6 +4569,22 @@ msgid "Non-progression dispensation needed"
 msgstr ""
 
 msgid "Non-resident (as defined by government decree)"
+msgstr ""
+
+msgid ""
+"Non-resident applicants may submit only one application among the limited "
+"enrollment courses. Any duplicate application will result in all "
+"applications being rejected."
+msgstr ""
+
+msgid "Non-resident contingent training receipt"
+msgstr ""
+
+msgid ""
+"Non-resident enrolment form for an enrolment beyond the first 60 credits"
+msgstr ""
+
+msgid "Non-resident file"
 msgstr ""
 
 msgid "Non-retrievable attachment"
@@ -5289,6 +5322,9 @@ msgid ""
 "Content of the message to be displayed for Message elements."
 msgstr ""
 
+msgid "Quota admission receipt"
+msgstr ""
+
 msgid "REDUCTION_VCRC"
 msgstr ""
 
@@ -5604,6 +5640,9 @@ msgstr ""
 msgid "Residence card of a family member of a European Union citizen"
 msgstr ""
 
+msgid "Residence certificate"
+msgstr ""
+
 msgid "Residence permit covering the entire course"
 msgstr ""
 
@@ -5617,6 +5656,9 @@ msgid "Residence permit valid for more than 3 months with replacement income"
 msgstr ""
 
 msgid "Resident (as defined by government decree)"
+msgstr ""
+
+msgid "Resident student form"
 msgstr ""
 
 msgid "Ressource not found."
@@ -6337,6 +6379,9 @@ msgstr ""
 msgid "The application is in quarantine"
 msgstr ""
 
+msgid "The ares application number of the admission"
+msgstr ""
+
 msgid ""
 "The authorization can not be done while there is one or more documents to be "
 "requested immediately."
@@ -6594,6 +6639,9 @@ msgid "The last name of the signing actor"
 msgstr ""
 
 msgid "The limited training you are enrolling into is not opened yet."
+msgstr ""
+
+msgid "The link to the receipt"
 msgstr ""
 
 msgid "The maximum number of documents must be a positive number."
@@ -7164,6 +7212,9 @@ msgstr ""
 msgid "UE"
 msgstr ""
 
+msgid "UNE"
+msgstr "Once"
+
 msgid "UUID"
 msgstr ""
 
@@ -7601,16 +7652,6 @@ msgstr ""
 
 msgid ""
 "You cannot ask for both modification and reorientation at the same time."
-msgstr ""
-
-#, python-format
-msgid ""
-"You cannot continue your application. The registration procedure for the "
-"<em>%(training_name)s</em> for non-resident students is not yet available. "
-"We invite you to consult the complete registration procedure on the "
-"following page: <a href=\"https://www.uclouvain.be/en/enrolment/limited-"
-"enrolment-courses\" target=\"_blank\">https://www.uclouvain.be/en/enrolment/"
-"limited-enrolment-courses</a>"
 msgstr ""
 
 msgid "You cannot enter a language more than once, please correct the form."
