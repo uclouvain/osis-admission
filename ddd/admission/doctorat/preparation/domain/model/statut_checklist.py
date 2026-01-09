@@ -152,7 +152,7 @@ class ConfigurationOngletChecklist(interface.ValueObject):
 
 STATUTS_CHECKLIST_PAR_ONGLET: Dict[str, Dict[str, ConfigurationStatutChecklist]] = {}
 
-onglet_donnes_personnelles = ConfigurationOngletChecklist(
+onglet_donnees_personnelles = ConfigurationOngletChecklist(
     identifiant=OngletsChecklist.donnees_personnelles,
     statuts=[
         ConfigurationStatutChecklist(
@@ -508,7 +508,7 @@ onglet_decision_sic = ConfigurationOngletChecklist(
 )
 
 ORGANISATION_ONGLETS_CHECKLIST: List[ConfigurationOngletChecklist] = [
-    onglet_donnes_personnelles,
+    onglet_donnees_personnelles,
     onglet_assimilation,
     onglet_parcours_anterieur,
     onglets_parcours_anterieur_experiences,

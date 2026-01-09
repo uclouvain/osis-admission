@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -41,6 +41,7 @@ from admission.ddd.admission.formation_continue.domain.model.proposition import 
 )
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
     ApprouverPropositionTransitionStatutException,
+    EtatChecklistDonneesPersonnellesNonValidePourApprouverDemande,
 )
 from admission.ddd.admission.formation_continue.events import (
     PropositionFormationContinueValideeEvent,
@@ -109,6 +110,19 @@ class ValiderPropositionTestCase(SimpleTestCase):
             self.message_bus.invoke(self.cmd)
 
         self.assertIsInstance(context.exception.exceptions.pop(), ApprouverPropositionTransitionStatutException)
+
+    def test_should_renvoyer_erreur_si_donnees_personnelles_non_validees(self):
+        proposition: Proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-USCC22'))
+        proposition.checklist_actuelle.donnees_personnelles.statut = ChoixStatutChecklist.GEST_EN_COURS
+        proposition.checklist_actuelle.donnees_personnelles.extra = {}
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd)
+
+        self.assertIsInstance(
+            context.exception.exceptions.pop(),
+            EtatChecklistDonneesPersonnellesNonValidePourApprouverDemande,
+        )
 
     def test_should_renvoyer_erreur_si_statut_valide(self):
         proposition: Proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-USCC22'))
