@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -37,9 +37,8 @@ from django.shortcuts import resolve_url
 from django.template.defaultfilters import unordered_list
 from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import mark_safe
-from django.utils.translation import get_language, gettext
+from django.utils.translation import get_language, gettext, pgettext, pgettext_lazy
 from django.utils.translation import gettext_lazy as _
-from django.utils.translation import pgettext, pgettext_lazy
 from osis_document_components.enums import PostProcessingWanted
 from osis_document_components.services import get_remote_metadata, get_remote_token
 from osis_history.models import HistoryEntry
@@ -632,15 +631,11 @@ def admission_status(status: str, osis_education_type: str):
     if admission_context is None:
         return status
 
-    return (
-        {
-            'general-education': ChoixStatutPropositionGenerale,
-            'continuing-education': ChoixStatutPropositionContinue,
-            'doctorate': ChoixStatutPropositionDoctorale,
-        }
-        .get(admission_context)
-        .get_value(status)
-    )
+    return {
+        'general-education': ChoixStatutPropositionGenerale,
+        'continuing-education': ChoixStatutPropositionContinue,
+        'doctorate': ChoixStatutPropositionDoctorale,
+    }.get(admission_context).get_value(status)
 
 
 @register.filter
@@ -698,7 +693,8 @@ def checklist_state_button(context, **kwargs):
         ]
     }
 
-    if context.get('can_update_checklist_tab') is False and not kwargs.pop('force_enabled', False):
+    force_enabled = kwargs.pop('force_enabled', False)
+    if context.get('can_update_checklist_tab') is False and not force_enabled:
         expected_attrs['disabled'] = True
 
     return {
@@ -839,7 +835,6 @@ def to_niss_format(s):
 
 @register.filter
 def map_fields_items(digit_fields):
-
     mapping = {
         "first_name": "firstName",
         "middle_name": "",

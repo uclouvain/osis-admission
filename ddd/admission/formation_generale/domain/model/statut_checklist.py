@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -115,7 +115,8 @@ class StatutsChecklistGenerale:
 
 
 INDEX_ONGLETS_CHECKLIST = {
-    onglet: index for index, onglet in enumerate(attr.fields_dict(StatutsChecklistGenerale))  # type: ignore
+    onglet: index
+    for index, onglet in enumerate(attr.fields_dict(StatutsChecklistGenerale))  # type: ignore
 }
 
 
@@ -180,6 +181,11 @@ onglet_donnes_personnelles = ConfigurationOngletChecklist(
             statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
         ),
         ConfigurationStatutChecklist(
+            identifiant='TOILETTEES',
+            libelle=pgettext_lazy('plural', 'Cleaned'),
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+        ),
+        ConfigurationStatutChecklist(
             identifiant='A_COMPLETER',
             libelle=_('To be completed'),
             statut=ChoixStatutChecklist.GEST_BLOCAGE,
@@ -193,7 +199,7 @@ onglet_donnes_personnelles = ConfigurationOngletChecklist(
         ),
         ConfigurationStatutChecklist(
             identifiant='VALIDEES',
-            libelle=_('Validated'),
+            libelle=pgettext_lazy('plural', 'Validated'),
             statut=ChoixStatutChecklist.GEST_REUSSITE,
         ),
     ],
