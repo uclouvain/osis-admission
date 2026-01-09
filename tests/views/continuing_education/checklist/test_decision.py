@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -509,6 +509,12 @@ class ChecklistViewTestCase(TestCase):
             'enfants': [],
             'extra': {'en_cours': 'fac_approval'},
             'statut': ChoixStatutChecklist.GEST_EN_COURS.name,
+        }
+        self.continuing_admission.checklist['current']['donnees_personnelles'] = {
+            'libelle': '',
+            'enfants': [],
+            'extra': {},
+            'statut': ChoixStatutChecklist.GEST_REUSSITE.name,
         }
         self.continuing_admission.save(update_fields=['checklist'])
         self.client.force_login(user=self.iufc_manager_user)

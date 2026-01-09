@@ -7,7 +7,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -32,8 +32,6 @@
   {% resultat_workflow_gestion_des_comptes_alert matricule=original_admission.candidate.global_id has_permission_to_merge=can_merge_candidate outil_de_comparaison_et_fusion_url=outil_de_comparaison_et_fusion_url has_permission_to_give_decision_double_check=can_give_decision_double_check double_check_decision_url=double_check_decision_url %}
 
   {% has_perm 'admission.change_checklist_iufc' as is_iufc %}
-  {% not_bool is_iufc as is_not_iufc %}
-  {% has_perm 'admission.cancel_admission_iufc' as can_cancel_admission_iufc %}
 
   {% if current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'fac_approval' %}
   <dl>
@@ -51,112 +49,7 @@
   </dl>
   {% endif %}
 
-  <div class="form-group btn-group status-group" role="group">
-    {% translate initial.libelle as initial_state_label %}
-    {% translate 'The application can only be validated if it was previously approved.' as validation_disabled_str %}
-    {% translate 'It is not possible to go from the "To validate IUFC" status to this status.' as from_to_validate_disabled_str %}
-    {% translate 'It is not possible to go from the "validated" status to this status.' as validation_other_disabled_str %}
-    {% translate "Validated" context "decision-checklist" as validated_label %}
-    {% translate 'You can not cancel this application, it is in the "Validated" state. Please contact Noemie Pecher.' as cancel_while_validated_label %}
-    {% if current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'on_hold' %}
-      {% checklist_state_button tab='decision' label=initial_state_label icon='user' state=initial.statut class='muted' open_modal='#decision-to-be-processed-modal' %}
-      {% checklist_state_button tab='decision' label=_("Taken in charge") icon='pencil' state='GEST_EN_COURS' en_cours="taken_in_charge" class='warning' open_modal='#decision-taken-in-charge-modal' %}
-      {% checklist_state_button tab='decision' label=_("Fac approval") icon='circle-arrow-right' state='GEST_EN_COURS' en_cours="fac_approval" class='success' open_modal='#decision-fac-approval-modal' %}
-      {% checklist_state_button tab='decision' label=_("On hold") icon='circle-stop' state='GEST_EN_COURS' en_cours="on_hold" class='info' open_modal='#decision-hold-modal' %}
-      {% checklist_state_button tab='decision' label=_("Denied") icon='circle-stop' state='GEST_BLOCAGE' blocage="denied" class='danger' open_modal='#decision-deny-modal' %}
-      {% checklist_state_button tab='decision' label=_("Canceled") icon='circle-stop' state='GEST_BLOCAGE' blocage="canceled" class='danger' open_modal='#decision-cancel-modal' %}
-      {% checklist_state_button tab='decision' label=_("To validate IUFC") icon='list-check' state='GEST_EN_COURS' en_cours="to_validate" class='info' tooltip=validation_disabled_str|force_escape disabled=True %}
-      {% if not original_admission.is_in_quarantine %}
-        {% checklist_state_button tab='decision' label=validated_label icon='check' state='GEST_REUSSITE' class='success' tooltip=validation_disabled_str|force_escape disabled=True %}
-      {% endif %}
-
-    {% elif current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'fac_approval' %}
-      {% checklist_state_button tab='decision' label=initial_state_label icon='user' state=initial.statut class='muted' open_modal='#decision-to-be-processed-modal' %}
-      {% checklist_state_button tab='decision' label=_("Taken in charge") icon='pencil' state='GEST_EN_COURS' en_cours="taken_in_charge" class='warning' open_modal='#decision-taken-in-charge-modal' %}
-      {% checklist_state_button tab='decision' label=_("Fac approval") icon='circle-arrow-right' state='GEST_EN_COURS' en_cours="fac_approval" class='success' open_modal='#decision-fac-approval-modal' %}
-      {% checklist_state_button tab='decision' label=_("On hold") icon='circle-stop' state='GEST_EN_COURS' en_cours="on_hold" class='info' open_modal='#decision-hold-modal' %}
-      {% checklist_state_button tab='decision' label=_("Denied") icon='circle-stop' state='GEST_BLOCAGE' blocage="denied" class='danger' open_modal='#decision-deny-modal' %}
-      {% checklist_state_button tab='decision' label=_("Canceled") icon='circle-stop' state='GEST_BLOCAGE' blocage="canceled" class='danger' open_modal='#decision-cancel-modal' %}
-      {% checklist_state_button tab='decision' label=_("To validate IUFC") icon='list-check' state='GEST_EN_COURS' en_cours="to_validate" class='info' htmx_post='decision-to-validate' disabled=is_not_iufc %}
-      {% if not original_admission.is_in_quarantine %}
-        {% if is_iufc %}
-          {% checklist_state_button tab='decision' label=validated_label icon='check' state='GEST_REUSSITE' class='success' htmx_post='decision-validation' %}
-        {% else %}
-          {% checklist_state_button tab='decision' label=validated_label icon='check' state='GEST_REUSSITE' class='success' disabled=True %}
-        {% endif %}
-      {% endif %}
-
-    {% elif current.statut == 'GEST_BLOCAGE' and current.extra.blocage == 'denied' %}
-      {% checklist_state_button tab='decision' label=initial_state_label icon='user' state=initial.statut class='muted' open_modal='#decision-to-be-processed-modal' %}
-      {% checklist_state_button tab='decision' label=_("Taken in charge") icon='pencil' state='GEST_EN_COURS' en_cours="taken_in_charge" class='warning' open_modal='#decision-taken-in-charge-modal' %}
-      {% checklist_state_button tab='decision' label=_("Fac approval") icon='circle-arrow-right' state='GEST_EN_COURS' en_cours="fac_approval" class='success' open_modal='#decision-fac-approval-modal' %}
-      {% checklist_state_button tab='decision' label=_("On hold") icon='circle-stop' state='GEST_EN_COURS' en_cours="on_hold" class='info' open_modal='#decision-hold-modal' %}
-      {% checklist_state_button tab='decision' label=_("Denied") icon='circle-stop' state='GEST_BLOCAGE' blocage="denied" class='danger' open_modal='#decision-deny-modal' %}
-      {% checklist_state_button tab='decision' label=_("Canceled") icon='circle-stop' state='GEST_BLOCAGE' blocage="canceled" class='danger' open_modal='#decision-cancel-modal' %}
-      {% checklist_state_button tab='decision' label=_("To validate IUFC") icon='list-check' state='GEST_EN_COURS' en_cours="to_validate" class='info' tooltip=validation_disabled_str|force_escape disabled=True %}
-      {% if not original_admission.is_in_quarantine %}
-        {% checklist_state_button tab='decision' label=validated_label icon='check' state='GEST_REUSSITE' class='success' tooltip=validation_disabled_str|force_escape disabled=True %}
-      {% endif %}
-
-    {% elif current.statut == 'GEST_BLOCAGE' and current.extra.blocage == 'canceled' %}
-      {% checklist_state_button tab='decision' label=initial_state_label icon='user' state=initial.statut class='muted' open_modal='#decision-to-be-processed-modal' %}
-      {% checklist_state_button tab='decision' label=_("Taken in charge") icon='pencil' state='GEST_EN_COURS' en_cours="taken_in_charge" class='warning' open_modal='#decision-taken-in-charge-modal' %}
-      {% checklist_state_button tab='decision' label=_("Fac approval") icon='circle-arrow-right' state='GEST_EN_COURS' en_cours="fac_approval" class='success' open_modal='#decision-fac-approval-modal' %}
-      {% checklist_state_button tab='decision' label=_("On hold") icon='circle-stop' state='GEST_EN_COURS' en_cours="on_hold" class='info' open_modal='#decision-hold-modal' %}
-      {% checklist_state_button tab='decision' label=_("Denied") icon='circle-stop' state='GEST_BLOCAGE' blocage="denied" class='danger' open_modal='#decision-deny-modal' %}
-      {% checklist_state_button tab='decision' label=_("Canceled") icon='circle-stop' state='GEST_BLOCAGE' blocage="canceled" class='danger' open_modal='#decision-cancel-modal' %}
-      {% checklist_state_button tab='decision' label=_("To validate IUFC") icon='list-check' state='GEST_EN_COURS' en_cours="to_validate" class='info' tooltip=validation_disabled_str|force_escape disabled=True %}
-      {% if not original_admission.is_in_quarantine %}
-        {% checklist_state_button tab='decision' label=validated_label icon='check' state='GEST_REUSSITE' class='success' tooltip=validation_disabled_str|force_escape disabled=True %}
-      {% endif %}
-
-    {% elif current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'to_validate' %}
-      {% checklist_state_button tab='decision' label=initial_state_label icon='user' state=initial.statut class='muted' tooltip=from_to_validate_disabled_str|force_escape disabled=True %}
-      {% checklist_state_button tab='decision' label=_("Taken in charge") icon='pencil' state='GEST_EN_COURS' en_cours="taken_in_charge" class='warning' tooltip=from_to_validate_disabled_str|force_escape disabled=True %}
-      {% checklist_state_button tab='decision' label=_("Fac approval") icon='circle-arrow-right' state='GEST_EN_COURS' en_cours="fac_approval" class='success' tooltip=from_to_validate_disabled_str|force_escape disabled=True %}
-      {% checklist_state_button tab='decision' label=_("On hold") icon='circle-stop' state='GEST_EN_COURS' en_cours="on_hold" class='info' tooltip=from_to_validate_disabled_str|force_escape disabled=True %}
-      {% checklist_state_button tab='decision' label=_("Denied") icon='circle-stop' state='GEST_BLOCAGE' blocage="denied" class='danger' tooltip=from_to_validate_disabled_str|force_escape disabled=True %}
-      {% checklist_state_button tab='decision' label=_("Canceled") icon='circle-stop' state='GEST_BLOCAGE' blocage="canceled" class='danger' open_modal='#decision-cancel-modal' %}
-      {% checklist_state_button tab='decision' label=_("To validate IUFC") icon='list-check' state='GEST_EN_COURS' en_cours="to_validate" class='info' disabled=True %}
-      {% if not original_admission.is_in_quarantine %}
-        {% checklist_state_button tab='decision' label=validated_label icon='check' state='GEST_REUSSITE' class='success' htmx_post='decision-validation' disabled=is_not_iufc %}
-      {% endif %}
-
-    {% elif current.statut == 'GEST_REUSSITE' %}
-      {% checklist_state_button tab='decision' label=initial_state_label icon='user' state=initial.statut class='muted' tooltip=validation_other_disabled_str|force_escape disabled=True %}
-      {% checklist_state_button tab='decision' label=_("Taken in charge") icon='pencil' state='GEST_EN_COURS' en_cours="taken_in_charge" class='warning' tooltip=validation_other_disabled_str|force_escape disabled=True %}
-      {% checklist_state_button tab='decision' label=_("Fac approval") icon='circle-arrow-right' state='GEST_EN_COURS' en_cours="fac_approval" class='success' tooltip=validation_other_disabled_str|force_escape disabled=True %}
-      {% checklist_state_button tab='decision' label=_("On hold") icon='circle-stop' state='GEST_EN_COURS' en_cours="on_hold" class='info' tooltip=validation_other_disabled_str|force_escape disabled=True %}
-      {% checklist_state_button tab='decision' label=_("Denied") icon='circle-stop' state='GEST_BLOCAGE' blocage="denied" class='danger' tooltip=validation_other_disabled_str|force_escape disabled=True %}
-      {% if can_cancel_admission_iufc %}
-        {% checklist_state_button tab='decision' label=_("Canceled") icon='circle-stop' state='GEST_BLOCAGE' blocage="canceled" class='danger' open_modal='#decision-cancel-modal' force_enabled=True %}
-      {% else %}
-        {% checklist_state_button tab='decision' label=_("Canceled") icon='circle-stop' state='GEST_BLOCAGE' blocage="canceled" class='danger' tooltip=cancel_while_validated_label|force_escape disabled=True %}
-      {% endif %}
-      {% checklist_state_button tab='decision' label=_("To validate IUFC") icon='list-check' state='GEST_EN_COURS' en_cours="to_validate" class='info' tooltip=validation_disabled_str|force_escape disabled=True %}
-      {% if not original_admission.is_in_quarantine %}
-        {% checklist_state_button tab='decision' label=validated_label icon='check' state='GEST_REUSSITE' class='success' htmx_post='decision-validation' %}
-      {% endif %}
-
-    {% else %}  {# Initial / on hold #}
-      {% checklist_state_button tab='decision' label=initial_state_label icon='user' state=initial.statut class='muted' htmx_post='decision-change-status-to-be-processed' %}
-      {% checklist_state_button tab='decision' label=_("Taken in charge") icon='pencil' state='GEST_EN_COURS' en_cours="taken_in_charge" class='warning' htmx_post='decision-change-status-taken-in-charge' %}
-      {% checklist_state_button tab='decision' label=_("Fac approval") icon='circle-arrow-right' state='GEST_EN_COURS' en_cours="fac_approval" class='success' open_modal='#decision-fac-approval-modal' %}
-      {% checklist_state_button tab='decision' label=_("On hold") icon='circle-stop' state='GEST_EN_COURS' en_cours="on_hold" class='info' open_modal='#decision-hold-modal' %}
-      {% checklist_state_button tab='decision' label=_("Denied") icon='circle-stop' state='GEST_BLOCAGE' blocage="denied" class='danger' open_modal='#decision-deny-modal' %}
-      {% checklist_state_button tab='decision' label=_("Canceled") icon='circle-stop' state='GEST_BLOCAGE' blocage="canceled" class='danger' open_modal='#decision-cancel-modal' %}
-      {% checklist_state_button tab='decision' label=_("To validate IUFC") icon='list-check' state='GEST_EN_COURS' en_cours="to_validate" class='info' tooltip=validation_disabled_str|force_escape disabled=True %}
-      {% if not original_admission.is_in_quarantine %}
-        {% checklist_state_button tab='decision' label=validated_label icon='check' state='GEST_REUSSITE' class='success' tooltip=validation_disabled_str|force_escape disabled=True %}
-      {% endif %}
-    {% endif %}
-
-    {% if original_admission.is_in_quarantine %}
-      {% translate 'The transition to this status is not possible while the application is in quarantine.' as validation_disabled_str %}
-      {% checklist_state_button tab='decision' label=validated_label icon='check' state='GEST_REUSSITE' class='success' tooltip=validation_disabled_str|force_escape disabled=True %}
-    {% endif %}
-
-  </div>
+  {% include 'admission/continuing_education/includes/checklist/decision_statuses.html' %}
 
   {% if is_iufc %}
   <p>

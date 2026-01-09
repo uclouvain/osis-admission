@@ -96,19 +96,17 @@ class ProgramManager(EducationGroupRoleModel):
             'admission.view_admission_person': is_part_of_education_group,
             'admission.change_admission_person': is_part_of_education_group
             & (
-                general.in_fac_status & personal_data_checklist_status_is_not_validated
+                general.in_fac_status
                 | continuing.in_manager_status & ~candidate_has_other_doctorate_or_general_admissions
-                | doctorate.in_fac_status & personal_data_checklist_status_is_not_validated
+                | doctorate.in_fac_status
             )
+            & personal_data_checklist_status_is_not_validated
             & ~is_sent_to_epc
             & ~workflow_injection_signaletique_en_cours,
             'admission.view_admission_coordinates': is_part_of_education_group,
             'admission.change_admission_coordinates': is_part_of_education_group
-            & (
-                general.in_fac_status & personal_data_checklist_status_is_not_validated
-                | continuing.in_manager_status
-                | doctorate.in_fac_status & personal_data_checklist_status_is_not_validated
-            )
+            & (general.in_fac_status | continuing.in_manager_status | doctorate.in_fac_status)
+            & personal_data_checklist_status_is_not_validated
             & ~is_sent_to_epc
             & ~workflow_injection_signaletique_en_cours,
             'admission.view_admission_secondary_studies': is_part_of_education_group,
@@ -204,11 +202,11 @@ class ProgramManager(EducationGroupRoleModel):
             & continuing.is_submitted
             & ~is_sent_to_epc,
             'admission.change_personal_data_checklist_status_to_be_processed': is_part_of_education_group
-            & (general.in_fac_status | doctorate.in_fac_status)
+            & (general.in_fac_status | doctorate.in_fac_status | continuing.is_submitted)
             & personal_data_checklist_status_is_cleaned
             & ~is_sent_to_epc,
             'admission.change_personal_data_checklist_status_cleaned': is_part_of_education_group
-            & (general.in_fac_status | doctorate.in_fac_status)
+            & (general.in_fac_status | doctorate.in_fac_status | continuing.is_submitted)
             & personal_data_checklist_status_is_to_be_processed
             & ~is_sent_to_epc,
             'admission.cancel_admission_iufc': is_part_of_education_group
