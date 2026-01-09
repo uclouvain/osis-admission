@@ -277,7 +277,7 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
             [12, 'Décembre'],
         ]
 
-        year_choices = [['', ' - ']] + [[year, year] for year in range(2023, 1900, -1)]
+        year_choices = [['', ' - ']] + [[year, year] for year in range(2024, 1900, -1)]
 
         # Start date
         self.assertEqual(form['start_date_month'].value(), 1)
