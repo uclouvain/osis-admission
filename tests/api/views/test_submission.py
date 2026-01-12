@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -100,7 +100,6 @@ from base.models.enums.person_address_type import PersonAddressType
 from base.models.enums.state_iufc import StateIUFC
 from base.models.person_address import PersonAddress
 from base.tests import QueriesAssertionsMixin
-from base.tests.factories.academic_year import AcademicYearFactory
 from infrastructure.financabilite.domain.service.financabilite import PASS_ET_LAS_LABEL
 from osis_profile import BE_ISO_CODE
 from osis_profile.models import EducationalExperience, ProfessionalExperience
@@ -190,6 +189,7 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
                 'reglement_general': IElementsConfirmation.REGLEMENT_GENERAL,
                 'protection_donnees': IElementsConfirmation.PROTECTION_DONNEES,
                 'professions_reglementees': IElementsConfirmation.PROFESSIONS_REGLEMENTEES,
+                'verification_donnees_tiers': IElementsConfirmation.VERIFICATION_DONNEES_TIERS,
                 'justificatifs': IElementsConfirmation.JUSTIFICATIFS % {'by_service': _("by the Enrolment Office")},
                 'declaration_sur_lhonneur': IElementsConfirmation.DECLARATION_SUR_LHONNEUR
                 % {'to_service': _("to the UCLouvain Registration Service")},
@@ -313,13 +313,13 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         self.client.force_authenticate(user=self.candidate_ok.user)
 
         # Add a specific period
-        current_specific_enrolment_period = AdmissionMedDentEnrollmentAcademicCalendarFactory(
+        AdmissionMedDentEnrollmentAcademicCalendarFactory(
             data_year=self.admission_ok.determined_academic_year,
             start_date=datetime.date(1980, 2, 1),
             end_date=datetime.date(1980, 2, 15),
         )
 
-        next_specific_enrolment_period = AdmissionMedDentEnrollmentAcademicCalendarFactory(
+        AdmissionMedDentEnrollmentAcademicCalendarFactory(
             data_year__year=self.admission_ok.determined_academic_year.year + 1,
             start_date=datetime.date(1980, 3, 1),
             end_date=datetime.date(1980, 3, 15),
@@ -661,6 +661,7 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
                 'reglement_general': IElementsConfirmation.REGLEMENT_GENERAL,
                 'protection_donnees': IElementsConfirmation.PROTECTION_DONNEES,
                 'professions_reglementees': IElementsConfirmation.PROFESSIONS_REGLEMENTEES,
+                'verification_donnees_tiers': IElementsConfirmation.VERIFICATION_DONNEES_TIERS,
                 'justificatifs': IElementsConfirmation.JUSTIFICATIFS % {'by_service': _("by the Enrolment Office")},
                 'declaration_sur_lhonneur': IElementsConfirmation.DECLARATION_SUR_LHONNEUR
                 % {'to_service': _("to the UCLouvain Registration Service")},
@@ -1078,7 +1079,7 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
         self.assertCountEqual(cc_recipients, [self.first_fac_manager.email, self.second_fac_manager.email])
 
         content = email_object.as_string()
-        self.assertIn(f'{self.admission_ok.candidate.first_name } {self.admission_ok.candidate.last_name}', content)
+        self.assertIn(f'{self.admission_ok.candidate.first_name} {self.admission_ok.candidate.last_name}', content)
         self.assertIn('http://dummyurl/file/foobar', content)
 
         # Check the history entries

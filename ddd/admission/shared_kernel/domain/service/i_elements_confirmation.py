@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -30,14 +30,15 @@ from django.utils.translation import gettext_lazy as _
 
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition as PropositionDoctorale
 from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import ElementsConfirmationNonConcordants
-from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation
 from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition as PropositionContinue
 from admission.ddd.admission.formation_continue.domain.service.i_formation import IFormationContinueTranslator
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition as PropositionGenerale
 from admission.ddd.admission.formation_generale.domain.service.i_formation import IFormationGeneraleTranslator
-from base.models.enums.academic_calendar_type import AcademicCalendarTypes, AcademicCalendarTypes as Pool
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import ElementsConfirmationNonConcordants
+from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes as Pool
 from base.models.enums.education_group_types import TrainingType
 from osis_common.ddd import interface
 
@@ -125,6 +126,12 @@ class IElementsConfirmation(interface.DomainService):
         'my application to the selected diplomatic post (e.g. diplomas, transcripts, enrolment authorisation, etc.) '
         'in order to ensure their authenticity.'
     )
+    VERIFICATION_DONNEES_TIERS = _(
+        'I am aware that UCLouvain reserves the right to consult the centralized database of the French Community of '
+        'Belgium, SIEL-SUP (Student Identification and Enrollment in Higher Education), to verify the data provided '
+        'with the relevant third parties, and to request the original documents constituting my admission file, as '
+        'well as any additional documents (which may be requested at the time of enrollment).'
+    )
     COMMUNICATION_ECOLE_SECONDAIRE = _(
         'UCLouvain to forward to the secondary school at which I obtained my Belgian secondary school, '
         'information relating to the successful completion of the first year of the bachelor\'s course, '
@@ -156,6 +163,7 @@ class IElementsConfirmation(interface.DomainService):
         'convention_cadre_stages': _("Internship Framework Agreement"),
         'communication_hopitaux': _("Communication with Host Hospitals"),
         'documents_etudes_contingentees': _("Documents specific to limited-enrolment courses"),
+        'verification_donnees_tiers': _("Data verification with third parties"),
         'communication_ecole_secondaire': _("Communication with your secondary school"),
         'justificatifs': _("Supporting documents"),
         'declaration_sur_lhonneur': _("I hereby declare that"),
@@ -293,6 +301,15 @@ class IElementsConfirmation(interface.DomainService):
                     nom='visa',
                     titre=cls.TITRE_ELEMENT_CONFIRMATION['visa'],
                     texte=cls.VISA,
+                )
+            )
+
+        if isinstance(proposition, PropositionGenerale):
+            elements.append(
+                ElementConfirmation(
+                    nom='verification_donnees_tiers',
+                    titre=cls.TITRE_ELEMENT_CONFIRMATION['verification_donnees_tiers'],
+                    texte=cls.VERIFICATION_DONNEES_TIERS,
                 )
             )
 
