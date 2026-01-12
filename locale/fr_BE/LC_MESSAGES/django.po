@@ -2088,6 +2088,9 @@ msgstr "Indicateur du tableau de bord"
 msgid "Data protection"
 msgstr "Protection des données"
 
+msgid "Data verification with third parties"
+msgstr "Vérification de données auprès de tiers"
+
 msgid "Date"
 msgstr "Date"
 
@@ -3654,6 +3657,16 @@ msgstr "Je suis apatride"
 
 msgid "I am an asylum seeker"
 msgstr "Je suis demandeur d’asile"
+
+msgid ""
+"I am aware that UCLouvain reserves the right to consult the centralized "
+"database of the French Community of Belgium, SIEL-SUP (Student "
+"Identification and Enrollment in Higher Education), to verify the data "
+"provided with the relevant third parties, and to request the original "
+"documents constituting my admission file, as well as any additional "
+"documents (which may be requested at the time of enrollment)."
+msgstr ""
+"J'autorise l'UCLouvain à consulter la base de données centralisée de la Communauté française de Belgique SIEL-SUP (Signalétique et Inscriptions des Étudiants de l'Enseignement Supérieur), vérifier les données fournies auprès des tiers concernés et réclamer les documents originaux constituant mon dossier d'admission, ainsi que tout document complémentaire (qui pourrait être réclamé au moment de l'inscription)."
 
 msgid ""
 "I am aware that as an applicant without a European Union nationality or "
