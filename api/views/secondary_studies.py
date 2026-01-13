@@ -23,9 +23,11 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import uuid
 from functools import partial
 
 from drf_spectacular.utils import extend_schema, extend_schema_view
+from osis_document_components.utils import is_uuid
 from rest_framework import mixins
 from rest_framework.generics import GenericAPIView
 
@@ -71,7 +73,8 @@ class BaseSecondaryStudiesViewSet(
                         form_item=form_items[form_item_uuid],
                         defaults={
                             'file': (
-                                answer if form_items[form_item_uuid].type == TypeItemFormulaire.DOCUMENT.name else None
+                                [uuid.UUID(value) if is_uuid(value) else value for value in answer]
+                                if form_items[form_item_uuid].type == TypeItemFormulaire.DOCUMENT.name else None
                             ),
                             'answer': (
                                 answer if form_items[form_item_uuid].type != TypeItemFormulaire.DOCUMENT.name else None
