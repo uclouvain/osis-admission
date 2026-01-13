@@ -735,6 +735,8 @@ class ApprouverAdmissionParSicValidatorList(TwoStepsMultipleBusinessExceptionLis
     checklist: StatutsChecklistDoctorale
     documents_dto: List[EmplacementDocumentDTO]
 
+    statut_validation_donnees_personnelles: str
+
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
@@ -744,7 +746,7 @@ class ApprouverAdmissionParSicValidatorList(TwoStepsMultipleBusinessExceptionLis
                 statut=self.statut,
             ),
             ShouldDonneesPersonnellesEtreDansEtatCorrectPourApprouverDemande(
-                checklist_actuelle=self.checklist,
+                statut_validation_donnees_personnelles=self.statut_validation_donnees_personnelles,
             ),
             ShouldDecisionCddEtreDansEtatCorrectPourApprouverDemande(
                 checklist_actuelle=self.checklist,
@@ -770,6 +772,8 @@ class ApprouverInscriptionParSicValidatorList(TwoStepsMultipleBusinessExceptionL
 
     documents_dto: List[EmplacementDocumentDTO]
 
+    statut_validation_donnees_personnelles: str
+
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
@@ -779,7 +783,7 @@ class ApprouverInscriptionParSicValidatorList(TwoStepsMultipleBusinessExceptionL
                 statut=self.statut,
             ),
             ShouldDonneesPersonnellesEtreDansEtatCorrectPourApprouverDemande(
-                checklist_actuelle=self.checklist,
+                statut_validation_donnees_personnelles=self.statut_validation_donnees_personnelles,
             ),
             ShouldDecisionCddEtreDansEtatCorrectPourApprouverDemande(
                 checklist_actuelle=self.checklist,

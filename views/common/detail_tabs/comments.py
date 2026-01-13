@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 # ##############################################################################
 import json
 
+from django.db.models import Q
 from django.views.generic import TemplateView
 from osis_comment.contrib.mixins import CommentEntryAPIMixin
 from osis_comment.models import CommentEntry
@@ -37,24 +38,24 @@ from admission.auth.roles.program_manager import (
 )
 from admission.auth.roles.sic_management import SicManagement
 from admission.constants import COMMENT_TAG_FAC, COMMENT_TAG_GLOBAL, COMMENT_TAG_SIC
-from admission.ddd.admission.shared_kernel.commands import (
-    RechercherParcoursAnterieurQuery,
-    RecupererEtudesSecondairesQuery,
-)
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     OngletsChecklist as DoctoratOngletsChecklist,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     CurriculumAdmissionDTO,
 )
-from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
-    ExperiencesCVRecuperees,
-)
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     OngletsChecklist as ContinueOngletsChecklist,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     OngletsChecklist as GeneralOngletsChecklist,
+)
+from admission.ddd.admission.shared_kernel.commands import (
+    RechercherParcoursAnterieurQuery,
+    RecupererEtudesSecondairesQuery,
+)
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
+    ExperiencesCVRecuperees,
 )
 from admission.views.common.mixins import LoadDossierViewMixin
 from backoffice.settings.base import CKEDITOR_CONFIGS
@@ -89,6 +90,8 @@ class AdmissionCommentsView(LoadDossierViewMixin, TemplateView):
         context['COMMENT_TAG_FAC'] = f'{COMMENT_TAG_FAC},{COMMENT_TAG_GLOBAL}'
         context['COMMENT_TAG_SIC'] = f'{COMMENT_TAG_SIC},{COMMENT_TAG_GLOBAL}'
 
+        profile_tabs = []
+
         if self.is_general or self.is_doctorate:
             if self.is_doctorate:
                 context['CHECKLIST_TABS_WITH_SIC_AND_FAC_COMMENTS'] = {
@@ -98,11 +101,17 @@ class AdmissionCommentsView(LoadDossierViewMixin, TemplateView):
                 context['checklist_tags'] = DoctoratOngletsChecklist.choices_except(
                     DoctoratOngletsChecklist.experiences_parcours_anterieur
                 )
+                profile_tabs = [
+                    DoctoratOngletsChecklist.donnees_personnelles.name,
+                ]
             else:
                 context['CHECKLIST_TABS_WITH_SIC_AND_FAC_COMMENTS'] = {GeneralOngletsChecklist.decision_facultaire.name}
                 context['checklist_tags'] = GeneralOngletsChecklist.choices_except(
                     GeneralOngletsChecklist.experiences_parcours_anterieur
                 )
+                profile_tabs = [
+                    GeneralOngletsChecklist.donnees_personnelles.name,
+                ]
 
             # Get the names of every experience
             curriculum: CurriculumAdmissionDTO = message_bus_instance.invoke(
@@ -136,11 +145,25 @@ class AdmissionCommentsView(LoadDossierViewMixin, TemplateView):
 
         elif self.is_continuing:
             context['checklist_tags'] = ContinueOngletsChecklist.choices()
+            profile_tabs = [
+                ContinueOngletsChecklist.donnees_personnelles.name,
+            ]
+
+        admission_tabs = [tab[0] for tab in context['checklist_tags'] if tab[0] not in profile_tabs]
 
         # Load the non-editable comments
         context['comments'] = {
             '__'.join(comment.tags): comment
-            for comment in CommentEntry.objects.filter(object_uuid=self.admission_uuid).select_related('author')
+            for comment in CommentEntry.objects.filter(
+                Q(
+                    object_uuid=self.admission_uuid,
+                    tags__overlap=admission_tabs,
+                )
+                | Q(
+                    object_uuid=self.admission.candidate.uuid,
+                    tags__overlap=profile_tabs,
+                )
+            ).select_related('author')
         }
 
         return context
@@ -148,9 +171,9 @@ class AdmissionCommentsView(LoadDossierViewMixin, TemplateView):
 
 class AdmissionCommentApiView(CommentEntryAPIMixin):
     urlpatterns = {
-        'sic-comments': [f"sic-comments", f"sic-comments/<uuid:comment_uuid>"],
-        'fac-comments': [f"fac-comments", f"fac-comments/<uuid:comment_uuid>"],
-        'other-comments': [f"other-comments", f"other-comments/<uuid:comment_uuid>"],
+        'sic-comments': ["sic-comments", "sic-comments/<uuid:comment_uuid>"],
+        'fac-comments': ["fac-comments", "fac-comments/<uuid:comment_uuid>"],
+        'other-comments': ["other-comments", "other-comments/<uuid:comment_uuid>"],
     }
     roles = {
         'sic-comments': {SicManagement, CentralManager},

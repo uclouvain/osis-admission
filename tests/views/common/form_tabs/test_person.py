@@ -72,6 +72,7 @@ from admission.tests.factories.roles import (
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.enums.civil_state import CivilState
 from base.models.enums.person_address_type import PersonAddressType
+from base.models.enums.personal_data import ChoixStatutValidationDonneesPersonnelles
 from base.models.person import Person
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
@@ -208,6 +209,10 @@ class AdmissionPersonFormTestCase(TestCase):
         self.doctorate_admission.status = ChoixStatutPropositionDoctorale.CONFIRMEE.name
         self.general_admission.save(update_fields=['status'])
         self.doctorate_admission.save(update_fields=['status'])
+        self.general_admission.candidate.personal_data_validation_status = (
+            ChoixStatutValidationDonneesPersonnelles.A_TRAITER.name
+        )
+        self.general_admission.candidate.save(update_fields=['personal_data_validation_status'])
 
     def test_already_registered_field_initialization(self):
         form = AdmissionPersonForm(
@@ -272,8 +277,10 @@ class AdmissionPersonFormTestCase(TestCase):
         response = self.client.get(self.general_url)
         self.assertEqual(response.status_code, 200)
 
-        self.general_admission.checklist['current']['donnees_personnelles']['statut'] = 'GEST_REUSSITE'
-        self.general_admission.save()
+        self.general_admission.candidate.personal_data_validation_status = (
+            ChoixStatutValidationDonneesPersonnelles.VALIDEES.name
+        )
+        self.general_admission.candidate.save()
 
         response = self.client.get(self.general_url)
         self.assertEqual(response.status_code, 403)
@@ -512,14 +519,18 @@ class AdmissionPersonFormTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-        other_continuing_admission.checklist['current']['donnees_personnelles']['statut'] = 'GEST_REUSSITE'
-        other_continuing_admission.save()
+        other_continuing_admission.candidate.personal_data_validation_status = (
+            ChoixStatutValidationDonneesPersonnelles.VALIDEES.name
+        )
+        other_continuing_admission.candidate.save()
 
         url = resolve_url('admission:continuing-education:update:person', uuid=other_continuing_admission.uuid)
 
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, 403)
+
+        other_continuing_admission.delete()
 
         doctorate_admission = DoctorateAdmissionFactory(
             candidate=self.continuing_admission.candidate,
@@ -605,8 +616,10 @@ class AdmissionPersonFormTestCase(TestCase):
         response = self.client.get(self.doctorate_url)
         self.assertEqual(response.status_code, 200)
 
-        self.doctorate_admission.checklist['current']['donnees_personnelles']['statut'] = 'GEST_REUSSITE'
-        self.doctorate_admission.save()
+        self.doctorate_admission.candidate.personal_data_validation_status = (
+            ChoixStatutValidationDonneesPersonnelles.VALIDEES.name
+        )
+        self.doctorate_admission.candidate.save()
 
         response = self.client.get(self.doctorate_url)
         self.assertEqual(response.status_code, 403)

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -43,6 +43,7 @@ from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import (
     EtudesSecondairesAdmissionDTO,
 )
 from base.models.enums.civil_state import CivilState
+from base.models.enums.personal_data import ChoixStatutValidationDonneesPersonnelles
 from base.tests.factories.person import generate_global_id
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     ValorisationEtudesSecondairesDTO,
@@ -88,6 +89,7 @@ class IdentificationDTOFactory(factory.Factory):
     nom_langue_contact = 'Français'
     date_expiration_passeport = factory.Faker('date')
     date_expiration_carte_identite = factory.Faker('date')
+    statut_validation_donnees_personnelles = ChoixStatutValidationDonneesPersonnelles.A_TRAITER.name
 
 
 class AdressePersonnelleDTOFactory(factory.Factory):

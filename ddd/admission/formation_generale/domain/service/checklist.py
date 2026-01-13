@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -29,12 +29,6 @@ from typing import Optional
 
 from django.utils.translation import gettext_noop as _
 
-from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import EtatAuthentificationParcours
-from admission.ddd.admission.shared_kernel.domain.model.formation import Formation
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.shared_kernel.dtos import IdentificationDTO
-from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation, Onglets
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
     ChoixStatutPropositionGenerale,
@@ -47,6 +41,12 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
 from admission.ddd.admission.formation_generale.domain.service.i_question_specifique import (
     IQuestionSpecifiqueTranslator,
 )
+from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import EtatAuthentificationParcours
+from admission.ddd.admission.shared_kernel.domain.model.formation import Formation
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.shared_kernel.dtos import IdentificationDTO
+from admission.ddd.admission.shared_kernel.enums import Onglets, TypeSituationAssimilation
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from osis_common.ddd import interface
 
@@ -126,10 +126,6 @@ class Checklist(interface.DomainService):
         )
 
         return StatutsChecklistGenerale(
-            donnees_personnelles=StatutChecklist(
-                libelle=_("To be processed"),
-                statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
-            ),
             assimilation=StatutChecklist(
                 libelle=_("Not concerned")
                 if identification_dto.pays_nationalite_europeen

@@ -1592,10 +1592,6 @@ msgstr "Réclamation annulée le"
 msgid "Cleaned"
 msgstr "Toiletté"
 
-msgctxt "plural"
-msgid "Cleaned"
-msgstr "Toilettées"
-
 msgid "Clear the reason"
 msgstr "Effacer le motif"
 
@@ -3383,6 +3379,9 @@ msgstr "Fraudeur"
 msgid "Fraudster status from ARES"
 msgstr "Statut fraudeur d'après l'ARES"
 
+msgid "Fraudster status from SIC"
+msgstr "Statut fraudeur d'après SIC"
+
 msgid "Free additional approval condition"
 msgstr "Condition complémentaire d'acceptation libre"
 
@@ -5054,6 +5053,9 @@ msgstr "Aucune formation n'a été trouvée pour :"
 
 msgid "No enrolment application"
 msgstr "Aucune demande d'inscription n'a été trouvée"
+
+msgid "No fraud identified"
+msgstr "Pas de fraude identifiée"
 
 msgid "No general enrolment"
 msgstr "Aucune inscription en formation générale n'a été trouvée"
@@ -8104,6 +8106,9 @@ msgstr "Inconnu·e"
 msgid "Unknown PDF type."
 msgstr "Type de PDF inconnu."
 
+msgid "Unknown author"
+msgstr "Auteur inconnu"
+
 msgid "Unknown citizenship"
 msgstr "Nationalité inconnue"
 
@@ -8168,10 +8173,6 @@ msgstr "Validée"
 msgctxt "decision-checklist"
 msgid "Validated"
 msgstr "Validée"
-
-msgctxt "plural"
-msgid "Validated"
-msgstr "Validées"
 
 msgid "Valuated diplomas or experiences:"
 msgstr "Diplômes ou expériences valorisées :"
@@ -8935,6 +8936,9 @@ msgstr "année académique"
 
 msgid "actions"
 msgstr "actions"
+
+msgid "an unknown author"
+msgstr "un auteur inconnu"
 
 msgid "approval"
 msgstr "accord"

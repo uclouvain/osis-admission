@@ -24,10 +24,12 @@
 #
 # ##############################################################################
 import datetime
+import itertools
 from typing import Dict, List, Set
 
 import attr
 from django.conf import settings
+from django.db.models import Q
 from django.shortcuts import resolve_url
 from django.template.defaultfilters import truncatechars
 from django.utils.functional import cached_property
@@ -245,21 +247,30 @@ class ChecklistView(
             )
 
             # Initialize forms
-            tab_names = list(self.extra_context['checklist_tabs'].keys())
+            profile_tabs = [
+                OngletsChecklist.donnees_personnelles.name,
+            ]
+            admission_tabs = list(tab for tab in self.extra_context['checklist_tabs'] if tab not in profile_tabs)
 
             comments = {
                 ('__'.join(c.tags)): c
                 for c in CommentEntry.objects.filter(
-                    object_uuid=self.admission_uuid,
-                    tags__overlap=tab_names,
+                    Q(
+                        object_uuid=self.admission_uuid,
+                        tags__overlap=admission_tabs,
+                    )
+                    | Q(
+                        object_uuid=self.admission.candidate.uuid,
+                        tags__overlap=profile_tabs,
+                    ),
                 ).select_related('author')
             }
 
             for tab in TABS_WITH_SIC_AND_FAC_COMMENTS:
-                tab_names.remove(tab)
-                tab_names += [f'{tab}__{COMMENT_TAG_SIC_FOR_CDD}', f'{tab}__{COMMENT_TAG_CDD_FOR_SIC}']
-            tab_names.append('decision_sic__derogation')
-            tab_names.append('financabilite__derogation')
+                admission_tabs.remove(tab)
+                admission_tabs += [f'{tab}__{COMMENT_TAG_SIC_FOR_CDD}', f'{tab}__{COMMENT_TAG_CDD_FOR_SIC}']
+            admission_tabs.append('decision_sic__derogation')
+            admission_tabs.append('financabilite__derogation')
 
             comments_permissions = {
                 'financabilite__derogation': 'admission.checklist_change_fac_comment',
@@ -269,11 +280,16 @@ class ChecklistView(
             context['comment_forms'] = {
                 tab_name: CommentForm(
                     comment=comments.get(tab_name, None),
-                    form_url=resolve_url(f'{self.base_namespace}:save-comment', uuid=self.admission_uuid, tab=tab_name),
+                    form_url=resolve_url(
+                        f'{self.base_namespace}:save-comment',
+                        uuid=self.admission_uuid,
+                        object_uuid=self.admission.candidate.uuid if tab_name in profile_tabs else self.admission_uuid,
+                        tab=tab_name,
+                    ),
                     prefix=tab_name,
                     permission=comments_permissions.get(tab_name, None),
                 )
-                for tab_name in tab_names
+                for tab_name in itertools.chain(admission_tabs, profile_tabs)
             }
             context['assimilation_form'] = AssimilationForm(
                 initial=self.admission.checklist.get('current', {}).get('assimilation', {}).get('extra'),
@@ -412,6 +428,7 @@ class ChecklistView(
                     form_url=resolve_url(
                         f'{self.base_namespace}:save-comment',
                         uuid=self.admission_uuid,
+                        object_uuid=self.admission_uuid,
                         tab=tab_identifier,
                     ),
                     prefix=tab_identifier,
@@ -422,6 +439,7 @@ class ChecklistView(
                     form_url=resolve_url(
                         f'{self.base_namespace}:save-comment',
                         uuid=self.admission_uuid,
+                        object_uuid=self.admission_uuid,
                         tab=authentication_comment_identifier,
                     ),
                     prefix=authentication_comment_identifier,

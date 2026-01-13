@@ -45,6 +45,7 @@ from admission.tests.factories.roles import (
     SicManagementRoleFactory,
 )
 from base.models.enums.person_address_type import PersonAddressType
+from base.models.enums.personal_data import ChoixStatutValidationDonneesPersonnelles
 from base.models.person import Person
 from base.models.person_address import PersonAddress
 from base.tests.factories.academic_year import AcademicYearFactory
@@ -130,6 +131,10 @@ class CoordonneesFormTestCase(TestCase):
         self.doctorate_admission.status = ChoixStatutPropositionDoctorale.CONFIRMEE.name
         self.general_admission.save(update_fields=['status'])
         self.doctorate_admission.save(update_fields=['status'])
+        self.general_admission.candidate.personal_data_validation_status = (
+            ChoixStatutValidationDonneesPersonnelles.A_TRAITER.name
+        )
+        self.general_admission.candidate.save(update_fields=['personal_data_validation_status'])
 
     def test_general_coordinates_form_on_get_program_manager(self):
         self.client.force_login(user=self.general_manager_user)
@@ -146,8 +151,10 @@ class CoordonneesFormTestCase(TestCase):
         response = self.client.get(self.general_url)
         self.assertEqual(response.status_code, 200)
 
-        self.general_admission.checklist['current']['donnees_personnelles']['statut'] = 'GEST_REUSSITE'
-        self.general_admission.save()
+        self.general_admission.candidate.personal_data_validation_status = (
+            ChoixStatutValidationDonneesPersonnelles.VALIDEES.name
+        )
+        self.general_admission.candidate.save()
 
         response = self.client.get(self.general_url)
         self.assertEqual(response.status_code, 403)
@@ -524,8 +531,10 @@ class CoordonneesFormTestCase(TestCase):
             status=ChoixStatutPropositionContinue.CONFIRMEE.name,
         )
 
-        other_continuing_admission.checklist['current']['donnees_personnelles']['statut'] = 'GEST_REUSSITE'
-        other_continuing_admission.save()
+        other_continuing_admission.candidate.personal_data_validation_status = (
+            ChoixStatutValidationDonneesPersonnelles.VALIDEES.name
+        )
+        other_continuing_admission.candidate.save()
 
         url = resolve_url('admission:continuing-education:update:person', uuid=other_continuing_admission.uuid)
 
@@ -598,8 +607,10 @@ class CoordonneesFormTestCase(TestCase):
         response = self.client.get(self.doctorate_url)
         self.assertEqual(response.status_code, 200)
 
-        self.doctorate_admission.checklist['current']['donnees_personnelles']['statut'] = 'GEST_REUSSITE'
-        self.doctorate_admission.save()
+        self.doctorate_admission.candidate.personal_data_validation_status = (
+            ChoixStatutValidationDonneesPersonnelles.VALIDEES.name
+        )
+        self.doctorate_admission.candidate.save()
 
         response = self.client.get(self.doctorate_url)
         self.assertEqual(response.status_code, 403)

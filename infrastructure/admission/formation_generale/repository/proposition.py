@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     BesoinDeDerogationDelegueVrae,
     ChoixStatutPropositionGenerale,
     DerogationFinancement,
-    PoursuiteDeCycle, ChoixStatutChecklist,
+    PoursuiteDeCycle,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import (
     Proposition,
@@ -124,14 +124,15 @@ from admission.models import (
     AdmissionFormItem,
     GeneralEducationAdmissionProxy,
 )
-from admission.models.specific_question import SpecificQuestionAnswer
 from admission.models.checklist import FreeAdditionalApprovalCondition, RefusalReason
 from admission.models.general_education import GeneralEducationAdmission
+from admission.models.specific_question import SpecificQuestionAnswer
 from base.models.academic_year import AcademicYear
 from base.models.campus import Campus as CampusDb
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
+from base.models.enums.personal_data import ChoixStatutValidationDonneesPersonnelles
 from base.models.person import Person
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
@@ -942,7 +943,6 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
         is_french_language = get_language() == settings.LANGUAGE_CODE_FR
         proposition = cls._load_dto(admission)
         poursuite_de_cycle_a_specifier = proposition.formation.type == TrainingType.BACHELOR.name
-        checklist_actuelle = admission.checklist.get('current')
 
         return PropositionGestionnaireDTO(
             **dto_to_dict(proposition),
@@ -979,10 +979,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             candidat_assimile=admission.accounting
             and admission.accounting.assimilation_situation
             and admission.accounting.assimilation_situation != TypeSituationAssimilation.AUCUNE_ASSIMILATION.name,
-            est_fraudeur=(
-                checklist_actuelle['donnees_personnelles']['statut'] == ChoixStatutChecklist.GEST_BLOCAGE.name
-                and checklist_actuelle['donnees_personnelles']['extra'].get('fraud') == '1'
-            ) if checklist_actuelle else False,
+            est_fraudeur=admission.candidate.personal_data_validation_status
+            == ChoixStatutValidationDonneesPersonnelles.FRAUDEUR.name,
             est_inscription_tardive=admission.late_enrollment,
             profil_soumis_candidat=(
                 ProfilCandidatDTO.from_dict(

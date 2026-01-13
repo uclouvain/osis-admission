@@ -40,6 +40,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
 from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
     EtatAuthentificationParcours,
 )
+from base.models.enums.personal_data import ChoixStatutValidationDonneesPersonnelles
 from osis_common.ddd import interface
 
 
@@ -71,7 +72,6 @@ class StatutChecklist(interface.ValueObject):
 
 @attr.dataclass
 class StatutsChecklistDoctorale:
-    donnees_personnelles: StatutChecklist
     assimilation: StatutChecklist
     parcours_anterieur: StatutChecklist
     financabilite: StatutChecklist
@@ -140,6 +140,12 @@ class ConfigurationStatutChecklist(interface.ValueObject):
             identifiant_parent=self.identifiant_parent,
         )
 
+    def to_dict(self):
+        return {
+            'extra': self.extra,
+            'statut': self.statut.name,
+        }
+
 
 @attr.dataclass
 class ConfigurationOngletChecklist(interface.ValueObject):
@@ -156,30 +162,37 @@ onglet_donnees_personnelles = ConfigurationOngletChecklist(
     identifiant=OngletsChecklist.donnees_personnelles,
     statuts=[
         ConfigurationStatutChecklist(
-            identifiant='A_TRAITER',
-            libelle=_('To be processed'),
+            identifiant=ChoixStatutValidationDonneesPersonnelles.A_TRAITER.name,
+            libelle=ChoixStatutValidationDonneesPersonnelles.A_TRAITER.value,
             statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
         ),
         ConfigurationStatutChecklist(
-            identifiant='TOILETTEES',
-            libelle=pgettext_lazy('plural', 'Cleaned'),
+            identifiant=ChoixStatutValidationDonneesPersonnelles.TOILETTEES.name,
+            libelle=ChoixStatutValidationDonneesPersonnelles.TOILETTEES.value,
             statut=ChoixStatutChecklist.GEST_EN_COURS,
+            extra={'en_cours': 'cleaned'},
         ),
         ConfigurationStatutChecklist(
-            identifiant='A_COMPLETER',
-            libelle=_('To be completed'),
+            identifiant=ChoixStatutValidationDonneesPersonnelles.A_COMPLETER.name,
+            libelle=ChoixStatutValidationDonneesPersonnelles.A_COMPLETER.value,
             statut=ChoixStatutChecklist.GEST_BLOCAGE,
             extra={'fraud': '0'},
         ),
         ConfigurationStatutChecklist(
-            identifiant='FRAUDEUR',
-            libelle=_('Fraudster'),
+            identifiant=ChoixStatutValidationDonneesPersonnelles.AVIS_EXPERT.name,
+            libelle=ChoixStatutValidationDonneesPersonnelles.AVIS_EXPERT.value,
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+            extra={'en_cours': 'expert_opinion'},
+        ),
+        ConfigurationStatutChecklist(
+            identifiant=ChoixStatutValidationDonneesPersonnelles.FRAUDEUR.name,
+            libelle=ChoixStatutValidationDonneesPersonnelles.FRAUDEUR.value,
             statut=ChoixStatutChecklist.GEST_BLOCAGE,
             extra={'fraud': '1'},
         ),
         ConfigurationStatutChecklist(
-            identifiant='VALIDEES',
-            libelle=pgettext_lazy('plural', 'Validated'),
+            identifiant=ChoixStatutValidationDonneesPersonnelles.VALIDEES.name,
+            libelle=ChoixStatutValidationDonneesPersonnelles.VALIDEES.value,
             statut=ChoixStatutChecklist.GEST_REUSSITE,
         ),
     ],
