@@ -109,10 +109,6 @@ class TestVerifierPropositionServiceCommun(TestCase):
 
         # Check the checklist values
         self.assertEqual(
-            updated_proposition.checklist_initiale.donnees_personnelles.statut,
-            ChoixStatutChecklist.INITIAL_CANDIDAT,
-        )
-        self.assertEqual(
             updated_proposition.checklist_initiale.assimilation.statut,
             ChoixStatutChecklist.INITIAL_NON_CONCERNE,
         )

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,21 +23,23 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+import itertools
 from typing import Dict, List, Set
 
+from django.db.models import Q
 from django.shortcuts import resolve_url
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, TemplateView
 from osis_comment.models import CommentEntry
 
+from admission.ddd.admission.formation_continue.commands import (
+    RecupererResumeEtEmplacementsDocumentsPropositionQuery,
+)
+from admission.ddd.admission.formation_continue.domain.model.enums import OngletsChecklist
 from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.shared_kernel.dtos.resume import (
     ResumeEtEmplacementsDocumentsPropositionDTO,
-)
-from admission.ddd.admission.formation_continue.commands import (
-    RecupererResumeEtEmplacementsDocumentsPropositionQuery,
 )
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
 from admission.forms.admission.checklist import CommentForm
@@ -129,8 +131,6 @@ class ChecklistView(
         return ["admission/continuing_education/checklist.html"]
 
     def get_context_data(self, **kwargs):
-        from infrastructure.messages_bus import message_bus_instance
-
         context = super().get_context_data(**kwargs)
         if not self.request.htmx:
             # Retrieve data related to the proposition
@@ -143,20 +143,37 @@ class ChecklistView(
             context['specific_questions_by_tab'] = get_dynamic_questions_by_tab(specific_questions)
 
             # Initialize forms
-            tab_names = list(self.extra_context['checklist_tabs'].keys())
+            profile_tabs = [
+                OngletsChecklist.donnees_personnelles.name,
+            ]
+            admission_tabs = list(tab for tab in self.extra_context['checklist_tabs'] if tab not in profile_tabs)
 
             comments = {
                 ('__'.join(c.tags)): c
-                for c in CommentEntry.objects.filter(object_uuid=self.admission_uuid, tags__overlap=tab_names)
+                for c in CommentEntry.objects.filter(
+                    Q(
+                        object_uuid=self.admission_uuid,
+                        tags__overlap=admission_tabs,
+                    )
+                    | Q(
+                        object_uuid=self.admission.candidate.uuid,
+                        tags__overlap=profile_tabs,
+                    ),
+                )
             }
 
             context['comment_forms'] = {
                 tab_name: CommentForm(
                     comment=comments.get(tab_name, None),
-                    form_url=resolve_url(f'{self.base_namespace}:save-comment', uuid=self.admission_uuid, tab=tab_name),
+                    form_url=resolve_url(
+                        f'{self.base_namespace}:save-comment',
+                        uuid=self.admission_uuid,
+                        object_uuid=self.admission.candidate.uuid if tab_name in profile_tabs else self.admission_uuid,
+                        tab=tab_name,
+                    ),
                     prefix=tab_name,
                 )
-                for tab_name in tab_names
+                for tab_name in itertools.chain(admission_tabs, profile_tabs)
             }
 
             # Documents

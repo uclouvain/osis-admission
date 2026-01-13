@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -74,6 +74,7 @@ from admission.tests.factories.roles import (
 )
 from admission.tests.views.doctorate.checklist.sic_decision.base import SicPatchMixin
 from base.models.enums.mandate_type import MandateTypes
+from base.models.enums.personal_data import ChoixStatutValidationDonneesPersonnelles
 from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
@@ -147,6 +148,7 @@ class SicApprovalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
                 country_of_citizenship__european_union=True,
                 graduated_from_high_school_year=AcademicYearFactory(current=True),
                 private_email='foo@bar',
+                personal_data_validation_status=ChoixStatutValidationDonneesPersonnelles.VALIDEES.name,
             ),
             status=ChoixStatutPropositionDoctorale.ATTENTE_VALIDATION_DIRECTION.name,
             with_prerequisite_courses=False,
@@ -158,7 +160,6 @@ class SicApprovalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
             communication_to_the_candidate='',
         )
         self.admission.checklist['current']['parcours_anterieur']['statut'] = ChoixStatutChecklist.GEST_REUSSITE.name
-        self.admission.checklist['current']['donnees_personnelles']['statut'] = ChoixStatutChecklist.GEST_REUSSITE.name
         self.admission.checklist['current']['decision_cdd']['statut'] = ChoixStatutChecklist.GEST_REUSSITE.name
         self.admission.checklist['current']['financabilite']['statut'] = ChoixStatutChecklist.GEST_REUSSITE.name
         self.admission.checklist['current']['financabilite']['extra'] = {'reussite': 'financable'}
@@ -486,7 +487,7 @@ class SicApprovalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
         email_notification.delete()
 
         # From the Student model
-        student = StudentFactory(
+        StudentFactory(
             person=self.admission.candidate,
             registration_id='123456789',
         )

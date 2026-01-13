@@ -38,6 +38,7 @@ from admission.auth.scope import Scope
 from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
 from admission.models import DoctorateAdmission, GeneralEducationAdmission
 from admission.models.base import BaseAdmission
+from base.models.enums.personal_data import ChoixStatutValidationDonneesPersonnelles
 from osis_role.errors import predicate_failed_msg
 
 
@@ -231,7 +232,7 @@ def past_experiences_checklist_tab_is_not_sufficient(
     message=_("The \"Personal data\" checklist tab must be in the \"Cleaned\" status in order to do this action.")
 )
 def personal_data_checklist_status_is_cleaned(self, user: User, obj: BaseAdmission):
-    return obj.checklist.get('current', {}).get('donnees_personnelles', {}).get('statut') == 'GEST_EN_COURS'
+    return obj.candidate.personal_data_validation_status == ChoixStatutValidationDonneesPersonnelles.TOILETTEES.name
 
 
 @predicate(bind=True)
@@ -241,7 +242,7 @@ def personal_data_checklist_status_is_cleaned(self, user: User, obj: BaseAdmissi
     )
 )
 def personal_data_checklist_status_is_to_be_processed(self, user: User, obj: BaseAdmission):
-    return obj.checklist.get('current', {}).get('donnees_personnelles', {}).get('statut') == 'INITIAL_CANDIDAT'
+    return obj.candidate.personal_data_validation_status == ChoixStatutValidationDonneesPersonnelles.A_TRAITER.name
 
 
 @predicate(bind=True)
@@ -249,4 +250,4 @@ def personal_data_checklist_status_is_to_be_processed(self, user: User, obj: Bas
     message=_("The \"Personal data\" checklist tab must not be in the \"Validated\" status in order to do this action.")
 )
 def personal_data_checklist_status_is_not_validated(self, user: User, obj: BaseAdmission):
-    return obj.checklist.get('current', {}).get('donnees_personnelles', {}).get('statut') != 'GEST_REUSSITE'
+    return obj.candidate.personal_data_validation_status != ChoixStatutValidationDonneesPersonnelles.VALIDEES.name

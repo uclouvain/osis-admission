@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -116,7 +116,7 @@ from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     ExperienceNonTrouveeException,
 )
-from admission.ddd.admission.shared_kernel.dtos import EtudesSecondairesAdmissionDTO
+from admission.ddd.admission.shared_kernel.dtos import EtudesSecondairesAdmissionDTO, IdentificationDTO
 from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
     EmplacementDocumentDTO,
 )
@@ -1205,6 +1205,7 @@ class Proposition(interface.RootEntity):
         experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
         grade_academique_formation_proposition: str,
         annee_formation: AcademicYear,
+        identification_dto: IdentificationDTO,
     ):
         if self.type_demande == TypeDemande.INSCRIPTION:
             ApprouverInscriptionParSicValidatorList(
@@ -1215,6 +1216,7 @@ class Proposition(interface.RootEntity):
                 conditions_complementaires_existantes=self.conditions_complementaires_existantes,
                 conditions_complementaires_libres=self.conditions_complementaires_libres,
                 documents_dto=documents_dto,
+                statut_validation_donnees_personnelles=identification_dto.statut_validation_donnees_personnelles,
             ).validate()
 
         else:
@@ -1228,6 +1230,7 @@ class Proposition(interface.RootEntity):
                 nombre_annees_prevoir_programme=self.nombre_annees_prevoir_programme,
                 checklist=self.checklist_actuelle,
                 documents_dto=documents_dto,
+                statut_validation_donnees_personnelles=identification_dto.statut_validation_donnees_personnelles,
             ).validate()
 
         try:

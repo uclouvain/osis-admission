@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -90,6 +90,7 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from base.ddd.utils.business_validator import BusinessValidator
 from base.models.enums.education_group_types import TrainingType
+from base.models.enums.personal_data import ChoixStatutValidationDonneesPersonnelles
 from epc.models.enums.condition_acces import ConditionAcces
 from osis_profile.models.enums.education import ForeignDiplomaTypes
 
@@ -393,8 +394,8 @@ class ShouldFinancabiliteEtreDansEtatCorrectPourApprouverDemande(BusinessValidat
 
 @attr.dataclass(frozen=True, slots=True)
 class ShouldDonneesPersonnellesEtreDansEtatCorrectPourApprouverDemande(BusinessValidator):
-    checklist_actuelle: StatutsChecklistGenerale
+    statut_validation_donnees_personnelles: str
 
     def validate(self, *args, **kwargs):
-        if self.checklist_actuelle.donnees_personnelles.statut != ChoixStatutChecklist.GEST_REUSSITE:
+        if self.statut_validation_donnees_personnelles != ChoixStatutValidationDonneesPersonnelles.VALIDEES.name:
             raise EtatChecklistDonneesPersonnellesNonValidePourApprouverDemande

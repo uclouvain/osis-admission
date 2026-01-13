@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -32,6 +32,22 @@ import factory
 from factory.fuzzy import FuzzyText
 
 from admission.ddd import DUREE_MAXIMALE_PROGRAMME, DUREE_MINIMALE_PROGRAMME
+from admission.ddd.admission.formation_generale.domain.model._comptabilite import (
+    Comptabilite,
+)
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutChecklist,
+    ChoixStatutPropositionGenerale,
+    DroitsInscriptionMontant,
+)
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    Proposition,
+    PropositionIdentity,
+)
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
+    StatutChecklist,
+    StatutsChecklistGenerale,
+)
 from admission.ddd.admission.shared_kernel.domain.model.complement_formation import (
     ComplementFormationIdentity,
 )
@@ -49,22 +65,6 @@ from admission.ddd.admission.shared_kernel.enums import (
     ChoixTypeCompteBancaire,
     LienParente,
     TypeSituationAssimilation,
-)
-from admission.ddd.admission.formation_generale.domain.model._comptabilite import (
-    Comptabilite,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutChecklist,
-    ChoixStatutPropositionGenerale,
-    DroitsInscriptionMontant,
-)
-from admission.ddd.admission.formation_generale.domain.model.proposition import (
-    Proposition,
-    PropositionIdentity,
-)
-from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
-    StatutChecklist,
-    StatutsChecklistGenerale,
 )
 from admission.ddd.admission.shared_kernel.tests.factory.bourse import BourseIdentityFactory
 from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationIdentityFactory
@@ -90,7 +90,6 @@ class StatutsChecklistGeneraleFactory(factory.Factory):
         model = StatutsChecklistGenerale
         abstract = False
 
-    donnees_personnelles = factory.SubFactory(StatutChecklistFactory)
     frais_dossier = factory.SubFactory(StatutChecklistFactory)
     assimilation = factory.SubFactory(StatutChecklistFactory)
     choix_formation = factory.SubFactory(StatutChecklistFactory)
@@ -330,6 +329,5 @@ class PropositionFactory(factory.Factory):
                 StatutsChecklistGeneraleFactory,
                 financabilite__statut=ChoixStatutChecklist.GEST_REUSSITE,
                 financabilite__extra={'reussite': 'financable'},
-                donnees_personnelles__statut=ChoixStatutChecklist.GEST_REUSSITE,
             ),
         )

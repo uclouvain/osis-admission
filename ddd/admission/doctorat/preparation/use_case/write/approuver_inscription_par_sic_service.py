@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -38,12 +38,6 @@ from admission.ddd.admission.doctorat.preparation.domain.service.i_comptabilite 
 from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import (
     IHistorique,
 )
-from admission.ddd.admission.doctorat.preparation.domain.service.i_membre_CA import (
-    IMembreCATranslator,
-)
-from admission.ddd.admission.doctorat.preparation.domain.service.i_promoteur import (
-    IPromoteurTranslator,
-)
 from admission.ddd.admission.doctorat.preparation.domain.service.i_question_specifique import (
     IQuestionSpecifiqueTranslator,
 )
@@ -52,9 +46,6 @@ from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervi
 )
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
     IPropositionRepository,
-)
-from admission.ddd.admission.shared_kernel.domain.model.proposition import (
-    PropositionIdentity,
 )
 from admission.ddd.admission.shared_kernel.domain.service.i_emplacements_documents_proposition import (
     IEmplacementsDocumentsPropositionTranslator,
@@ -125,6 +116,7 @@ def approuver_inscription_par_sic(
         experience_parcours_interne_translator=experience_parcours_interne_translator,
         grade_academique_formation_proposition=resume_dto.proposition.doctorat.grade_academique,
         annee_formation=annee_formation,
+        identification_dto=resume_dto.identification,
     )
 
     # THEN

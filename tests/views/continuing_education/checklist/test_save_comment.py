@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -33,10 +33,10 @@ from osis_comment.models import CommentEntry
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.tests.factories.continuing_education import (
-    ContinuingEducationTrainingFactory,
     ContinuingEducationAdmissionFactory,
+    ContinuingEducationTrainingFactory,
 )
-from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
+from admission.tests.factories.roles import ProgramManagerRoleFactory, SicManagementRoleFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -79,6 +79,7 @@ class SaveCommentViewTestCase(TestCase):
         url = resolve_url(
             'admission:continuing-education:save-comment',
             uuid=self.admission.uuid,
+            object_uuid=self.admission.uuid,
             tab='donnees_personnelles',
         )
 
@@ -89,7 +90,7 @@ class SaveCommentViewTestCase(TestCase):
         form = response.context['form']
         self.assertEqual(
             form.fields['comment'].label,
-            f'Commentaire (dernière modification par {self.sic_manager_user.person} ' f'le 31/12/2021 à 08:15) :',
+            f'Commentaire (dernière modification par {self.sic_manager_user.person} le 31/12/2021 à 08:15) :',
         )
 
         # Check the added comment
@@ -112,6 +113,7 @@ class SaveCommentViewTestCase(TestCase):
         url = resolve_url(
             'admission:continuing-education:save-comment',
             uuid=self.admission.uuid,
+            object_uuid=self.admission.uuid,
             tab='donnees_personnelles',
         )
 
@@ -136,7 +138,7 @@ class SaveCommentViewTestCase(TestCase):
             form = response.context['form']
             self.assertEqual(
                 form.fields['comment'].label,
-                f'Commentaire (dernière modification par {self.sic_manager_user.person} ' f'le 31/12/2021 à 08:20) :',
+                f'Commentaire (dernière modification par {self.sic_manager_user.person} le 31/12/2021 à 08:20) :',
             )
 
             # Check the added comment

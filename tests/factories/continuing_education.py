@@ -165,5 +165,4 @@ def get_checklist():
     return {
         'fiche_etudiant': default_content,
         'decision': default_content,
-        'donnees_personnelles': default_content,
     }

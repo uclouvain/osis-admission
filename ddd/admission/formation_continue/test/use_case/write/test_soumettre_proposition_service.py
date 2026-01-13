@@ -83,10 +83,6 @@ class TestSoumettrePropositionContinue(TestCase):
 
         # Check the checklist initialization
         self.assertEqual(
-            updated_proposition.checklist_initiale.donnees_personnelles.statut,
-            ChoixStatutChecklist.INITIAL_CANDIDAT,
-        )
-        self.assertEqual(
             updated_proposition.checklist_initiale.decision.statut,
             ChoixStatutChecklist.INITIAL_CANDIDAT,
         )
@@ -95,10 +91,6 @@ class TestSoumettrePropositionContinue(TestCase):
             ChoixStatutChecklist.INITIAL_CANDIDAT,
         )
 
-        self.assertEqual(
-            updated_proposition.checklist_actuelle.donnees_personnelles.statut,
-            ChoixStatutChecklist.INITIAL_CANDIDAT,
-        )
         self.assertEqual(
             updated_proposition.checklist_actuelle.decision.statut,
             ChoixStatutChecklist.INITIAL_CANDIDAT,

@@ -150,7 +150,6 @@ from osis_profile.utils.utils import (
     format_school_title,
     get_superior_institute_queryset,
 )
-from osis_role.templatetags.osis_role import has_perm
 from reference.models.country import Country
 from reference.models.language import Language
 
@@ -654,19 +653,28 @@ def country_name_from_iso_code(iso_code: str):
 @register.filter
 def get_ordered_checklist_items_general_education(checklist_items: dict):
     """Return the ordered checklist items."""
-    return sorted(checklist_items.items(), key=lambda tab: INDEX_ONGLETS_CHECKLIST_GENERALE[tab[0]])
+    return sorted(
+        [(key, value) for key, value in checklist_items.items() if key in INDEX_ONGLETS_CHECKLIST_GENERALE],
+        key=lambda tab: INDEX_ONGLETS_CHECKLIST_GENERALE[tab[0]],
+    )
 
 
 @register.filter
 def get_ordered_checklist_items_doctorate(checklist_items: dict):
     """Return the ordered checklist items."""
-    return sorted(checklist_items.items(), key=lambda tab: INDEX_ONGLETS_CHECKLIST_DOCTORALE[tab[0]])
+    return sorted(
+        [(key, value) for key, value in checklist_items.items() if key in INDEX_ONGLETS_CHECKLIST_DOCTORALE],
+        key=lambda tab: INDEX_ONGLETS_CHECKLIST_DOCTORALE[tab[0]],
+    )
 
 
 @register.filter
 def get_ordered_checklist_items_continuing_education(checklist_items: dict):
     """Return the ordered checklist items."""
-    return sorted(checklist_items.items(), key=lambda tab: INDEX_ONGLETS_CHECKLIST_CONTINUE[tab[0]])
+    return sorted(
+        [(key, value) for key, value in checklist_items.items() if key in INDEX_ONGLETS_CHECKLIST_CONTINUE],
+        key=lambda tab: INDEX_ONGLETS_CHECKLIST_CONTINUE[tab[0]],
+    )
 
 
 @register.filter
@@ -707,6 +715,31 @@ def checklist_state_button(context, **kwargs):
             'status': expected_attrs['state'],
         },
     }
+
+
+@register.inclusion_tag('admission/checklist_macro_state_button.html', takes_context=True)
+def checklist_macro_state_button(context, **kwargs):
+    tag_context = {
+        arg_name: kwargs.pop(arg_name, None)
+        for arg_name in [
+            'icon',
+            'class',
+            'tab',
+            'tooltip',
+            'disabled',
+            'open_modal',
+            'htmx_post',
+            'sub_id',
+            'status_configuration',
+            'selected_status_configuration',
+        ]
+    }
+
+    force_enabled = kwargs.pop('force_enabled', False)
+    if context.get('can_update_checklist_tab') is False and not force_enabled:
+        tag_context['disabled'] = True
+
+    return tag_context
 
 
 @register.filter

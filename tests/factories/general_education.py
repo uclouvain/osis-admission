@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,7 +24,6 @@
 #
 # ##############################################################################
 import datetime
-import uuid
 from typing import Dict, List, Union
 
 import factory.fuzzy
@@ -39,8 +38,8 @@ from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscr
     AnneeInscriptionFormationTranslator,
 )
 from admission.models import GeneralEducationAdmission
-from admission.models.specific_question import SpecificQuestionAnswer
 from admission.models.general_education import AdmissionPrerequisiteCourses
+from admission.models.specific_question import SpecificQuestionAnswer
 from admission.tests.factories.accounting import AccountingFactory
 from admission.tests.factories.form_item import AdmissionFormItemFactory
 from admission.tests.factories.person import CompletePersonForBachelorFactory
@@ -93,6 +92,7 @@ def get_checklist():
         onglet.name: default_content.copy()
         for onglet in OngletsChecklist.get_except(
             OngletsChecklist.experiences_parcours_anterieur.name,
+            OngletsChecklist.donnees_personnelles.name,
         )
     }
 

@@ -244,6 +244,7 @@ class FinancabiliteContextMixin(CheckListDefaultContextMixin):
                     form_url=resolve_url(
                         f'{self.base_namespace}:save-comment',
                         uuid=self.admission_uuid,
+                        object_uuid=self.admission_uuid,
                         tab='financabilite',
                     ),
                     prefix='financabilite',
@@ -253,6 +254,7 @@ class FinancabiliteContextMixin(CheckListDefaultContextMixin):
                     form_url=resolve_url(
                         f'{self.base_namespace}:save-comment',
                         uuid=self.admission_uuid,
+                        object_uuid=self.admission_uuid,
                         tab='financabilite__derogation',
                     ),
                     prefix='financabilite__derogation',

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -43,11 +43,12 @@ from django.db.models import (
     Q,
     QuerySet,
     Subquery,
+    UUIDField,
     Value,
-    When, UUIDField,
+    When,
 )
 from django.db.models.fields.json import KeyTextTransform
-from django.db.models.functions import Concat, ExtractMonth, ExtractYear, Cast
+from django.db.models.functions import Cast, Concat, ExtractMonth, ExtractYear
 from django.utils.translation import get_language
 
 from admission.ddd import LANGUES_OBLIGATOIRES_DOCTORAT, NB_MOIS_MIN_VAE
@@ -98,8 +99,6 @@ from admission.models.valuated_epxeriences import (
     AdmissionEducationalValuatedExperiences,
     AdmissionProfessionalValuatedExperiences,
 )
-from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences, \
-    AdmissionProfessionalValuatedExperiences
 from base.models.enums.community import CommunityEnum
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
@@ -204,6 +203,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             noma_derniere_inscription_ucl=candidate.last_registration_id,
             pays_residence=residential_country,
             autres_prenoms=candidate.middle_name,
+            statut_validation_donnees_personnelles=candidate.personal_data_validation_status,
             **country_of_citizenship,
             **birth_country,
         )
@@ -746,9 +746,13 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         ).first()
         if exam_type is None:
             return ExamenDTO(uuid='', requis=False, titre='', attestation=[], annee=None)
-        exam = Exam.objects.filter(
-            admissions__admission__uuid=uuid_proposition,
-        ).annotate(**cls.get_examen_annotations()).first()
+        exam = (
+            Exam.objects.filter(
+                admissions__admission__uuid=uuid_proposition,
+            )
+            .annotate(**cls.get_examen_annotations())
+            .first()
+        )
         if exam is None:
             return ExamenDTO(uuid='', requis=True, titre=exam_type.title, attestation=[], annee=None)
         return ExamenDTO(
@@ -758,7 +762,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             attestation=exam.certificate,
             annee=exam.year.year if exam.year else None,
             identifiant_externe=exam.external_id,
-            injectee=exam.injecte_par_admission or exam.injecte_par_cv
+            injectee=exam.injecte_par_admission or exam.injecte_par_cv,
         )
 
     @classmethod
@@ -771,10 +775,11 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 attestation=exam.certificate,
                 annee=exam.year.year if exam.year else None,
                 identifiant_externe=exam.external_id,
-                injectee=exam.injecte_par_cv or exam.injecte_par_admission
+                injectee=exam.injecte_par_cv or exam.injecte_par_admission,
             )
             for exam in (
-                Exam.objects.exclude(type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR).annotate(
+                Exam.objects.exclude(type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR)
+                .annotate(
                     **cls.get_examen_annotations(),
                 )
                 .select_related('type')
@@ -1088,8 +1093,8 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             ProfessionalExperience.objects.filter(person__global_id=matricule)
             .annotate(
                 nombre_mois=(ExtractYear('end_date') - ExtractYear('start_date')) * 12
-                            + (ExtractMonth('end_date') - ExtractMonth('start_date'))
-                            + 1
+                + (ExtractMonth('end_date') - ExtractMonth('start_date'))
+                + 1
                 # + 1 car la date de début est le premier jour du mois et la date de fin, le dernier jour du mois
             )
             .aggregate(total=models.Sum('nombre_mois'))
