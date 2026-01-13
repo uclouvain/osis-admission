@@ -91,6 +91,9 @@ from admission.ddd.admission.shared_kernel.use_case.write import (
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.comptabilite import (
     ComptabiliteInMemoryTranslator,
 )
+from admission.infrastructure.admission.formation_generale.domain.service.in_memory.contingente import (
+    ContingenteInMemory,
+)
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.formation import (
     FormationGeneraleInMemoryTranslator,
 )
@@ -211,6 +214,7 @@ _matricule_etudiant_service = MatriculeEtudiantInMemoryService()
 _compteur_noma = CompteurAnnuelPourNomaInMemoryRepository()
 _experience_parcours_interne_translator = ExperienceParcoursInterneInMemoryTranslator()
 _financabilite_fetcher = FinancabiliteInMemoryFetcher()
+_contingente = ContingenteInMemory()
 
 
 COMMAND_HANDLERS = {
@@ -262,6 +266,7 @@ COMMAND_HANDLERS = {
         academic_year_repository=_academic_year_repository,
         questions_specifiques_translator=_question_specific_translator,
         maximum_propositions_service=_maximum_propositions_autorisees,
+        contingente_service=_contingente,
     ),
     SoumettrePropositionCommand: lambda msg_bus, cmd: soumettre_proposition(
         msg_bus,
@@ -280,6 +285,7 @@ COMMAND_HANDLERS = {
         paiement_frais_dossier_service=_paiement_frais_dossier,
         historique=_historique_global,
         financabilite_fetcher=_financabilite_fetcher,
+        contingente_service=_contingente,
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,

@@ -60,7 +60,7 @@ from admission.ddd.admission.formation_continue.commands import (
 from admission.ddd.admission.formation_generale.commands import (
     ListerPropositionsCandidatQuery as ListerPropositionsFormationGeneraleCandidatQuery,
 )
-from admission.models import DoctorateAdmission
+from admission.models import DoctorateAdmission, GeneralEducationAdmission
 from admission.utils import get_cached_admission_perm_obj
 from backoffice.settings.rest_framework.common_views import (
     DisplayExceptionsByFieldNameAPIMixin,
@@ -126,6 +126,17 @@ class PropositionListView(APIPermissionRequiredMixin, DisplayExceptionsByFieldNa
                 ListerPropositionsFormationContinueCandidatQuery(matricule_candidat=candidate_global_id),
             ]
         )
+
+        # Set _perm_obj to handle permissions in action_links
+        queryset = (
+            GeneralEducationAdmission.objects.select_related(
+                'candidate',
+            )
+            .filter(uuid__in=[p.uuid for p in general_education_list])
+            .in_bulk(field_name='uuid')
+        )
+        for proposition in general_education_list:
+            proposition._perm_obj = queryset[proposition.uuid]
 
         serializer = serializers.PropositionSearchSerializer(
             instance={
