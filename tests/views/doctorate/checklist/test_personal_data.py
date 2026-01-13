@@ -23,19 +23,15 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from unittest import mock
+
 from django.shortcuts import resolve_url
 from django.test import TestCase
 
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
-    ChoixStatutChecklist,
-    OngletsChecklist,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
-    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
-)
+from admission.ddd.admission.formation_generale.events import DonneesPersonellesCandidatValidee
 from admission.models import DoctorateAdmission
 from admission.tests.factories.doctorate import (
     DoctorateAdmissionFactory,
@@ -45,6 +41,7 @@ from admission.tests.factories.roles import (
     CentralManagerRoleFactory,
     ProgramManagerRoleFactory,
 )
+from base.models.enums.personal_data import ChoixStatutValidationDonneesPersonnelles
 from base.tests.factories.entity import EntityWithVersionFactory
 
 
@@ -58,7 +55,6 @@ class PersonalDataChangeStatusViewTestCase(TestCase):
         cls.central_manager = CentralManagerRoleFactory(entity=cls.entity).person
         cls.default_headers = {'HTTP_HX-Request': 'true'}
         cls.base_url = 'admission:doctorate:personal-data-change-status'
-        cls.checklist_statuses = ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT[OngletsChecklist.donnees_personnelles.name]
 
     def setUp(self) -> None:
         self.admission: DoctorateAdmission = DoctorateAdmissionFactory(
@@ -66,63 +62,50 @@ class PersonalDataChangeStatusViewTestCase(TestCase):
             status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
         )
 
+        self.url = resolve_url(self.base_url, uuid=self.admission.uuid)
+
+        publish_mock = mock.patch('infrastructure.utils.MessageBus.publish')
+        self.publish_mock = publish_mock.start()
+        self.addCleanup(publish_mock.stop)
+
     def test_change_the_checklist_status_with_program_manager_user(self):
         self.client.force_login(user=self.program_manager.user)
 
-        url = resolve_url(self.base_url, uuid=self.admission.uuid, status=ChoixStatutChecklist.INITIAL_CANDIDAT.name)
-
-        response = self.client.post(url, **self.default_headers)
+        status = ChoixStatutValidationDonneesPersonnelles.A_TRAITER.name
+        response = self.client.post(
+            self.url,
+            data={'status': status},
+            **self.default_headers,
+        )
         self.assertEqual(response.status_code, 403)
 
         self.admission.status = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name
         self.admission.save()
 
-        # Cleaned
-        status = self.checklist_statuses['TOILETTEES']
-        url = resolve_url(self.base_url, uuid=self.admission.uuid, status=status.statut.name)
+        # Authorized statuses
+        authorized_statuses = [
+            ChoixStatutValidationDonneesPersonnelles.TOILETTEES.name,
+            ChoixStatutValidationDonneesPersonnelles.A_TRAITER.name,
+        ]
 
-        response = self.client.post(
-            url,
-            data=status.extra,
-            **self.default_headers,
-        )
+        for status in authorized_statuses:
+            response = self.client.post(
+                self.url,
+                data={'status': status},
+                **self.default_headers,
+            )
 
-        self.assertEqual(response.status_code, 200)
-        self.admission.refresh_from_db()
+            self.assertEqual(response.status_code, 200)
 
-        self.assertEqual(
-            self.admission.checklist['current'][OngletsChecklist.donnees_personnelles.name]['statut'],
-            ChoixStatutChecklist.GEST_EN_COURS.name,
-        )
-        self.assertEqual(self.admission.checklist['current'][OngletsChecklist.donnees_personnelles.name]['extra'], {})
+            self.admission.candidate.refresh_from_db()
 
-        # To be processed
-        status = self.checklist_statuses['A_TRAITER']
-        url = resolve_url(self.base_url, uuid=self.admission.uuid, status=status.statut.name)
-
-        response = self.client.post(
-            url,
-            data=status.extra,
-            **self.default_headers,
-        )
-
-        self.assertEqual(response.status_code, 200)
-        self.admission.refresh_from_db()
-
-        self.assertEqual(
-            self.admission.checklist['current'][OngletsChecklist.donnees_personnelles.name]['statut'],
-            ChoixStatutChecklist.INITIAL_CANDIDAT.name,
-        )
-        self.assertEqual(self.admission.checklist['current'][OngletsChecklist.donnees_personnelles.name]['extra'], {})
+            self.assertEqual(self.admission.candidate.personal_data_validation_status, status)
 
         # Unauthorized statuses
-        for status_name in ['A_COMPLETER', 'FRAUDEUR', 'VALIDEES']:
-            status = self.checklist_statuses[status_name]
-            url = resolve_url(self.base_url, uuid=self.admission.uuid, status=status.statut.name)
-
+        for status in ChoixStatutValidationDonneesPersonnelles.get_names_except(*authorized_statuses):
             response = self.client.post(
-                url,
-                data=status.extra,
+                self.url,
+                data={'status': status},
                 **self.default_headers,
             )
 
@@ -131,103 +114,28 @@ class PersonalDataChangeStatusViewTestCase(TestCase):
     def test_change_the_checklist_status_with_central_manager_user(self):
         self.client.force_login(user=self.central_manager.user)
 
-        # To be processed
-        status = self.checklist_statuses['A_TRAITER']
-        url = resolve_url(self.base_url, uuid=self.admission.uuid, status=status.statut.name)
+        for status in ChoixStatutValidationDonneesPersonnelles.get_names():
+            self.publish_mock.reset_mock()
 
-        response = self.client.post(
-            url,
-            data=status.extra,
-            **self.default_headers,
-        )
+            response = self.client.post(
+                self.url,
+                data={'status': status},
+                **self.default_headers,
+            )
 
-        self.assertEqual(response.status_code, 200)
-        self.admission.refresh_from_db()
+            self.assertEqual(response.status_code, 200)
 
-        self.assertEqual(
-            self.admission.checklist['current'][OngletsChecklist.donnees_personnelles.name]['statut'],
-            ChoixStatutChecklist.INITIAL_CANDIDAT.name,
-        )
-        self.assertEqual(self.admission.checklist['current'][OngletsChecklist.donnees_personnelles.name]['extra'], {})
+            self.admission.candidate.refresh_from_db()
 
-        # Cleaned
-        status = self.checklist_statuses['TOILETTEES']
-        url = resolve_url(self.base_url, uuid=self.admission.uuid, status=status.statut.name)
+            self.assertEqual(self.admission.candidate.personal_data_validation_status, status)
 
-        response = self.client.post(
-            url,
-            data=status.extra,
-            **self.default_headers,
-        )
-
-        self.assertEqual(response.status_code, 200)
-        self.admission.refresh_from_db()
-
-        self.assertEqual(
-            self.admission.checklist['current'][OngletsChecklist.donnees_personnelles.name]['statut'],
-            ChoixStatutChecklist.GEST_EN_COURS.name,
-        )
-        self.assertEqual(self.admission.checklist['current'][OngletsChecklist.donnees_personnelles.name]['extra'], {})
-
-        # To be completed
-        status = self.checklist_statuses['A_COMPLETER']
-        url = resolve_url(self.base_url, uuid=self.admission.uuid, status=status.statut.name)
-
-        response = self.client.post(
-            url,
-            data=status.extra,
-            **self.default_headers,
-        )
-
-        self.assertEqual(response.status_code, 200)
-        self.admission.refresh_from_db()
-
-        self.assertEqual(
-            self.admission.checklist['current'][OngletsChecklist.donnees_personnelles.name]['statut'],
-            ChoixStatutChecklist.GEST_BLOCAGE.name,
-        )
-        self.assertEqual(
-            self.admission.checklist['current'][OngletsChecklist.donnees_personnelles.name]['extra'],
-            {'fraud': '0'},
-        )
-
-        # Fraudster
-        status = self.checklist_statuses['FRAUDEUR']
-        url = resolve_url(self.base_url, uuid=self.admission.uuid, status=status.statut.name)
-
-        response = self.client.post(
-            url,
-            data=status.extra,
-            **self.default_headers,
-        )
-
-        self.assertEqual(response.status_code, 200)
-        self.admission.refresh_from_db()
-
-        self.assertEqual(
-            self.admission.checklist['current'][OngletsChecklist.donnees_personnelles.name]['statut'],
-            ChoixStatutChecklist.GEST_BLOCAGE.name,
-        )
-        self.assertEqual(
-            self.admission.checklist['current'][OngletsChecklist.donnees_personnelles.name]['extra'],
-            {'fraud': '1'},
-        )
-
-        # Validated
-        status = self.checklist_statuses['VALIDEES']
-        url = resolve_url(self.base_url, uuid=self.admission.uuid, status=status.statut.name)
-
-        response = self.client.post(
-            url,
-            data=status.extra,
-            **self.default_headers,
-        )
-
-        self.assertEqual(response.status_code, 200)
-        self.admission.refresh_from_db()
-
-        self.assertEqual(
-            self.admission.checklist['current'][OngletsChecklist.donnees_personnelles.name]['statut'],
-            ChoixStatutChecklist.GEST_REUSSITE.name,
-        )
-        self.assertEqual(self.admission.checklist['current'][OngletsChecklist.donnees_personnelles.name]['extra'], {})
+            if status == ChoixStatutValidationDonneesPersonnelles.VALIDEES.name:
+                self.publish_mock.assert_called_once_with(
+                    DonneesPersonellesCandidatValidee(
+                        matricule=self.admission.candidate.global_id,
+                        transaction_id=mock.ANY,
+                        entity_id=None,
+                    )
+                )
+            else:
+                self.publish_mock.assert_not_called()

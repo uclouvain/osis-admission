@@ -112,6 +112,7 @@ from base.forms.utils.file_field import MaxOneFileUploadField
 from base.models.academic_year import AcademicYear
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.education_group_types import TrainingType
+from base.models.enums.personal_data import ChoixStatutValidationDonneesPersonnelles
 from base.models.learning_unit_year import LearningUnitYear
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import (
@@ -185,7 +186,7 @@ class CommentForm(forms.Form):
         if comment:
             self.fields['comment'].initial = comment.content
             self.fields['comment'].label += _(" (last update by {author} on {date} at {time}):").format(
-                author=comment.author,
+                author=comment.author or _('an unknown author'),
                 date=comment.modified_at.strftime("%d/%m/%Y"),
                 time=comment.modified_at.strftime("%H:%M"),
             )
@@ -1504,3 +1505,9 @@ class SendEMailForm(forms.Form):
                 'language': get_language(),
             }
         )
+
+
+class PersonalDataStatusForm(forms.Form):
+    status = forms.ChoiceField(
+        choices=ChoixStatutValidationDonneesPersonnelles.choices(),
+    )

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -51,6 +51,7 @@ from admission.tests.factories.roles import (
     SicManagementRoleFactory,
 )
 from admission.tests.views.doctorate.checklist.sic_decision.base import SicPatchMixin
+from base.models.enums.personal_data import ChoixStatutValidationDonneesPersonnelles
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -83,13 +84,13 @@ class SicEnrolmentApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
             candidate=CompletePersonFactory(
                 language=settings.LANGUAGE_CODE_FR,
                 country_of_citizenship__european_union=True,
+                personal_data_validation_status=ChoixStatutValidationDonneesPersonnelles.VALIDEES.name,
             ),
             status=ChoixStatutPropositionDoctorale.COMPLETEE_POUR_SIC.name,
             determined_academic_year=cls.academic_years[0],
         )
         cls.experience_uuid = str(cls.admission.candidate.educationalexperience_set.first().uuid)
         cls.admission.checklist['current']['parcours_anterieur']['statut'] = ChoixStatutChecklist.GEST_REUSSITE.name
-        cls.admission.checklist['current']['donnees_personnelles']['statut'] = ChoixStatutChecklist.GEST_REUSSITE.name
         cls.admission.save()
         cls.url = resolve_url(
             'admission:doctorate:sic-decision-enrolment-approval',

@@ -61,7 +61,7 @@
         id="tabs-content"
         class="tab-content"
     >
-      {% with initial=original_admission.checklist.initial.donnees_personnelles current=original_admission.checklist.current.donnees_personnelles next_url=next_base_url|add:'donnees_personnelles' %}
+      {% with next_url=next_base_url|add:'donnees_personnelles' %}
         <div role="tabpanel" class="tab-pane" id="donnees_personnelles">
           {% has_perm 'admission.merge_candidate_with_known_person' as can_merge_candidate %}
           {% has_perm 'admission.double_check_decision_informations_signaletique' as can_give_decision_double_check %}
