@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -147,10 +147,6 @@ class TestVerifierPropositionServiceCommun(TestCase):
         self.assertEqual(updated_proposition.statut, ChoixStatutPropositionDoctorale.TRAITEMENT_FAC)
 
         # Check the checklist values
-        self.assertEqual(
-            updated_proposition.checklist_initiale.donnees_personnelles.statut,
-            ChoixStatutChecklist.INITIAL_CANDIDAT,
-        )
         self.assertEqual(
             updated_proposition.checklist_initiale.assimilation.statut,
             ChoixStatutChecklist.INITIAL_NON_CONCERNE,

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -561,6 +561,8 @@ class ApprouverAdmissionParSicValidatorList(TwoStepsMultipleBusinessExceptionLis
     checklist: StatutsChecklistGenerale
     documents_dto: List[EmplacementDocumentDTO]
 
+    statut_validation_donnees_personnelles: str
+
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
@@ -570,7 +572,7 @@ class ApprouverAdmissionParSicValidatorList(TwoStepsMultipleBusinessExceptionLis
                 statut=self.statut,
             ),
             ShouldDonneesPersonnellesEtreDansEtatCorrectPourApprouverDemande(
-                checklist_actuelle=self.checklist,
+                statut_validation_donnees_personnelles=self.statut_validation_donnees_personnelles,
             ),
             ShouldFinancabiliteEtreDansEtatCorrectPourApprouverDemande(
                 checklist_actuelle=self.checklist,
@@ -605,6 +607,8 @@ class ApprouverInscriptionParSicValidatorList(TwoStepsMultipleBusinessExceptionL
 
     documents_dto: List[EmplacementDocumentDTO]
 
+    statut_validation_donnees_personnelles: str
+
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
@@ -614,7 +618,7 @@ class ApprouverInscriptionParSicValidatorList(TwoStepsMultipleBusinessExceptionL
                 statut=self.statut,
             ),
             ShouldDonneesPersonnellesEtreDansEtatCorrectPourApprouverDemande(
-                checklist_actuelle=self.checklist,
+                statut_validation_donnees_personnelles=self.statut_validation_donnees_personnelles,
             ),
             ShouldFinancabiliteEtreDansEtatCorrectPourApprouverDemande(
                 checklist_actuelle=self.checklist,

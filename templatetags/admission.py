@@ -150,7 +150,6 @@ from osis_profile.utils.utils import (
     format_school_title,
     get_superior_institute_queryset,
 )
-from osis_role.templatetags.osis_role import has_perm
 from reference.models.country import Country
 from reference.models.language import Language
 
@@ -569,6 +568,12 @@ def get_item(dictionary, value):
 
 
 @register.filter
+def get_attr(obj, attribute):
+    """Returns the value of a key in a dictionary if it exists else None"""
+    return getattr(obj, attribute, None)
+
+
+@register.filter
 def get_bound_field(form, field_name):
     """Returns the bound field of a form"""
     return form[field_name]
@@ -654,19 +659,28 @@ def country_name_from_iso_code(iso_code: str):
 @register.filter
 def get_ordered_checklist_items_general_education(checklist_items: dict):
     """Return the ordered checklist items."""
-    return sorted(checklist_items.items(), key=lambda tab: INDEX_ONGLETS_CHECKLIST_GENERALE[tab[0]])
+    return sorted(
+        [(key, value) for key, value in checklist_items.items() if key in INDEX_ONGLETS_CHECKLIST_GENERALE],
+        key=lambda tab: INDEX_ONGLETS_CHECKLIST_GENERALE[tab[0]],
+    )
 
 
 @register.filter
 def get_ordered_checklist_items_doctorate(checklist_items: dict):
     """Return the ordered checklist items."""
-    return sorted(checklist_items.items(), key=lambda tab: INDEX_ONGLETS_CHECKLIST_DOCTORALE[tab[0]])
+    return sorted(
+        [(key, value) for key, value in checklist_items.items() if key in INDEX_ONGLETS_CHECKLIST_DOCTORALE],
+        key=lambda tab: INDEX_ONGLETS_CHECKLIST_DOCTORALE[tab[0]],
+    )
 
 
 @register.filter
 def get_ordered_checklist_items_continuing_education(checklist_items: dict):
     """Return the ordered checklist items."""
-    return sorted(checklist_items.items(), key=lambda tab: INDEX_ONGLETS_CHECKLIST_CONTINUE[tab[0]])
+    return sorted(
+        [(key, value) for key, value in checklist_items.items() if key in INDEX_ONGLETS_CHECKLIST_CONTINUE],
+        key=lambda tab: INDEX_ONGLETS_CHECKLIST_CONTINUE[tab[0]],
+    )
 
 
 @register.filter

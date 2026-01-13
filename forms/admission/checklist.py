@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -36,9 +36,8 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db.models import F, Q
 from django.utils.safestring import mark_safe
-from django.utils.translation import get_language, gettext
+from django.utils.translation import get_language, gettext, ngettext_lazy, override, pgettext, pgettext_lazy
 from django.utils.translation import gettext_lazy as _
-from django.utils.translation import ngettext_lazy, override, pgettext, pgettext_lazy
 from osis_document_components.utils import is_uuid
 
 from admission.constants import (
@@ -113,6 +112,7 @@ from base.forms.utils.file_field import MaxOneFileUploadField
 from base.models.academic_year import AcademicYear
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.education_group_types import TrainingType
+from base.models.enums.personal_data import ChoixStatutValidationDonneesPersonnelles
 from base.models.learning_unit_year import LearningUnitYear
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import (
@@ -1472,7 +1472,6 @@ class SinglePastExperienceAuthenticationForm(forms.Form):
     )
 
     def __init__(self, checklist_experience_data, *args, **kwargs):
-
         super().__init__(*args, **kwargs)
 
         checklist_experience_data = checklist_experience_data or {}
@@ -1504,3 +1503,9 @@ class SendEMailForm(forms.Form):
                 'language': get_language(),
             }
         )
+
+
+class PersonalDataStatusForm(forms.Form):
+    status = forms.ChoiceField(
+        choices=ChoixStatutValidationDonneesPersonnelles.choices(),
+    )

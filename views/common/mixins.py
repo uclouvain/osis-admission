@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 import json
-from typing import Dict, Optional, Union, List
+from typing import Dict, Optional, Union
 
 from django.contrib import messages
 from django.core.cache import cache
@@ -56,6 +56,9 @@ from admission.ddd.admission.doctorat.preparation.commands import (
 from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionDoctoraleQuery,
 )
+from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_DOCTORALE_PAR_STATUT,
+)
 from admission.ddd.admission.doctorat.preparation.dtos import (
     PropositionDTO,
 )
@@ -66,20 +69,24 @@ from admission.ddd.admission.formation_continue.commands import (
 from admission.ddd.admission.formation_continue.commands import (
     RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionContinueQuery,
 )
+from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_CONTINUE_PAR_STATUT,
+)
 from admission.ddd.admission.formation_continue.dtos.proposition import (
     PropositionDTO as PropositionContinueDTO,
 )
 from admission.ddd.admission.formation_generale.commands import (
     RecupererPropositionGestionnaireQuery,
+    RecupererTitresAccesSelectionnablesPropositionQuery,
 )
 from admission.ddd.admission.formation_generale.commands import (
     RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionGeneraleQuery,
 )
-from admission.ddd.admission.formation_generale.commands import (
-    RecupererTitresAccesSelectionnablesPropositionQuery,
-)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_GENERALE_PAR_STATUT,
 )
 from admission.ddd.admission.formation_generale.dtos.proposition import (
     PropositionGestionnaireDTO,
@@ -113,7 +120,7 @@ from admission.views.list import BaseAdmissionList
 from base.models.person_merge_proposal import PersonMergeStatus
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.gestion_des_comptes.dto.periode_soumission_ticket import PeriodeSoumissionTicketDigitDTO
-from ddd.logic.gestion_des_comptes.queries import GetPropositionFusionQuery, GetPeriodeActiveSoumissionTicketQuery
+from ddd.logic.gestion_des_comptes.queries import GetPeriodeActiveSoumissionTicketQuery, GetPropositionFusionQuery
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import PermissionRequiredMixin
 
@@ -224,6 +231,14 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         return message_bus_instance.invoke(cmd)
 
     @cached_property
+    def checklist_tabs_organization(self):
+        return {
+            CONTEXT_DOCTORATE: ORGANISATION_ONGLETS_CHECKLIST_DOCTORALE_PAR_STATUT,
+            CONTEXT_CONTINUING: ORGANISATION_ONGLETS_CHECKLIST_CONTINUE_PAR_STATUT,
+            CONTEXT_GENERAL: ORGANISATION_ONGLETS_CHECKLIST_GENERALE_PAR_STATUT,
+        }[self.current_context]
+
+    @cached_property
     def proposition_fusion(self) -> Optional['PropositionFusionPersonneDTO']:
         return message_bus_instance.invoke(GetPropositionFusionQuery(matricule=self.admission.candidate.global_id))
 
@@ -281,9 +296,9 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         # Leave this test first so we are sure the other information are available.
         if self.admission.status != ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name:
             return False, "Le dossier doit être en 'Inscription autorisée'"
-        periodes_actives = message_bus_instance.invoke(
-            GetPeriodeActiveSoumissionTicketQuery()
-        )  # type: List[PeriodeSoumissionTicketDigitDTO]
+        periodes_actives: list[PeriodeSoumissionTicketDigitDTO] = message_bus_instance.invoke(
+            GetPeriodeActiveSoumissionTicketQuery(),
+        )
         annees_ouvertes = [p.annee for p in periodes_actives]
         if annees_ouvertes and self.admission.determined_academic_year.year not in annees_ouvertes:
             return False, f"Seules les inscriptions en {annees_ouvertes} sont autorisées"
@@ -372,6 +387,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         context['demande_est_en_quarantaine'] = self.demande_est_en_quarantaine
         context['outil_de_comparaison_et_fusion_url'] = self.get_outil_de_comparaison_et_fusion_url()
         context['double_check_decision_url'] = self.get_double_check_decision_url()
+        context['checklist_tabs_organization'] = self.checklist_tabs_organization
         return context
 
     def get_outil_de_comparaison_et_fusion_url(self) -> str:
@@ -382,7 +398,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
     def get_double_check_decision_url(self) -> str:
         return resolve_url(
             'admission:services:gestion-des-comptes:double-check-decision-informations-injection-signaletique',
-            uuid=self.admission_uuid
+            uuid=self.admission_uuid,
         )
 
     def dispatch(self, request, *args, **kwargs):

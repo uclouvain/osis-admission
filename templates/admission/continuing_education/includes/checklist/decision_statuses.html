@@ -35,7 +35,7 @@
     {% translate 'It is not possible to go from the "validated" status to this status.' as validation_other_disabled_str %}
     {% translate "Validated" context "decision-checklist" as validated_label %}
     {% translate 'You can not cancel this application, it is in the "Validated" state. Please contact Noemie Pecher.' as cancel_while_validated_label %}
-    {% if original_admission.checklist.current.donnees_personnelles.statut != 'GEST_REUSSITE' %}
+    {% if original_admission.candidate.personal_data_validation_status != 'VALIDEES' %}
       {% translate 'The status of the checklist for the personal data must be "Validated".' as no_validated_personal_data_str %}
     {% endif %}
     {% if current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'on_hold' %}

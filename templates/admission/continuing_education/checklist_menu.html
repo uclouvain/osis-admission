@@ -24,11 +24,19 @@
 {% endcomment %}
 
 <ul id="checklist-menu" class="list-group">
+  <li
+      class="list-group-item active"
+      href="#donnees_personnelles"
+  >
+    {% with main_status=checklist_tabs_organization.donnees_personnelles|get_item:original_admission.candidate.personal_data_validation_status %}
+      {% include 'admission/general_education/checklist_menu_item.html' with checklist_item_name='donnees_personnelles' statut=main_status.statut.name %}
+    {% endwith %}
+  </li>
   {% for checklist_item_name, checklist_item in original_admission.checklist.initial|get_ordered_checklist_items_continuing_education %}
     {% with initial=original_admission.checklist.initial|get_item:checklist_item_name current=original_admission.checklist.current|get_item:checklist_item_name %}
       {% firstof current.statut initial.statut as statut %}
       <li
-          class="list-group-item{% if forloop.first %} active{% endif %}"
+          class="list-group-item"
           href="#{{ checklist_item_name }}"
       >
         <div

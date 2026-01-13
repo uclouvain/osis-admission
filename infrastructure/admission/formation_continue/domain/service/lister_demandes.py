@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,15 +27,15 @@ from collections import defaultdict
 from typing import Dict, List, Optional
 
 from django.conf import settings
-from django.db.models import Case, F, OuterRef, Prefetch, Q, Subquery, Value, When
+from django.db.models import Case, F, Q, Value, When
 from django.db.models.fields import CharField
-from django.db.models.functions import Coalesce, Concat
+from django.db.models.functions import Concat
 from django.utils.translation import get_language, gettext
 
-from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixEdition,
     ChoixStatutPropositionContinue,
+    OngletsChecklist,
 )
 from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
@@ -45,8 +45,9 @@ from admission.ddd.admission.formation_continue.domain.service.i_lister_demandes
     IListerDemandesService,
 )
 from admission.ddd.admission.formation_continue.dtos.liste import DemandeRechercheDTO
+from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
 from admission.infrastructure.utils import get_entities_with_descendants_ids
-from admission.models import ContinuingEducationAdmission, EPCInjection
+from admission.models import ContinuingEducationAdmission
 from admission.models.epc_injection import EPCInjectionStatus
 from admission.views import PaginatedList
 
@@ -144,7 +145,6 @@ class ListerDemandesService(IListerDemandesService):
             qs = qs.filter_according_to_roles(demandeur, permission='admission.view_continuing_enrolment_applications')
 
         if mode_filtres_etats_checklist and filtres_etats_checklist:
-
             json_path_to_checks = defaultdict(set)
             all_checklist_filters = Q()
 
@@ -168,25 +168,31 @@ class ListerDemandesService(IListerDemandesService):
                     current_checklist_filters = Q()
                     with_json_checklist_filter = False
 
-                    # Filter on the checklist tab status
-                    if current_status_filter.statut:
-                        current_checklist_filters = Q(
-                            **{
-                                f'checklist__current__{tab_name}__statut': current_status_filter.statut.name,
-                            }
-                        )
-                        json_path_to_checks[f'checklist__current__{tab_name}'].add('statut')
-                        with_json_checklist_filter = True
+                    # Specific cases
+                    if tab_name == OngletsChecklist.donnees_personnelles.name:
+                        # > For the personal data, the status is saved on the candidate
+                        current_checklist_filters = Q(candidate__personal_data_validation_status=status_value)
 
-                    # Filter on the checklist tab extra if necessary
-                    if current_status_filter.extra:
-                        current_checklist_filters &= Q(
-                            **{
-                                f'checklist__current__{tab_name}__extra__contains': current_status_filter.extra,
-                            }
-                        )
-                        json_path_to_checks[f'checklist__current__{tab_name}'].add('extra')
-                        with_json_checklist_filter = True
+                    else:
+                        # Filter on the checklist tab status
+                        if current_status_filter.statut:
+                            current_checklist_filters = Q(
+                                **{
+                                    f'checklist__current__{tab_name}__statut': current_status_filter.statut.name,
+                                }
+                            )
+                            json_path_to_checks[f'checklist__current__{tab_name}'].add('statut')
+                            with_json_checklist_filter = True
+
+                        # Filter on the checklist tab extra if necessary
+                        if current_status_filter.extra:
+                            current_checklist_filters &= Q(
+                                **{
+                                    f'checklist__current__{tab_name}__extra__contains': current_status_filter.extra,
+                                }
+                            )
+                            json_path_to_checks[f'checklist__current__{tab_name}'].add('extra')
+                            with_json_checklist_filter = True
 
                     if with_json_checklist_filter:
                         json_path_to_checks['checklist__current'].add(tab_name)
