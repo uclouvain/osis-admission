@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -40,9 +40,8 @@ from django.urls import reverse
 from django.utils import timezone, translation
 from django.utils.formats import date_format
 from django.utils.functional import cached_property
-from django.utils.translation import gettext
+from django.utils.translation import gettext, ngettext, override, pgettext
 from django.utils.translation import gettext_lazy as _
-from django.utils.translation import ngettext, override, pgettext
 from django.views.generic import FormView, TemplateView
 from django.views.generic.base import RedirectView, View
 from django_htmx.http import HttpResponseClientRefresh
@@ -548,8 +547,15 @@ class PersonalDataChangeStatusView(
 ):
     urlpatterns = {'personal-data-change-status': 'personal-data-change-status/<str:status>'}
     template_name = 'admission/general_education/includes/checklist/personal_data.html'
-    permission_required = 'admission.change_checklist'
     form_class = Form
+
+    def get_permission_required(self):
+        return (
+            {
+                'INITIAL_CANDIDAT': 'admission.change_personal_data_checklist_status_to_be_processed',
+                'GEST_EN_COURS': 'admission.change_personal_data_checklist_status_cleaned',
+            }.get(self.kwargs.get('status'), 'admission.change_checklist'),
+        )
 
     def form_valid(self, form):
         admission = self.get_permission_object()
@@ -1310,10 +1316,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             tokens = {
                 "admission_reference": self.proposition.reference,
                 "candidate": (
-                    (
-                        f"{self.proposition.profil_soumis_candidat.prenom} "
-                        f"{self.proposition.profil_soumis_candidat.nom}"
-                    )
+                    (f"{self.proposition.profil_soumis_candidat.prenom} {self.proposition.profil_soumis_candidat.nom}")
                     if self.proposition.profil_soumis_candidat
                     else ""
                 ),
@@ -3169,7 +3172,6 @@ class ChecklistView(
         }
 
     def get_context_data(self, **kwargs):
-
         context = super().get_context_data(**kwargs)
         if not self.request.htmx:
             # Retrieve data related to the proposition
