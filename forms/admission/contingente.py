@@ -23,25 +23,22 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.auth.roles.admission_reader import AdmissionReader
-from admission.auth.roles.ca_member import CommitteeMember
-from admission.auth.roles.candidate import Candidate
-from admission.auth.roles.central_manager import CentralManager
-from admission.auth.roles.doctorate_committee_member import DoctorateCommitteeMember
-from admission.auth.roles.limited_enrolment_delegate import LimitedEnrolmentDelegate
-from admission.auth.roles.program_manager import ProgramManager
-from admission.auth.roles.promoter import Promoter
-from admission.auth.roles.sceb import Sceb
-from admission.auth.roles.sic_management import AdmissionSicManagement
-from osis_role import role
+from django import forms
+from django.utils.translation import gettext_lazy as _
 
-role.role_manager.register(Candidate)
-role.role_manager.register(CommitteeMember)
-role.role_manager.register(DoctorateCommitteeMember)
-role.role_manager.register(Promoter)
-role.role_manager.register(Sceb)
-role.role_manager.register(ProgramManager)
-role.role_manager.register(CentralManager)
-role.role_manager.register(AdmissionReader)
-role.role_manager.register(AdmissionSicManagement)
-role.role_manager.register(LimitedEnrolmentDelegate)
+from admission.models.contingente import ContingenteTraining
+
+
+class ContingenteTrainingForm(forms.ModelForm):
+    class Meta:
+        model = ContingenteTraining
+        fields = [
+            'places_number',
+        ]
+
+
+class ContingenteTrainingImportForm(forms.Form):
+    import_file = forms.FileField(
+        label=_("File to import"),
+        required=True,
+    )

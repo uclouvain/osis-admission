@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -45,8 +45,10 @@ from admission.ddd.admission.formation_generale.domain.service.checklist import 
     Checklist,
 )
 from admission.models import ContinuingEducationAdmission, DoctorateAdmission
-from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences
 from admission.models.general_education import GeneralEducationAdmission
+from admission.models.valuated_epxeriences import (
+    AdmissionEducationalValuatedExperiences,
+)
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import (
     ContinuingEducationAdmissionFactory,
@@ -136,7 +138,7 @@ class CurriculumEducationalExperienceValuateViewTestCase(TestCase):
     def test_valuate_experience_from_curriculum_and_redirect(self):
         self.client.force_login(self.sic_manager_user)
 
-        admission_url = resolve_url('admission')
+        admission_url = resolve_url('admission:all-list')
         expected_url = f'{admission_url}#custom_hash'
 
         response = self.client.post(f'{self.valuate_url}?next={admission_url}&next_hash_url=custom_hash')
@@ -231,14 +233,14 @@ class CurriculumEducationalExperienceValuateViewTestCase(TestCase):
                 experience_uuid=self.experience.uuid,
             )
             + '?next='
-            + resolve_url('admission'),
+            + resolve_url('admission:all-list'),
         )
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
 
     def test_valuate_experience_from_doctorate_curriculum_is_allowed_for_sic_users(self):
         self.client.force_login(self.sic_manager_user)
 
-        admission_url = resolve_url('admission')
+        admission_url = resolve_url('admission:all-list')
         expected_url = f'{admission_url}#custom_hash'
 
         response = self.client.post(f'{self.doctorate_valuate_url}?next={admission_url}&next_hash_url=custom_hash')

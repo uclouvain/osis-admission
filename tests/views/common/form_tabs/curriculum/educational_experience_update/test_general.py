@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -38,21 +38,25 @@ from rest_framework import status
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
     ENTITY_CDE,
 )
-from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
-    EtatAuthentificationParcours,
-)
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
     ChoixStatutPropositionGenerale,
 )
+from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
+    EtatAuthentificationParcours,
+)
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    OngletsDemande,
+)
 from admission.models import EPCInjection as AdmissionEPCInjection
-from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences
 from admission.models.epc_injection import (
     EPCInjectionStatus as AdmissionEPCInjectionStatus,
 )
 from admission.models.epc_injection import EPCInjectionType
 from admission.models.general_education import GeneralEducationAdmission
+from admission.models.valuated_epxeriences import (
+    AdmissionEducationalValuatedExperiences,
+)
 from admission.tests.factories.curriculum import (
     AdmissionEducationalValuatedExperiencesFactory,
     EducationalExperienceFactory,
@@ -177,7 +181,9 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
         )
 
         # Mock osis document api
-        patcher = mock.patch("osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value)
+        patcher = mock.patch(
+            "osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
@@ -1824,7 +1830,7 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
     def test_post_form_with_created_and_deleted_years_and_redirect(self):
         self.client.force_login(self.sic_manager_user)
 
-        admission_url = resolve_url('admission')
+        admission_url = resolve_url('admission:all-list')
         expected_url = f'{admission_url}#custom_hash'
         file_uuid = uuid.uuid4()
         response = self.client.post(

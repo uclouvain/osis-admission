@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -55,13 +55,15 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
 )
 from admission.models import DoctorateAdmission
 from admission.models import EPCInjection as AdmissionEPCInjection
-from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences
 from admission.models.continuing_education import ContinuingEducationAdmission
 from admission.models.epc_injection import (
     EPCInjectionStatus as AdmissionEPCInjectionStatus,
 )
 from admission.models.epc_injection import EPCInjectionType
 from admission.models.general_education import GeneralEducationAdmission
+from admission.models.valuated_epxeriences import (
+    AdmissionEducationalValuatedExperiences,
+)
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import (
     ContinuingEducationAdmissionFactory,
@@ -204,7 +206,9 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
         )
 
         # Mock osis document api
-        patcher = mock.patch("osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value)
+        patcher = mock.patch(
+            "osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
@@ -296,7 +300,7 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
     def test_delete_experience_from_curriculum_and_redirect(self):
         self.client.force_login(self.sic_manager_user)
 
-        admission_url = resolve_url('admission')
+        admission_url = resolve_url('admission:all-list')
         expected_url = f'{admission_url}#custom_hash'
 
         response = self.client.delete(f'{self.delete_url}?next={admission_url}&next_hash_url=custom_hash')

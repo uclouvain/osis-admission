@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -43,6 +43,7 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
 )
 from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.shared_kernel.enums.liste import (
+    ContingenteFiltre,
     TardiveModificationReorientationFiltre,
 )
 from admission.ddd.admission.shared_kernel.enums.statut import (
@@ -320,6 +321,19 @@ class AllAdmissionsFilterForm(AdmissionFilterWithEntitiesAndTrainingTypesForm):
             ),
         ),
         label=_('Deadline for complements'),
+        required=False,
+    )
+
+    contingentes = forms.MultipleChoiceField(
+        choices=ContingenteFiltre.choices(),
+        widget=Select2MultipleCheckboxesWidget(
+            attrs={
+                'data-dropdown-auto-width': True,
+                'data-selection-template': _("{items} types out of {total}"),
+            }
+        ),
+        label=_('Limited-enrolments'),
+        initial=[ContingenteFiltre.NON_CONTINGENTE.name, ContingenteFiltre.CONTINGENTE_RESIDENT.name],
         required=False,
     )
 

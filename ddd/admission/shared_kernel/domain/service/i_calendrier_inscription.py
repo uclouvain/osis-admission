@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -39,7 +39,9 @@ from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formatio
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     IdentificationNonCompleteeException,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+)
 from admission.ddd.admission.formation_generale.domain.model.proposition import (
     Proposition,
 )
@@ -355,7 +357,7 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
             and est_formation_contingentee_et_non_resident(proposition.formation_id.sigle, proposition)
             # hors periode
             and (AdmissionPoolNonResidentQuotaCalendar.event_reference, proposition.formation_id.annee)
-                not in cls.get_pool_ouverts()
+            not in cls.get_pool_ouverts()
         ):
             raise PoolNonResidentContingenteNonOuvertException()
 

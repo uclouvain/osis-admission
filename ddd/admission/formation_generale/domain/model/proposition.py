@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -72,7 +72,8 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
     SicPeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList,
     SpecifierConditionAccesParcoursAnterieurValidatorList,
     SpecifierInformationsApprobationInscriptionValidatorList,
-    SpecifierNouvellesInformationsDecisionFacultaireValidatorList, SupprimerPropositionValidatorList,
+    SpecifierNouvellesInformationsDecisionFacultaireValidatorList,
+    SupprimerPropositionValidatorList,
 )
 from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import (
     ProfilCandidat,

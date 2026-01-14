@@ -1,5 +1,4 @@
-{% extends "admin/base_site.html" %}
-{% load i18n admin_urls bootstrap3 %}
+{% load i18n %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -25,24 +24,22 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
+<div class="panel panel-default">
+    <div class="panel-heading">
+      {{ training }} {{ academic_year }}
+    </div>
+    <div class="panel-body">
+      <form hx-post="{% url "admission:contingente:training_change" training %}">
+        {% include "admission/general_education/contingente/contingente_training_form.html" %}
+      </form>
 
-{% block bodyclass %}{{ block.super }} delete-confirmation delete-selected-confirmation{% endblock %}
+      <dd>
+        <dt>{% translate "Excel export for the court bailiff" %}</dt>
+        <dl><a href="{% url "admission:contingente:training_export" training %}" class="btn btn-primary">{% translate "Export" %}</a></dl>
+      </dd>
 
-{% block breadcrumbs %}
-  <div class="breadcrumbs">
-    <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
-    &rsaquo; <a href="{% url 'admin:app_list' app_label='admission' %}">{% translate 'Admission' %}</a>
-    &rsaquo; <a href="{% url 'admin:admission_admissionformitem_changelist' %}">{% translate 'Admission form items' %}</a>
-    &rsaquo; {% translate 'Initialization of the predefined specific questions' %}
-  </div>
-{% endblock %}
-
-{% block content %}
-  <h1>{% translate 'Initialization of the predefined specific questions for an academic year' %}</h1>
-  `<form method="post" action="">
-    {% csrf_token %}
-    {% bootstrap_form form %}
-    <input type="submit" value="{% translate 'Launch' %}">
-    <a href="{% url 'admin:admission_admissionformitem_changelist' %}" class="button cancel-link">{% translate "Cancel" %}</a>
-  </form>`
-{% endblock %}
+      <form hx-post="{% url "admission:contingente:training_import" training %}" enctype="multipart/form-data">
+        {% include "admission/general_education/contingente/manage_training_import.html" %}
+      </form>
+    </div>
+</div>
