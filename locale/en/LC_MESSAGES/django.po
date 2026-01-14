@@ -520,6 +520,9 @@ msgstr ""
 msgid "Admission has been sent to EPC."
 msgstr ""
 
+msgid "Admission limited enrolment"
+msgstr ""
+
 #, python-format
 msgid ""
 "Admission request for the academic year %(academic_year)s to the program:"
@@ -601,6 +604,13 @@ msgid "An education type"
 msgstr ""
 
 msgid "An holding mail has already been sent to the candidate."
+msgstr ""
+
+#, python-format
+msgid ""
+"An import was already realized for %(training)s for the year "
+"%(academic_year)s, a new import will overwrite the data already present. Do "
+"you confirm the overwriting of the data ?"
 msgstr ""
 
 msgid ""
@@ -1081,6 +1091,10 @@ msgstr ""
 msgid "Brief justification"
 msgstr ""
 
+#, python-format
+msgid "Bulk action for academic year %(academic_year)s"
+msgstr ""
+
 msgid ""
 "By finalising my application, I undertake to pay the registration fees upon "
 "receipt of the invoice (provided my application is accepted). In case of "
@@ -1485,6 +1499,12 @@ msgstr ""
 msgid "Closed"
 msgstr ""
 
+msgid "Columns"
+msgstr ""
+
+msgid "Columns selection"
+msgstr ""
+
 msgid "Comment"
 msgstr ""
 
@@ -1881,9 +1901,6 @@ msgstr "Delegate dispensation"
 msgid "DEROGATION_VRAE"
 msgstr "VRAE dispensation"
 
-msgid "DEUX_OU_PLUS"
-msgstr "Twice or more"
-
 msgid "DISPENSE_BOURSE"
 msgstr ""
 
@@ -1921,6 +1938,9 @@ msgid "Data verification with third parties"
 msgstr ""
 
 msgid "Date"
+msgstr ""
+
+msgid "Date and time of the results publication"
 msgstr ""
 
 msgid "Date of birth"
@@ -2390,6 +2410,9 @@ msgstr ""
 msgid "Dr"
 msgstr ""
 
+msgid "Draw number"
+msgstr ""
+
 msgid "Dual degree scholarship"
 msgstr ""
 
@@ -2712,10 +2735,16 @@ msgstr ""
 msgid "Exams"
 msgstr ""
 
+msgid "Excel export for the court bailiff"
+msgstr ""
+
 msgid "Excel export of admission"
 msgstr ""
 
 msgid "Excel export of admission applications"
+msgstr ""
+
+msgid "Excel import completed by the court bailiff"
 msgstr ""
 
 msgid "Exclude"
@@ -2864,6 +2893,9 @@ msgid "Feedback from Fac/CDD"
 msgstr ""
 
 msgid "File"
+msgstr ""
+
+msgid "File to import"
 msgstr ""
 
 msgid "File with header"
@@ -3646,6 +3678,9 @@ msgstr ""
 msgid "Immediately"
 msgstr ""
 
+msgid "Import"
+msgstr ""
+
 msgid "Import from csv file"
 msgstr ""
 
@@ -3845,6 +3880,9 @@ msgstr ""
 msgid "Invalid date"
 msgstr ""
 
+msgid "Invalid file format ."
+msgstr ""
+
 #, python-format
 msgid "Invalid property: %(config_params)s"
 msgid_plural "Invalid properties: %(config_params)s"
@@ -3895,9 +3933,6 @@ msgstr ""
 msgid "It is not possible to go from the \"validated\" status to this status."
 msgstr ""
 
-msgid "JAMAIS"
-msgstr "Never"
-
 msgid "Joint research project (ARC)"
 msgstr ""
 
@@ -3928,6 +3963,12 @@ msgstr ""
 msgid "Language regime"
 msgstr ""
 
+msgid "Last bulk notification at"
+msgstr ""
+
+msgid "Last bulk notification by"
+msgstr ""
+
 msgid "Last degree level"
 msgstr ""
 
@@ -3938,6 +3979,16 @@ msgid "Last email sent the"
 msgstr ""
 
 msgid "Last hour views:"
+msgstr ""
+
+msgid "Last import at"
+msgstr ""
+
+msgid "Last import by"
+msgstr ""
+
+#, python-format
+msgid "Last import done the %(date)s by %(author)s."
 msgstr ""
 
 #, python-format
@@ -4009,6 +4060,12 @@ msgstr ""
 
 msgctxt "equivalence_type"
 msgid "Level equivalence"
+msgstr ""
+
+msgid "Limited-enrolment application no."
+msgstr ""
+
+msgid "Limited-enrolments"
 msgstr ""
 
 msgid ""
@@ -4524,6 +4581,9 @@ msgstr ""
 msgid "No PhD found."
 msgstr ""
 
+msgid "No date configured yet."
+msgstr ""
+
 msgid "No defense"
 msgstr ""
 
@@ -4633,6 +4693,12 @@ msgstr ""
 msgid "Non-resident file"
 msgstr ""
 
+msgid "Non-resident limited-enrolment"
+msgstr ""
+
+msgid "Non-resident limited-enrolment management"
+msgstr ""
+
 msgid "Non-retrievable attachment"
 msgstr ""
 
@@ -4686,6 +4752,9 @@ msgctxt "dashboard-indicator pre-admission"
 msgid "Not in order of registration"
 msgstr ""
 
+msgid "Not limited-enrolment"
+msgstr ""
+
 msgid "Not specified"
 msgstr ""
 
@@ -4707,6 +4776,9 @@ msgstr ""
 
 msgctxt "admission"
 msgid "Number of additional years the candidate can have"
+msgstr ""
+
+msgid "Number of places"
 msgstr ""
 
 msgctxt "admission"
@@ -5710,6 +5782,9 @@ msgstr ""
 msgid "Resident (as defined by government decree)"
 msgstr ""
 
+msgid "Resident limited-enrolment"
+msgstr ""
+
 msgid "Resident student form"
 msgstr ""
 
@@ -5766,6 +5841,9 @@ msgstr ""
 msgid "Role: Doctorate committee members"
 msgstr ""
 
+msgid "Role: Limited enrolment delegate"
+msgstr ""
+
 msgid "Role: Program manager"
 msgstr ""
 
@@ -5803,6 +5881,9 @@ msgid "SIC comment for the faculty"
 msgstr ""
 
 msgid "SIC decision"
+msgstr ""
+
+msgid "SIC decision status"
 msgstr ""
 
 msgid "SIGNING_IN_PROGRESS"
@@ -6177,6 +6258,9 @@ msgid "Submission date"
 msgstr ""
 
 msgid "Submission date:"
+msgstr ""
+
+msgid "Submit"
 msgstr ""
 
 msgid "Submit my decision"
@@ -6792,6 +6876,9 @@ msgstr ""
 msgid "The proposition has already been confirmed or is cancelled"
 msgstr ""
 
+msgid "The proposition is not in progress."
+msgstr ""
+
 msgid ""
 "The proposition must be a late enrollment with a defined access condition."
 msgstr ""
@@ -6806,6 +6893,14 @@ msgid "The proposition must be an enrollment."
 msgstr ""
 
 msgid "The proposition must be concerned by the payment."
+msgstr ""
+
+msgid "The proposition must be confirmed to realize this action."
+msgstr ""
+
+msgid ""
+"The proposition must be for a contingent training for a non-resident "
+"candidat."
 msgstr ""
 
 msgid "The proposition must be in draft form to realize this action."
@@ -6951,6 +7046,10 @@ msgid "There is no required exam for this training."
 msgstr ""
 
 msgid "There was an error while getting the EPC documents list."
+msgstr ""
+
+#, python-brace-format
+msgid "There was an error while importing the file: {error}."
 msgstr ""
 
 msgid "Thesis field"
@@ -7199,6 +7298,9 @@ msgid ""
 "To visualize and edit a document, please select it in the list opposite."
 msgstr ""
 
+msgid "Training"
+msgstr ""
+
 msgctxt "admission"
 msgid "Training acronym"
 msgstr ""
@@ -7291,9 +7393,6 @@ msgstr ""
 msgid "UE"
 msgstr ""
 
-msgid "UNE"
-msgstr "Once"
-
 msgid "UUID"
 msgstr ""
 
@@ -7330,6 +7429,9 @@ msgid ""
 "application on this page."
 msgstr ""
 
+msgid "Update"
+msgstr ""
+
 msgctxt "verb"
 msgid "Update"
 msgstr ""
@@ -7344,6 +7446,9 @@ msgid "Update experience"
 msgstr ""
 
 msgid "Update member"
+msgstr ""
+
+msgid "Update saved successfully."
 msgstr ""
 
 msgctxt "admission"

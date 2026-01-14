@@ -45,6 +45,10 @@ from admission.auth.predicates.common import (
 from admission.auth.scope import Scope
 from osis_role.contrib.models import EntityRoleModel
 
+is_general_or_has_contingente_scope = (~general.is_contingent_non_resident & has_scope(Scope.GENERAL)) | (
+    general.is_contingent_non_resident & has_scope(Scope.CONTINGENTE_NON_RESIDENT)
+)
+
 
 class CentralManager(EntityRoleModel):
     """
@@ -75,7 +79,8 @@ class CentralManager(EntityRoleModel):
     def common_rule_set(cls, is_entity_manager: callable):
         ruleset = {
             # Listings
-            'admission.view_enrolment_applications': has_scope(Scope.GENERAL),
+            'admission.view_enrolment_applications': has_scope(Scope.GENERAL)
+            | has_scope(Scope.CONTINGENTE_NON_RESIDENT),
             'admission.view_doctorate_enrolment_applications': has_scope(Scope.DOCTORAT),
             'admission.view_continuing_enrolment_applications': has_scope(Scope.IUFC),
             # Access a single application
@@ -87,7 +92,7 @@ class CentralManager(EntityRoleModel):
             'admission.view_admission_person': is_entity_manager,
             'admission.change_admission_person': is_entity_manager
             & (
-                (general.in_sic_status | general.in_progress)
+                ((general.in_sic_status | general.in_progress) & is_general_or_has_contingente_scope)
                 | (
                     (continuing.in_manager_status | continuing.in_progress)
                     & ~candidate_has_other_doctorate_or_general_admissions
@@ -99,10 +104,9 @@ class CentralManager(EntityRoleModel):
             'admission.view_admission_coordinates': is_entity_manager,
             'admission.change_admission_coordinates': is_entity_manager
             & (
-                general.in_sic_status
+                ((general.in_sic_status | general.in_progress) & is_general_or_has_contingente_scope)
                 | continuing.in_manager_status
                 | doctorate.in_sic_status
-                | general.in_progress
                 | continuing.in_progress
                 | doctorate.in_progress
             )
@@ -110,7 +114,11 @@ class CentralManager(EntityRoleModel):
             & ~workflow_injection_signaletique_en_cours,
             'admission.view_admission_training_choice': is_entity_manager,
             'admission.change_admission_training_choice': is_entity_manager
-            & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status)
+            & (
+                (general.in_sic_status & is_general_or_has_contingente_scope)
+                | continuing.in_manager_status
+                | doctorate.in_sic_status
+            )
             & ~is_sent_to_epc
             & ~workflow_injection_signaletique_en_cours,
             'admission.view_admission_languages': is_entity_manager,
@@ -119,30 +127,34 @@ class CentralManager(EntityRoleModel):
             'admission.view_admission_exam': is_entity_manager,
             'admission.change_admission_secondary_studies': is_entity_manager
             & (
-                general.in_sic_status
+                (general.in_sic_status & is_general_or_has_contingente_scope)
                 | (continuing.in_manager_status & ~candidate_has_other_doctorate_or_general_admissions)
             )
             & ~is_sent_to_epc,
             'admission.change_admission_exam': is_entity_manager
             & (
-                general.in_sic_status
+                (general.in_sic_status & is_general_or_has_contingente_scope)
                 | (continuing.in_manager_status & ~candidate_has_other_doctorate_or_general_admissions)
             )
             & ~is_sent_to_epc,
             'admission.view_admission_curriculum': is_entity_manager,
             'admission.change_admission_global_curriculum': is_entity_manager
-            & (general.in_sic_status | continuing.in_manager_status | doctorate.in_sic_status)
+            & (
+                (general.in_sic_status & is_general_or_has_contingente_scope)
+                | continuing.in_manager_status
+                | doctorate.in_sic_status
+            )
             & ~is_sent_to_epc,
             'admission.change_admission_curriculum': is_entity_manager
             & (
-                general.in_sic_status
+                (general.in_sic_status & is_general_or_has_contingente_scope)
                 | (continuing.in_manager_status & ~candidate_has_other_doctorate_or_general_admissions)
                 | doctorate.in_sic_status
             )
             & ~is_sent_to_epc,
             'admission.delete_admission_curriculum': is_entity_manager
             & (
-                general.in_sic_status
+                (general.in_sic_status & is_general_or_has_contingente_scope)
                 | (continuing.in_manager_status & ~candidate_has_other_doctorate_or_general_admissions)
                 | doctorate.in_sic_status
             )
@@ -158,11 +170,11 @@ class CentralManager(EntityRoleModel):
             'admission.view_admission_supervision': is_entity_manager,
             'admission.view_admission_accounting': is_entity_manager,
             'admission.change_admission_accounting': is_entity_manager
-            & (general.in_sic_status | doctorate.in_sic_status)
+            & ((general.in_sic_status & is_general_or_has_contingente_scope) | doctorate.in_sic_status)
             & ~is_sent_to_epc,
             'admission.view_admission_specific_questions': is_entity_manager,
             'admission.change_admission_specific_questions': is_entity_manager
-            & (general.in_sic_status | continuing.in_manager_status)
+            & ((general.in_sic_status & is_general_or_has_contingente_scope) | continuing.in_manager_status)
             & ~is_sent_to_epc,
             'admission.view_admission_jury': is_entity_manager,
             'admission.change_admission_jury': is_entity_manager,
@@ -173,21 +185,29 @@ class CentralManager(EntityRoleModel):
             'admission.view_documents_management': is_entity_manager
             & (general.not_cancelled | continuing.is_submitted_or_not_cancelled | doctorate.not_cancelled),
             'admission.edit_documents': is_entity_manager
-            & (general.is_submitted | continuing.not_cancelled | doctorate.is_submitted)
+            & (
+                (general.is_submitted & is_general_or_has_contingente_scope)
+                | continuing.not_cancelled
+                | doctorate.is_submitted
+            )
             & ~is_sent_to_epc,
             'admission.request_documents': is_entity_manager
-            & (general.in_sic_status | continuing.can_request_documents | doctorate.in_sic_status)
+            & (
+                (general.in_sic_status & is_general_or_has_contingente_scope)
+                | continuing.can_request_documents
+                | doctorate.in_sic_status
+            )
             & ~is_sent_to_epc,
             'admission.cancel_document_request': is_entity_manager
             & (
-                general.in_sic_document_request_status
+                (general.in_sic_document_request_status & is_general_or_has_contingente_scope)
                 | continuing.in_document_request_status
                 | doctorate.in_sic_document_request_status
             )
             & ~is_sent_to_epc,
             'admission.generate_in_progress_analysis_folder': is_entity_manager
             & (
-                (general.is_general & general.in_progress)
+                ((general.is_general & general.in_progress) & is_general_or_has_contingente_scope)
                 | (continuing.is_continuing & continuing.in_progress)
                 | (doctorate.is_doctorate & doctorate.in_progress)
             )
@@ -195,7 +215,11 @@ class CentralManager(EntityRoleModel):
             'admission.view_checklist': is_entity_manager
             & (general.is_submitted | continuing.is_submitted | doctorate.is_submitted),
             'admission.change_checklist': is_entity_manager
-            & (general.in_sic_status | continuing.is_submitted | doctorate.in_sic_status)
+            & (
+                (general.in_sic_status & is_general_or_has_contingente_scope)
+                | continuing.is_submitted
+                | doctorate.in_sic_status
+            )
             & ~is_sent_to_epc,
             'admission.change_personal_data_checklist_status_to_be_processed': is_entity_manager
             & (general.in_sic_status | continuing.is_submitted | doctorate.in_sic_status)
@@ -205,45 +229,59 @@ class CentralManager(EntityRoleModel):
             & ~is_sent_to_epc,
             'admission.change_checklist_iufc': is_entity_manager & continuing.is_submitted & ~is_sent_to_epc,
             'admission.cancel_admission_iufc': is_entity_manager & continuing.is_submitted,
-            'admission.change_payment': is_entity_manager & general.in_sic_status_or_application_fees & ~is_sent_to_epc,
+            'admission.change_payment': is_entity_manager
+            & (general.in_sic_status_or_application_fees & is_general_or_has_contingente_scope)
+            & ~is_sent_to_epc,
             'admission.checklist_faculty_decision_transfer_to_fac': is_entity_manager
-            & (general.can_send_to_fac_faculty_decision | doctorate.can_send_to_fac_faculty_decision)
+            & (
+                (general.can_send_to_fac_faculty_decision & is_general_or_has_contingente_scope)
+                | doctorate.can_send_to_fac_faculty_decision
+            )
             & ~is_sent_to_epc,
             'admission.checklist_faculty_decision_transfer_to_sic_without_decision': is_entity_manager
-            & (general.in_fac_status | doctorate.in_fac_status)
+            & ((general.in_fac_status & is_general_or_has_contingente_scope) | doctorate.in_fac_status)
             & ~is_sent_to_epc,
             'admission.checklist_change_past_experiences': is_entity_manager
-            & (general.in_sic_status | doctorate.in_sic_status)
+            & ((general.in_sic_status & is_general_or_has_contingente_scope) | doctorate.in_sic_status)
             & ~is_sent_to_epc,
             'admission.checklist_select_access_title': is_entity_manager
-            & (general.in_sic_status | doctorate.in_sic_status)
+            & ((general.in_sic_status & is_general_or_has_contingente_scope) | doctorate.in_sic_status)
             & past_experiences_checklist_tab_is_not_sufficient
             & ~is_sent_to_epc,
             'admission.checklist_change_training_choice': is_entity_manager & doctorate.in_sic_status & ~is_sent_to_epc,
             'admission.checklist_change_sic_comment': is_entity_manager
-            & (general.is_submitted | doctorate.is_submitted)
+            & ((general.is_submitted & is_general_or_has_contingente_scope) | doctorate.is_submitted)
             & ~is_sent_to_epc,
             'admission.checklist_financability_dispensation': is_entity_manager & ~is_sent_to_epc,
             'admission.checklist_financability_dispensation_fac': is_entity_manager & ~is_sent_to_epc,
             'admission.continuing_checklist_change_iufc_comment': is_entity_manager & ~is_sent_to_epc,
             'admission.continuing_checklist_change_fac_comment': is_entity_manager & ~is_sent_to_epc,
             'admission.checklist_change_comment': is_entity_manager
-            & (general.is_submitted | continuing.is_continuing | doctorate.is_submitted)
+            & (
+                (general.is_submitted & is_general_or_has_contingente_scope)
+                | continuing.is_continuing
+                | doctorate.is_submitted
+            )
             & ~is_sent_to_epc,
             'admission.checklist_change_sic_decision': is_entity_manager
-            & (general.in_sic_status | doctorate.in_sic_status)
+            & ((general.in_sic_status & is_general_or_has_contingente_scope) | doctorate.in_sic_status)
             & ~is_sent_to_epc,
             'profil.can_see_parcours_externe': rules.always_allow,
             'profil.can_edit_parcours_externe': rules.always_allow,
             'admission.can_inject_to_epc': ~is_sent_to_epc,
             # Fusion
-            'admission.merge_candidate_with_known_person': has_scope(Scope.GENERAL)
+            'admission.merge_candidate_with_known_person': (
+                has_scope(Scope.GENERAL) | has_scope(Scope.CONTINGENTE_NON_RESIDENT)
+            )
             & is_entity_manager
+            & is_general_or_has_contingente_scope
             & ~is_sent_to_epc,
             # Tables de références
             'reference.view_diplomatitle': rules.always_allow,
             'reference.view_scholarship': rules.always_allow,
             'reference.view_reference_choice': rules.always_allow,
             'base.view_organization': rules.always_allow,
+            # Contingente
+            'admission.view_contingente_management': has_scope(Scope.CONTINGENTE_NON_RESIDENT),
         }
         return RuleSet(ruleset)

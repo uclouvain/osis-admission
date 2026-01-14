@@ -30,7 +30,6 @@ from rules import predicate
 
 from admission.auth.predicates import not_in_general_statuses_predicate_message
 from admission.calendar.admission_calendar import SIGLES_WITH_QUOTA
-from admission.models import GeneralEducationAdmission
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_ENVOYABLE_EN_FAC_POUR_DECISION,
     STATUTS_PROPOSITION_GENERALE_SOUMISE,

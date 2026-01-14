@@ -1,4 +1,4 @@
-##############################################################################
+# ##############################################################################
 #
 #    OSIS stands for Open Student Information System. It's an application
 #    designed to manage the core business of higher education institutions,
@@ -22,12 +22,14 @@
 #    at the root of the source code of this program.  If not,
 #    see http://www.gnu.org/licenses/.
 #
-##############################################################################
-from base.models.utils.utils import ChoiceEnum
+# ##############################################################################
+import factory
+
+from admission.models.contingente import ContingenteTraining
 
 
-class Scope(ChoiceEnum):
-    GENERAL = 'GENERAL'
-    IUFC = 'IUFC'
-    DOCTORAT = 'DOCTORAT'
-    CONTINGENTE_NON_RESIDENT = 'CONTINGENTE_NON_RESIDENT'
+class ContingenteTrainingFactory(factory.django.DjangoModelFactory):
+    training = factory.SubFactory('base.tests.factories.education_group_year.EducationGroupYearFactory')
+
+    class Meta:
+        model = ContingenteTraining

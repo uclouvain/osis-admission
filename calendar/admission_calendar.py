@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,10 +27,10 @@ import datetime
 from abc import ABC
 from typing import Dict, List, Optional
 
+from admission.ddd import CODE_BACHELIER_VETERINAIRE
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
     DoctoratFormation,
 )
-from admission.ddd import CODE_BACHELIER_VETERINAIRE
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AdresseDomicileLegalNonCompleteeException,
 )
@@ -583,7 +583,6 @@ class AdmissionPoolMedicineDentistryStandardPeriodCalendar(PoolCalendar):
     cutover_date = Date(jour=6, mois=9, annee=0)
     end_date = Date(jour=30, mois=9, annee=0)
 
-
     @classmethod
     def ensure_consistency_until_n_plus_6(cls):
         ensure_consistency_until_n_plus_6(
@@ -595,16 +594,16 @@ class AdmissionPoolMedicineDentistryStandardPeriodCalendar(PoolCalendar):
 
     @classmethod
     def matches_criteria(
-            cls,
-            proposition: 'PropositionGenerale',
-            formation: Formation | DoctoratFormation,
-            **kwargs,
+        cls,
+        proposition: 'PropositionGenerale',
+        formation: Formation | DoctoratFormation,
+        **kwargs,
     ) -> bool:
         """Candidat souhaitant s'inscrire à un bachelier en médecine ou dentisterie"""
         return (
-                isinstance(proposition, PropositionGenerale)
-                and formation.type == TrainingType.BACHELOR
-                and formation.est_formation_medecine_ou_dentisterie is True
+            isinstance(proposition, PropositionGenerale)
+            and formation.type == TrainingType.BACHELOR
+            and formation.est_formation_medecine_ou_dentisterie is True
         )
 
 

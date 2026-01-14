@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -40,8 +40,9 @@ from admission.ddd.admission.formation_continue import (
 from admission.ddd.admission.formation_generale import (
     commands as general_education_commands,
 )
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import \
-    PoolNonResidentContingenteNonOuvertException
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
+    PoolNonResidentContingenteNonOuvertException,
+)
 from admission.utils import (
     get_cached_admission_perm_obj,
     get_cached_continuing_education_admission_perm_obj,
@@ -63,7 +64,7 @@ class GeneralPropositionView(APIPermissionRequiredMixin, RetrieveAPIView):
     }
 
     def check_method_permissions(self, user, method, obj=None) -> Optional[str]:
-        """ Check calendar is open for non-resident submitted proposition with quota """
+        """Check calendar is open for non-resident submitted proposition with quota"""
         error_message = super().check_method_permissions(user, method, obj)
         if error_message or method != 'DELETE':
             return error_message

@@ -23,11 +23,48 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from base.models.utils.utils import ChoiceEnum
+from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
-class Scope(ChoiceEnum):
-    GENERAL = 'GENERAL'
-    IUFC = 'IUFC'
-    DOCTORAT = 'DOCTORAT'
-    CONTINGENTE_NON_RESIDENT = 'CONTINGENTE_NON_RESIDENT'
+class ContingenteTraining(models.Model):
+    training = models.OneToOneField(
+        'base.EducationGroupYear',
+        verbose_name=_('Training'),
+        on_delete=models.CASCADE,
+        editable=False,
+        unique=True,
+    )
+    places_number = models.PositiveSmallIntegerField(
+        verbose_name=_('Number of places'),
+        default=0,
+    )
+    last_import_at = models.DateTimeField(
+        _("Last import at"),
+        null=True,
+        editable=False,
+    )
+    last_import_by = models.ForeignKey(
+        'base.Person',
+        verbose_name=_("Last import by"),
+        related_name='+',
+        on_delete=models.SET_NULL,
+        null=True,
+        editable=False,
+    )
+    last_bulk_notification_at = models.DateTimeField(
+        _("Last bulk notification at"),
+        null=True,
+        editable=False,
+    )
+    last_bulk_notification_by = models.ForeignKey(
+        'base.Person',
+        verbose_name=_("Last bulk notification by"),
+        related_name='+',
+        on_delete=models.SET_NULL,
+        null=True,
+        editable=False,
+    )
+
+    def __str__(self):
+        return f'Détail contingente pour {self.training}'

@@ -72,7 +72,8 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
     SicPeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList,
     SpecifierConditionAccesParcoursAnterieurValidatorList,
     SpecifierInformationsApprobationInscriptionValidatorList,
-    SpecifierNouvellesInformationsDecisionFacultaireValidatorList, SupprimerPropositionValidatorList,
+    SpecifierNouvellesInformationsDecisionFacultaireValidatorList,
+    SupprimerPropositionValidatorList,
 )
 from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import (
     ProfilCandidat,
