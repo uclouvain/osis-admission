@@ -988,6 +988,7 @@ class GeneralAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedDoc
                 str(self.non_free_document.form_item.uuid): [
                     str(self.uuid_documents_by_token[non_free_specific_question_file[0]]),
                 ],
+                str(self.free_document.form_item.uuid): [],
             },
         )
 
@@ -1621,6 +1622,7 @@ class ContinuingAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequested
                 str(self.non_free_document.form_item.uuid): [
                     str(self.uuid_documents_by_token[non_free_specific_question_file[0]]),
                 ],
+                str(self.free_document.form_item.uuid): [],
             },
         )
 
@@ -2355,6 +2357,7 @@ class DoctorateAdmissionRequestedDocumentListApiTestCase(BaseAdmissionRequestedD
                 str(self.non_free_document.form_item.uuid): [
                     str(self.uuid_documents_by_token[non_free_specific_question_file[0]]),
                 ],
+                str(self.free_document.form_item.uuid): [],
             },
         )
 
