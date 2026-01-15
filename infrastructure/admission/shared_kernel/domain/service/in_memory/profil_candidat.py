@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -66,6 +66,7 @@ from base.models.enums.community import CommunityEnum
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.enums.got_diploma import GotDiploma
 from base.models.enums.person_address_type import PersonAddressType
+from base.models.enums.personal_data import ChoixStatutValidationDonneesPersonnelles
 from base.models.enums.teaching_type import TeachingTypeEnum
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     DiplomeBelgeEtudesSecondairesDTO,
@@ -308,6 +309,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 nom_langue_contact='Français',
                 date_expiration_passeport=datetime.date(2020, 1, 1),
                 date_expiration_carte_identite=datetime.date(2020, 1, 1),
+                statut_validation_donnees_personnelles=ChoixStatutValidationDonneesPersonnelles.VALIDEES.name,
             ),
             _IdentificationDTO(
                 matricule="0000000001",
@@ -339,6 +341,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 nom_langue_contact='Français',
                 date_expiration_passeport=datetime.date(2020, 1, 1),
                 date_expiration_carte_identite=datetime.date(2020, 1, 1),
+                statut_validation_donnees_personnelles=ChoixStatutValidationDonneesPersonnelles.VALIDEES.name,
             ),
             _IdentificationDTO(
                 matricule="0000000002",
@@ -370,6 +373,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 nom_langue_contact='Français',
                 date_expiration_passeport=datetime.date(2020, 1, 1),
                 date_expiration_carte_identite=datetime.date(2020, 1, 1),
+                statut_validation_donnees_personnelles=ChoixStatutValidationDonneesPersonnelles.VALIDEES.name,
             ),
             _IdentificationDTO(
                 matricule="0000000003",
@@ -401,6 +405,39 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 nom_pays_naissance='Belgique',
                 date_expiration_passeport=datetime.date(2020, 1, 1),
                 date_expiration_carte_identite=datetime.date(2020, 1, 1),
+                statut_validation_donnees_personnelles=ChoixStatutValidationDonneesPersonnelles.VALIDEES.name,
+            ),
+            _IdentificationDTO(
+                matricule="candidat_checklist",
+                nom='Foreign',
+                prenom='Individual',
+                date_naissance=datetime.date(1990, 1, 1),
+                annee_naissance=None,
+                lieu_naissance='Louvain-la-Neuve',
+                pays_nationalite_europeen=True,
+                pays_nationalite='AR',
+                langue_contact='en',
+                sexe='M',
+                genre='H',
+                photo_identite=['uuid11'],
+                carte_identite=['uuid12'],
+                passeport=['uuid13'],
+                numero_registre_national_belge='',
+                numero_carte_identite='',
+                numero_passeport='1003',
+                annee_derniere_inscription_ucl=None,
+                noma_derniere_inscription_ucl='',
+                email='john.doe@ucl.be',
+                pays_naissance='BE',
+                etat_civil=CivilState.MARRIED.name,
+                pays_residence="BE",
+                nom_langue_contact='Anglais',
+                autres_prenoms='',
+                nom_pays_nationalite='Argentine',
+                nom_pays_naissance='Belgique',
+                date_expiration_passeport=datetime.date(2020, 1, 1),
+                date_expiration_carte_identite=datetime.date(2020, 1, 1),
+                statut_validation_donnees_personnelles=ChoixStatutValidationDonneesPersonnelles.VALIDEES.name,
             ),
         ]
         cls.adresses_candidats = [
@@ -984,6 +1021,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 nom_pays_naissance=candidate.nom_pays_naissance,
                 date_expiration_passeport=candidate.date_expiration_passeport,
                 date_expiration_carte_identite=candidate.date_expiration_carte_identite,
+                statut_validation_donnees_personnelles=candidate.statut_validation_donnees_personnelles,
             )
         except StopIteration:  # pragma: no cover
             raise CandidatNonTrouveException

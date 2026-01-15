@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -88,13 +88,15 @@ from admission.models import EPCInjection as AdmissionEPCInjection
 from admission.models.base import (
     BaseAdmission,
 )
-from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences, \
-    AdmissionProfessionalValuatedExperiences
 from admission.models.epc_injection import (
     EPCInjectionStatus as AdmissionEPCInjectionStatus,
 )
 from admission.models.epc_injection import EPCInjectionType
 from admission.models.functions import ArrayLength
+from admission.models.valuated_epxeriences import (
+    AdmissionEducationalValuatedExperiences,
+    AdmissionProfessionalValuatedExperiences,
+)
 from base.models.enums.community import CommunityEnum
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
@@ -199,6 +201,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             noma_derniere_inscription_ucl=candidate.last_registration_id,
             pays_residence=residential_country,
             autres_prenoms=candidate.middle_name,
+            statut_validation_donnees_personnelles=candidate.personal_data_validation_status,
             **country_of_citizenship,
             **birth_country,
         )
@@ -442,7 +445,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             valuated_from_admissions=ArrayAgg(
                 'educational_experience__valuated_from_admission__uuid',
                 filter=Q(educational_experience__valuated_from_admission__isnull=False),
-                default=Value([])
+                default=Value([]),
             ),
         )
 
@@ -588,7 +591,6 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def get_identification(cls, matricule: str) -> 'IdentificationDTO':
-
         person = (
             Person.objects.select_related(
                 'country_of_citizenship',
@@ -659,7 +661,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             valuated_training_types=ArrayAgg(
                 'baseadmissions__training__education_group_type__name',
                 filter=Q(baseadmissions__valuated_secondary_studies_person_id=F('pk')),
-                default=Value([])
+                default=Value([]),
             ),
         )
 
@@ -760,7 +762,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 valuated_from_admissions=ArrayAgg(
                     'valuated_from_admission__uuid',
                     filter=Q(valuated_from_admission__isnull=False),
-                    default=Value([])
+                    default=Value([]),
                 ),
                 injecte_par_admission=Exists(
                     AdmissionEPCInjection.objects.filter(
@@ -801,7 +803,6 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         uuid_proposition: str,
         experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
     ) -> Optional['CurriculumAdmissionDTO']:
-
         try:
             minimal_years = cls.get_annees_minimum_curriculum(matricule, annee_courante)
 

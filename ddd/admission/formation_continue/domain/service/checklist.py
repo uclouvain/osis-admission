@@ -62,8 +62,4 @@ class Checklist(interface.DomainService):
                 libelle=_('To be processed'),
                 statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
             ),
-            donnees_personnelles=StatutChecklist(
-                libelle=_("To be processed"),
-                statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
-            ),
         )

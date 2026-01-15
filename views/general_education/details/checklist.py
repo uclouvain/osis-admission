@@ -302,7 +302,6 @@ __all__ = [
     'SicDecisionDispensationView',
     'SicDecisionChangeStatusView',
     'SicDecisionPdfPreviewView',
-    'PersonalDataChangeStatusView',
 ]
 
 
@@ -537,43 +536,6 @@ def get_email(template_identifier, language, proposition_dto: PropositionGestion
             mail_template.render_subject(tokens),
             mail_template.body_as_html(tokens),
         )
-
-
-class PersonalDataChangeStatusView(
-    AdmissionFormMixin,
-    LoadDossierViewMixin,
-    HtmxPermissionRequiredMixin,
-    FormView,
-):
-    urlpatterns = {'personal-data-change-status': 'personal-data-change-status/<str:status>'}
-    template_name = 'admission/general_education/includes/checklist/personal_data.html'
-    form_class = Form
-
-    def get_permission_required(self):
-        return (
-            {
-                'INITIAL_CANDIDAT': 'admission.change_personal_data_checklist_status_to_be_processed',
-                'GEST_EN_COURS': 'admission.change_personal_data_checklist_status_cleaned',
-            }.get(self.kwargs.get('status'), 'admission.change_checklist'),
-        )
-
-    def form_valid(self, form):
-        admission = self.get_permission_object()
-
-        extra = {}
-        if 'fraud' in self.request.POST:
-            extra['fraud'] = self.request.POST['fraud']
-
-        change_admission_status(
-            tab=OngletsChecklist.donnees_personnelles.name,
-            admission_status=self.kwargs['status'],
-            extra=extra,
-            admission=admission,
-            author=self.request.user.person,
-            replace_extra=True,
-        )
-
-        return super().form_valid(form)
 
 
 class PaymentsListView(AdmissionViewMixin, TemplateView):

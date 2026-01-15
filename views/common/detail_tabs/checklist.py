@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -36,14 +36,14 @@ from rest_framework.parsers import FormParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from admission.constants import COMMENT_TAG_FAC, COMMENT_TAG_SIC
+from admission.constants import COMMENT_TAG_FAC, COMMENT_TAG_SIC, CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
 )
 from admission.ddd.admission.formation_generale.events import (
     DonneesPersonellesCandidatValidee,
 )
-from admission.forms.admission.checklist import CommentForm
+from admission.forms.admission.checklist import CommentForm, PersonalDataStatusForm
 from admission.views.common.detail_tabs.comments import (
     COMMENT_TAG_CDD_FOR_SIC,
     COMMENT_TAG_FAC_FOR_IUFC,
@@ -51,18 +51,20 @@ from admission.views.common.detail_tabs.comments import (
     COMMENT_TAG_SIC_FOR_CDD,
 )
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
+from base.models.enums.personal_data import ChoixStatutValidationDonneesPersonnelles
+from base.utils.htmx import HtmxPermissionRequiredMixin
+from infrastructure.messages_bus import message_bus_instance
+from osis_common.ddd.interface import BusinessException
 
 __all__ = [
     'ChangeStatusView',
     'SaveCommentView',
     'PropositionFromResumeMixin',
     'ChecklistTabIcon',
+    'PersonalDataChangeStatusView',
 ]
 
 __namespace__ = False
-
-from infrastructure.messages_bus import message_bus_instance
-from osis_common.ddd.interface import BusinessException
 
 COMMENT_FINANCABILITE_DISPENSATION = 'financabilite__derogation'
 
@@ -226,3 +228,50 @@ class ChecklistTabIcon:
         self.title = title
         self.identifier = identifier
         self.displayed = displayed
+
+
+class PersonalDataChangeStatusView(
+    AdmissionFormMixin,
+    LoadDossierViewMixin,
+    HtmxPermissionRequiredMixin,
+    FormView,
+):
+    urlpatterns = {'personal-data-change-status': 'personal-data-change-status/<str:status>'}
+    template_name = 'admission/general_education/includes/checklist/personal_data.html'
+    form_class = PersonalDataStatusForm
+    update_admission_author = True
+    permission_by_status = {
+        ChoixStatutValidationDonneesPersonnelles.A_TRAITER.name: (
+            'admission.change_personal_data_checklist_status_to_be_processed'
+        ),
+        ChoixStatutValidationDonneesPersonnelles.TOILETTEES.name: (
+            'admission.change_personal_data_checklist_status_cleaned'
+        ),
+    }
+    permission_by_context = {
+        CONTEXT_GENERAL: 'admission.change_checklist',
+        CONTEXT_DOCTORATE: 'admission.change_checklist',
+        CONTEXT_CONTINUING: 'admission.change_checklist_iufc',
+    }
+
+    def get_permission_required(self):
+        return (
+            self.permission_by_status.get(self.kwargs.get('status'))
+            or self.permission_by_context[self.current_context],
+        )
+
+    def get_form_kwargs(self):
+        if self.request.method == 'POST':
+            return {'data': {'status': self.kwargs['status']}}
+        return {}
+
+    def form_valid(self, form):
+        candidate = self.get_permission_object().candidate
+
+        candidate.personal_data_validation_status = form.cleaned_data['status']
+        candidate.save(update_fields=['personal_data_validation_status'])
+
+        if form.cleaned_data['status'] == ChoixStatutValidationDonneesPersonnelles.VALIDEES.name:
+            message_bus_instance.publish(DonneesPersonellesCandidatValidee(matricule=candidate.global_id))
+
+        return super().form_valid(form)
