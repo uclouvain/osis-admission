@@ -26,6 +26,7 @@
 from functools import cached_property
 
 from django.urls import reverse
+from osis_history.utilities import add_history_entry
 
 from admission.forms.admission.person import AdmissionPersonForm
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
@@ -71,3 +72,16 @@ class AdmissionPersonFormView(AdmissionFormMixin, LoadDossierViewMixin, Personne
                 if form.cleaned_data.get('birth_date')
                 else '',
             }
+
+    def form_valid(self, form):
+        form_valid = super().form_valid(form)
+
+        add_history_entry(
+            self.admission_uuid,
+            'Les données personnelles ont été éditées.',
+            'Personal data have been updated.',
+            '{person.first_name} {person.last_name}'.format(person=self.request.user.person),
+            tags=['proposition', 'identification', 'modification'],
+        )
+
+        return form_valid

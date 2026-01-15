@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,10 +24,11 @@
 #
 # ##############################################################################
 from enum import Enum
-from typing import List, Optional, Dict
+from typing import Dict, List, Optional
 
 import attr
-from django.utils.translation import gettext_lazy as _, pgettext_lazy
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext_lazy
 
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutChecklist, OngletsChecklist
 from osis_common.ddd import interface
@@ -61,6 +62,7 @@ class StatutChecklist(interface.ValueObject):
 
 @attr.dataclass
 class StatutsChecklistContinue:
+    donnees_personnelles: StatutChecklist
     decision: StatutChecklist
     fiche_etudiant: StatutChecklist
 
@@ -79,7 +81,8 @@ class StatutsChecklistContinue:
 
 
 INDEX_ONGLETS_CHECKLIST = {
-    onglet: index for index, onglet in enumerate(attr.fields_dict(StatutsChecklistContinue))  # type: ignore
+    onglet: index
+    for index, onglet in enumerate(attr.fields_dict(StatutsChecklistContinue))  # type: ignore
 }
 
 
@@ -188,8 +191,42 @@ onglet_decision = ConfigurationOngletChecklist(
     ],
 )
 
+onglet_donnees_personnelles = ConfigurationOngletChecklist(
+    identifiant=OngletsChecklist.donnees_personnelles,
+    statuts=[
+        ConfigurationStatutChecklist(
+            identifiant='A_TRAITER',
+            libelle=_('To be processed'),
+            statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='TOILETTEES',
+            libelle=pgettext_lazy('plural', 'Cleaned'),
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='A_COMPLETER',
+            libelle=_('To be completed'),
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+            extra={'fraud': '0'},
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='FRAUDEUR',
+            libelle=_('Fraudster'),
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+            extra={'fraud': '1'},
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='VALIDEES',
+            libelle=pgettext_lazy('plural', 'Validated'),
+            statut=ChoixStatutChecklist.GEST_REUSSITE,
+        ),
+    ],
+)
+
 
 ORGANISATION_ONGLETS_CHECKLIST: List[ConfigurationOngletChecklist] = [
+    onglet_donnees_personnelles,
     onglet_decision,
 ]
 

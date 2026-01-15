@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -35,13 +35,14 @@ from admission.ddd.admission.formation_continue.domain.builder.proposition_ident
     PropositionIdentityBuilder,
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import (
+    ChoixStatutChecklist,
     ChoixStatutPropositionContinue,
-)
-from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.elements_confirmation import (
-    ElementsConfirmationInMemory,
 )
 from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.elements_confirmation import (
+    ElementsConfirmationInMemory,
 )
 from admission.infrastructure.message_bus_in_memory import (
     message_bus_in_memory_instance,
@@ -79,6 +80,33 @@ class TestSoumettrePropositionContinue(TestCase):
         # Updated proposition
         self.assertEqual(updated_proposition.statut, ChoixStatutPropositionContinue.CONFIRMEE)
         self.assertEqual(updated_proposition.auteur_derniere_modification, proposition.matricule_candidat)
+
+        # Check the checklist initialization
+        self.assertEqual(
+            updated_proposition.checklist_initiale.donnees_personnelles.statut,
+            ChoixStatutChecklist.INITIAL_CANDIDAT,
+        )
+        self.assertEqual(
+            updated_proposition.checklist_initiale.decision.statut,
+            ChoixStatutChecklist.INITIAL_CANDIDAT,
+        )
+        self.assertEqual(
+            updated_proposition.checklist_initiale.fiche_etudiant.statut,
+            ChoixStatutChecklist.INITIAL_CANDIDAT,
+        )
+
+        self.assertEqual(
+            updated_proposition.checklist_actuelle.donnees_personnelles.statut,
+            ChoixStatutChecklist.INITIAL_CANDIDAT,
+        )
+        self.assertEqual(
+            updated_proposition.checklist_actuelle.decision.statut,
+            ChoixStatutChecklist.INITIAL_CANDIDAT,
+        )
+        self.assertEqual(
+            updated_proposition.checklist_actuelle.fiche_etudiant.statut,
+            ChoixStatutChecklist.INITIAL_CANDIDAT,
+        )
 
     def test_should_soumettre_proposition_en_nettoyant_reponses_questions_specifiques(self):
         proposition = self.proposition_repository.get(PropositionIdentityBuilder.build_from_uuid("uuid-USCC1"))
