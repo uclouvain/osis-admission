@@ -128,7 +128,9 @@ _CANDIDATE_RULESET = {
     'change_generaleducationadmission_accounting': common.is_admission_request_author & general.in_progress,
     'change_generaleducationadmission_specific_question': common.is_admission_request_author & general.in_progress,
     'change_generaleducationadmission': common.is_admission_request_author & general.in_progress,
-    'delete_generaleducationadmission': common.is_admission_request_author & general.in_progress,
+    'delete_generaleducationadmission': common.is_admission_request_author & (
+        general.in_progress | (general.is_confirmed & general.is_contingent_non_resident)
+    ),
     'submit_generaleducationadmission': common.is_admission_request_author & general.in_progress,
     # A candidate can edit some tabs after the proposition has been submitted
     'view_generaleducationadmission_documents': common.is_admission_request_author & general.is_invited_to_complete,

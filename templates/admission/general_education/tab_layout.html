@@ -106,6 +106,18 @@
         <i class="far fa-copy"></i>
       </button>
     </span>
+    {% if admission.numero_dossier_ares %}
+    <span> - </span>
+    <span class="copy-to-clipboard">
+      <span class="copy-to-clipboard-element">{{ admission.numero_dossier_ares }}</span>
+      <button
+        class="copy-button"
+        data-html="true"
+      >
+        <i class="far fa-copy"></i>
+      </button>
+    </span>
+    {% endif %}
   </div>
   <div class="min-width">
     {% include 'admission/includes/admission_status.html' with display_on_load=True %}

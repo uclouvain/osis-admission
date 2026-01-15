@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,17 +23,19 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from osis_mail_template.exceptions import DuplicateMailTemplateIdentifier
+from typing import Optional
 
-# When running tests, the test runner try to import it directly, re-registrering the identifiers
-try:
-    from .checklist import *
-    from .contingente import *
-    from .document import *
-    from .signatures import *
-    from .submission import *
-except DuplicateMailTemplateIdentifier:
-    import sys
+import attr
 
-    if 'test' not in sys.argv:
-        raise
+from admission.ddd.admission.formation_generale.domain.model.enums import STATUTS_PROPOSITION_GENERALE_NON_SOUMISE
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonEnCoursException
+from base.ddd.utils.business_validator import BusinessValidator
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldPropositionEtreEnCours(BusinessValidator):
+    statut: 'ChoixStatutPropositionGenerale'
+
+    def validate(self, *args, **kwargs):
+        if self.statut not in STATUTS_PROPOSITION_GENERALE_NON_SOUMISE:
+            raise PropositionNonEnCoursException()

@@ -36,12 +36,14 @@ def supprimer_proposition(
     cmd: 'SupprimerPropositionCommand',
     proposition_repository: 'IPropositionRepository',
     historique: 'IHistorique',
+    calendrier_inscription: 'ICalendrierInscription',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition = proposition_repository.get(entity_id=proposition_id)
 
     # WHEN
+    calendrier_inscription.verifier_suppression_pour_formation_contingentee(proposition)
     proposition.supprimer()
 
     # THEN

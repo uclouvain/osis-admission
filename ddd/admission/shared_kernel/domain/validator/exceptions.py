@@ -198,30 +198,6 @@ class PosteDiplomatiqueNonTrouveException(BusinessException):
         super().__init__(message, **kwargs)
 
 
-class ResidenceAuSensDuDecretNonDisponiblePourInscriptionException(BusinessException):
-    status_code = "ADMISSION-20"
-
-    @classmethod
-    def get_message(cls, nom_formation_fr, nom_formation_en):
-        return _(
-            'You cannot continue your application. The registration procedure for the <em>%(training_name)s</em> '
-            'for non-resident students is not yet available. We invite '
-            'you to consult the complete registration procedure on the following page: '
-            '<a href="https://www.uclouvain.be/en/enrolment/limited-enrolment-courses" target="_blank">'
-            'https://www.uclouvain.be/en/enrolment/limited-enrolment-courses</a>'
-        ) % {
-            'training_name': (
-                nom_formation_en
-                if nom_formation_en and get_language() == settings.LANGUAGE_CODE_EN
-                else nom_formation_fr
-            )
-        }
-
-    def __init__(self, nom_formation_fr, nom_formation_en, **kwargs):
-        message = self.get_message(nom_formation_fr=nom_formation_fr, nom_formation_en=nom_formation_en)
-        super().__init__(message, **kwargs)
-
-
 class DocumentsReclamesImmediatementNonCompletesException(BusinessException):
     status_code = "ADMISSION-21"
 
