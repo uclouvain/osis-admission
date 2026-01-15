@@ -111,6 +111,7 @@ class ElementsConfirmationTestCase(TestCase):
             'reglement_doctorat_deontologie',
             'protection_donnees',
             'professions_reglementees',
+            'verification_donnees_tiers',
             'justificatifs',
             'declaration_sur_lhonneur',
         ]
@@ -128,6 +129,7 @@ class ElementsConfirmationTestCase(TestCase):
                 'reglement_doctorat_deontologie',
                 'protection_donnees',
                 'professions_reglementees',
+                'verification_donnees_tiers',
                 'justificatifs',
                 'declaration_sur_lhonneur',
             ]

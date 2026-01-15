@@ -304,7 +304,7 @@ class IElementsConfirmation(interface.DomainService):
                 )
             )
 
-        if isinstance(proposition, PropositionGenerale):
+        if isinstance(proposition, (PropositionDoctorale, PropositionGenerale)):
             elements.append(
                 ElementConfirmation(
                     nom='verification_donnees_tiers',
