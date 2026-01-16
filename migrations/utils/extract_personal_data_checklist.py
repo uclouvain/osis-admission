@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 
-from django.db.models import Case, Max, Value, When, Q
+from django.db.models import Case, Max, Value, When
 
 from base.models.enums.personal_data import ChoixStatutValidationDonneesPersonnelles
 

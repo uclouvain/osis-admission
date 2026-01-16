@@ -2845,9 +2845,6 @@ msgstr ""
 msgid "Faculty process"
 msgstr ""
 
-msgid "False"
-msgstr ""
-
 msgid "Feedback from Fac"
 msgstr ""
 
@@ -3026,6 +3023,11 @@ msgstr ""
 msgid ""
 "For example, a contract, a letter from a supervisor, or any other document "
 "showing that you have been awarded the scholarship on the dates indicated."
+msgstr ""
+
+msgid ""
+"For some reason, the experience isn't yet initialized. However, this is "
+"required to edit its status, its comments, etc."
 msgstr ""
 
 msgid "For the CDD Chair:"
@@ -3784,9 +3786,6 @@ msgid "Institution"
 msgstr ""
 
 msgid "Institution Federation Wallonie-Bruxelles"
-msgstr ""
-
-msgid "Institution contacted"
 msgstr ""
 
 msgid "Institution in which the PhD thesis has been realised / started"
@@ -6572,6 +6571,9 @@ msgstr ""
 msgid "The element has not been found."
 msgstr ""
 
+msgid "The experience has been initialized"
+msgstr ""
+
 msgid "The experience has been valuated."
 msgstr ""
 
@@ -7184,9 +7186,6 @@ msgstr ""
 msgid "Trigger the payment hook"
 msgstr ""
 
-msgid "True"
-msgstr ""
-
 msgid "Tuition fees amount"
 msgstr ""
 
@@ -7645,6 +7644,17 @@ msgid ""
 msgstr ""
 
 msgid ""
+"You can do it automatically be clicking <button type=\"submit\" class=\"btn "
+"btn-link p-0\">here</button>"
+msgstr ""
+
+#, python-format
+msgid ""
+"You can do it manually through the <a href=\"%(edit_experience_url)s\">edit "
+"form</a>."
+msgstr ""
+
+msgid ""
 "You can find more information on the French Community webpage <a "
 "href=\"https://equisup.cfwb.be/\" target=\"_blank\">https://equisup.cfwb.be/"
 "</a>"
@@ -8041,6 +8051,11 @@ msgstr ""
 msgctxt "payment"
 msgid "open"
 msgstr "Open"
+
+#, python-format
+msgid ""
+"or manually through the <a href=\"%(edit_experience_url)s\">edit form</a>"
+msgstr ""
 
 msgctxt "payment"
 msgid "paid"

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,12 +23,11 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 
+import freezegun
 from django.test import SimpleTestCase
 
-from admission.ddd.admission.formation_generale.test.factory.proposition import PropositionFactory
-from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import TypeEquivalenceTitreAcces
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_generale.commands import (
     ModifierStatutChecklistParcoursAnterieurCommand,
 )
@@ -38,25 +37,24 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.ddd.admission.formation_generale.domain.model.proposition import (
     PropositionIdentity,
 )
-from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
-    StatutChecklist,
-)
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     ConditionAccesEtreSelectionneException,
+    InformationsEquivalenceNonSpecifieesChecklistException,
     PropositionNonTrouveeException,
     StatutsChecklistExperiencesEtreValidesException,
     TitreAccesEtreSelectionneException,
-    InformationsEquivalenceNonSpecifieesChecklistException,
 )
+from admission.ddd.admission.formation_generale.test.factory.proposition import PropositionFactory
 from admission.ddd.admission.formation_generale.test.factory.titre_acces import (
     TitreAccesSelectionnableFactory,
 )
+from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import TypeEquivalenceTitreAcces
 from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationIdentityFactory
-from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
-    ProfilCandidatInMemoryTranslator,
-)
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
+    ProfilCandidatInMemoryTranslator,
 )
 from admission.infrastructure.admission.shared_kernel.repository.in_memory.titre_acces_selectionnable import (
     TitreAccesSelectionnableInMemoryRepositoryFactory,
@@ -65,11 +63,15 @@ from admission.infrastructure.message_bus_in_memory import (
     message_bus_in_memory_instance,
 )
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import DiplomeEtrangerEtudesSecondairesDTO
 from epc.models.enums.condition_acces import ConditionAcces
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 from osis_profile.models.enums.education import ForeignDiplomaTypes
+from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
 
 
+@freezegun.freeze_time('2020-01-01')
 class TestModifierStatutChecklistParcoursAnterieurService(SimpleTestCase):
     def assertHasInstance(self, container, cls, msg=None):
         if not any(isinstance(obj, cls) for obj in container):
@@ -90,6 +92,17 @@ class TestModifierStatutChecklistParcoursAnterieurService(SimpleTestCase):
         self.addCleanup(self.profil_candidat_translator.reset)
 
         self.message_bus = message_bus_in_memory_instance
+
+        self.academic_year_repository = AcademicYearInMemoryRepository()
+
+        for annee in range(2016, 2021):
+            self.academic_year_repository.save(
+                AcademicYear(
+                    entity_id=AcademicYearIdentity(year=annee),
+                    start_date=datetime.date(annee, 9, 15),
+                    end_date=datetime.date(annee + 1, 9, 30),
+                )
+            )
 
     def test_should_modifier_si_statut_cible_est_initial_candidat(self):
         proposition_id = self.message_bus.invoke(
@@ -155,13 +168,9 @@ class TestModifierStatutChecklistParcoursAnterieurService(SimpleTestCase):
                 selectionne=True,
             )
         )
-        proposition.checklist_actuelle.parcours_anterieur.enfants.append(
-            StatutChecklist(
-                libelle='l1',
-                statut=ChoixStatutChecklist.GEST_REUSSITE,
-                extra={'identifiant': OngletsDemande.ETUDES_SECONDAIRES.name},
-            ),
-        )
+        self.profil_candidat_translator.etudes_secondaires[
+            proposition.matricule_candidat
+        ].statut_validation = ChoixStatutValidationExperience.VALIDEE.name
 
         proposition_id = self.message_bus.invoke(
             ModifierStatutChecklistParcoursAnterieurCommand(
@@ -177,27 +186,13 @@ class TestModifierStatutChecklistParcoursAnterieurService(SimpleTestCase):
             ChoixStatutChecklist.GEST_REUSSITE,
         )
 
-        # Expériences avec un statut incorrect mais inconnues ou non valorisées -> non prises en compte
-        checklist_experience = StatutChecklist(
-            libelle='l1',
-            statut=ChoixStatutChecklist.GEST_BLOCAGE,
-            extra={'identifiant': 'INCONNUE'},
-        )
-        proposition.checklist_actuelle.parcours_anterieur.enfants.append(checklist_experience)
-
-        proposition_id = self.message_bus.invoke(
-            ModifierStatutChecklistParcoursAnterieurCommand(
-                uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
-                statut=ChoixStatutChecklist.GEST_REUSSITE.name,
-                gestionnaire='0123456789',
-            )
-        )
-        self.assertIsNotNone(proposition_id)
-
         # Expérience valorisée et avec un statut incorrect -> lever une exception
-        self.profil_candidat_translator.valorisations[checklist_experience.extra['identifiant']] = [
-            'uuid-MASTER-SCI-CONFIRMED'
-        ]
+        premiere_experience = next(
+            xp
+            for xp in self.profil_candidat_translator.experiences_academiques
+            if xp.personne == proposition.matricule_candidat
+        )
+        self.profil_candidat_translator.valorisations[premiere_experience.uuid] = ['uuid-MASTER-SCI-CONFIRMED']
 
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(
@@ -209,7 +204,7 @@ class TestModifierStatutChecklistParcoursAnterieurService(SimpleTestCase):
             )
             self.assertHasInstance(context.exception.exceptions, StatutsChecklistExperiencesEtreValidesException)
 
-        checklist_experience.statut = ChoixStatutChecklist.GEST_REUSSITE
+        premiere_experience.statut_validation = ChoixStatutValidationExperience.VALIDEE.name
 
         proposition_id = self.message_bus.invoke(
             ModifierStatutChecklistParcoursAnterieurCommand(
@@ -220,7 +215,7 @@ class TestModifierStatutChecklistParcoursAnterieurService(SimpleTestCase):
         )
         self.assertIsNotNone(proposition_id)
 
-        checklist_experience.statut = ChoixStatutChecklist.GEST_BLOCAGE_ULTERIEUR
+        premiere_experience.statut_validation = ChoixStatutValidationExperience.A_COMPLETER_APRES_INSCRIPTION.name
 
         proposition_id = self.message_bus.invoke(
             ModifierStatutChecklistParcoursAnterieurCommand(
@@ -230,23 +225,10 @@ class TestModifierStatutChecklistParcoursAnterieurService(SimpleTestCase):
             )
         )
         self.assertIsNotNone(proposition_id)
-
-        # Expérience valorisée mais sans checklist -> lever une exception
-        self.profil_candidat_translator.valorisations['INCONNUE-VALORISEE'] = ['uuid-MASTER-SCI-CONFIRMED']
-
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(
-                ModifierStatutChecklistParcoursAnterieurCommand(
-                    uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
-                    statut=ChoixStatutChecklist.GEST_REUSSITE.name,
-                    gestionnaire='0123456789',
-                )
-            )
-            self.assertHasInstance(context.exception.exceptions, StatutsChecklistExperiencesEtreValidesException)
 
     def test_should_renvoyer_erreur_si_statut_cible_est_gestionnaire_reussite_et_incomplet_pour_certificat(self):
         with self.assertRaises(MultipleBusinessExceptions) as context:
-            proposition_id = self.message_bus.invoke(
+            self.message_bus.invoke(
                 ModifierStatutChecklistParcoursAnterieurCommand(
                     uuid_proposition='uuid-CERTIFICATE-CONFIRMED',
                     statut=ChoixStatutChecklist.GEST_REUSSITE.name,

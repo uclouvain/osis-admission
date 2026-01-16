@@ -88,6 +88,10 @@ from osis_profile.models.enums.curriculum import (
     Result,
     TranscriptType,
 )
+from osis_profile.models.enums.experience_validation import (
+    ChoixStatutValidationExperience,
+    EtatAuthentificationParcours,
+)
 from reference.models.enums.cycle import Cycle
 
 
@@ -158,6 +162,8 @@ class ConnaissanceLangue:
 class DiplomeEtudeSecondaire:
     personne: str
     annee: int
+    statut_validation: str = ChoixStatutValidationExperience.EN_BROUILLON.name
+    statut_authentification: str = EtatAuthentificationParcours.NON_CONCERNE.name
 
 
 @dataclass
@@ -211,6 +217,8 @@ class ExperienceAcademique:
     avec_complements = None
     credits_inscrits_complements = None
     credits_acquis_complements = None
+    statut_validation: str = ChoixStatutValidationExperience.EN_BROUILLON.name
+    statut_authentification: str = EtatAuthentificationParcours.NON_CONCERNE.name
 
 
 @dataclass
@@ -226,6 +234,8 @@ class ExperienceNonAcademique:
     secteur: str
     autre_activite: str
     identifiant_externe: Optional[str] = None
+    statut_validation: str = ChoixStatutValidationExperience.EN_BROUILLON.name
+    statut_authentification: str = EtatAuthentificationParcours.NON_CONCERNE.name
 
 
 class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
@@ -1122,7 +1132,13 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
 
             experiences_dtos = []
             for experience in cls.experiences_academiques:
-                if experience.personne == matricule:
+                if experience.personne == matricule and (
+                    experiences_cv_recuperees == ExperiencesCVRecuperees.TOUTES
+                    or experiences_cv_recuperees == ExperiencesCVRecuperees.SEULEMENT_VALORISEES
+                    and experience.uuid in cls.valorisations
+                    or experiences_cv_recuperees == ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION
+                    and uuid_proposition in cls.valorisations.get(experience.uuid, [])
+                ):
                     experiences_dtos.append(
                         ExperienceAcademiqueDTO(
                             uuid=experience.uuid,
@@ -1173,6 +1189,8 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                             credits_inscrits_complements=experience.credits_inscrits_complements,
                             credits_acquis_complements=experience.credits_acquis_complements,
                             grade_academique_formation=experience.grade_academique_formation,
+                            statut_validation=experience.statut_validation,
+                            statut_authentification=experience.statut_authentification,
                         ),
                     )
 
@@ -1188,9 +1206,18 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                     secteur=experience.secteur,
                     autre_activite=experience.autre_activite,
                     valorisee_par_admissions=[],
+                    statut_validation=experience.statut_validation,
+                    statut_authentification=experience.statut_authentification,
                 )
                 for experience in cls.experiences_non_academiques
                 if experience.personne == matricule
+                and (
+                    experiences_cv_recuperees == ExperiencesCVRecuperees.TOUTES
+                    or experiences_cv_recuperees == ExperiencesCVRecuperees.SEULEMENT_VALORISEES
+                    and experience.uuid in cls.valorisations
+                    or experiences_cv_recuperees == ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION
+                    and uuid_proposition in cls.valorisations.get(experience.uuid, [])
+                )
             ]
 
             etudes_secondaires = cls.etudes_secondaires.get(matricule)
@@ -1344,11 +1371,3 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
     @classmethod
     def get_merge_proposal(cls, matricule: str) -> Optional['MergeProposalDTO']:
         return None
-
-    @classmethod
-    def get_uuids_experiences_curriculum_valorisees_par_admission(cls, uuid_proposition: str) -> set[str]:
-        return set(
-            uuid_experience
-            for uuid_experience, uuids_propositions in cls.valorisations.items()
-            if uuid_proposition in uuids_propositions
-        )

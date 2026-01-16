@@ -146,7 +146,6 @@ class SicApprovalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
             candidate=CompletePersonFactory(
                 language=settings.LANGUAGE_CODE_FR,
                 country_of_citizenship__european_union=True,
-                graduated_from_high_school_year=AcademicYearFactory(current=True),
                 private_email='foo@bar',
                 personal_data_validation_status=ChoixStatutValidationDonneesPersonnelles.VALIDEES.name,
             ),
@@ -161,6 +160,8 @@ class SicApprovalFinalDecisionViewTestCase(SicPatchMixin, TestCase):
             must_report_to_sic=False,
             communication_to_the_candidate='',
         )
+        self.general_admission.candidate.highschooldiploma.academic_graduation_year = AcademicYearFactory(current=True)
+        self.general_admission.candidate.highschooldiploma.save()
         self.general_admission.checklist['current']['parcours_anterieur']['statut'] = (
             ChoixStatutChecklist.GEST_REUSSITE.name
         )

@@ -35,12 +35,12 @@ from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervi
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
 from admission.ddd.admission.doctorat.preparation.dtos import AvisDTO, PropositionDTO
 from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import EmplacementDocument
-from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import IMatriculeEtudiantService
 from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.shared_kernel.repository.i_email_destinataire import IEmailDestinataireRepository
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
 from osis_common.ddd import interface
+from osis_profile.models.enums.experience_validation import EtatAuthentificationParcours
 
 
 class INotification(interface.DomainService):

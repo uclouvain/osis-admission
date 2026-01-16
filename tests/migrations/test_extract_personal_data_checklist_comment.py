@@ -140,7 +140,7 @@ class ExtractPersonalDataChecklistCommentTestCase(TestCase):
             object_uuid=self.first_admission.candidate.uuid
         )
         comments_related_to_first_admission = CommentEntry.objects.filter(object_uuid=self.first_admission.uuid)
-        comments_related_to_second_admission = CommentEntry.objects.filter(object_uuid=self.first_admission.uuid)
+        comments_related_to_second_admission = CommentEntry.objects.filter(object_uuid=self.second_admission.uuid)
 
         self.assertEqual(len(comments_related_to_first_candidate), 1)
         self.assertEqual(len(comments_related_to_first_admission), 0)

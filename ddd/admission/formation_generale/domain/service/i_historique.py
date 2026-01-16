@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,9 +27,6 @@ from abc import abstractmethod
 from email.message import EmailMessage
 from typing import Optional
 
-from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
-    EtatAuthentificationParcours,
-)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
@@ -38,6 +35,7 @@ from admission.ddd.admission.formation_generale.domain.model.proposition import 
 )
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
 from osis_common.ddd import interface
+from osis_profile.models.enums.experience_validation import EtatAuthentificationParcours
 
 
 class IHistorique(interface.DomainService):

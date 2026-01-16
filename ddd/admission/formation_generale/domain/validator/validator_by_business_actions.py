@@ -132,6 +132,7 @@ from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     DiplomeBelgeEtudesSecondairesDTO,
     DiplomeEtrangerEtudesSecondairesDTO,
 )
+from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
@@ -654,12 +655,12 @@ class ModifierStatutChecklistParcoursAnterieurValidatorList(TwoStepsMultipleBusi
     condition_acces: Optional[ConditionAcces]
     millesime_condition_acces: Optional[int]
 
-    uuids_experiences_valorisees: set[str]
-    checklist: StatutsChecklistGenerale
-
     type_formation: TrainingType
     type_equivalence_titre_acces: TypeEquivalenceTitreAcces | None
     etudes_secondaires: EtudesSecondairesAdmissionDTO
+    examen: ExamenDTO
+    experiences_academiques: list[ExperienceAcademiqueDTO]
+    experiences_non_academiques: list[ExperienceNonAcademiqueDTO]
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -676,10 +677,12 @@ class ModifierStatutChecklistParcoursAnterieurValidatorList(TwoStepsMultipleBusi
                 millesime_condition_acces=self.millesime_condition_acces,
             ),
             ShouldStatutsChecklistExperiencesEtreValidees(
-                uuids_experiences_valorisees=self.uuids_experiences_valorisees,
-                checklist=self.checklist,
                 statut=self.statut,
                 type_formation=self.type_formation,
+                etudes_secondaires=self.etudes_secondaires,
+                examen=self.examen,
+                experiences_academiques=self.experiences_academiques,
+                experiences_non_academiques=self.experiences_non_academiques,
             ),
             ShouldInformationsEquivalenceEtreRenseignees(
                 statut=self.statut,

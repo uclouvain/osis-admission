@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -52,12 +52,12 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
 )
 from admission.models import ContinuingEducationAdmission
 from admission.models import EPCInjection as AdmissionEPCInjection
-from admission.models.specific_question import SpecificQuestionAnswer
 from admission.models.epc_injection import (
     EPCInjectionStatus as AdmissionEPCInjectionStatus,
 )
 from admission.models.epc_injection import EPCInjectionType
 from admission.models.general_education import GeneralEducationAdmission
+from admission.models.specific_question import SpecificQuestionAnswer
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import (
     ContinuingEducationAdmissionFactory,
@@ -107,6 +107,7 @@ from osis_profile.models.epc_injection import (
 from osis_profile.models.epc_injection import ExperienceType
 from osis_profile.models.exam import EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
 from osis_profile.tests.factories.exam import ExamFactory
+from osis_profile.tests.factories.high_school_diploma import HighSchoolDiplomaFactory
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.domain import DomainFactory
 from reference.tests.factories.language import FrenchLanguageFactory, LanguageFactory
@@ -136,10 +137,14 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         # Mocked data
         self.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             training=self.training,
-            candidate__graduated_from_high_school=GotDiploma.THIS_YEAR.name,
-            candidate__graduated_from_high_school_year=self.academic_years[1],
             candidate__id_photo=[],
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+
+        HighSchoolDiplomaFactory(
+            person=self.general_admission.candidate,
+            got_diploma=GotDiploma.THIS_YEAR.name,
+            academic_graduation_year=self.academic_years[1],
         )
 
         # Url
@@ -192,7 +197,7 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         # The experience has been injected from another admission
         other_admission = GeneralEducationAdmissionFactory(candidate=self.general_admission.candidate)
 
-        other_admission_injection = AdmissionEPCInjection.objects.create(
+        AdmissionEPCInjection.objects.create(
             admission=other_admission,
             type=EPCInjectionType.DEMANDE.name,
             status=AdmissionEPCInjectionStatus.OK.name,
@@ -204,7 +209,7 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         other_admission.delete()
 
         # The current admission has been injected
-        admission_injection = AdmissionEPCInjection.objects.create(
+        AdmissionEPCInjection.objects.create(
             admission=self.general_admission,
             type=EPCInjectionType.DEMANDE.name,
             status=AdmissionEPCInjectionStatus.OK.name,
@@ -291,8 +296,10 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.YES.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, self.academic_years[0])
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.YES.name)
+        self.assertEqual(
+            self.general_admission.candidate.highschooldiploma.academic_graduation_year, self.academic_years[0]
+        )
 
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
@@ -330,8 +337,10 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.YES.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, self.academic_years[0])
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.YES.name)
+        self.assertEqual(
+            self.general_admission.candidate.highschooldiploma.academic_graduation_year, self.academic_years[0]
+        )
 
         self.assertTrue(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
@@ -367,8 +376,10 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.YES.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, self.academic_years[0])
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.YES.name)
+        self.assertEqual(
+            self.general_admission.candidate.highschooldiploma.academic_graduation_year, self.academic_years[0]
+        )
 
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertTrue(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
@@ -388,7 +399,7 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         admission_url = resolve_url('admission:all-list')
         expected_url = f'{admission_url}#custom_hash'
 
-        high_school_diploma_alternative = HighSchoolDiplomaAlternativeFactory(person=self.general_admission.candidate)
+        HighSchoolDiplomaAlternativeFactory(person=self.general_admission.candidate)
 
         response = self.client.post(
             f'{self.form_url}?next={admission_url}&next_hash_url=custom_hash',
@@ -403,8 +414,10 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.YES.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, self.academic_years[0])
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.YES.name)
+        self.assertEqual(
+            self.general_admission.candidate.highschooldiploma.academic_graduation_year, self.academic_years[0]
+        )
 
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
@@ -430,8 +443,10 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.YES.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, self.academic_years[0])
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.YES.name)
+        self.assertEqual(
+            self.general_admission.candidate.highschooldiploma.academic_graduation_year, self.academic_years[0]
+        )
 
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
@@ -462,8 +477,10 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.THIS_YEAR.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, self.academic_years[1])
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.THIS_YEAR.name)
+        self.assertEqual(
+            self.general_admission.candidate.highschooldiploma.academic_graduation_year, self.academic_years[1]
+        )
 
         self.assertTrue(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
@@ -499,8 +516,10 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.THIS_YEAR.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, self.academic_years[1])
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.THIS_YEAR.name)
+        self.assertEqual(
+            self.general_admission.candidate.highschooldiploma.academic_graduation_year, self.academic_years[1]
+        )
 
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertTrue(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
@@ -517,7 +536,7 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
     def test_submit_valid_data_when_the_candidate_will_have_a_diploma_with_existing_alternative_diploma(self):
         self.client.force_login(self.sic_manager_user)
 
-        high_school_diploma_alternative = HighSchoolDiplomaAlternativeFactory(person=self.general_admission.candidate)
+        HighSchoolDiplomaAlternativeFactory(person=self.general_admission.candidate)
 
         response = self.client.post(
             self.form_url,
@@ -532,8 +551,10 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.THIS_YEAR.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, self.academic_years[1])
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.THIS_YEAR.name)
+        self.assertEqual(
+            self.general_admission.candidate.highschooldiploma.academic_graduation_year, self.academic_years[1]
+        )
 
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
@@ -559,8 +580,8 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.NO.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, None)
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.NO.name)
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.academic_graduation_year, None)
 
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
@@ -672,8 +693,8 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.NO.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, None)
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.NO.name)
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.academic_graduation_year, None)
 
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
@@ -705,8 +726,8 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.NO.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, None)
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.NO.name)
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.academic_graduation_year, None)
 
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
@@ -734,8 +755,8 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.NO.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, None)
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.NO.name)
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.academic_graduation_year, None)
 
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
@@ -783,13 +804,17 @@ class AdmissionEducationFormViewForContinuingTestCase(TestCase):
         # Mocked data
         self.continuing_admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
             training=self.training,
-            candidate__graduated_from_high_school=GotDiploma.THIS_YEAR.name,
-            candidate__graduated_from_high_school_year=self.academic_years[1],
             candidate__id_photo=[],
             status=ChoixStatutPropositionContinue.CONFIRMEE.name,
             specific_question_answers={
                 self.other_specific_question_uuid: 'My other answer',
             },
+        )
+
+        HighSchoolDiplomaFactory(
+            person=self.continuing_admission.candidate,
+            got_diploma=GotDiploma.THIS_YEAR.name,
+            academic_graduation_year=self.academic_years[1],
         )
 
         # Url
@@ -821,7 +846,7 @@ class AdmissionEducationFormViewForContinuingTestCase(TestCase):
         response = self.client.get(self.form_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        continuing_admission = ContinuingEducationAdmissionFactory(
+        ContinuingEducationAdmissionFactory(
             candidate=self.continuing_admission.candidate,
             status=ChoixStatutPropositionContinue.CONFIRMEE.name,
         )
@@ -839,7 +864,7 @@ class AdmissionEducationFormViewForContinuingTestCase(TestCase):
 
         doctorate_admission.delete()
 
-        general_admission = GeneralEducationAdmissionFactory(
+        GeneralEducationAdmissionFactory(
             candidate=self.continuing_admission.candidate,
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
@@ -853,7 +878,7 @@ class AdmissionEducationFormViewForContinuingTestCase(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        continuing_admission = ContinuingEducationAdmissionFactory(
+        ContinuingEducationAdmissionFactory(
             candidate=self.continuing_admission.candidate,
             status=ChoixStatutPropositionContinue.CONFIRMEE.name,
         )
@@ -871,7 +896,7 @@ class AdmissionEducationFormViewForContinuingTestCase(TestCase):
 
         doctorate_admission.delete()
 
-        general_admission = GeneralEducationAdmissionFactory(
+        GeneralEducationAdmissionFactory(
             candidate=self.continuing_admission.candidate,
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
@@ -897,8 +922,10 @@ class AdmissionEducationFormViewForContinuingTestCase(TestCase):
         self.continuing_admission.refresh_from_db()
         candidate = self.continuing_admission.candidate
 
-        self.assertEqual(candidate.graduated_from_high_school, GotDiploma.YES.name)
-        self.assertEqual(candidate.graduated_from_high_school_year, self.academic_years[0])
+        self.assertEqual(self.continuing_admission.candidate.highschooldiploma.got_diploma, GotDiploma.YES.name)
+        self.assertEqual(
+            self.continuing_admission.candidate.highschooldiploma.academic_graduation_year, self.academic_years[0]
+        )
 
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=candidate).exists())
@@ -976,9 +1003,13 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         # Mocked data
         self.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             training=self.training,
-            candidate__graduated_from_high_school=GotDiploma.THIS_YEAR.name,
-            candidate__graduated_from_high_school_year=self.academic_years[1],
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+
+        HighSchoolDiplomaFactory(
+            person=self.general_admission.candidate,
+            got_diploma=GotDiploma.THIS_YEAR.name,
+            academic_graduation_year=self.academic_years[1],
         )
 
         # Url
@@ -1176,7 +1207,7 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
     def test_form_initialization_with_existing_belgian_diploma(self):
         self.client.force_login(self.sic_manager_user)
 
-        belgian_diploma = BelgianHighSchoolDiplomaFactory(
+        BelgianHighSchoolDiplomaFactory(
             person=self.general_admission.candidate,
             high_school_diploma=[self.files_uuids['high_school_diploma']],
             community=CommunityEnum.FRENCH_SPEAKING.name,
@@ -1281,7 +1312,7 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
     def test_form_initialization_with_existing_foreign_diploma(self):
         self.client.force_login(self.sic_manager_user)
 
-        foreign_diploma = ForeignHighSchoolDiplomaFactory(
+        ForeignHighSchoolDiplomaFactory(
             person=self.general_admission.candidate,
             high_school_diploma=[self.files_uuids['high_school_diploma']],
             foreign_diploma_type=ForeignDiplomaTypes.EUROPEAN_BACHELOR.name,
@@ -1428,7 +1459,7 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
     def test_form_initialization_with_existing_diploma_alternative(self):
         self.client.force_login(self.sic_manager_user)
 
-        alternative = HighSchoolDiplomaAlternativeFactory(
+        HighSchoolDiplomaAlternativeFactory(
             person=self.general_admission.candidate,
             certificate=[self.files_uuids['first_cycle_admission_exam']],
         )
@@ -1708,8 +1739,10 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.YES.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, self.academic_years[0])
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.YES.name)
+        self.assertEqual(
+            self.general_admission.candidate.highschooldiploma.academic_graduation_year, self.academic_years[0]
+        )
 
         belgian_diploma.refresh_from_db()
 
@@ -1755,8 +1788,10 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.YES.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, self.academic_years[0])
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.YES.name)
+        self.assertEqual(
+            self.general_admission.candidate.highschooldiploma.academic_graduation_year, self.academic_years[0]
+        )
 
         belgian_diploma.refresh_from_db()
 
@@ -1773,7 +1808,7 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
     def test_submit_valid_data_for_belgian_diploma_with_existing_foreign_diploma(self):
         self.client.force_login(self.sic_manager_user)
 
-        foreign_diploma = ForeignHighSchoolDiplomaFactory(
+        ForeignHighSchoolDiplomaFactory(
             person=self.general_admission.candidate,
             high_school_diploma=[self.files_uuids['high_school_diploma']],
             foreign_diploma_type=ForeignDiplomaTypes.EUROPEAN_BACHELOR.name,
@@ -1824,8 +1859,10 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.YES.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, self.academic_years[0])
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.YES.name)
+        self.assertEqual(
+            self.general_admission.candidate.highschooldiploma.academic_graduation_year, self.academic_years[0]
+        )
 
         belgian_diploma = BelgianHighSchoolDiploma.objects.filter(
             person=self.general_admission.candidate,
@@ -1846,7 +1883,7 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
     def test_submit_valid_data_for_belgian_diploma_with_existing_alternative(self):
         self.client.force_login(self.sic_manager_user)
 
-        alternative = HighSchoolDiplomaAlternativeFactory(
+        HighSchoolDiplomaAlternativeFactory(
             person=self.general_admission.candidate,
             certificate=[self.files_uuids['first_cycle_admission_exam']],
         )
@@ -1876,8 +1913,10 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.YES.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, self.academic_years[0])
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.YES.name)
+        self.assertEqual(
+            self.general_admission.candidate.highschooldiploma.academic_graduation_year, self.academic_years[0]
+        )
 
         belgian_diploma = BelgianHighSchoolDiploma.objects.filter(
             person=self.general_admission.candidate,
@@ -1898,7 +1937,7 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
     def test_submit_valid_data_for_foreign_diploma_with_existing_belgian_diploma(self):
         self.client.force_login(self.sic_manager_user)
 
-        belgian_diploma = BelgianHighSchoolDiplomaFactory(
+        BelgianHighSchoolDiplomaFactory(
             person=self.general_admission.candidate,
             academic_graduation_year=self.academic_years[1],
             high_school_diploma=[self.files_uuids['high_school_diploma']],
@@ -1959,8 +1998,10 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.YES.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, self.academic_years[0])
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.YES.name)
+        self.assertEqual(
+            self.general_admission.candidate.highschooldiploma.academic_graduation_year, self.academic_years[0]
+        )
 
         foreign_diploma: ForeignHighSchoolDiploma = ForeignHighSchoolDiploma.objects.filter(
             person=self.general_admission.candidate,
@@ -2065,8 +2106,10 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.YES.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, self.academic_years[0])
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.YES.name)
+        self.assertEqual(
+            self.general_admission.candidate.highschooldiploma.academic_graduation_year, self.academic_years[0]
+        )
 
         foreign_diploma.refresh_from_db()
 
@@ -2098,7 +2141,7 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
     def test_submit_valid_data_for_foreign_diploma_with_existing_diploma_alternative(self):
         self.client.force_login(self.sic_manager_user)
 
-        diploma_alternative = HighSchoolDiplomaAlternativeFactory(
+        HighSchoolDiplomaAlternativeFactory(
             person=self.general_admission.candidate,
             certificate=[self.files_uuids['first_cycle_admission_exam']],
         )
@@ -2151,8 +2194,10 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.YES.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, self.academic_years[0])
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.YES.name)
+        self.assertEqual(
+            self.general_admission.candidate.highschooldiploma.academic_graduation_year, self.academic_years[0]
+        )
 
         foreign_diploma: ForeignHighSchoolDiploma = ForeignHighSchoolDiploma.objects.filter(
             person=self.general_admission.candidate

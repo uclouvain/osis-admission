@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -62,6 +62,10 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceNonAcademiqueDTO,
 )
 from osis_profile.models import ProfessionalExperience
+from osis_profile.models.enums.experience_validation import (
+    ChoixStatutValidationExperience,
+    EtatAuthentificationParcours,
+)
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
@@ -82,6 +86,8 @@ class CurriculumNonEducationalExperienceDetailViewTestCase(TestCase):
         )
         cls.other_experience: ProfessionalExperience = ProfessionalExperienceFactory(
             person=cls.other_candidate,
+            validation_status=ChoixStatutValidationExperience.AUTHENTIFICATION.name,
+            authentication_status=EtatAuthentificationParcours.VRAI.name,
         )
 
         cls.other_continuing_admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
@@ -184,6 +190,8 @@ class CurriculumNonEducationalExperienceDetailViewTestCase(TestCase):
 
         self.assertIsInstance(experience, ExperienceNonAcademiqueDTO)
         self.assertEqual(experience.uuid, self.other_experience.uuid)
+        self.assertEqual(experience.statut_validation, ChoixStatutValidationExperience.AUTHENTIFICATION.name)
+        self.assertEqual(experience.statut_authentification, EtatAuthentificationParcours.VRAI.name)
         self.assertEqual(
             response.context['edit_url'],
             f'/admissions/continuing-education/{self.other_continuing_admission.uuid}/update/curriculum/'
@@ -210,7 +218,7 @@ class CurriculumNonEducationalExperienceDetailViewTestCase(TestCase):
 
         doctorate_admission.delete()
 
-        general_admission = GeneralEducationAdmissionFactory(
+        GeneralEducationAdmissionFactory(
             candidate=self.other_candidate,
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )

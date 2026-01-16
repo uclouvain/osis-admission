@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -30,6 +30,9 @@ from .recuperer_etudes_secondaires_service import recuperer_etudes_secondaires
 from .recuperer_experience_academique_service import recuperer_experience_academique
 from .recuperer_experience_non_academique_service import recuperer_experience_non_academique
 from .recuperer_informations_destinataire_service import recuperer_informations_destinataire
+from .recuperer_informations_validation_experience_parcours_anterieur_service import (
+    recuperer_informations_validation_experience_parcours_anterieur,
+)
 from .recuperer_questions_specifiques_proposition_service import recuperer_questions_specifiques_proposition
 from .recuperer_titres_acces_selectionnables_proposition_service import (
     recuperer_titres_acces_selectionnables_proposition,

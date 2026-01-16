@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -51,7 +51,7 @@ class TitresAcces(ITitresAcces):
     @classmethod
     def conditions_remplies(cls, matricule_candidat: str, equivalence_diplome: List[str]) -> AdmissionConditionsDTO:
         repondu_oui_ou_en_cours = models.Q(
-            graduated_from_high_school__in=[GotDiploma.YES.name, GotDiploma.THIS_YEAR.name]
+            highschooldiploma__got_diploma__in=[GotDiploma.YES.name, GotDiploma.THIS_YEAR.name]
         )
         result = (
             Person.objects.alias(
@@ -83,7 +83,7 @@ class TitresAcces(ITitresAcces):
                 #     ET avoir fourni la PJ d'attestation de réussite de l'examen d'admission aux études de
                 #     premier cycle de l'enseignement supérieur
                 alternative_etudes_secondaires=models.ExpressionWrapper(
-                    models.Q(graduated_from_high_school=GotDiploma.NO.name, diplome_alternatif=True),
+                    models.Q(highschooldiploma__got_diploma=GotDiploma.NO.name, diplome_alternatif=True),
                     output_field=models.BooleanField(),
                 ),
                 # avoir suivi, sans en être diplômé, une formation académique belge

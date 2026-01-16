@@ -38,7 +38,6 @@ from osis_common.ddd import interface
 @attr.dataclass
 class StatutChecklist(interface.ValueObject):
     libelle: str
-    enfants: List['StatutChecklist'] = attr.Factory(list)
     statut: Optional[ChoixStatutChecklist] = None
     extra: Dict[str, any] = attr.Factory(dict)
 
@@ -47,7 +46,6 @@ class StatutChecklist(interface.ValueObject):
         return cls(
             libelle=item.get('libelle', ''),
             statut=ChoixStatutChecklist[item['statut']] if item.get('statut') else None,
-            enfants=[cls.from_dict(enfant) for enfant in item.get('enfants', [])],
             extra=item.get('extra', {}),
         )
 
@@ -73,11 +71,6 @@ class StatutsChecklistContinue:
             item = checklist_en_tant_que_dict.get(key, {})
             checklist_by_tab[key] = StatutChecklist.from_dict(item=item)
         return cls(**checklist_by_tab)
-
-    def recuperer_enfant(self, onglet, identifiant_enfant) -> StatutChecklist:
-        return next(
-            enfant for enfant in getattr(self, onglet).enfants if enfant.extra.get('identifiant') == identifiant_enfant
-        )
 
 
 INDEX_ONGLETS_CHECKLIST = {

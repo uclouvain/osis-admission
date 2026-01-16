@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,19 +24,12 @@
 #
 # ##############################################################################
 
-from django.utils.translation import gettext_lazy as _
+import attr
 
-from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import EtatAuthentificationParcours
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutChecklist
-from admission.ddd.admission.formation_generale.domain.model.statut_checklist import StatutChecklist
+from ddd.logic.shared_kernel.profil.dtos.validation_experience import ExperienceAvecValidationDTO
 
 
-def initialiser_checklist_experience(experience_uuid):
-    return StatutChecklist(
-        libelle=_('To be processed'),
-        statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
-        extra={
-            'identifiant': experience_uuid,
-            'etat_authentification': EtatAuthentificationParcours.NON_CONCERNE.name,
-        },
-    )
+@attr.dataclass(frozen=True, slots=True)
+class ValidationExperienceParcoursAnterieurDTO(ExperienceAvecValidationDTO):
+    uuid: str
+    type_experience: str

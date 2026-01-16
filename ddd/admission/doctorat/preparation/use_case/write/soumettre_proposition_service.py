@@ -47,6 +47,9 @@ from admission.ddd.admission.shared_kernel.domain.builder.formation_identity imp
 from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.ddd.admission.shared_kernel.domain.service.i_elements_confirmation import IElementsConfirmation
 from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
+from admission.ddd.admission.shared_kernel.domain.service.i_modifier_checklist_experience_parcours_anterieur import (
+    IValidationExperienceParcoursAnterieurService,
+)
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import ITitresAcces
 from admission.ddd.admission.shared_kernel.domain.service.profil_soumis_candidat import ProfilSoumisCandidatTranslator
@@ -77,6 +80,7 @@ def soumettre_proposition(
     element_confirmation: 'IElementsConfirmation',
     maximum_propositions_service: 'IMaximumPropositionsAutorisees',
     email_destinataire_repository: 'IEmailDestinataireRepository',
+    validation_experience_parcours_anterieur_service: 'IValidationExperienceParcoursAnterieurService',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -166,11 +170,13 @@ def soumettre_proposition(
     Checklist.initialiser(
         proposition=proposition,
         profil_candidat_translator=profil_candidat_translator,
-        annee_courante=annee_courante,
     )
 
     proposition_repository.save(proposition)
     demande_repository.save(demande)
+    validation_experience_parcours_anterieur_service.passer_experiences_en_brouillon_en_a_traiter(
+        proposition=proposition
+    )
     historique.historiser_soumission(proposition)
     notification.notifier_soumission(proposition, email_destinataire_repository)
 

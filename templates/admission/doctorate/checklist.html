@@ -291,11 +291,11 @@
           {% include 'admission/general_education/includes/checklist/previous_experiences_prevent_to_choose_success_modal.html' %}
         </div>
 
-        {% for child in current.enfants %}
-          <div role="tabpanel" class="tab-pane single-past-experience-container" id="parcours_anterieur__{{ child.extra.identifiant }}">
-            {% with experience=experiences_by_uuid|get_item:child.extra.identifiant %}
+        {% for experience_uuid, experience in experiences_by_uuid.items %}
+          {% concat 'parcours_anterieur__' experience_uuid as checklist_tab_name %}
+          <div role="tabpanel" class="tab-pane single-past-experience-container" id="{{ checklist_tab_name }}">
               {% if experience.valorisee_par_admissions != None and view.kwargs.uuid not in experience.valorisee_par_admissions %}
-                {% with last_valuated_admission_by_experience_uuid|get_item:child.extra.identifiant as last_valuated_admission %}
+                {% with last_valuated_admission_by_experience_uuid|get_item:experience_uuid as last_valuated_admission %}
                   <div class="flex-content alert alert-warning">
                     <p>
                       {% if last_valuated_admission %}
@@ -312,7 +312,7 @@
                     </p>
                     {% experience_valuation_url experience=experience as valuate_experience_url %}
                     {% if can_update_curriculum and valuate_experience_url %}
-                      {% concat 'valuate-experience-modal-single-' child.extra.identifiant as valuate_modal_id %}
+                      {% concat 'valuate-experience-modal-single-' experience_uuid as valuate_modal_id %}
                       <button
                           class="btn btn-warning"
                           data-toggle="modal"
@@ -330,12 +330,11 @@
                   {% experience_details_template resume_proposition=resume_proposition experience=experience with_edit_link_button=False specific_questions=specific_questions_by_tab %}
                 </div>
               {% else %}
-                {% include 'admission/general_education/includes/checklist/previous_experience_single.html' with current=child authentication_form=authentication_forms|get_item_or_none:child.extra.identifiant experience_authentication_history_entry=all_experience_authentication_history_entries|get_item_or_none:child.extra.identifiant experience_type=experience.type_experience %}
+                {% include 'admission/general_education/includes/checklist/previous_experience_single.html' with experience=experience authentication_form=authentication_forms|get_item_or_none:experience_uuid experience_authentication_history_entry=all_experience_authentication_history_entries|get_item_or_none:experience_uuid %}
                 <div>
                   {% experience_details_template resume_proposition=resume_proposition experience=experience with_edit_link_button=True specific_questions=specific_questions_by_tab %}
                 </div>
               {% endif %}
-            {% endwith %}
           </div>
         {% endfor %}
 

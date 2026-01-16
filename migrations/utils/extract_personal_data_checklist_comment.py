@@ -32,7 +32,7 @@ from django.utils.translation import gettext
 def extract_personal_data_checklist_comment(comment_model, base_admission_model):
     tags = ['donnees_personnelles']
 
-    # Update the object uuid to specify the person uuid instead on the admission uuid
+    # Update the object uuid to specify the person uuid instead of the admission uuid
     matching_admission = base_admission_model.objects.filter(uuid=OuterRef('object_uuid'))
 
     comment_model.objects.filter(tags=tags).filter(Exists(matching_admission)).update(
