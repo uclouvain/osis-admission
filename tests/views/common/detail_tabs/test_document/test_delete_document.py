@@ -117,13 +117,13 @@ class DeleteDocumentTestCase(BaseDocumentViewTestCase):
 
         # Requestable document
         specific_question_uuid = str(uuid.UUID(self.sic_free_requestable_document.split('.')[-1]))
-        SpecificQuestionAnswer.objects.create(
+        SpecificQuestionAnswer.objects.update_or_create(
             admission=self.general_admission,
             form_item=AdmissionFormItemFactory(
                 uuid=specific_question_uuid,
                 type=TypeItemFormulaire.DOCUMENT.name,
             ),
-            file=[uuid.uuid4()],
+            defaults={'file': [uuid.uuid4()]},
         )
         frozen_time.move_to('2022-01-04')
         self.general_admission.last_update_author = None
@@ -254,13 +254,13 @@ class DeleteDocumentTestCase(BaseDocumentViewTestCase):
 
         # Requestable document
         specific_question_uuid = str(uuid.UUID(self.fac_free_requestable_document.split('.')[-1]))
-        SpecificQuestionAnswer.objects.create(
+        SpecificQuestionAnswer.objects.update_or_create(
             admission=self.general_admission,
             form_item=AdmissionFormItemFactory(
                 uuid=specific_question_uuid,
                 type=TypeItemFormulaire.DOCUMENT.name,
             ),
-            file=[uuid.uuid4()],
+            defaults={'file': [uuid.uuid4()]},
         )
         frozen_time.move_to('2022-01-04')
         self.general_admission.last_update_author = None
@@ -483,13 +483,13 @@ class DeleteDocumentTestCase(BaseDocumentViewTestCase):
 
         # Requestable document
         specific_question_uuid = str(uuid.UUID(self.sic_free_requestable_document.split('.')[-1]))
-        SpecificQuestionAnswer.objects.create(
+        SpecificQuestionAnswer.objects.update_or_create(
             admission=self.general_admission,
             form_item=AdmissionFormItemFactory(
                 uuid=specific_question_uuid,
                 type=TypeItemFormulaire.DOCUMENT.name,
             ),
-            file=[uuid.uuid4()],
+            defaults={'file': [uuid.uuid4()]},
         )
         frozen_time.move_to('2022-01-04')
         self.doctorate_admission.last_update_author = None
@@ -615,13 +615,13 @@ class DeleteDocumentTestCase(BaseDocumentViewTestCase):
 
         # Requestable document
         specific_question_uuid = str(uuid.UUID(self.fac_free_requestable_document.split('.')[-1]))
-        SpecificQuestionAnswer.objects.create(
+        SpecificQuestionAnswer.objects.update_or_create(
             admission=self.general_admission,
             form_item=AdmissionFormItemFactory(
                 uuid=specific_question_uuid,
                 type=TypeItemFormulaire.DOCUMENT.name,
             ),
-            file=[uuid.uuid4()],
+            defaults={'file': [uuid.uuid4()]},
         )
         frozen_time.move_to('2022-01-04')
         self.doctorate_admission.last_update_author = None

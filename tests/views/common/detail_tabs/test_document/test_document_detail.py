@@ -329,13 +329,13 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
         # Simulate that the field is not missing but still requested
         self.general_admission.refresh_from_db()
         specific_question_uuid = str(uuid.UUID(self.fac_free_requestable_document.split('.')[-1]))
-        SpecificQuestionAnswer.objects.create(
+        SpecificQuestionAnswer.objects.update_or_create(
             admission=self.general_admission,
             form_item=AdmissionFormItemFactory(
                 uuid=specific_question_uuid,
                 type=TypeItemFormulaire.DOCUMENT.name,
             ),
-            file=[uuid.uuid4()],
+            defaults={'file': [uuid.uuid4()]},
         )
         response = self.client.get(url)
 
@@ -565,13 +565,13 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
         # Filled document
         file_uuid = uuid.uuid4()
         specific_question_uuid = str(uuid.UUID(self.sic_free_requestable_document.split('.')[-1]))
-        SpecificQuestionAnswer.objects.create(
+        SpecificQuestionAnswer.objects.update_or_create(
             admission=self.general_admission,
             form_item=AdmissionFormItemFactory(
                 uuid=specific_question_uuid,
                 type=TypeItemFormulaire.DOCUMENT.name,
             ),
-            file=[file_uuid],
+            defaults={'file': [file_uuid]},
         )
 
         response = self.client.get(url)
@@ -855,13 +855,13 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
         # Simulate that the field is not missing but still requested
         self.doctorate_admission.refresh_from_db()
         specific_question_uuid = str(uuid.UUID(self.fac_free_requestable_document.split('.')[-1]))
-        SpecificQuestionAnswer.objects.create(
+        SpecificQuestionAnswer.objects.update_or_create(
             admission=self.doctorate_admission,
             form_item=AdmissionFormItemFactory(
                 uuid=specific_question_uuid,
                 type=TypeItemFormulaire.DOCUMENT.name,
             ),
-            file=[uuid.uuid4()],
+            defaults={'file': [uuid.uuid4()]},
         )
         response = self.client.get(url)
 
@@ -1115,13 +1115,13 @@ class DocumentDetailTestCase(BaseDocumentViewTestCase):
         # Filled document
         file_uuid = uuid.uuid4()
         specific_question_uuid = str(uuid.UUID(self.sic_free_requestable_document.split('.')[-1]))
-        SpecificQuestionAnswer.objects.create(
+        SpecificQuestionAnswer.objects.update_or_create(
             admission=self.doctorate_admission,
             form_item=AdmissionFormItemFactory(
                 uuid=specific_question_uuid,
                 type=TypeItemFormulaire.DOCUMENT.name,
             ),
-            file=[file_uuid],
+            defaults={'file': [file_uuid]},
         )
 
         response = self.client.get(url)
