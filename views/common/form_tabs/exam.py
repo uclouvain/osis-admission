@@ -23,14 +23,9 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.conf import settings
-from django.db import transaction, IntegrityError
-from django.urls import reverse
+from django.db import transaction
 from django.utils.functional import cached_property
-from django.utils.translation import get_language
-from django.views.generic import FormView
 
-from admission.forms.admission.exam import ExamForm
 from admission.models import EPCInjection as AdmissionEPCInjection
 from admission.models.epc_injection import (
     EPCInjectionStatus as AdmissionEPCInjectionStatus,
@@ -44,17 +39,18 @@ from osis_profile.models.epc_injection import (
     EPCInjectionStatus as CurriculumEPCInjectionStatus,
 )
 from osis_profile.models.epc_injection import ExperienceType
+from osis_profile.views.edit_examen import EditExamenView
 
 __all__ = [
     'ExamFormView',
 ]
 
 
-class ExamFormView(AdmissionFormMixin, LoadDossierViewMixin, FormView):
+
+class ExamFormView(AdmissionFormMixin, LoadDossierViewMixin, EditExamenView):
     urlpatterns = 'exam'
     template_name = 'admission/forms/exams.html'
     permission_required = 'admission.change_admission_exam'
-    form_class = ExamForm
 
     def has_permission(self):
         return super().has_permission() and self.can_be_updated
@@ -85,18 +81,16 @@ class ExamFormView(AdmissionFormMixin, LoadDossierViewMixin, FormView):
     def exam(self):
         return Exam.objects.filter(admissions__admission=self.admission).first()
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['certificate_title'] = self.exam_type.title
-        kwargs['instance'] = self.exam
-        return kwargs
+    @property
+    def person(self):
+        return self.admission.candidate
 
     @transaction.atomic
     def form_valid(self, form):
-        exam = form.save(commit=False)
-        exam.person = self.admission.candidate
-        exam.type = self.exam_type
-        exam.save()
-        if not AdmissionExam.objects.filter(admission=self.admission, exam=exam).exists():
-            AdmissionExam.objects.create(admission=self.admission, exam=exam)
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        exam = form.instance
+        AdmissionExam.objects.get_or_create(
+            admission=self.admission,
+            exam=exam,
+        )
+        return response
