@@ -46,6 +46,7 @@ from base.tests.factories.academic_year import AcademicYearFactory, get_current_
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.person_address import PersonAddressFactory
 from osis_profile.models.enums.curriculum import Result
+from osis_profile.tests.factories.high_school_diploma import HighSchoolDiplomaFactory
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.language import (
     EnglishLanguageFactory,
@@ -72,8 +73,6 @@ class CompletePersonFactory(PersonFactory):
 
     last_registration_year = factory.LazyAttribute(lambda _: AcademicYearFactory(current=True))
     last_registration_id = '01234567'
-    graduated_from_high_school = GotDiploma.YES.name
-    graduated_from_high_school_year = factory.SubFactory(AcademicYearFactory)
     private_email = factory.Faker('email')
     phone_mobile = factory.Faker('phone_number')
 
@@ -150,6 +149,11 @@ class CompletePersonFactory(PersonFactory):
         )
 
         # Create highschool belgian diploma
+        HighSchoolDiplomaFactory(
+            person=self,
+            got_diploma=GotDiploma.YES.name,
+            academic_graduation_year=AcademicYearFactory(year=current_year - 1)
+        )
         BelgianHighSchoolDiplomaFactory(
             person=self,
             academic_graduation_year=AcademicYearFactory(year=current_year - 1),
@@ -171,7 +175,11 @@ class CompletePersonForBachelorFactory(CompletePersonFactory):
             city='Louvain-la-Neuve',
             country=CountryFactory(iso_code="BE"),
         )
-        self.graduated_from_high_school_year = academic_year
+        HighSchoolDiplomaFactory(
+            person=self,
+            got_diploma=GotDiploma.YES.name,
+            academic_graduation_year=academic_year,
+        )
         BelgianHighSchoolDiplomaFactory(
             person=self,
             academic_graduation_year=academic_year,
@@ -220,14 +228,23 @@ class CompletePersonForIUFCFactory(CompletePersonFactory):
             start_date=datetime.date(current_year - 1, 1, 1),
             end_date=datetime.date(current_year - 1, 3, 31),
         )
+        HighSchoolDiplomaFactory(
+            person=self,
+            got_diploma=GotDiploma.YES.name,
+            academic_graduation_year=AcademicYearFactory(year=current_year - 1)
+        )
 
 
 class IncompletePersonForBachelorFactory(CompletePersonFactory):
-    graduated_from_high_school = GotDiploma.NO.name
     last_registration_year = None
 
     @factory.post_generation
     def create_related_objects(self, create, extracted, **kwargs):
+        HighSchoolDiplomaFactory(
+            person=self,
+            got_diploma=GotDiploma.NO.name,
+            academic_graduation_year=None
+        )
         PersonAddressFactory(
             person=self,
             label=PersonAddressType.RESIDENTIAL.name,

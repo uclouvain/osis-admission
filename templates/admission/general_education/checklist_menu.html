@@ -40,19 +40,21 @@
           href="#{{ checklist_item_name }}"
       >
         {% include 'admission/general_education/checklist_menu_item.html' with checklist_item_name=checklist_item_name statut=statut %}
-        {% if current.enfants %}
+        {% if checklist_item_name == 'parcours_anterieur' %}
           <ul class="list-group sub-items" id="checklist-menu-item-child-{{ checklist_item_name }}">
-            {% for child in current.enfants %}
-              {% concat checklist_item_name '__' child.extra.identifiant as child_identifier %}
+            {% for experience_uuid, experience in experiences_by_uuid.items %}
+              {% concat checklist_item_name '__' experience_uuid as child_identifier %}
               <li
                   class="list-group-item sub-item {{ bg_classes|get_item:child_identifier }}"
                   data-toggle="tab"
                   href="#{{ child_identifier }}"
               >
                 <a class="sub-item-link">
-                  {% include 'admission/general_education/checklist_menu_item_status.html' with statut=child.statut item_name=child_identifier %}
+                  {% with main_status_configuration=checklist_tabs_organization.experiences_parcours_anterieur|get_item:experience.statut_validation %}
+                  {% include 'admission/general_education/checklist_menu_item_status.html' with statut=main_status_configuration.statut.name item_name=child_identifier %}
+                  {% endwith %}
                     {{ checklist_tabs|get_item:child_identifier }}
-                    {% if child.extra.identifiant in curex_a_fusionner %}
+                    {% if experience_uuid in curex_a_fusionner %}
                         <div class="pull-right badge small badge-warning">Fusion</div>
                     {% endif %}
                   {% with item_icons=checklist_additional_icons|get_item_or_none:child_identifier %}

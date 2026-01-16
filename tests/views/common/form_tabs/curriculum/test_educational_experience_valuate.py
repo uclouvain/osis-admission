@@ -172,49 +172,9 @@ class CurriculumEducationalExperienceValuateViewTestCase(TestCase):
         ).first()
         self.assertIsNotNone(valuation)
 
-        # Check that the experience has been added to the checklist
-        self.general_admission.refresh_from_db()
-
-        saved_experience_checklist = [
-            experience_checklist
-            for experience_checklist in self.general_admission.checklist['current']['parcours_anterieur']['enfants']
-            if experience_checklist.get('extra', {}).get('identifiant') == str(self.experience.uuid)
-        ]
-
-        self.assertEqual(len(saved_experience_checklist), 1)
-        self.assertEqual(saved_experience_checklist[0], default_experience_checklist)
-
         # Check that the modified informations have been updated
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-
-        # Keep the experience checklist if one is already there
-        saved_experience_checklist[0]['extra']['custom'] = 'custom value'
-        self.general_admission.save(update_fields=['checklist'])
-
-        valuation.delete()
-
-        response = self.client.post(self.valuate_url)
-
-        # Check that the experience has been valuated
-        valuation = AdmissionEducationalValuatedExperiences.objects.filter(
-            educationalexperience_id=self.experience.uuid,
-            baseadmission=self.general_admission,
-        ).first()
-        self.assertIsNotNone(valuation)
-
-        # Check that the experience checklist has been kept
-        self.general_admission.refresh_from_db()
-
-        new_saved_experience_checklist = [
-            experience_checklist
-            for experience_checklist in self.general_admission.checklist['current']['parcours_anterieur']['enfants']
-            if experience_checklist.get('extra', {}).get('identifiant') == str(self.experience.uuid)
-        ]
-
-        self.assertEqual(len(new_saved_experience_checklist), 1)
-        self.assertNotEqual(new_saved_experience_checklist[0], default_experience_checklist)
-        self.assertEqual(new_saved_experience_checklist[0], saved_experience_checklist[0])
 
     def test_valuate_experience_from_doctorate_curriculum_is_allowed_for_fac_users(self):
         self.client.force_login(self.doctorate_program_manager_user)

@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import itertools
 from typing import List, Optional
 
 import attr
@@ -91,8 +92,11 @@ from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from base.ddd.utils.business_validator import BusinessValidator
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.personal_data import ChoixStatutValidationDonneesPersonnelles
+from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
 from epc.models.enums.condition_acces import ConditionAcces
 from osis_profile.models.enums.education import ForeignDiplomaTypes
+from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -278,35 +282,35 @@ class ShouldTitreAccesEtreSelectionne(BusinessValidator):
 
 @attr.dataclass(frozen=True, slots=True)
 class ShouldStatutsChecklistExperiencesEtreValidees(BusinessValidator):
-    uuids_experiences_valorisees: set[str]
-    checklist: StatutsChecklistGenerale
     statut: ChoixStatutChecklist
     type_formation: TrainingType
+    etudes_secondaires: EtudesSecondairesAdmissionDTO
+    examen: ExamenDTO
+    experiences_academiques: list[ExperienceAcademiqueDTO]
+    experiences_non_academiques: list[ExperienceNonAcademiqueDTO]
 
     def validate(self, *args, **kwargs):
         if self.statut == ChoixStatutChecklist.GEST_REUSSITE:
-            valid_experience_statuses = {
-                ChoixStatutChecklist.GEST_REUSSITE,
-                ChoixStatutChecklist.GEST_BLOCAGE_ULTERIEUR,
-            }
             # Le passage à l'état valide nécessite que toutes les expériences valorisées soient passées à l'état valide
-            uuids_experiences_valorisees = self.uuids_experiences_valorisees.copy()
+            statuts_experiences_valides = {
+                ChoixStatutValidationExperience.A_COMPLETER_APRES_INSCRIPTION.name,
+                ChoixStatutValidationExperience.VALIDEE.name,
+            }
+
+            experiences_supplementaires_a_valider = []
+
+            if self.examen.requis:
+                experiences_supplementaires_a_valider.append(self.examen)
 
             if self.type_formation == TrainingType.BACHELOR:
-                uuids_experiences_valorisees.add(OngletsDemande.ETUDES_SECONDAIRES.name)
+                experiences_supplementaires_a_valider.append(self.etudes_secondaires)
 
-            for experience in self.checklist.parcours_anterieur.enfants:
-                identifiant_experience = experience.extra.get('identifiant')
-
-                if identifiant_experience in uuids_experiences_valorisees:
-                    uuids_experiences_valorisees.discard(identifiant_experience)
-
-                    # Si une expérience valorisée n'est pas à l'état valide, lever l'exception
-                    if experience.statut not in valid_experience_statuses:
-                        raise StatutsChecklistExperiencesEtreValidesException
-
-            # Si une expérience valorisée n'a pas de checklist associée, lever l'exception
-            if uuids_experiences_valorisees:
+            # Si une expérience valorisée n'est pas à l'état valide, lever l'exception
+            if any(experience_a_valider.statut_validation not in statuts_experiences_valides for experience_a_valider in itertools.chain(
+                self.experiences_academiques,
+                self.experiences_non_academiques,
+                experiences_supplementaires_a_valider,
+            )):
                 raise StatutsChecklistExperiencesEtreValidesException
 
 

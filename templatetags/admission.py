@@ -710,10 +710,6 @@ def checklist_state_button(context, **kwargs):
         **expected_attrs,
         'extra': kwargs,
         'view': context['view'],
-        'submitted_extra': {
-            **kwargs,
-            'status': expected_attrs['state'],
-        },
     }
 
 

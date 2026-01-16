@@ -97,7 +97,6 @@ class ChangeExtraViewTestCase(TestCase):
         self.assertEqual(
             self.admission.checklist['current']['assimilation'],
             {
-                'enfants': [],
                 'libelle': '',
                 'extra': {},
                 'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
@@ -130,7 +129,6 @@ class ChangeExtraViewTestCase(TestCase):
         self.assertEqual(
             self.admission.checklist['current']['assimilation'],
             {
-                'enfants': [],
                 'libelle': '',
                 'extra': {
                     'date_debut': '2021-12-31',

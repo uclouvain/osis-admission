@@ -755,7 +755,7 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         self.assertEqual(pdf_context['manager'].matricule, self.fac_manager_user.person.global_id)
 
         self.assertIn('access_titles_names', pdf_context)
-        belgian_diploma_year = self.general_admission.candidate.graduated_from_high_school_year.year
+        belgian_diploma_year = self.general_admission.candidate.highschooldiploma.academic_graduation_year.year
         self.assertEqual(
             pdf_context['access_titles_names'],
             [
@@ -823,9 +823,10 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
 
         self.assertIn('access_titles_names', pdf_context)
         self.assertEqual(len(pdf_context['access_titles_names']), 1)
+        diploma_year = self.general_admission.candidate.highschooldiploma.academic_graduation_year.year
         self.assertEqual(
             pdf_context['access_titles_names'][0],
-            f'{candidate.graduated_from_high_school_year.year}-{candidate.graduated_from_high_school_year.year + 1} : '
+            f'{diploma_year}-{diploma_year + 1} : '
             f'{secondary_studies_base_title}',
         )
 
@@ -846,9 +847,10 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
 
         self.assertIn('access_titles_names', pdf_context)
         self.assertEqual(len(pdf_context['access_titles_names']), 1)
+        diploma_year = self.general_admission.candidate.highschooldiploma.academic_graduation_year.year
         self.assertEqual(
             pdf_context['access_titles_names'][0],
-            f'{candidate.graduated_from_high_school_year.year}-{candidate.graduated_from_high_school_year.year + 1} : '
+            f'{diploma_year}-{diploma_year + 1} : '
             f'{secondary_studies_base_title}',
         )
 
@@ -861,9 +863,9 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         Exam.objects.filter(person=candidate, type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR).delete()
         diploma_alternative = HighSchoolDiplomaAlternativeFactory(person=candidate)
 
-        candidate.graduated_from_high_school = GotDiploma.NO.name
-        candidate.graduated_from_high_school_year = None
-        candidate.save()
+        candidate.highschooldiploma.got_diploma = GotDiploma.NO.name
+        candidate.highschooldiploma.academic_graduation_year = None
+        candidate.highschooldiploma.save()
 
         self.get_pdf_from_template_patcher.reset_mock()
 
@@ -906,9 +908,9 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name)
 
         # The candidate specified that he has secondary education but without more information
-        candidate.graduated_from_high_school = GotDiploma.YES.name
-        candidate.graduated_from_high_school_year = self.general_admission.training.academic_year
-        candidate.save()
+        candidate.highschooldiploma.got_diploma = GotDiploma.YES.name
+        candidate.highschooldiploma.academic_graduation_year = self.general_admission.training.academic_year
+        candidate.highschooldiploma.save()
 
         self.get_pdf_from_template_patcher.reset_mock()
 
@@ -921,9 +923,10 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
 
         self.assertIn('access_titles_names', pdf_context)
         self.assertEqual(len(pdf_context['access_titles_names']), 1)
+        diploma_year = self.general_admission.candidate.highschooldiploma.academic_graduation_year.year
         self.assertEqual(
             pdf_context['access_titles_names'][0],
-            f'{candidate.graduated_from_high_school_year.year}-{candidate.graduated_from_high_school_year.year + 1} : '
+            f'{diploma_year}-{diploma_year + 1} : '
             f'{secondary_studies_base_title}',
         )
 

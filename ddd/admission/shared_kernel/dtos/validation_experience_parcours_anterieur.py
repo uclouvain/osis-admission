@@ -23,20 +23,16 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import uuid
+from typing import Optional
 
-from django.utils.translation import gettext_lazy as _
+import attr
 
-from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import EtatAuthentificationParcours
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutChecklist
-from admission.ddd.admission.formation_generale.domain.model.statut_checklist import StatutChecklist
+from ddd.logic.shared_kernel.profil.dtos.validation_experience import ExperienceAvecValidationDTO
+from osis_common.ddd.interface import DTO
 
 
-def initialiser_checklist_experience(experience_uuid):
-    return StatutChecklist(
-        libelle=_('To be processed'),
-        statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
-        extra={
-            'identifiant': experience_uuid,
-            'etat_authentification': EtatAuthentificationParcours.NON_CONCERNE.name,
-        },
-    )
+@attr.dataclass(frozen=True, slots=True)
+class ValidationExperienceParcoursAnterieurDTO(ExperienceAvecValidationDTO):
+    uuid: str
+    type_experience: str

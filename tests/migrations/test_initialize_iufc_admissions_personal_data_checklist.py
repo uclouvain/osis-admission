@@ -42,7 +42,6 @@ class InitializeIUFCAdmissionsPersonalDataChecklistTestCase(TestCase):
     def setUpTestData(cls):
         cls.initial_personal_data_checklist = {
             'libelle': 'To be processed',
-            'enfants': [],
             'extra': {},
             'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
         }

@@ -135,10 +135,10 @@ from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.shared_kernel.repository.i_titre_acces_selectionnable import (
     ITitreAccesSelectionnableRepository,
 )
-from admission.ddd.admission.shared_kernel.utils import initialiser_checklist_experience
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
+from base.models.enums.personal_data import ChoixStatutValidationDonneesPersonnelles
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import (
     SITUATION_FINANCABILITE_PAR_ETAT,
@@ -151,6 +151,8 @@ from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
 from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
     IExperienceParcoursInterneTranslator,
 )
+from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceNonAcademiqueDTO, ExperienceAcademiqueDTO
 from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd import interface
 
@@ -579,9 +581,9 @@ class Proposition(interface.RootEntity):
         self.auteur_derniere_modification = auteur_modification
 
     def specifier_paiement_frais_dossier_plus_necessaire_par_gestionnaire(
-        self,
-        statut_checklist_cible: str,
-        auteur_modification: str,
+            self,
+            statut_checklist_cible: str,
+            auteur_modification: str,
     ):
         self.statut = ChoixStatutPropositionGenerale.CONFIRMEE
         self.checklist_actuelle.frais_dossier = {
@@ -605,11 +607,11 @@ class Proposition(interface.RootEntity):
         self.echeance_demande_documents = None
 
     def completer_curriculum(
-        self,
-        curriculum: List[str],
-        equivalence_diplome: List[str],
-        reponses_questions_specifiques: Dict,
-        auteur_modification: str,
+            self,
+            curriculum: List[str],
+            equivalence_diplome: List[str],
+            reponses_questions_specifiques: Dict,
+            auteur_modification: str,
     ):
         self.curriculum = curriculum
         self.equivalence_diplome = equivalence_diplome
@@ -617,59 +619,59 @@ class Proposition(interface.RootEntity):
         self.auteur_derniere_modification = auteur_modification
 
     def completer_comptabilite(
-        self,
-        auteur_modification: str,
-        attestation_absence_dette_etablissement: List[str],
-        demande_allocation_etudes_fr_be: Optional[bool],
-        enfant_personnel: Optional[bool],
-        attestation_enfant_personnel: List[str],
-        type_situation_assimilation: Optional[str],
-        sous_type_situation_assimilation_1: Optional[str],
-        carte_resident_longue_duree: List[str],
-        carte_cire_sejour_illimite_etranger: List[str],
-        carte_sejour_membre_ue: List[str],
-        carte_sejour_permanent_membre_ue: List[str],
-        sous_type_situation_assimilation_2: Optional[str],
-        carte_a_b_refugie: List[str],
-        annexe_25_26_refugies_apatrides: List[str],
-        attestation_immatriculation: List[str],
-        preuve_statut_apatride: List[str],
-        carte_a_b: List[str],
-        decision_protection_subsidiaire: List[str],
-        decision_protection_temporaire: List[str],
-        carte_a: List[str],
-        sous_type_situation_assimilation_3: Optional[str],
-        titre_sejour_3_mois_professionel: List[str],
-        fiches_remuneration: List[str],
-        titre_sejour_3_mois_remplacement: List[str],
-        preuve_allocations_chomage_pension_indemnite: List[str],
-        attestation_cpas: List[str],
-        relation_parente: Optional[str],
-        sous_type_situation_assimilation_5: Optional[str],
-        composition_menage_acte_naissance: List[str],
-        acte_tutelle: List[str],
-        composition_menage_acte_mariage: List[str],
-        attestation_cohabitation_legale: List[str],
-        carte_identite_parent: List[str],
-        titre_sejour_longue_duree_parent: List[str],
-        annexe_25_26_protection_parent: List[str],
-        titre_sejour_3_mois_parent: List[str],
-        fiches_remuneration_parent: List[str],
-        attestation_cpas_parent: List[str],
-        sous_type_situation_assimilation_6: Optional[str],
-        decision_bourse_cfwb: List[str],
-        attestation_boursier: List[str],
-        titre_identite_sejour_longue_duree_ue: List[str],
-        titre_sejour_belgique: List[str],
-        affiliation_sport: Optional[str],
-        etudiant_solidaire: Optional[bool],
-        type_numero_compte: Optional[str],
-        numero_compte_iban: Optional[str],
-        iban_valide: Optional[bool],
-        numero_compte_autre_format: Optional[str],
-        code_bic_swift_banque: Optional[str],
-        prenom_titulaire_compte: Optional[str],
-        nom_titulaire_compte: Optional[str],
+            self,
+            auteur_modification: str,
+            attestation_absence_dette_etablissement: List[str],
+            demande_allocation_etudes_fr_be: Optional[bool],
+            enfant_personnel: Optional[bool],
+            attestation_enfant_personnel: List[str],
+            type_situation_assimilation: Optional[str],
+            sous_type_situation_assimilation_1: Optional[str],
+            carte_resident_longue_duree: List[str],
+            carte_cire_sejour_illimite_etranger: List[str],
+            carte_sejour_membre_ue: List[str],
+            carte_sejour_permanent_membre_ue: List[str],
+            sous_type_situation_assimilation_2: Optional[str],
+            carte_a_b_refugie: List[str],
+            annexe_25_26_refugies_apatrides: List[str],
+            attestation_immatriculation: List[str],
+            preuve_statut_apatride: List[str],
+            carte_a_b: List[str],
+            decision_protection_subsidiaire: List[str],
+            decision_protection_temporaire: List[str],
+            carte_a: List[str],
+            sous_type_situation_assimilation_3: Optional[str],
+            titre_sejour_3_mois_professionel: List[str],
+            fiches_remuneration: List[str],
+            titre_sejour_3_mois_remplacement: List[str],
+            preuve_allocations_chomage_pension_indemnite: List[str],
+            attestation_cpas: List[str],
+            relation_parente: Optional[str],
+            sous_type_situation_assimilation_5: Optional[str],
+            composition_menage_acte_naissance: List[str],
+            acte_tutelle: List[str],
+            composition_menage_acte_mariage: List[str],
+            attestation_cohabitation_legale: List[str],
+            carte_identite_parent: List[str],
+            titre_sejour_longue_duree_parent: List[str],
+            annexe_25_26_protection_parent: List[str],
+            titre_sejour_3_mois_parent: List[str],
+            fiches_remuneration_parent: List[str],
+            attestation_cpas_parent: List[str],
+            sous_type_situation_assimilation_6: Optional[str],
+            decision_bourse_cfwb: List[str],
+            attestation_boursier: List[str],
+            titre_identite_sejour_longue_duree_ue: List[str],
+            titre_sejour_belgique: List[str],
+            affiliation_sport: Optional[str],
+            etudiant_solidaire: Optional[bool],
+            type_numero_compte: Optional[str],
+            numero_compte_iban: Optional[str],
+            iban_valide: Optional[bool],
+            numero_compte_autre_format: Optional[str],
+            code_bic_swift_banque: Optional[str],
+            prenom_titulaire_compte: Optional[str],
+            nom_titulaire_compte: Optional[str],
     ):
         self.auteur_derniere_modification = auteur_modification
         self.comptabilite = Comptabilite(
@@ -738,18 +740,15 @@ class Proposition(interface.RootEntity):
             nom_titulaire_compte=nom_titulaire_compte,
         )
 
-    def specifier_statut_checklist_parcours_anterieur(
-        self,
-        statut_checklist_cible: str,
-        titres_acces_selectionnes: List[TitreAccesSelectionnable],
-        auteur_modification: str,
-        uuids_experiences_valorisees: set[str],
-        type_formation: TrainingType,
-        etudes_secondaires: EtudesSecondairesAdmissionDTO,
-    ):
+    def specifier_statut_checklist_parcours_anterieur(self, statut_checklist_cible: str,
+                                                      titres_acces_selectionnes: List[TitreAccesSelectionnable],
+                                                      auteur_modification: str,
+                                                      type_formation: TrainingType,
+                                                      etudes_secondaires: EtudesSecondairesAdmissionDTO,
+                                                      examen: ExamenDTO,
+                                                      experiences_academiques: list[ExperienceAcademiqueDTO],
+                                                      experiences_non_academiques: list[ExperienceNonAcademiqueDTO], ):
         ModifierStatutChecklistParcoursAnterieurValidatorList(
-            checklist=self.checklist_actuelle,
-            uuids_experiences_valorisees=uuids_experiences_valorisees,
             statut=ChoixStatutChecklist[statut_checklist_cible],
             titres_acces_selectionnes=titres_acces_selectionnes,
             condition_acces=self.condition_acces,
@@ -757,22 +756,24 @@ class Proposition(interface.RootEntity):
             type_formation=type_formation,
             type_equivalence_titre_acces=self.type_equivalence_titre_acces,
             etudes_secondaires=etudes_secondaires,
+            experiences_academiques=experiences_academiques,
+            experiences_non_academiques=experiences_non_academiques,
+            examen=examen,
         ).validate()
 
         self.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist[statut_checklist_cible]
         self.auteur_derniere_modification = auteur_modification
 
     def specifier_statut_checklist_experience_parcours_anterieur(
-        self,
-        statut_checklist_cible: str,
-        statut_checklist_authentification: Optional[bool],
-        uuid_experience: str,
-        auteur_modification: str,
-        type_experience: str,
-        profil_candidat_translator: IProfilCandidatTranslator,
-        grade_academique_formation_proposition: str,
+            self,
+            statut_checklist_cible: str,
+            uuid_experience: str,
+            auteur_modification: str,
+            type_experience: str,
+            profil_candidat_translator: IProfilCandidatTranslator,
+            grade_academique_formation_proposition: str,
     ):
-        if statut_checklist_cible == ChoixStatutChecklist.GEST_REUSSITE.name:
+        if statut_checklist_cible == ChoixStatutValidationDonneesPersonnelles.VALIDEES.name:
             # Une expérience académique ne peut passer à l'état "Validé" que si elle est complète
             ProfilCandidatService.verifier_experience_curriculum_formation_generale_apres_soumission(
                 proposition=self,
@@ -781,45 +782,22 @@ class Proposition(interface.RootEntity):
                 profil_candidat_translator=profil_candidat_translator,
                 grade_academique_formation_proposition=grade_academique_formation_proposition,
             )
-
-        try:
-            experience = self.checklist_actuelle.recuperer_enfant('parcours_anterieur', uuid_experience)
-        except StopIteration:
-            # Si l'expérience n'existe pas dans la checklist, on l'initialise
-            experience = initialiser_checklist_experience(experience_uuid=uuid_experience)
-            self.checklist_actuelle.parcours_anterieur.enfants.append(experience)
-
-        experience.statut = ChoixStatutChecklist[statut_checklist_cible]
-
-        if statut_checklist_authentification is None:
-            experience.extra.pop('authentification', None)
-        else:
-            experience.extra['authentification'] = '1' if statut_checklist_authentification else '0'
-
         self.auteur_derniere_modification = auteur_modification
 
     def specifier_authentification_experience_parcours_anterieur(
-        self,
-        uuid_experience: str,
-        auteur_modification: str,
-        etat_authentification: str,
+            self,
+            auteur_modification: str,
     ):
-        try:
-            experience = self.checklist_actuelle.recuperer_enfant('parcours_anterieur', uuid_experience)
-        except StopIteration:
-            raise ExperienceNonTrouveeException
-
-        experience.extra['etat_authentification'] = etat_authentification
         self.auteur_derniere_modification = auteur_modification
 
     def specifier_condition_acces(
-        self,
-        auteur_modification: str,
-        condition_acces: str,
-        millesime_condition_acces: Optional[int],
-        avec_complements_formation: Optional[bool],
-        titre_acces_selectionnable_repository: 'ITitreAccesSelectionnableRepository',
-        experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
+            self,
+            auteur_modification: str,
+            condition_acces: str,
+            millesime_condition_acces: Optional[int],
+            avec_complements_formation: Optional[bool],
+            titre_acces_selectionnable_repository: 'ITitreAccesSelectionnableRepository',
+            experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
     ):
         nouveau_millesime_condition_acces = millesime_condition_acces
         nouvelle_condition_acces = getattr(ConditionAcces, condition_acces, None)
@@ -856,13 +834,13 @@ class Proposition(interface.RootEntity):
             self.commentaire_complements_formation = ''
 
     def specifier_equivalence_titre_acces(
-        self,
-        auteur_modification: str,
-        type_equivalence_titre_acces: str,
-        statut_equivalence_titre_acces: str,
-        information_a_propos_de_la_restriction: str,
-        etat_equivalence_titre_acces: str,
-        date_prise_effet_equivalence_titre_acces: Optional[datetime.date],
+            self,
+            auteur_modification: str,
+            type_equivalence_titre_acces: str,
+            statut_equivalence_titre_acces: str,
+            information_a_propos_de_la_restriction: str,
+            etat_equivalence_titre_acces: str,
+            date_prise_effet_equivalence_titre_acces: Optional[datetime.date],
     ):
         self.auteur_derniere_modification = auteur_modification
         self.type_equivalence_titre_acces = getattr(TypeEquivalenceTitreAcces, type_equivalence_titre_acces, None)
@@ -872,10 +850,10 @@ class Proposition(interface.RootEntity):
         self.date_prise_effet_equivalence_titre_acces = date_prise_effet_equivalence_titre_acces
 
     def completer_informations_complementaires(
-        self,
-        reponses_questions_specifiques: Dict,
-        documents_additionnels: List[str],
-        poste_diplomatique: Optional[PosteDiplomatiqueIdentity],
+            self,
+            reponses_questions_specifiques: Dict,
+            documents_additionnels: List[str],
+            poste_diplomatique: Optional[PosteDiplomatiqueIdentity],
     ):
         self.auteur_derniere_modification = self.matricule_candidat
         self.reponses_questions_specifiques = reponses_questions_specifiques
@@ -883,19 +861,19 @@ class Proposition(interface.RootEntity):
         self.poste_diplomatique = poste_diplomatique
 
     def completer_informations_complementaires_par_gestionnaire(
-        self,
-        auteur_modification: str,
-        reponses_questions_specifiques: Dict,
-        documents_additionnels: List[str],
-        poste_diplomatique: Optional[PosteDiplomatiqueIdentity],
-        est_bachelier_belge: Optional[bool],
-        est_reorientation_inscription_externe: Optional[bool],
-        attestation_inscription_reguliere: List[str],
-        formulaire_reorientation: List[str],
-        est_modification_inscription_externe: Optional[bool],
-        formulaire_modification_inscription: List[str],
-        attestation_inscription_reguliere_pour_modification_inscription: List[str],
-        est_non_resident_au_sens_decret: Optional[bool],
+            self,
+            auteur_modification: str,
+            reponses_questions_specifiques: Dict,
+            documents_additionnels: List[str],
+            poste_diplomatique: Optional[PosteDiplomatiqueIdentity],
+            est_bachelier_belge: Optional[bool],
+            est_reorientation_inscription_externe: Optional[bool],
+            attestation_inscription_reguliere: List[str],
+            formulaire_reorientation: List[str],
+            est_modification_inscription_externe: Optional[bool],
+            formulaire_modification_inscription: List[str],
+            attestation_inscription_reguliere_pour_modification_inscription: List[str],
+            est_non_resident_au_sens_decret: Optional[bool],
     ):
         self.auteur_derniere_modification = auteur_modification
         self.reponses_questions_specifiques = reponses_questions_specifiques
@@ -917,10 +895,10 @@ class Proposition(interface.RootEntity):
             self.est_inscription_tardive = False
 
     def specifier_financabilite_resultat_calcul(
-        self,
-        financabilite_regle_calcule: EtatFinancabilite,
-        financabilite_regle_calcule_situation: str,
-        auteur_modification: Optional[str] = '',
+            self,
+            financabilite_regle_calcule: EtatFinancabilite,
+            financabilite_regle_calcule_situation: str,
+            auteur_modification: Optional[str] = '',
     ):
         self.financabilite_regle_calcule = financabilite_regle_calcule
         self.financabilite_regle_calcule_situation = (
@@ -933,9 +911,9 @@ class Proposition(interface.RootEntity):
             self.auteur_derniere_modification = auteur_modification
 
     def specifier_financabilite_regle(
-        self,
-        financabilite_regle: SituationFinancabilite,
-        auteur_modification: str,
+            self,
+            financabilite_regle: SituationFinancabilite,
+            auteur_modification: str,
     ):
         self.financabilite_regle = financabilite_regle
         self.financabilite_etabli_par = auteur_modification
@@ -956,8 +934,8 @@ class Proposition(interface.RootEntity):
             )
 
     def specifier_financabilite_non_concernee(
-        self,
-        auteur_modification: str,
+            self,
+            auteur_modification: str,
     ):
         self.financabilite_regle = None
         self.financabilite_etabli_par = auteur_modification
@@ -969,11 +947,11 @@ class Proposition(interface.RootEntity):
         )
 
     def specifier_derogation_financabilite(
-        self,
-        statut: DerogationFinancement,
-        refus_uuids_motifs: Optional[List[str]],
-        refus_autres_motifs: Optional[List[str]],
-        auteur_modification: str,
+            self,
+            statut: DerogationFinancement,
+            refus_uuids_motifs: Optional[List[str]],
+            refus_autres_motifs: Optional[List[str]],
+            auteur_modification: str,
     ):
         self.auteur_derniere_modification = auteur_modification
         self.financabilite_derogation_statut = statut
@@ -982,9 +960,9 @@ class Proposition(interface.RootEntity):
             self.autres_motifs_refus = refus_autres_motifs
 
     def specifier_derogation_vrae_financabilite(
-        self,
-        derogation_vrae: bool,
-        auteur_modification: str,
+            self,
+            derogation_vrae: bool,
+            auteur_modification: str,
     ):
         self.auteur_derniere_modification = auteur_modification
         self.financabilite_derogation_vrae = derogation_vrae
@@ -1003,11 +981,11 @@ class Proposition(interface.RootEntity):
         self.auteur_derniere_modification = auteur_modification
 
     def specifier_derogation_delegue_vrae(
-        self,
-        derogation: BesoinDeDerogationDelegueVrae,
-        commentaire: str,
-        justificatif: List[str],
-        auteur_modification: str,
+            self,
+            derogation: BesoinDeDerogationDelegueVrae,
+            commentaire: str,
+            justificatif: List[str],
+            auteur_modification: str,
     ):
         self.derogation_delegue_vrae = derogation
         if derogation == BesoinDeDerogationDelegueVrae.PAS_DE_DEROGATION:
@@ -1023,17 +1001,17 @@ class Proposition(interface.RootEntity):
         )
 
     def _specifier_informations_de_base_acceptation_par_sic(
-        self,
-        auteur_modification: str,
-        avec_conditions_complementaires: Optional[bool],
-        uuids_conditions_complementaires_existantes: Optional[List[str]],
-        conditions_complementaires_libres: Optional[List[Dict]],
-        avec_complements_formation: Optional[bool],
-        uuids_complements_formation: Optional[List[str]],
-        commentaire_complements_formation: str,
-        nombre_annees_prevoir_programme: Optional[int],
-        nom_personne_contact_programme_annuel: str,
-        email_personne_contact_programme_annuel: str,
+            self,
+            auteur_modification: str,
+            avec_conditions_complementaires: Optional[bool],
+            uuids_conditions_complementaires_existantes: Optional[List[str]],
+            conditions_complementaires_libres: Optional[List[Dict]],
+            avec_complements_formation: Optional[bool],
+            uuids_complements_formation: Optional[List[str]],
+            commentaire_complements_formation: str,
+            nombre_annees_prevoir_programme: Optional[int],
+            nom_personne_contact_programme_annuel: str,
+            email_personne_contact_programme_annuel: str,
     ):
         """Spécifier les informations d'acceptation par SIC communes entre les admissions et les inscriptions."""
         self.auteur_derniere_modification = auteur_modification
@@ -1070,29 +1048,29 @@ class Proposition(interface.RootEntity):
         self.email_personne_contact_programme_annuel_annuel = email_personne_contact_programme_annuel
 
     def specifier_informations_acceptation_par_sic(
-        self,
-        auteur_modification: str,
-        documents_dto: List[EmplacementDocumentDTO],
-        avec_conditions_complementaires: Optional[bool],
-        uuids_conditions_complementaires_existantes: Optional[List[str]],
-        conditions_complementaires_libres: Optional[List[Dict]],
-        avec_complements_formation: Optional[bool],
-        uuids_complements_formation: Optional[List[str]],
-        commentaire_complements_formation: str,
-        nombre_annees_prevoir_programme: Optional[int],
-        nom_personne_contact_programme_annuel: str,
-        email_personne_contact_programme_annuel: str,
-        droits_inscription_montant: str,
-        droits_inscription_montant_autre: Optional[float],
-        dispense_ou_droits_majores: str,
-        tarif_particulier: str,
-        refacturation_ou_tiers_payant: str,
-        annee_de_premiere_inscription_et_statut: str,
-        est_mobilite: Optional[bool],
-        nombre_de_mois_de_mobilite: str,
-        doit_se_presenter_en_sic: Optional[bool],
-        communication_au_candidat: str,
-        doit_fournir_visa_etudes: Optional[bool],
+            self,
+            auteur_modification: str,
+            documents_dto: List[EmplacementDocumentDTO],
+            avec_conditions_complementaires: Optional[bool],
+            uuids_conditions_complementaires_existantes: Optional[List[str]],
+            conditions_complementaires_libres: Optional[List[Dict]],
+            avec_complements_formation: Optional[bool],
+            uuids_complements_formation: Optional[List[str]],
+            commentaire_complements_formation: str,
+            nombre_annees_prevoir_programme: Optional[int],
+            nom_personne_contact_programme_annuel: str,
+            email_personne_contact_programme_annuel: str,
+            droits_inscription_montant: str,
+            droits_inscription_montant_autre: Optional[float],
+            dispense_ou_droits_majores: str,
+            tarif_particulier: str,
+            refacturation_ou_tiers_payant: str,
+            annee_de_premiere_inscription_et_statut: str,
+            est_mobilite: Optional[bool],
+            nombre_de_mois_de_mobilite: str,
+            doit_se_presenter_en_sic: Optional[bool],
+            communication_au_candidat: str,
+            doit_fournir_visa_etudes: Optional[bool],
     ):
         ApprouverParSicAValiderValidatorList(
             statut=self.statut,
@@ -1133,17 +1111,17 @@ class Proposition(interface.RootEntity):
         self.doit_fournir_visa_etudes = doit_fournir_visa_etudes
 
     def specifier_informations_acceptation_inscription_par_sic(
-        self,
-        auteur_modification: str,
-        avec_conditions_complementaires: Optional[bool],
-        uuids_conditions_complementaires_existantes: Optional[List[str]],
-        conditions_complementaires_libres: Optional[List[Dict]],
-        avec_complements_formation: Optional[bool],
-        uuids_complements_formation: Optional[List[str]],
-        commentaire_complements_formation: str,
-        nombre_annees_prevoir_programme: Optional[int],
-        nom_personne_contact_programme_annuel: str,
-        email_personne_contact_programme_annuel: str,
+            self,
+            auteur_modification: str,
+            avec_conditions_complementaires: Optional[bool],
+            uuids_conditions_complementaires_existantes: Optional[List[str]],
+            conditions_complementaires_libres: Optional[List[Dict]],
+            avec_complements_formation: Optional[bool],
+            uuids_complements_formation: Optional[List[str]],
+            commentaire_complements_formation: str,
+            nombre_annees_prevoir_programme: Optional[int],
+            nom_personne_contact_programme_annuel: str,
+            email_personne_contact_programme_annuel: str,
     ):
         SpecifierInformationsApprobationInscriptionValidatorList(
             statut=self.statut,
@@ -1163,11 +1141,11 @@ class Proposition(interface.RootEntity):
         )
 
     def specifier_motifs_refus_par_sic(
-        self,
-        auteur_modification: str,
-        type_de_refus: TypeDeRefus,
-        uuids_motifs: List[str],
-        autres_motifs: List[str],
+            self,
+            auteur_modification: str,
+            type_de_refus: TypeDeRefus,
+            uuids_motifs: List[str],
+            autres_motifs: List[str],
     ):
         RefuserParSicAValiderValidatorList(statut=self.statut).validate()
         self.statut = ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION
@@ -1197,15 +1175,15 @@ class Proposition(interface.RootEntity):
         self.auteur_derniere_modification = auteur_modification
 
     def approuver_par_sic(
-        self,
-        auteur_modification: str,
-        documents_dto: List[EmplacementDocumentDTO],
-        curriculum_dto: CurriculumAdmissionDTO,
-        profil_candidat_translator: IProfilCandidatTranslator,
-        experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
-        grade_academique_formation_proposition: str,
-        annee_formation: AcademicYear,
-        identification_dto: IdentificationDTO,
+            self,
+            auteur_modification: str,
+            documents_dto: List[EmplacementDocumentDTO],
+            curriculum_dto: CurriculumAdmissionDTO,
+            profil_candidat_translator: IProfilCandidatTranslator,
+            experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
+            grade_academique_formation_proposition: str,
+            annee_formation: AcademicYear,
+            identification_dto: IdentificationDTO,
     ):
         if self.type_demande == TypeDemande.INSCRIPTION:
             ApprouverInscriptionParSicValidatorList(

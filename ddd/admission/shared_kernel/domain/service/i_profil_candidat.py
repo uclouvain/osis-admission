@@ -258,8 +258,3 @@ class IProfilCandidatTranslator(interface.DomainService):
     @abstractmethod
     def get_merge_proposal(cls, matricule: str) -> Optional['MergeProposalDTO']:
         raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def get_uuids_experiences_curriculum_valorisees_par_admission(cls, uuid_proposition: str) -> set[str]:
-        raise NotImplementedError

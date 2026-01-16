@@ -33,6 +33,7 @@ from rest_framework import serializers
 
 from base.models.entity_version import EntityVersion
 from base.models.enums.entity_type import INSTITUTE
+from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
 
 
 class TranslatedField(serializers.SerializerMethodField):
@@ -81,6 +82,12 @@ AnswerToSpecificQuestionField = partial(
     serializers.JSONField,
     encoder=DjangoJSONEncoder,
     default=dict,
+)
+
+
+ExperienceDefaultValidationStatusField = partial(
+    serializers.HiddenField,
+    default=serializers.CreateOnlyDefault(ChoixStatutValidationExperience.EN_BROUILLON.name)
 )
 
 

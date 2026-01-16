@@ -42,6 +42,8 @@ from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscripti
 from admission.ddd.admission.shared_kernel.domain.service.i_elements_confirmation import IElementsConfirmation
 from admission.ddd.admission.shared_kernel.domain.service.i_historique import IHistorique
 from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
+from admission.ddd.admission.shared_kernel.domain.service.i_modifier_checklist_experience_parcours_anterieur import \
+    IValidationExperienceParcoursAnterieurService
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.domain.service.i_raccrocher_experiences_curriculum import (
     IRaccrocherExperiencesCurriculum,
@@ -68,6 +70,7 @@ def soumettre_proposition(
     historique: 'IHistorique',
     raccrocher_experiences_curriculum: 'IRaccrocherExperiencesCurriculum',
     email_destinataire_repository: 'IEmailDestinataireRepository',
+    validation_experience_parcours_anterieur_service: 'IValidationExperienceParcoursAnterieurService',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -117,6 +120,7 @@ def soumettre_proposition(
     )
     proposition_repository.save(proposition)
 
+    validation_experience_parcours_anterieur_service.mettre_a_jour_experiences_en_brouillon(proposition=proposition)
     raccrocher_experiences_curriculum.raccrocher(proposition)
     notification.confirmer_soumission(proposition, email_destinataire_repository)
     historique.historiser_soumission(proposition)

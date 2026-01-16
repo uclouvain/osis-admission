@@ -39,6 +39,8 @@ from admission.ddd.admission.shared_kernel.use_case.write import (
 from admission.infrastructure.admission.shared_kernel.domain.service.lister_toutes_demandes import (
     ListerToutesDemandes,
 )
+from admission.infrastructure.admission.shared_kernel.domain.service.modifier_checklist_experience_parcours_anterieur import \
+    ValidationExperienceParcoursAnterieurService
 from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import (
     ProfilCandidatTranslator,
 )
@@ -95,6 +97,12 @@ COMMAND_HANDLERS = {
     RechercherFormationsGereesQuery: lambda msg_bus, cmd: rechercher_formations_gerees(
         cmd,
         repository=GestionnaireRepository(),
+    ),
+    RecupererInformationsValidationExperienceParcoursAnterieurQuery: (
+        lambda msg_bus, cmd: recuperer_informations_validation_experience_parcours_anterieur(
+            cmd,
+            validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
+        )
     ),
 }
 

@@ -23,7 +23,11 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
+from itertools import chain
+from unittest.mock import patch
 
+import freezegun
 from django.test import SimpleTestCase
 
 from admission.ddd.admission.doctorat.preparation.commands import (
@@ -60,9 +64,13 @@ from admission.infrastructure.message_bus_in_memory import (
     message_bus_in_memory_instance,
 )
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from epc.models.enums.condition_acces import ConditionAcces
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
 
 
+@freezegun.freeze_time('2020-01-01')
 class TestModifierStatutChecklistParcoursAnterieurService(SimpleTestCase):
     def assertHasInstance(self, container, cls, msg=None):
         if not any(isinstance(obj, cls) for obj in container):
@@ -79,6 +87,17 @@ class TestModifierStatutChecklistParcoursAnterieurService(SimpleTestCase):
         self.addCleanup(self.profil_candidat_translator.reset)
 
         self.message_bus = message_bus_in_memory_instance
+
+        self.academic_year_repository = AcademicYearInMemoryRepository()
+
+        for annee in range(2016, 2021):
+            self.academic_year_repository.save(
+                AcademicYear(
+                    entity_id=AcademicYearIdentity(year=annee),
+                    start_date=datetime.date(annee, 9, 15),
+                    end_date=datetime.date(annee + 1, 9, 30),
+                )
+            )
 
     def test_should_modifier_si_statut_cible_est_initial_candidat(self):
         proposition_id = self.message_bus.invoke(
@@ -143,6 +162,20 @@ class TestModifierStatutChecklistParcoursAnterieurService(SimpleTestCase):
                 selectionne=True,
             )
         )
+
+        experiences_academiques_candidat = [
+            xp for xp in self.profil_candidat_translator.experiences_academiques
+            if xp.personne == proposition.matricule_candidat
+        ]
+
+        experiences_non_academiques_candidat = [
+            xp for xp in self.profil_candidat_translator.experiences_non_academiques
+            if xp.personne == proposition.matricule_candidat
+        ]
+
+        for xp in experiences_academiques_candidat + experiences_non_academiques_candidat:
+            xp.statut_validation = ChoixStatutValidationExperience.VALIDEE.name
+
         proposition_id = self.message_bus.invoke(
             ModifierStatutChecklistParcoursAnterieurCommand(
                 uuid_proposition='uuid-SC3DP-confirmee',
@@ -150,21 +183,14 @@ class TestModifierStatutChecklistParcoursAnterieurService(SimpleTestCase):
                 gestionnaire='0123456789',
             )
         )
-
         proposition = self.proposition_repository.get(proposition_id)
         self.assertEqual(
             proposition.checklist_actuelle.parcours_anterieur.statut,
             ChoixStatutChecklist.GEST_REUSSITE,
         )
 
-        # Expériences avec un statut incorrect mais inconnues ou non valorisées -> non prises en compte
-        proposition.checklist_actuelle.parcours_anterieur.enfants.append(
-            StatutChecklist(
-                libelle='l1',
-                statut=ChoixStatutChecklist.GEST_BLOCAGE,
-                extra={'identifiant': 'INCONNUE'},
-            ),
-        )
+        for xp in experiences_academiques_candidat + experiences_non_academiques_candidat:
+            xp.statut_validation = ChoixStatutValidationExperience.A_COMPLETER_APRES_INSCRIPTION.name
 
         proposition_id = self.message_bus.invoke(
             ModifierStatutChecklistParcoursAnterieurCommand(
@@ -173,58 +199,35 @@ class TestModifierStatutChecklistParcoursAnterieurService(SimpleTestCase):
                 gestionnaire='0123456789',
             )
         )
-        self.assertIsNotNone(proposition_id)
+        proposition = self.proposition_repository.get(proposition_id)
+        self.assertEqual(
+            proposition.checklist_actuelle.parcours_anterieur.statut,
+            ChoixStatutChecklist.GEST_REUSSITE,
+        )
 
-        # Expérience valorisée et avec un statut incorrect -> lever une exception
-        checklist_premiere_experience = proposition.checklist_actuelle.parcours_anterieur.enfants[0]
-        identifiant_premiere_experience = checklist_premiere_experience.extra['identifiant']
-
-        self.profil_candidat_translator.valorisations[identifiant_premiere_experience] = ['uuid-SC3DP-confirmee']
-
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(
-                ModifierStatutChecklistParcoursAnterieurCommand(
-                    uuid_proposition='uuid-SC3DP-confirmee',
-                    statut=ChoixStatutChecklist.GEST_REUSSITE.name,
-                    gestionnaire='0123456789',
+        # Expérience académique avec un statut incorrect
+        with patch.multiple(experiences_academiques_candidat[0], statut_validation=ChoixStatutValidationExperience.AVIS_EXPERT):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(
+                    ModifierStatutChecklistParcoursAnterieurCommand(
+                        uuid_proposition='uuid-SC3DP-confirmee',
+                        statut=ChoixStatutChecklist.GEST_REUSSITE.name,
+                        gestionnaire='0123456789',
+                    )
                 )
-            )
-            self.assertHasInstance(context.exception.exceptions, StatutsChecklistExperiencesEtreValidesException)
+                self.assertHasInstance(context.exception.exceptions, StatutsChecklistExperiencesEtreValidesException)
 
-        checklist_premiere_experience.statut = ChoixStatutChecklist.GEST_REUSSITE
-
-        proposition_id = self.message_bus.invoke(
-            ModifierStatutChecklistParcoursAnterieurCommand(
-                uuid_proposition='uuid-SC3DP-confirmee',
-                statut=ChoixStatutChecklist.GEST_REUSSITE.name,
-                gestionnaire='0123456789',
-            )
-        )
-        self.assertIsNotNone(proposition_id)
-
-        checklist_premiere_experience.statut = ChoixStatutChecklist.GEST_BLOCAGE_ULTERIEUR
-
-        proposition_id = self.message_bus.invoke(
-            ModifierStatutChecklistParcoursAnterieurCommand(
-                uuid_proposition='uuid-SC3DP-confirmee',
-                statut=ChoixStatutChecklist.GEST_REUSSITE.name,
-                gestionnaire='0123456789',
-            )
-        )
-        self.assertIsNotNone(proposition_id)
-
-        # Expérience valorisée mais sans checklist -> lever une exception
-        self.profil_candidat_translator.valorisations['INCONNUE-VALORISEE'] = ['uuid-SC3DP-confirmee']
-
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(
-                ModifierStatutChecklistParcoursAnterieurCommand(
-                    uuid_proposition='uuid-SC3DP-confirmee',
-                    statut=ChoixStatutChecklist.GEST_REUSSITE.name,
-                    gestionnaire='0123456789',
+        # Expérience non-académique avec un statut incorrect
+        with patch.multiple(experiences_non_academiques_candidat[0], statut_validation=ChoixStatutValidationExperience.AVIS_EXPERT):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(
+                    ModifierStatutChecklistParcoursAnterieurCommand(
+                        uuid_proposition='uuid-SC3DP-confirmee',
+                        statut=ChoixStatutChecklist.GEST_REUSSITE.name,
+                        gestionnaire='0123456789',
+                    )
                 )
-            )
-            self.assertHasInstance(context.exception.exceptions, StatutsChecklistExperiencesEtreValidesException)
+                self.assertHasInstance(context.exception.exceptions, StatutsChecklistExperiencesEtreValidesException)
 
     def test_should_empecher_si_proposition_non_trouvee(self):
         with self.assertRaises(PropositionNonTrouveeException):

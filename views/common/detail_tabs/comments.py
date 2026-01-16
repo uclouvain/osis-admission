@@ -91,6 +91,7 @@ class AdmissionCommentsView(LoadDossierViewMixin, TemplateView):
         context['COMMENT_TAG_SIC'] = f'{COMMENT_TAG_SIC},{COMMENT_TAG_GLOBAL}'
 
         profile_tabs = []
+        experiences_names_by_uuid = {}
 
         if self.is_general or self.is_doctorate:
             if self.is_doctorate:
@@ -125,8 +126,6 @@ class AdmissionCommentsView(LoadDossierViewMixin, TemplateView):
                     ),
                 )
             )
-
-            experiences_names_by_uuid = {}
 
             for experience in curriculum.experiences_academiques:
                 experiences_names_by_uuid[str(experience.uuid)] = experience.titre_formate
@@ -163,6 +162,10 @@ class AdmissionCommentsView(LoadDossierViewMixin, TemplateView):
                     object_uuid=self.admission.candidate.uuid,
                     tags__overlap=profile_tabs,
                 )
+                | Q(
+                    object_uuid__in=experiences_names_by_uuid.keys(),
+                    tags__0='parcours_anterieur',
+                ),
             ).select_related('author')
         }
 

@@ -493,9 +493,9 @@ class GetAccessTitlesViewTestCase(TestCase):
         high_school_diploma_alternative.delete()
 
         # The candidate specified that he has a secondary education but without more information
-        general_admission.candidate.graduated_from_high_school = GotDiploma.YES.name
-        general_admission.candidate.graduated_from_high_school_year = general_admission.training.academic_year
-        general_admission.candidate.save()
+        general_admission.candidate.highschooldiploma.got_diploma = GotDiploma.YES.name
+        general_admission.candidate.highschooldiploma.academic_graduation_year = general_admission.training.academic_year
+        general_admission.candidate.highschooldiploma.save()
 
         access_titles = message_bus_instance.invoke(
             RecupererTitresAccesSelectionnablesPropositionQuery(
@@ -510,7 +510,7 @@ class GetAccessTitlesViewTestCase(TestCase):
         current_access_title = access_titles[OngletsDemande.ETUDES_SECONDAIRES.name]
 
         self.assertEqual(current_access_title.type_titre, TypeTitreAccesSelectionnable.ETUDES_SECONDAIRES.name)
-        self.assertEqual(current_access_title.annee, general_admission.candidate.graduated_from_high_school_year.year)
+        self.assertEqual(current_access_title.annee, general_admission.candidate.highschooldiploma.academic_graduation_year.year)
         self.assertEqual(current_access_title.selectionne, True)
 
         general_admission.candidate.graduated_from_high_school = GotDiploma.THIS_YEAR.name
@@ -529,13 +529,13 @@ class GetAccessTitlesViewTestCase(TestCase):
         current_access_title = access_titles[OngletsDemande.ETUDES_SECONDAIRES.name]
 
         self.assertEqual(current_access_title.type_titre, TypeTitreAccesSelectionnable.ETUDES_SECONDAIRES.name)
-        self.assertEqual(current_access_title.annee, general_admission.candidate.graduated_from_high_school_year.year)
+        self.assertEqual(current_access_title.annee, general_admission.candidate.highschooldiploma.academic_graduation_year.year)
         self.assertEqual(current_access_title.selectionne, True)
 
         # The candidate specified that he had no secondary education
-        general_admission.candidate.graduated_from_high_school = GotDiploma.NO.name
-        general_admission.candidate.graduated_from_high_school_year = None
-        general_admission.candidate.save()
+        general_admission.candidate.highschooldiploma.got_diploma = GotDiploma.NO.name
+        general_admission.candidate.highschooldiploma.academic_graduation_year = None
+        general_admission.candidate.highschooldiploma.save()
 
         access_titles = message_bus_instance.invoke(
             RecupererTitresAccesSelectionnablesPropositionQuery(

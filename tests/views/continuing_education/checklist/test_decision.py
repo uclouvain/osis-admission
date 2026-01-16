@@ -257,7 +257,6 @@ class ChecklistViewTestCase(TestCase):
 
         self.continuing_admission.checklist['current']['decision'] = {
             'libelle': '',
-            'enfants': [],
             'extra': {'en_cours': 'fac_approval'},
             'statut': ChoixStatutChecklist.GEST_EN_COURS.name,
         }
@@ -538,7 +537,6 @@ class ChecklistViewTestCase(TestCase):
     def test_post_validation_iufc(self):
         self.continuing_admission.checklist['current']['decision'] = {
             'libelle': '',
-            'enfants': [],
             'extra': {'en_cours': 'fac_approval'},
             'statut': ChoixStatutChecklist.GEST_EN_COURS.name,
         }
@@ -934,7 +932,6 @@ class ChecklistViewTestCase(TestCase):
 
         self.continuing_admission.checklist['current']['decision'] = {
             'libelle': '',
-            'enfants': [],
             'extra': {'en_cours': 'fac_approval'},
             'statut': ChoixStatutChecklist.GEST_EN_COURS.name,
         }
@@ -1202,7 +1199,6 @@ class ChecklistViewTestCase(TestCase):
     def test_post_validation_fac(self):
         self.continuing_admission.checklist['current']['decision'] = {
             'libelle': '',
-            'enfants': [],
             'extra': {'en_cours': 'fac_approval'},
             'statut': ChoixStatutChecklist.GEST_EN_COURS.name,
         }

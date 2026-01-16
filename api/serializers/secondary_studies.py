@@ -30,7 +30,7 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from admission.api.serializers.fields import AnswerToSpecificQuestionField
+from admission.api.serializers.fields import AnswerToSpecificQuestionField, ExperienceDefaultValidationStatusField
 from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import (
     ProfilCandidatTranslator,
 )
@@ -38,7 +38,10 @@ from base.api.serializers.academic_year import RelatedAcademicYearField
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.enums.got_diploma import CHOIX_DIPLOME_OBTENU, GotDiploma
 from base.models.organization import Organization
+from base.models.person import Person
 from osis_profile.models import BelgianHighSchoolDiploma, Exam, ForeignHighSchoolDiploma
+from osis_profile.models.education import HighSchoolDiploma
+from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
 from osis_profile.models.exam import EXAM_TYPE_PREMIER_CYCLE_LABEL_FR, ExamType
 from reference.api.serializers.country import RelatedCountryField
 from reference.api.serializers.language import RelatedLanguageField
@@ -108,8 +111,17 @@ class HighSchoolDiplomaAlternativeSerializer(serializers.ModelSerializer):
 
 
 class HighSchoolDiplomaSerializer(serializers.Serializer):
-    graduated_from_high_school = serializers.ChoiceField(required=False, allow_blank=True, choices=GotDiploma.choices())
-    graduated_from_high_school_year = RelatedAcademicYearField(required=False, allow_null=True)
+    graduated_from_high_school = serializers.ChoiceField(
+        source='highschooldiploma.got_diploma',
+        required=False,
+        allow_blank=True,
+        choices=GotDiploma.choices(),
+    )
+    graduated_from_high_school_year = RelatedAcademicYearField(
+        source='highschooldiploma.academic_graduation_year',
+        required=False,
+        allow_null=True,
+    )
     belgian_diploma = BelgianHighSchoolDiplomaSerializer(required=False, allow_null=True)
     foreign_diploma = ForeignHighSchoolDiplomaSerializer(required=False, allow_null=True)
     high_school_diploma_alternative = HighSchoolDiplomaAlternativeSerializer(required=False, allow_null=True)
@@ -134,6 +146,11 @@ class HighSchoolDiplomaSerializer(serializers.Serializer):
             person=instance,
             type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR,
         ).first()
+        if not hasattr(instance, 'highschooldiploma'):
+            instance.highschooldiploma = HighSchoolDiploma(
+                person=instance,
+                validation_status=ChoixStatutValidationExperience.EN_BROUILLON.name,
+            )
 
     def to_representation(self, instance):
         self.load_diploma(instance)
@@ -153,6 +170,10 @@ class HighSchoolDiplomaSerializer(serializers.Serializer):
 
     @staticmethod
     def update_high_school_diploma_alternative(instance, high_school_diploma_alternative_data):
+        # Harmonize the validation status
+        high_school_diploma_alternative_data['validation_status'] = instance.highschooldiploma.validation_status
+        high_school_diploma_alternative_data['authentication_status'] = instance.highschooldiploma.authentication_status
+
         Exam.objects.update_or_create(
             person=instance,
             type=ExamType.objects.get(label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR),
@@ -196,9 +217,10 @@ class HighSchoolDiplomaSerializer(serializers.Serializer):
 
         if not self.get_is_valuated(instance):
             # The base data can only be updated if the secondary studies are not valuated
-            instance.graduated_from_high_school = validated_data.get('graduated_from_high_school')
-            instance.graduated_from_high_school_year = validated_data.get('graduated_from_high_school_year')
-            instance.save()
+            base_diploma_data = validated_data.get('highschooldiploma', {})
+            instance.highschooldiploma.got_diploma = base_diploma_data.get('got_diploma') or ''
+            instance.highschooldiploma.academic_graduation_year = base_diploma_data.get('academic_graduation_year')
+            instance.highschooldiploma.save()
 
         # The diploma data can only be updated in a specific case for the admissions for a bachelor
         if not self.get_can_update_diploma(instance):
@@ -215,15 +237,15 @@ class HighSchoolDiplomaSerializer(serializers.Serializer):
         elif high_school_diploma_alternative_data:
             self.update_high_school_diploma_alternative(instance, high_school_diploma_alternative_data)
         else:
-            if instance.graduated_from_high_school not in CHOIX_DIPLOME_OBTENU:
+            if instance.highschooldiploma.got_diploma not in CHOIX_DIPLOME_OBTENU:
                 self.clean_belgian_diploma(instance)
                 self.clean_foreign_diploma(instance)
             else:
                 for diploma in [instance.belgian_diploma, instance.foreign_diploma]:
-                    if diploma and diploma.academic_graduation_year != instance.graduated_from_high_school_year:
-                        diploma.academic_graduation_year = instance.graduated_from_high_school_year
+                    if diploma and diploma.academic_graduation_year != instance.highschooldiploma.academic_graduation_year:
+                        diploma.academic_graduation_year = instance.highschooldiploma.academic_graduation_year
                         diploma.save(update_fields=['academic_graduation_year'])
 
-            if instance.graduated_from_high_school != GotDiploma.NO.name:
+            if instance.highschooldiploma.got_diploma != GotDiploma.NO.name:
                 self.clean_high_school_diploma_alternative(instance)
         return instance

@@ -49,6 +49,8 @@ from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import ITitresAcces
 from admission.ddd.admission.shared_kernel.domain.service.profil_soumis_candidat import ProfilSoumisCandidatTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_modifier_checklist_experience_parcours_anterieur import \
+    IValidationExperienceParcoursAnterieurService
 from admission.ddd.admission.shared_kernel.enums.question_specifique import Onglets
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
@@ -74,6 +76,7 @@ def soumettre_proposition(
     inscription_tardive_service: 'IInscriptionTardive',
     paiement_frais_dossier_service: 'IPaiementFraisDossier',
     historique: 'IHistorique',
+    validation_experience_parcours_anterieur_service: 'IValidationExperienceParcoursAnterieurService',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -149,12 +152,11 @@ def soumettre_proposition(
     est_inscription_tardive = inscription_tardive_service.est_inscription_tardive(pool)
 
     # THEN
-    financabilite = Financabilite(
+    financabilite = Financabilite(annee=formation.entity_id.annee).determiner(
         sigle_formation=formation.entity_id.sigle,
-        annee=formation.entity_id.annee,
         est_en_reorientation=proposition.est_reorientation_inscription_externe,
         matricule_fgs=proposition.matricule_candidat,
-    ).determiner()
+    )
 
     proposition.nettoyer_reponses_questions_specifiques(
         questions_specifiques=questions_specifiques,
@@ -181,10 +183,10 @@ def soumettre_proposition(
         formation=formation,
         profil_candidat_translator=profil_candidat_translator,
         questions_specifiques_translator=questions_specifiques_translator,
-        annee_courante=annee_courante,
     )
     proposition_repository.save(proposition)
 
+    validation_experience_parcours_anterieur_service.mettre_a_jour_experiences_en_brouillon(proposition=proposition)
     notification.confirmer_soumission(proposition)
     historique.historiser_soumission(proposition)
 

@@ -196,3 +196,11 @@ class RecupererInformationsDestinataireQuery(QueryRequest):
     annee: int
     sigle_formation: str
     est_premiere_annee: bool
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererInformationsValidationExperienceParcoursAnterieurQuery(interface.CommandRequest):
+    uuid_experience: str
+    type_experience: str
+    matricule_candidat: str
+

@@ -337,36 +337,6 @@ class CurriculumNonEducationalExperienceDuplicateViewTestCase(TestCase):
             ],
         )
 
-        # Check that the checklists have been well initialized
-        self.general_admission.refresh_from_db()
-        other_valuated_admission_without_checklist.refresh_from_db()
-        other_valuated_admission_with_checklist.refresh_from_db()
-        other_not_valuated_admission.refresh_from_db()
-
-        self.assertIn(
-            default_checklist,
-            self.general_admission.checklist.get('current', {}).get('parcours_anterieur', {}).get('enfants', []),
-        )
-
-        self.assertIn(
-            default_checklist,
-            other_valuated_admission_with_checklist.checklist.get('current', {})
-            .get('parcours_anterieur', {})
-            .get('enfants', []),
-        )
-
-        self.assertNotIn(
-            default_checklist,
-            other_not_valuated_admission.checklist.get('current', {}).get('parcours_anterieur', {}).get('enfants', []),
-        )
-
-        self.assertNotIn(
-            default_checklist,
-            other_valuated_admission_without_checklist.checklist.get('current', {})
-            .get('parcours_anterieur', {})
-            .get('enfants', []),
-        )
-
     def test_duplicate_experience_from_doctorate_curriculum_is_allowed_for_fac_users(self):
         self.client.force_login(self.doctorate_program_manager_user)
 

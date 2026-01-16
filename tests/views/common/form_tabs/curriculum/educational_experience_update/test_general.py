@@ -83,6 +83,7 @@ from osis_profile.models.enums.curriculum import (
     Result,
     TranscriptType,
 )
+from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
 from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection
 from osis_profile.models.epc_injection import (
     EPCInjectionStatus as CurriculumEPCInjectionStatus,
@@ -1922,6 +1923,8 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
         self.assertEqual(new_experience.transcript_type, TranscriptType.ONE_FOR_ALL_YEARS.name)
         self.assertEqual(new_experience.obtained_diploma, False)
         self.assertEqual(new_experience.transcript, [file_uuid])
+        self.assertEqual(new_experience.validation_status, ChoixStatutValidationExperience.A_TRAITER.name)
+        self.assertEqual(new_experience.authentication_status, EtatAuthentificationParcours.NON_CONCERNE.name)
 
         # Check the years
         years = new_experience.educationalexperienceyear_set.all()
@@ -1939,29 +1942,6 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
                 baseadmission_id=self.general_admission.uuid,
                 educationalexperience_id=new_experience.uuid,
             ).exists()
-        )
-
-        # Check that the checklist has been updated
-        self.general_admission.refresh_from_db()
-
-        last_experience_checklist = self.general_admission.checklist['current']['parcours_anterieur']['enfants'][-1]
-
-        self.assertEqual(
-            last_experience_checklist['extra']['identifiant'],
-            str(new_experience.uuid),
-        )
-
-        self.assertEqual(
-            last_experience_checklist,
-            {
-                'libelle': 'To be processed',
-                'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
-                'extra': {
-                    'identifiant': str(new_experience.uuid),
-                    'etat_authentification': EtatAuthentificationParcours.NON_CONCERNE.name,
-                },
-                'enfants': [],
-            },
         )
 
     @mock.patch('admission.views.common.form_tabs.curriculum.CurriculumEducationalExperienceFormView.delete_url')
@@ -2025,6 +2005,8 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
         self.assertEqual(new_experience.transcript_type, TranscriptType.ONE_FOR_ALL_YEARS.name)
         self.assertEqual(new_experience.obtained_diploma, False)
         self.assertEqual(new_experience.transcript, [file_uuid])
+        self.assertEqual(new_experience.validation_status, ChoixStatutValidationExperience.A_TRAITER.name)
+        self.assertEqual(new_experience.authentication_status, EtatAuthentificationParcours.NON_CONCERNE.name)
 
         # Check the years
         years = new_experience.educationalexperienceyear_set.all().order_by('academic_year__year')
@@ -2047,27 +2029,4 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
                 baseadmission_id=self.general_admission.uuid,
                 educationalexperience_id=new_experience.uuid,
             ).exists()
-        )
-
-        # Check that the checklist has been updated
-        self.general_admission.refresh_from_db()
-
-        last_experience_checklist = self.general_admission.checklist['current']['parcours_anterieur']['enfants'][-1]
-
-        self.assertEqual(
-            last_experience_checklist['extra']['identifiant'],
-            str(new_experience.uuid),
-        )
-
-        self.assertEqual(
-            last_experience_checklist,
-            {
-                'libelle': 'To be processed',
-                'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
-                'extra': {
-                    'identifiant': str(new_experience.uuid),
-                    'etat_authentification': EtatAuthentificationParcours.NON_CONCERNE.name,
-                },
-                'enfants': [],
-            },
         )

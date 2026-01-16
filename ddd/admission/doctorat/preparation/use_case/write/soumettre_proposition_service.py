@@ -40,6 +40,8 @@ from admission.ddd.admission.doctorat.preparation.domain.service.verifier_propos
 from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
     IGroupeDeSupervisionRepository,
 )
+from admission.ddd.admission.shared_kernel.domain.service.i_modifier_checklist_experience_parcours_anterieur import \
+    IValidationExperienceParcoursAnterieurService
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.doctorat.validation.domain.service.demande import DemandeService
 from admission.ddd.admission.doctorat.validation.repository.i_demande import IDemandeRepository
@@ -77,6 +79,7 @@ def soumettre_proposition(
     element_confirmation: 'IElementsConfirmation',
     maximum_propositions_service: 'IMaximumPropositionsAutorisees',
     email_destinataire_repository: 'IEmailDestinataireRepository',
+    validation_experience_parcours_anterieur_service: 'IValidationExperienceParcoursAnterieurService',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -142,12 +145,11 @@ def soumettre_proposition(
     )
 
     # THEN
-    financabilite = Financabilite(
+    financabilite = Financabilite(annee=formation.entity_id.annee).determiner(
         sigle_formation=formation.entity_id.sigle,
-        annee=formation.entity_id.annee,
         est_en_reorientation=False,
         matricule_fgs=proposition.matricule_candidat,
-    ).determiner()
+    )
 
     proposition.nettoyer_reponses_questions_specifiques(questions_specifiques)
 
@@ -167,11 +169,11 @@ def soumettre_proposition(
     Checklist.initialiser(
         proposition=proposition,
         profil_candidat_translator=profil_candidat_translator,
-        annee_courante=annee_courante,
     )
 
     proposition_repository.save(proposition)
     demande_repository.save(demande)
+    validation_experience_parcours_anterieur_service.mettre_a_jour_experiences_en_brouillon(proposition=proposition)
     historique.historiser_soumission(proposition)
     notification.notifier_soumission(proposition, email_destinataire_repository)
 

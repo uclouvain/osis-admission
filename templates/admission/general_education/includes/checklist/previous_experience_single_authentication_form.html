@@ -24,13 +24,14 @@
 * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% if current.statut == 'GEST_EN_COURS' and current.extra.authentification == '1' or current.extra.etat_authentification and current.extra.etat_authentification != 'NON_CONCERNE' %}
+{% if experience.authentification_en_cours or experience.statut_authentification != 'NON_CONCERNE' %}
+  {% url view.base_namespace|add:':single-past-experience-change-authentication' uuid=view.kwargs.uuid experience_type=experience.type_experience experience_uuid=experience.uuid as current_experience_authentication_url %}
   <form
-      id="authentication-form-{{ current.extra.identifiant }}"
+      id="authentication-form-{{ experience.uuid }}"
       method="post"
-      action="{% url view.base_namespace|add:':single-past-experience-change-authentication' uuid=view.kwargs.uuid %}?identifier={{ current.extra.identifiant }}"
-      hx-post="{% url view.base_namespace|add:':single-past-experience-change-authentication' uuid=view.kwargs.uuid %}?identifier={{ current.extra.identifiant }}"
-      hx-trigger='change from:input[name="{{ current.extra.identifiant }}-state"]'
+      action="{{ current_experience_authentication_url }}"
+      hx-post="{{ current_experience_authentication_url }}"
+      hx-trigger='change from:input[name="{{ experience.uuid }}-state"]'
       hx-swap="outerHTML"
       hx-target="this"
       class="authentication-form"
@@ -47,24 +48,23 @@
               type="button"
               class="btn btn-xs btn-default admission-collapse-button pull-right"
               data-toggle="collapse"
-              data-target="#experience-authentication-message-{{ current.extra.identifiant }}"
+              data-target="#experience-authentication-message-{{ experience.uuid }}"
               aria-expanded="false"
           >
             <i class="fa-solid fa-chevron-up"></i>
             <i class="fa-solid fa-chevron-down"></i>
           </button>
-          <p id="experience-authentication-message-{{ current.extra.identifiant }}" class="experience-authentication-message">{{ experience_authentication_history_entry|history_entry_message }}</p>
+          <p id="experience-authentication-message-{{ experience.uuid }}" class="experience-authentication-message">{{ experience_authentication_history_entry|history_entry_message }}</p>
         </div>
       {% endif %}
     {% endif %}
 
-    {% with current_authentication_form='parcours_anterieur__'|add:current.extra.identifiant|add:'__authentication' %}
-      {% htmx_comment_form comment_forms|get_item_or_none:current_authentication_form %}
-    {% endwith %}
+    {% concat 'parcours_anterieur__' experience.uuid|stringformat:'s' '__authentication' as current_authentication_form %}
+    {% htmx_comment_form comment_forms|get_item_or_none:current_authentication_form %}
 
     {% if request.htmx %}
       {# Update the checklist menu item authentication #}
-      {% concat 'parcours_anterieur__' current.extra.identifiant as item_name %}
+      {% concat 'parcours_anterieur__' experience.uuid|stringformat:'s' as item_name %}
       {# Update the checklist menu tab icons #}
       {% with item_icons=checklist_additional_icons|get_item_or_none:item_name %}
         {% if item_icons %}

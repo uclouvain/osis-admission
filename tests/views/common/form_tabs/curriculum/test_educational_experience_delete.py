@@ -347,12 +347,6 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
             educationalexperience_id=self.experience.uuid,
         )
 
-        self.general_admission.checklist['current']['parcours_anterieur']['enfants'] = [
-            Checklist.initialiser_checklist_experience(experience_uuid=self.experience.uuid).to_dict()
-        ]
-
-        self.general_admission.save()
-
         response = self.client.post(self.delete_url)
 
         self.assertFalse(EducationalExperience.objects.filter(uuid=self.experience.uuid).exists())
@@ -370,11 +364,6 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
         )
 
         self.general_admission.refresh_from_db()
-
-        self.assertEqual(
-            self.general_admission.checklist['current']['parcours_anterieur']['enfants'],
-            [],
-        )
 
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)

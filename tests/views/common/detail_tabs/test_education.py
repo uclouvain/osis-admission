@@ -155,9 +155,9 @@ class AdmissionEducationDetailViewForContinuingEducationTestCase(TestCase):
             person=self.continuing_admission.candidate,
         )
 
-        self.continuing_admission.candidate.graduated_from_high_school = GotDiploma.YES.name
-        self.continuing_admission.candidate.graduated_from_high_school_year = self.academic_years[2]
-        self.continuing_admission.candidate.save()
+        self.continuing_admission.candidate.highschooldiploma.got_diploma = GotDiploma.YES.name
+        self.continuing_admission.candidate.highschooldiploma.academic_graduation_year = self.academic_years[2]
+        self.continuing_admission.candidate.highschooldiploma.save()
 
         self.client.force_login(self.program_manager_user)
 
@@ -243,9 +243,9 @@ class AdmissionEducationDetailViewForContinuingEducationTestCase(TestCase):
             restrictive_equivalence_admission_test=[uuid.uuid4()],
         )
 
-        self.continuing_admission.candidate.graduated_from_high_school = GotDiploma.THIS_YEAR.name
-        self.continuing_admission.candidate.graduated_from_high_school_year = self.academic_years[2]
-        self.continuing_admission.candidate.save()
+        self.continuing_admission.candidate.highschooldiploma.got_diploma = GotDiploma.THIS_YEAR.name
+        self.continuing_admission.candidate.highschooldiploma.academic_graduation_year = self.academic_years[2]
+        self.continuing_admission.candidate.highschooldiploma.save()
 
         self.client.force_login(self.program_manager_user)
 

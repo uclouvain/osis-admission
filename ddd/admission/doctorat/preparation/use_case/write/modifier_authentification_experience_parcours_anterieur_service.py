@@ -31,6 +31,8 @@ from admission.ddd.admission.doctorat.preparation.domain.model.proposition impor
 from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
 from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import INotification
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.shared_kernel.domain.service.i_modifier_checklist_experience_parcours_anterieur import \
+    IValidationExperienceParcoursAnterieurService
 from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
 
 
@@ -40,13 +42,19 @@ def modifier_authentification_experience_parcours_anterieur(
     notification: 'INotification',
     historique: 'IHistorique',
     personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
+    validation_experience_parcours_anterieur_service: 'IValidationExperienceParcoursAnterieurService',
 ) -> 'PropositionIdentity':
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition = proposition_repository.get(entity_id=proposition_id)
 
     proposition.specifier_authentification_experience_parcours_anterieur(
-        uuid_experience=cmd.uuid_experience,
         auteur_modification=cmd.gestionnaire,
+    )
+
+    validation_experience_parcours_anterieur_service.modifier_authentification(
+        matricule_candidat=proposition.matricule_candidat,
+        uuid_experience=cmd.uuid_experience,
+        type_experience=cmd.type_experience,
         etat_authentification=cmd.etat_authentification,
     )
 

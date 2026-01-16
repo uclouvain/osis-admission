@@ -130,6 +130,8 @@ from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.m
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.maximum_propositions import (
     MaximumPropositionsAutoriseesInMemory,
 )
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.modifier_checklist_experience_parcours_anterieur import \
+    ValidationExperienceParcoursAnterieurInMemoryService
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.poste_diplomatique import (
     PosteDiplomatiqueInMemoryFactory,
 )
@@ -193,6 +195,7 @@ _taches_techniques = TachesTechniquesInMemory()
 _matricule_etudiant_service = MatriculeEtudiantInMemoryService()
 _compteur_noma = CompteurAnnuelPourNomaInMemoryRepository()
 _experience_parcours_interne_translator = ExperienceParcoursInterneInMemoryTranslator()
+_validation_experience_parcours_anterieur_service = ValidationExperienceParcoursAnterieurInMemoryService()
 
 
 COMMAND_HANDLERS = {
@@ -261,6 +264,7 @@ COMMAND_HANDLERS = {
         inscription_tardive_service=InscriptionTardiveInMemory(),
         paiement_frais_dossier_service=_paiement_frais_dossier,
         historique=_historique_global,
+        validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur_service,
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,
@@ -581,6 +585,7 @@ COMMAND_HANDLERS = {
         experience_parcours_interne_translator=_experience_parcours_interne_translator,
         profil_candidat_translator=_profil_candidat_translator,
         formation_translator=_formation_generale_translator,
+        academic_year_repository=_academic_year_repository,
     ),
     SpecifierConditionAccesPropositionCommand: lambda msg_bus, cmd: specifier_condition_acces_proposition(
         cmd,
@@ -636,6 +641,7 @@ COMMAND_HANDLERS = {
             proposition_repository=_proposition_repository,
             profil_candidat_translator=_profil_candidat_translator,
             formation_translator=_formation_generale_translator,
+            validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur_service,
         )
     ),
     SpecifierInformationsAcceptationPropositionParSicCommand: (
@@ -657,6 +663,7 @@ COMMAND_HANDLERS = {
             proposition_repository=_proposition_repository,
             notification=_notification,
             historique=_historique_formation_generale,
+            validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur_service,
         )
     ),
     SpecifierMotifsRefusPropositionParSicCommand: (

@@ -45,6 +45,8 @@ from admission.ddd.admission.formation_generale.domain.model.proposition import 
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     PropositionNonTrouveeException,
 )
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.modifier_checklist_experience_parcours_anterieur import \
+    ValidationExperienceParcoursAnterieurInMemoryService
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
 )
@@ -57,6 +59,7 @@ from admission.infrastructure.message_bus_in_memory import (
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.community import CommunityEnum
 from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
+from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
 from reference.models.enums.cycle import Cycle
 
 
@@ -66,34 +69,12 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
         self.addCleanup(self.proposition_repository.reset)
         self.message_bus = message_bus_in_memory_instance
         self.proposition_identity = PropositionIdentity(uuid='uuid-MASTER-SCI-CONFIRMED')
-        self.proposition_repository.initialiser_checklist_proposition(self.proposition_identity)
         self.candidat_translator = ProfilCandidatInMemoryTranslator()
         self.experiences_academiques = self.candidat_translator.experiences_academiques
         self.experience = next(exp for exp in self.experiences_academiques if exp.personne == '0000000001')
 
         self.experience_uuid = '9cbdf4db-2454-4cbf-9e48-55d2a9881ee3'
-
-    def test_should_verifier_etat_initial_checklist(self):
-        proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-MASTER-SCI-CONFIRMED'))
-        enfants_parcours_anterieur = proposition.checklist_actuelle.parcours_anterieur.enfants
-        uuids_experiences = [
-            # Experiences academiques
-            '9cbdf4db-2454-4cbf-9e48-55d2a9881ee3',
-            '9cbdf4db-2454-4cbf-9e48-55d2a9881ee4',
-            # Experiences non academiques
-            '1cbdf4db-2454-4cbf-9e48-55d2a9881ee1',
-            '1cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
-            # Etudes secondaires
-            OngletsDemande.ETUDES_SECONDAIRES.name,
-        ]
-
-        self.assertEqual(len(enfants_parcours_anterieur), len(uuids_experiences))
-
-        for index, experience in enumerate(enfants_parcours_anterieur):
-            self.assertEqual(experience.statut, ChoixStatutChecklist.INITIAL_CANDIDAT)
-            self.assertEqual(experience.libelle, 'To be processed')
-            self.assertEqual(experience.extra.get('etat_authentification'), 'NON_CONCERNE')
-            self.assertEqual(experience.extra.get('identifiant'), uuids_experiences[index])
+        self.validation_experience_parcours_anterieur_service = ValidationExperienceParcoursAnterieurInMemoryService()
 
     def test_should_modifier_vers_statut_checklist_sans_indication_authentification(self):
         proposition_id = self.message_bus.invoke(
@@ -101,27 +82,25 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
                 uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                 uuid_experience=self.experience_uuid,
                 type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
-                statut=ChoixStatutChecklist.SYST_REUSSITE.name,
-                statut_authentification=None,
+                statut=ChoixStatutValidationExperience.VALIDEE.name,
                 gestionnaire='0123456789',
             )
         )
 
         proposition = self.proposition_repository.get(proposition_id)
 
-        checklist_experience = proposition.checklist_actuelle.recuperer_enfant(
-            'parcours_anterieur',
-            self.experience_uuid,
+        informations_validation =self.validation_experience_parcours_anterieur_service.recuperer_information_validation(
+            matricule_candidat=proposition.matricule_candidat,
+            uuid_experience=self.experience_uuid,
+            type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
         )
+
         self.assertEqual(proposition.entity_id, proposition_id)
-        self.assertEqual(checklist_experience.statut, ChoixStatutChecklist.SYST_REUSSITE)
-        self.assertEqual(
-            checklist_experience.extra,
-            {
-                'identifiant': self.experience_uuid,
-                'etat_authentification': EtatAuthentificationParcours.NON_CONCERNE.name,
-            },
-        )
+        self.assertEqual(informations_validation.uuid, self.experience_uuid)
+        self.assertEqual(informations_validation.type_experience, TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name)
+        self.assertEqual(informations_validation.statut_validation, ChoixStatutValidationExperience.VALIDEE.name)
+        self.assertEqual(informations_validation.statut_authentification, EtatAuthentificationParcours.NON_CONCERNE.name)
+
 
     def test_should_modifier_vers_statut_checklist_d_authentification(self):
         proposition_id = self.message_bus.invoke(
@@ -129,28 +108,24 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
                 uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                 uuid_experience=self.experience_uuid,
                 type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
-                statut=ChoixStatutChecklist.GEST_BLOCAGE.name,
-                statut_authentification=True,
+                statut=ChoixStatutValidationExperience.AUTHENTIFICATION.name,
                 gestionnaire='0123456789',
             )
         )
 
         proposition = self.proposition_repository.get(proposition_id)
 
-        checklist_experience = proposition.checklist_actuelle.recuperer_enfant(
-            'parcours_anterieur',
-            self.experience_uuid,
+        informations_validation =self.validation_experience_parcours_anterieur_service.recuperer_information_validation(
+            matricule_candidat=proposition.matricule_candidat,
+            uuid_experience=self.experience_uuid,
+            type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
         )
+
         self.assertEqual(proposition.entity_id, proposition_id)
-        self.assertEqual(checklist_experience.statut, ChoixStatutChecklist.GEST_BLOCAGE)
-        self.assertEqual(
-            checklist_experience.extra,
-            {
-                'identifiant': self.experience_uuid,
-                'etat_authentification': EtatAuthentificationParcours.NON_CONCERNE.name,
-                'authentification': '1',
-            },
-        )
+        self.assertEqual(informations_validation.uuid, self.experience_uuid)
+        self.assertEqual(informations_validation.type_experience, TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name)
+        self.assertEqual(informations_validation.statut_validation, ChoixStatutValidationExperience.AUTHENTIFICATION.name)
+        self.assertEqual(informations_validation.statut_authentification, EtatAuthentificationParcours.NON_CONCERNE.name)
 
     def test_should_modifier_vers_statut_checklist_pas_d_authentification(self):
         proposition_id = self.message_bus.invoke(
@@ -158,28 +133,24 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
                 uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                 uuid_experience=self.experience_uuid,
                 type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
-                statut=ChoixStatutChecklist.GEST_BLOCAGE.name,
-                statut_authentification=False,
+                statut=ChoixStatutValidationExperience.A_COMPLETER.name,
                 gestionnaire='0123456789',
             )
         )
 
         proposition = self.proposition_repository.get(proposition_id)
 
-        checklist_experience = proposition.checklist_actuelle.recuperer_enfant(
-            'parcours_anterieur',
-            self.experience_uuid,
+        informations_validation =self.validation_experience_parcours_anterieur_service.recuperer_information_validation(
+            matricule_candidat=proposition.matricule_candidat,
+            uuid_experience=self.experience_uuid,
+            type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
         )
+
         self.assertEqual(proposition.entity_id, proposition_id)
-        self.assertEqual(checklist_experience.statut, ChoixStatutChecklist.GEST_BLOCAGE)
-        self.assertEqual(
-            checklist_experience.extra,
-            {
-                'identifiant': self.experience_uuid,
-                'etat_authentification': EtatAuthentificationParcours.NON_CONCERNE.name,
-                'authentification': '0',
-            },
-        )
+        self.assertEqual(informations_validation.uuid, self.experience_uuid)
+        self.assertEqual(informations_validation.type_experience, TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name)
+        self.assertEqual(informations_validation.statut_validation, ChoixStatutValidationExperience.AVIS_EXPERT.name)
+        self.assertEqual(informations_validation.statut_authentification, EtatAuthentificationParcours.NON_CONCERNE.name)
 
     def test_should_verifier_experience_academique_complete_pour_passage_a_valide(self):
         with mock.patch.multiple(
@@ -195,8 +166,7 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
                         uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                         uuid_experience=self.experience_uuid,
                         type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
-                        statut=ChoixStatutChecklist.GEST_REUSSITE.name,
-                        statut_authentification=False,
+                        statut=ChoixStatutValidationExperience.VALIDEE.name,
                         gestionnaire='0123456789',
                     )
                 )
@@ -219,8 +189,7 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
                     uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                     uuid_experience=self.experience_uuid,
                     type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
-                    statut=ChoixStatutChecklist.GEST_REUSSITE.name,
-                    statut_authentification=False,
+                    statut=ChoixStatutValidationExperience.VALIDEE.name,
                     gestionnaire='0123456789',
                 )
             )
@@ -242,8 +211,7 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
                         uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                         uuid_experience=self.experience_uuid,
                         type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
-                        statut=ChoixStatutChecklist.GEST_REUSSITE.name,
-                        statut_authentification=False,
+                        statut=ChoixStatutValidationExperience.VALIDEE.name,
                         gestionnaire='0123456789',
                     )
                 )
@@ -268,8 +236,7 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
                         uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                         uuid_experience=self.experience_uuid,
                         type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
-                        statut=ChoixStatutChecklist.GEST_REUSSITE.name,
-                        statut_authentification=False,
+                        statut=ChoixStatutValidationExperience.VALIDEE.name,
                         gestionnaire='0123456789',
                     )
                 )
@@ -291,8 +258,7 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
                     uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                     uuid_experience=self.experience_uuid,
                     type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
-                    statut=ChoixStatutChecklist.GEST_BLOCAGE.name,
-                    statut_authentification=False,
+                    statut=ChoixStatutValidationExperience.A_COMPLETER.name,
                     gestionnaire='0123456789',
                 )
             )
@@ -311,8 +277,7 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
                     uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                     uuid_experience=self.experience_uuid,
                     type_experience=TypeExperience.ACTIVITE_NON_ACADEMIQUE.name,
-                    statut=ChoixStatutChecklist.GEST_BLOCAGE.name,
-                    statut_authentification=False,
+                    statut=ChoixStatutValidationExperience.A_COMPLETER.name,
                     gestionnaire='0123456789',
                 )
             )
@@ -331,8 +296,7 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
                     uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                     uuid_experience=self.experience_uuid,
                     type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
-                    statut=ChoixStatutChecklist.GEST_BLOCAGE.name,
-                    statut_authentification=False,
+                    statut=ChoixStatutValidationExperience.A_COMPLETER.name,
                     gestionnaire='0123456789',
                 )
             )
@@ -353,8 +317,7 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
                     uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                     uuid_experience=self.experience_uuid,
                     type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
-                    statut=ChoixStatutChecklist.GEST_BLOCAGE.name,
-                    statut_authentification=False,
+                    statut=ChoixStatutValidationExperience.A_COMPLETER.name,
                     gestionnaire='0123456789',
                 )
             )
@@ -375,8 +338,7 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
                     uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                     uuid_experience=self.experience_uuid,
                     type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
-                    statut=ChoixStatutChecklist.GEST_BLOCAGE.name,
-                    statut_authentification=False,
+                    statut=ChoixStatutValidationExperience.A_COMPLETER.name,
                     gestionnaire='0123456789',
                 )
             )
@@ -390,37 +352,7 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
                     uuid_proposition='INCONNUE',
                     uuid_experience=self.experience_uuid,
                     type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
-                    statut=ChoixStatutChecklist.GEST_BLOCAGE.name,
-                    statut_authentification=False,
+                    statut=ChoixStatutValidationExperience.A_COMPLETER.name,
                     gestionnaire='0123456789',
                 )
             )
-
-    def test_should_creer_experience_si_non_trouvee(self):
-        proposition_id = self.message_bus.invoke(
-            ModifierStatutChecklistExperienceParcoursAnterieurCommand(
-                uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
-                uuid_experience='INCONNUE',
-                type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
-                statut=ChoixStatutChecklist.GEST_BLOCAGE.name,
-                statut_authentification=False,
-                gestionnaire='0123456789',
-            )
-        )
-
-        proposition = self.proposition_repository.get(proposition_id)
-
-        checklist_experience = proposition.checklist_actuelle.recuperer_enfant(
-            'parcours_anterieur',
-            'INCONNUE',
-        )
-        self.assertEqual(proposition.entity_id, proposition_id)
-        self.assertEqual(checklist_experience.statut, ChoixStatutChecklist.GEST_BLOCAGE)
-        self.assertEqual(
-            checklist_experience.extra,
-            {
-                'identifiant': 'INCONNUE',
-                'etat_authentification': EtatAuthentificationParcours.NON_CONCERNE.name,
-                'authentification': '0',
-            },
-        )

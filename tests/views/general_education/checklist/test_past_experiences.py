@@ -59,9 +59,11 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
 )
 from admission.forms.admission.checklist import PastExperiencesAdmissionAccessTitleForm
 from admission.models import GeneralEducationAdmission
+from admission.models.exam import AdmissionExam
 from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences, \
     AdmissionProfessionalValuatedExperiences
-from admission.tests.factories.curriculum import ProfessionalExperienceFactory
+from admission.tests.factories.curriculum import ProfessionalExperienceFactory, EducationalExperienceFactory, \
+    EducationalExperienceYearFactory
 from admission.tests.factories.general_education import (
     AdmissionPrerequisiteCoursesFactory,
     GeneralEducationAdmissionFactory,
@@ -104,7 +106,9 @@ from epc.tests.factories.inscription_programme_cycle import (
 )
 from osis_profile.models import BelgianHighSchoolDiploma, Exam, ForeignHighSchoolDiploma
 from osis_profile.models.enums.education import ForeignDiplomaTypes
+from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
 from osis_profile.models.exam import EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
+from osis_profile.tests.factories.exam import ExamFactory, ExamTypeFactory
 from reference.tests.factories.diploma_title import DiplomaTitleFactory
 
 
@@ -132,7 +136,7 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
         cls.candidate = CompletePersonFactory(language=settings.LANGUAGE_CODE_FR)
         cls.experiences = cls.candidate.educationalexperience_set.all()
         cls.professional_experiences = cls.candidate.professionalexperience_set.all()
-        cls.experiences.update(obtained_diploma=True)
+        cls.experiences.update(obtained_diploma=True, validation_status=ChoixStatutValidationExperience.A_TRAITER.name)
 
         cls.sic_manager_user = SicManagementRoleFactory(entity=cls.commission).person.user
         cls.fac_manager_user = ProgramManagerRoleFactory(education_group=cls.training.education_group).person.user
@@ -202,20 +206,6 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
 
         self.general_admission.checklist['current'][OngletsChecklist.parcours_anterieur.name] = {
             'statut': ChoixStatutChecklist.GEST_BLOCAGE.name,
-            'enfants': [
-                {
-                    'statut': ChoixStatutChecklist.GEST_BLOCAGE.name,
-                    'extra': {
-                        'identifiant': 'UNKNOWN',
-                    },
-                },
-                {
-                    'statut': ChoixStatutChecklist.GEST_BLOCAGE.name,
-                    'extra': {
-                        'identifiant': OngletsDemande.ETUDES_SECONDAIRES.name,
-                    },
-                },
-            ],
         }
 
         self.general_admission.save()
@@ -266,16 +256,9 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
             ChoixStatutChecklist.GEST_REUSSITE.name,
         )
 
-        # Add checklist data for the valuated experience
-        self.general_admission.checklist['current'][OngletsChecklist.parcours_anterieur.name]['enfants'].append(
-            {
-                'statut': ChoixStatutChecklist.GEST_BLOCAGE.name,
-                'extra': {
-                    'identifiant': self.experiences[0].uuid,
-                },
-            }
-        )
-        self.general_admission.save()
+        # Change the validation status of the valuated experience
+        self.experiences[0].validation_status = ChoixStatutValidationExperience.A_COMPLETER.name
+        self.experiences[0].save()
 
         response = self.client.post(success_url, **self.default_headers)
 
@@ -292,11 +275,9 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
             ChoixStatutChecklist.GEST_REUSSITE.name,
         )
 
-        # Change the status of the experience checklist
-        self.general_admission.checklist['current'][OngletsChecklist.parcours_anterieur.name]['enfants'][-1][
-            'statut'
-        ] = ChoixStatutChecklist.GEST_REUSSITE.name
-        self.general_admission.save()
+        # Change the validation status of the valuated experience
+        self.experiences[0].validation_status = ChoixStatutValidationExperience.VALIDEE.name
+        self.experiences[0].save()
 
         response = self.client.post(success_url, **self.default_headers)
 
@@ -313,11 +294,9 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
             ChoixStatutChecklist.GEST_REUSSITE.name,
         )
 
-        # Change the checklist data of the secondary studies
-        self.general_admission.checklist['current'][OngletsChecklist.parcours_anterieur.name]['enfants'][1][
-            'statut'
-        ] = ChoixStatutChecklist.GEST_REUSSITE.name
-        self.general_admission.save()
+        # Change the validation status of the secondary studies
+        self.general_admission.candidate.highschooldiploma.validation_status = ChoixStatutValidationExperience.VALIDEE.name
+        self.general_admission.candidate.highschooldiploma.save()
 
         response = self.client.post(success_url, **self.default_headers)
 
@@ -360,17 +339,8 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
         self.general_admission.admission_requirement_year = self.academic_years[1]
 
         # Set the checklists of the experiences
-        self.general_admission.checklist['current'][OngletsChecklist.parcours_anterieur.name] = {
-            'statut': ChoixStatutChecklist.GEST_BLOCAGE.name,
-            'enfants': [
-                {
-                    'statut': ChoixStatutChecklist.GEST_REUSSITE.name,
-                    'extra': {
-                        'identifiant': OngletsDemande.ETUDES_SECONDAIRES.name,
-                    },
-                },
-            ],
-        }
+        self.general_admission.candidate.highschooldiploma.validation_status = ChoixStatutValidationExperience.VALIDEE.name
+        self.general_admission.candidate.highschooldiploma.save()
 
         # Set the access title
         self.general_admission.are_secondary_studies_access_title = True
@@ -425,25 +395,11 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
             status=ChoixStatutChecklist.GEST_REUSSITE.name,
         )
 
-        self.general_admission.checklist['current'][OngletsChecklist.parcours_anterieur.name] = {
-            'statut': ChoixStatutChecklist.GEST_BLOCAGE.name,
-            'enfants': [
-                {
-                    'statut': ChoixStatutChecklist.GEST_BLOCAGE.name,
-                    'extra': {
-                        'identifiant': 'UNKNOWN',
-                    },
-                },
-                {
-                    'statut': ChoixStatutChecklist.GEST_BLOCAGE.name,
-                    'extra': {
-                        'identifiant': OngletsDemande.ETUDES_SECONDAIRES.name,
-                    },
-                },
-            ],
-        }
-        self.general_admission.training = self.certificate_training
+        # Set the checklists of the experiences
+        self.general_admission.candidate.highschooldiploma.validation_status = ChoixStatutValidationExperience.A_COMPLETER.name
+        self.general_admission.candidate.highschooldiploma.save()
 
+        self.general_admission.training = self.certificate_training
         self.general_admission.save()
 
         # The success status requires at least one access title and an admission requirement
@@ -491,15 +447,8 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
         )
 
         # Add checklist data for the valuated experience
-        self.general_admission.checklist['current'][OngletsChecklist.parcours_anterieur.name]['enfants'].append(
-            {
-                'statut': ChoixStatutChecklist.GEST_BLOCAGE.name,
-                'extra': {
-                    'identifiant': self.experiences[0].uuid,
-                },
-            }
-        )
-        self.general_admission.save()
+        self.experiences[0].validation_status = ChoixStatutValidationExperience.A_COMPLETER.name
+        self.experiences[0].save()
 
         response = self.client.post(success_url, **self.default_headers)
 
@@ -517,10 +466,8 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
         )
 
         # Change the status of the experience checklist
-        self.general_admission.checklist['current'][OngletsChecklist.parcours_anterieur.name]['enfants'][-1][
-            'statut'
-        ] = ChoixStatutChecklist.GEST_REUSSITE.name
-        self.general_admission.save()
+        self.experiences[0].validation_status = ChoixStatutValidationExperience.VALIDEE.name
+        self.experiences[0].save()
 
         response = self.client.post(success_url, **self.default_headers)
 
@@ -547,6 +494,184 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
                 'Changes for the access title are not available when the state of the Previous experience '
                 'is "Sufficient".'
             ),
+        )
+
+    def test_change_the_checklist_status_to_success_with_educational_experiences(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        success_url = resolve_url(
+            self.url_name,
+            uuid=self.general_admission.uuid,
+            status=ChoixStatutChecklist.GEST_REUSSITE.name,
+        )
+
+        # All critera are met except the one related to the valuated educational experiences
+        self.general_admission.training = self.certificate_training
+        self.general_admission.admission_requirement = ConditionAcces.BAC.name
+        self.general_admission.admission_requirement_year = self.academic_years[1]
+        self.general_admission.save()
+
+        other_experience = EducationalExperienceFactory(
+            person=self.general_admission.candidate,
+            validation_status=ChoixStatutValidationExperience.A_COMPLETER.name,
+        )
+
+        other_experience_year = EducationalExperienceYearFactory(educational_experience=other_experience)
+
+        valuated_experience = AdmissionEducationalValuatedExperiences.objects.create(
+            baseadmission=self.general_admission,
+            educationalexperience=other_experience,
+            is_access_title=True,
+        )
+
+        response = self.client.post(success_url, **self.default_headers)
+
+        # Check response
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.general_admission.refresh_from_db()
+        self.assertNotEqual(
+            self.general_admission.checklist['current']['parcours_anterieur']['statut'],
+            ChoixStatutChecklist.GEST_REUSSITE.name,
+        )
+
+        # Update the status of the valuated experience
+        other_experience.validation_status = ChoixStatutValidationExperience.VALIDEE.name
+        other_experience.save()
+
+        response = self.client.post(success_url, **self.default_headers)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.general_admission.refresh_from_db()
+        self.assertEqual(
+            self.general_admission.checklist['current']['parcours_anterieur']['statut'],
+            ChoixStatutChecklist.GEST_REUSSITE.name,
+        )
+
+    def test_change_the_checklist_status_to_success_with_non_educational_experiences(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        success_url = resolve_url(
+            self.url_name,
+            uuid=self.general_admission.uuid,
+            status=ChoixStatutChecklist.GEST_REUSSITE.name,
+        )
+
+        # All critera are met except the one related to the valuated educational experiences
+        self.general_admission.training = self.certificate_training
+        self.general_admission.admission_requirement = ConditionAcces.BAC.name
+        self.general_admission.admission_requirement_year = self.academic_years[1]
+        self.general_admission.save()
+
+        other_experience = ProfessionalExperienceFactory(
+            person=self.general_admission.candidate,
+            validation_status=ChoixStatutValidationExperience.A_COMPLETER.name,
+        )
+
+        AdmissionProfessionalValuatedExperiences.objects.create(
+            baseadmission=self.general_admission,
+            professionalexperience=other_experience,
+            is_access_title=True,
+        )
+
+        response = self.client.post(success_url, **self.default_headers)
+
+        # Check response
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.general_admission.refresh_from_db()
+        self.assertNotEqual(
+            self.general_admission.checklist['current']['parcours_anterieur']['statut'],
+            ChoixStatutChecklist.GEST_REUSSITE.name,
+        )
+
+        # Update the status of the valuated experience
+        other_experience.validation_status = ChoixStatutValidationExperience.VALIDEE.name
+        other_experience.save()
+
+        response = self.client.post(success_url, **self.default_headers)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.general_admission.refresh_from_db()
+        self.assertEqual(
+            self.general_admission.checklist['current']['parcours_anterieur']['statut'],
+            ChoixStatutChecklist.GEST_REUSSITE.name,
+        )
+
+    def test_change_the_checklist_status_to_success_with_a_required_exam(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        # The exam is required but there is no exam related to the admission
+        exam_type = ExamTypeFactory(
+            education_group_years=[self.general_admission.training],
+        )
+
+        success_url = resolve_url(
+            self.url_name,
+            uuid=self.general_admission.uuid,
+            status=ChoixStatutChecklist.GEST_REUSSITE.name,
+        )
+
+        # All critera are met except the one related to the exam
+        self.general_admission.candidate.highschooldiploma.validation_status = ChoixStatutValidationExperience.VALIDEE.name
+        self.general_admission.candidate.highschooldiploma.save()
+
+        self.general_admission.are_secondary_studies_access_title = True
+        self.general_admission.admission_requirement = ConditionAcces.BAC.name
+        self.general_admission.admission_requirement_year = self.academic_years[1]
+        self.general_admission.save()
+
+        response = self.client.post(success_url, **self.default_headers)
+
+        # Check response
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        messages = [m.message for m in response.context['messages']]
+        self.assertIn(self.error_message_if_missing_data, messages)
+        self.assertNotIn(self.success_message, messages)
+
+        # Check admission
+        self.general_admission.refresh_from_db()
+        self.assertNotEqual(
+            self.general_admission.checklist['current']['parcours_anterieur']['statut'],
+            ChoixStatutChecklist.GEST_REUSSITE.name,
+        )
+
+        # Add an exam but with invalid status
+        exam = ExamFactory(
+            person=self.general_admission.candidate,
+            type=exam_type,
+            year=self.academic_years[1],
+        )
+
+        admission_exam = AdmissionExam.objects.create(exam=exam, admission=self.general_admission)
+
+        response = self.client.post(success_url, **self.default_headers)
+
+        # Check response
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        messages = [m.message for m in response.context['messages']]
+        self.assertIn(self.error_message_if_missing_data, messages)
+        self.assertNotIn(self.success_message, messages)
+
+        # Check admission
+        self.general_admission.refresh_from_db()
+        self.assertNotEqual(
+            self.general_admission.checklist['current']['parcours_anterieur']['statut'],
+            ChoixStatutChecklist.GEST_REUSSITE.name,
+        )
+
+        # Change the status of the related exam
+        exam.validation_status = ChoixStatutValidationExperience.A_COMPLETER_APRES_INSCRIPTION.name
+        exam.save()
+
+        response = self.client.post(success_url, **self.default_headers)
+
+        # Check response
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check admission
+        self.general_admission.refresh_from_db()
+        self.assertEqual(
+            self.general_admission.checklist['current']['parcours_anterieur']['statut'],
+            ChoixStatutChecklist.GEST_REUSSITE.name,
         )
 
 
@@ -1756,9 +1881,9 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
         self.general_admission.are_secondary_studies_access_title = False
         self.general_admission.save()
 
-        self.candidate.graduated_from_high_school = GotDiploma.NO.name
-        self.candidate.graduated_from_high_school_year = None
-        self.candidate.save()
+        self.candidate.highschooldiploma.got_diploma = GotDiploma.NO.name
+        self.candidate.highschooldiploma.academic_graduation_year = None
+        self.candidate.highschooldiploma.save()
 
         high_school_diploma_alternative = HighSchoolDiplomaAlternativeFactory(
             person=self.candidate,
@@ -1785,9 +1910,9 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
         self.general_admission.are_secondary_studies_access_title = False
         self.general_admission.save()
 
-        self.candidate.graduated_from_high_school = GotDiploma.YES.name
-        self.candidate.graduated_from_high_school_year = self.general_admission.training.academic_year
-        self.candidate.save()
+        self.candidate.highschooldiploma.got_diploma = GotDiploma.YES.name
+        self.candidate.highschooldiploma.academic_graduation_year = self.general_admission.training.academic_year
+        self.candidate.highschooldiploma.save()
 
         response = self.client.post(
             f'{self.url}?experience_uuid={OngletsDemande.ETUDES_SECONDAIRES.name}'

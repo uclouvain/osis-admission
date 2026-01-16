@@ -148,7 +148,7 @@ class ChangeStatusView(LoadDossierViewMixin, APIView):
 
 
 class SaveCommentView(AdmissionFormMixin, FormView):
-    urlpatterns = {'save-comment': 'save-comment/<uuid:object_uuid>/<str:tab>'}
+    urlpatterns = {'save-comment': 'save-comment/<str:object_uuid>/<str:tab>'}
     form_class = CommentForm
     template_name = 'admission/forms/default_form.html'
 

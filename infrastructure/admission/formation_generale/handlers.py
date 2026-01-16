@@ -115,6 +115,8 @@ from admission.infrastructure.admission.shared_kernel.domain.service.matricule_e
 from admission.infrastructure.admission.shared_kernel.domain.service.maximum_propositions import (
     MaximumPropositionsAutorisees,
 )
+from admission.infrastructure.admission.shared_kernel.domain.service.modifier_checklist_experience_parcours_anterieur import \
+    ValidationExperienceParcoursAnterieurService
 from admission.infrastructure.admission.shared_kernel.domain.service.poste_diplomatique import (
     PosteDiplomatiqueTranslator,
 )
@@ -532,6 +534,7 @@ COMMAND_HANDLERS = {
         experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
         profil_candidat_translator=ProfilCandidatTranslator(),
         formation_translator=FormationGeneraleTranslator(),
+        academic_year_repository=AcademicYearRepository(),
     ),
     SpecifierConditionAccesPropositionCommand: lambda msg_bus, cmd: specifier_condition_acces_proposition(
         cmd,
@@ -587,6 +590,7 @@ COMMAND_HANDLERS = {
             proposition_repository=PropositionRepository(),
             profil_candidat_translator=ProfilCandidatTranslator(),
             formation_translator=FormationGeneraleTranslator(),
+            validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
         )
     ),
     SpecifierInformationsAcceptationPropositionParSicCommand: (
@@ -608,6 +612,7 @@ COMMAND_HANDLERS = {
             proposition_repository=PropositionRepository(),
             notification=Notification(),
             historique=HistoriqueFormationGenerale(),
+            validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
         )
     ),
     SpecifierMotifsRefusPropositionParSicCommand: (

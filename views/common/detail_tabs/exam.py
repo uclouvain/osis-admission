@@ -63,6 +63,8 @@ class ExamDetailView(LoadDossierViewMixin, TemplateView):
                 titre=titre,
                 attestation=exam.certificate,
                 annee=exam.year.year if exam.year else None,
+                statut_validation=exam.validation_status,
+                statut_authentification=exam.authentication_status,
             )
         except Exam.DoesNotExist:
             context_data['examen'] = None

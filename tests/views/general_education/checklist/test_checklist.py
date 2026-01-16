@@ -151,7 +151,9 @@ class ChecklistViewTestCase(TestCase):
         educational_experience_uuid_str = str(educational_experience.uuid)
         non_educational_experience_uuid_str = str(non_educational_experience.uuid)
 
-        secondary_studies_child_identifier = f'parcours_anterieur__{OngletsDemande.ETUDES_SECONDAIRES.name}'
+        high_school_diploma_uuid_str = str(self.general_admission.candidate.highschooldiploma.uuid)
+
+        secondary_studies_child_identifier = f'parcours_anterieur__{high_school_diploma_uuid_str}'
         educational_experience_child_identifier = f'parcours_anterieur__{educational_experience_uuid_str}'
         non_educational_experience_child_identifier = f'parcours_anterieur__{non_educational_experience_uuid_str}'
 
@@ -162,17 +164,12 @@ class ChecklistViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-        past_experiences = [
-            experience['extra']['identifiant']
-            for experience in response.context['original_admission'].checklist['current']['parcours_anterieur'][
-                'enfants'
-            ]
-        ]
+        past_experiences = response.context['experiences_by_uuid']
 
         documents = response.context['documents']
 
         # Experiences
-        self.assertIn(OngletsDemande.ETUDES_SECONDAIRES.name, past_experiences)
+        self.assertIn(high_school_diploma_uuid_str, past_experiences)
         self.assertNotIn(educational_experience_uuid_str, past_experiences)
         self.assertNotIn(non_educational_experience_uuid_str, past_experiences)
         self.assertEqual(response.context['last_valuated_admission_by_experience_uuid'], {})
@@ -202,17 +199,12 @@ class ChecklistViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-        past_experiences = [
-            experience['extra']['identifiant']
-            for experience in response.context['original_admission'].checklist['current']['parcours_anterieur'][
-                'enfants'
-            ]
-        ]
+        past_experiences = response.context['experiences_by_uuid']
 
         documents = response.context['documents']
 
         # Experiences
-        self.assertIn(OngletsDemande.ETUDES_SECONDAIRES.name, past_experiences)
+        self.assertIn(high_school_diploma_uuid_str, past_experiences)
         self.assertIn(educational_experience_uuid_str, past_experiences)
         self.assertIn(non_educational_experience_uuid_str, past_experiences)
 
@@ -262,17 +254,12 @@ class ChecklistViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-        past_experiences = [
-            experience['extra']['identifiant']
-            for experience in response.context['original_admission'].checklist['current']['parcours_anterieur'][
-                'enfants'
-            ]
-        ]
+        past_experiences = response.context['experiences_by_uuid']
 
         documents = response.context['documents']
 
         # Experiences
-        self.assertIn(OngletsDemande.ETUDES_SECONDAIRES.name, past_experiences)
+        self.assertIn(high_school_diploma_uuid_str, past_experiences)
         self.assertIn(educational_experience_uuid_str, past_experiences)
         self.assertIn(non_educational_experience_uuid_str, past_experiences)
         self.assertEqual(response.context['last_valuated_admission_by_experience_uuid'], {})

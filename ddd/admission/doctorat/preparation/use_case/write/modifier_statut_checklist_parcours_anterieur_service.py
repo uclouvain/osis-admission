@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
@@ -36,12 +37,15 @@ from admission.ddd.admission.doctorat.preparation.domain.model.proposition impor
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
     IPropositionRepository,
 )
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.shared_kernel.repository.i_titre_acces_selectionnable import (
     ITitreAccesSelectionnableRepository,
 )
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
+from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
+from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
     IExperienceParcoursInterneTranslator,
 )
@@ -53,7 +57,16 @@ def modifier_statut_checklist_parcours_anterieur(
     titre_acces_selectionnable_repository: 'ITitreAccesSelectionnableRepository',
     experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
     profil_candidat_translator: 'IProfilCandidatTranslator',
+    academic_year_repository: 'IAcademicYearRepository',
 ) -> 'PropositionIdentity':
+    annee_courante = (
+        GetCurrentAcademicYear()
+        .get_starting_academic_year(
+            datetime.date.today(),
+            academic_year_repository,
+        )
+        .year
+    )
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition = proposition_repository.get(entity_id=proposition_id)
 
@@ -63,15 +76,19 @@ def modifier_statut_checklist_parcours_anterieur(
         seulement_selectionnes=True,
     )
 
-    uuids_experiences_valorisees = profil_candidat_translator.get_uuids_experiences_curriculum_valorisees_par_admission(
-        uuid_proposition=proposition_id.uuid,
+    curriculum = profil_candidat_translator.get_curriculum(
+        matricule=proposition.matricule_candidat,
+        experiences_cv_recuperees=ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION,
+        uuid_proposition=proposition.entity_id.uuid,
+        annee_courante=annee_courante,
     )
 
     proposition.specifier_statut_checklist_parcours_anterieur(
         statut_checklist_cible=cmd.statut,
         titres_acces_selectionnes=titres_acces_selectionnes,
         auteur_modification=cmd.gestionnaire,
-        uuids_experiences_valorisees=uuids_experiences_valorisees,
+        experiences_academiques=curriculum.experiences_academiques,
+        experiences_non_academiques=curriculum.experiences_non_academiques,
     )
 
     proposition_repository.save(proposition)

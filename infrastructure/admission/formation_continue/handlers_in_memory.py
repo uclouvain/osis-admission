@@ -79,6 +79,8 @@ from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.h
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.maximum_propositions import (
     MaximumPropositionsAutoriseesInMemory,
 )
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.modifier_checklist_experience_parcours_anterieur import \
+    ValidationExperienceParcoursAnterieurInMemoryService
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
 )
@@ -122,6 +124,7 @@ _emplacement_document_repository = emplacement_document_in_memory_repository
 _raccrocher_experiences_curriculum = RaccrocherExperiencesCurriculumInMemory()
 _pdf_generation = PDFGenerationInMemory()
 _email_destinataire_repository = EmailDestinataireInMemoryRepository()
+_validation_experience_parcours_anterieur_service = ValidationExperienceParcoursAnterieurInMemoryService()
 
 
 COMMAND_HANDLERS = {
@@ -184,6 +187,7 @@ COMMAND_HANDLERS = {
         historique=_historique_global,
         raccrocher_experiences_curriculum=_raccrocher_experiences_curriculum,
         email_destinataire_repository=_email_destinataire_repository,
+        validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur_service,
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,

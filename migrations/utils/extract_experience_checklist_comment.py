@@ -23,25 +23,46 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from django.contrib.postgres.fields import ArrayField
 from django.db import transaction
-from django.db.models import Exists, OuterRef
+from django.db.models import Exists, OuterRef, F, Q, Func, Subquery, Value
+from django.db.models.fields import UUIDField, CharField
+from django.db.models.functions import Length, Cast
 from django.utils.translation import gettext
 
 
+class ArrayReplace(Func):
+    function = "array_replace"
+    output_field = ArrayField(base_field=CharField(max_length=50))
+
 @transaction.atomic
-def extract_personal_data_checklist_comment(comment_model, base_admission_model):
-    tags = ['donnees_personnelles']
+def extract_experience_checklist_comment(comment_model, base_admission_model):
+    experience_condition = Q(
+        tags__0='parcours_anterieur',
+        tags_1_len=36,
+    )
+    high_school_diploma_condition = Q(
+        tags__0='parcours_anterieur',
+        tags__1='ETUDES_SECONDAIRES',
+    )
 
-    # Update the object uuid to specify the person uuid instead of the admission uuid
-    matching_admission = base_admission_model.objects.filter(uuid=OuterRef('object_uuid'))
+    # Update the object uuid to specify the experience uuid instead of the admission uuid
+    comment_model.objects.annotate(
+        tags_1_len=Length('tags__1'),
+    ).filter(experience_condition).update(object_uuid=Cast(F('tags__1'), output_field=UUIDField()))
 
-    comment_model.objects.filter(tags=tags).filter(Exists(matching_admission)).update(
-        object_uuid=matching_admission.values('candidate__uuid')[:1]
+    # Update the object uuid to specify the secondary studies uuid instead of the admission uuid
+    matching_admission = base_admission_model.objects.filter(uuid=OuterRef('object_uuid'), candidate__highschooldiploma__isnull=False)
+    comment_model.objects.filter(high_school_diploma_condition).annotate(
+        high_school_diploma_uuid=Subquery(matching_admission.values('candidate__highschooldiploma__uuid')[:1]),
+    ).filter(high_school_diploma_uuid__isnull=False).update(
+        object_uuid=F('high_school_diploma_uuid'),
+        tags=ArrayReplace('tags', Value('ETUDES_SECONDAIRES'), Cast(F('high_school_diploma_uuid'), output_field=CharField())),
     )
 
     # Now we can have several comments by object uuid by tags but we want only unique comments so we merge them
     duplicate_comments = (
-        comment_model.objects.filter(tags=tags)
+        comment_model.objects.annotate(tags_1_len=Length('tags__1')).filter(experience_condition | high_school_diploma_condition)
         .filter(
             Exists(
                 comment_model.objects.filter(
@@ -59,8 +80,8 @@ def extract_personal_data_checklist_comment(comment_model, base_admission_model)
     for comment in duplicate_comments:
         comment_author = f'{comment.author.first_name} {comment.author.last_name}' if comment.author else unknown_author
         comment_content = (
-            f'{comment_author} ({comment.modified_at.strftime("%H:%M")} - '
-            f'{comment.modified_at.strftime("%d/%m/%Y")}) : {comment.content}\n'
+            f'{comment_author} ({comment.modified_at:"%H:%M")} - '
+            f'{comment.modified_at:"%d/%m/%Y"}) : {comment.content}\n'
         )
 
         if comment.object_uuid in comments_to_create_by_object_uuid:

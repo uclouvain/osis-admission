@@ -53,6 +53,7 @@ from admission.infrastructure.admission.doctorat.preparation.repository.in_memor
 from admission.infrastructure.message_bus_in_memory import (
     message_bus_in_memory_instance,
 )
+from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
     PersonneConnueUclInMemoryTranslator,
 )
@@ -76,6 +77,7 @@ class TestModifierAuthentificationExperienceParcoursAnterieur(SimpleTestCase):
             ModifierAuthentificationExperienceParcoursAnterieurCommand(
                 uuid_proposition='uuid-SC3DP-confirmee',
                 uuid_experience=self.experience_uuid,
+                type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
                 etat_authentification=EtatAuthentificationParcours.VRAI.name,
                 gestionnaire='0123456789',
             )
@@ -103,6 +105,7 @@ class TestModifierAuthentificationExperienceParcoursAnterieur(SimpleTestCase):
                 ModifierAuthentificationExperienceParcoursAnterieurCommand(
                     uuid_proposition='INCONNUE',
                     uuid_experience=self.experience_uuid,
+                    type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
                     etat_authentification=EtatAuthentificationParcours.VRAI.name,
                     gestionnaire='0123456789',
                 )
@@ -114,6 +117,7 @@ class TestModifierAuthentificationExperienceParcoursAnterieur(SimpleTestCase):
                 ModifierAuthentificationExperienceParcoursAnterieurCommand(
                     uuid_proposition='uuid-SC3DP-confirmee',
                     uuid_experience='INCONNUE',
+                    type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
                     etat_authentification=EtatAuthentificationParcours.VRAI.name,
                     gestionnaire='0123456789',
                 )

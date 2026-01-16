@@ -51,7 +51,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.models import GeneralEducationAdmission
 from admission.tests.factories.curriculum import (
     EducationalExperienceFactory,
-    EducationalExperienceYearFactory,
+    EducationalExperienceYearFactory, ProfessionalExperienceFactory,
 )
 from admission.tests.factories.general_education import (
     GeneralEducationAdmissionFactory,
@@ -69,6 +69,8 @@ from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.hops import HopsFactory
 from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
 from osis_profile.models.enums.curriculum import EvaluationSystem, Result
+from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
+from osis_profile.tests.factories.exam import ExamFactory
 
 
 @freezegun.freeze_time('2023-01-01')
@@ -89,9 +91,6 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
             ares_graca=1,
         )
 
-        cls.candidate = CompletePersonFactory(language=settings.LANGUAGE_CODE_FR)
-        cls.experiences = cls.candidate.educationalexperience_set.all()
-
         cls.sic_manager_user = SicManagementRoleFactory(entity=cls.commission).person.user
         cls.fac_manager_user = ProgramManagerRoleFactory(education_group=cls.training.education_group).person.user
         cls.default_headers = {'HTTP_HX-Request': 'true'}
@@ -100,84 +99,65 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
     def setUp(self) -> None:
         self.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             training=self.training,
-            candidate=self.candidate,
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
-        )
-
-        self.general_admission.checklist['current']['parcours_anterieur']['enfants'] = [
-            {
-                'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
-                'libelle': 'To be processed',
-                'extra': {
-                    'identifiant': self.experiences[0].uuid,
-                },
-            }
-        ]
-
-        self.general_admission.save(update_fields=['checklist'])
-
-        self.url = (
-            resolve_url(
-                self.url_name,
-                uuid=self.general_admission.uuid,
-            )
-            + '?identifier='
-            + str(self.experiences[0].uuid)
         )
 
     def test_change_the_checklist_status_is_forbidden_with_fac_user(self):
         self.client.force_login(user=self.fac_manager_user)
 
-        response = self.client.post(self.url, **self.default_headers)
+        response = self.client.post(
+            resolve_url(
+                self.url_name,
+                uuid=self.general_admission.uuid,
+                experience_type=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
+                experience_uuid=uuid.uuid4(),
+            ),
+            **self.default_headers,
+        )
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_change_unknown_experience(self):
         self.client.force_login(user=self.sic_manager_user)
 
-        unknown_uuid = str(uuid.uuid4())
+        unknown_uuid = uuid.uuid4()
 
         response = self.client.post(
             resolve_url(
                 self.url_name,
                 uuid=self.general_admission.uuid,
-            )
-            + '?identifier='
-            + str(unknown_uuid),
+                experience_type=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
+                experience_uuid=unknown_uuid,
+            ),
             **self.default_headers,
             data={
-                'status': ChoixStatutChecklist.GEST_BLOCAGE.name,
+                'status': ChoixStatutValidationExperience.A_COMPLETER.name,
             },
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        self.assertNotIn(gettext('Experience not found.'), [m.message for m in response.context['messages']])
+        self.assertIn(gettext('Experience not found.'), [m.message for m in response.context['messages']])
 
         self.general_admission.refresh_from_db()
 
-        new_experience_data = next(
-            (
-                experience
-                for experience in self.general_admission.checklist['current']['parcours_anterieur']['enfants']
-                if experience['extra']['identifiant'] == unknown_uuid
-            ),
-            None,
-        )
-
-        self.assertIsNotNone(new_experience_data)
-
-        self.assertEqual(new_experience_data['statut'], ChoixStatutChecklist.GEST_BLOCAGE.name)
-        self.assertEqual(new_experience_data['extra']['identifiant'], unknown_uuid)
-
-        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
+        self.assertNotEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertNotEqual(self.general_admission.modified_at, datetime.datetime.now())
 
     def test_pass_invalid_data(self):
         self.client.force_login(user=self.sic_manager_user)
 
+        experience = EducationalExperienceYearFactory()
+
+        url = resolve_url(
+            self.url_name,
+            uuid=self.general_admission.uuid,
+            experience_type=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
+            experience_uuid=experience.uuid,
+        )
+
         # No data
-        response = self.client.post(self.url, **self.default_headers, data={})
+        response = self.client.post(url, **self.default_headers, data={})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         form = response.context['form']
@@ -186,7 +166,7 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
         self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('status', []))
 
         # Invalid status
-        response = self.client.post(self.url, **self.default_headers, data={'status': 'invalid'})
+        response = self.client.post(url, **self.default_headers, data={'status': 'invalid'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         form = response.context['form']
@@ -194,30 +174,23 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn('status', form.errors)
 
-        # Invalid authentication
-        response = self.client.post(
-            self.url,
-            **self.default_headers,
-            data={
-                'status': ChoixStatutChecklist.GEST_BLOCAGE.name,
-                'authentification': 'invalid_auth',
-            },
-        )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        form = response.context['form']
-
-        self.assertFalse(form.is_valid())
-        self.assertIn('authentification', form.errors)
-
-    def test_change_the_checklist_status_to_a_status_without_authentication_info(self):
+    def test_change_the_checklist_status_of_an_academic_experience(self):
         self.client.force_login(user=self.sic_manager_user)
 
+        experience = EducationalExperienceFactory(person=self.general_admission.candidate)
+
+        url = resolve_url(
+            self.url_name,
+            uuid=self.general_admission.uuid,
+            experience_type=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
+            experience_uuid=experience.uuid,
+        )
+
         response = self.client.post(
-            self.url,
+            url,
             **self.default_headers,
             data={
-                'status': ChoixStatutChecklist.GEST_BLOCAGE.name,
+                'status': ChoixStatutValidationExperience.A_COMPLETER.name,
             },
         )
 
@@ -225,12 +198,77 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
 
         self.general_admission.refresh_from_db()
 
-        experience_checklist = self.general_admission.checklist['current']['parcours_anterieur']['enfants'][0]
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
 
-        self.assertEqual(experience_checklist['statut'], ChoixStatutChecklist.GEST_BLOCAGE.name)
+        experience.refresh_from_db()
+
+        self.assertEqual(experience.validation_status, ChoixStatutValidationExperience.A_COMPLETER.name)
+
+    def test_change_the_checklist_status_of_a_non_academic_experience(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        experience = ProfessionalExperienceFactory(person=self.general_admission.candidate)
+
+        url = resolve_url(
+            self.url_name,
+            uuid=self.general_admission.uuid,
+            experience_type=TypeExperience.ACTIVITE_NON_ACADEMIQUE.name,
+            experience_uuid=experience.uuid,
+        )
+
+        response = self.client.post(
+            url,
+            **self.default_headers,
+            data={
+                'status': ChoixStatutValidationExperience.A_COMPLETER.name,
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.general_admission.refresh_from_db()
 
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
+
+        experience.refresh_from_db()
+
+        self.assertEqual(experience.validation_status, ChoixStatutValidationExperience.A_COMPLETER.name)
+
+    def test_change_the_checklist_status_of_an_exam(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        exam = ExamFactory(
+            type__education_group_years=[self.general_admission.training],
+        )
+        experience = ProfessionalExperienceFactory(person=self.general_admission.candidate)
+
+        url = resolve_url(
+            self.url_name,
+            uuid=self.general_admission.uuid,
+            experience_type=TypeExperience.ACTIVITE_NON_ACADEMIQUE.name,
+            experience_uuid=experience.uuid,
+        )
+
+        response = self.client.post(
+            url,
+            **self.default_headers,
+            data={
+                'status': ChoixStatutValidationExperience.A_COMPLETER.name,
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.general_admission.refresh_from_db()
+
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
+
+        experience.refresh_from_db()
+
+        self.assertEqual(experience.validation_status, ChoixStatutValidationExperience.A_COMPLETER.name)
 
     def test_change_the_checklist_status_to_the_validated_status_needs_a_complete_experience(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -252,18 +290,17 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
             acquired_credit_number=10,
         )
 
-        url = (
-            resolve_url(
-                self.url_name,
-                uuid=self.general_admission.uuid,
-            )
-            + f'?identifier={experience.uuid}&type={TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name}'
+        url = resolve_url(
+            self.url_name,
+            uuid=self.admission.uuid,
+            experience_type=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
+            experience_uuid=experience.uuid,
         )
 
         response = self.client.post(
             url,
             **self.default_headers,
-            data={'status': ChoixStatutChecklist.GEST_REUSSITE.name},
+            data={'status': ChoixStatutValidationExperience.VALIDEE.name},
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -273,11 +310,9 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
             [m.message for m in response.context['messages']],
         )
 
-        self.general_admission.refresh_from_db()
+        experience.refresh_from_db()
 
-        experiences_checklists = self.general_admission.checklist['current']['parcours_anterieur']['enfants']
-
-        self.assertEqual(len(experiences_checklists), 1)
+        self.assertEqual(experience.validation_status, ChoixStatutValidationExperience.A_TRAITER.name)
 
         experience.with_complement = False
         experience.save()
@@ -285,7 +320,7 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
         response = self.client.post(
             url,
             **self.default_headers,
-            data={'status': ChoixStatutChecklist.GEST_REUSSITE.name},
+            data={'status': ChoixStatutValidationExperience.VALIDEE.name},
         )
 
         self.assertNotIn(
@@ -297,14 +332,12 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
 
         self.general_admission.refresh_from_db()
 
-        experiences_checklists = self.general_admission.checklist['current']['parcours_anterieur']['enfants']
-
-        self.assertEqual(len(experiences_checklists), 2)
-        self.assertEqual(experiences_checklists[1]['extra']['identifiant'], str(experience.uuid))
-        self.assertEqual(experiences_checklists[1]['statut'], ChoixStatutChecklist.GEST_REUSSITE.name)
-
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
+
+        experience.refresh_from_db()
+
+        self.assertEqual(experience.validation_status, ChoixStatutValidationExperience.VALIDEE.name)
 
         # The experience training isn't the same as the admission one so the checking is different
         experience = EducationalExperienceFactory(
@@ -326,18 +359,17 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
             acquired_credit_number=10,
         )
 
-        url = (
-            resolve_url(
-                self.url_name,
-                uuid=self.general_admission.uuid,
-            )
-            + f'?identifier={experience.uuid}&type={TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name}'
-        )
+        url = resolve_url(
+            self.url_name,
+            uuid=self.general_admission.uuid,
+            experience_uuid=experience.uuid,
+            experience_type=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
+        ),
 
         response = self.client.post(
             url,
             **self.default_headers,
-            data={'status': ChoixStatutChecklist.GEST_REUSSITE.name},
+            data={'status': ChoixStatutValidationExperience.VALIDEE.name},
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -348,56 +380,6 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    def test_change_the_checklist_status_to_a_status_with_authentication(self):
-        self.client.force_login(user=self.sic_manager_user)
-
-        response = self.client.post(
-            self.url,
-            **self.default_headers,
-            data={
-                'status': ChoixStatutChecklist.GEST_BLOCAGE.name,
-                'authentification': '1',
-            },
-        )
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        self.general_admission.refresh_from_db()
-
-        experience_checklist = self.general_admission.checklist['current']['parcours_anterieur']['enfants'][0]
-
-        self.assertEqual(experience_checklist['statut'], ChoixStatutChecklist.GEST_BLOCAGE.name)
-
-        self.assertEqual(experience_checklist['extra'].get('authentification'), '1')
-
-        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
-
-    def test_change_the_checklist_status_to_a_status_without_authentication(self):
-        self.client.force_login(user=self.sic_manager_user)
-
-        response = self.client.post(
-            self.url,
-            **self.default_headers,
-            data={
-                'status': ChoixStatutChecklist.GEST_BLOCAGE.name,
-                'authentification': '0',
-            },
-        )
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        self.general_admission.refresh_from_db()
-
-        experience_checklist = self.general_admission.checklist['current']['parcours_anterieur']['enfants'][0]
-
-        self.assertEqual(experience_checklist['statut'], ChoixStatutChecklist.GEST_BLOCAGE.name)
-
-        self.assertEqual(experience_checklist['extra'].get('authentification'), '0')
-
-        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
-        self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
 
 
 @freezegun.freeze_time('2023-01-01')
@@ -430,25 +412,11 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
 
-        self.general_admission.checklist['current']['parcours_anterieur']['enfants'] = [
-            {
-                'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
-                'libelle': 'To be processed',
-                'extra': {
-                    'identifiant': self.first_experience_uuid,
-                },
-            }
-        ]
-
-        self.general_admission.save(update_fields=['checklist'])
-
-        self.url = (
-            resolve_url(
-                self.url_name,
-                uuid=self.general_admission.uuid,
-            )
-            + '?identifier='
-            + str(self.experiences[0].uuid)
+        self.url = resolve_url(
+            self.url_name,
+            uuid=self.admission.uuid,
+            experience_uuid=self.experiences[0].uuid,
+            experience_type=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
         )
 
     def test_change_the_authentication_is_forbidden_with_fac_user(self):
@@ -465,12 +433,12 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
             resolve_url(
                 self.url_name,
                 uuid=self.general_admission.uuid,
-            )
-            + '?identifier='
-            + str(uuid.uuid4()),
+                experience_uuid=uuid.uuid4(),
+                experience_type=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
+            ),
             **self.default_headers,
             data={
-                'status': ChoixStatutChecklist.GEST_BLOCAGE.name,
+                'status': ChoixStatutValidationExperience.A_COMPLETER.name,
             },
         )
 
@@ -481,12 +449,10 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
     def test_form_initialization_if_the_checklist_status_is_not_related_to_the_authentication(self):
         self.client.force_login(user=self.sic_manager_user)
 
-        experience_checklist = self.general_admission.checklist['current']['parcours_anterieur']['enfants'][0]
-        experience_checklist['statut'] = ChoixStatutChecklist.GEST_EN_COURS.name
-        experience_checklist['extra']['authentification'] = '0'
-        experience_checklist['extra']['etat_authentification'] = EtatAuthentificationParcours.VRAI.name
+        self.experiences[0].validation_status = ChoixStatutValidationExperience.AVIS_EXPERT.name
+        self.experiences[0].authentication_status = EtatAuthentificationParcours.VRAI.name
 
-        self.general_admission.save(update_fields=['checklist'])
+        self.experiences[0].save()
 
         response = self.client.get(self.url)
 
@@ -501,12 +467,10 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
     def test_form_initialization_if_the_checklist_status_is_related_to_the_authentication(self):
         self.client.force_login(user=self.sic_manager_user)
 
-        experience_checklist = self.general_admission.checklist['current']['parcours_anterieur']['enfants'][0]
-        experience_checklist['statut'] = ChoixStatutChecklist.GEST_EN_COURS.name
-        experience_checklist['extra']['authentification'] = '1'
-        experience_checklist['extra']['etat_authentification'] = EtatAuthentificationParcours.VRAI.name
+        self.experiences[0].validation_status = ChoixStatutValidationExperience.AUTHENTIFICATION.name
+        self.experiences[0].authentication_status = EtatAuthentificationParcours.VRAI.name
 
-        self.general_admission.save(update_fields=['checklist'])
+        self.experiences[0].save()
 
         response = self.client.get(self.url)
 
@@ -522,12 +486,10 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
     def test_change_the_authentication_data(self):
         self.client.force_login(user=self.sic_manager_user)
 
-        experience_checklist = self.general_admission.checklist['current']['parcours_anterieur']['enfants'][0]
-        experience_checklist['statut'] = ChoixStatutChecklist.GEST_EN_COURS.name
-        experience_checklist['extra']['authentification'] = '1'
-        experience_checklist['extra']['etat_authentification'] = EtatAuthentificationParcours.VRAI.name
+        self.experiences[0].validation_status = ChoixStatutValidationExperience.AUTHENTIFICATION.name
+        self.experiences[0].authentication_status = EtatAuthentificationParcours.VRAI.name
 
-        self.general_admission.save(update_fields=['checklist'])
+        self.experiences[0].save()
 
         # Invalid state
         response = self.client.post(
@@ -557,14 +519,13 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
 
         self.general_admission.refresh_from_db()
 
-        experience_checklist = self.general_admission.checklist['current']['parcours_anterieur']['enfants'][0]
-
-        self.assertEqual(experience_checklist['statut'], ChoixStatutChecklist.GEST_EN_COURS.name)
-        self.assertEqual(experience_checklist['extra']['authentification'], '1')
-        self.assertEqual(experience_checklist['extra']['etat_authentification'], EtatAuthentificationParcours.FAUX.name)
-
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
+
+        self.experiences[0].refresh_from_db()
+
+        self.assertEqual(self.experiences[0].validation_status, ChoixStatutValidationExperience.AUTHENTIFICATION.name)
+        self.assertEqual(self.experiences[0].authentication_status, EtatAuthentificationParcours.FAUX.name)
 
         # Check that no history entry has been created
         self.assertEqual(HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid).count(), 0)
@@ -576,12 +537,10 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
     def test_change_the_authentication_data_by_informing_the_checkers(self):
         self.client.force_login(user=self.sic_manager_user)
 
-        experience_checklist = self.general_admission.checklist['current']['parcours_anterieur']['enfants'][0]
-        experience_checklist['statut'] = ChoixStatutChecklist.GEST_EN_COURS.name
-        experience_checklist['extra']['authentification'] = '1'
-        experience_checklist['extra']['etat_authentification'] = EtatAuthentificationParcours.VRAI.name
+        self.experiences[0].validation_status = ChoixStatutValidationExperience.AUTHENTIFICATION.name
+        self.experiences[0].authentication_status = EtatAuthentificationParcours.VRAI.name
 
-        self.general_admission.save(update_fields=['checklist'])
+        self.experiences[0].save()
 
         # Valid data
         response = self.client.post(
@@ -596,17 +555,13 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
 
         self.general_admission.refresh_from_db()
 
-        experience_checklist = self.general_admission.checklist['current']['parcours_anterieur']['enfants'][0]
-
-        self.assertEqual(experience_checklist['statut'], ChoixStatutChecklist.GEST_EN_COURS.name)
-        self.assertEqual(experience_checklist['extra']['authentification'], '1')
-        self.assertEqual(
-            experience_checklist['extra']['etat_authentification'],
-            EtatAuthentificationParcours.AUTHENTIFICATION_DEMANDEE.name,
-        )
-
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
+
+        self.experiences[0].refresh_from_db()
+
+        self.assertEqual(self.experiences[0].validation_status, ChoixStatutValidationExperience.AUTHENTIFICATION.name)
+        self.assertEqual(self.experiences[0].authentication_status, EtatAuthentificationParcours.AUTHENTIFICATION_DEMANDEE.name)
 
         # Check that the history entry has been created
         history_items: QuerySet[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid)
@@ -638,12 +593,10 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
     def test_change_the_authentication_data_by_informing_the_candidate(self):
         self.client.force_login(user=self.sic_manager_user)
 
-        experience_checklist = self.general_admission.checklist['current']['parcours_anterieur']['enfants'][0]
-        experience_checklist['statut'] = ChoixStatutChecklist.GEST_EN_COURS.name
-        experience_checklist['extra']['authentification'] = '1'
-        experience_checklist['extra']['etat_authentification'] = EtatAuthentificationParcours.VRAI.name
+        self.experiences[0].validation_status = ChoixStatutValidationExperience.AUTHENTIFICATION.name
+        self.experiences[0].authentication_status = EtatAuthentificationParcours.VRAI.name
 
-        self.general_admission.save(update_fields=['checklist'])
+        self.experiences[0].save()
 
         # Valid data
         response = self.client.post(
@@ -658,17 +611,13 @@ class SinglePastExperienceChangeAuthenticationViewTestCase(TestCase):
 
         self.general_admission.refresh_from_db()
 
-        experience_checklist = self.general_admission.checklist['current']['parcours_anterieur']['enfants'][0]
-
-        self.assertEqual(experience_checklist['statut'], ChoixStatutChecklist.GEST_EN_COURS.name)
-        self.assertEqual(experience_checklist['extra']['authentification'], '1')
-        self.assertEqual(
-            experience_checklist['extra']['etat_authentification'],
-            EtatAuthentificationParcours.ETABLISSEMENT_CONTACTE.name,
-        )
-
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
+
+        self.experiences[0].refresh_from_db()
+
+        self.assertEqual(self.experiences[0].validation_status, ChoixStatutValidationExperience.AUTHENTIFICATION.name)
+        self.assertEqual(self.experiences[0].authentication_status, EtatAuthentificationParcours.ETABLISSEMENT_CONTACTE.name)
 
         # Check that the history entry has been created
         history_items: QuerySet[HistoryEntry] = HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid)

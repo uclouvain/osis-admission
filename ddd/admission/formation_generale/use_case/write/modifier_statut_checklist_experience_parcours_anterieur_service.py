@@ -23,6 +23,8 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from admission.ddd.admission.shared_kernel.domain.service.i_modifier_checklist_experience_parcours_anterieur import \
+    IValidationExperienceParcoursAnterieurService
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
@@ -48,6 +50,7 @@ def modifier_statut_checklist_experience_parcours_anterieur(
     proposition_repository: 'IPropositionRepository',
     profil_candidat_translator: 'IProfilCandidatTranslator',
     formation_translator: 'IFormationGeneraleTranslator',
+    validation_experience_parcours_anterieur_service: 'IValidationExperienceParcoursAnterieurService',
 ) -> 'PropositionIdentity':
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition = proposition_repository.get(entity_id=proposition_id)
@@ -56,12 +59,18 @@ def modifier_statut_checklist_experience_parcours_anterieur(
 
     proposition.specifier_statut_checklist_experience_parcours_anterieur(
         statut_checklist_cible=cmd.statut,
-        statut_checklist_authentification=cmd.statut_authentification,
         uuid_experience=cmd.uuid_experience,
         auteur_modification=cmd.gestionnaire,
         type_experience=cmd.type_experience,
         profil_candidat_translator=profil_candidat_translator,
         grade_academique_formation_proposition=formation.grade_academique,
+    )
+
+    validation_experience_parcours_anterieur_service.modifier_statut(
+        matricule_candidat=proposition.matricule_candidat,
+        uuid_experience=cmd.uuid_experience,
+        type_experience=cmd.type_experience,
+        statut=cmd.statut,
     )
 
     proposition_repository.save(proposition)

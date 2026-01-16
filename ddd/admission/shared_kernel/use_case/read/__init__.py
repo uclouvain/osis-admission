@@ -34,3 +34,4 @@ from .recuperer_questions_specifiques_proposition_service import recuperer_quest
 from .recuperer_titres_acces_selectionnables_proposition_service import (
     recuperer_titres_acces_selectionnables_proposition,
 )
+from .recuperer_informations_validation_experience_parcours_anterieur_service import recuperer_informations_validation_experience_parcours_anterieur

@@ -2,14 +2,6 @@
 
 from django.db import migrations
 
-from admission.migrations.utils.initialize_past_experiences_checklist import (
-    initialization_of_missing_checklists_in_cv_experiences,
-)
-
-
-def initialization_migration_of_missing_checklists_in_cv_experiences(apps, schema_editor):
-    initialization_of_missing_checklists_in_cv_experiences(apps.get_model('admission', 'BaseAdmission'))
-
 
 class Migration(migrations.Migration):
 
@@ -19,7 +11,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(
-            code=initialization_migration_of_missing_checklists_in_cv_experiences,
+            code=migrations.RunPython.noop,
             reverse_code=migrations.RunPython.noop,
         ),
     ]

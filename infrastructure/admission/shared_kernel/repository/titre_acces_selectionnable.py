@@ -79,8 +79,10 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
                 'candidate__belgianhighschooldiploma__institute',
                 'candidate__foreignhighschooldiploma__academic_graduation_year',
                 'candidate__foreignhighschooldiploma__country',
-                'candidate__graduated_from_high_school_year',
+                'candidate__highschooldiploma__academic_graduation_year',
                 'training__academic_year',
+            ).annotate(
+                secondary_studies_year=F('candidate__highschooldiploma__academic_graduation_year__year'),
             )
             .prefetch_related(
                 Prefetch(
@@ -193,9 +195,9 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
             elif isinstance(high_school_diploma, Exam) and high_school_diploma.year is not None:
                 high_school_diploma_experience_year = high_school_diploma.year.year
 
-        elif getattr(admission.candidate, 'graduated_from_high_school_year', None):
+        elif admission.secondary_studies_year:
             high_school_diploma_experience_uuid = OngletsDemande.ETUDES_SECONDAIRES.name
-            high_school_diploma_experience_year = admission.candidate.graduated_from_high_school_year.year
+            high_school_diploma_experience_year = admission.secondary_studies_year
             formatted_high_school_diploma_name = '{title} ({year})'
             formatted_high_school_diploma_name_variables['title'] = gettext('Secondary school')
 

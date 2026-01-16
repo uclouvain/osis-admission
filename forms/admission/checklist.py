@@ -68,9 +68,12 @@ from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import
     StatutEquivalenceTitreAcces,
     TypeEquivalenceTitreAcces,
 )
+from admission.ddd.admission.shared_kernel.dtos import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
     EmplacementDocumentDTO,
 )
+from admission.ddd.admission.shared_kernel.dtos.validation_experience_parcours_anterieur import \
+    ValidationExperienceParcoursAnterieurDTO
 from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.forms import (
@@ -120,9 +123,13 @@ from ddd.logic.financabilite.domain.model.enums.situation import (
     SituationFinancabilite,
 )
 from ddd.logic.learning_unit.commands import LearningUnitAndPartimSearchCommand
+from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
+from ddd.logic.shared_kernel.profil.dtos.validation_experience import ExperienceAvecValidationDTO
 from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile.forms import DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS
+from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
 
 FINANCABILITE_REFUS_CATEGORY = 'Finançabilité'
 
@@ -206,12 +213,9 @@ class StatusForm(forms.Form):
     )
 
 
-class ExperienceStatusForm(StatusForm):
-    authentification = forms.TypedChoiceField(
-        required=False,
-        coerce=lambda val: val == '1',
-        empty_value=None,
-        choices=(('0', 'No'), ('1', _('Yes'))),
+class ExperienceStatusForm(forms.Form):
+    status = forms.ChoiceField(
+        choices=ChoixStatutValidationExperience.choices_except(ChoixStatutValidationExperience.EN_BROUILLON),
     )
 
 
@@ -1454,17 +1458,6 @@ class FinancabiliteNotificationForm(forms.Form):
         )
 
 
-def can_edit_experience_authentication(checklist_experience_data):
-    checklist_experience_data = checklist_experience_data or {}
-
-    extra = checklist_experience_data.get('extra', {})
-
-    return (
-        checklist_experience_data.get('statut') == ChoixStatutChecklist.GEST_EN_COURS.name
-        and extra.get('authentification') == '1'
-    )
-
-
 class SinglePastExperienceAuthenticationForm(forms.Form):
     state = forms.ChoiceField(
         label=_('Past experiences authentication'),
@@ -1473,18 +1466,14 @@ class SinglePastExperienceAuthenticationForm(forms.Form):
         widget=forms.RadioSelect,
     )
 
-    def __init__(self, checklist_experience_data, *args, **kwargs):
+    def __init__(self, experience_validation_data: ValidationExperienceParcoursAnterieurDTO | EtudesSecondairesAdmissionDTO | ExperienceAcademiqueDTO | ExperienceNonAcademiqueDTO | ExamenDTO, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        checklist_experience_data = checklist_experience_data or {}
+        self.initial['state'] = experience_validation_data.statut_authentification
 
-        extra = checklist_experience_data.get('extra', {})
+        self.prefix = experience_validation_data.uuid
 
-        self.initial['state'] = extra.get('etat_authentification')
-
-        self.prefix = extra.get('identifiant', '')
-
-        self.fields['state'].disabled = not can_edit_experience_authentication(checklist_experience_data)
+        self.fields['state'].disabled = not experience_validation_data.authentification_en_cours
 
 
 class SendEMailForm(forms.Form):

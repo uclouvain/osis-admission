@@ -174,8 +174,8 @@ class GetMissingCurriculumPeriodsTestCase(TestCase):
         )
 
     def test_with_secondary_studies(self):
-        self.admission.candidate.graduated_from_high_school = GotDiploma.YES.name
-        self.admission.candidate.graduated_from_high_school_year = self.academic_years[2012]
+        self.admission.candidate.highschooldiploma.got_diploma = GotDiploma.YES.name
+        self.admission.candidate.highschooldiploma.academic_graduation_year = self.academic_years[2012]
         self.admission.candidate.save()
 
         result = get_missing_curriculum_periods(proposition_uuid=self.admission.uuid)

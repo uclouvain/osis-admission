@@ -85,6 +85,8 @@ from admission.infrastructure.admission.shared_kernel.domain.service.historique 
 from admission.infrastructure.admission.shared_kernel.domain.service.maximum_propositions import (
     MaximumPropositionsAutorisees,
 )
+from admission.infrastructure.admission.shared_kernel.domain.service.modifier_checklist_experience_parcours_anterieur import \
+    ValidationExperienceParcoursAnterieurService
 from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import (
     ProfilCandidatTranslator,
 )
@@ -162,6 +164,7 @@ COMMAND_HANDLERS = {
         historique=HistoriqueGlobal(),
         raccrocher_experiences_curriculum=RaccrocherExperiencesCurriculum(),
         email_destinataire_repository=EmailDestinataireRepository(),
+        validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,

@@ -510,6 +510,5 @@ class PropositionInMemoryRepository(
             proposition=proposition,
             formation=FormationGeneraleInMemoryTranslator.get(proposition.formation_id),
             profil_candidat_translator=ProfilCandidatInMemoryTranslator(),
-            annee_courante=proposition.annee_calculee,
             questions_specifiques_translator=QuestionSpecifiqueInMemoryTranslator(),
         )

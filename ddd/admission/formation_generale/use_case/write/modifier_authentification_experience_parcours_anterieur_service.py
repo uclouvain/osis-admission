@@ -33,6 +33,8 @@ from admission.ddd.admission.formation_generale.domain.model.proposition import 
 from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
 from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.shared_kernel.domain.service.i_modifier_checklist_experience_parcours_anterieur import \
+    IValidationExperienceParcoursAnterieurService
 
 
 def modifier_authentification_experience_parcours_anterieur(
@@ -40,13 +42,19 @@ def modifier_authentification_experience_parcours_anterieur(
     proposition_repository: 'IPropositionRepository',
     notification: 'INotification',
     historique: 'IHistorique',
+    validation_experience_parcours_anterieur_service: 'IValidationExperienceParcoursAnterieurService',
 ) -> 'PropositionIdentity':
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition = proposition_repository.get(entity_id=proposition_id)
 
     proposition.specifier_authentification_experience_parcours_anterieur(
-        uuid_experience=cmd.uuid_experience,
         auteur_modification=cmd.gestionnaire,
+    )
+
+    validation_experience_parcours_anterieur_service.modifier_authentification(
+        matricule_candidat=proposition.matricule_candidat,
+        uuid_experience=cmd.uuid_experience,
+        type_experience=cmd.type_experience,
         etat_authentification=cmd.etat_authentification,
     )
 

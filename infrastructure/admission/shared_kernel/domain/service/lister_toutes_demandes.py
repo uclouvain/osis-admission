@@ -76,13 +76,17 @@ from admission.ddd.admission.shared_kernel.enums.statut import (
 from admission.infrastructure.utils import get_entities_with_descendants_ids
 from admission.models import AdmissionViewer
 from admission.models.base import BaseAdmission
+from admission.models.exam import AdmissionExam
 from admission.models.specific_question import SpecificQuestionAnswer
+from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences
 from admission.views import PaginatedList
 from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
 from osis_profile import BE_ISO_CODE
-from osis_profile.models import EducationalExperienceYear
+from osis_profile.models import EducationalExperienceYear, EducationalExperience, ProfessionalExperience, Exam
+from osis_profile.models.education import HighSchoolDiploma
 from osis_profile.models.enums.curriculum import Result
+from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
 
 
 class ListerToutesDemandes(IListerToutesDemandes):
@@ -298,6 +302,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
         if mode_filtres_etats_checklist and filtres_etats_checklist:
             json_path_to_checks = defaultdict(set)
             all_checklist_filters = Q()
+            past_experiences_filters = Q()
 
             # Manage the case of the "AUTHENTIFICATION" and "BESOIN_DEROGATION" filters which are hierarchical
             # If one sub item is selected, the parent must be unselected as the parent itself includes all sub items
@@ -348,16 +353,6 @@ class ListerToutesDemandes(IListerToutesDemandes):
                     if not current_status_filter:
                         continue
 
-                    if (
-                        current_status_filter.identifiant_parent
-                        and selected_parent_identifiers
-                        and current_status_filter.identifiant_parent in selected_parent_identifiers
-                    ):
-                        # For the sub statuses, if the parent is selected, we filter on both items (AND query)
-                        current_status_filter = current_status_filter.merge_statuses(
-                            current_tab[current_status_filter.identifiant_parent]
-                        )
-
                     # Specific cases
                     if tab_name == OngletsChecklist.donnees_personnelles.name:
                         # > For the personal data, the status is saved on the candidate
@@ -365,24 +360,36 @@ class ListerToutesDemandes(IListerToutesDemandes):
 
                     elif tab_name == OngletsChecklist.experiences_parcours_anterieur.name:
                         # > For the past experiences, we search if one of them match the criteria
-                        fields_to_filter = {}
+                        # We build a specific filter (past_experiences_filters) added later to limit the number of subqueries
+                        if current_status_filter.identifiant_parent == 'AUTHENTIFICATION':
+                            validation_status, authentication_status = current_status_filter.identifiant.split('.')
 
-                        if current_status_filter.statut:
-                            fields_to_filter['statut'] = current_status_filter.statut.name
-                        if current_status_filter.extra:
-                            fields_to_filter['extra'] = current_status_filter.extra
+                            current_condition = Q(authentication_status=authentication_status)
 
-                        current_checklist_filters = Q(
-                            checklist__current__parcours_anterieur__enfants__contains=[fields_to_filter],
-                        )
+                            # For the sub statuses, if the parent is selected, we filter on both items (AND query)
+                            if selected_parent_identifiers and current_status_filter.identifiant_parent in selected_parent_identifiers:
+                                current_condition &= Q(validation_status=validation_status)
 
-                        json_path_to_checks['checklist__current__parcours_anterieur'].add('enfants')
-                        json_path_to_checks['checklist__current'].add('parcours_anterieur')
-                        json_path_to_checks['checklist'].add('current')
+                        else:
+                            current_condition = Q(validation_status=current_status_filter.identifiant)
+
+                        past_experiences_filters |= current_condition
+
+                        continue
 
                     else:
                         current_checklist_filters = Q()
                         with_json_checklist_filter = False
+
+                        if (
+                            current_status_filter.identifiant_parent
+                            and selected_parent_identifiers
+                            and current_status_filter.identifiant_parent in selected_parent_identifiers
+                        ):
+                            # For the sub statuses, if the parent is selected, we filter on both items (AND query)
+                            current_status_filter = current_status_filter.merge_statuses(
+                                current_tab[current_status_filter.identifiant_parent]
+                            )
 
                         # Filter on the checklist tab status
                         if current_status_filter.statut:
@@ -431,6 +438,30 @@ class ListerToutesDemandes(IListerToutesDemandes):
                             json_path_to_checks['checklist'].add('current')
 
                     all_checklist_filters |= current_checklist_filters
+
+            if past_experiences_filters:
+                default_exclude_condition = Q(validation_status=ChoixStatutValidationExperience.EN_BROUILLON.name)
+                all_checklist_filters |= Q(
+                    Exists(
+                        HighSchoolDiploma.objects.filter(
+                            person_id=OuterRef('candidate_id'),
+                        ).exclude(default_exclude_condition).filter(past_experiences_filters)
+                    )
+                    | Exists(
+                        Exam.objects.filter(
+                            person_id=OuterRef('candidate_id'),
+                            admissions__admission_id=OuterRef('pk'),
+                        ).exclude(default_exclude_condition).filter(past_experiences_filters)
+                    ) | Exists(
+                        ProfessionalExperience.objects.filter(
+                            person_id=OuterRef('candidate_id'),
+                        ).exclude(default_exclude_condition).filter(past_experiences_filters)
+                    ) | Exists(
+                        EducationalExperience.objects.filter(
+                            person_id=OuterRef('candidate_id'),
+                        ).exclude(default_exclude_condition).filter(past_experiences_filters),
+                    )
+                )
 
             if mode_filtres_etats_checklist == ModeFiltrageChecklist.EXCLUSION.name:
                 # We exclude the admissions whose the specific keys have the specified values

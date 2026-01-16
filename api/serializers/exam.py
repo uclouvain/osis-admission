@@ -37,6 +37,7 @@ from admission.infrastructure.admission.shared_kernel.domain.service.profil_cand
 from admission.models.exam import AdmissionExam
 from base.api.serializers.academic_year import RelatedAcademicYearField
 from osis_profile.models import Exam
+from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
 from osis_profile.models.exam import ExamType
 
 
@@ -96,16 +97,17 @@ class ExamSerializer(serializers.ModelSerializer):
         if self.exam_type is None:
             return instance
         try:
-            exam = AdmissionExam.objects.select_related('exam').get(admission=self.context['admission'])
+            exam = AdmissionExam.objects.select_related('exam').get(admission=self.context['admission']).exam
             exam.certificate = validated_data.get("certificate", None)
             exam.year = validated_data.get("year", None)
-            exam.save()
+            exam.save(update_fields=['certificate', 'year'])
         except AdmissionExam.DoesNotExist:
             exam = Exam.objects.create(
                 person=self.context['admission'].candidate,
                 type=self.exam_type,
                 certificate=validated_data.get("certificate", None),
                 year=validated_data.get("year", None),
+                validation_status=ChoixStatutValidationExperience.EN_BROUILLON.name,
             )
             AdmissionExam.objects.create(admission=self.context['admission'], exam=exam)
-        return instance
+        return exam

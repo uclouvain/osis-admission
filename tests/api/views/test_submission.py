@@ -1202,7 +1202,7 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
             [e["status_code"] for e in json_response['errors']],
         )
 
-        admission.candidate.graduated_from_high_school_year = self.candidate_ok.graduated_from_high_school_year
+        admission.candidate.highschooldiploma.academic_graduation_year = self.candidate_ok.highschooldiploma.academic_graduation_year
         admission.candidate.save()
         self.client.force_authenticate(user=admission.candidate.user)
         response = self.client.get(url)

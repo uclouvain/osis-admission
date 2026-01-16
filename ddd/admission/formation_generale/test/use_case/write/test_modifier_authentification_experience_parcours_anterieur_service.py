@@ -40,6 +40,7 @@ from admission.infrastructure.admission.formation_generale.repository.in_memory.
     PropositionInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
 
 
 class TestModifierAuthentificationExperienceParcoursAnterieur(SimpleTestCase):
@@ -57,6 +58,7 @@ class TestModifierAuthentificationExperienceParcoursAnterieur(SimpleTestCase):
             ModifierAuthentificationExperienceParcoursAnterieurCommand(
                 uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                 uuid_experience=self.experience_uuid,
+                type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
                 etat_authentification=EtatAuthentificationParcours.VRAI.name,
                 gestionnaire='0123456789',
             )
@@ -84,6 +86,7 @@ class TestModifierAuthentificationExperienceParcoursAnterieur(SimpleTestCase):
                 ModifierAuthentificationExperienceParcoursAnterieurCommand(
                     uuid_proposition='INCONNUE',
                     uuid_experience=self.experience_uuid,
+                    type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
                     etat_authentification=EtatAuthentificationParcours.VRAI.name,
                     gestionnaire='0123456789',
                 )
@@ -95,6 +98,7 @@ class TestModifierAuthentificationExperienceParcoursAnterieur(SimpleTestCase):
                 ModifierAuthentificationExperienceParcoursAnterieurCommand(
                     uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                     uuid_experience='INCONNUE',
+                    type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
                     etat_authentification=EtatAuthentificationParcours.VRAI.name,
                     gestionnaire='0123456789',
                 )

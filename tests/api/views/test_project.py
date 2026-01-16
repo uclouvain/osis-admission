@@ -1081,11 +1081,12 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         admission = DoctorateAdmissionFactory(
             candidate=CompletePersonFactory(
                 last_registration_year=None,
-                graduated_from_high_school_year=None,
             ),
             status=ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
             supervision_group=self.first_invited_promoter.actor_ptr.process,
         )
+        admission.candidate.highschooldiploma.academic_graduation_year = None
+        admission.candidate.highschooldiploma.save()
         admission.candidate.educationalexperience_set.all().delete()
         admission.candidate.professionalexperience_set.all().delete()
         url = resolve_url("admission_api_v1:submit-doctoral-proposition", uuid=admission.uuid)

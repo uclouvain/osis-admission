@@ -76,6 +76,7 @@ from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from osis_profile.models import ProfessionalExperience
 from osis_profile.models.enums.curriculum import ActivitySector, ActivityType
+from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
 from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection
 from osis_profile.models.epc_injection import (
     EPCInjectionStatus as CurriculumEPCInjectionStatus,
@@ -505,6 +506,8 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
         self.assertEqual(created_experience.sector, ActivitySector.PRIVATE.name)
         self.assertEqual(created_experience.institute_name, 'Institute')
         self.assertEqual(created_experience.activity, '')
+        self.assertEqual(created_experience.validation_status, ChoixStatutValidationExperience.A_TRAITER.name)
+        self.assertEqual(created_experience.authentication_status, EtatAuthentificationParcours.NON_CONCERNE.name)
 
         # Check that the experience has been valuated
         self.assertTrue(
@@ -512,29 +515,6 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
                 baseadmission_id=self.general_admission.uuid,
                 professionalexperience_id=created_experience.uuid,
             ).exists()
-        )
-
-        # Check that the checklist has been updated
-        self.general_admission.refresh_from_db()
-
-        last_experience_checklist = self.general_admission.checklist['current']['parcours_anterieur']['enfants'][-1]
-
-        self.assertEqual(
-            last_experience_checklist['extra']['identifiant'],
-            str(created_experience.uuid),
-        )
-
-        self.assertEqual(
-            last_experience_checklist,
-            {
-                'libelle': 'To be processed',
-                'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
-                'extra': {
-                    'identifiant': str(created_experience.uuid),
-                    'etat_authentification': EtatAuthentificationParcours.NON_CONCERNE.name,
-                },
-                'enfants': [],
-            },
         )
 
     def test_continuing_update_curriculum_for_fac_users(self):

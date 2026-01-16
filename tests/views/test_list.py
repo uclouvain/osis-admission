@@ -59,6 +59,7 @@ from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageCh
 from admission.ddd.admission.shared_kernel.enums.liste import (
     TardiveModificationReorientationFiltre,
 )
+from admission.forms import SelectOrOtherField
 from admission.models import (
     ContinuingEducationAdmission,
     DoctorateAdmission,
@@ -70,6 +71,7 @@ from admission.tests.factories.continuing_education import (
     ContinuingEducationAdmissionFactory,
     ContinuingEducationTrainingFactory,
 )
+from admission.tests.factories.curriculum import EducationalExperienceFactory
 from admission.tests.factories.doctorate import DoctorateFactory
 from admission.tests.factories.general_education import (
     GeneralEducationAdmissionFactory,
@@ -96,6 +98,8 @@ from base.tests.factories.entity_version import (
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.student import StudentFactory
 from base.tests.factories.user import UserFactory
+from osis_profile.models import EducationalExperience
+from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
 from program_management.models.education_group_version import EducationGroupVersion
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.scholarship import DoctorateScholarshipFactory
@@ -1417,19 +1421,15 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
 
+        academic_experience = EducationalExperienceFactory(
+            person=second_admission.candidate,
+            validation_status=ChoixStatutValidationExperience.A_COMPLETER.name,
+        )
+
         default_cmd_params = {
             'mode_filtres_etats_checklist': ModeFiltrageChecklist.INCLUSION.name,
             'numero': str(second_admission),
         }
-
-        current_checklist = Checklist.initialiser_checklist_experience(experience_uuid=uuid.uuid4()).to_dict()
-        current_checklist['statut'] = ChoixStatutChecklist.INITIAL_NON_CONCERNE.name
-
-        second_admission.checklist['current'][OngletsChecklist.parcours_anterieur.name]['enfants'].append(
-            current_checklist
-        )
-
-        second_admission.save(update_fields=['checklist'])
 
         response = self._do_request(
             **default_cmd_params,
@@ -1440,8 +1440,8 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         self.assertEqual(len(response.context['object_list']), 0)
 
-        current_checklist['statut'] = ChoixStatutChecklist.INITIAL_CANDIDAT.name
-        second_admission.save(update_fields=['checklist'])
+        academic_experience.validation_status = ChoixStatutValidationExperience.A_TRAITER.name
+        academic_experience.save()
 
         response = self._do_request(
             **default_cmd_params,
@@ -1462,8 +1462,8 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         self.assertEqual(len(response.context['object_list']), 0)
 
-        current_checklist['statut'] = ChoixStatutChecklist.GEST_BLOCAGE.name
-        second_admission.save(update_fields=['checklist'])
+        academic_experience.validation_status = ChoixStatutValidationExperience.A_COMPLETER.name
+        academic_experience.save()
 
         response = self._do_request(
             **default_cmd_params,
@@ -1484,9 +1484,8 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         self.assertEqual(len(response.context['object_list']), 0)
 
-        current_checklist['statut'] = ChoixStatutChecklist.GEST_EN_COURS.name
-        current_checklist['extra'] = {'authentification': '1'}
-        second_admission.save(update_fields=['checklist'])
+        academic_experience.validation_status = ChoixStatutValidationExperience.AUTHENTIFICATION.name
+        academic_experience.save()
 
         response = self._do_request(
             **default_cmd_params,
@@ -1507,9 +1506,8 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         self.assertEqual(len(response.context['object_list']), 0)
 
-        current_checklist['statut'] = ChoixStatutChecklist.GEST_EN_COURS.name
-        current_checklist['extra'] = {'authentification': '0'}
-        second_admission.save(update_fields=['checklist'])
+        academic_experience.validation_status = ChoixStatutValidationExperience.AVIS_EXPERT.name
+        academic_experience.save()
 
         response = self._do_request(
             **default_cmd_params,
@@ -1530,9 +1528,8 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         self.assertEqual(len(response.context['object_list']), 0)
 
-        current_checklist['statut'] = ChoixStatutChecklist.GEST_BLOCAGE_ULTERIEUR.name
-        current_checklist['extra'] = {}
-        second_admission.save(update_fields=['checklist'])
+        academic_experience.validation_status = ChoixStatutValidationExperience.A_COMPLETER_APRES_INSCRIPTION.name
+        academic_experience.save()
 
         response = self._do_request(
             **default_cmd_params,
@@ -1553,9 +1550,8 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         self.assertEqual(len(response.context['object_list']), 0)
 
-        current_checklist['statut'] = ChoixStatutChecklist.GEST_REUSSITE.name
-        current_checklist['extra'] = {}
-        second_admission.save(update_fields=['checklist'])
+        academic_experience.validation_status = ChoixStatutValidationExperience.VALIDEE.name
+        academic_experience.save()
 
         response = self._do_request(
             **default_cmd_params,
@@ -1581,10 +1577,8 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         self.assertEqual(len(response.context['object_list']), 0)
 
-        current_checklist['extra'] = {
-            'etat_authentification': EtatAuthentificationParcours.VRAI.name,
-        }
-        second_admission.save(update_fields=['checklist'])
+        academic_experience.authentication_status = EtatAuthentificationParcours.VRAI.name
+        academic_experience.save()
 
         response = self._do_request(
             **default_cmd_params,
@@ -1595,9 +1589,8 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         self.assertEqual(len(response.context['object_list']), 1)
 
-        current_checklist['statut'] = ChoixStatutChecklist.GEST_EN_COURS.name
-        current_checklist['extra']['authentification'] = '1'
-        second_admission.save(update_fields=['checklist'])
+        academic_experience.validation_status = ChoixStatutValidationExperience.AUTHENTIFICATION.name
+        academic_experience.save()
 
         response = self._do_request(
             **default_cmd_params,
@@ -2683,13 +2676,11 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             'filtres_etats_checklist_4': [f'AUTHENTIFICATION.{EtatAuthentificationParcours.VRAI.name}'],
         }
 
-        second_admission.checklist['current'][OngletsChecklist.parcours_anterieur.name]['enfants'] = [
-            {
-                'statut': ChoixStatutChecklist.GEST_EN_COURS.name,
-                'extra': {'authentification': '1', 'etat_authentification': EtatAuthentificationParcours.VRAI.name},
-            }
-        ]
-        second_admission.save(update_fields=['checklist'])
+        academic_experience: EducationalExperience = EducationalExperienceFactory(
+            person=second_admission.candidate,
+            validation_status=ChoixStatutValidationExperience.AUTHENTIFICATION.name,
+            authentication_status=EtatAuthentificationParcours.VRAI.name,
+        )
 
         # The admission has the specific status and checklist info for one experience so we exclude it
         response = self._do_request(**default_cmd_params)
@@ -2698,13 +2689,8 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(len(response.context['object_list']), 0)
 
         # The admission hasn't got the specific status for one experience so we don't exclude it
-        second_admission.checklist['current'][OngletsChecklist.parcours_anterieur.name]['enfants'] = [
-            {
-                'statut': ChoixStatutChecklist.GEST_BLOCAGE.name,
-                'extra': {'authentification': '1'},
-            }
-        ]
-        second_admission.save(update_fields=['checklist'])
+        academic_experience.validation_status = ChoixStatutValidationExperience.AVIS_EXPERT.name
+        academic_experience.save()
 
         response = self._do_request(**default_cmd_params)
 
@@ -2712,67 +2698,18 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(len(response.context['object_list']), 1)
 
         # The admission hasn't got the specific authentification state for one experience so we don't exclude it
-        second_admission.checklist['current'][OngletsChecklist.parcours_anterieur.name]['enfants'] = [
-            {
-                'statut': ChoixStatutChecklist.GEST_EN_COURS.name,
-                'extra': {'authentification': '1', 'etat_authentification': EtatAuthentificationParcours.FAUX.name},
-            }
-        ]
-        second_admission.save(update_fields=['checklist'])
+        academic_experience.validation_status = ChoixStatutValidationExperience.AUTHENTIFICATION.name
+        academic_experience.authentication_status = EtatAuthentificationParcours.FAUX.name
+        academic_experience.save()
 
         response = self._do_request(**default_cmd_params)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context['object_list']), 1)
 
-        # The admission hasn't got the specific extra info for one experience so we don't exclude it
-        second_admission.checklist['current'][OngletsChecklist.parcours_anterieur.name]['enfants'] = [
-            {
-                'statut': ChoixStatutChecklist.GEST_EN_COURS.name,
-                'extra': {'authentification': '0'},
-            }
-        ]
-        second_admission.save(update_fields=['checklist'])
-
-        response = self._do_request(**default_cmd_params)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.context['object_list']), 1)
-
-        # The experience hasn't got any specified status so we don't exclude it
-        second_admission.checklist['current'][OngletsChecklist.parcours_anterieur.name]['enfants'] = [
-            {
-                'extra': {'authentification': '0'},
-            }
-        ]
-        second_admission.save(update_fields=['checklist'])
-
-        response = self._do_request(**default_cmd_params)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.context['object_list']), 1)
-
-        # The experience has empty extra info so we don't exclude it
-        second_admission.checklist['current'][OngletsChecklist.parcours_anterieur.name]['enfants'] = [
-            {
-                'statut': ChoixStatutChecklist.GEST_EN_COURS.name,
-                'extra': {},
-            }
-        ]
-        second_admission.save(update_fields=['checklist'])
-
-        response = self._do_request(**default_cmd_params)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.context['object_list']), 1)
-
-        # The experience has no extra info so we don't exclude it
-        second_admission.checklist['current'][OngletsChecklist.parcours_anterieur.name]['enfants'] = [
-            {
-                'statut': ChoixStatutChecklist.GEST_EN_COURS.name,
-            }
-        ]
-        second_admission.save(update_fields=['checklist'])
+        # The experience is in draft so we don't exclude it
+        academic_experience.validation_status = ChoixStatutValidationExperience.EN_BROUILLON.name
+        academic_experience.save()
 
         response = self._do_request(**default_cmd_params)
 
@@ -2780,35 +2717,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(len(response.context['object_list']), 1)
 
         # The admission has no specified experiences so we don't exclude it
-        second_admission.checklist['current'][OngletsChecklist.parcours_anterieur.name]['enfants'] = []
-        second_admission.save(update_fields=['checklist'])
-
-        response = self._do_request(**default_cmd_params)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.context['object_list']), 1)
-
-        # The admission checklist for the past experiences has no child attribute so we don't exclude it
-        second_admission.checklist['current'][OngletsChecklist.parcours_anterieur.name].pop('enfants')
-        second_admission.save(update_fields=['checklist'])
-
-        response = self._do_request(**default_cmd_params)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.context['object_list']), 1)
-
-        # The admission has no checklist info for the past experiences tab so we don't exclude it
-        second_admission.checklist['current'].pop(OngletsChecklist.parcours_anterieur.name)
-        second_admission.save(update_fields=['checklist'])
-
-        response = self._do_request(**default_cmd_params)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.context['object_list']), 1)
-
-        # The admission has no checklist current info so we don't exclude it
-        second_admission.checklist = {}
-        second_admission.save(update_fields=['checklist'])
+        academic_experience.delete()
 
         response = self._do_request(**default_cmd_params)
 

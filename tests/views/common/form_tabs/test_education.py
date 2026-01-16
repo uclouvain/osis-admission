@@ -291,8 +291,8 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.YES.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, self.academic_years[0])
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.YES.name)
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.academic_graduation_year, self.academic_years[0])
 
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
@@ -330,8 +330,8 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.YES.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, self.academic_years[0])
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.YES.name)
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.academic_graduation_year, self.academic_years[0])
 
         self.assertTrue(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
@@ -367,8 +367,8 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.YES.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, self.academic_years[0])
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.YES.name)
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.academic_graduation_year, self.academic_years[0])
 
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertTrue(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
@@ -403,8 +403,8 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.YES.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, self.academic_years[0])
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.YES.name)
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.academic_graduation_year, self.academic_years[0])
 
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
@@ -430,8 +430,8 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.YES.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, self.academic_years[0])
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.YES.name)
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.academic_graduation_year, self.academic_years[0])
 
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
@@ -462,8 +462,8 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.THIS_YEAR.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, self.academic_years[1])
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.THIS_YEAR.name)
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.academic_graduation_year, self.academic_years[1])
 
         self.assertTrue(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
@@ -499,8 +499,8 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.THIS_YEAR.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, self.academic_years[1])
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.THIS_YEAR.name)
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.academic_graduation_year, self.academic_years[1])
 
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertTrue(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
@@ -532,8 +532,8 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.THIS_YEAR.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, self.academic_years[1])
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.THIS_YEAR.name)
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.academic_graduation_year, self.academic_years[1])
 
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
@@ -559,8 +559,8 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.NO.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, None)
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.NO.name)
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.academic_graduation_year, None)
 
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
@@ -672,8 +672,8 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.NO.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, None)
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.NO.name)
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.academic_graduation_year, None)
 
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
@@ -705,8 +705,8 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.NO.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, None)
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.NO.name)
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.academic_graduation_year, None)
 
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
@@ -734,8 +734,8 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.NO.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, None)
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.NO.name)
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.academic_graduation_year, None)
 
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=self.general_admission.candidate).exists())
@@ -897,8 +897,8 @@ class AdmissionEducationFormViewForContinuingTestCase(TestCase):
         self.continuing_admission.refresh_from_db()
         candidate = self.continuing_admission.candidate
 
-        self.assertEqual(candidate.graduated_from_high_school, GotDiploma.YES.name)
-        self.assertEqual(candidate.graduated_from_high_school_year, self.academic_years[0])
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.YES.name)
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.academic_graduation_year, self.academic_years[0])
 
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=candidate).exists())
@@ -1708,8 +1708,8 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.YES.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, self.academic_years[0])
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.YES.name)
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.academic_graduation_year, self.academic_years[0])
 
         belgian_diploma.refresh_from_db()
 
@@ -1755,8 +1755,8 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.YES.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, self.academic_years[0])
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.YES.name)
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.academic_graduation_year, self.academic_years[0])
 
         belgian_diploma.refresh_from_db()
 
@@ -1824,8 +1824,8 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.YES.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, self.academic_years[0])
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.YES.name)
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.academic_graduation_year, self.academic_years[0])
 
         belgian_diploma = BelgianHighSchoolDiploma.objects.filter(
             person=self.general_admission.candidate,
@@ -1876,8 +1876,8 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.YES.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, self.academic_years[0])
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.YES.name)
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.academic_graduation_year, self.academic_years[0])
 
         belgian_diploma = BelgianHighSchoolDiploma.objects.filter(
             person=self.general_admission.candidate,
@@ -1959,8 +1959,8 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.YES.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, self.academic_years[0])
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.YES.name)
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.academic_graduation_year, self.academic_years[0])
 
         foreign_diploma: ForeignHighSchoolDiploma = ForeignHighSchoolDiploma.objects.filter(
             person=self.general_admission.candidate,
@@ -2065,8 +2065,8 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.YES.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, self.academic_years[0])
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.YES.name)
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.academic_graduation_year, self.academic_years[0])
 
         foreign_diploma.refresh_from_db()
 
@@ -2151,8 +2151,8 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         # Check saved data
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school, GotDiploma.YES.name)
-        self.assertEqual(self.general_admission.candidate.graduated_from_high_school_year, self.academic_years[0])
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.YES.name)
+        self.assertEqual(self.general_admission.candidate.highschooldiploma.academic_graduation_year, self.academic_years[0])
 
         foreign_diploma: ForeignHighSchoolDiploma = ForeignHighSchoolDiploma.objects.filter(
             person=self.general_admission.candidate

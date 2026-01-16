@@ -402,5 +402,4 @@ class PropositionInMemoryRepository(
         Checklist.initialiser(
             proposition=proposition,
             profil_candidat_translator=ProfilCandidatInMemoryTranslator(),
-            annee_courante=proposition.annee_calculee,
         )

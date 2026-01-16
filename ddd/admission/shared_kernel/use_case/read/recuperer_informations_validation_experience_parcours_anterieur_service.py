@@ -23,12 +23,24 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 
-import attr
+from admission.ddd.admission.shared_kernel.commands import RechercherParcoursAnterieurQuery
+from admission.ddd.admission.shared_kernel.commands import \
+    RecupererInformationsValidationExperienceParcoursAnterieurQuery
+from admission.ddd.admission.shared_kernel.domain.service.i_modifier_checklist_experience_parcours_anterieur import \
+    IValidationExperienceParcoursAnterieurService
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
+from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 
-from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import EtudesSecondairesDTO
 
-
-@attr.dataclass(slots=True, frozen=True)
-class EtudesSecondairesAdmissionDTO(EtudesSecondairesDTO):
-    pass
+def recuperer_informations_validation_experience_parcours_anterieur(
+    cmd: 'RecupererInformationsValidationExperienceParcoursAnterieurQuery',
+    validation_experience_parcours_anterieur_service: 'IValidationExperienceParcoursAnterieurService',
+):
+    return validation_experience_parcours_anterieur_service.recuperer_information_validation(
+        matricule_candidat=cmd.matricule_candidat,
+        uuid_experience=cmd.uuid_experience,
+        type_experience=cmd.type_experience,
+    )

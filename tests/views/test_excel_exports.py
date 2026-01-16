@@ -761,8 +761,6 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
             last_registration_id='NOMA1',
             emergency_contact_phone='010203',
             phone_mobile='01020304',
-            graduated_from_high_school=GotDiploma.YES.name,
-            graduated_from_high_school_year=AcademicYearFactory(year=2014),
         )
         experiences = EducationalExperience.objects.filter(person=candidate)
         experience = experiences[0]
@@ -832,6 +830,9 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
             ],
             other_way_to_find_out_about_the_course='Other way',
         )
+        candidate.highschooldiploma.got_diploma = GotDiploma.YES.name
+        candidate.highschooldiploma.academic_graduation_year = AcademicYearFactory(year=2014)
+        candidate.highschooldiploma.save()
 
         cls.text_form_item = AdmissionFormItemInstantiationFactory(
             form_item=TextAdmissionFormItemFactory(
@@ -1069,9 +1070,10 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
         self.admission.save()
 
         self.admission.candidate.last_registration_year = None
-        self.admission.candidate.graduated_from_high_school = GotDiploma.NO.name
-        self.admission.candidate.graduated_from_high_school_year = None
+        self.admission.candidate.highschooldiploma.got_diploma = GotDiploma.NO.name
+        self.admission.candidate.highschooldiploma.academic_graduation_year = None
 
+        self.admission.candidate.highschooldiploma.save()
         self.admission.candidate.save()
 
         new_experience = EducationalExperienceFactory(
