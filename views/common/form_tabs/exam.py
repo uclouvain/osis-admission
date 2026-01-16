@@ -52,6 +52,10 @@ class ExamFormView(AdmissionFormMixin, LoadDossierViewMixin, EditExamenView):
     template_name = 'admission/forms/exams.html'
     permission_required = 'admission.change_admission_exam'
 
+
+    def traitement_specifique(self):
+        pass
+
     def has_permission(self):
         return super().has_permission() and self.can_be_updated
 
