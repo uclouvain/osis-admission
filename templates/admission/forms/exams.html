@@ -43,20 +43,6 @@
       </a>
       {% endif %}
     </div>
-    <div class="panel-body">
-
-      {% bootstrap_form_errors form %}
-
-      <div class="row">
-        <div class="col-md-12 required_field">
-          {% bootstrap_field form.certificate %}
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-md-12 required_field">
-          {% bootstrap_field form.year %}
-        </div>
-      </div>
-    </div>
+    {% include 'osis_profile/forms/base_edit_examen.html' %}
   </div>
 {% endblock %}

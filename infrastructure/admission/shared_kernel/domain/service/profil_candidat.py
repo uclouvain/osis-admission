@@ -44,9 +44,10 @@ from django.db.models import (
     QuerySet,
     Subquery,
     Value,
-    When,
+    When, UUIDField,
 )
-from django.db.models.functions import Concat, ExtractMonth, ExtractYear
+from django.db.models.fields.json import KeyTextTransform
+from django.db.models.functions import Concat, ExtractMonth, ExtractYear, Cast
 from django.utils.translation import get_language
 
 from admission.ddd import LANGUES_OBLIGATOIRES_DOCTORAT, NB_MOIS_MIN_VAE
@@ -88,13 +89,13 @@ from admission.models import EPCInjection as AdmissionEPCInjection
 from admission.models.base import (
     BaseAdmission,
 )
-from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences, \
-    AdmissionProfessionalValuatedExperiences
 from admission.models.epc_injection import (
     EPCInjectionStatus as AdmissionEPCInjectionStatus,
 )
 from admission.models.epc_injection import EPCInjectionType
 from admission.models.functions import ArrayLength
+from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences, \
+    AdmissionProfessionalValuatedExperiences
 from base.models.enums.community import CommunityEnum
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
@@ -640,6 +641,30 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         )
 
     @classmethod
+    def get_examen_annotations(cls):
+        return dict(
+            injecte_par_admission=Exists(
+                AdmissionEPCInjection.objects.filter(
+                    admission__exam__exam__uuid=OuterRef('uuid'),
+                    type=EPCInjectionType.DEMANDE.name,
+                    status__in=AdmissionEPCInjectionStatus.blocking_statuses_for_experience(),
+                )
+            ),
+            injecte_par_cv=Exists(
+                CurriculumEPCInjection.objects.annotate(
+                    osis_uuid_text=KeyTextTransform(
+                        'osis_uuid',
+                        KeyTextTransform('examens', 'payload'),
+                    ),
+                    osis_uuid=Cast('osis_uuid_text', UUIDField()),
+                ).filter(
+                    status__in=CurriculumEPCInjectionStatus.blocking_statuses_for_experience(),
+                    osis_uuid=OuterRef('uuid'),
+                )
+            ),
+        )
+
+    @classmethod
     def get_secondary_studies_valuation_annotations(cls):
         return dict(
             belgian_highschool_diploma_institute_address=Concat(
@@ -706,7 +731,11 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def get_examen(
-        cls, uuid_proposition: str, matricule: str, formation_sigle: str, formation_annee: int
+        cls,
+        uuid_proposition: str,
+        matricule: str,
+        formation_sigle: str,
+        formation_annee: int,
     ) -> 'ExamenDTO':
         exam_type = ExamType.objects.filter(
             education_group_years__acronym=formation_sigle,
@@ -716,7 +745,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             return ExamenDTO(uuid='', requis=False, titre='', attestation=[], annee=None)
         exam = Exam.objects.filter(
             admissions__admission__uuid=uuid_proposition,
-        ).first()
+        ).annotate(**cls.get_examen_annotations()).first()
         if exam is None:
             return ExamenDTO(uuid='', requis=True, titre=exam_type.title, attestation=[], annee=None)
         return ExamenDTO(
@@ -725,6 +754,8 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             titre=exam_type.title,
             attestation=exam.certificate,
             annee=exam.year.year if exam.year else None,
+            identifiant_externe=exam.external_id,
+            injectee=exam.injecte_par_admission or exam.injecte_par_cv
         )
 
     @classmethod
@@ -736,9 +767,13 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 titre=exam.type.title,
                 attestation=exam.certificate,
                 annee=exam.year.year if exam.year else None,
+                identifiant_externe=exam.external_id,
+                injectee=exam.injecte_par_cv or exam.injecte_par_admission
             )
             for exam in (
-                Exam.objects.exclude(type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR)
+                Exam.objects.exclude(type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR).annotate(
+                    **cls.get_examen_annotations(),
+                )
                 .select_related('type')
                 .filter(person__global_id=matricule)
             )
@@ -1040,8 +1075,8 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             ProfessionalExperience.objects.filter(person__global_id=matricule)
             .annotate(
                 nombre_mois=(ExtractYear('end_date') - ExtractYear('start_date')) * 12
-                + (ExtractMonth('end_date') - ExtractMonth('start_date'))
-                + 1
+                            + (ExtractMonth('end_date') - ExtractMonth('start_date'))
+                            + 1
                 # + 1 car la date de début est le premier jour du mois et la date de fin, le dernier jour du mois
             )
             .aggregate(total=models.Sum('nombre_mois'))
