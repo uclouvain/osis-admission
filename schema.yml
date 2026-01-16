@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Admission API
-  version: 1.1.16
+  version: 1.1.17.dev1651
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -8412,13 +8412,13 @@ components:
           maxItems: 2
         has_access_diploma_to_higher_education_ue:
           type: boolean
-          title: A le Diplôme d'Aptitude à accéder à l'Enseignement Supérieur (DAES)
-            (UE)
+          title: Has the diploma of aptitude for access to higher education (DAES)
+            (EU)
         access_diploma_to_higher_education_ue:
           type: array
           items:
             type: string
-          title: Diplôme d'Aptitude à accéder à l'Enseignement Supérieur (DAES)
+          title: Diplôme d'Aptitude à accéder à l'Enseignement supérieur (DAES)
           maxItems: 1
         final_equivalence_decision_not_ue:
           type: array
@@ -8428,13 +8428,13 @@ components:
           maxItems: 2
         has_access_diploma_to_higher_education_not_ue:
           type: boolean
-          title: A le Diplôme d'Aptitude à accéder à l'Enseignement Supérieur (DAES)
-            (non UE)
+          title: Has the diploma of aptitude for access to higher education (DAES)
+            (not EU)
         access_diploma_to_higher_education_not_ue:
           type: array
           items:
             type: string
-          title: Diplôme d'Aptitude à accéder à l'Enseignement Supérieur (DAES)
+          title: Diplôme d'Aptitude à accéder à l'Enseignement supérieur (DAES)
           maxItems: 1
         equivalence_decision_proof:
           type: array
@@ -10053,6 +10053,7 @@ components:
       - ADMISSION_POOL_EXTERNAL_REORIENTATION
       - DOCTORATE_EDUCATION_ENROLLMENT
       - CONTINUING_EDUCATION_ENROLLMENT
+      - ADMISSION_POOL_NON_RESIDENT_QUOTA
       - ADMISSION_POOL_EXTERNAL_ENROLLMENT_CHANGE
       - ADMISSION_POOL_PREFERENTIAL_FOR_MEDICINE_DENTISTRY
       - ADMISSION_POOL_VIP
@@ -10062,12 +10063,12 @@ components:
       - ADMISSION_POOL_UE5_NON_BELGIAN
       - ADMISSION_POOL_HUE5_BELGIUM_RESIDENCY
       - ADMISSION_POOL_HUE5_FOREIGN_RESIDENCY
-      - ADMISSION_POOL_NON_RESIDENT_QUOTA
       type: string
       description: |-
         * `ADMISSION_POOL_EXTERNAL_REORIENTATION` - ADMISSION_POOL_EXTERNAL_REORIENTATION
         * `DOCTORATE_EDUCATION_ENROLLMENT` - DOCTORATE_EDUCATION_ENROLLMENT
         * `CONTINUING_EDUCATION_ENROLLMENT` - CONTINUING_EDUCATION_ENROLLMENT
+        * `ADMISSION_POOL_NON_RESIDENT_QUOTA` - ADMISSION_POOL_NON_RESIDENT_QUOTA
         * `ADMISSION_POOL_EXTERNAL_ENROLLMENT_CHANGE` - ADMISSION_POOL_EXTERNAL_ENROLLMENT_CHANGE
         * `ADMISSION_POOL_PREFERENTIAL_FOR_MEDICINE_DENTISTRY` - ADMISSION_POOL_PREFERENTIAL_FOR_MEDICINE_DENTISTRY
         * `ADMISSION_POOL_VIP` - ADMISSION_POOL_VIP
@@ -10077,7 +10078,6 @@ components:
         * `ADMISSION_POOL_UE5_NON_BELGIAN` - ADMISSION_POOL_UE5_NON_BELGIAN
         * `ADMISSION_POOL_HUE5_BELGIUM_RESIDENCY` - ADMISSION_POOL_HUE5_BELGIUM_RESIDENCY
         * `ADMISSION_POOL_HUE5_FOREIGN_RESIDENCY` - ADMISSION_POOL_HUE5_FOREIGN_RESIDENCY
-        * `ADMISSION_POOL_NON_RESIDENT_QUOTA` - ADMISSION_POOL_NON_RESIDENT_QUOTA
     PoolQuestions:
       type: object
       properties:
@@ -10122,6 +10122,31 @@ components:
           type: boolean
           nullable: true
           title: Est non-résident (au sens du décret)
+        residence_certificate:
+          type: array
+          items:
+            type: string
+          title: Certificat de résidence
+        residence_student_form:
+          type: array
+          items:
+            type: string
+          title: Dossier résident
+        non_resident_file:
+          type: array
+          items:
+            type: string
+          title: Dossier non-résident
+        non_resident_with_second_year_enrolment:
+          type: boolean
+          nullable: true
+          title: Désirez-vous faire une demande d’admission directement pour la deuxième
+            année ?
+        non_resident_with_second_year_enrolment_form:
+          type: array
+          items:
+            type: string
+          title: Formulaire de demande d’admission au-delà des 60 premiers crédits
         reorientation_pool_end_date:
           type: string
           format: date-time
@@ -10140,9 +10165,26 @@ components:
           type: integer
           readOnly: true
           nullable: true
-        forbid_enrolment_limited_course_for_non_resident:
+        non_resident_quota_pool_start_date:
           type: string
+          format: date
           readOnly: true
+          nullable: true
+        non_resident_quota_pool_start_time:
+          type: string
+          format: time
+          readOnly: true
+          nullable: true
+        non_resident_quota_pool_end_date:
+          type: string
+          format: date
+          readOnly: true
+          nullable: true
+        non_resident_quota_pool_end_time:
+          type: string
+          format: time
+          readOnly: true
+          nullable: true
     PosteDiplomatiqueDTONested:
       type: object
       description: |-
@@ -10296,6 +10338,14 @@ components:
         pool_end_date:
           type: string
           format: date
+          nullable: true
+        pool_start_time:
+          type: string
+          format: time
+          nullable: true
+        pool_end_time:
+          type: string
+          format: time
           nullable: true
         access_conditions_url:
           type: string

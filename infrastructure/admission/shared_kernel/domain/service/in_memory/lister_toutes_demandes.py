@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -78,6 +78,7 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
         filtres_etats_checklist: Optional[Dict[str, List[str]]] = '',
         tardif_modif_reorientation: Optional[str] = '',
         delai_depasse_complements: Optional[bool] = None,
+        contingentes: Optional[List[str]] = None,
     ) -> PaginatedList[DemandeRechercheDTO]:
 
         result = PaginatedList(id_attribute='uuid')

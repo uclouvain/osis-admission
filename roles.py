@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@ from admission.auth.roles.ca_member import CommitteeMember
 from admission.auth.roles.candidate import Candidate
 from admission.auth.roles.central_manager import CentralManager
 from admission.auth.roles.doctorate_committee_member import DoctorateCommitteeMember
+from admission.auth.roles.limited_enrolment_delegate import LimitedEnrolmentDelegate
 from admission.auth.roles.program_manager import ProgramManager
 from admission.auth.roles.promoter import Promoter
 from admission.auth.roles.sceb import Sceb
@@ -43,3 +44,4 @@ role.role_manager.register(ProgramManager)
 role.role_manager.register(CentralManager)
 role.role_manager.register(AdmissionReader)
 role.role_manager.register(AdmissionSicManagement)
+role.role_manager.register(LimitedEnrolmentDelegate)

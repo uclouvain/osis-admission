@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,17 +31,6 @@ import factory
 
 from admission.constants import ADMISSION_POOL_ACADEMIC_CALENDAR_TYPES
 from admission.ddd import CODE_BACHELIER_VETERINAIRE
-from admission.ddd.admission.shared_kernel.domain.service.i_unites_enseignement_translator import (
-    IUnitesEnseignementTranslator,
-)
-from admission.ddd.admission.shared_kernel.dtos.formation import BaseFormationDTO
-from admission.ddd.admission.shared_kernel.dtos.profil_candidat import ProfilCandidatDTO
-from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
-    StatutEmplacementDocument,
-    StatutReclamationEmplacementDocument,
-    TypeEmplacementDocument,
-)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     DROITS_INSCRIPTION_MONTANT_VALEURS,
     ChoixStatutPropositionGenerale,
@@ -68,16 +57,31 @@ from admission.ddd.admission.formation_generale.test.factory.proposition import 
     PropositionFactory,
     _PropositionIdentityFactory,
 )
-from admission.ddd.admission.shared_kernel.repository.i_proposition import formater_reference
-from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationIdentityFactory
+from admission.ddd.admission.shared_kernel.domain.service.i_unites_enseignement_translator import (
+    IUnitesEnseignementTranslator,
+)
+from admission.ddd.admission.shared_kernel.dtos.formation import BaseFormationDTO
+from admission.ddd.admission.shared_kernel.dtos.profil_candidat import ProfilCandidatDTO
+from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    StatutEmplacementDocument,
+    StatutReclamationEmplacementDocument,
+    TypeEmplacementDocument,
+)
+from admission.ddd.admission.shared_kernel.repository.i_proposition import (
+    formater_reference,
+)
+from admission.ddd.admission.shared_kernel.tests.factory.formation import (
+    FormationIdentityFactory,
+)
+from admission.infrastructure.admission.formation_generale.domain.service.in_memory.formation import (
+    FormationGeneraleInMemoryTranslator,
+)
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.poste_diplomatique import (
     PosteDiplomatiqueInMemoryTranslator,
 )
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
-)
-from admission.infrastructure.admission.formation_generale.domain.service.in_memory.formation import (
-    FormationGeneraleInMemoryTranslator,
 )
 from admission.infrastructure.admission.shared_kernel.repository.in_memory.proposition import (
     GlobalPropositionInMemoryRepository,
@@ -330,6 +334,8 @@ class PropositionInMemoryRepository(
             curriculum=proposition.curriculum,
             est_bachelier_belge=proposition.est_bachelier_belge,
             est_non_resident_au_sens_decret=proposition.est_non_resident_au_sens_decret,
+            accuse_de_reception_contingente=proposition.accuse_de_reception_contingente,
+            numero_dossier_ares=proposition.numero_dossier_ares,
             elements_confirmation=proposition.elements_confirmation,
             est_modification_inscription_externe=proposition.est_modification_inscription_externe,
             formulaire_modification_inscription=proposition.formulaire_modification_inscription,

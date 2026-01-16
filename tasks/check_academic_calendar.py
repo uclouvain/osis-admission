@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -45,4 +45,5 @@ def run() -> dict:  # pragma: no cover
     AdmissionAccessConditionsUrl.ensure_consistency_until_n_plus_6()
     AdmissionMedicineDentistryEnrollmentCalendar.ensure_consistency_until_n_plus_6()
     AdmissionPoolMedicineDentistryStandardPeriodCalendar.ensure_consistency_until_n_plus_6()
+    AdmissionNonResidentQuotaResultPublication.ensure_consistency_until_n_plus_6()
     return {}

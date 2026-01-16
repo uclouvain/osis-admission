@@ -2,6 +2,7 @@
 
 from django.db import migrations
 
+
 def copier_gestionnaires_iufc(apps, schema_editor):
     try:
         ContinuingEducationTrainingManager = apps.get_model(
@@ -33,6 +34,4 @@ class Migration(migrations.Migration):
         ('admission', '0217_alter_accounting_sport_affiliation'),
     ]
 
-    operations = [
-        migrations.RunPython(copier_gestionnaires_iufc, reverse_code=migrations.RunPython.noop)
-    ]
+    operations = [migrations.RunPython(copier_gestionnaires_iufc, reverse_code=migrations.RunPython.noop)]

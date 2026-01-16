@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -1539,6 +1539,8 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             est_bachelier_belge=None,
             est_modification_inscription_externe=None,
             est_non_resident_au_sens_decret=None,
+            accuse_de_reception_contingente=[],
+            numero_dossier_ares='',
             est_reorientation_inscription_externe=None,
             formulaire_modification_inscription=['uuid-formulaire-modification-inscription'],
             attestation_inscription_reguliere_pour_modification_inscription=[

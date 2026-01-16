@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -39,6 +39,7 @@ from osis_notification.models import EmailNotification
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from admission.calendar.admission_calendar import SIGLES_WITH_QUOTA
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
 )
@@ -55,7 +56,6 @@ from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     HorsPeriodeSpecifiqueInscription,
     NombrePropositionsSoumisesDepasseException,
     QuestionsSpecifiquesInformationsComplementairesNonCompleteesException,
-    ResidenceAuSensDuDecretNonDisponiblePourInscriptionException,
 )
 from admission.ddd.admission.shared_kernel.enums import (
     CritereItemFormulaireFormation,
@@ -92,6 +92,7 @@ from admission.tests.factories.person import (
 )
 from admission.tests.factories.roles import ProgramManagerRoleFactory
 from base.forms.utils.file_field import PDF_MIME_TYPE
+from base.models.academic_calendar import AcademicCalendar
 from base.models.academic_year import AcademicYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
@@ -99,6 +100,7 @@ from base.models.enums.got_diploma import GotDiploma
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.enums.state_iufc import StateIUFC
 from base.models.person_address import PersonAddress
+from base.templatetags.learning_unit import academic_year
 from base.tests import QueriesAssertionsMixin
 from base.tests.factories.academic_year import AcademicYearFactory
 from infrastructure.financabilite.domain.service.financabilite import PASS_ET_LAS_LABEL
@@ -116,6 +118,35 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
             'infrastructure.utils.MessageBus.publish',
         )
         self.mock_publish = patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch(
+            'admission.infrastructure.admission.formation_generale.domain.service.notification.get_remote_token',
+            return_value='foobar',
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch('osis_document_components.fields.FileField._confirm_multiple_upload')
+        self.confirm_upload = patcher.start()
+        self.confirm_upload.side_effect = lambda _, value, __: ["550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92"] if value else []
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch('osis_document_components.services.save_raw_content_remotely')
+        self.save_raw_content_mock = patcher.start()
+        self.save_raw_content_mock.return_value = 'pdf-token'
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch('osis_document_components.services.get_several_remote_metadata')
+        patched = patcher.start()
+        patched.side_effect = lambda tokens: {
+            token: {
+                'name': 'myfile',
+                'mimetype': PDF_MIME_TYPE,
+                'size': 1,
+            }
+            for token in tokens
+        }
         self.addCleanup(patcher.stop)
 
     @classmethod
@@ -277,38 +308,6 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
             professional_experience.uuid,
         )
 
-    @mock.patch(
-        'admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription.ICalendrierInscription.'
-        'INTERDIRE_INSCRIPTION_ETUDES_CONTINGENTES_POUR_NON_RESIDENT',
-        new_callable=PropertyMock,
-        return_value=False,
-    )
-    def test_general_proposition_verification_contingent_non_ouvert(self, _):
-        admission = GeneralEducationAdmissionFactory(
-            is_non_resident=True,
-            candidate=IncompletePersonForBachelorFactory(),
-            training__education_group_type__name=TrainingType.BACHELOR.name,
-            training__acronym="VETE1BA",
-        )
-        url = resolve_url("admission_api_v1:submit-general-proposition", uuid=admission.uuid)
-        self.client.force_authenticate(user=admission.candidate.user)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        ret = response.json()
-        self.assertIsNotNone(ret['pool_start_date'])
-        self.assertIsNotNone(ret['pool_end_date'])
-        admission.refresh_from_db()
-        self.assertNotIn(
-            {
-                'status_code': ResidenceAuSensDuDecretNonDisponiblePourInscriptionException.status_code,
-                'detail': ResidenceAuSensDuDecretNonDisponiblePourInscriptionException.get_message(
-                    nom_formation_fr=admission.training.title,
-                    nom_formation_en=admission.training.title_english,
-                ),
-            },
-            admission.detailed_status,
-        )
-
     def test_general_proposition_verification_specific_enrolment_period_for_medicine_dentistry_bachelor(self):
         self.client.force_authenticate(user=self.candidate_ok.user)
 
@@ -405,29 +404,6 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
                 "Dans l'attente de la publication des résultats du concours d'entrée en médecine et dentisterie, "
                 "votre demande ne pourra être soumise qu'à partir du 1 février 1980.",
             )
-
-    def test_general_proposition_verification_contingent_est_interdite(self):
-        admission = GeneralEducationAdmissionFactory(
-            is_non_resident=True,
-            candidate=IncompletePersonForBachelorFactory(),
-            training__education_group_type__name=TrainingType.BACHELOR.name,
-            training__acronym="VETE1BA",
-        )
-        url = resolve_url("admission_api_v1:submit-general-proposition", uuid=admission.uuid)
-        self.client.force_authenticate(user=admission.candidate.user)
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        admission.refresh_from_db()
-        self.assertIn(
-            {
-                'status_code': ResidenceAuSensDuDecretNonDisponiblePourInscriptionException.status_code,
-                'detail': ResidenceAuSensDuDecretNonDisponiblePourInscriptionException.get_message(
-                    nom_formation_fr=admission.training.title,
-                    nom_formation_en=admission.training.title_english,
-                ),
-            },
-            admission.detailed_status,
-        )
 
     def test_general_proposition_submission_ok(self):
         self.client.force_authenticate(user=self.candidate_ok.user)
@@ -816,6 +792,72 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         errors_statuses = [e["status_code"] for e in response.json()['non_field_errors']]
         self.assertNotIn(NombrePropositionsSoumisesDepasseException.status_code, errors_statuses)
+
+    @freezegun.freeze_time("1980-06-01 12:00:00")
+    def test_general_proposition_submission_contingente_ok(self):
+        self.client.force_authenticate(user=self.candidate_ok.user)
+        self.assertEqual(self.admission_ok.status, ChoixStatutPropositionGenerale.EN_BROUILLON.name)
+        required_admission_form_item = TextAdmissionFormItemFactory()
+        AdmissionFormItemInstantiationFactory(
+            form_item=required_admission_form_item,
+            required=True,
+            display_according_education=CritereItemFormulaireFormation.TOUTE_FORMATION.name,
+            tab=Onglets.INFORMATIONS_ADDITIONNELLES.name,
+            academic_year=self.admission_ok.training.academic_year,
+        )
+        facultative_admission_form_item = TextAdmissionFormItemFactory()
+        AdmissionFormItemInstantiationFactory(
+            form_item=facultative_admission_form_item,
+            required=False,
+            display_according_education=CritereItemFormulaireFormation.TOUTE_FORMATION.name,
+            tab=Onglets.INFORMATIONS_ADDITIONNELLES.name,
+            academic_year=self.admission_ok.training.academic_year,
+        )
+        required_admission_form_item.refresh_from_db()
+        facultative_admission_form_item.refresh_from_db()
+        SpecificQuestionAnswer.objects.create(
+            admission=self.admission_ok,
+            form_item=required_admission_form_item,
+            answer='My first answer',
+        )
+        self.admission_ok.training = GeneralEducationTrainingFactory(
+            acronym=SIGLES_WITH_QUOTA[0],
+            academic_year__year=1980,
+            education_group_type__name=TrainingType.BACHELOR.name,
+        )
+        self.admission_ok.is_non_resident = True
+        self.admission_ok.non_resident_file = [uuid.uuid4()]
+        self.admission_ok.non_resident_with_second_year_enrolment = False
+        self.admission_ok.save(
+            update_fields=[
+                'training',
+                'is_non_resident',
+                'non_resident_file',
+                'non_resident_with_second_year_enrolment',
+            ]
+        )
+        AcademicCalendar.objects.filter(reference=AcademicCalendarTypes.ADMISSION_POOL_NON_RESIDENT_QUOTA.name).update(
+            start_time=datetime.time(hour=10, minute=0, second=0),
+            end_time=datetime.time(hour=18, minute=0, second=0),
+        )
+
+        data = {
+            'pool': AcademicCalendarTypes.ADMISSION_POOL_NON_RESIDENT_QUOTA.name,
+            'annee': 1980,
+            'elements_confirmation': {
+                'reglement_general': IElementsConfirmation.REGLEMENT_GENERAL,
+                'protection_donnees': IElementsConfirmation.PROTECTION_DONNEES,
+                'professions_reglementees': IElementsConfirmation.PROFESSIONS_REGLEMENTEES,
+                'justificatifs': IElementsConfirmation.JUSTIFICATIFS % {'by_service': _("by the Enrolment Office")},
+                'declaration_sur_lhonneur': IElementsConfirmation.DECLARATION_SUR_LHONNEUR
+                % {'to_service': _("to the UCLouvain Registration Service")},
+            },
+        }
+        response = self.client.post(self.ok_url, data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
+        self.admission_ok.refresh_from_db()
+        self.assertEqual(self.admission_ok.status, ChoixStatutPropositionGenerale.CONFIRMEE.name)
+        self.assertTrue(self.admission_ok.quota_admission_receipt)
 
 
 @freezegun.freeze_time('2022-12-10')

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -52,12 +52,12 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
 )
 from admission.models import ContinuingEducationAdmission
 from admission.models import EPCInjection as AdmissionEPCInjection
-from admission.models.specific_question import SpecificQuestionAnswer
 from admission.models.epc_injection import (
     EPCInjectionStatus as AdmissionEPCInjectionStatus,
 )
 from admission.models.epc_injection import EPCInjectionType
 from admission.models.general_education import GeneralEducationAdmission
+from admission.models.specific_question import SpecificQuestionAnswer
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import (
     ContinuingEducationAdmissionFactory,

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,31 +31,21 @@ from django.shortcuts import resolve_url
 from rest_framework.test import APITestCase
 
 from admission.calendar.admission_calendar import *
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
-    ResidenceAuSensDuDecretNonDisponiblePourInscriptionException,
-)
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_year import AcademicYearFactory
 
 
-@freezegun.freeze_time('2024-01-01')
+@freezegun.freeze_time('2022-01-01')
 class PoolQuestionApiTestCase(APITestCase):
+
+    maxDiff = None
+
     @classmethod
     def setUpTestData(cls):
         AcademicYearFactory.produce(number_future=6)
         AdmissionAcademicCalendarFactory.produce_all_required()
-
-    def setUp(self):
-        self.mock_calendrier_inscription = patch(
-            'admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription.ICalendrierInscription.'
-            'INTERDIRE_INSCRIPTION_ETUDES_CONTINGENTES_POUR_NON_RESIDENT',
-            new_callable=PropertyMock,
-            return_value=False,
-        )
-        self.mock_calendrier_inscription.start()
-        self.addCleanup(self.mock_calendrier_inscription.stop)
 
     @freezegun.freeze_time('2022-08-01')
     def test_pool_question_api_get_with_not_bachelor(self):
@@ -89,37 +79,16 @@ class PoolQuestionApiTestCase(APITestCase):
             'reorientation_pool_end_date': None,
             'modification_pool_academic_year': None,
             'reorientation_pool_academic_year': None,
+            'non_resident_quota_pool_start_date': '2023-06-01',
+            'non_resident_quota_pool_start_time': '09:00:00',
+            'non_resident_quota_pool_end_date': '2023-06-03',
+            'non_resident_quota_pool_end_time': '16:00:00',
             'is_non_resident': None,
-        }
-        self.assertDictEqual(expected, response.json())
-
-    @freezegun.freeze_time('2022-08-01')
-    @patch(
-        'admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription.ICalendrierInscription.'
-        'INTERDIRE_INSCRIPTION_ETUDES_CONTINGENTES_POUR_NON_RESIDENT',
-        new_callable=PropertyMock,
-        return_value=True,
-    )
-    def test_pool_question_api_get_with_residency_is_forbidden_is_specified(self, _):
-        admission = GeneralEducationAdmissionFactory(
-            training__education_group_type__name=TrainingType.BACHELOR.name,
-            training__acronym=SIGLES_WITH_QUOTA[0],
-        )
-        self.client.force_authenticate(admission.candidate.user)
-        url = resolve_url('admission_api_v1:pool-questions', uuid=admission.uuid)
-        response = self.client.get(url)
-        expected = {
-            'modification_pool_end_date': None,
-            'reorientation_pool_end_date': None,
-            'modification_pool_academic_year': None,
-            'reorientation_pool_academic_year': None,
-            'is_non_resident': None,
-            'forbid_enrolment_limited_course_for_non_resident': (
-                ResidenceAuSensDuDecretNonDisponiblePourInscriptionException.get_message(
-                    nom_formation_fr=admission.training.title,
-                    nom_formation_en=admission.training.title_english,
-                )
-            ),
+            'non_resident_file': [],
+            'non_resident_with_second_year_enrolment': None,
+            'non_resident_with_second_year_enrolment_form': [],
+            'residence_certificate': [],
+            'residence_student_form': [],
         }
         self.assertDictEqual(expected, response.json())
 
@@ -155,11 +124,20 @@ class PoolQuestionApiTestCase(APITestCase):
             'reorientation_pool_end_date': '2023-02-15T23:59:00',
             'modification_pool_academic_year': None,
             'reorientation_pool_academic_year': 2022,
+            'non_resident_quota_pool_start_date': '2023-06-01',
+            'non_resident_quota_pool_start_time': '09:00:00',
+            'non_resident_quota_pool_end_date': '2023-06-03',
+            'non_resident_quota_pool_end_time': '16:00:00',
             'is_non_resident': None,
             'is_belgian_bachelor': None,
             'is_external_reorientation': None,
             'regular_registration_proof': [],
             'reorientation_form': [],
+            'non_resident_file': [],
+            'non_resident_with_second_year_enrolment': None,
+            'non_resident_with_second_year_enrolment_form': [],
+            'residence_certificate': [],
+            'residence_student_form': [],
         }
         self.assertDictEqual(expected, response.json())
 
@@ -208,7 +186,16 @@ class PoolQuestionApiTestCase(APITestCase):
             'reorientation_pool_end_date': None,
             'modification_pool_academic_year': None,
             'reorientation_pool_academic_year': None,
+            'non_resident_quota_pool_start_date': '2023-06-01',
+            'non_resident_quota_pool_start_time': '09:00:00',
+            'non_resident_quota_pool_end_date': '2023-06-03',
+            'non_resident_quota_pool_end_time': '16:00:00',
             'is_non_resident': None,
+            'non_resident_file': [],
+            'non_resident_with_second_year_enrolment': None,
+            'non_resident_with_second_year_enrolment_form': [],
+            'residence_certificate': [],
+            'residence_student_form': [],
         }
         self.assertDictEqual(expected, response.json())
 
@@ -227,6 +214,15 @@ class PoolQuestionApiTestCase(APITestCase):
             'regular_registration_proof_for_registration_change': [],
             'regular_registration_proof': [],
             'reorientation_form': [],
+            'non_resident_quota_pool_start_date': None,
+            'non_resident_quota_pool_start_time': None,
+            'non_resident_quota_pool_end_date': None,
+            'non_resident_quota_pool_end_time': None,
+            'non_resident_file': [],
+            'non_resident_with_second_year_enrolment': None,
+            'non_resident_with_second_year_enrolment_form': [],
+            'residence_certificate': [],
+            'residence_student_form': [],
         }
         self.assertDictEqual(expected, response.json())
         admission.refresh_from_db()

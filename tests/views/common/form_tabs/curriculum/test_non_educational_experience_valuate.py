@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -32,20 +32,27 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
-from admission.models import DoctorateAdmission
-from admission.models.valuated_epxeriences import AdmissionProfessionalValuatedExperiences
-from admission.models.general_education import GeneralEducationAdmission
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
+    ChoixStatutPropositionDoctorale,
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
-from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
-from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.curriculum import (
-    ProfessionalExperienceFactory,
+from admission.ddd.admission.formation_generale.domain.service.checklist import (
+    Checklist,
 )
+from admission.models import DoctorateAdmission
+from admission.models.general_education import GeneralEducationAdmission
+from admission.models.valuated_epxeriences import (
+    AdmissionProfessionalValuatedExperiences,
+)
+from admission.tests.factories import DoctorateAdmissionFactory
+from admission.tests.factories.curriculum import ProfessionalExperienceFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
-from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
+from admission.tests.factories.roles import (
+    ProgramManagerRoleFactory,
+    SicManagementRoleFactory,
+)
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from osis_profile.models import ProfessionalExperience

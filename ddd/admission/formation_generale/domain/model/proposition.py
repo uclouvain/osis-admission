@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -73,6 +73,7 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
     SpecifierConditionAccesParcoursAnterieurValidatorList,
     SpecifierInformationsApprobationInscriptionValidatorList,
     SpecifierNouvellesInformationsDecisionFacultaireValidatorList,
+    SupprimerPropositionValidatorList,
 )
 from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import (
     ProfilCandidat,
@@ -195,6 +196,8 @@ class Proposition(interface.RootEntity):
     attestation_inscription_reguliere_pour_modification_inscription: List[str] = attr.Factory(list)
 
     est_non_resident_au_sens_decret: Optional[bool] = None
+    numero_dossier_ares: str = ''
+    accuse_de_reception_contingente: List[str] = attr.Factory(list)
 
     reponses_questions_specifiques: Dict = attr.Factory(dict)
 
@@ -347,6 +350,7 @@ class Proposition(interface.RootEntity):
         self.est_inscription_tardive = est_inscription_tardive
 
     def supprimer(self):
+        SupprimerPropositionValidatorList(proposition=self).validate()
         self.statut = ChoixStatutPropositionGenerale.ANNULEE
         self.auteur_derniere_modification = self.matricule_candidat
 
@@ -359,6 +363,7 @@ class Proposition(interface.RootEntity):
         est_inscription_tardive: bool,
         profil_candidat_soumis: ProfilCandidat,
         doit_payer_frais_dossier: bool,
+        numero_dossier_ares: str,
     ):
         if doit_payer_frais_dossier:
             self.statut = ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE
@@ -378,6 +383,7 @@ class Proposition(interface.RootEntity):
             self.attestation_inscription_reguliere_pour_modification_inscription = []
         self.est_inscription_tardive = est_inscription_tardive
         self.profil_soumis_candidat = profil_candidat_soumis
+        self.numero_dossier_ares = numero_dossier_ares
         self.auteur_derniere_modification = self.matricule_candidat
 
     def payer_frais_dossier(self):

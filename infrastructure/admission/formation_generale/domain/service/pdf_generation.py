@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -78,6 +78,8 @@ from admission.infrastructure.admission.shared_kernel.domain.service.unites_ense
 )
 from admission.infrastructure.utils import CHAMPS_DOCUMENTS_EXPERIENCES_CURRICULUM
 from admission.utils import WeasyprintStylesheets
+from base.models.academic_calendar import AcademicCalendar
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
 from base.utils.utils import format_academic_year
@@ -532,3 +534,39 @@ class PDFGeneration(IPDFGeneration):
         if temporaire:
             return token
         proposition.certificat_refus_sic = [token]
+
+    @classmethod
+    def generer_accuse_de_reception_contingente(
+        cls,
+        proposition_repository: IPropositionRepository,
+        profil_candidat_translator: IProfilCandidatTranslator,
+        proposition: Proposition,
+    ) -> Optional[str]:
+        result_publication_calendar = (
+            AcademicCalendar.objects.filter(
+                reference=AcademicCalendarTypes.ADMISSION_NON_RESIDENT_QUOTA_RESULT_PUBLICATION.name,
+                start_date__gte=datetime.date.today(),
+            )
+            .order_by('start_date')
+            .first()
+        )
+
+        with translation.override(settings.LANGUAGE_CODE_FR):
+            proposition_dto = proposition_repository.get_dto_for_gestionnaire(
+                proposition.entity_id, UnitesEnseignementTranslator
+            )
+            profil_candidat_identification = profil_candidat_translator.get_identification(
+                proposition.matricule_candidat
+            )
+            token = admission_generate_pdf(
+                admission=None,
+                template='admission/exports/contingente_inscription.html',
+                filename=f'UCLouvain_contingente_accuse_de_reception_{proposition_dto.reference}.pdf',
+                context={
+                    'proposition': proposition_dto,
+                    'profil_candidat_identification': profil_candidat_identification,
+                    'director': cls._get_sic_director(proposition_dto),
+                    'result_publication_calendar': result_publication_calendar,
+                },
+            )
+        proposition.accuse_de_reception_contingente = [token]

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,15 +25,6 @@
 # ##############################################################################
 from typing import List, Optional
 
-from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import (
-    TitreAccesSelectionnable,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
-    IProfilCandidatTranslator,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_unites_enseignement_translator import (
-    IUnitesEnseignementTranslator,
-)
 from admission.ddd.admission.formation_generale.domain.model.proposition import (
     Proposition,
 )
@@ -42,6 +33,15 @@ from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation 
 )
 from admission.ddd.admission.formation_generale.repository.i_proposition import (
     IPropositionRepository,
+)
+from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import (
+    TitreAccesSelectionnable,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
+    IProfilCandidatTranslator,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_unites_enseignement_translator import (
+    IUnitesEnseignementTranslator,
 )
 from ddd.logic.shared_kernel.campus.repository.i_uclouvain_campus import (
     IUclouvainCampusRepository,
@@ -119,5 +119,14 @@ class PDFGenerationInMemory(IPDFGeneration):
         proposition: Proposition,
         gestionnaire: str,
         temporaire: bool = False,
+    ) -> Optional[str]:
+        pass
+
+    @classmethod
+    def generer_accuse_de_reception_contingente(
+        cls,
+        proposition_repository: IPropositionRepository,
+        profil_candidat_translator: IProfilCandidatTranslator,
+        proposition: Proposition,
     ) -> Optional[str]:
         pass

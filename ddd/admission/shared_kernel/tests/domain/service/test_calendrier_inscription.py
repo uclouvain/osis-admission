@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -39,9 +39,6 @@ from admission.ddd.admission.doctorat.preparation.test.factory.proposition impor
 )
 from admission.ddd.admission.formation_continue.test.factory.proposition import (
     PropositionFactory as PropositionContinueFactory,
-)
-from admission.ddd.admission.formation_generale.domain.model.proposition import (
-    PropositionIdentity,
 )
 from admission.ddd.admission.formation_generale.test.factory.proposition import (
     PropositionFactory,
@@ -86,14 +83,6 @@ class CalendrierInscriptionTestCase(TestCase):
         self.profil_candidat_translator = ProfilCandidatInMemoryTranslator()
         self.formation_translator = FormationGeneraleInMemoryTranslator()
         self.profil_candidat_translator.reset()
-        mock_calendrier_inscription = mock.patch(
-            'admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription.ICalendrierInscription.'
-            'INTERDIRE_INSCRIPTION_ETUDES_CONTINGENTES_POUR_NON_RESIDENT',
-            new_callable=PropertyMock,
-            return_value=False,
-        )
-        mock_calendrier_inscription.start()
-        self.addCleanup(mock_calendrier_inscription.stop)
 
     def test_verification_calendrier_inscription_doctorat(self):
         proposition = PropositionAdmissionECGE3DPMinimaleFactory()
@@ -386,7 +375,7 @@ class CalendrierInscriptionTestCase(TestCase):
         profil = ProfilCandidatFactory(matricule=proposition.matricule_candidat)
         self.profil_candidat_translator.profil_candidats.append(profil.identification)
         self.profil_candidat_translator.get_coordonnees = lambda m: profil.coordonnees
-        with self.assertRaises(PoolNonResidentContingenteNonOuvertException):
+        with self.assertRaises(AucunPoolCorrespondantException):
             CalendrierInscriptionInMemory.verifier(
                 formation_id=proposition.formation_id,
                 proposition=proposition,

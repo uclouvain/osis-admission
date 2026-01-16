@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -156,9 +156,54 @@ class GeneralEducationAdmission(BaseAdmission):
         upload_to=admission_directory_path,
         blank=True,
     )
+
+    # Contingenté
+    ares_application_number = models.CharField(
+        verbose_name=_("Ares application number for trainings with quota"),
+        default="",
+        max_length=30,
+        editable=False,
+    )
+    quota_admission_receipt = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('Quota admission receipt'),
+    )
     is_non_resident = models.BooleanField(
         verbose_name=_("Is non-resident (as defined in decree)"),
         null=True,
+    )
+    # Resident
+    residence_certificate = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('Residence certificate'),
+    )
+    residence_student_form = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('Resident student form'),
+    )
+    # Non-resident
+    draw_number = models.PositiveIntegerField(
+        verbose_name=_('Draw number'),
+        null=True,
+        blank=True,
+    )
+    non_resident_file = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('Non-resident file'),
+    )
+    non_resident_with_second_year_enrolment = models.BooleanField(
+        _("Do you intend to make an enrolment directly for the second year?"),
+        blank=True,
+        null=True,
+    )
+    non_resident_with_second_year_enrolment_form = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('Non-resident enrolment form for an enrolment beyond the first 60 credits'),
     )
 
     diploma_equivalence = FileField(
@@ -526,6 +571,13 @@ class GeneralEducationAdmission(BaseAdmission):
         verbose_name = _("General education admission")
         ordering = ('-created_at',)
         permissions = []
+        constraints = [
+            models.UniqueConstraint(
+                fields=('ares_application_number',),
+                condition=~models.Q(ares_application_number=""),
+                name='unique_admission_general_education_ares_application_number',
+            ),
+        ]
 
     def get_admission_context(self):
         return CONTEXT_GENERAL
