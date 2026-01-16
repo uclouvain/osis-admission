@@ -1,5 +1,4 @@
-{% extends "admin/base_site.html" %}
-{% load i18n admin_urls bootstrap3 %}
+{% load bootstrap3 i18n %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -25,24 +24,14 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
+{% if contingente_training_form_success %}
+  <div class="alert alert-success">{% translate "Update saved successfully." %}</div>
+{% endif %}
 
-{% block bodyclass %}{{ block.super }} delete-confirmation delete-selected-confirmation{% endblock %}
-
-{% block breadcrumbs %}
-  <div class="breadcrumbs">
-    <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
-    &rsaquo; <a href="{% url 'admin:app_list' app_label='admission' %}">{% translate 'Admission' %}</a>
-    &rsaquo; <a href="{% url 'admin:admission_admissionformitem_changelist' %}">{% translate 'Admission form items' %}</a>
-    &rsaquo; {% translate 'Initialization of the predefined specific questions' %}
+{% csrf_token %}
+<div class="row">
+  <div class="col-md-3">
+    {% bootstrap_form contingente_training_form %}
   </div>
-{% endblock %}
-
-{% block content %}
-  <h1>{% translate 'Initialization of the predefined specific questions for an academic year' %}</h1>
-  `<form method="post" action="">
-    {% csrf_token %}
-    {% bootstrap_form form %}
-    <input type="submit" value="{% translate 'Launch' %}">
-    <a href="{% url 'admin:admission_admissionformitem_changelist' %}" class="button cancel-link">{% translate "Cancel" %}</a>
-  </form>`
-{% endblock %}
+</div>
+<input class="btn btn-primary" type="submit" value="{% translate 'Update' %}">
