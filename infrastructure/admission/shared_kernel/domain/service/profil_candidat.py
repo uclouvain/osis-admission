@@ -641,6 +641,30 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         )
 
     @classmethod
+    def get_examen_annotations(cls):
+        return dict(
+            injecte_par_admission=Exists(
+                AdmissionEPCInjection.objects.filter(
+                    admission__exam__exam__uuid=OuterRef('uuid'),
+                    type=EPCInjectionType.DEMANDE.name,
+                    status__in=AdmissionEPCInjectionStatus.blocking_statuses_for_experience(),
+                )
+            ),
+            injecte_par_cv=Exists(
+                CurriculumEPCInjection.objects.annotate(
+                    osis_uuid_text=KeyTextTransform(
+                        'osis_uuid',
+                        KeyTextTransform('examens', 'payload'),
+                    ),
+                    osis_uuid=Cast('osis_uuid_text', UUIDField()),
+                ).filter(
+                    status__in=CurriculumEPCInjectionStatus.blocking_statuses_for_experience(),
+                    osis_uuid=OuterRef('uuid'),
+                )
+            ),
+        )
+
+    @classmethod
     def get_secondary_studies_valuation_annotations(cls):
         return dict(
             belgian_highschool_diploma_institute_address=Concat(
@@ -719,32 +743,9 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         ).first()
         if exam_type is None:
             return ExamenDTO(uuid='', requis=False, titre='', attestation=[], annee=None)
-        exam_uuids =  Exam.objects.filter(
-            admissions__admission__uuid=uuid_proposition,
-        ).values('uuid')[:1]
         exam = Exam.objects.filter(
             admissions__admission__uuid=uuid_proposition,
-        ).annotate(
-            injecte_par_admission=Exists(
-                AdmissionEPCInjection.objects.filter(
-                    admission__exam__exam__uuid=OuterRef('uuid'),
-                    type=EPCInjectionType.DEMANDE.name,
-                    status__in=AdmissionEPCInjectionStatus.blocking_statuses_for_experience(),
-                )
-            ),
-            injecte_par_cv=Exists(
-                CurriculumEPCInjection.objects.annotate(
-                    osis_uuid_text=KeyTextTransform(
-                        'osis_uuid',
-                        KeyTextTransform('examens', 'payload'),
-                    ),
-                    osis_uuid=Cast('osis_uuid_text', UUIDField()),
-                ).filter(
-                    status__in=CurriculumEPCInjectionStatus.blocking_statuses_for_experience(),
-                    osis_uuid__in=Subquery(exam_uuids),
-                )
-            ),
-        ).first()
+        ).annotate(**cls.get_examen_annotations()).first()
         if exam is None:
             return ExamenDTO(uuid='', requis=True, titre=exam_type.title, attestation=[], annee=None)
         return ExamenDTO(
@@ -767,10 +768,12 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 attestation=exam.certificate,
                 annee=exam.year.year if exam.year else None,
                 identifiant_externe=exam.external_id,
-                injectee=True
+                injectee=exam.injecte_par_cv or exam.injecte_par_admission
             )
             for exam in (
-                Exam.objects.exclude(type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR)
+                Exam.objects.exclude(type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR).annotate(
+                    **cls.get_examen_annotations(),
+                )
                 .select_related('type')
                 .filter(person__global_id=matricule)
             )
