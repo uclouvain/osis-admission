@@ -1,14 +1,14 @@
 from django.conf import settings
 from django.db import migrations
 
-from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import EtatAuthentificationParcours
-from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
-from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
+    BesoinDeDerogation,
     ChoixStatutPropositionGenerale,
     OngletsChecklist,
-    BesoinDeDerogation,
 )
+from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
+from osis_profile.models.enums.experience_validation import EtatAuthentificationParcours
 
 
 def _get_checklist_filters_with_default_tabs(custom_checklist_filters):
@@ -307,7 +307,6 @@ def initialize_default_working_lists(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('admission', '0163_initialize_past_experiences_checklist'),
     ]

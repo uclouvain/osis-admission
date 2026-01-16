@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -28,14 +28,14 @@ from django.test import TestCase
 
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
+    ChoixStatutPropositionGenerale,
 )
 from admission.tests.factories.general_education import (
-    GeneralEducationTrainingFactory,
     GeneralEducationAdmissionFactory,
+    GeneralEducationTrainingFactory,
 )
-from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
+from admission.tests.factories.roles import ProgramManagerRoleFactory, SicManagementRoleFactory
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
@@ -95,7 +95,6 @@ class ChangeExtraViewTestCase(TestCase):
         self.assertEqual(
             self.general_admission.checklist['current']['assimilation'],
             {
-                'enfants': [],
                 'libelle': '',
                 'extra': {},
                 'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
@@ -128,7 +127,6 @@ class ChangeExtraViewTestCase(TestCase):
         self.assertEqual(
             self.general_admission.checklist['current']['assimilation'],
             {
-                'enfants': [],
                 'libelle': '',
                 'extra': {
                     'date_debut': '2021-12-31',

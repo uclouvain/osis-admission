@@ -84,7 +84,6 @@ class GeneralEducationTrainingFactory(EducationGroupYearFactory):
 def get_checklist():
     default_content = {
         'libelle': '',
-        'enfants': [],
         'extra': {},
         'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
     }

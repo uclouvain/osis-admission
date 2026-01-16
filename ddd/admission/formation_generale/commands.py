@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -598,13 +598,13 @@ class ModifierStatutChecklistExperienceParcoursAnterieurCommand(interface.Comman
     type_experience: str
     gestionnaire: str
     statut: str
-    statut_authentification: Optional[bool]
 
 
 @attr.dataclass(frozen=True, slots=True)
 class ModifierAuthentificationExperienceParcoursAnterieurCommand(interface.CommandRequest):
     uuid_proposition: str
     uuid_experience: str
+    type_experience: str
     gestionnaire: str
     etat_authentification: str
 

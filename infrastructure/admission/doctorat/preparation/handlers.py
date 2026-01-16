@@ -77,6 +77,9 @@ from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import
 from infrastructure.shared_kernel.profil.domain.service.parcours_interne import ExperienceParcoursInterneTranslator
 
 from ...shared_kernel.domain.service.matricule_etudiant import MatriculeEtudiantService
+from ...shared_kernel.domain.service.modifier_checklist_experience_parcours_anterieur import (
+    ValidationExperienceParcoursAnterieurService,
+)
 from ..validation.repository.demande import DemandeRepository
 from .domain.service.comptabilite import ComptabiliteTranslator
 from .domain.service.doctorat import DoctoratTranslator
@@ -223,6 +226,7 @@ COMMAND_HANDLERS = {
         element_confirmation=ElementsConfirmation(),
         maximum_propositions_service=MaximumPropositionsAutorisees(),
         email_destinataire_repository=EmailDestinataireRepository(),
+        validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
     ),
     DefinirCotutelleCommand: lambda msg_bus, cmd: definir_cotutelle(
         cmd,
@@ -533,6 +537,7 @@ COMMAND_HANDLERS = {
         titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
         experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
         profil_candidat_translator=ProfilCandidatTranslator(),
+        academic_year_repository=AcademicYearRepository(),
     ),
     SpecifierConditionAccesPropositionCommand: lambda msg_bus, cmd: specifier_condition_acces_proposition(
         cmd,
@@ -564,6 +569,7 @@ COMMAND_HANDLERS = {
             proposition_repository=PropositionRepository(),
             profil_candidat_translator=ProfilCandidatTranslator(),
             doctorat_translator=DoctoratTranslator(),
+            validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
         )
     ),
     SpecifierInformationsAcceptationPropositionParSicCommand: (
@@ -587,6 +593,7 @@ COMMAND_HANDLERS = {
             notification=Notification(),
             historique=Historique(),
             personne_connue_ucl_translator=PersonneConnueUclTranslator(),
+            validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
         )
     ),
     SpecifierMotifsRefusPropositionParSicCommand: (
