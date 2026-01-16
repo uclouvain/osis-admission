@@ -63,13 +63,13 @@ class RetypeDocumentTestCase(BaseDocumentViewTestCase):
 
         with self.subTest('Post a valid form'):
             other_doc = self.sic_free_requestable_document.split('.')[-1]
-            SpecificQuestionAnswer.objects.create(
+            SpecificQuestionAnswer.objects.update_or_create(
                 admission=self.general_admission,
                 form_item=AdmissionFormItemFactory(
                     uuid=other_doc,
                     type=TypeItemFormulaire.DOCUMENT.name,
                 ),
-                file=['uuid-doc'],
+                defaults={'file':['uuid-doc']},
             )
 
             response = self.client.post(
@@ -151,13 +151,13 @@ class RetypeDocumentTestCase(BaseDocumentViewTestCase):
 
         with self.subTest('Post a valid form'):
             other_doc = self.sic_free_requestable_document.split('.')[-1]
-            SpecificQuestionAnswer.objects.create(
+            SpecificQuestionAnswer.objects.update_or_create(
                 admission=self.doctorate_admission,
                 form_item=AdmissionFormItemFactory(
                     uuid=other_doc,
                     type=TypeItemFormulaire.DOCUMENT.name,
                 ),
-                file=['uuid-doc'],
+                defaults={'file':['uuid-doc']},
             )
 
             response = self.client.post(
