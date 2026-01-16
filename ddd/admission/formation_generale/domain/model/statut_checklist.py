@@ -46,35 +46,14 @@ from osis_common.ddd import interface
 @attr.dataclass
 class StatutChecklist(interface.ValueObject):
     libelle: str
-    enfants: List['StatutChecklist'] = attr.Factory(list)
     statut: Optional[ChoixStatutChecklist] = None
     extra: Dict[str, any] = attr.Factory(dict)
 
-    # @property
-    # def statut(self) -> Optional[ChoixStatutChecklist]:
-    #     if self.enfants:
-    #         # Si tous les enfants sont ok, alors c'est ok
-    #         if all(c.statut == ChoixStatutChecklist.GEST_REUSSITE for c in self.enfants):
-    #             return ChoixStatutChecklist.GEST_REUSSITE
-    #
-    #         # Puis c'est selon la présence du plus urgent
-    #         ordre = [
-    #             ChoixStatutChecklist.GEST_BLOCAGE,
-    #             ChoixStatutChecklist.GEST_EN_COURS,
-    #             ChoixStatutChecklist.GEST_BLOCAGE_ULTERIEUR,
-    #             ChoixStatutChecklist.INITIAL_CANDIDAT,
-    #             ChoixStatutChecklist.INITIAL_NON_CONCERNE,
-    #         ]
-    #         for statut in ordre:
-    #             if any(c.statut == statut for c in self.enfants):
-    #                 return statut
-    #     return self.statut
     @classmethod
     def from_dict(cls, item: Dict[str, any]):
         return cls(
             libelle=item.get('libelle', ''),
             statut=ChoixStatutChecklist[item['statut']] if item.get('statut') else None,
-            enfants=[cls.from_dict(enfant) for enfant in item.get('enfants', [])],
             extra=item.get('extra', {}),
         )
 
@@ -107,11 +86,6 @@ class StatutsChecklistGenerale:
             item = checklist_en_tant_que_dict.get(key, {})
             checklist_by_tab[key] = StatutChecklist.from_dict(item=item)
         return cls(**checklist_by_tab)
-
-    def recuperer_enfant(self, onglet, identifiant_enfant) -> StatutChecklist:
-        return next(
-            enfant for enfant in getattr(self, onglet).enfants if enfant.extra.get('identifiant') == identifiant_enfant
-        )
 
 
 INDEX_ONGLETS_CHECKLIST = {

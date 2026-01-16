@@ -62,7 +62,6 @@ class StatutChecklistFactory(factory.Factory):
         abstract = False
 
     libelle = FuzzyText(length=10, chars=string.digits)
-    enfants = factory.List([])
     statut = ChoixStatutChecklist.INITIAL_CANDIDAT
     extra = factory.Dict({})
 

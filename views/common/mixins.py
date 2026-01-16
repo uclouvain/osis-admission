@@ -110,7 +110,15 @@ from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.gestion_des_comptes.queries import GetPeriodeActiveSoumissionTicketQuery, GetPropositionFusionQuery
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import PermissionRequiredMixin
-
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_GENERALE_PAR_STATUT,
+)
+from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_CONTINUE_PAR_STATUT,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_DOCTORALE_PAR_STATUT,
+)
 
 class AdmissionViewMixin(PermissionRequiredMixin, ContextMixin):
     @property
@@ -192,6 +200,13 @@ class AdmissionViewMixin(PermissionRequiredMixin, ContextMixin):
     def current_user_name(self):
         return f'{self.request.user.person.first_name} {self.request.user.person.last_name}'
 
+    @cached_property
+    def checklist_tabs_organization(self):
+        return {
+            CONTEXT_DOCTORATE: ORGANISATION_ONGLETS_CHECKLIST_DOCTORALE_PAR_STATUT,
+            CONTEXT_CONTINUING: ORGANISATION_ONGLETS_CHECKLIST_CONTINUE_PAR_STATUT,
+            CONTEXT_GENERAL: ORGANISATION_ONGLETS_CHECKLIST_GENERALE_PAR_STATUT,
+        }[self.current_context]
 
 class LoadDossierViewMixin(AdmissionViewMixin):
     specific_questions_tab: Optional[Onglets] = None

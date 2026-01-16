@@ -218,7 +218,6 @@ def soumettre_proposition(
     Checklist.initialiser(
         proposition=proposition,
         profil_candidat_translator=profil_candidat_translator,
-        annee_courante=annee_courante,
     )
 
     proposition_repository.save(proposition)

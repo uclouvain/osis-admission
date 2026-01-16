@@ -35,7 +35,7 @@
       {% url view.base_namespace|add:':past-experiences-change-status' uuid=view.kwargs.uuid status='GEST_EN_COURS' as change_status_url_in_progress %}
       {% url view.base_namespace|add:':past-experiences-change-status' uuid=view.kwargs.uuid status='GEST_BLOCAGE' as change_status_url_insufficient %}
       {% url view.base_namespace|add:':past-experiences-change-status' uuid=view.kwargs.uuid status='GEST_REUSSITE' as change_status_url_sufficient %}
-      {% checklist_state_button tab='parcours_anterieur' label=_('To be processed') icon='xmark' state='INITIAL_CANDIDAT' class='muted' htmx_post=change_status_url_initial %}
+      {% checklist_state_button tab='parcours_anterieur' label=_('To be processed') icon='user' state='INITIAL_CANDIDAT' class='muted' htmx_post=change_status_url_initial %}
       {% checklist_state_button tab='parcours_anterieur' label=_("Cleaned") icon='pencil' state='GEST_EN_COURS' class='warning' htmx_post=change_status_url_in_progress %}
       {% checklist_state_button tab='parcours_anterieur' label=_("Insufficient") icon='circle-stop' state='GEST_BLOCAGE' class='danger' htmx_post=change_status_url_insufficient %}
       {% checklist_state_button tab='parcours_anterieur' label=_("Sufficient") icon='check' state='GEST_REUSSITE' class='success' htmx_post=change_status_url_sufficient %}

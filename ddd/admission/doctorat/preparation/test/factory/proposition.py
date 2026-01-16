@@ -203,7 +203,6 @@ class StatutChecklistFactory(factory.Factory):
         abstract = False
 
     libelle = FuzzyText(length=10, chars=string.digits)
-    enfants = factory.List([])
     statut = ChoixStatutChecklist.INITIAL_CANDIDAT
     extra = factory.Dict({})
 
@@ -473,7 +472,6 @@ class PropositionAdmissionSC3DPConfirmeeFactory(PropositionAdmissionSC3DPAvecPro
         Checklist.initialiser(
             proposition=self,
             profil_candidat_translator=ProfilCandidatInMemoryTranslator(),
-            annee_courante=self.annee_calculee,
         )
 
 

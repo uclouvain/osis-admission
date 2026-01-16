@@ -62,7 +62,8 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     DocumentsProjetRecherche,
     OngletsDemande,
 )
-from admission.ddd.admission.shared_kernel.utils import initialiser_checklist_experience
+from admission.ddd.admission.shared_kernel.utils import initialiser_checklist_experience, \
+    initialiser_dictionnaire_checklist_experience
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
 from admission.forms import disable_unavailable_forms
 from admission.forms.admission.checklist import (
@@ -109,6 +110,7 @@ from admission.views.doctorate.details.checklist.projet_recherche import (
     ProjetRechercheContextMixin,
 )
 from admission.views.doctorate.details.checklist.sic_decision import SicDecisionMixin
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
     ExperienceParcoursInterneDTO,
 )
@@ -338,13 +340,6 @@ class ChecklistView(
             # Authentication forms (one by experience)
             context['authentication_forms'] = {}
 
-            children = (
-                context['original_admission']
-                .checklist.get('current', {})
-                .get('parcours_anterieur', {})
-                .get('enfants', [])
-            )
-
             extra_tokens = {
                 'sender_name': self.current_user_name,
                 'management_entity_acronym': self.proposition.doctorat.sigle_entite_gestion,
@@ -377,28 +372,31 @@ class ChecklistView(
                     context['all_experience_authentication_history_entries'].setdefault(experience_id, entry)
 
             # Past experiences
-            children_by_identifier = {
-                child['extra']['identifiant']: child for child in children if child.get('extra', {}).get('identifiant')
-            }
+            past_experiences = []
+            context['original_admission'].checklist.setdefault('current', {})
+            context['original_admission'].checklist['current'].setdefault('parcours_anterieur', {})
+            context['original_admission'].checklist['current']['parcours_anterieur']['enfants'] = past_experiences
             last_valuated_admission_by_experience_uuid = {}
             not_valuated_by_current_admission_experiences_uuids = set()
+            checklist_tabs_organization = self.checklist_tabs_organization
 
             for experience_uuid, current_experience in experiences_by_uuid.items():
                 tab_identifier = f'parcours_anterieur__{experience_uuid}'
 
-                if experience_uuid in children_by_identifier:
-                    experience_checklist_info = children_by_identifier.get(experience_uuid, {})
-                else:
-                    experience_checklist_info = initialiser_checklist_experience(experience_uuid).to_dict()
-                    children.append(experience_checklist_info)
+                experience_checklist_info = initialiser_dictionnaire_checklist_experience(
+                    checklist_tabs_organization=checklist_tabs_organization,
+                    experience_uuid=experience_uuid,
+                    statut=current_experience.statut_validation,
+                    statut_authentification=current_experience.statut_authentification,
+                )
+                past_experiences.append(experience_checklist_info)
 
-                experience_authentication_state = experience_checklist_info['extra'].get('etat_authentification') or ''
                 context['checklist_additional_icons'][tab_identifier].append(
                     ChecklistTabIcon(
                         identifier='authentication_state',
-                        icon=authentication_css_class(authentication_status=experience_authentication_state),
-                        title=EtatAuthentificationParcours.get_value(experience_authentication_state),
-                        displayed=bool(experience_authentication_state),
+                        icon=authentication_css_class(authentication_status=current_experience.statut_authentification),
+                        title=EtatAuthentificationParcours.get_value(current_experience.statut_authentification),
+                        displayed=bool(current_experience.statut_authentification),
                     )
                 )
                 context['authentication_forms'].setdefault(
@@ -444,23 +442,6 @@ class ChecklistView(
                     )
 
             context['last_valuated_admission_by_experience_uuid'] = last_valuated_admission_by_experience_uuid
-
-            # Remove the experiences that we had in the checklist that have been removed
-            children[:] = [child for child in children if child['extra']['identifiant'] in experiences_by_uuid]
-
-            # Order the experiences in chronological order
-            ordered_experiences = {}
-            if children:
-                order = 0
-
-                for annee, experience_list in experiences.items():
-                    for experience in experience_list:
-                        experience_uuid = str(experience.uuid)
-                        if experience_uuid not in ordered_experiences:
-                            ordered_experiences[experience_uuid] = order
-                            order += 1
-
-                children.sort(key=lambda x: ordered_experiences.get(x['extra']['identifiant'], 0))
 
             prefixed_past_experiences_documents = []
             read_only_documents = []
@@ -600,7 +581,7 @@ class ChecklistView(
         }
 
     def _get_experiences_by_uuid(self, resume: ResumeCandidatDTO):
-        experiences = {}
+        experiences: dict[str, ExperienceAcademiqueDTO |ExperienceNonAcademiqueDTO] = {}
         for experience_academique in resume.curriculum.experiences_academiques:
             experiences[str(experience_academique.uuid)] = experience_academique
         for experience_non_academique in resume.curriculum.experiences_non_academiques:

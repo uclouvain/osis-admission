@@ -98,7 +98,6 @@ def generate_token():
 def get_checklist():
     default_content = {
         'libelle': '',
-        'enfants': [],
         'extra': {},
         'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
     }
