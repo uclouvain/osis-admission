@@ -60,6 +60,7 @@
                 <a class="sub-item-link">
                   {% include 'admission/general_education/checklist_menu_item_status.html' with statut=child.statut item_name=child_identifier %}
                     {{ checklist_tabs|get_item:child_identifier }}
+                    {{ child }}
                     {% if child.extra.identifiant in curex_a_fusionner %}
                         <div class="pull-right badge small badge-warning">Fusion</div>
                     {% endif %}

@@ -244,6 +244,7 @@ class ShouldStatutsChecklistExperiencesEtreValidees(BusinessValidator):
             # Le passage à l'état valide nécessite que toutes les expériences valorisées soient passées à l'état valide
             uuids_experiences_valorisees = self.uuids_experiences_valorisees.copy()
 
+            # TODO 1718
             for experience in self.checklist.parcours_anterieur.enfants:
                 identifiant_experience = experience.extra.get('identifiant')
 

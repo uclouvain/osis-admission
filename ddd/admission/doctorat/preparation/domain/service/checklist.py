@@ -48,12 +48,10 @@ class Checklist(interface.DomainService):
         cls,
         proposition: Proposition,
         profil_candidat_translator: 'IProfilCandidatTranslator',
-        annee_courante: int,
     ):
         checklist_initiale = cls.recuperer_checklist_initiale(
             proposition=proposition,
             profil_candidat_translator=profil_candidat_translator,
-            annee_courante=annee_courante,
         )
         proposition.checklist_initiale = checklist_initiale
         proposition.checklist_actuelle = copy.deepcopy(checklist_initiale)
@@ -63,14 +61,8 @@ class Checklist(interface.DomainService):
         cls,
         proposition: Proposition,
         profil_candidat_translator: 'IProfilCandidatTranslator',
-        annee_courante: int = None,
     ) -> Optional[StatutsChecklistDoctorale]:
         identification_dto = profil_candidat_translator.get_identification(proposition.matricule_candidat)
-        curriculum_dto = profil_candidat_translator.get_curriculum(
-            proposition.matricule_candidat,
-            annee_courante,
-            proposition.entity_id.uuid,
-        )
 
         return StatutsChecklistDoctorale(
             donnees_personnelles=StatutChecklist(
@@ -91,13 +83,6 @@ class Checklist(interface.DomainService):
             parcours_anterieur=StatutChecklist(
                 libelle=_("To be processed"),
                 statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
-                enfants=[
-                    cls.initialiser_checklist_experience(experience.uuid)
-                    for experience in itertools.chain(
-                        curriculum_dto.experiences_academiques,
-                        curriculum_dto.experiences_non_academiques,
-                    )
-                ],
             ),
             financabilite=StatutChecklist(
                 libelle=_("Not concerned"),

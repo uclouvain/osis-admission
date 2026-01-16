@@ -29,9 +29,33 @@ from django.utils.translation import gettext_lazy as _
 from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutChecklist
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import StatutChecklist
+from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
 
 
-def initialiser_checklist_experience(experience_uuid):
+def initialiser_checklist_experience(experience_uuid, statut, statut_authentification):
+    return StatutChecklist(
+        libelle=_('To be processed'),
+        statut=statut,
+        extra={
+            'identifiant': experience_uuid,
+            'etat_authentification': EtatAuthentificationParcours.NON_CONCERNE.name,
+        },
+    )
+
+def initialiser_dictionnaire_checklist_experience(checklist_tabs_organization, experience_uuid, statut, statut_authentification):
+    configuration_statut = checklist_tabs_organization['experiences_parcours_anterieur'][statut]
+
+    return {
+        'macro_statut': statut,
+        'statut': configuration_statut.statut.name,
+        'libelle': ChoixStatutValidationExperience[statut].value,
+        'extra': {
+            'identifiant': experience_uuid,
+            'etat_authentification': statut_authentification,
+            **configuration_statut.extra,
+        },
+
+    }
     return StatutChecklist(
         libelle=_('To be processed'),
         statut=ChoixStatutChecklist.INITIAL_CANDIDAT,

@@ -758,23 +758,7 @@ class Proposition(interface.RootEntity):
                 profil_candidat_translator=profil_candidat_translator,
                 grade_academique_formation_proposition=grade_academique_formation_proposition,
             )
-        try:
-            experience = self.checklist_actuelle.recuperer_enfant(
-                OngletsChecklist.parcours_anterieur.name,
-                uuid_experience,
-            )
-        except StopIteration:
-            # Si l'expérience n'existe pas dans la checklist, on l'initialise
-            experience = initialiser_checklist_experience(experience_uuid=uuid_experience)
-            self.checklist_actuelle.parcours_anterieur.enfants.append(experience)
-
-        experience.statut = ChoixStatutChecklist[statut_checklist_cible]
-
-        if statut_checklist_authentification is None:
-            experience.extra.pop('authentification', None)
-        else:
-            experience.extra['authentification'] = '1' if statut_checklist_authentification else '0'
-
+        # TODO 1718
         self.auteur_derniere_modification = auteur_modification
 
     def specifier_authentification_experience_parcours_anterieur(
@@ -783,12 +767,7 @@ class Proposition(interface.RootEntity):
         auteur_modification: str,
         etat_authentification: str,
     ):
-        try:
-            experience = self.checklist_actuelle.recuperer_enfant('parcours_anterieur', uuid_experience)
-        except StopIteration:
-            raise ExperienceNonTrouveeException
-
-        experience.extra['etat_authentification'] = etat_authentification
+        # TODO 1718
         self.auteur_derniere_modification = auteur_modification
 
     def specifier_condition_acces(

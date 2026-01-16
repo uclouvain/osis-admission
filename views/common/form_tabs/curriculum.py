@@ -147,12 +147,6 @@ class CurriculumEducationalExperienceFormView(AdmissionFormMixin, LoadDossierVie
             baseadmission_id=self.admission.uuid,
             educationalexperience_id=self._experience_id,
         )
-        # Add the experience to the checklist
-        if 'current' in self.admission.checklist and 'parcours_anterieur' in self.admission.checklist['current']:
-            admission = self.admission
-            experience_checklist = Checklist.initialiser_checklist_experience(self._experience_id).to_dict()
-            admission.checklist['current']['parcours_anterieur']['enfants'].append(experience_checklist)
-            admission.save(update_fields=['checklist'])
 
     @property
     def person(self):
@@ -247,12 +241,6 @@ class CurriculumNonEducationalExperienceFormView(
             baseadmission_id=self.admission.uuid,
             professionalexperience_id=self._experience_id,
         )
-        # Add the experience to the checklist
-        if 'current' in self.admission.checklist and 'parcours_anterieur' in self.admission.checklist['current']:
-            admission = self.admission
-            experience_checklist = Checklist.initialiser_checklist_experience(self._experience_id).to_dict()
-            admission.checklist['current']['parcours_anterieur']['enfants'].append(experience_checklist)
-            admission.save(update_fields=['checklist'])
 
     def get_success_url(self):
         if self.next_url:
@@ -338,21 +326,8 @@ class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteEducationalExperience
             messages.error(self.request, error_message)
             return redirect(self.next_url or self.get_failure_url())
 
-        # Delete the information of the experience from the checklist
         admission: BaseAdmission = self.admission
-
-        if 'current' in admission.checklist and 'parcours_anterieur' in admission.checklist['current']:
-            experiences = admission.checklist['current']['parcours_anterieur']['enfants']
-
-            experience_uuid = str(self.kwargs.get('experience_uuid'))
-
-            for index, experience in enumerate(experiences):
-                if experience.get('extra', {}).get('identifiant') == experience_uuid:
-                    experiences.pop(index)
-                    break
-
         admission.last_update_author = self.request.user.person
-
         admission.save()
 
         return delete
@@ -504,10 +479,7 @@ class CurriculumBaseExperienceDuplicateView(AdmissionFormMixin, LoadDossierViewM
         # Save the sub models, if any
         self.additional_duplications_save(additional_duplications)
 
-        initial_checklist = Checklist.initialiser_checklist_experience(duplicated_experience.uuid).to_dict()
-
         new_valuations = []
-        admissions_to_update = []
 
         # Loop over the valuated admissions by the experience
         for current_valuation in valuated_admissions:
@@ -522,21 +494,8 @@ class CurriculumBaseExperienceDuplicateView(AdmissionFormMixin, LoadDossierViewM
                 )
             )
 
-            # Initialize the checklist of the duplicated experience
-            admission_experience_checklists = (
-                current_valuation.baseadmission.checklist.get('current', {})
-                .get('parcours_anterieur', {})
-                .get('enfants')
-            )
-            if admission_experience_checklists is not None:
-                admission_experience_checklists.append(initial_checklist)
-                admissions_to_update.append(current_valuation.baseadmission)
-
         if new_valuations:
             self.valuated_experience_model.objects.bulk_create(new_valuations)
-
-        if admissions_to_update:
-            BaseAdmission.objects.bulk_update(admissions_to_update, ['checklist'])
 
         return super().form_valid(form)
 
@@ -616,20 +575,6 @@ class CurriculumBaseExperienceValuateView(AdmissionFormMixin, LoadDossierViewMix
             **{self.valuated_experience_field_id_name: self.experience.uuid},
         )
         return super().form_valid(form)
-
-    def update_current_admission_on_form_valid(self, form, admission):
-        # Add the experience to the checklist if it's not already there
-        if (
-            'current' in admission.checklist
-            and 'parcours_anterieur' in admission.checklist['current']
-            and not any(
-                experience
-                for experience in admission.checklist['current']['parcours_anterieur']['enfants']
-                if experience.get('extra', {}).get('identifiant') == self.experience_id
-            )
-        ):
-            experience_checklist = Checklist.initialiser_checklist_experience(self.experience_id).to_dict()
-            admission.checklist['current']['parcours_anterieur']['enfants'].append(experience_checklist)
 
 
 class CurriculumNonEducationalExperienceValuateView(CurriculumBaseExperienceValuateView):
