@@ -50,6 +50,8 @@ def lister_demandes(
         injection_epc_en_erreur=cmd.injection_epc_en_erreur,
         paye=cmd.paye,
         marque_d_interet=cmd.marque_d_interet,
+        quarantaine=cmd.quarantaine,
+        site_inscription=cmd.site_inscription,
         mode_filtres_etats_checklist=cmd.mode_filtres_etats_checklist,
         filtres_etats_checklist=cmd.filtres_etats_checklist,
         demandeur=cmd.demandeur,

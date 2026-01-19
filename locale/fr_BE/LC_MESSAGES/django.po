@@ -713,6 +713,9 @@ msgstr "Dossier d'analyse pour une demande en formation doctorale"
 msgid "Analysis folder for a general education admission"
 msgstr "Dossier d'analyse pour une demande en formation générale"
 
+msgid "Analysis folder generated when the application is validated"
+msgstr "Dossier d'analyse généré quand la demande est validée"
+
 msgid "Annex 1 visa form"
 msgstr "Formulaire visa annexe 1"
 

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,18 +25,36 @@
 ##############################################################################
 from django.conf import settings
 
+from admission.ddd.admission.formation_continue.event_handler import (
+    GenererDocumentAnalysePropositionAutorisationHandler,
+)
 from admission.ddd.admission.shared_kernel.commands import *
-from admission.ddd.admission.shared_kernel.commands import RecupererInformationsDestinataireQuery
+from admission.ddd.admission.shared_kernel.commands import (
+    RecupererInformationsDestinataireQuery,
+)
 from admission.ddd.admission.shared_kernel.use_case.read import *
-from admission.ddd.admission.shared_kernel.use_case.write import specifier_experience_en_tant_que_titre_acces
-from admission.infrastructure.admission.shared_kernel.domain.service.lister_toutes_demandes import ListerToutesDemandes
-from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidatTranslator
-from admission.infrastructure.admission.shared_kernel.repository.titre_acces_selectionnable import TitreAccesSelectionnableRepository
+from admission.ddd.admission.shared_kernel.use_case.write import (
+    specifier_experience_en_tant_que_titre_acces,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.lister_toutes_demandes import (
+    ListerToutesDemandes,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import (
+    ProfilCandidatTranslator,
+)
 from admission.infrastructure.admission.shared_kernel.repository.email_destinataire import (
     EmailDestinataireRepository,
 )
-from admission.infrastructure.admission.shared_kernel.repository.gestionnaire import GestionnaireRepository
-from infrastructure.shared_kernel.profil.domain.service.parcours_interne import ExperienceParcoursInterneTranslator
+from admission.infrastructure.admission.shared_kernel.repository.gestionnaire import (
+    GestionnaireRepository,
+)
+from admission.infrastructure.admission.shared_kernel.repository.titre_acces_selectionnable import (
+    TitreAccesSelectionnableRepository,
+)
+from infrastructure.shared_kernel.profil.domain.service.parcours_interne import (
+    ExperienceParcoursInterneTranslator,
+)
+from osis_common.ddd.interface import EventConsumptionMode
 
 COMMAND_HANDLERS = {
     ListerToutesDemandesQuery: lambda msg_bus, cmd: lister_demandes(
@@ -83,13 +101,16 @@ COMMAND_HANDLERS = {
 EVENT_HANDLERS = {}
 
 if 'admission' in settings.INSTALLED_APPS:
-    from admission.ddd.admission.formation_generale.events import (
-        InscriptionApprouveeParSicEvent,
-        AdmissionApprouveeParSicEvent,
-    )
     from admission.ddd.admission.doctorat.events import (
-        InscriptionDoctoraleApprouveeParSicEvent,
         AdmissionDoctoraleApprouveeParSicEvent,
+        InscriptionDoctoraleApprouveeParSicEvent,
+    )
+    from admission.ddd.admission.formation_continue.events import (
+        PropositionFormationContinueValideeEvent,
+    )
+    from admission.ddd.admission.formation_generale.events import (
+        AdmissionApprouveeParSicEvent,
+        InscriptionApprouveeParSicEvent,
     )
     from admission.infrastructure.admission.event_handler.reagir_a_approuver_proposition import (
         reagir_a_approuver_proposition,
@@ -101,4 +122,7 @@ if 'admission' in settings.INSTALLED_APPS:
         AdmissionApprouveeParSicEvent: [reagir_a_approuver_proposition],
         InscriptionDoctoraleApprouveeParSicEvent: [reagir_a_approuver_proposition],
         AdmissionDoctoraleApprouveeParSicEvent: [reagir_a_approuver_proposition],
+        PropositionFormationContinueValideeEvent: [
+            GenererDocumentAnalysePropositionAutorisationHandler(consumption_mode=EventConsumptionMode.ASYNCHRONOUS),
+        ],
     }

@@ -26,9 +26,8 @@
 import re
 
 from django import forms
-from django.utils.translation import get_language
+from django.utils.translation import get_language, ngettext, pgettext_lazy
 from django.utils.translation import gettext_lazy as _
-from django.utils.translation import ngettext, pgettext_lazy
 
 from admission.constants import DEFAULT_PAGINATOR_SIZE
 from admission.ddd.admission.formation_continue.domain.model.enums import (
@@ -408,6 +407,27 @@ class ContinuingAdmissionsFilterForm(AdmissionFilterWithEntitiesAndTrainingTypes
     statuses_choices = ChoixStatutPropositionContinue.choices()
     training_types = AnneeInscriptionFormationTranslator.CONTINUING_EDUCATION_TYPES
 
+    site_inscription = MainCampusChoiceField(
+        empty_label=_('All'),
+        label=_('Enrolment campus'),
+        queryset=None,
+        required=False,
+        to_field_name='uuid',
+    )
+
+    quarantaine = forms.TypedChoiceField(
+        label=_('Quarantine'),
+        coerce=lambda x: x == 'True',
+        required=False,
+        choices=(
+            (None, ' - '),
+            (True, _('Yes')),
+            (False, _('No')),
+        ),
+        widget=forms.Select(attrs={"class": "form-control"}),
+        empty_value=None,
+    )
+
     edition = forms.MultipleChoiceField(
         label=_('Edition'),
         choices=ChoixEdition.choices(),
@@ -501,6 +521,10 @@ class ContinuingAdmissionsFilterForm(AdmissionFilterWithEntitiesAndTrainingTypes
                 (selected_training.acronym, selected_training.formatted_title)
                 for selected_training in available_selected_trainings_qs
             ]
+
+    def clean_site_inscription(self):
+        site_inscription = self.cleaned_data.get('site_inscription')
+        return str(site_inscription.uuid) if site_inscription else ''
 
     def clean(self):
         cleaned_data = super().clean()

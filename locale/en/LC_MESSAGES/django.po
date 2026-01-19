@@ -637,6 +637,9 @@ msgstr ""
 msgid "Analysis folder for a general education admission"
 msgstr ""
 
+msgid "Analysis folder generated when the application is validated"
+msgstr ""
+
 msgid "Annex 1 visa form"
 msgstr ""
 

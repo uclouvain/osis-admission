@@ -76,6 +76,7 @@ from admission.ddd.admission.shared_kernel.enums.statut import (
 from admission.infrastructure.utils import get_entities_with_descendants_ids
 from admission.models import AdmissionViewer
 from admission.models.base import BaseAdmission
+from admission.models.specific_question import SpecificQuestionAnswer
 from admission.views import PaginatedList
 from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
@@ -183,6 +184,10 @@ class ListerToutesDemandes(IListerToutesDemandes):
                 ),
                 'candidate__student_set',
                 'candidate__personmergeproposal',
+                Prefetch(
+                    'specific_question_answers',
+                    queryset=SpecificQuestionAnswer.objects.select_related('form_item'),
+                ),
             )
             .only(
                 'uuid',
@@ -266,7 +271,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
             if quarantaine:
                 qs = qs.filter_in_quarantine()
             else:
-                qs = qs.exclude(id__in=qs.filter_in_quarantine().values('id'))
+                qs = qs.exclude_in_quarantine()
 
         if tardif_modif_reorientation:
             related_field = {
@@ -291,7 +296,6 @@ class ListerToutesDemandes(IListerToutesDemandes):
             )
 
         if mode_filtres_etats_checklist and filtres_etats_checklist:
-
             json_path_to_checks = defaultdict(set)
             all_checklist_filters = Q()
 
