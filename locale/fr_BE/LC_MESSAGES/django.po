@@ -506,6 +506,9 @@ msgstr ""
 "Ajouter les rôles de gestionnaire de parcours étudiant correspondants "
 "(doctorat)"
 
+msgid "Add this reason"
+msgstr "Ajouter ce motif"
+
 msgid "Add validation of prior experience (VAE)"
 msgstr "Ajouter une valorisation des acquis de l'expérience"
 
@@ -1581,6 +1584,9 @@ msgstr "Réclamation annulée le"
 
 msgid "Cleaned"
 msgstr "Toiletté"
+
+msgid "Clear the reason"
+msgstr "Effacer le motif"
 
 msgid "Clinical Research Fund (FRC)"
 msgstr "FRC - Fonds de recherche clinique"
