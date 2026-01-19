@@ -58,6 +58,7 @@ class ShouldAnneesCVRequisesCompletees(BusinessValidator):
     annee_courante: int
     annee_derniere_inscription_ucl: Optional[int]
     annee_diplome_etudes_secondaires: Optional[int]
+    annee_alternative_diplome_etudes_secondaires: Optional[int]
     experiences_non_academiques: List[ExperienceNonAcademiqueDTO]
     experiences_academiques: List[ExperienceAcademiqueDTO]
     experiences_academiques_incompletes: Dict[str, str]
@@ -70,6 +71,7 @@ class ShouldAnneesCVRequisesCompletees(BusinessValidator):
             annee_courante=self.annee_courante,
             annee_diplome_etudes_secondaires=self.annee_diplome_etudes_secondaires,
             annee_derniere_inscription_ucl=self.annee_derniere_inscription_ucl,
+            annee_alternative_diplome_etudes_secondaires=self.annee_alternative_diplome_etudes_secondaires,
         )
 
         # Les expériences académiques externes complètes valorisent certaines années

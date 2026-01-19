@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,8 +31,9 @@ from admission.ddd.admission.doctorat.preparation.domain.model.proposition impor
 from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import INotification
 from admission.ddd.admission.doctorat.preparation.dtos import AvisDTO, PropositionDTO
 from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import EmplacementDocument
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import IMatriculeEtudiantService
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.shared_kernel.repository.i_email_destinataire import IEmailDestinataireRepository
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
 
 
@@ -46,7 +47,11 @@ class NotificationInMemory(INotification):
         pass
 
     @classmethod
-    def notifier_soumission(cls, proposition: Proposition) -> None:
+    def notifier_soumission(
+        cls,
+        proposition: Proposition,
+        email_destinataire_repository: IEmailDestinataireRepository,
+    ) -> None:
         pass
 
     @classmethod

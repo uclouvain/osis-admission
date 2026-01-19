@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -60,10 +60,10 @@ from admission.mail_templates import (
 )
 from admission.utils import (
     add_close_modal_into_htmx_response,
-    get_training_url,
-    get_salutation_prefix,
-    get_portal_admission_url,
     get_backoffice_admission_url,
+    get_portal_admission_url,
+    get_salutation_prefix,
+    get_training_url,
 )
 from admission.views.common.detail_tabs.checklist import change_admission_status
 from admission.views.common.mixins import AdmissionFormMixin
@@ -153,7 +153,6 @@ class FinancabiliteContextMixin(CheckListDefaultContextMixin):
             'sender_name': self.current_user_name,
             'management_entity_acronym': self.proposition.doctorat.sigle_entite_gestion,
             'management_entity_name': self.proposition.doctorat.intitule_entite_gestion,
-            'program_managers_names': self.admission_program_managers_names,
             'salutation': get_salutation_prefix(self.admission.candidate),
         }
 
@@ -455,9 +454,9 @@ class FinancabiliteDerogationNotificationView(
 ):
     urlpatterns = {'financability-derogation-notification': 'financability-derogation-notification'}
     permission_required = 'admission.checklist_financability_dispensation'
-    template_name = (
-        htmx_template_name
-    ) = 'admission/general_education/includes/checklist/financabilite_derogation_candidat_notifie_form.html'
+    template_name = htmx_template_name = (
+        'admission/general_education/includes/checklist/financabilite_derogation_candidat_notifie_form.html'
+    )
     htmx_template_name = (
         'admission/general_education/includes/checklist/financabilite_derogation_candidat_notifie_form.html'
     )
@@ -511,9 +510,9 @@ class FinancabiliteDerogationRefusView(
 ):
     urlpatterns = {'financability-derogation-refus': 'financability-derogation-refus'}
     permission_required = 'admission.checklist_financability_dispensation_fac'
-    template_name = (
-        htmx_template_name
-    ) = 'admission/general_education/includes/checklist/financabilite_derogation_refus_form.html'
+    template_name = htmx_template_name = (
+        'admission/general_education/includes/checklist/financabilite_derogation_refus_form.html'
+    )
     htmx_template_name = 'admission/general_education/includes/checklist/financabilite_derogation_refus_form.html'
 
     def get_form(self, form_class=None):

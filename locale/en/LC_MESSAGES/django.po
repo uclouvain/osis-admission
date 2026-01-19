@@ -175,6 +175,19 @@ msgstr ""
 msgid "A comment from the faculty for the SIC is specified"
 msgstr ""
 
+#, python-format
+msgid ""
+"A compulsory minimum EURO 50 tuition fee deposit must be paid as soon as "
+"possible and no later than 31 October %(start_year)s. The tuition fee "
+"balance must be paid in full by 1 February %(end_year)s. As soon as we "
+"receive the enrolment authorisation signed by you, we will let you know how "
+"to pay."
+msgstr ""
+"A compulsory minimum €50 tuition fee deposit must be paid as soon as possible and no later than 31 October "
+"%(start_year)s. The tuition fee balance must be paid in full by 1 February "
+"%(end_year)s. As soon as we receive the enrolment authorisation signed by "
+"you, we will let you know how to pay."
+
 msgid "A deny mail has already been sent to the candidate."
 msgstr ""
 
@@ -436,6 +449,9 @@ msgstr ""
 msgid "Add the corresponding program manager roles (doctorate)"
 msgstr ""
 
+msgid "Add this reason"
+msgstr ""
+
 msgid "Add validation of prior experience (VAE)"
 msgstr ""
 
@@ -619,6 +635,9 @@ msgid "Analysis folder for a doctorate education admission"
 msgstr ""
 
 msgid "Analysis folder for a general education admission"
+msgstr ""
+
+msgid "Analysis folder generated when the application is validated"
 msgstr ""
 
 msgid "Annex 1 visa form"
@@ -1437,6 +1456,9 @@ msgid "Claim cancelled on"
 msgstr ""
 
 msgid "Cleaned"
+msgstr ""
+
+msgid "Clear the reason"
 msgstr ""
 
 msgid "Clinical Research Fund (FRC)"
@@ -3999,9 +4021,6 @@ msgstr ""
 msgid "List of emails of the program managers."
 msgstr ""
 
-msgid "List of names of the program managers."
-msgstr ""
-
 msgid ""
 "List of the mandatory requested documents that must be submitted "
 "immediately, with the reason"
@@ -6296,9 +6315,6 @@ msgid ""
 "The SIC decision mail was sent to the candidate the %(date)s by %(author)s."
 msgstr ""
 
-msgid "The University tuition fee is EUR 0.0."
-msgstr ""
-
 msgid "The academic year of the period"
 msgstr ""
 
@@ -6794,20 +6810,6 @@ msgstr ""
 msgid "The university tuition fee is EURO %(montant)s."
 msgstr "The university tuition fee is €%(montant)s."
 
-#, python-format
-msgid ""
-"The university tuition fee is EURO %(montant)s. A compulsory minimum EURO 50 "
-"tuition fee deposit must be paid as soon as possible and no later than 31 "
-"October %(start_year)s. The tuition fee balance must be paid in full by 1 "
-"February %(end_year)s. As soon as we receive the enrolment authorisation "
-"signed by you, we will let you know how to pay."
-msgstr ""
-"The university tuition fee is €%(montant)s. A compulsory minimum €50 tuition "
-"fee deposit must be paid as soon as possible and no later than 31 October "
-"%(start_year)s. The tuition fee balance must be paid in full by 1 February "
-"%(end_year)s. As soon as we receive the enrolment authorisation signed by "
-"you, we will let you know how to pay."
-
 msgid "There can be no more CA members in the supervision group."
 msgstr ""
 "There can be no more supervision committee members in the supervision group."
@@ -6902,6 +6904,11 @@ msgid "This activity will be refused"
 msgstr ""
 
 msgid "This activity will be restored"
+msgstr ""
+
+msgid ""
+"This amount is subject to change pending the adoption and publication of the "
+"decree setting it."
 msgstr ""
 
 msgid ""
@@ -7906,9 +7913,6 @@ msgstr ""
 msgctxt "payment"
 msgid "open"
 msgstr "Open"
-
-msgid "or"
-msgstr ""
 
 msgctxt "payment"
 msgid "paid"

@@ -52,6 +52,7 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
 )
 from admission.models import AdmissionFormItem, SupervisionActor
 from admission.models.base import BaseAdmission
+from admission.models.specific_question import SpecificQuestionAnswer
 from base.models.entity_version import (
     PEDAGOGICAL_ENTITY_ADDED_EXCEPTIONS,
     EntityVersion,
@@ -247,15 +248,7 @@ def get_document_from_identifier(
 
             document_type = TypeEmplacementDocument.NON_LIBRE.name
 
-        obj = admission
-        field = 'specific_question_answers'
         specific_question_uuid = document_identifier_parts[-1]
-        document_uuids = [
-            uuid.UUID(document_uuid) if isinstance(document_uuid, str) else document_uuid
-            for document_uuid in admission.get_specific_question_answers_dict().get(specific_question_uuid, [])
-        ]
-        requestable_document = True
-        document_status = requested_document.get('status', StatutEmplacementDocument.NON_ANALYSE.name)
 
         specific_question: AdmissionFormItem = AdmissionFormItem.objects.filter(
             uuid=specific_question_uuid,
@@ -263,6 +256,19 @@ def get_document_from_identifier(
 
         if not specific_question:
             return
+
+        obj, _ = SpecificQuestionAnswer.objects.get_or_create(
+            admission=admission,
+            form_item=specific_question,
+            defaults={
+                'file': [],
+            },
+        )
+
+        field = 'file'
+        document_uuids = obj.file or []
+        requestable_document = True
+        document_status = requested_document.get('status', StatutEmplacementDocument.NON_ANALYSE.name)
 
         document_mimetypes = specific_question.configuration.get(
             CleConfigurationItemFormulaire.TYPES_MIME_FICHIER.name,
@@ -632,6 +638,7 @@ CORRESPONDANCE_CHAMPS_AUTORISATION = {
 
 CORRESPONDANCE_CHAMPS_SYSTEME = {
     'DOSSIER_ANALYSE': 'pdf_recap',
+    'DOSSIER_ANALYSE_AUTORISATION': 'authorization_analysis_folder',
     'ATTESTATION_ACCORD_FACULTAIRE': 'fac_approval_certificate',
     'ATTESTATION_ACCORD_CDD': 'cdd_approval_certificate',
     'ATTESTATION_REFUS_CDD': 'cdd_refusal_certificate',

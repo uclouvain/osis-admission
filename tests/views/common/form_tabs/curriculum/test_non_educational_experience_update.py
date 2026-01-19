@@ -277,7 +277,7 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
             [12, 'Décembre'],
         ]
 
-        year_choices = [['', ' - ']] + [[year, year] for year in range(2023, 1900, -1)]
+        year_choices = [['', ' - ']] + [[year, year] for year in range(2024, 1900, -1)]
 
         # Start date
         self.assertEqual(form['start_date_month'].value(), 1)
@@ -437,7 +437,7 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
     def test_general_submit_valid_form_for_other_activity_and_redirect(self):
         self.client.force_login(self.sic_manager_user)
 
-        admission_url = resolve_url('admission')
+        admission_url = resolve_url('admission:all-list')
         expected_url = f'{admission_url}#custom_hash'
 
         response = self.client.post(

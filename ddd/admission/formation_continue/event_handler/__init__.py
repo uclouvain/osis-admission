@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,33 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
-
-from django import forms
-from django.forms import ModelChoiceField
-
-from base.forms.utils.academic_year_field import (
-    AcademicYearEndYearLabelModelChoiceField,
+from .generer_document_analyse_proposition_autorisation_service import (
+    GenererDocumentAnalysePropositionAutorisationHandler,
 )
-from base.models.academic_year import AcademicYear
-from osis_profile.models import Exam
-
-
-class ExamForm(forms.ModelForm):
-    class Meta:
-        model = Exam
-        fields = [
-            'certificate',
-            'year',
-        ]
-        field_classes = {
-            'year': AcademicYearEndYearLabelModelChoiceField,
-        }
-
-    def __init__(self, certificate_title, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.fields['certificate'].label = certificate_title
-        self.fields['year'].queryset = AcademicYear.objects.filter(start_date__lte=datetime.date.today()).order_by(
-            '-year'
-        )
