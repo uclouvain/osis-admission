@@ -449,6 +449,9 @@ msgstr ""
 msgid "Add the corresponding program manager roles (doctorate)"
 msgstr ""
 
+msgid "Add this reason"
+msgstr ""
+
 msgid "Add validation of prior experience (VAE)"
 msgstr ""
 
@@ -632,6 +635,9 @@ msgid "Analysis folder for a doctorate education admission"
 msgstr ""
 
 msgid "Analysis folder for a general education admission"
+msgstr ""
+
+msgid "Analysis folder generated when the application is validated"
 msgstr ""
 
 msgid "Annex 1 visa form"
@@ -1450,6 +1456,9 @@ msgid "Claim cancelled on"
 msgstr ""
 
 msgid "Cleaned"
+msgstr ""
+
+msgid "Clear the reason"
 msgstr ""
 
 msgid "Clinical Research Fund (FRC)"

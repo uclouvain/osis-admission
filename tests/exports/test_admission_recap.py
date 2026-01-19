@@ -1240,6 +1240,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             annee_derniere_inscription_ucl=2020,
             annee_diplome_etudes_secondaires=2015,
             annee_minimum_a_remplir=2020,
+            annee_alternative_diplome_etudes_secondaires=None,
         )
         continuing_secondary_studies_dto = _EtudesSecondairesDTO(
             diplome_belge=None,
@@ -1468,6 +1469,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             motif_de_refus_autre="",
             motif_d_annulation="",
             photo_identite_candidat=[],
+            dossier_analyse_autorisation=[],
         )
         bachelor_proposition_dto = _PropositionFormationGeneraleDTO(
             uuid='uuid-proposition',

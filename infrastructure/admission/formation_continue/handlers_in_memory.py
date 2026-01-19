@@ -55,6 +55,9 @@ from admission.infrastructure.admission.formation_continue.domain.service.in_mem
 from admission.infrastructure.admission.formation_continue.domain.service.in_memory.notification import (
     NotificationInMemory,
 )
+from admission.infrastructure.admission.formation_continue.domain.service.in_memory.pdf_generation import (
+    PDFGenerationInMemory,
+)
 from admission.infrastructure.admission.formation_continue.domain.service.in_memory.question_specifique import (
     QuestionSpecifiqueInMemoryTranslator,
 )
@@ -117,6 +120,7 @@ _notification = NotificationInMemory()
 _lister_demandes_service = ListerDemandesInMemory()
 _emplacement_document_repository = emplacement_document_in_memory_repository
 _raccrocher_experiences_curriculum = RaccrocherExperiencesCurriculumInMemory()
+_pdf_generation = PDFGenerationInMemory()
 _email_destinataire_repository = EmailDestinataireInMemoryRepository()
 
 
@@ -397,6 +401,12 @@ COMMAND_HANDLERS = {
             academic_year_repository=_academic_year_repository,
             personne_connue_translator=_personne_connue_ucl_translator,
             emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
+        )
+    ),
+    GenererDocumentAnalysePropositionAutorisationCommand: (
+        lambda msg_bus, cmd: generer_document_analyse_proposition_autorisation(
+            cmd=cmd,
+            pdf_generation_service=_pdf_generation,
         )
     ),
 }

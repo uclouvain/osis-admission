@@ -60,6 +60,7 @@ from admission.tests.factories.roles import CandidateFactory
 from base.models.enums.got_diploma import GotDiploma
 from base.models.enums.teaching_type import TeachingTypeEnum
 from base.tests.factories.academic_year import AcademicYearFactory
+from base.tests.factories.person import PersonFactory
 from osis_profile import FR_ISO_CODE
 from osis_profile.models import (
     EducationalExperience,
@@ -74,6 +75,7 @@ from osis_profile.models.enums.curriculum import (
     Result,
     TranscriptType,
 )
+from osis_profile.tests.factories.exam import FirstCycleExamFactory
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.diploma_title import DiplomaTitleFactory
 from reference.tests.factories.language import LanguageFactory
@@ -271,6 +273,42 @@ class BaseCurriculumTestCase:
             ['De Septembre 2019 à Décembre 2019'] if self.with_incomplete_periods else [],
         )
 
+    def test_get_curriculum_minimal_year_with_secondary_studies_alternative(self):
+        self.client.force_authenticate(user=self.user)
+
+        create_educational_experiences(person=self.user.person, country=self.country)
+        create_professional_experiences(person=self.user.person)
+
+        # With exam for another person
+        exam = FirstCycleExamFactory(person=PersonFactory())
+
+        response = self.client.get(self.url)
+
+        json_response = response.json()
+        self.assertEqual(json_response.get('minimal_date'), '2016-09-01')
+
+        # With exam for the current person but without year
+        exam.person = self.user.person
+        exam.save()
+
+        response = self.client.get(self.url)
+
+        json_response = response.json()
+        self.assertEqual(json_response.get('minimal_date'), '2016-09-01')
+
+        # With exam for the current person with a specified year
+        exam.year = self.academic_year_2018
+        exam.save()
+
+        response = self.client.get(self.url)
+
+        json_response = response.json()
+        self.assertEqual(json_response.get('minimal_date'), '2019-09-01')
+        self.assertEqual(
+            json_response.get('incomplete_periods'),
+            ['De Septembre 2019 à Décembre 2019'] if self.with_incomplete_periods else [],
+        )
+
 
 class AdmissionBaseCurriculumTestCase(BaseCurriculumTestCase):
     def test_get_curriculum(self):
@@ -432,7 +470,7 @@ class BaseIncompleteCurriculumExperiencesTestCase:
             json_response.get('incomplete_experiences'),
             (
                 {
-                    str(experience_2018.uuid): [f"L'expérience académique '{program_name}' " f"est incomplète."],
+                    str(experience_2018.uuid): [f"L'expérience académique '{program_name}' est incomplète."],
                 }
                 if desired_result is None
                 else desired_result
@@ -1158,7 +1196,7 @@ class ProfessionalExperienceTestCase(APITestCase):
         json_response = response.json()
 
         # Check response data
-        self.assertEqual(json_response.get('sector'), ActivitySector.PRIVATE.name),
+        self.assertEqual(json_response.get('sector'), ActivitySector.PRIVATE.name)
 
         experience = ProfessionalExperience.objects.get(
             uuid=self.professional_experience.uuid,
@@ -1184,7 +1222,7 @@ class ProfessionalExperienceTestCase(APITestCase):
         json_response = response.json()
 
         # Check response data
-        self.assertEqual(json_response.get('sector'), ActivitySector.PRIVATE.name),
+        self.assertEqual(json_response.get('sector'), ActivitySector.PRIVATE.name)
 
         experience = ProfessionalExperience.objects.get(
             uuid=self.professional_experience.uuid,

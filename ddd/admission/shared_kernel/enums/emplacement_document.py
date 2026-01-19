@@ -150,6 +150,7 @@ DocumentsSystemeSIC = {
 
 DocumentsSysteme = {
     'DOSSIER_ANALYSE': _('Analysis folder'),
+    'DOSSIER_ANALYSE_AUTORISATION': _('Analysis folder generated when the application is validated'),
     'FICHE_ARCHIVE_SIGNATURE_ENVOYEES': _('Application form'),
     **DocumentsSystemeFAC,
     **DocumentsSystemeSIC,

@@ -413,6 +413,7 @@ class ChecklistView(
                 'CURRICULUM',
                 'COPIE_TITRE_SEJOUR',
                 'DOSSIER_ANALYSE',
+                'DOSSIER_ANALYSE_AUTORISATION',
                 'DIPLOME',
             },
             'decision': {
@@ -421,6 +422,7 @@ class ChecklistView(
                 'CURRICULUM',
                 'COPIE_TITRE_SEJOUR',
                 'DOSSIER_ANALYSE',
+                'DOSSIER_ANALYSE_AUTORISATION',
                 'DIPLOME',
             },
         }
