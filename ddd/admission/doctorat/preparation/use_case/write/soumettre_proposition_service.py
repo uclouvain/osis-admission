@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -87,6 +87,7 @@ from admission.ddd.admission.shared_kernel.domain.service.profil_soumis_candidat
     ProfilSoumisCandidatTranslator,
 )
 from admission.ddd.admission.shared_kernel.enums.question_specifique import Onglets
+from admission.ddd.admission.shared_kernel.repository.i_email_destinataire import IEmailDestinataireRepository
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.service.financabilite import Financabilite
@@ -117,6 +118,7 @@ def soumettre_proposition(
     element_confirmation: 'IElementsConfirmation',
     maximum_propositions_service: 'IMaximumPropositionsAutorisees',
     financabilite_fetcher: 'IFinancabiliteFetcher',
+    email_destinataire_repository: 'IEmailDestinataireRepository',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -222,7 +224,7 @@ def soumettre_proposition(
     proposition_repository.save(proposition)
     demande_repository.save(demande)
     historique.historiser_soumission(proposition)
-    notification.notifier_soumission(proposition)
+    notification.notifier_soumission(proposition, email_destinataire_repository)
 
     msg_bus.publish(
         PropositionDoctoraleSoumiseEvent(

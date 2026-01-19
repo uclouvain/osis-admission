@@ -4458,9 +4458,6 @@ msgstr "Liste des UEs du module complémentaire ou autres"
 msgid "List of emails of the program managers."
 msgstr "Liste des emails des gestionnaires d'admission d'un programme."
 
-msgid "List of names of the program managers."
-msgstr "Liste des noms des gestionnaires d'admission d'un programme."
-
 msgid ""
 "List of the mandatory requested documents that must be submitted "
 "immediately, with the reason"
@@ -8854,9 +8851,6 @@ msgstr "le %(date)s at %(hour)s"
 msgctxt "payment"
 msgid "open"
 msgstr "Ouvert"
-
-msgid "or"
-msgstr "ou"
 
 msgctxt "payment"
 msgid "paid"
