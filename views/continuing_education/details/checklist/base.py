@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,23 +31,24 @@ from django.conf import settings
 from django.shortcuts import resolve_url
 from django.template.defaultfilters import truncatechars
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
 from osis_comment.models import CommentEntry
 from osis_mail_template.exceptions import EmptyMailTemplateContent
 from osis_mail_template.models import MailTemplate
 
-from admission.auth.roles.program_manager import ProgramManager
 from admission.ddd.admission.formation_continue.commands import (
     RecupererResumeEtEmplacementsDocumentsPropositionQuery,
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     OngletsChecklist,
 )
-from admission.ddd.admission.shared_kernel.commands import ListerToutesDemandesQuery
-from admission.ddd.admission.shared_kernel.dtos.question_specifique import (
-    QuestionSpecifiqueDTO,
+from admission.ddd.admission.shared_kernel.commands import (
+    ListerToutesDemandesQuery,
+    RecupererInformationsDestinataireQuery,
 )
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import InformationsDestinatairePasTrouvee
+from admission.ddd.admission.shared_kernel.dtos.destinataire import InformationsDestinataireDTO
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.shared_kernel.dtos.resume import (
     ResumeEtEmplacementsDocumentsPropositionDTO,
 )
@@ -119,14 +120,19 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
             settings.LANGUAGE_CODE_EN: self.proposition.formation.intitule,
         }[candidate.language]
 
-        program_managers = ProgramManager.objects.filter(
-            education_group=self.admission.training.education_group,
-        ).select_related('person')
-
-        managers_emails = (' ' + _('or') + ' ').join(
-            f'<a href="mailto:{program_manager.person.email}">{program_manager.person.email}</a>'
-            for program_manager in program_managers
-        )
+        try:
+            recipient: InformationsDestinataireDTO = message_bus_instance.invoke(
+                RecupererInformationsDestinataireQuery(
+                    sigle_formation=self.admission.training.acronym,
+                    annee=self.admission.training.academic_year.year,
+                    est_premiere_annee=False,
+                )
+            )
+            if not recipient.email:
+                raise InformationsDestinatairePasTrouvee
+            managers_emails = f'<a href="mailto:{recipient.email}">{recipient.email}</a>'
+        except InformationsDestinatairePasTrouvee:
+            managers_emails = ''
 
         return {
             'candidate_first_name': self.proposition.prenom_candidat,
@@ -434,8 +440,6 @@ class ChecklistView(
         return ["admission/continuing_education/checklist.html"]
 
     def get_context_data(self, **kwargs):
-        from infrastructure.messages_bus import message_bus_instance
-
         context = super().get_context_data(**kwargs)
         if not self.request.htmx:
             # Retrieve data related to the proposition
