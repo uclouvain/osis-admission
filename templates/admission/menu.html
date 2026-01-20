@@ -24,16 +24,7 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% if perms.admission.view_enrolment_applications or perms.admission.view_doctorate_enrolment_applications or perms.admission.view_continuing_enrolment_applications %}
-  <li class="nav-item dropdown">
-    <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" data-bs-toggle="dropdown" role="button"
-       aria-haspopup="true" aria-expanded="false"
-       id="lnk_home_dropdown_admissions">
-      <span class="hidden-md fa fa-address-card" aria-hidden="true"></span>
-      <span class="hidden-sm">{% trans 'Enrolments' %}</span>
-      <span class="caret"></span>
-    </a>
-    <ul class="dropdown-menu">
+
       <li class="dropdown-item">
         <a
           {% if perms.admission.view_enrolment_applications %}
@@ -48,6 +39,4 @@
           {% trans 'Enrolment applications' %}
         </a>
       </li>
-    </ul>
-  </li>
-{% endif %}
+
