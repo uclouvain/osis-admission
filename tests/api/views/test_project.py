@@ -847,6 +847,7 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
                 'reglement_doctorat_deontologie': IElementsConfirmation.REGLEMENT_DOCTORAT_DEONTOLOGIE,
                 'protection_donnees': IElementsConfirmation.PROTECTION_DONNEES,
                 'professions_reglementees': IElementsConfirmation.PROFESSIONS_REGLEMENTEES,
+                'verification_donnees_tiers': IElementsConfirmation.VERIFICATION_DONNEES_TIERS,
                 'justificatifs': IElementsConfirmation.JUSTIFICATIFS % {'by_service': _("by the Enrolment Office")},
                 'declaration_sur_lhonneur': IElementsConfirmation.DECLARATION_SUR_LHONNEUR
                 % {'to_service': _("to the UCLouvain Registration Service")},
