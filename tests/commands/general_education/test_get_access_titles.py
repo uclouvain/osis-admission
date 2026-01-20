@@ -461,7 +461,8 @@ class GetAccessTitlesViewTestCase(TestCase):
             )
         )
 
-        self.assertEqual(len(access_titles), 0)
+        self.assertEqual(len(access_titles), 1)
+        self.assertIn(high_school_diploma_alternative.uuid, access_titles)
 
         high_school_diploma_alternative.certificate = ['file.pdf']
         high_school_diploma_alternative.save()
