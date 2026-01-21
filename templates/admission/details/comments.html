@@ -57,6 +57,16 @@
             {% include 'admission/includes/comment_entry.html' with title=_('Faculty comment for the SIC') comment=comments|get_item_or_none:fac_checklist_tag panel_class="panel-default" %}
           </div>
         </div>
+      {% elif checklist_tag == 'specificites_formation' %}
+        <div class="comment-panel panel panel-panel panel-info">
+          <div class="panel-heading clearfix">
+            {{ checklist_title }}
+          </div>
+          <div class="panel-body">
+            {% include 'admission/includes/comment_entry.html' with title=_('Global') comment=comments.specificites_formation panel_class="panel-default" %}
+            {% include 'admission/includes/comment_entry.html' with title=_('Delegate comment') comment=comments.specificites_formation__delegue_contingente panel_class="panel-default" %}
+          </div>
+        </div>
       {% elif checklist_tag == 'financabilite' %}
         <div class="comment-panel panel panel-panel panel-info">
           <div class="panel-heading clearfix">

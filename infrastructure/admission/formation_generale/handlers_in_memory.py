@@ -730,6 +730,7 @@ COMMAND_HANDLERS = {
             personne_connue_translator=_personne_connue_ucl_translator,
             experience_parcours_interne_translator=_experience_parcours_interne_translator,
             matricule_etudiant_service=_matricule_etudiant_service,
+            unites_enseignement_translator=_unites_enseignement_translator,
         )
     ),
     ApprouverInscriptionParSicCommand: (
@@ -762,6 +763,7 @@ COMMAND_HANDLERS = {
             proposition_repository=_proposition_repository,
             profil_candidat_translator=_profil_candidat_translator,
             campus_repository=_campus_repository,
+            unites_enseignement_translator=_unites_enseignement_translator,
             pdf_generation=_pdf_generation,
         )
     ),

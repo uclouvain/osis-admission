@@ -34,7 +34,7 @@ from admission.ddd.admission.formation_generale.domain.model._comptabilite impor
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     BesoinDeDerogation,
     ChoixStatutChecklist,
-    ChoixStatutPropositionGenerale,
+    ChoixStatutPropositionGenerale, TypeDeRefus,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     StatutChecklist,
@@ -84,6 +84,8 @@ from admission.ddd.admission.formation_generale.domain.validator._should_informa
 from admission.ddd.admission.formation_generale.domain.validator._should_proposition_etre_en_cours import (
     ShouldPropositionEtreEnCours,
 )
+from admission.ddd.admission.formation_generale.domain.validator._should_refus_non_financable_avoir_une_regle import \
+    ShouldRefusNonFinancableAvoirUneRegle
 from admission.ddd.admission.shared_kernel.domain.model.complement_formation import (
     ComplementFormationIdentity,
 )
@@ -127,6 +129,7 @@ from base.ddd.utils.business_validator import (
     TwoStepsMultipleBusinessExceptionListValidator,
 )
 from base.models.enums.education_group_types import TrainingType
+from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
     AcademicYear,
 )
@@ -785,6 +788,8 @@ class SpecifierInformationsApprobationInscriptionValidatorList(TwoStepsMultipleB
 @attr.dataclass(frozen=True, slots=True)
 class RefuserParSicAValiderValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     statut: ChoixStatutPropositionGenerale
+    type_de_refus: TypeDeRefus
+    financabilite_regle: SituationFinancabilite
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -794,6 +799,10 @@ class RefuserParSicAValiderValidatorList(TwoStepsMultipleBusinessExceptionListVa
             ShouldSicPeutDonnerDecision(
                 statut=self.statut,
             ),
+            ShouldRefusNonFinancableAvoirUneRegle(
+                type_de_refus=self.type_de_refus,
+                financabilite_regle=self.financabilite_regle,
+            )
         ]
 
 

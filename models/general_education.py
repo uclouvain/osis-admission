@@ -205,6 +205,19 @@ class GeneralEducationAdmission(BaseAdmission):
         upload_to=admission_directory_path,
         verbose_name=_('Non-resident enrolment form for an enrolment beyond the first 60 credits'),
     )
+    non_resident_notified_at = models.DateTimeField(
+        verbose_name=_('Non-resident notified at'),
+        null=True,
+        editable=False,
+    )
+    non_resident_notified_by = models.ForeignKey(
+        'base.Person',
+        verbose_name=_('Non-resident notified by'),
+        on_delete=models.PROTECT,
+        related_name='+',
+        null=True,
+        editable=False,
+    )
 
     diploma_equivalence = FileField(
         blank=True,

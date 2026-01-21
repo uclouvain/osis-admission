@@ -1175,7 +1175,11 @@ class Proposition(interface.RootEntity):
         uuids_motifs: List[str],
         autres_motifs: List[str],
     ):
-        RefuserParSicAValiderValidatorList(statut=self.statut).validate()
+        RefuserParSicAValiderValidatorList(
+            statut=self.statut,
+            type_de_refus=type_de_refus,
+            financabilite_regle=self.financabilite_regle,
+        ).validate()
         self.statut = ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION
         self.checklist_actuelle.decision_sic = StatutChecklist(
             statut=ChoixStatutChecklist.GEST_EN_COURS,

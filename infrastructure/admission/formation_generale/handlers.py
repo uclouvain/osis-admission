@@ -711,6 +711,7 @@ COMMAND_HANDLERS = {
             personne_connue_translator=PersonneConnueUclTranslator(),
             experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
             matricule_etudiant_service=MatriculeEtudiantService(),
+            unites_enseignement_translator=UnitesEnseignementTranslator(),
         )
     ),
     ApprouverInscriptionParSicCommand: (
@@ -743,6 +744,7 @@ COMMAND_HANDLERS = {
             proposition_repository=PropositionRepository(),
             profil_candidat_translator=ProfilCandidatTranslator(),
             campus_repository=UclouvainCampusRepository(),
+            unites_enseignement_translator=UnitesEnseignementTranslator(),
             pdf_generation=PDFGeneration(),
         )
     ),

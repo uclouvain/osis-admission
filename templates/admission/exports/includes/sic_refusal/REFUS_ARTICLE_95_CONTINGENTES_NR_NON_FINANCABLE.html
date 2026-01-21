@@ -1,0 +1,72 @@
+{% load admission academic_year_display enums %}
+{% comment 'License' %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+<p>
+  Vu le décret du 16 juin 2006 régulant le nombre d’étudiants dans certains cursus de premier cycle de l'enseignement
+  supérieur ;
+</p>
+<p>
+  Vu le décret du 7 novembre 2013 définissant le paysage de l’enseignement supérieur et l'organisation académique des
+  études ;
+</p>
+<p>
+  Vu le décret du 11 avril 2014 adaptant le financement des établissements d'enseignement supérieur à la nouvelle
+  organisation des études ;
+</p>
+<p>
+  Vu le décret du 17 juillet 2020 déterminant la finançabilité des étudiants à partir de l'année académique 2020-2021 ;
+</p>
+<p>
+  Après contrôle par les Commissaires ou Délégué·e·s du Gouvernement de la Communauté française auprès des institutions
+  universitaires, la demande d’inscription au
+  {% if proposition|est_premiere_annee %}
+    {{ proposition.formation.intitule|intitule_premiere_annee }}
+  {% else %}
+    {{ proposition.formation.intitule }}
+  {% endif %}
+  est refusée pour la raison suivante :
+</p>
+
+<p>
+  La·Le candidat·e ne remplit pas les conditions académiques de finançabilité prévues par l'article 5 du décret du 11
+  avril 2014 adaptant le financement des établissements d'enseignement supérieur à la nouvelle organisation des études.
+</p>
+
+<p>En effet, selon les informations renseignées dans votre dossier, vous ne remplissez la balise de finançabilité suivante :</p>
+
+<ul>
+  <li>{{ proposition.financabilite_regle|enum_display:'SituationFinancabilite' }}</li>
+</ul>
+
+<p>
+  Toutefois, si la·le candidat·e estime que le motif de refus n'est pas justifié, que des circonstances exceptionnelles
+  le justifient et qu'elle/il dispose d'arguments à faire valoir, un recours éventuel contre cette décision peut être
+  introduit en application des articles 96 du décret du 7 novembre 2013 définissant le paysage de l'enseignement
+  supérieur et l'organisation académique des études.
+</p>
+<p>
+  Les informations utiles relatives aux recours sont disponibles sur notre site à la page : <a
+    href="https://uclouvain.be/recours">https://uclouvain.be/recours</a>
+</p>

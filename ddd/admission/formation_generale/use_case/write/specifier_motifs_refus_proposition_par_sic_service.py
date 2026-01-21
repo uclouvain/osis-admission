@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from admission.ddd.admission.formation_generale.domain.model.enums import TypeDeRefus
 from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.commands import (
     SpecifierMotifsRefusPropositionParSicCommand,
@@ -43,7 +44,7 @@ def specifier_motifs_refus_proposition_par_sic(
 
     proposition.specifier_motifs_refus_par_sic(
         auteur_modification=cmd.gestionnaire,
-        type_de_refus=cmd.type_de_refus,
+        type_de_refus=TypeDeRefus[cmd.type_de_refus],
         uuids_motifs=cmd.uuids_motifs,
         autres_motifs=cmd.autres_motifs,
     )

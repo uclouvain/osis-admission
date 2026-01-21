@@ -401,3 +401,19 @@ class PropositionNonEnCoursException(BusinessException):
     def __init__(self, **kwargs):
         message = _('The proposition is not in progress.')
         super().__init__(message, **kwargs)
+
+
+class RefusDossierIncompletSansDocumentException(BusinessException):
+    status_code = "FORMATION-GENERALE-44"
+
+    def __init__(self, **kwargs):
+        message = _('There need to be at least one document with the request status to "Immediately".')
+        super().__init__(message, **kwargs)
+
+
+class RefusNonFinancableSansRegleException(BusinessException):
+    status_code = "FORMATION-GENERALE-44"
+
+    def __init__(self, **kwargs):
+        message = _('A non-financability rule must be selected.')
+        super().__init__(message, **kwargs)

@@ -84,6 +84,7 @@ class IPDFGeneration(DomainService):
         proposition_repository: IPropositionRepository,
         profil_candidat_translator: IProfilCandidatTranslator,
         campus_repository: IUclouvainCampusRepository,
+        unites_enseignement_translator: IUnitesEnseignementTranslator,
         proposition: Proposition,
         gestionnaire: str,
         pdf: str,
@@ -108,6 +109,7 @@ class IPDFGeneration(DomainService):
         cls,
         proposition_repository: IPropositionRepository,
         profil_candidat_translator: IProfilCandidatTranslator,
+        unites_enseignement_translator: IUnitesEnseignementTranslator,
         proposition: Proposition,
         gestionnaire: str,
         temporaire: bool = False,
@@ -121,6 +123,7 @@ class IPDFGeneration(DomainService):
         proposition_repository: IPropositionRepository,
         profil_candidat_translator: IProfilCandidatTranslator,
         campus_repository: IUclouvainCampusRepository,
+        unites_enseignement_translator: IUnitesEnseignementTranslator,
         proposition: Proposition,
         gestionnaire: str,
         temporaire: bool = False,
@@ -133,6 +136,7 @@ class IPDFGeneration(DomainService):
         cls,
         proposition_repository: IPropositionRepository,
         profil_candidat_translator: IProfilCandidatTranslator,
+        unites_enseignement_translator: IUnitesEnseignementTranslator,
         proposition: Proposition,
     ) -> Optional[str]:
         raise NotImplementedError

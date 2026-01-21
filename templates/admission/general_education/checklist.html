@@ -396,6 +396,32 @@
               {% endpanel %}
             {% endif %}
             {% multiple_field_data specific_questions_by_tab|get_item:'INFORMATIONS_ADDITIONNELLES' title=_('Specific questions') %}
+
+            {% if resume_proposition.proposition.est_non_resident_au_sens_decret is True %}
+              {% panel _("Processing of the non-resident limited-enrolment application") %}
+                {% field_data _('Limited-enrolment application number') resume_proposition.proposition.numero_dossier_ares %}
+
+                <dl>
+                  <dt>{% translate "Position / last position to notify (= places + refusal in business order + withdrawal in business order )" %}</dt>
+                  <dd>{{ contingente_places.position }} / {{ contingente_places.derniere_place }} (= {{ contingente_places.nombre_places }} + {{ contingente_places.nombre_places_refus }} + {{ contingente_places.nombre_places_abandon }})</dd>
+                </dl>
+
+                {% htmx_comment_form comment_forms.specificites_formation__delegue_contingente %}
+
+                {% if resume_proposition.proposition.non_resident_notifie_a %}
+                  <dl>
+                    <dt>{% translate "Candidate approval notification" %}</dt>
+                    <dd><div class="alert alert-success">
+                      {% blocktranslate with notified_on=resume_proposition.proposition.non_resident_notifie_a|date:"SHORT_DATETIME_FORMAT" notified_by=original_admission.non_resident_notified_by trimmed %}
+                        Mail de notification d'acceptation envoyé le {{ notified_on }} par {{ notified_by }}
+                      {% endblocktranslate %}
+                    </div></dd>
+                  </dl>
+                {% else %}
+                  {% field_data _('Candidate approval notification') _('Not notified') %}
+                {% endif %}
+              {% endpanel %}
+            {% endif %}
           </div>
 
         </div>

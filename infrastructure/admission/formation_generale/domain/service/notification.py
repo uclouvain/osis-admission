@@ -84,6 +84,8 @@ from admission.infrastructure.admission.formation_generale.repository.propositio
 from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import (
     ProfilCandidatTranslator,
 )
+from admission.infrastructure.admission.shared_kernel.domain.service.unites_enseignement_translator import \
+    UnitesEnseignementTranslator
 from admission.infrastructure.utils import get_requested_documents_html_lists
 from admission.mail_templates import (
     ADMISSION_EMAIL_CONTINGENTE_CONFIRMATION,
@@ -148,7 +150,7 @@ class Notification(INotification):
     @classmethod
     def _confirmer_soumission_contingente(cls, proposition: Proposition, admission: GeneralEducationAdmission):
         PDFGeneration.generer_accuse_de_reception_contingente(
-            PropositionRepository(), ProfilCandidatTranslator(), proposition
+            PropositionRepository(), ProfilCandidatTranslator(), UnitesEnseignementTranslator(), proposition
         )
         admission.quota_admission_receipt = proposition.accuse_de_reception_contingente
         admission.save(update_fields=['quota_admission_receipt'])

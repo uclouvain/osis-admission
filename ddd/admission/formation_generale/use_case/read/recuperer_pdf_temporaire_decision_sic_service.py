@@ -30,6 +30,8 @@ from admission.ddd.admission.formation_generale.domain.builder.proposition_ident
 from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation import IPDFGeneration
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.shared_kernel.domain.service.i_unites_enseignement_translator import \
+    IUnitesEnseignementTranslator
 from ddd.logic.shared_kernel.campus.repository.i_uclouvain_campus import IUclouvainCampusRepository
 
 
@@ -38,6 +40,7 @@ def recuperer_pdf_temporaire_decision_sic(
     proposition_repository: 'IPropositionRepository',
     profil_candidat_translator: 'IProfilCandidatTranslator',
     campus_repository: IUclouvainCampusRepository,
+    unites_enseignement_translator: IUnitesEnseignementTranslator,
     pdf_generation: 'IPDFGeneration',
 ) -> 'PropositionDTO':
     proposition = proposition_repository.get(PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition))
@@ -46,6 +49,7 @@ def recuperer_pdf_temporaire_decision_sic(
         proposition_repository=proposition_repository,
         profil_candidat_translator=profil_candidat_translator,
         campus_repository=campus_repository,
+        unites_enseignement_translator=unites_enseignement_translator,
         proposition=proposition,
         gestionnaire=cmd.auteur,
         pdf=cmd.pdf,

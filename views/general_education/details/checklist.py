@@ -53,6 +53,7 @@ from osis_history.utilities import add_history_entry
 from osis_mail_template.exceptions import EmptyMailTemplateContent
 from osis_mail_template.models import MailTemplate
 
+from admission.calendar.admission_calendar import SIGLES_WITH_QUOTA
 from admission.constants import COMMENT_TAG_FAC, COMMENT_TAG_SIC
 from admission.ddd import MAIL_VERIFICATEUR_CURSUS, MONTANT_FRAIS_DOSSIER
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
@@ -207,7 +208,8 @@ from admission.mail_templates.checklist import (
     EMAIL_TEMPLATE_ENROLLMENT_AUTHORIZATION_DOCUMENT_URL_TOKEN,
     EMAIL_TEMPLATE_VISA_APPLICATION_DOCUMENT_URL_TOKEN,
 )
-from admission.models import EPCInjection
+from admission.models import EPCInjection, GeneralEducationAdmission
+from admission.models.contingente import ContingenteTraining
 from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
 from admission.models.online_payment import PaymentMethod, PaymentStatus
 from admission.templatetags.admission import (
@@ -3106,6 +3108,10 @@ class ChecklistView(
             },
             'donnees_personnelles': assimilation_documents,
             'specificites_formation': {
+                'DOSSIER_NON_RESIDENT',
+                'FORMULAIRE_DE_DEMANDE_NON_RESIDENT_ADMISSION_EN_SECONDE_ANNEE',
+                'CERTIFICAT_DE_RESIDENCE',
+                'DOSSIER_RESIDENT',
                 'ACCUSE_DE_RECEPTION_FORMATION_CONTINGENTE',
                 'ADDITIONAL_DOCUMENTS',
             },
@@ -3196,13 +3202,16 @@ class ChecklistView(
                 tab_names += [f'{tab}__{COMMENT_TAG_SIC}', f'{tab}__{COMMENT_TAG_FAC}']
             tab_names.append('decision_sic__derogation')
             tab_names.append('financabilite__derogation')
+            tab_names.append('specificites_formation__delegue_contingente')
 
             comments_labels = {
                 'decision_sic__derogation': _('Non-progression dispensation comment'),
                 'financabilite__derogation': _('Faculty comment about financability dispensation'),
+                'specificites_formation__delegue_contingente': _('Delegate comment'),
             }
             comments_permissions = {
                 'financabilite__derogation': 'admission.checklist_change_fac_comment',
+                'specificites_formation__delegue_contingente': 'admission.checklist_change_limited_enrolment_delegate_comment',
             }
 
             context['comment_forms'] = {
@@ -3455,6 +3464,10 @@ class ChecklistView(
                     'admission.checklist_change_sic_comment',
                     original_admission,
                 ),
+                'admission.checklist_change_limited_enrolment_delegate_comment': self.request.user.has_perm(
+                    'admission.checklist_change_limited_enrolment_delegate_comment',
+                    original_admission,
+                ),
             }
 
             disable_unavailable_forms(
@@ -3486,6 +3499,29 @@ class ChecklistView(
             )
             if self.proposition_fusion:
                 context['proposition_fusion'] = self.proposition_fusion
+
+            # Contingente
+            if self.proposition.formation.sigle in SIGLES_WITH_QUOTA and self.proposition.est_non_resident_au_sens_decret:
+                contingente_training = ContingenteTraining.objects.filter(training=self.admission.training).first()
+                if contingente_training:
+                    nombre_places = contingente_training.places_number
+                else:
+                    nombre_places = 0
+                nombre_places_refus = GeneralEducationAdmission.objects.filter(
+                    draw_number__lte=nombre_places,
+                    status=ChoixStatutPropositionGenerale.INSCRIPTION_REFUSEE.name,
+                ).count()
+                nombre_places_abandon = GeneralEducationAdmission.objects.filter(
+                    draw_number__lte=nombre_places,
+                    status=ChoixStatutPropositionGenerale.CLOTUREE.name,
+                ).count()
+                context['contingente_places'] = {
+                    'position': self.proposition.numero_de_tirage_contingente,
+                    'nombre_places': nombre_places,
+                    'nombre_places_refus': nombre_places_refus,
+                    'nombre_places_abandon': nombre_places_abandon,
+                    'derniere_place': nombre_places + nombre_places_refus + nombre_places_abandon,
+                }
 
         context['injection_signaletique'] = self.injection_signaletique
         return context
