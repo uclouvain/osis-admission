@@ -765,6 +765,9 @@ msgstr ""
 "framework-reference-languages/table-1-cefr-3.3-common-reference-levels-"
 "global-scale</a>"
 
+msgid "Appendix to enrolment authorization"
+msgstr "Document annexe à l'autorisation d'inscription"
+
 msgid "Application"
 msgstr "Demande"
 
@@ -2201,6 +2204,9 @@ msgctxt "equivalence_state"
 msgid "Definitive"
 msgstr "Définitive"
 
+msgid "Definitive PhD admission date"
+msgstr "Date d'admission définitive au doctorat"
+
 msgid "Definitive admission date to doctorate"
 msgstr "Date de l'admission définitive au doctorat"
 
@@ -3308,6 +3314,9 @@ msgid ""
 msgstr ""
 "Par exemple, un contrat, une lettre d'un•e promoteur•trice ou tout autre "
 "document indiquant que la bourse vous est octroyée aux dates indiquées."
+
+msgid "For the CDD Chair:"
+msgstr "Pour le·la président·e de CDD :"
 
 msgid "For the attention of"
 msgstr "A l'attention de"
@@ -5521,6 +5530,9 @@ msgstr "Doctorat déjà réalisé"
 msgid "PhD research experience"
 msgstr "Expérience de recherche doctorale"
 
+msgid "PhD student"
+msgstr "Doctorant·e"
+
 msgid "Place of birth"
 msgstr "Lieu de naissance"
 
@@ -5852,6 +5864,9 @@ msgstr "Type de la demande"
 msgctxt "equivalence_state"
 msgid "Provisional"
 msgstr "Provisoire"
+
+msgid "Provisional thesis title"
+msgstr "Titre provisoire de la thèse"
 
 msgid "Proximity Commission for Dental Sciences (DENT)"
 msgstr "Commission de proximité de sciences dentaires (DENT)"
@@ -6969,6 +6984,14 @@ msgid "The NOMA must contain 8 digits."
 msgstr "Le NOMA doit contenir exactement 8 chiffres."
 
 msgid ""
+"The PhD Field Committee has approved your proposal for a <span class=\"bold-"
+"text\">supervisor</span> and <span class=\"bold-text\">supervisory "
+"committee</span>, composed as follows:"
+msgstr ""
+"La Commission doctorale de domaine a approuvé votre proposition de <span class=\"bold-"
+"text\">promoteur·trice</span> et de <span class=\"bold-text\">comité d'accompagnement</span>, constitué de la manière suivante :"
+
+msgid ""
 "The Previous experience must be in the \"Sufficient\" status in order to do "
 "this action."
 msgstr ""
@@ -7562,6 +7585,10 @@ msgstr ""
 "Le passage à cet état n’est pas possible tant que la demande est en "
 "quarantaine."
 
+msgid ""
+"The tuition fee communicated by the Enrolment Office is based on your status."
+msgstr ""
+"Le montant des droits d'inscription communiqué par le Service des inscriptions est déterminé en fonction de votre statut."
 #, python-format
 msgid "The type of the admission form item is unknown (%(type)s)."
 msgstr "Le type de l'élément du formulaire d'admission est inconnu (%(type)s)."
@@ -8160,6 +8187,13 @@ msgstr ""
 "demande d'inscription tardive. Le jury d'admission se réserve le droit "
 "d'accepter ou de refuser cette demande en raison des impératifs pédagogiques."
 
+msgid ""
+"We would like to draw your attention to the need to meet the deadline set "
+"out in the PhD regulations for the submission of your mid-term evaluation."
+msgstr ""
+"Nous attirons votre attention sur la nécessite de respecter le délai prévu par le règlement doctoral pour la "
+"présentation de votre épreuve de confirmation."
+
 msgid "Weight"
 msgstr "Poids"
 
@@ -8425,6 +8459,18 @@ msgstr "Vous vous inscrivez à titre"
 
 msgid "You are registering as"
 msgstr "Vous inscrivez-vous à titre"
+
+msgid ""
+"You are writing your thesis under <span class=\"bold-text\">joint "
+"supervision</span>. Please note that the procedures involved in establishing "
+"joint supervision (CDD approval of joint supervision, contact with the "
+"partner university, submission of application form) must be completed within "
+"the first 12 months of starting your thesis."
+msgstr ""
+"Vous faites votre thèse dans le cadre d'une <span class=\"bold-text\">cotutelle"
+"</span>. Veuillez noter que les procédures liées à l'établissement d'une cotutelle "
+"(accord de la CDD sur le principe de la cotutelle, contacts avec l'université partenaire, envoi de la fiche d'ouverture) doivent "
+"être réalisées dans les douze premiers mois suivant le démarrage de la thèse."
 
 msgid ""
 "You can add any document you feel is relevant to your application "
@@ -8723,6 +8769,14 @@ msgstr ""
 "Vous avez spécifié qu'aucune situation d'assimilation ne s'appliquait à vous."
 
 msgid ""
+"You will find the PhD regulations, specific provisions for your field, the "
+"stages of the PhD programme and more helpful information on the website of "
+"your PhD Field Committee."
+msgstr ""
+"Vous trouverez sur le site de votre Commission doctorale de domaine le règlement doctoral, les dispositions "
+"particulières de votre domaine, les étapes du parcours doctoral ainsi que toute autre information utile."
+
+msgid ""
 "You will receive a monthly newsletter explaining all the benefits and "
 "activities associated with this programme."
 msgstr ""
@@ -8865,6 +8919,9 @@ msgstr "modifiée"
 
 msgid "no"
 msgstr "non"
+
+msgid "on"
+msgstr "le"
 
 #, python-format
 msgid "on %(date)s at %(hour)s"
