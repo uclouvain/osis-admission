@@ -46,6 +46,7 @@ from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.utils import generate_proposition_reference
 from base.models.enums import education_group_categories
 from base.models.enums.education_group_types import TrainingType
+from base.models.enums.organization_type import MAIN
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group_year import EducationGroupYearFactory
 from base.tests.factories.person import PersonFactory
@@ -90,6 +91,7 @@ class ContinuingEducationAdmissionFactory(factory.django.DjangoModelFactory):
         ContinuingEducationTrainingFactory,
         academic_year__current=True,
         enrollment_campus__name='Mons',
+        enrollment_campus__organization__type=MAIN,
     )
     reference = factory.LazyAttribute(generate_proposition_reference)
     registration_as = ChoixInscriptionATitre.PRIVE.name

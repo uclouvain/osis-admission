@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -85,6 +85,7 @@ from admission.infrastructure.admission.shared_kernel.domain.service.titres_acce
 from admission.infrastructure.admission.shared_kernel.domain.service.unites_enseignement_translator import (
     UnitesEnseignementTranslator,
 )
+from admission.infrastructure.admission.shared_kernel.repository.email_destinataire import EmailDestinataireRepository
 from admission.infrastructure.admission.shared_kernel.repository.titre_acces_selectionnable import (
     TitreAccesSelectionnableRepository,
 )
@@ -252,6 +253,7 @@ COMMAND_HANDLERS = {
         element_confirmation=ElementsConfirmation(),
         maximum_propositions_service=MaximumPropositionsAutorisees(),
         financabilite_fetcher=FinancabiliteFetcher(),
+        email_destinataire_repository=EmailDestinataireRepository(),
     ),
     DefinirCotutelleCommand: lambda msg_bus, cmd: definir_cotutelle(
         cmd,

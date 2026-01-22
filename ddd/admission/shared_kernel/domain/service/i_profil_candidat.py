@@ -98,7 +98,13 @@ class IProfilCandidatTranslator(interface.DomainService):
 
     @classmethod
     @abstractmethod
-    def get_examen(cls, uuid_proposition: str, matricule: str, formation_sigle: str, formation_annee: int) -> 'ExamenDTO':
+    def get_examen(
+        cls,
+        uuid_proposition: str,
+        matricule: str,
+        formation_sigle: str,
+        formation_annee: int,
+    ) -> 'ExamenDTO':
         raise NotImplementedError
 
     @classmethod
@@ -152,6 +158,7 @@ class IProfilCandidatTranslator(interface.DomainService):
         annee_courante: int,
         annee_diplome_etudes_secondaires: Optional[int] = None,
         annee_derniere_inscription_ucl: Optional[int] = None,
+        annee_alternative_diplome_etudes_secondaires: Optional[int] = None,
     ):
         return 1 + max(
             [
@@ -160,6 +167,7 @@ class IProfilCandidatTranslator(interface.DomainService):
                     annee_courante - cls.NB_MAX_ANNEES_CV_REQUISES,
                     annee_diplome_etudes_secondaires,
                     annee_derniere_inscription_ucl,
+                    annee_alternative_diplome_etudes_secondaires,
                 ]
                 if annee
             ]

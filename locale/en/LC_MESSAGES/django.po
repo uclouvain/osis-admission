@@ -449,6 +449,9 @@ msgstr ""
 msgid "Add the corresponding program manager roles (doctorate)"
 msgstr ""
 
+msgid "Add this reason"
+msgstr ""
+
 msgid "Add validation of prior experience (VAE)"
 msgstr ""
 
@@ -634,6 +637,9 @@ msgstr ""
 msgid "Analysis folder for a general education admission"
 msgstr ""
 
+msgid "Analysis folder generated when the application is validated"
+msgstr ""
+
 msgid "Annex 1 visa form"
 msgstr ""
 
@@ -670,6 +676,9 @@ msgid ""
 "target=\"_blank\"> https://www.coe.int/en/web/common-european-framework-"
 "reference-languages/table-1-cefr-3.3-common-reference-levels-global-scale </"
 "a>"
+msgstr ""
+
+msgid "Appendix to enrolment authorization"
 msgstr ""
 
 msgid "Application"
@@ -1452,6 +1461,9 @@ msgstr ""
 msgid "Cleaned"
 msgstr ""
 
+msgid "Clear the reason"
+msgstr ""
+
 msgid "Clinical Research Fund (FRC)"
 msgstr ""
 
@@ -2006,6 +2018,9 @@ msgstr ""
 
 msgctxt "equivalence_state"
 msgid "Definitive"
+msgstr ""
+
+msgid "Definitive PhD admission date"
 msgstr ""
 
 msgid "Definitive admission date to doctorate"
@@ -3004,6 +3019,9 @@ msgstr ""
 msgid ""
 "For example, a contract, a letter from a supervisor, or any other document "
 "showing that you have been awarded the scholarship on the dates indicated."
+msgstr ""
+
+msgid "For the CDD Chair:"
 msgstr ""
 
 msgid "For the attention of"
@@ -4012,9 +4030,6 @@ msgstr ""
 msgid "List of emails of the program managers."
 msgstr ""
 
-msgid "List of names of the program managers."
-msgstr ""
-
 msgid ""
 "List of the mandatory requested documents that must be submitted "
 "immediately, with the reason"
@@ -4965,6 +4980,9 @@ msgstr ""
 msgid "PhD research experience"
 msgstr ""
 
+msgid "PhD student"
+msgstr ""
+
 msgid "Place of birth"
 msgstr ""
 
@@ -5253,6 +5271,9 @@ msgstr ""
 
 msgctxt "equivalence_state"
 msgid "Provisional"
+msgstr ""
+
+msgid "Provisional thesis title"
 msgstr ""
 
 msgid "Proximity Commission for Dental Sciences (DENT)"
@@ -6295,6 +6316,12 @@ msgid "The NOMA must contain 8 digits."
 msgstr ""
 
 msgid ""
+"The PhD Field Committee has approved your proposal for a <span class=\"bold-"
+"text\">supervisor</span> and <span class=\"bold-text\">supervisory "
+"committee</span>, composed as follows:"
+msgstr ""
+
+msgid ""
 "The Previous experience must be in the \"Sufficient\" status in order to do "
 "this action."
 msgstr ""
@@ -6794,6 +6821,10 @@ msgstr ""
 msgid ""
 "The transition to this status is not possible while the application is in "
 "quarantine."
+msgstr ""
+
+msgid ""
+"The tuition fee communicated by the Enrolment Office is based on your status."
 msgstr ""
 
 #, python-format
@@ -7308,6 +7339,11 @@ msgid ""
 "this application on the basis of educational requirements."
 msgstr ""
 
+msgid ""
+"We would like to draw your attention to the need to meet the deadline set "
+"out in the PhD regulations for the submission of your mid-term evaluation."
+msgstr ""
+
 msgid "Weight"
 msgstr ""
 
@@ -7545,6 +7581,14 @@ msgid "You are registering as"
 msgstr ""
 
 msgid ""
+"You are writing your thesis under <span class=\"bold-text\">joint "
+"supervision</span>. Please note that the procedures involved in establishing "
+"joint supervision (CDD approval of joint supervision, contact with the "
+"partner university, submission of application form) must be completed within "
+"the first 12 months of starting your thesis."
+msgstr ""
+
+msgid ""
 "You can add any document you feel is relevant to your application "
 "(supporting documents, proof of language level, etc.)."
 msgstr ""
@@ -7769,6 +7813,12 @@ msgid "You specified that no Belgian student status situation applies to you."
 msgstr ""
 
 msgid ""
+"You will find the PhD regulations, specific provisions for your field, the "
+"stages of the PhD programme and more helpful information on the website of "
+"your PhD Field Committee."
+msgstr ""
+
+msgid ""
 "You will receive a monthly newsletter explaining all the benefits and "
 "activities associated with this programme."
 msgstr ""
@@ -7900,6 +7950,9 @@ msgstr ""
 msgid "no"
 msgstr ""
 
+msgid "on"
+msgstr ""
+
 #, python-format
 msgid "on %(date)s at %(hour)s"
 msgstr ""
@@ -7907,9 +7960,6 @@ msgstr ""
 msgctxt "payment"
 msgid "open"
 msgstr "Open"
-
-msgid "or"
-msgstr ""
 
 msgctxt "payment"
 msgid "paid"

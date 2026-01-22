@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -221,7 +221,6 @@ class PDFGeneration(IPDFGeneration):
         proposition.certificat_refus_cdd = [token]
 
     @classmethod
-    @override(settings.LANGUAGE_CODE)
     def generer_attestation_accord_cdd(
         cls,
         proposition: Proposition,
@@ -249,13 +248,14 @@ class PDFGeneration(IPDFGeneration):
             template = 'admission/exports/cdd_approval_certificate_pre_admission.html'
 
         # Generate the pdf
-        token = admission_generate_pdf(
-            admission=None,
-            template=template,
-            filename='cdd_approval_certificate.pdf',
-            context=context,
-            author=gestionnaire.matricule,
-        )
+        with translation.override(language=context['proposition'].langue_contact_candidat):
+            token = admission_generate_pdf(
+                admission=None,
+                template=template,
+                filename='cdd_approval_certificate.pdf',
+                context=context,
+                author=gestionnaire.matricule,
+            )
 
         # Store the token of the pdf
         proposition.certificat_approbation_cdd = [token]

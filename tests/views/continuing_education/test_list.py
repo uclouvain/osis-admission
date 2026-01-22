@@ -33,7 +33,6 @@ from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
 from admission.auth.scope import Scope
-from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixEdition,
     ChoixStatutChecklist,
@@ -41,6 +40,7 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     OngletsChecklist,
 )
 from admission.ddd.admission.formation_continue.dtos.liste import DemandeRechercheDTO
+from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
 from admission.models import ContinuingEducationAdmission, EPCInjection
 from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
 from admission.tests.factories.continuing_education import (
@@ -55,6 +55,7 @@ from base.models.academic_year import AcademicYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import EntityType
+from base.models.person_merge_proposal import PersonMergeProposal, PersonMergeStatus
 from base.tests import QueriesAssertionsMixin
 from base.tests.factories.academic_calendar import AcademicCalendarFactory
 from base.tests.factories.academic_year import AcademicYearFactory
@@ -442,6 +443,147 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(len(response.context['object_list']), 1)
         self.assertEqual(response.context['object_list'][0].uuid, self.admissions[0].uuid)
 
+    def test_list_with_filter_by_enrollment_campus(self):
+        self.client.force_login(user=self.sic_management_user)
+
+        response = self._do_request(
+            site_inscription=self.admissions[0].training.enrollment_campus.uuid,
+            allowed_sql_surplus=1,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['object_list']), 1)
+        self.assertEqual(response.context['object_list'][0].uuid, self.admissions[0].uuid)
+
+    def test_list_with_filter_by_quarantine_criteria(self):
+        self.client.force_login(user=self.sic_management_user)
+
+        merge_proposal_person = PersonMergeProposal.objects.create(
+            status=PersonMergeStatus.MATCH_FOUND.name,
+            original_person=self.admissions[0].candidate,
+            last_similarity_result_update=datetime.datetime.now(),
+            registration_id_sent_to_digit='',
+            validation={'valid': True},
+        )
+
+        response = self._do_request(
+            quarantaine=True,
+            allowed_sql_surplus=0,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['object_list']), 1)
+        self.assertEqual(response.context['object_list'][0].uuid, self.admissions[0].uuid)
+
+        merge_proposal_person.status = PersonMergeStatus.NO_MATCH.name
+        merge_proposal_person.validation['valid'] = False
+        merge_proposal_person.save()
+
+        response = self._do_request(
+            quarantaine=True,
+            allowed_sql_surplus=0,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['object_list']), 1)
+        self.assertEqual(response.context['object_list'][0].uuid, self.admissions[0].uuid)
+
+        merge_proposal_person.validation['valid'] = True
+        merge_proposal_person.save()
+
+        response = self._do_request(
+            quarantaine=True,
+            allowed_sql_surplus=0,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['object_list']), 0)
+
+        merge_proposal_person.validation = {}
+        merge_proposal_person.save()
+
+        response = self._do_request(
+            quarantaine=True,
+            allowed_sql_surplus=0,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['object_list']), 0)
+
+        merge_proposal_person.delete()
+
+        response = self._do_request(
+            quarantaine=True,
+            allowed_sql_surplus=0,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['object_list']), 0)
+
+    def test_list_with_exclude_by_quarantine_criteria(self):
+        self.client.force_login(user=self.sic_management_user)
+
+        response = self._do_request(
+            quarantaine=False,
+            allowed_sql_surplus=0,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['object_list'][0].uuid, self.admissions[0].uuid)
+
+        merge_proposal_person = PersonMergeProposal.objects.create(
+            status=PersonMergeStatus.NO_MATCH.name,
+            original_person=self.admissions[0].candidate,
+            last_similarity_result_update=datetime.datetime.now(),
+            registration_id_sent_to_digit='',
+            validation={'valid': True},
+        )
+
+        response = self._do_request(
+            quarantaine=False,
+            allowed_sql_surplus=0,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['object_list']), 2)
+        self.assertEqual(response.context['object_list'][0].uuid, self.admissions[0].uuid)
+
+        merge_proposal_person.validation = {}
+        merge_proposal_person.save()
+
+        response = self._do_request(
+            quarantaine=False,
+            allowed_sql_surplus=0,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['object_list']), 2)
+        self.assertEqual(response.context['object_list'][0].uuid, self.admissions[0].uuid)
+
+        merge_proposal_person.validation = {'valid': False}
+        merge_proposal_person.save()
+
+        response = self._do_request(
+            quarantaine=False,
+            allowed_sql_surplus=0,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['object_list']), 1)
+        self.assertNotEqual(response.context['object_list'][0].uuid, self.admissions[0].uuid)
+
+        merge_proposal_person.status = PersonMergeStatus.ERROR.name
+        merge_proposal_person.validation = {'valid': True}
+        merge_proposal_person.save()
+
+        response = self._do_request(
+            quarantaine=False,
+            allowed_sql_surplus=0,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['object_list']), 1)
+        self.assertNotEqual(response.context['object_list'][0].uuid, self.admissions[0].uuid)
+
     def test_list_with_filter_by_entities(self):
         self.client.force_login(user=self.sic_management_user)
 
@@ -708,7 +850,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
     def test_list_sort_by_epc_injection_status(self):
         self.client.force_login(user=self.sic_management_user)
 
-        admission_injection = EPCInjection.objects.create(
+        EPCInjection.objects.create(
             admission=self.admissions[0],
             type=EPCInjectionType.DEMANDE.name,
             status=EPCInjectionStatus.ERROR.name,

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -100,7 +100,8 @@ from base.models.enums.person_address_type import PersonAddressType
 from base.models.enums.state_iufc import StateIUFC
 from base.models.person_address import PersonAddress
 from base.tests import QueriesAssertionsMixin
-from base.tests.factories.academic_year import AcademicYearFactory
+from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
+from epc.tests.factories.email_fonction_programme import EmailFonctionProgrammeFactory
 from infrastructure.financabilite.domain.service.financabilite import PASS_ET_LAS_LABEL
 from osis_profile import BE_ISO_CODE
 from osis_profile.models import EducationalExperience, ProfessionalExperience
@@ -313,13 +314,13 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         self.client.force_authenticate(user=self.candidate_ok.user)
 
         # Add a specific period
-        current_specific_enrolment_period = AdmissionMedDentEnrollmentAcademicCalendarFactory(
+        AdmissionMedDentEnrollmentAcademicCalendarFactory(
             data_year=self.admission_ok.determined_academic_year,
             start_date=datetime.date(1980, 2, 1),
             end_date=datetime.date(1980, 2, 15),
         )
 
-        next_specific_enrolment_period = AdmissionMedDentEnrollmentAcademicCalendarFactory(
+        AdmissionMedDentEnrollmentAcademicCalendarFactory(
             data_year__year=self.admission_ok.determined_academic_year.year + 1,
             start_date=datetime.date(1980, 3, 1),
             end_date=datetime.date(1980, 3, 15),
@@ -856,6 +857,11 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
             training=training,
         )
 
+        cls.training_email = EmailFonctionProgrammeFactory(
+            type=TypeEmailFonctionProgramme.DESTINATAIRE_ADMISSION.name,
+            programme=training.education_group,
+        )
+
         cls.first_fac_manager = ProgramManagerRoleFactory(education_group=training.education_group).person
         cls.second_fac_manager = ProgramManagerRoleFactory(education_group=training.education_group).person
 
@@ -1073,12 +1079,11 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
 
         self.assertEqual(email_object['To'], self.admission_ok.candidate.private_email)
 
-        cc_recipients = email_object['Cc'].split(',')
-        self.assertEqual(len(cc_recipients), 2)
-        self.assertCountEqual(cc_recipients, [self.first_fac_manager.email, self.second_fac_manager.email])
+        cc_recipients = email_object['Cc']
+        self.assertEqual(cc_recipients, self.training_email.email)
 
         content = email_object.as_string()
-        self.assertIn(f'{self.admission_ok.candidate.first_name } {self.admission_ok.candidate.last_name}', content)
+        self.assertIn(f'{self.admission_ok.candidate.first_name} {self.admission_ok.candidate.last_name}', content)
         self.assertIn('http://dummyurl/file/foobar', content)
 
         # Check the history entries

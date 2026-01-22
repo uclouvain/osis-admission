@@ -237,7 +237,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
     connaissances_langues: List[ConnaissanceLangue] = []
     diplomes_etudes_secondaires_belges: List[DiplomeEtudeSecondaire] = []
     diplomes_etudes_secondaires_etrangers: List[DiplomeEtudeSecondaire] = []
-    etudes_secondaires = {}
+    etudes_secondaires: dict[str, _EtudesSecondairesDTO] = {}
     experiences_academiques: List[ExperienceAcademique] = []
     experiences_non_academiques: List[ExperienceNonAcademique] = []
     valorisations: Dict[str, List[str]] = []
@@ -1057,7 +1057,11 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def get_examen(
-        cls, uuid_proposition: str, matricule: str, formation_sigle: str, formation_annee: int
+        cls,
+        uuid_proposition: str,
+        matricule: str,
+        formation_sigle: str,
+        formation_annee: int,
     ) -> 'ExamenDTO':
         return ExamenDTO(
             uuid='',
@@ -1153,16 +1157,23 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
 
             etudes_secondaires = cls.etudes_secondaires.get(matricule)
             annee_etudes_secondaires = etudes_secondaires and etudes_secondaires.annee_diplome_etudes_secondaires
+            annee_alternative_diplome_etudes_secondaires = (
+                etudes_secondaires
+                and etudes_secondaires.alternative_secondaires
+                and etudes_secondaires.alternative_secondaires.examen_admission_premier_cycle_annee
+            )
 
             return CurriculumAdmissionDTO(
                 experiences_academiques=experiences_dtos,
                 annee_diplome_etudes_secondaires=annee_etudes_secondaires,
                 annee_derniere_inscription_ucl=candidate.annee_derniere_inscription_ucl,
                 experiences_non_academiques=experiences_non_academiques,
+                annee_alternative_diplome_etudes_secondaires=annee_alternative_diplome_etudes_secondaires,
                 annee_minimum_a_remplir=cls.get_annee_minimale_a_completer_cv(
                     annee_courante=datetime.date.today().year,
                     annee_diplome_etudes_secondaires=annee_etudes_secondaires,
                     annee_derniere_inscription_ucl=candidate.annee_derniere_inscription_ucl,
+                    annee_alternative_diplome_etudes_secondaires=annee_alternative_diplome_etudes_secondaires,
                 ),
             )
         except StopIteration:

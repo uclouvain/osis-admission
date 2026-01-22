@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -328,7 +328,6 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
                     'sender_name': f'{self.request.user.person.first_name} {self.request.user.person.last_name}',
                     'document_link': EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN,
                     'management_entity_acronym': self.proposition.doctorat.sigle_entite_gestion,
-                    'program_managers_names': self.admission_program_managers_names,
                 },
             )
 
@@ -371,7 +370,6 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             'training_acronym': self.proposition.formation.sigle,
             'management_entity_name': self.proposition.formation.intitule_entite_gestion,
             'management_entity_acronym': self.proposition.formation.sigle_entite_gestion,
-            'program_managers_names': self.admission_program_managers_names,
             'sender_name': self.current_user_name,
         }
 

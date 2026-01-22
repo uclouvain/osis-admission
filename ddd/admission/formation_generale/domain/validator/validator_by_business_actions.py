@@ -148,6 +148,7 @@ class FormationGeneraleCurriculumValidatorList(TwoStepsMultipleBusinessException
     annee_courante: int
     annee_derniere_inscription_ucl: Optional[int]
     annee_diplome_etudes_secondaires: Optional[int]
+    annee_alternative_diplome_etudes_secondaires: Optional[int]
     experiences_non_academiques: List[ExperienceNonAcademiqueDTO]
     experiences_academiques: List[ExperienceAcademiqueDTO]
     experiences_academiques_incompletes: Dict[str, str]
@@ -171,6 +172,7 @@ class FormationGeneraleCurriculumValidatorList(TwoStepsMultipleBusinessException
                 experiences_academiques_incompletes=self.experiences_academiques_incompletes,
                 annee_derniere_inscription_ucl=self.annee_derniere_inscription_ucl,
                 annee_diplome_etudes_secondaires=self.annee_diplome_etudes_secondaires,
+                annee_alternative_diplome_etudes_secondaires=self.annee_alternative_diplome_etudes_secondaires,
                 experiences_non_academiques=self.experiences_non_academiques,
                 annee_formation=self.annee_formation,
             ),
@@ -193,6 +195,7 @@ class FormationGeneraleCurriculumPostSoumissionValidatorList(TwoStepsMultipleBus
     annee_precedent_formation: int
     date_soumission: datetime.date
     annee_diplome_etudes_secondaires: Optional[int]
+    annee_alternative_diplome_etudes_secondaires: Optional[int]
     experiences_non_academiques: List[ExperienceNonAcademiqueDTO]
     experiences_academiques: List[ExperienceAcademiqueDTO]
     experiences_parcours_interne: List[ExperienceParcoursInterneDTO]
@@ -211,6 +214,7 @@ class FormationGeneraleCurriculumPostSoumissionValidatorList(TwoStepsMultipleBus
                 experiences_academiques_incompletes={},  # Une expérience incomplète justifie quand même une période
                 annee_derniere_inscription_ucl=None,
                 annee_diplome_etudes_secondaires=self.annee_diplome_etudes_secondaires,
+                annee_alternative_diplome_etudes_secondaires=self.annee_alternative_diplome_etudes_secondaires,
                 experiences_non_academiques=self.experiences_non_academiques,
                 date_soumission=self.date_soumission,
                 experiences_parcours_interne=self.experiences_parcours_interne,

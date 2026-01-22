@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -55,6 +55,9 @@ from admission.infrastructure.admission.formation_continue.domain.service.lister
 from admission.infrastructure.admission.formation_continue.domain.service.notification import (
     Notification,
 )
+from admission.infrastructure.admission.formation_continue.domain.service.pdf_generation import (
+    PDFGeneration,
+)
 from admission.infrastructure.admission.formation_continue.domain.service.question_specifique import (
     QuestionSpecifiqueTranslator,
 )
@@ -91,6 +94,7 @@ from admission.infrastructure.admission.shared_kernel.domain.service.raccrocher_
 from admission.infrastructure.admission.shared_kernel.domain.service.titres_acces import (
     TitresAcces,
 )
+from admission.infrastructure.admission.shared_kernel.repository.email_destinataire import EmailDestinataireRepository
 from infrastructure.shared_kernel.academic_year.repository.academic_year import (
     AcademicYearRepository,
 )
@@ -157,6 +161,7 @@ COMMAND_HANDLERS = {
         questions_specifiques_translator=QuestionSpecifiqueTranslator(),
         historique=HistoriqueGlobal(),
         raccrocher_experiences_curriculum=RaccrocherExperiencesCurriculum(),
+        email_destinataire_repository=EmailDestinataireRepository(),
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,
@@ -376,6 +381,12 @@ COMMAND_HANDLERS = {
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
             emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
+        )
+    ),
+    GenererDocumentAnalysePropositionAutorisationCommand: (
+        lambda msg_bus, cmd: generer_document_analyse_proposition_autorisation(
+            cmd=cmd,
+            pdf_generation_service=PDFGeneration(),
         )
     ),
 }

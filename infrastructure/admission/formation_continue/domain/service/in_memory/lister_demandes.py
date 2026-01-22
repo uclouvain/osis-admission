@@ -52,6 +52,8 @@ class ListerDemandesInMemory(IListerDemandesService):
         injection_epc_en_erreur: Optional[bool] = None,
         paye: Optional[bool] = None,
         marque_d_interet: Optional[bool] = None,
+        quarantaine: Optional[bool] = None,
+        site_inscription: Optional[str] = '',
         mode_filtres_etats_checklist: Optional[str] = '',
         filtres_etats_checklist: Optional[Dict[str, List[str]]] = None,
         demandeur: Optional[str] = '',
@@ -60,7 +62,6 @@ class ListerDemandesInMemory(IListerDemandesService):
         page: Optional[int] = None,
         taille_page: Optional[int] = None,
     ) -> PaginatedList[DemandeRechercheDTO]:
-
         result = PaginatedList(id_attribute='uuid')
 
         for proposition in PropositionInMemoryRepository.search_dto(matricule_candidat=matricule_candidat):

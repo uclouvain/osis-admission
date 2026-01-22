@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,13 +24,14 @@
 #
 # ##############################################################################
 import datetime
+import uuid
 from email import message_from_string
 
 import freezegun
 import mock
 from django.conf import settings
 from django.shortcuts import resolve_url
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from osis_history.models import HistoryEntry
 from osis_notification.models import EmailNotification
 
@@ -79,8 +80,14 @@ from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
+from osis_common.ddd.interface import EventConsumptionMode
+from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
+from epc.tests.factories.email_fonction_programme import EmailFonctionProgrammeFactory
+from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
+from epc.tests.factories.email_fonction_programme import EmailFonctionProgrammeFactory
 
 
+@override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
 class ChecklistViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -102,6 +109,8 @@ class ChecklistViewTestCase(TestCase):
         ).person.user
 
         cls.default_headers = {'HTTP_HX-Request': 'true'}
+
+        cls.file_uuid = uuid.uuid4()
 
         cls.file_metadata = {
             'name': 'myfile',
@@ -135,6 +144,30 @@ class ChecklistViewTestCase(TestCase):
         patcher = mock.patch('osis_document_components.services.get_several_remote_metadata')
         patched = patcher.start()
         patched.side_effect = lambda tokens: {token: self.file_metadata for token in tokens}
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch(
+            'admission.ddd.admission.formation_continue.event_handler.generer_document_analyse_proposition_autorisation'
+            '_service.GenererDocumentAnalysePropositionAutorisationHandler.consumption_mode',
+            return_value=EventConsumptionMode.SYNCHRONOUS,
+            new_callable=mock.PropertyMock,
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch('admission.exports.admission_recap.admission_recap.admission_pdf_recap')
+        patched = patcher.start()
+        patched.return_value = self.file_uuid
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch('osis_document_components.services.save_raw_content_remotely')
+        patched = patcher.start()
+        patched.return_value = 'a-token'
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch('osis_document_components.services.change_remote_metadata')
+        self.change_remote_metadata_patcher = patcher.start()
+        self.change_remote_metadata_patcher.return_value = 'a-token'
         self.addCleanup(patcher.stop)
 
         self.continuing_admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
@@ -534,6 +567,9 @@ class ChecklistViewTestCase(TestCase):
         self.assertEqual(self.continuing_admission.status, ChoixStatutPropositionContinue.INSCRIPTION_AUTORISEE.name)
         self.assertEqual(self.continuing_admission.last_update_author, self.iufc_manager_user.person)
 
+        # Check that a document has been generated
+        self.assertIn(self.file_uuid, self.continuing_admission.authorization_analysis_folder)
+
         # Check that no notification have been created
         notifications = EmailNotification.objects.filter(person=self.continuing_admission.candidate)
         self.assertEqual(len(notifications), 0)
@@ -785,7 +821,12 @@ class ChecklistViewTestCase(TestCase):
     def test_post_send_to_fac_iufc(self):
         self.client.force_login(user=self.iufc_manager_user)
 
-        self.assertFalse(EmailNotification.objects.filter(person=self.fac_manager_user.person).exists())
+        self.assertFalse(EmailNotification.objects.filter(person=None).exists())
+
+        training_email = EmailFonctionProgrammeFactory(
+            type=TypeEmailFonctionProgramme.DESTINATAIRE_ADMISSION.name,
+            programme=self.continuing_admission.training.education_group,
+        )
 
         url = resolve_url(
             'admission:continuing-education:decision-send-to-fac',
@@ -804,10 +845,10 @@ class ChecklistViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context['decision_send_to_fac_form'].is_valid())
 
-        notifications = EmailNotification.objects.filter(person=self.fac_manager_user.person)
+        notifications = EmailNotification.objects.filter(person=None)
         self.assertEqual(len(notifications), 1)
         email_object = message_from_string(notifications[0].payload)
-        self.assertEqual(email_object['To'], self.fac_manager_user.person.email)
+        self.assertEqual(email_object['To'], training_email.email)
 
     #### FAC MANAGER
 
