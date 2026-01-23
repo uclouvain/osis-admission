@@ -81,6 +81,8 @@ from admission.ddd.admission.formation_generale.domain.validator._should_informa
     ShouldParcoursAnterieurEtreSuffisant,
     ShouldSicPeutDonnerDecision,
 )
+from admission.ddd.admission.formation_generale.domain.validator._should_proposition_etre_en_cours import \
+    ShouldPropositionEtreEnCours
 from admission.ddd.admission.shared_kernel.domain.model.complement_formation import (
     ComplementFormationIdentity,
 )
@@ -812,4 +814,19 @@ class ChoixFormationValidatorList(TwoStepsMultipleBusinessExceptionListValidator
                 proposition=self.proposition,
                 formation=self.formation,
             )
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SupprimerPropositionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    proposition: 'Proposition'
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldPropositionEtreEnCours(
+                statut=self.proposition.statut,
+            ),
         ]
