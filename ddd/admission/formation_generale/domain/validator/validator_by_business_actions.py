@@ -81,6 +81,8 @@ from admission.ddd.admission.formation_generale.domain.validator._should_informa
     ShouldParcoursAnterieurEtreSuffisant,
     ShouldSicPeutDonnerDecision,
 )
+from admission.ddd.admission.formation_generale.domain.validator._should_proposition_etre_en_cours_ou_contingente_non_resident_soumise import \
+    ShouldPropositionEtreEnCoursOuContingenteNonResidentSoumise
 from admission.ddd.admission.shared_kernel.domain.model.complement_formation import (
     ComplementFormationIdentity,
 )
@@ -812,4 +814,21 @@ class ChoixFormationValidatorList(TwoStepsMultipleBusinessExceptionListValidator
                 proposition=self.proposition,
                 formation=self.formation,
             )
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SupprimerPropositionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    proposition: 'Proposition'
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldPropositionEtreEnCoursOuContingenteNonResidentSoumise(
+                statut=self.proposition.statut,
+                est_non_resident_au_sens_decret=self.proposition.est_non_resident_au_sens_decret,
+                formation=self.proposition.formation_id.sigle,
+            ),
         ]

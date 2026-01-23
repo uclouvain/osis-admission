@@ -93,6 +93,9 @@ from admission.ddd.admission.shared_kernel.use_case.write import (
 from admission.infrastructure.admission.formation_generale.domain.service.comptabilite import (
     ComptabiliteTranslator,
 )
+from admission.infrastructure.admission.formation_generale.domain.service.contingente import (
+    Contingente,
+)
 from admission.infrastructure.admission.formation_generale.domain.service.formation import (
     FormationGeneraleTranslator,
 )
@@ -233,6 +236,7 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=PropositionRepository(),
         historique=HistoriqueGlobal(),
+        calendrier_inscription=CalendrierInscription(),
     ),
     VerifierPropositionQuery: lambda msg_bus, cmd: verifier_proposition(
         cmd,
@@ -244,6 +248,7 @@ COMMAND_HANDLERS = {
         academic_year_repository=AcademicYearRepository(),
         questions_specifiques_translator=QuestionSpecifiqueTranslator(),
         maximum_propositions_service=MaximumPropositionsAutorisees(),
+        contingente_service=Contingente(),
     ),
     SoumettrePropositionCommand: lambda msg_bus, cmd: soumettre_proposition(
         msg_bus,
@@ -262,6 +267,7 @@ COMMAND_HANDLERS = {
         paiement_frais_dossier_service=PaiementFraisDossier(),
         historique=HistoriqueGlobal(),
         financabilite_fetcher=FinancabiliteFetcher(),
+        contingente_service=Contingente(),
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,

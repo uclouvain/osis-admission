@@ -396,6 +396,15 @@
               {% endpanel %}
             {% endif %}
             {% multiple_field_data specific_questions_by_tab|get_item:'INFORMATIONS_ADDITIONNELLES' title=_('Specific questions') %}
+
+            {% if resume_proposition.proposition.est_non_resident_au_sens_decret is False %}
+              {% panel _("Processing of the non-resident limited-enrolment application") %}
+                {% field_data _('Limited-enrolment application number') resume_proposition.proposition.numero_dossier_ares %}
+                {% field_data _('Position / last position to notify (= places + refusal in business order + withdrawal in business order )') 'Pas encore implémenté' %}
+                {% field_data _('Delegate comment') 'Pas encore implémenté' %}
+                {% field_data _('Candidate approval notification') 'Pas encore implémenté' %}
+              {% endpanel %}
+            {% endif %}
           </div>
 
         </div>
