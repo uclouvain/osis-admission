@@ -25,6 +25,7 @@
 # ##############################################################################
 from django.forms import Form
 from django.template.loader import render_to_string
+from django.utils import translation
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
@@ -175,14 +176,15 @@ class CddDecisionMixin(CheckListDefaultContextMixin):
         }
 
         if self.request.method == 'GET':
-            prerequisite_courses_list = render_to_string(
-                'admission/includes/prerequisite_courses.html',
-                context={'admission': self.proposition},
-            )
-            prerequisite_courses_communication = render_to_string(
-                'admission/includes/prerequisite_courses_communication.html',
-                context={'admission': self.proposition},
-            )
+            with translation.override(self.proposition.langue_contact_candidat):
+                prerequisite_courses_list = render_to_string(
+                    'admission/includes/prerequisite_courses.html',
+                    context={'admission': self.proposition},
+                )
+                prerequisite_courses_communication = render_to_string(
+                    'admission/includes/prerequisite_courses_communication.html',
+                    context={'admission': self.proposition},
+                )
 
             # Load the email template
             subject, body = get_email(
