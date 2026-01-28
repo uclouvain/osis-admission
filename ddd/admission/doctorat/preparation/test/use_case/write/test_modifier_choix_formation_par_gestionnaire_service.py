@@ -133,15 +133,15 @@ class TestModifierChoixFormationParGestionnaireService(SimpleTestCase):
             self.message_bus.invoke(cmd)
         self.assertIsInstance(e.exception.exceptions.pop(), CommissionProximiteInconsistantException)
 
-    def test_should_empecher_si_commission_proximite_cde_ou_clsm_vide_et_requis(self):
+    def test_should_pas_empecher_si_commission_proximite_cde_ou_clsm_vide(self):
         cmd = attr.evolve(
             self.cmd,
             commission_proximite='',
             uuid_proposition="uuid-ECGE3DP",
         )
-        with self.assertRaises(MultipleBusinessExceptions) as e:
-            self.message_bus.invoke(cmd)
-        self.assertIsInstance(e.exception.exceptions.pop(), CommissionProximiteInconsistantException)
+        proposition_id = self.message_bus.invoke(cmd)
+        proposition = self.proposition_repository.get(proposition_id)
+        self.assertIsNone(proposition.commission_proximite)
 
     def test_should_empecher_si_commission_proximite_cdds_vide_et_requis(self):
         cmd = attr.evolve(

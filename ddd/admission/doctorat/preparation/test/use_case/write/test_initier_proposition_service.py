@@ -166,11 +166,11 @@ class TestInitierPropositionService(TestCase):
         proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
         self.assertEqual(proposition.commission_proximite.name, ChoixSousDomaineSciences.BIOLOGY.name)
 
-    def test_should_pas_initier_commission_proximite_CLSM_vide(self):
+    def test_should_initier_commission_proximite_CLSM_vide(self):
         cmd = attr.evolve(self.cmd, commission_proximite='', sigle_formation=self.doctorat_CLSM)
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(cmd)
-            self.assertIsInstance(context.exception.exceptions.pop(), CommissionProximiteInconsistantException)
+        proposition_id = self.message_bus.invoke(cmd)
+        proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
+        self.assertIsNone(proposition.commission_proximite)
 
     def test_should_pas_initier_commission_proximite_cdss_invalide(self):
         cmd = attr.evolve(
@@ -194,11 +194,11 @@ class TestInitierPropositionService(TestCase):
         proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
         self.assertIsNone(proposition.commission_proximite)
 
-    def test_should_pas_initier_commission_proximite_CDE_vide_et_CDE(self):
+    def test_should_initier_commission_proximite_CDE_vide_et_CDE(self):
         cmd = attr.evolve(self.cmd, commission_proximite='')
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(cmd)
-            self.assertIsInstance(context.exception.exceptions.pop(), CommissionProximiteInconsistantException)
+        proposition_id = self.message_bus.invoke(cmd)
+        proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
+        self.assertIsNone(proposition.commission_proximite)
 
     def test_should_pas_initier_commission_proximite_CDSS_vide_et_CDSS(self):
         cmd = attr.evolve(self.cmd, sigle_formation='ESP3DP', commission_proximite='')
