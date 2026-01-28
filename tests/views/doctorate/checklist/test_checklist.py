@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -30,16 +30,9 @@ from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import TestCase
 
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
-    ENTITY_CDE,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixStatutPropositionDoctorale,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
-    OngletsChecklist,
-)
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import OngletsChecklist
 from admission.models import DoctorateAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.curriculum import (
@@ -49,14 +42,11 @@ from admission.tests.factories.curriculum import (
 from admission.tests.factories.doctorate import DoctorateFactory
 from admission.tests.factories.form_item import AdmissionFormItemFactory
 from admission.tests.factories.person import CompletePersonFactory
-from admission.tests.factories.roles import (
-    DoctorateCommitteeMemberRoleFactory,
-    SicManagementRoleFactory,
-)
+from admission.tests.factories.roles import DoctorateCommitteeMemberRoleFactory, SicManagementRoleFactory
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
-from infrastructure.financabilite.domain.service.financabilite import PASS_ET_LAS_LABEL
+from infrastructure.financabilite.domain.service.fetcher import PASS_ET_LAS_LABEL
 
 
 class ChecklistViewTestCase(TestCase):
@@ -79,7 +69,9 @@ class ChecklistViewTestCase(TestCase):
         cls.candidate = cls.admission.candidate
 
         cls.sic_manager_user = SicManagementRoleFactory(entity=cls.first_doctoral_commission).person.user
-        cls.doctorate_committee_member = DoctorateCommitteeMemberRoleFactory(education_group=cls.training.education_group).person.user
+        cls.doctorate_committee_member = DoctorateCommitteeMemberRoleFactory(
+            education_group=cls.training.education_group
+        ).person.user
 
         cls.file_metadata = {
             'name': 'myfile',
