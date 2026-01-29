@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ from unittest.mock import patch
 import freezegun
 from django.shortcuts import resolve_url
 from django.test import TestCase
+from osis_history.models import HistoryEntry
 
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
@@ -40,9 +41,8 @@ from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import (
-    CentralManagerRoleFactory,
-    SicManagementRoleFactory,
     ProgramManagerRoleFactory,
+    SicManagementRoleFactory,
 )
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.person import Person
@@ -67,7 +67,6 @@ class CoordonneesFormTestCase(TestCase):
         first_doctoral_commission = EntityWithVersionFactory(version__acronym=ENTITY_CDE)
 
         cls.sic_manager_user = SicManagementRoleFactory(entity=first_doctoral_commission).person.user
-        cls.cdd_manager = CentralManagerRoleFactory(entity=first_doctoral_commission).person.user
 
         cls.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             training__management_entity=first_doctoral_commission,
@@ -113,6 +112,10 @@ class CoordonneesFormTestCase(TestCase):
             status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
         )
 
+        cls.cdd_manager = ProgramManagerRoleFactory(
+            education_group=cls.doctorate_admission.training.education_group,
+        ).person.user
+
         cls.doctorate_url = resolve_url('admission:doctorate:update:coordonnees', uuid=cls.doctorate_admission.uuid)
 
     def setUp(self) -> None:
@@ -123,15 +126,36 @@ class CoordonneesFormTestCase(TestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
+        self.general_admission.status = ChoixStatutPropositionGenerale.CONFIRMEE.name
+        self.doctorate_admission.status = ChoixStatutPropositionDoctorale.CONFIRMEE.name
+        self.general_admission.save(update_fields=['status'])
+        self.doctorate_admission.save(update_fields=['status'])
+
     def test_general_coordinates_form_on_get_program_manager(self):
         self.client.force_login(user=self.general_manager_user)
+
+        self.general_admission.status = ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC.name
+        self.general_admission.save()
+
+        response = self.client.get(self.general_url)
+        self.assertEqual(response.status_code, 403)
+
+        self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
+        self.general_admission.save()
+
+        response = self.client.get(self.general_url)
+        self.assertEqual(response.status_code, 200)
+
+        self.general_admission.checklist['current']['donnees_personnelles']['statut'] = 'GEST_REUSSITE'
+        self.general_admission.save()
+
         response = self.client.get(self.general_url)
         self.assertEqual(response.status_code, 403)
 
     def test_general_coordinates_form_on_post_program_manager(self):
         self.client.force_login(user=self.general_manager_user)
         response = self.client.post(self.general_url, data={})
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 200)
 
     def test_general_coordinates_form_on_get_sic_manager(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -188,6 +212,11 @@ class CoordonneesFormTestCase(TestCase):
             f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',
             self.general_admission.requested_documents,
         )
+
+        historic_entries = HistoryEntry.objects.filter(object_uuid=self.general_admission.uuid)
+        self.assertEqual(len(historic_entries), 1)
+
+        self.assertCountEqual(historic_entries[0].tags, ['proposition', 'coordonnees', 'modification'])
 
     def test_general_coordinates_form_post_residential_address(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -540,10 +569,25 @@ class CoordonneesFormTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_doctoral_coordinates_form_on_get_cdd_manager(self):
-        self.client.force_login(user=self.cdd_manager.person.user)
+        self.client.force_login(user=self.cdd_manager)
+
+        self.doctorate_admission.status = ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_FAC.name
+        self.doctorate_admission.save()
+
+        response = self.client.get(self.doctorate_url)
+        self.assertEqual(response.status_code, 403)
+
+        self.doctorate_admission.status = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name
+        self.doctorate_admission.save()
 
         response = self.client.get(self.doctorate_url)
         self.assertEqual(response.status_code, 200)
+
+        self.doctorate_admission.checklist['current']['donnees_personnelles']['statut'] = 'GEST_REUSSITE'
+        self.doctorate_admission.save()
+
+        response = self.client.get(self.doctorate_url)
+        self.assertEqual(response.status_code, 403)
 
     def test_doctoral_coordinates_form_on_get(self):
         self.client.force_login(user=self.sic_manager_user)

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -29,18 +29,19 @@ from django.utils.translation import gettext_lazy as _
 from rules import predicate
 
 from admission.auth.predicates import not_in_general_statuses_predicate_message
-from admission.models import GeneralEducationAdmission
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
-    ChoixStatutChecklist,
-    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC,
-    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC,
-    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS,
-    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_ETENDUS,
-    STATUTS_PROPOSITION_GENERALE_SOUMISE,
-    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_OU_FRAIS_DOSSIER_EN_ATTENTE,
     STATUTS_PROPOSITION_GENERALE_ENVOYABLE_EN_FAC_POUR_DECISION,
+    STATUTS_PROPOSITION_GENERALE_SOUMISE,
+    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC,
+    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC_ETENDUS,
+    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_GESTIONNAIRE,
+    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC,
+    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_ETENDUS,
+    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_OU_FRAIS_DOSSIER_EN_ATTENTE,
+    ChoixStatutChecklist,
+    ChoixStatutPropositionGenerale,
 )
+from admission.models import GeneralEducationAdmission
 from osis_role.errors import predicate_failed_msg
 
 
@@ -114,6 +115,15 @@ def not_cancelled(self, user: User, obj: GeneralEducationAdmission):
 @predicate_failed_msg(not_in_general_statuses_predicate_message(STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC))
 def in_fac_status(self, user: User, obj: GeneralEducationAdmission):
     return isinstance(obj, GeneralEducationAdmission) and obj.status in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_FAC
+
+
+@predicate(bind=True)
+@predicate_failed_msg(not_in_general_statuses_predicate_message(STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_GESTIONNAIRE))
+def in_manager_status(self, user: User, obj: GeneralEducationAdmission):
+    return (
+        isinstance(obj, GeneralEducationAdmission)
+        and obj.status in STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_GESTIONNAIRE
+    )
 
 
 @predicate(bind=True)

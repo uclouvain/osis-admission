@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,9 +31,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
 )
 from admission.views.common.detail_tabs.checklist import change_admission_status
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
-from admission.views.general_education.details.checklist import (
-    PersonalDataChangeStatusView,
-)
 from base.utils.htmx import HtmxPermissionRequiredMixin
 
 __all__ = [
@@ -51,8 +48,15 @@ class PersonalDataChangeStatusView(
 ):
     urlpatterns = {'personal-data-change-status': 'personal-data-change-status/<str:status>'}
     template_name = 'admission/general_education/includes/checklist/personal_data.html'
-    permission_required = 'admission.change_checklist'
     form_class = Form
+
+    def get_permission_required(self):
+        return (
+            {
+                'INITIAL_CANDIDAT': 'admission.change_personal_data_checklist_status_to_be_processed',
+                'GEST_EN_COURS': 'admission.change_personal_data_checklist_status_cleaned',
+            }.get(self.kwargs.get('status'), 'admission.change_checklist'),
+        )
 
     def form_valid(self, form):
         admission = self.get_permission_object()
