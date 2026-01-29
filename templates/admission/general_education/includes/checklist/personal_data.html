@@ -23,7 +23,11 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
+{% if view.is_continuing %}
+{% has_perm 'admission.change_checklist_iufc' as can_update_personal_data_tab %}
+{% else %}
 {% has_perm 'admission.change_checklist' as can_update_personal_data_tab %}
+{% endif %}
 
 {% with initial=original_admission.checklist.initial.donnees_personnelles current=original_admission.checklist.current.donnees_personnelles can_update_checklist_tab=can_update_personal_data_tab %}
   <div
@@ -59,6 +63,8 @@
     {# Update the sic decision statuses #}
     {% if view.is_doctorate %}
       {% include 'admission/doctorate/includes/checklist/sic_decision_statuses.html' with proposition=admission current=original_admission.checklist.current.decision_sic %}
+    {% elif view.is_continuing %}
+      {% include 'admission/continuing_education/includes/checklist/decision_statuses.html' %}
     {% else %}
       {% include 'admission/general_education/includes/checklist/sic_decision_statuses.html' with proposition=admission current=original_admission.checklist.current.decision_sic %}
     {% endif %}
