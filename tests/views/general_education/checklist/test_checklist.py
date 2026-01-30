@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,31 +25,31 @@
 # ##############################################################################
 import datetime
 import itertools
-import factory
 
+import factory
 import mock
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import TestCase
 
-from admission.models import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
-    PoursuiteDeCycle,
     OngletsChecklist,
+    PoursuiteDeCycle,
 )
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
+from admission.models import GeneralEducationAdmission
 from admission.tests.factories.curriculum import (
-    EducationalExperienceYearFactory,
-    EducationalExperienceFactory,
-    AdmissionProfessionalValuatedExperiencesFactory,
     AdmissionEducationalValuatedExperiencesFactory,
+    AdmissionProfessionalValuatedExperiencesFactory,
+    EducationalExperienceFactory,
+    EducationalExperienceYearFactory,
 )
 from admission.tests.factories.form_item import AdmissionFormItemFactory
 from admission.tests.factories.general_education import (
-    GeneralEducationTrainingFactory,
     GeneralEducationAdmissionFactory,
+    GeneralEducationTrainingFactory,
 )
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import SicManagementRoleFactory
@@ -58,7 +58,7 @@ from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group_type import EducationGroupTypeFactory
 from base.tests.factories.entity import EntityWithVersionFactory
-from infrastructure.financabilite.domain.service.financabilite import PASS_ET_LAS_LABEL
+from infrastructure.financabilite.domain.service.fetcher import PASS_ET_LAS_LABEL
 from osis_profile.models.enums.curriculum import Result
 
 

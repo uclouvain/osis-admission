@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,9 +25,7 @@
 ##############################################################################
 
 from admission.ddd.admission.formation_generale.commands import *
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    OngletsChecklist,
-)
+from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
 from admission.ddd.admission.formation_generale.test.factory.repository.paiement_frais_dossier import (
     PaiementFraisDossierInMemoryRepositoryFactory,
 )
@@ -51,9 +49,7 @@ from admission.ddd.admission.formation_generale.use_case.write.refuser_admission
 from admission.ddd.admission.formation_generale.use_case.write.refuser_inscription_par_sic_service import (
     refuser_inscription_par_sic,
 )
-from admission.ddd.admission.formation_generale.use_case.write.retyper_document_service import (
-    retyper_document,
-)
+from admission.ddd.admission.formation_generale.use_case.write.retyper_document_service import retyper_document
 from admission.ddd.admission.formation_generale.use_case.write.specifier_besoin_de_derogation_service import (
     specifier_besoin_de_derogation,
 )
@@ -75,9 +71,7 @@ from admission.ddd.admission.formation_generale.use_case.write.specifier_financa
 from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_resultat_calcul_service import (
     specifier_financabilite_resultat_calcul,
 )
-from admission.ddd.admission.shared_kernel.use_case.read import (
-    recuperer_questions_specifiques_proposition,
-)
+from admission.ddd.admission.shared_kernel.use_case.read import recuperer_questions_specifiques_proposition
 from admission.ddd.admission.shared_kernel.use_case.write import (
     annuler_reclamation_emplacement_document,
     initialiser_emplacement_document_a_reclamer,
@@ -145,9 +139,7 @@ from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.p
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.recuperer_documents_proposition import (
     EmplacementsDocumentsPropositionInMemoryTranslator,
 )
-from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.titres_acces import (
-    TitresAccesInMemory,
-)
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.titres_acces import TitresAccesInMemory
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.unites_enseignement_translator import (
     UnitesEnseignementInMemoryTranslator,
 )
@@ -160,18 +152,9 @@ from admission.infrastructure.admission.shared_kernel.repository.in_memory.empla
 from admission.infrastructure.admission.shared_kernel.repository.in_memory.titre_acces_selectionnable import (
     TitreAccesSelectionnableInMemoryRepositoryFactory,
 )
-from infrastructure.financabilite.domain.service.in_memory.financabilite import (
-    FinancabiliteInMemoryFetcher,
-)
-from infrastructure.reference.domain.service.in_memory.bourse import (
-    BourseInMemoryTranslator,
-)
-from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import (
-    AcademicYearInMemoryRepository,
-)
-from infrastructure.shared_kernel.campus.repository.in_memory.campus import (
-    UclouvainCampusInMemoryRepository,
-)
+from infrastructure.reference.domain.service.in_memory.bourse import BourseInMemoryTranslator
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from infrastructure.shared_kernel.campus.repository.in_memory.campus import UclouvainCampusInMemoryRepository
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
     PersonneConnueUclInMemoryTranslator,
 )
@@ -210,7 +193,6 @@ _taches_techniques = TachesTechniquesInMemory()
 _matricule_etudiant_service = MatriculeEtudiantInMemoryService()
 _compteur_noma = CompteurAnnuelPourNomaInMemoryRepository()
 _experience_parcours_interne_translator = ExperienceParcoursInterneInMemoryTranslator()
-_financabilite_fetcher = FinancabiliteInMemoryFetcher()
 
 
 COMMAND_HANDLERS = {
@@ -279,7 +261,6 @@ COMMAND_HANDLERS = {
         inscription_tardive_service=InscriptionTardiveInMemory(),
         paiement_frais_dossier_service=_paiement_frais_dossier,
         historique=_historique_global,
-        financabilite_fetcher=_financabilite_fetcher,
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,
