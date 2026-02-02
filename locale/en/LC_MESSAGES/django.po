@@ -183,10 +183,11 @@ msgid ""
 "receive the enrolment authorisation signed by you, we will let you know how "
 "to pay."
 msgstr ""
-"A compulsory minimum €50 tuition fee deposit must be paid as soon as possible and no later than 31 October "
-"%(start_year)s. The tuition fee balance must be paid in full by 1 February "
-"%(end_year)s. As soon as we receive the enrolment authorisation signed by "
-"you, we will let you know how to pay."
+"A compulsory minimum €50 tuition fee deposit must be paid as soon as "
+"possible and no later than 31 October %(start_year)s. The tuition fee "
+"balance must be paid in full by 1 February %(end_year)s. As soon as we "
+"receive the enrolment authorisation signed by you, we will let you know how "
+"to pay."
 
 msgid "A deny mail has already been sent to the candidate."
 msgstr ""
@@ -1461,6 +1462,10 @@ msgstr ""
 msgid "Cleaned"
 msgstr ""
 
+msgctxt "plural"
+msgid "Cleaned"
+msgstr ""
+
 msgid "Clear the reason"
 msgstr ""
 
@@ -1908,6 +1913,9 @@ msgid "Dashboard indicator"
 msgstr ""
 
 msgid "Data protection"
+msgstr ""
+
+msgid "Data verification with third parties"
 msgstr ""
 
 msgid "Date"
@@ -3343,6 +3351,15 @@ msgid "I am a stateless person"
 msgstr ""
 
 msgid "I am an asylum seeker"
+msgstr ""
+
+msgid ""
+"I am aware that UCLouvain reserves the right to consult the centralized "
+"database of the French Community of Belgium, SIEL-SUP (Student "
+"Identification and Enrollment in Higher Education), to verify the data "
+"provided with the relevant third parties, and to request the original "
+"documents constituting my admission file, as well as any additional "
+"documents (which may be requested at the time of enrollment)."
 msgstr ""
 
 msgid ""
@@ -6257,6 +6274,21 @@ msgid "Text size"
 msgstr ""
 
 msgid ""
+"The \"Personal data\" checklist tab must be in the \"Cleaned\" status in "
+"order to do this action."
+msgstr ""
+
+msgid ""
+"The \"Personal data\" checklist tab must be in the \"To be processed\" "
+"status in order to do this action."
+msgstr ""
+
+msgid ""
+"The \"Personal data\" checklist tab must not be in the \"Validated\" status "
+"in order to do this action."
+msgstr ""
+
+msgid ""
 "The \"Sufficient\" status requires the equivalence information to be "
 "specified."
 msgstr ""
@@ -7275,6 +7307,10 @@ msgid "Validated"
 msgstr ""
 
 msgctxt "decision-checklist"
+msgid "Validated"
+msgstr ""
+
+msgctxt "plural"
 msgid "Validated"
 msgstr ""
 

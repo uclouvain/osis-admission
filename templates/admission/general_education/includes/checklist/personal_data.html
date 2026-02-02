@@ -6,7 +6,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,13 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% with initial=original_admission.checklist.initial.donnees_personnelles current=original_admission.checklist.current.donnees_personnelles %}
+{% if view.is_continuing %}
+{% has_perm 'admission.change_checklist_iufc' as can_update_personal_data_tab %}
+{% else %}
+{% has_perm 'admission.change_checklist' as can_update_personal_data_tab %}
+{% endif %}
+
+{% with initial=original_admission.checklist.initial.donnees_personnelles current=original_admission.checklist.current.donnees_personnelles can_update_checklist_tab=can_update_personal_data_tab %}
   <div
     id="personal-data-statuses"
     class="form-group btn-group status-group"
@@ -32,13 +38,24 @@
   >
     {% concat view.base_namespace ':personal-data-change-status' as personal_data_base_url %}
     {% url personal_data_base_url view.kwargs.uuid initial.statut as initial_status_url %}
+    {% url personal_data_base_url view.kwargs.uuid 'GEST_EN_COURS' as in_progress_status_url %}
     {% url personal_data_base_url view.kwargs.uuid 'GEST_BLOCAGE' as blocking_status_url %}
     {% url personal_data_base_url view.kwargs.uuid 'GEST_REUSSITE' as success_status_url %}
     {% translate initial.libelle as initial_state_label %}
-    {% checklist_state_button tab='donnees_personnelles' label=initial_state_label icon='user' state=initial.statut class='muted' htmx_post=initial_status_url %}
+    {% translate 'Cleaned' context 'plural' as cleaned_label %}
+    {% translate 'Validated' context 'plural' as validated_label %}
+
+    {% has_perm 'admission.change_personal_data_checklist_status_to_be_processed' as can_change_personal_data_checklist_status_to_be_processed %}
+    {% has_perm 'admission.change_personal_data_checklist_status_cleaned' as can_change_personal_data_checklist_status_cleaned %}
+
+    {% not_bool can_change_personal_data_checklist_status_to_be_processed as cannot_change_personal_data_checklist_status_to_be_processed %}
+    {% not_bool can_change_personal_data_checklist_status_cleaned as cannot_change_personal_data_checklist_status_cleaned %}
+
+    {% checklist_state_button tab='donnees_personnelles' label=initial_state_label icon='user' state=initial.statut class='muted' htmx_post=initial_status_url disabled=cannot_change_personal_data_checklist_status_to_be_processed force_enabled=True %}
+    {% checklist_state_button tab='donnees_personnelles' label=cleaned_label icon='pencil' state='GEST_EN_COURS' class='warning' htmx_post=in_progress_status_url disabled=cannot_change_personal_data_checklist_status_cleaned force_enabled=True %}
     {% checklist_state_button tab='donnees_personnelles' label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' class='danger' fraud='0' htmx_post=blocking_status_url %}
     {% checklist_state_button tab='donnees_personnelles' label=_("Fraudster") icon='circle-stop' state='GEST_BLOCAGE' class='danger' fraud='1' htmx_post=blocking_status_url %}
-    {% checklist_state_button tab='donnees_personnelles' label=_("Validated") icon='check' state='GEST_REUSSITE' class='success' htmx_post=success_status_url %}
+    {% checklist_state_button tab='donnees_personnelles' label=validated_label icon='check' state='GEST_REUSSITE' class='success' htmx_post=success_status_url %}
   </div>
   {% if request.htmx %}
     {# Update the checklist menu item status #}
@@ -46,6 +63,8 @@
     {# Update the sic decision statuses #}
     {% if view.is_doctorate %}
       {% include 'admission/doctorate/includes/checklist/sic_decision_statuses.html' with proposition=admission current=original_admission.checklist.current.decision_sic %}
+    {% elif view.is_continuing %}
+      {% include 'admission/continuing_education/includes/checklist/decision_statuses.html' %}
     {% else %}
       {% include 'admission/general_education/includes/checklist/sic_decision_statuses.html' with proposition=admission current=original_admission.checklist.current.decision_sic %}
     {% endif %}

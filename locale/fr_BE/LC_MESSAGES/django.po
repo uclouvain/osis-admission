@@ -1591,6 +1591,10 @@ msgstr "Réclamation annulée le"
 msgid "Cleaned"
 msgstr "Toiletté"
 
+msgctxt "plural"
+msgid "Cleaned"
+msgstr "Toilettées"
+
 msgid "Clear the reason"
 msgstr "Effacer le motif"
 
@@ -2090,6 +2094,9 @@ msgstr "Indicateur du tableau de bord"
 
 msgid "Data protection"
 msgstr "Protection des données"
+
+msgid "Data verification with third parties"
+msgstr "Vérification de données auprès de tiers"
 
 msgid "Date"
 msgstr "Date"
@@ -3663,6 +3670,16 @@ msgstr "Je suis apatride"
 
 msgid "I am an asylum seeker"
 msgstr "Je suis demandeur d’asile"
+
+msgid ""
+"I am aware that UCLouvain reserves the right to consult the centralized "
+"database of the French Community of Belgium, SIEL-SUP (Student "
+"Identification and Enrollment in Higher Education), to verify the data "
+"provided with the relevant third parties, and to request the original "
+"documents constituting my admission file, as well as any additional "
+"documents (which may be requested at the time of enrollment)."
+msgstr ""
+"J'autorise l'UCLouvain à consulter la base de données centralisée de la Communauté française de Belgique SIEL-SUP (Signalétique et Inscriptions des Étudiants de l'Enseignement Supérieur), vérifier les données fournies auprès des tiers concernés et réclamer les documents originaux constituant mon dossier d'admission, ainsi que tout document complémentaire (qui pourrait être réclamé au moment de l'inscription)."
 
 msgid ""
 "I am aware that as an applicant without a European Union nationality or "
@@ -6891,6 +6908,27 @@ msgid "Text size"
 msgstr "Taille du texte"
 
 msgid ""
+"The \"Personal data\" checklist tab must be in the \"Cleaned\" status in "
+"order to do this action."
+msgstr ""
+"L'onglet de checklist \"Données personnelles\" doit être à l'état \"Toilettées\" pour pouvoir "
+"effectuer cette action."
+
+msgid ""
+"The \"Personal data\" checklist tab must be in the \"To be processed\" "
+"status in order to do this action."
+msgstr ""
+"L'onglet de checklist \"Données personnelles\" doit être à l'état \"À traiter\" pour pouvoir "
+"effectuer cette action."
+
+msgid ""
+"The \"Personal data\" checklist tab must not be in the \"Validated\" status "
+"in order to do this action."
+msgstr ""
+"L'onglet de checklist \"Données personnelles\" doit être à l'état \"Validées\" pour pouvoir "
+"effectuer cette action."
+
+msgid ""
 "The \"Sufficient\" status requires the equivalence information to be "
 "specified."
 msgstr ""
@@ -8103,6 +8141,10 @@ msgstr "Validée"
 msgctxt "decision-checklist"
 msgid "Validated"
 msgstr "Validée"
+
+msgctxt "plural"
+msgid "Validated"
+msgstr "Validées"
 
 msgid "Valuated diplomas or experiences:"
 msgstr "Diplômes ou expériences valorisées :"
