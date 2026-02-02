@@ -26,9 +26,7 @@
 from django.forms.forms import Form
 from django.views.generic import FormView
 
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
-    OngletsChecklist,
-)
+from admission.ddd.admission.formation_continue.domain.model.enums import OngletsChecklist
 from admission.views.common.detail_tabs.checklist import change_admission_status
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from base.utils.htmx import HtmxPermissionRequiredMixin
@@ -55,7 +53,7 @@ class PersonalDataChangeStatusView(
             {
                 'INITIAL_CANDIDAT': 'admission.change_personal_data_checklist_status_to_be_processed',
                 'GEST_EN_COURS': 'admission.change_personal_data_checklist_status_cleaned',
-            }.get(self.kwargs.get('status'), 'admission.change_checklist'),
+            }.get(self.kwargs.get('status'), 'admission.change_checklist_iufc'),
         )
 
     def form_valid(self, form):
