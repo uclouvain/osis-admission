@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,39 +24,17 @@
 #
 # ##############################################################################
 from functools import partial
-from typing import List
 
 from admission.calendar.admission_calendar import DIPLOMES_ACCES_BELGE
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
-    DoctoratFormation,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import (
-    GroupeDeSupervision,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
-    Proposition,
-)
-from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import (
-    IDoctoratTranslator,
-)
-from admission.ddd.admission.shared_kernel.domain.model.question_specifique import (
-    QuestionSpecifique,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription import (
-    ICalendrierInscription,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions import (
-    IMaximumPropositionsAutorisees,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
-    IProfilCandidatTranslator,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import (
-    ITitresAcces,
-)
-from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import (
-    ProfilCandidat,
-)
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import DoctoratFormation
+from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import GroupeDeSupervision
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
+from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription import ICalendrierInscription
+from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import ITitresAcces
+from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidat
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from base.ddd.utils.business_validator import execute_functions_and_aggregate_exceptions
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
@@ -73,7 +51,6 @@ class VerifierProposition(interface.DomainService):
         profil_candidat_translator: 'IProfilCandidatTranslator',
         annee_courante: int,
         titres_acces: 'ITitresAcces',
-        questions_specifiques: List['QuestionSpecifique'],
         formation_translator: 'IDoctoratTranslator',
         calendrier_inscription: 'ICalendrierInscription',
         maximum_propositions_service: 'IMaximumPropositionsAutorisees',
