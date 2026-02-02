@@ -25,13 +25,9 @@
 # ##############################################################################
 
 from admission.ddd.admission.doctorat.preparation.commands import *
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
-    OngletsChecklist,
-)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import OngletsChecklist
 from admission.ddd.admission.doctorat.preparation.use_case.read import *
-from admission.ddd.admission.doctorat.preparation.use_case.read.recuperer_doctorat_service import (
-    recuperer_doctorat,
-)
+from admission.ddd.admission.doctorat.preparation.use_case.read.recuperer_doctorat_service import recuperer_doctorat
 from admission.ddd.admission.doctorat.preparation.use_case.write import *
 from admission.ddd.admission.doctorat.preparation.use_case.write.demander_candidat_modifier_ca_service import (
     demander_candidat_modifier_ca,
@@ -39,12 +35,8 @@ from admission.ddd.admission.doctorat.preparation.use_case.write.demander_candid
 from admission.ddd.admission.doctorat.preparation.use_case.write.redonner_la_main_au_candidat_service import (
     redonner_la_main_au_candidat,
 )
-from admission.ddd.admission.doctorat.preparation.use_case.write.soumettre_ca_service import (
-    soumettre_ca,
-)
-from admission.ddd.admission.shared_kernel.use_case.read import (
-    recuperer_questions_specifiques_proposition,
-)
+from admission.ddd.admission.doctorat.preparation.use_case.write.soumettre_ca_service import soumettre_ca
+from admission.ddd.admission.shared_kernel.use_case.read import recuperer_questions_specifiques_proposition
 from admission.ddd.admission.shared_kernel.use_case.write import (
     annuler_reclamation_emplacement_document,
     initialiser_emplacement_document_a_reclamer,
@@ -73,9 +65,7 @@ from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.m
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
 )
-from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.titres_acces import (
-    TitresAccesInMemory,
-)
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.titres_acces import TitresAccesInMemory
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.unites_enseignement_translator import (
     UnitesEnseignementInMemoryTranslator,
 )
@@ -88,18 +78,9 @@ from admission.infrastructure.admission.shared_kernel.repository.in_memory.empla
 from admission.infrastructure.admission.shared_kernel.repository.in_memory.titre_acces_selectionnable import (
     TitreAccesSelectionnableInMemoryRepositoryFactory,
 )
-from infrastructure.financabilite.domain.service.in_memory.financabilite import (
-    FinancabiliteInMemoryFetcher,
-)
-from infrastructure.reference.domain.service.in_memory.bourse import (
-    BourseInMemoryTranslator,
-)
-from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import (
-    AcademicYearInMemoryRepository,
-)
-from infrastructure.shared_kernel.campus.repository.in_memory.campus import (
-    UclouvainCampusInMemoryRepository,
-)
+from infrastructure.reference.domain.service.in_memory.bourse import BourseInMemoryTranslator
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from infrastructure.shared_kernel.campus.repository.in_memory.campus import UclouvainCampusInMemoryRepository
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
     PersonneConnueUclInMemoryTranslator,
 )
@@ -123,13 +104,9 @@ from .domain.service.in_memory.membre_CA import MembreCAInMemoryTranslator
 from .domain.service.in_memory.notification import NotificationInMemory
 from .domain.service.in_memory.pdf_generation import PDFGenerationInMemory
 from .domain.service.in_memory.promoteur import PromoteurInMemoryTranslator
-from .domain.service.in_memory.question_specifique import (
-    QuestionSpecifiqueInMemoryTranslator,
-)
+from .domain.service.in_memory.question_specifique import QuestionSpecifiqueInMemoryTranslator
 from .repository.doctorat import DoctoratRepository
-from .repository.in_memory.groupe_de_supervision import (
-    GroupeDeSupervisionInMemoryRepository,
-)
+from .repository.in_memory.groupe_de_supervision import GroupeDeSupervisionInMemoryRepository
 from .repository.in_memory.proposition import PropositionInMemoryRepository
 
 _proposition_repository = PropositionInMemoryRepository()
@@ -161,7 +138,6 @@ _personne_connue_ucl_translator = PersonneConnueUclInMemoryTranslator()
 _titre_acces_selectionnable_repository = TitreAccesSelectionnableInMemoryRepositoryFactory()
 _experience_parcours_interne_translator = ExperienceParcoursInterneInMemoryTranslator()
 _matricule_etudiant_service = MatriculeEtudiantService()
-_financabilite_fetcher = FinancabiliteInMemoryFetcher()
 _raccrocher_experiences_curriculum = RaccrocherExperiencesCurriculumInMemory()
 
 
@@ -231,7 +207,6 @@ COMMAND_HANDLERS = {
         profil_candidat_translator=_profil_candidat_translator,
         academic_year_repository=_academic_year_repository,
         titres_acces=_titres_acces,
-        questions_specifiques_translator=_question_specific_translator,
         formation_translator=_doctorat_translator,
         calendrier_inscription=CalendrierInscriptionInMemory(),
         maximum_propositions_service=_maximum_propositions_autorisees,
@@ -296,7 +271,6 @@ COMMAND_HANDLERS = {
         calendrier_inscription=CalendrierInscriptionInMemory(),
         element_confirmation=ElementsConfirmationInMemory(),
         maximum_propositions_service=_maximum_propositions_autorisees,
-        financabilite_fetcher=_financabilite_fetcher,
         email_destinataire_repository=_email_destinataire_repository,
     ),
     DefinirCotutelleCommand: lambda msg_bus, cmd: definir_cotutelle(

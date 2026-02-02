@@ -26,78 +26,37 @@
 import datetime
 
 from admission.ddd.admission.doctorat.events import PropositionDoctoraleSoumiseEvent
-from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import (
-    PropositionIdentityBuilder,
-)
-from admission.ddd.admission.doctorat.preparation.commands import (
-    SoumettrePropositionCommand,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
-    PropositionIdentity,
-)
-from admission.ddd.admission.doctorat.preparation.domain.service.checklist import (
-    Checklist,
-)
-from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import (
-    IDoctoratTranslator,
-)
-from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import (
-    IHistorique,
-)
-from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import (
-    INotification,
-)
+from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
+from admission.ddd.admission.doctorat.preparation.commands import SoumettrePropositionCommand
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.doctorat.preparation.domain.service.checklist import Checklist
+from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
+from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
+from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import INotification
 from admission.ddd.admission.doctorat.preparation.domain.service.i_question_specifique import (
     IQuestionSpecifiqueTranslator,
 )
-from admission.ddd.admission.doctorat.preparation.domain.service.verifier_proposition import (
-    VerifierProposition,
-)
+from admission.ddd.admission.doctorat.preparation.domain.service.verifier_proposition import VerifierProposition
 from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
     IGroupeDeSupervisionRepository,
 )
-from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
-    IPropositionRepository,
-)
-from admission.ddd.admission.doctorat.validation.domain.service.demande import (
-    DemandeService,
-)
-from admission.ddd.admission.doctorat.validation.repository.i_demande import (
-    IDemandeRepository,
-)
-from admission.ddd.admission.shared_kernel.domain.builder.formation_identity import (
-    FormationIdentityBuilder,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription import (
-    ICalendrierInscription,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_elements_confirmation import (
-    IElementsConfirmation,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions import (
-    IMaximumPropositionsAutorisees,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
-    IProfilCandidatTranslator,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import (
-    ITitresAcces,
-)
-from admission.ddd.admission.shared_kernel.domain.service.profil_soumis_candidat import (
-    ProfilSoumisCandidatTranslator,
-)
+from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.doctorat.validation.domain.service.demande import DemandeService
+from admission.ddd.admission.doctorat.validation.repository.i_demande import IDemandeRepository
+from admission.ddd.admission.shared_kernel.domain.builder.formation_identity import FormationIdentityBuilder
+from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription import ICalendrierInscription
+from admission.ddd.admission.shared_kernel.domain.service.i_elements_confirmation import IElementsConfirmation
+from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import ITitresAcces
+from admission.ddd.admission.shared_kernel.domain.service.profil_soumis_candidat import ProfilSoumisCandidatTranslator
 from admission.ddd.admission.shared_kernel.enums.question_specifique import Onglets
 from admission.ddd.admission.shared_kernel.repository.i_email_destinataire import IEmailDestinataireRepository
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.service.financabilite import Financabilite
-from ddd.logic.financabilite.domain.service.i_financabilite import IFinancabiliteFetcher
-from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import (
-    GetCurrentAcademicYear,
-)
-from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import (
-    IAcademicYearRepository,
-)
+from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
+from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 from infrastructure.utils import MessageBus
 
 
@@ -117,7 +76,6 @@ def soumettre_proposition(
     calendrier_inscription: 'ICalendrierInscription',
     element_confirmation: 'IElementsConfirmation',
     maximum_propositions_service: 'IMaximumPropositionsAutorisees',
-    financabilite_fetcher: 'IFinancabiliteFetcher',
     email_destinataire_repository: 'IEmailDestinataireRepository',
 ) -> 'PropositionIdentity':
     # GIVEN
@@ -150,15 +108,6 @@ def soumettre_proposition(
         profil_candidat_translator,
     )
 
-    parcours = financabilite_fetcher.recuperer_donnees_parcours_via_matricule_fgs(
-        matricule_fgs=proposition.matricule_candidat,
-        annee=formation.entity_id.annee,
-    )
-    formation_dto = financabilite_fetcher.recuperer_informations_formation(
-        sigle_formation=formation.entity_id.sigle,
-        annee=formation.entity_id.annee,
-    )
-
     # WHEN
     VerifierProposition().verifier(
         proposition_candidat=proposition,
@@ -166,7 +115,6 @@ def soumettre_proposition(
         profil_candidat_translator=profil_candidat_translator,
         annee_courante=annee_courante,
         titres_acces=titres_acces,
-        questions_specifiques=questions_specifiques,
         formation_translator=doctorat_translator,
         calendrier_inscription=calendrier_inscription,
         maximum_propositions_service=maximum_propositions_service,
@@ -195,9 +143,10 @@ def soumettre_proposition(
 
     # THEN
     financabilite = Financabilite(
-        parcours=parcours,
-        formation=formation_dto,
+        sigle_formation=formation.entity_id.sigle,
+        annee=formation.entity_id.annee,
         est_en_reorientation=False,
+        matricule_fgs=proposition.matricule_candidat,
     ).determiner()
 
     proposition.nettoyer_reponses_questions_specifiques(questions_specifiques)

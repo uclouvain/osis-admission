@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -29,9 +29,6 @@ from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_b
 from admission.ddd.admission.doctorat.preparation.commands import VerifierPropositionQuery
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
-from admission.ddd.admission.doctorat.preparation.domain.service.i_question_specifique import (
-    IQuestionSpecifiqueTranslator,
-)
 from admission.ddd.admission.doctorat.preparation.domain.service.verifier_proposition import VerifierProposition
 from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
     IGroupeDeSupervisionRepository,
@@ -41,7 +38,6 @@ from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscripti
 from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import ITitresAcces
-from admission.ddd.admission.shared_kernel.enums.question_specifique import Onglets
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 
@@ -53,7 +49,6 @@ def verifier_proposition(
     profil_candidat_translator: 'IProfilCandidatTranslator',
     academic_year_repository: 'IAcademicYearRepository',
     titres_acces: 'ITitresAcces',
-    questions_specifiques_translator: 'IQuestionSpecifiqueTranslator',
     formation_translator: 'IDoctoratTranslator',
     calendrier_inscription: 'ICalendrierInscription',
     maximum_propositions_service: 'IMaximumPropositionsAutorisees',
@@ -70,10 +65,6 @@ def verifier_proposition(
         )
         .year
     )
-    questions_specifiques = questions_specifiques_translator.search_by_proposition(
-        cmd.uuid_proposition,
-        onglets=Onglets.get_names(),
-    )
 
     formation = formation_translator.get(
         sigle=proposition_candidat.formation_id.sigle,
@@ -87,7 +78,6 @@ def verifier_proposition(
         profil_candidat_translator,
         annee_courante,
         titres_acces,
-        questions_specifiques,
         formation_translator,
         calendrier_inscription,
         maximum_propositions_service,
