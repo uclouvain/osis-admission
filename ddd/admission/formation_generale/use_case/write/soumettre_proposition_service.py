@@ -149,12 +149,11 @@ def soumettre_proposition(
     est_inscription_tardive = inscription_tardive_service.est_inscription_tardive(pool)
 
     # THEN
-    financabilite = Financabilite(
+    financabilite = Financabilite(annee=formation.entity_id.annee).determiner(
         sigle_formation=formation.entity_id.sigle,
-        annee=formation.entity_id.annee,
         est_en_reorientation=proposition.est_reorientation_inscription_externe,
         matricule_fgs=proposition.matricule_candidat,
-    ).determiner()
+    )
 
     proposition.nettoyer_reponses_questions_specifiques(
         questions_specifiques=questions_specifiques,
