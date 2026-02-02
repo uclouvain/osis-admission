@@ -6671,6 +6671,11 @@ msgstr ""
 msgid "The member is not external."
 msgstr ""
 
+msgid ""
+"The member of the supervision group can't be invited because he has already "
+"agreed."
+msgstr ""
+
 msgid "The mimetypes must be a list with at least one mimetype."
 msgstr ""
 

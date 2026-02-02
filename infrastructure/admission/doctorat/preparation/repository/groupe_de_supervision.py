@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -264,8 +264,9 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
     ):
         for actor in member_list:
             membre = cls._get_member(signature_list, str(actor.uuid))
-            if actor.state != membre.etat.name:
+            if actor.state != membre.etat.name or actor.last_state_date != membre.date:
                 StateHistory.objects.create(state=membre.etat.name, actor_id=actor.id)
+            if actor.state != membre.etat.name:
                 if membre.etat.name in [ChoixEtatSignature.APPROVED.name, ChoixEtatSignature.DECLINED.name]:
                     actor.comment = membre.commentaire_externe
                     actor.supervisionactor.pdf_from_candidate = membre.pdf
@@ -331,10 +332,10 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
             language=language,
         )
         if type == ActorType.PROMOTER:
-            group_name, model = 'promoters', Promoter
+            _group_name, model = 'promoters', Promoter
             signataire_id = PromoteurIdentity(str(new_actor.uuid))
         else:
-            group_name, model = 'committee_members', CommitteeMember
+            _group_name, model = 'committee_members', CommitteeMember
             signataire_id = MembreCAIdentity(str(new_actor.uuid))
         if invited_by_default:
             new_actor.switch_state(SignatureState.INVITED)

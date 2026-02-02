@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -120,8 +120,8 @@ class GroupeDeSupervision(interface.RootEntity):
         return membre_CA
 
     def inviter_a_signer(self) -> None:
-        """Inviter à signer tous les promoteurs et membres CA non invités ou refusés"""
-        etats_initiaux = [ChoixEtatSignature.NOT_INVITED, ChoixEtatSignature.DECLINED]
+        """Inviter à signer tous les promoteurs et membres CA invités, non invités ou refusés"""
+        etats_initiaux = [ChoixEtatSignature.INVITED, ChoixEtatSignature.NOT_INVITED, ChoixEtatSignature.DECLINED]
         for promoteur in filter(lambda s: s.etat in etats_initiaux, self.signatures_promoteurs):
             InviterASignerValidatorList(groupe_de_supervision=self, signataire_id=promoteur.promoteur_id).validate()
             self.signatures_promoteurs = [s for s in self.signatures_promoteurs if s != promoteur]
