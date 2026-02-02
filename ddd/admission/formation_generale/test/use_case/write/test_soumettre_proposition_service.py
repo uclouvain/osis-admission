@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -30,18 +30,10 @@ import freezegun
 import mock
 from django.test import TestCase
 
-from admission.ddd.admission.formation_generale.commands import (
-    SoumettrePropositionCommand,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
-)
-from admission.ddd.admission.formation_generale.domain.model.proposition import (
-    PropositionIdentity,
-)
-from admission.ddd.admission.formation_generale.test.factory.proposition import (
-    PropositionFactory,
-)
+from admission.ddd.admission.formation_generale.commands import SoumettrePropositionCommand
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.formation_generale.test.factory.proposition import PropositionFactory
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.formation import (
     FormationGeneraleInMemoryTranslator,
 )
@@ -54,23 +46,12 @@ from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.e
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
 )
-from admission.infrastructure.message_bus_in_memory import (
-    message_bus_in_memory_instance,
-)
+from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
-from base.models.enums.education_group_types import TrainingType
-from ddd.logic.financabilite.domain.model.catalogue import Formation
-from ddd.logic.financabilite.domain.model.parcours import ParcoursAcademiqueInterne, ParcoursAcademiqueExterne, Parcours
-from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
-    AcademicYear,
-    AcademicYearIdentity,
-)
-from infrastructure.financabilite.domain.service.in_memory.financabilite import (
-    FinancabiliteInMemoryFetcher,
-)
-from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import (
-    AcademicYearInMemoryRepository,
-)
+from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
+from ddd.logic.financabilite.dtos.financabilite import FinancabiliteDTO
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 
 
 class TestSoumettrePropositionGenerale(TestCase):
@@ -81,8 +62,14 @@ class TestSoumettrePropositionGenerale(TestCase):
         self.academic_year_repository = AcademicYearInMemoryRepository()
         self.candidat_translator = ProfilCandidatInMemoryTranslator()
         self.candidat = self.candidat_translator.profil_candidats[1]
-        self.financabilite_fetcher = FinancabiliteInMemoryFetcher()
-        self.addCleanup(self.financabilite_fetcher.reset)
+        patcher = mock.patch(
+            'admission.ddd.admission.formation_generale.use_case.write.soumettre_proposition_service.Financabilite'
+        )
+        mock_financabilite = patcher.start()
+        self.addCleanup(patcher.stop)
+        mock_financabilite.return_value.determiner.return_value = FinancabiliteDTO(
+            etat=EtatFinancabilite.NON_FINANCABLE.name, details=[]
+        )
 
         for annee in range(2016, 2026):
             self.academic_year_repository.save(
@@ -105,15 +92,6 @@ class TestSoumettrePropositionGenerale(TestCase):
         elements_confirmation = ElementsConfirmationInMemory.get_elements_for_tests(
             self.proposition_repository.get(PropositionIdentity("uuid-MASTER-SCI")),
             FormationGeneraleInMemoryTranslator(),
-        )
-        self.financabilite_fetcher.save(
-            Parcours(
-                matricule_fgs='0000000001',
-                parcours_academique_interne=ParcoursAcademiqueInterne(programmes_cycles=[]),
-                parcours_academique_externe=ParcoursAcademiqueExterne(experiences=[]),
-                annee_diplome_etudes_secondaires=2015,
-                nombre_tentative_de_passer_concours_pass_et_las=0,
-            )
         )
         proposition_id = self.message_bus.invoke(
             SoumettrePropositionCommand(
@@ -154,16 +132,6 @@ class TestSoumettrePropositionGenerale(TestCase):
 
             self.proposition_repository.save(proposition)
 
-            self.financabilite_fetcher.save(
-                Parcours(
-                    matricule_fgs=proposition.matricule_candidat,
-                    parcours_academique_interne=ParcoursAcademiqueInterne(programmes_cycles=[]),
-                    parcours_academique_externe=ParcoursAcademiqueExterne(experiences=[]),
-                    annee_diplome_etudes_secondaires=2015,
-                    nombre_tentative_de_passer_concours_pass_et_las=0,
-                )
-            )
-
             elements_confirmation = ElementsConfirmationInMemory.get_elements_for_tests(
                 self.proposition_repository.get(proposition.entity_id),
                 FormationGeneraleInMemoryTranslator(),
@@ -203,16 +171,6 @@ class TestSoumettrePropositionGenerale(TestCase):
 
             self.proposition_repository.save(proposition)
 
-            self.financabilite_fetcher.save(
-                Parcours(
-                    matricule_fgs=proposition.matricule_candidat,
-                    parcours_academique_interne=ParcoursAcademiqueInterne(programmes_cycles=[]),
-                    parcours_academique_externe=ParcoursAcademiqueExterne(experiences=[]),
-                    annee_diplome_etudes_secondaires=2015,
-                    nombre_tentative_de_passer_concours_pass_et_las=0,
-                )
-            )
-
             elements_confirmation = ElementsConfirmationInMemory.get_elements_for_tests(
                 self.proposition_repository.get(proposition.entity_id),
                 FormationGeneraleInMemoryTranslator(),
@@ -237,15 +195,6 @@ class TestSoumettrePropositionGenerale(TestCase):
             self.proposition_repository.get(PropositionIdentity("uuid-MASTER-SCI")),
             FormationGeneraleInMemoryTranslator(),
         )
-        self.financabilite_fetcher.save(
-            Parcours(
-                matricule_fgs='0000000001',
-                parcours_academique_interne=ParcoursAcademiqueInterne(programmes_cycles=[]),
-                parcours_academique_externe=ParcoursAcademiqueExterne(experiences=[]),
-                annee_diplome_etudes_secondaires=2015,
-                nombre_tentative_de_passer_concours_pass_et_las=0,
-            )
-        )
         proposition_id = self.message_bus.invoke(
             SoumettrePropositionCommand(
                 uuid_proposition="uuid-BACHELIER-FINANCABILITE",
@@ -265,27 +214,6 @@ class TestSoumettrePropositionGenerale(TestCase):
         elements_confirmation = ElementsConfirmationInMemory.get_elements_for_tests(
             proposition,
             FormationGeneraleInMemoryTranslator(),
-        )
-
-        self.financabilite_fetcher.save(
-            Parcours(
-                matricule_fgs='0000000001',
-                parcours_academique_interne=ParcoursAcademiqueInterne(programmes_cycles=[]),
-                parcours_academique_externe=ParcoursAcademiqueExterne(experiences=[]),
-                annee_diplome_etudes_secondaires=2015,
-                nombre_tentative_de_passer_concours_pass_et_las=0,
-            )
-        )
-
-        self.financabilite_fetcher.formations.append(
-            Formation(
-                sigle='MASTER-SCI',
-                annee=2021,
-                type=TrainingType.MASTER_MC.name,
-                code_etude_ares=TrainingType.MASTER_MC.name,
-                credits=60,
-                cycle=2,
-            ),
         )
 
         proposition.reponses_questions_specifiques = {

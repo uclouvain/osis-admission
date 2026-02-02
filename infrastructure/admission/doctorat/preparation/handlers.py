@@ -25,13 +25,9 @@
 # ##############################################################################
 
 from admission.ddd.admission.doctorat.preparation.commands import *
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
-    OngletsChecklist,
-)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import OngletsChecklist
 from admission.ddd.admission.doctorat.preparation.use_case.read import *
-from admission.ddd.admission.doctorat.preparation.use_case.read.recuperer_doctorat_service import (
-    recuperer_doctorat,
-)
+from admission.ddd.admission.doctorat.preparation.use_case.read.recuperer_doctorat_service import recuperer_doctorat
 from admission.ddd.admission.doctorat.preparation.use_case.write import *
 from admission.ddd.admission.doctorat.preparation.use_case.write.demander_candidat_modifier_ca_service import (
     demander_candidat_modifier_ca,
@@ -39,12 +35,8 @@ from admission.ddd.admission.doctorat.preparation.use_case.write.demander_candid
 from admission.ddd.admission.doctorat.preparation.use_case.write.redonner_la_main_au_candidat_service import (
     redonner_la_main_au_candidat,
 )
-from admission.ddd.admission.doctorat.preparation.use_case.write.soumettre_ca_service import (
-    soumettre_ca,
-)
-from admission.ddd.admission.shared_kernel.use_case.read import (
-    recuperer_questions_specifiques_proposition,
-)
+from admission.ddd.admission.doctorat.preparation.use_case.write.soumettre_ca_service import soumettre_ca
+from admission.ddd.admission.shared_kernel.use_case.read import recuperer_questions_specifiques_proposition
 from admission.ddd.admission.shared_kernel.use_case.write import (
     annuler_reclamation_emplacement_document,
     initialiser_emplacement_document_a_reclamer,
@@ -58,30 +50,20 @@ from admission.ddd.admission.shared_kernel.use_case.write import (
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
-from admission.infrastructure.admission.shared_kernel.domain.service.calendrier_inscription import (
-    CalendrierInscription,
-)
-from admission.infrastructure.admission.shared_kernel.domain.service.elements_confirmation import (
-    ElementsConfirmation,
-)
+from admission.infrastructure.admission.shared_kernel.domain.service.calendrier_inscription import CalendrierInscription
+from admission.infrastructure.admission.shared_kernel.domain.service.elements_confirmation import ElementsConfirmation
 from admission.infrastructure.admission.shared_kernel.domain.service.emplacements_documents_proposition import (
     EmplacementsDocumentsPropositionTranslator,
 )
-from admission.infrastructure.admission.shared_kernel.domain.service.historique import (
-    Historique as HistoriqueGlobal,
-)
+from admission.infrastructure.admission.shared_kernel.domain.service.historique import Historique as HistoriqueGlobal
 from admission.infrastructure.admission.shared_kernel.domain.service.maximum_propositions import (
     MaximumPropositionsAutorisees,
 )
-from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import (
-    ProfilCandidatTranslator,
-)
+from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidatTranslator
 from admission.infrastructure.admission.shared_kernel.domain.service.raccrocher_experiences_curriculum import (
     RaccrocherExperiencesCurriculum,
 )
-from admission.infrastructure.admission.shared_kernel.domain.service.titres_acces import (
-    TitresAcces,
-)
+from admission.infrastructure.admission.shared_kernel.domain.service.titres_acces import TitresAcces
 from admission.infrastructure.admission.shared_kernel.domain.service.unites_enseignement_translator import (
     UnitesEnseignementTranslator,
 )
@@ -89,21 +71,10 @@ from admission.infrastructure.admission.shared_kernel.repository.email_destinata
 from admission.infrastructure.admission.shared_kernel.repository.titre_acces_selectionnable import (
     TitreAccesSelectionnableRepository,
 )
-from infrastructure.financabilite.domain.service.financabilite import (
-    FinancabiliteFetcher,
-)
-from infrastructure.shared_kernel.academic_year.repository.academic_year import (
-    AcademicYearRepository,
-)
-from infrastructure.shared_kernel.campus.repository.uclouvain_campus import (
-    UclouvainCampusRepository,
-)
-from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import (
-    PersonneConnueUclTranslator,
-)
-from infrastructure.shared_kernel.profil.domain.service.parcours_interne import (
-    ExperienceParcoursInterneTranslator,
-)
+from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
+from infrastructure.shared_kernel.campus.repository.uclouvain_campus import UclouvainCampusRepository
+from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
+from infrastructure.shared_kernel.profil.domain.service.parcours_interne import ExperienceParcoursInterneTranslator
 
 from ...shared_kernel.domain.service.matricule_etudiant import MatriculeEtudiantService
 from ..validation.repository.demande import DemandeRepository
@@ -187,7 +158,6 @@ COMMAND_HANDLERS = {
         profil_candidat_translator=ProfilCandidatTranslator(),
         academic_year_repository=AcademicYearRepository(),
         titres_acces=TitresAcces(),
-        questions_specifiques_translator=QuestionSpecifiqueTranslator(),
         formation_translator=DoctoratTranslator(),
         calendrier_inscription=CalendrierInscription(),
         maximum_propositions_service=MaximumPropositionsAutorisees(),
@@ -252,7 +222,6 @@ COMMAND_HANDLERS = {
         calendrier_inscription=CalendrierInscription(),
         element_confirmation=ElementsConfirmation(),
         maximum_propositions_service=MaximumPropositionsAutorisees(),
-        financabilite_fetcher=FinancabiliteFetcher(),
         email_destinataire_repository=EmailDestinataireRepository(),
     ),
     DefinirCotutelleCommand: lambda msg_bus, cmd: definir_cotutelle(
