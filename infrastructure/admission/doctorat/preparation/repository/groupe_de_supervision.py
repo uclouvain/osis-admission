@@ -375,6 +375,7 @@ class GroupeDeSupervisionRepository(IGroupeDeSupervisionRepository):
                     and getattr(actor.country, 'name_en' if get_language() == 'en' else 'name')
                     or '',
                     est_externe=actor.is_external,
+                    langue=actor.language,
                 )
             )
         return members
