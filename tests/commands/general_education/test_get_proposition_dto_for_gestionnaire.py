@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -32,9 +32,6 @@ from django.test import TestCase, override_settings
 from django.utils.translation import pgettext
 from osis_history.models import HistoryEntry
 
-from admission.ddd.admission.shared_kernel.dtos.campus import CampusDTO
-from admission.ddd.admission.shared_kernel.dtos.formation import BaseFormationDTO, FormationDTO
-from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
     PropositionNonTrouveeException,
 )
@@ -53,6 +50,9 @@ from admission.ddd.admission.formation_generale.dtos.condition_approbation impor
 from admission.ddd.admission.formation_generale.dtos.proposition import (
     PropositionGestionnaireDTO,
 )
+from admission.ddd.admission.shared_kernel.dtos.campus import CampusDTO
+from admission.ddd.admission.shared_kernel.dtos.formation import BaseFormationDTO, FormationDTO
+from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation
 from admission.models import GeneralEducationAdmission
 from admission.tests.factories.faculty_decision import (
     AdditionalApprovalConditionFactory,
@@ -106,7 +106,9 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         patcher = patch("osis_document_components.services.get_remote_token", return_value="foobar")
         patcher.start()
         self.addCleanup(patcher.stop)
-        patcher = patch("osis_document_components.services.get_remote_metadata", return_value={"name": "myfile", "size": 1})
+        patcher = patch(
+            "osis_document_components.services.get_remote_metadata", return_value={"name": "myfile", "size": 1}
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
         patcher = patch("osis_document_components.services.confirm_remote_upload", return_value=str(uuid.uuid4()))
@@ -197,9 +199,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         self.assertEqual(result.nationalite_candidat_code_iso, self.admission.candidate.country_of_citizenship.iso_code)
         self.assertEqual(result.photo_identite_candidat, self.admission.candidate.id_card)
         self.assertEqual(result.candidat_a_plusieurs_demandes, False)
-        self.assertEqual(result.titre_acces, '')
-        self.assertEqual(result.fraudeur_ares, False)
-        self.assertEqual(result.non_financable, False)
+        self.assertEqual(result.est_fraudeur, False)
         self.assertEqual(result.est_inscription_tardive, None)
         self.assertEqual(result.candidat_vip, False)
         self.assertEqual(result.candidat_assimile, False)

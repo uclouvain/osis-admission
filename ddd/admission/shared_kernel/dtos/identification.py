@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ from typing import List, Optional
 import attr
 
 from osis_common.ddd import interface
-from osis_profile import PLUS_5_ISO_CODES, BE_ISO_CODE
+from osis_profile import BE_ISO_CODE, PLUS_5_ISO_CODES
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -67,6 +67,8 @@ class IdentificationDTO(interface.DTO):
 
     annee_derniere_inscription_ucl: Optional[int]
     noma_derniere_inscription_ucl: str
+
+    statut_validation_donnees_personnelles: str
 
     @property
     def est_concerne_par_visa(self):

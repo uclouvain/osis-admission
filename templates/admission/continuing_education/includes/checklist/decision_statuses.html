@@ -24,7 +24,7 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% with initial=original_admission.checklist.initial.decision current=original_admission.checklist.current.decision current_personal_data=original_admission.checklist.current.donnees_personnelles %}
+{% with initial=original_admission.checklist.initial.decision current=original_admission.checklist.current.decision %}
 <div id="decision-statuses-container" class="form-group btn-group status-group" role="group" hx-swap-oob="true">
     {% has_perm 'admission.change_checklist_iufc' as is_iufc %}
     {% not_bool is_iufc as is_not_iufc %}
@@ -35,7 +35,7 @@
     {% translate 'It is not possible to go from the "validated" status to this status.' as validation_other_disabled_str %}
     {% translate "Validated" context "decision-checklist" as validated_label %}
     {% translate 'You can not cancel this application, it is in the "Validated" state. Please contact Noemie Pecher.' as cancel_while_validated_label %}
-    {% if original_admission.checklist.current.donnees_personnelles.statut != 'GEST_REUSSITE' %}
+    {% if original_admission.candidate.personal_data_validation_status != 'VALIDEES' %}
       {% translate 'The status of the checklist for the personal data must be "Validated".' as no_validated_personal_data_str %}
     {% endif %}
     {% if current.statut == 'GEST_EN_COURS' and current.extra.en_cours == 'on_hold' %}

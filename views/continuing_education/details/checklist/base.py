@@ -29,6 +29,7 @@ from typing import Dict, List, Set
 
 import attr
 from django.conf import settings
+from django.db.models import Q
 from django.shortcuts import resolve_url
 from django.template.defaultfilters import truncatechars
 from django.utils.functional import cached_property
@@ -361,19 +362,33 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
             'decision__FAC_for_IUFC',
             'donnees_personnelles',
         ]
+        profile_tabs = [
+            OngletsChecklist.donnees_personnelles.name,
+        ]
 
         comments = {
             ('__'.join(c.tags)): c
             for c in CommentEntry.objects.filter(
-                object_uuid=self.admission_uuid,
-                tags__overlap=OngletsChecklist.get_names(),
+                Q(
+                    object_uuid=self.admission_uuid,
+                    tags__overlap=OngletsChecklist.get_names_except(*profile_tabs),
+                )
+                | Q(
+                    object_uuid=self.admission.candidate.uuid,
+                    tags__overlap=profile_tabs,
+                ),
             )
         }
 
         context['comment_forms'] = {
             tab_name: CommentForm(
                 comment=comments.get(tab_name, None),
-                form_url=resolve_url(f'{self.base_namespace}:save-comment', uuid=self.admission_uuid, tab=tab_name),
+                form_url=resolve_url(
+                    f'{self.base_namespace}:save-comment',
+                    uuid=self.admission_uuid,
+                    object_uuid=self.admission.candidate.uuid if tab_name in profile_tabs else self.admission_uuid,
+                    tab=tab_name,
+                ),
                 prefix=tab_name,
             )
             for tab_name in tab_names

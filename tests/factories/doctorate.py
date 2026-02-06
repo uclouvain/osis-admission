@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -41,8 +41,8 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
 )
 from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire
 from admission.models import DoctorateAdmission
-from admission.models.specific_question import SpecificQuestionAnswer
 from admission.models.doctorate import DoctorateAdmissionPrerequisiteCourses
+from admission.models.specific_question import SpecificQuestionAnswer
 from admission.tests.factories.accounting import AccountingFactory
 from admission.tests.factories.form_item import AdmissionFormItemFactory
 from admission.tests.factories.roles import CandidateFactory
@@ -106,6 +106,7 @@ def get_checklist():
         onglet.name: default_content.copy()
         for onglet in OngletsChecklist.get_except(
             OngletsChecklist.experiences_parcours_anterieur.name,
+            OngletsChecklist.donnees_personnelles.name,
         )
     }
 

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -176,6 +176,7 @@ from base.models.enums.community import CommunityEnum
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.enums.got_diploma import GotDiploma
+from base.models.enums.personal_data import ChoixStatutValidationDonneesPersonnelles
 from base.models.enums.state_iufc import StateIUFC
 from base.models.enums.teaching_type import TeachingTypeEnum
 from base.models.person import Person
@@ -1105,6 +1106,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             noma_derniere_inscription_ucl='0123456789',
             date_expiration_carte_identite=datetime.date(2023, 1, 1),
             date_expiration_passeport=datetime.date(2023, 1, 1),
+            statut_validation_donnees_personnelles=ChoixStatutValidationDonneesPersonnelles.A_TRAITER.name,
         )
         coordinates_dto = _CoordonneesDTO(
             domicile_legal=_AdressePersonnelleDTO(

@@ -390,8 +390,11 @@ class Proposition(interface.RootEntity):
         gestionnaire: str,
         profil_candidat_translator: IProfilCandidatTranslator,
     ):
+        identification_dto = profil_candidat_translator.get_identification(self.matricule_candidat)
+
         ApprouverPropositionValidatorList(
             checklist_actuelle=self.checklist_actuelle,
+            statut_validation_donnees_personnelles=identification_dto.statut_validation_donnees_personnelles,
         ).validate()
 
         ProfilCandidatService.verifier_quarantaine(

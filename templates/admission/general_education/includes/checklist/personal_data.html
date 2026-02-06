@@ -29,7 +29,9 @@
 {% has_perm 'admission.change_checklist' as can_update_personal_data_tab %}
 {% endif %}
 
-{% with initial=original_admission.checklist.initial.donnees_personnelles current=original_admission.checklist.current.donnees_personnelles can_update_checklist_tab=can_update_personal_data_tab %}
+{% with tab_statuses_configurations=checklist_tabs_organization.donnees_personnelles can_update_checklist_tab=can_update_personal_data_tab %}
+{% with selected_status_configuration=tab_statuses_configurations|get_item:original_admission.candidate.personal_data_validation_status %}
+
   {% include 'admission/details/includes/checklist/fraud_ares_status.html' with container_id="donnees_personnelles" %}
   <div
     id="personal-data-statuses"
@@ -38,14 +40,7 @@
     hx-swap-oob="true"
   >
     {% concat view.base_namespace ':personal-data-change-status' as personal_data_base_url %}
-    {% url personal_data_base_url view.kwargs.uuid initial.statut as initial_status_url %}
-    {% url personal_data_base_url view.kwargs.uuid 'GEST_EN_COURS' as in_progress_status_url %}
-    {% url personal_data_base_url view.kwargs.uuid 'GEST_EN_COURS' as ongoing_status_url %}
-    {% url personal_data_base_url view.kwargs.uuid 'GEST_BLOCAGE' as blocking_status_url %}
-    {% url personal_data_base_url view.kwargs.uuid 'GEST_REUSSITE' as success_status_url %}
-    {% translate initial.libelle as initial_state_label %}
-    {% translate 'Cleaned' context 'plural' as cleaned_label %}
-    {% translate 'Validated' context 'plural' as validated_label %}
+    {% url personal_data_base_url uuid=view.kwargs.uuid as change_status_url %}
 
     {% has_perm 'admission.change_personal_data_checklist_status_to_be_processed' as can_change_personal_data_checklist_status_to_be_processed %}
     {% has_perm 'admission.change_personal_data_checklist_status_cleaned' as can_change_personal_data_checklist_status_cleaned %}
@@ -53,16 +48,17 @@
     {% not_bool can_change_personal_data_checklist_status_to_be_processed as cannot_change_personal_data_checklist_status_to_be_processed %}
     {% not_bool can_change_personal_data_checklist_status_cleaned as cannot_change_personal_data_checklist_status_cleaned %}
 
-    {% checklist_state_button tab='donnees_personnelles' label=initial_state_label icon='user' state=initial.statut class='muted' htmx_post=initial_status_url disabled=cannot_change_personal_data_checklist_status_to_be_processed force_enabled=True %}
-    {% checklist_state_button tab='donnees_personnelles' label=cleaned_label icon='pencil' state='GEST_EN_COURS' class='warning' htmx_post=in_progress_status_url disabled=cannot_change_personal_data_checklist_status_cleaned force_enabled=True %}
-    {% checklist_state_button tab='donnees_personnelles' label=_("To be completed") icon='circle-stop' state='GEST_BLOCAGE' class='danger' fraud='0' htmx_post=blocking_status_url %}
-    {% checklist_state_button tab='donnees_personnelles' label=_("Expert opinion") icon='pencil' state='GEST_EN_COURS' class='warning' en_cours='expert_opinion' htmx_post=ongoing_status_url %}
-    {% checklist_state_button tab='donnees_personnelles' label=_("Fraudster") icon='circle-stop' state='GEST_BLOCAGE' class='danger' fraud='1' htmx_post=blocking_status_url %}
-    {% checklist_state_button tab='donnees_personnelles' label=validated_label icon='check' state='GEST_REUSSITE' class='success' htmx_post=success_status_url %}
+    {% checklist_macro_state_button tab='donnees_personnelles' status_configuration=tab_statuses_configurations.A_TRAITER selected_status_configuration=selected_status_configuration icon='user' class='muted' htmx_post=change_status_url disabled=cannot_change_personal_data_checklist_status_to_be_processed force_enabled=True %}
+    {% checklist_macro_state_button tab='donnees_personnelles' status_configuration=tab_statuses_configurations.TOILETTEES selected_status_configuration=selected_status_configuration icon='pencil' class='warning' htmx_post=change_status_url disabled=cannot_change_personal_data_checklist_status_cleaned force_enabled=True %}
+    {% checklist_macro_state_button tab='donnees_personnelles' status_configuration=tab_statuses_configurations.A_COMPLETER selected_status_configuration=selected_status_configuration icon='circle-stop' class='danger' htmx_post=change_status_url %}
+    {% checklist_macro_state_button tab='donnees_personnelles' status_configuration=tab_statuses_configurations.AVIS_EXPERT selected_status_configuration=selected_status_configuration icon='pencil' class='warning' htmx_post=change_status_url %}
+    {% checklist_macro_state_button tab='donnees_personnelles' status_configuration=tab_statuses_configurations.FRAUDEUR selected_status_configuration=selected_status_configuration icon='circle-stop' class='danger' htmx_post=change_status_url %}
+    {% checklist_macro_state_button tab='donnees_personnelles' status_configuration=tab_statuses_configurations.VALIDEES selected_status_configuration=selected_status_configuration icon='check' class='success' htmx_post=change_status_url %}
+
   </div>
   {% if request.htmx %}
     {# Update the checklist menu item status #}
-    {% include "admission/general_education/checklist_menu_item_status.html" with statut=current.statut item_name='donnees_personnelles' %}
+    {% include "admission/general_education/checklist_menu_item_status.html" with statut=selected_status_configuration.statut.name item_name='donnees_personnelles' %}
 
     {# Update the sic decision statuses #}
     {% if view.is_doctorate %}
@@ -73,4 +69,5 @@
       {% include 'admission/general_education/includes/checklist/sic_decision_statuses.html' with proposition=admission current=original_admission.checklist.current.decision_sic %}
     {% endif %}
   {% endif %}
+{% endwith %}
 {% endwith %}

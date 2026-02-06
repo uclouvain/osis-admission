@@ -31,7 +31,6 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
 )
 from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
     StatutChecklist,
-    StatutsChecklistContinue,
 )
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
     AnnulerPropositionTransitionStatutException,
@@ -43,6 +42,7 @@ from admission.ddd.admission.formation_continue.domain.validator.exceptions impo
     RefuserPropositionTransitionStatutException,
 )
 from base.ddd.utils.business_validator import BusinessValidator
+from base.models.enums.personal_data import ChoixStatutValidationDonneesPersonnelles
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -126,8 +126,8 @@ class ShouldPeutCloturerProposition(BusinessValidator):
 
 @attr.dataclass(frozen=True, slots=True)
 class ShouldDonneesPersonnellesEtreDansEtatCorrectPourApprouverDemande(BusinessValidator):
-    checklist_actuelle: StatutsChecklistContinue
+    statut_validation_donnees_personnelles: str
 
     def validate(self, *args, **kwargs):
-        if self.checklist_actuelle.donnees_personnelles.statut != ChoixStatutChecklist.GEST_REUSSITE:
+        if self.statut_validation_donnees_personnelles != ChoixStatutValidationDonneesPersonnelles.VALIDEES.name:
             raise EtatChecklistDonneesPersonnellesNonValidePourApprouverDemande

@@ -1462,10 +1462,6 @@ msgstr ""
 msgid "Cleaned"
 msgstr ""
 
-msgctxt "plural"
-msgid "Cleaned"
-msgstr ""
-
 msgid "Clear the reason"
 msgstr ""
 
@@ -3081,6 +3077,9 @@ msgstr ""
 msgid "Fraudster status from ARES"
 msgstr ""
 
+msgid "Fraudster status from SIC"
+msgstr ""
+
 msgid "Free additional approval condition"
 msgstr ""
 
@@ -4525,6 +4524,9 @@ msgid "No education group has been found for:"
 msgstr ""
 
 msgid "No enrolment application"
+msgstr ""
+
+msgid "No fraud identified"
 msgstr ""
 
 msgid "No general enrolment"
@@ -7251,6 +7253,9 @@ msgstr ""
 msgid "Unknown PDF type."
 msgstr ""
 
+msgid "Unknown author"
+msgstr ""
+
 msgid "Unknown citizenship"
 msgstr ""
 
@@ -7311,10 +7316,6 @@ msgid "Validated"
 msgstr ""
 
 msgctxt "decision-checklist"
-msgid "Validated"
-msgstr ""
-
-msgctxt "plural"
 msgid "Validated"
 msgstr ""
 
@@ -7927,6 +7928,9 @@ msgid "academic year"
 msgstr ""
 
 msgid "actions"
+msgstr ""
+
+msgid "an unknown author"
 msgstr ""
 
 msgid "approval"

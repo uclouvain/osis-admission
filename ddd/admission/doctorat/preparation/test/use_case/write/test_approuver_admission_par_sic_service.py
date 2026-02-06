@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -41,8 +41,9 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     DocumentAReclamerImmediatException,
+    EtatChecklistDecisionCddNonValidePourApprouverDemande,
     EtatChecklistDonneesPersonnellesNonValidePourApprouverDemande,
-    ParcoursAnterieurNonSuffisantException, EtatChecklistDecisionCddNonValidePourApprouverDemande,
+    ParcoursAnterieurNonSuffisantException,
 )
 from admission.ddd.admission.doctorat.preparation.test.factory.groupe_de_supervision import (
     GroupeDeSupervisionSC3DPFactory,
@@ -79,6 +80,7 @@ from admission.infrastructure.message_bus_in_memory import (
     message_bus_in_memory_instance,
 )
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from base.models.enums.personal_data import ChoixStatutValidationDonneesPersonnelles
 from base.models.person_merge_proposal import PersonMergeStatus
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
     AcademicYear,
@@ -214,9 +216,15 @@ class TestApprouverAdmissionParSic(TestCase):
         self.assertIsInstance(context.exception.exceptions.pop(), ParcoursAnterieurNonSuffisantException)
 
     def test_should_lever_exception_si_donnees_personnelles_non_validees(self):
-        self.proposition.checklist_actuelle.donnees_personnelles.statut = ChoixStatutChecklist.INITIAL_CANDIDAT
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
+        index = next(
+            i for i, c in enumerate(ProfilCandidatInMemoryTranslator.profil_candidats) if c.matricule == '0123456789'
+        )
+        with patch.multiple(
+            ProfilCandidatInMemoryTranslator.profil_candidats[index],
+            statut_validation_donnees_personnelles=ChoixStatutValidationDonneesPersonnelles.A_COMPLETER.name,
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
         self.assertIsInstance(
             context.exception.exceptions.pop(),
             EtatChecklistDonneesPersonnellesNonValidePourApprouverDemande,

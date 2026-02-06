@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -359,7 +359,11 @@ class ListerToutesDemandes(IListerToutesDemandes):
                         )
 
                     # Specific cases
-                    if tab_name == OngletsChecklist.experiences_parcours_anterieur.name:
+                    if tab_name == OngletsChecklist.donnees_personnelles.name:
+                        # > For the personal data, the status is saved on the candidate
+                        current_checklist_filters = Q(candidate__personal_data_validation_status=status_value)
+
+                    elif tab_name == OngletsChecklist.experiences_parcours_anterieur.name:
                         # > For the past experiences, we search if one of them match the criteria
                         fields_to_filter = {}
 

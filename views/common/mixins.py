@@ -53,6 +53,9 @@ from admission.ddd.admission.doctorat.preparation.commands import (
 from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionDoctoraleQuery,
 )
+from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_DOCTORALE_PAR_STATUT,
+)
 from admission.ddd.admission.doctorat.preparation.dtos import (
     PropositionDTO,
 )
@@ -62,6 +65,9 @@ from admission.ddd.admission.formation_continue.commands import (
 )
 from admission.ddd.admission.formation_continue.commands import (
     RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionContinueQuery,
+)
+from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_CONTINUE_PAR_STATUT,
 )
 from admission.ddd.admission.formation_continue.dtos.proposition import (
     PropositionDTO as PropositionContinueDTO,
@@ -75,6 +81,9 @@ from admission.ddd.admission.formation_generale.commands import (
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_GENERALE_PAR_STATUT,
 )
 from admission.ddd.admission.formation_generale.dtos.proposition import (
     PropositionGestionnaireDTO,
@@ -107,6 +116,7 @@ from admission.utils import (
 from admission.views.list import BaseAdmissionList
 from base.models.person_merge_proposal import PersonMergeStatus
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
+from ddd.logic.gestion_des_comptes.dto.periode_soumission_ticket import PeriodeSoumissionTicketDigitDTO
 from ddd.logic.gestion_des_comptes.queries import GetPeriodeActiveSoumissionTicketQuery, GetPropositionFusionQuery
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import PermissionRequiredMixin
@@ -192,6 +202,14 @@ class AdmissionViewMixin(PermissionRequiredMixin, ContextMixin):
     def current_user_name(self):
         return f'{self.request.user.person.first_name} {self.request.user.person.last_name}'
 
+    @cached_property
+    def checklist_tabs_organization(self):
+        return {
+            CONTEXT_DOCTORATE: ORGANISATION_ONGLETS_CHECKLIST_DOCTORALE_PAR_STATUT,
+            CONTEXT_CONTINUING: ORGANISATION_ONGLETS_CHECKLIST_CONTINUE_PAR_STATUT,
+            CONTEXT_GENERAL: ORGANISATION_ONGLETS_CHECKLIST_GENERALE_PAR_STATUT,
+        }[self.current_context]
+
 
 class LoadDossierViewMixin(AdmissionViewMixin):
     specific_questions_tab: Optional[Onglets] = None
@@ -264,7 +282,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         if self.admission.status != ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name:
             return False, "Le dossier doit être en 'Inscription autorisée'"
         periodes_actives: list[PeriodeSoumissionTicketDigitDTO] = message_bus_instance.invoke(
-            GetPeriodeActiveSoumissionTicketQuery()
+            GetPeriodeActiveSoumissionTicketQuery(),
         )
         annees_ouvertes = [p.annee for p in periodes_actives]
         if annees_ouvertes and self.admission.determined_academic_year.year not in annees_ouvertes:
@@ -354,6 +372,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         context['demande_est_en_quarantaine'] = self.demande_est_en_quarantaine
         context['outil_de_comparaison_et_fusion_url'] = self.get_outil_de_comparaison_et_fusion_url()
         context['double_check_decision_url'] = self.get_double_check_decision_url()
+        context['checklist_tabs_organization'] = self.checklist_tabs_organization
         return context
 
     def get_outil_de_comparaison_et_fusion_url(self) -> str:

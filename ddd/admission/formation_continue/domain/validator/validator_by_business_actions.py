@@ -127,6 +127,7 @@ class AnnulerPropositionValidatorList(TwoStepsMultipleBusinessExceptionListValid
 @attr.dataclass(frozen=True, slots=True)
 class ApprouverPropositionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     checklist_actuelle: StatutsChecklistContinue
+    statut_validation_donnees_personnelles: str
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -137,7 +138,7 @@ class ApprouverPropositionValidatorList(TwoStepsMultipleBusinessExceptionListVal
                 checklist_statut=self.checklist_actuelle.decision,
             ),
             ShouldDonneesPersonnellesEtreDansEtatCorrectPourApprouverDemande(
-                checklist_actuelle=self.checklist_actuelle,
+                statut_validation_donnees_personnelles=self.statut_validation_donnees_personnelles,
             ),
         ]
 

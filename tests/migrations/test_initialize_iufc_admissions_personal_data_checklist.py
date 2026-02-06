@@ -50,7 +50,7 @@ class InitializeIUFCAdmissionsPersonalDataChecklistTestCase(TestCase):
     def test_do_not_update_if_the_personal_data_checklist_is_already_set(self):
         admission = ContinuingEducationAdmissionFactory(status=ChoixStatutPropositionContinue.CONFIRMEE.name)
 
-        admission.checklist['current']['donnees_personnelles']['statut'] = ChoixStatutChecklist.GEST_EN_COURS.name
+        admission.checklist['current']['donnees_personnelles'] = {'statut': ChoixStatutChecklist.GEST_EN_COURS.name}
         admission.save(update_fields=['checklist'])
 
         initialize_iufc_admissions_personal_data_checklist(model_class=BaseAdmission)
@@ -58,7 +58,8 @@ class InitializeIUFCAdmissionsPersonalDataChecklistTestCase(TestCase):
         admission.refresh_from_db()
 
         self.assertEqual(
-            admission.checklist['current']['donnees_personnelles']['statut'], ChoixStatutChecklist.GEST_EN_COURS.name
+            admission.checklist['current']['donnees_personnelles']['statut'],
+            ChoixStatutChecklist.GEST_EN_COURS.name,
         )
 
     def test_do_not_update_if_the_checklist_is_not_already_set(self):
