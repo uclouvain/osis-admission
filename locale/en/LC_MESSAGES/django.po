@@ -703,7 +703,7 @@ msgstr ""
 msgid "Application fee: <strong>&euro;%(amount)s</strong>"
 msgstr ""
 
-msgid "Application fees where also received."
+msgid "Application fees were also received."
 msgstr ""
 
 msgid "Application for a study allowance from the French Community of Belgium"
