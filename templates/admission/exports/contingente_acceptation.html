@@ -1,0 +1,226 @@
+{% load admission i18n osis_document_components static academic_year_display %}
+{% comment 'License' %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+<!doctype html>
+<html lang="fr-be">
+  <head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'css/bootstrap5/bootstrap.min.css' %}">
+    <style>
+      @page {
+        size: A4 portrait;
+        margin: 1cm 2cm 120px 2cm;
+
+        @bottom-left {
+          content: element(footer);
+          width: 100%;
+          height: 120px;
+        }
+      }
+
+      @media print {
+        footer {
+          position: running(footer);
+          font-size: 9pt;
+        }
+
+        #page-counter:after {
+          content: counter(page) "/" counter(pages);
+        }
+
+        #guillemet-droite {
+            position: absolute;
+            right: -15mm;
+            margin-top: 3em;
+            background-color: #9cb7d4;
+            width: 2.5mm;
+            height: 7mm;
+        }
+
+        #guillemet-gauche {
+            position: absolute;
+            left: -12mm;
+            bottom: -8mm;
+            background-color: #5db3e6;
+            width: 8mm;
+            height: 10mm;
+        }
+        #guillemet-gauche:after {
+            content: '';
+            position: absolute;
+            {# We have a 1px blue line otherwise #}
+            right: -1mm;
+            top: -1mm;
+            background-color: #fff;
+            width: 6.5mm;
+            height: 8.5mm;
+        }
+
+        @font-face {
+            font-family: "Garamond";
+            src: url("{% static "admission/fonts/AGaramond-Regular.otf" %}");
+        }
+
+        body {
+          font-family: "Garamond", serif;
+          font-size: 10pt;
+          text-align: justify;
+          line-height: 0.5cm;
+        }
+
+        #header {
+            padding-top: 4px;
+            padding-bottom: 0;
+            margin-top: 15mm;
+            margin-bottom: 5mm;
+            border: 1px solid #aaa;
+            text-align: center;
+            font-size: 14pt;
+        }
+
+        ul {
+            margin: 0;
+        }
+
+        #logo {
+          height: 1.5cm;
+          width: auto;
+        }
+
+        #logo-subtext {
+            font-weight: bold;
+            color: #033060;
+            margin-left: 1cm;
+            margin-top: -0.5mm;
+        }
+
+        #signature {
+            width: 3cm;
+            text-align: center;
+            margin-left: auto;
+            margin-right: 0;
+        }
+
+        #sigle-container {
+            position: relative;
+            z-index: -50;
+        }
+
+        #sigle {
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 40mm;
+            width: auto;
+        }
+
+        #student-signature td {
+            height: 2cm;
+            text-align: center;
+            vertical-align: top;
+            border: 1px #000 solid;
+        }
+
+        .on-single-page {
+            page-break-inside: avoid;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <footer>
+      <p>(*) Décret du 16 juin 2006 régulant le nombre d'étudiants dans certains cursus de premier cycle de l'enseignement supérieur</p>
+
+      {% footer_campus proposition %}
+      <a href="mailto:etudes-contingentees-NR@uclouvain.be">etudes-contingentees-NR@uclouvain.be</a><br>
+    </footer>
+
+    <div>
+      <img id="logo" src="{% static "img/logo_uclouvain.png" %}">
+      <div id="logo-subtext">Service des inscriptions</div>
+    </div>
+
+    <div id="header">
+
+      <p>Notification d'acceptation de dossier au grade de</p>
+      <p>{{ proposition.formation.intitule_fr|lower }}</p>
+      <p>Cette notification n'est valable que pour l'année
+        académique {{ proposition.annee_calculee }}-{{ proposition.annee_calculee|add:1 }} et</p>
+      <p>uniquement à l'UCLouvain</p>
+
+    </div>
+
+    <div id="guillemet-droite"></div>
+
+
+    <p>Conformément au prescrit du décret du 16 juin 2006 (*), votre demande d'inscription au nom de
+      {% if profil_candidat_identification.genre == 'H' %}Monsieur{% elif profil_candidat_identification.genre == 'F' %}Madame{% endif %}
+      {{ profil_candidat_identification.prenom }} {{ profil_candidat_identification.nom }}</p>
+    <p>Au premier cycle du grade de {{ proposition.formation.intitule_fr|lower }} (Dossier {{ proposition.numero_dossier_ares }})
+      a été classé·e en {{ proposition_dto.numero_de_tirage_contingente }}e position suite au tirage au sort effectué ce {{ drawing_calendar.start_date|date:"j F Y" }} sous le
+      contrôle de Intermediance & Partners, association d'huissiers de justice, et a été jugée recevable.</p>
+    <p>Suite à ce classement, il vous sera possible de confirmer personnellement votre demande d'inscription (Numéro de
+      dossier OSIS)
+      <strong>entre le {{ answer_deadline_calendar.start_date|date:"l j F Y" }}{% if answer_deadline_calendar.start_time %} à {{ answer_deadline_calendar.start_time|date:"H:i" }}{% endif %}
+      et le {{ answer_deadline_calendar.end_date|date:"l j F Y" }}{% if answer_deadline_calendar.end_time %} à {{ answer_deadline_calendar.end_time|date:"H:i" }}{% endif %} UNIQUEMENT via votre plateforme de demande
+        en ligne :</strong></p>
+
+    <p class="text-center">
+      <a href="{{ admission_link_front }}"><strong>{{ admission_link_front }}</strong></a>
+    </p>
+
+    <ul>
+        <li>Le présent document daté et signé pour accord.</li>
+        {% for document in documents_demandes %}<li>{{ document }}</li>{% endfor %}
+    </ul>
+
+    <p>Si vous n'avez pas confirmé votre demande d'inscription <strong>en téléchargeant ce document complété et signé sur votre
+      plateforme de demande en ligne</strong> pour le
+      {{ answer_deadline_calendar.end_date|date:"l j F Y" }}{% if answer_deadline_calendar.end_time %} à {{ answer_deadline_calendar.end_time|date:"H:i" }}{% endif %}
+      (date et heure belge du mail faisant foi) au
+      plus tard,
+      votre place sera réattribuée.</p>
+    <p>Meilleures salutations,<br>
+      Service des inscriptions de l'UCLouvain</p>
+
+    <div class="on-single-page">
+      <div class="w-50">
+        <table class="w-100" id="student-signature">
+          <tr>
+            <td class="text-center">{% trans "Date" %}</td>
+            <td class="text-center">{% trans "Student signature for agreement" %}</td>
+          </tr>
+        </table>
+      </div>
+
+      <div id="sigle-container">
+        <img id="sigle" src="{% static "img/sedes-filigrane.jpg" %}">
+
+        {% include 'admission/exports/includes/sic_certificate_signature.html' with director=director proposition=proposition %}
+      </div>
+    </div>
+
+    <div id="guillemet-gauche"></div>
+  </body>
+</html>

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -567,6 +567,12 @@ CORRESPONDANCE_CHAMPS_INFORMATIONS_ADDITIONNELLES = {
     'ATTESTATION_INSCRIPTION_REGULIERE_POUR_MODIFICATION_INSCRIPTION': (
         'regular_registration_proof_for_registration_change'
     ),
+    'DOSSIER_NON_RESIDENT': 'non_resident_file',
+    'FORMULAIRE_DE_DEMANDE_NON_RESIDENT_ADMISSION_EN_SECONDE_ANNEE': 'non_resident_with_second_year_enrolment_form',
+    'CERTIFICAT_DE_RESIDENCE': 'residence_certificate',
+    'DOSSIER_RESIDENT': 'residence_student_form',
+    'ACCUSE_DE_RECEPTION_FORMATION_CONTINGENTE': 'quota_admission_receipt',
+    'ACCEPTATION_FORMATION_CONTINGENTE': 'non_resident_limited_enrolment_acceptance_file',
     'ADDITIONAL_DOCUMENTS': 'additional_documents',
 }
 

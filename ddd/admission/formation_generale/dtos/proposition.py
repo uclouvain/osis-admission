@@ -94,7 +94,15 @@ class PropositionDTO(interface.DTO):
 
     est_non_resident_au_sens_decret: Optional[bool]
     accuse_de_reception_contingente: List[str]
+    acceptation_contingente: List[str]
     numero_dossier_ares: str
+    certificat_de_residence: List[str]
+    dossier_resident: List[str]
+    numero_de_tirage_contingente: Optional[int]
+    dossier_non_resident: List[str]
+    non_resident_admission_en_seconde_annee: Optional[bool]
+    formulaire_de_demande_non_resident_admission_en_seconde_annee: List[str]
+    non_resident_notifie_a: Optional[datetime.datetime]
 
     poste_diplomatique: Optional[PosteDiplomatiqueDTO]
 

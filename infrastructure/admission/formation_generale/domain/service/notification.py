@@ -42,6 +42,9 @@ from osis_notification.contrib.notification import EmailNotification
 
 from admission.calendar.admission_calendar import SIGLES_WITH_QUOTA
 from admission.ddd import MAIL_INSCRIPTION_DEFAUT, MAIL_VERIFICATEUR_CURSUS
+from admission.ddd.admission.formation_generale.domain.model.contingente import (
+    PropositionContingenteResume,
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
     ChoixStatutPropositionGenerale,
@@ -53,6 +56,9 @@ from admission.ddd.admission.formation_generale.domain.service.i_notification im
     INotification,
 )
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
+from admission.ddd.admission.formation_generale.dtos.contingente import (
+    AdmissionContingenteNonResidenteNotificationDTO,
+)
 from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import (
     EmplacementDocument,
 )
@@ -83,6 +89,9 @@ from admission.infrastructure.admission.formation_generale.repository.propositio
 )
 from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import (
     ProfilCandidatTranslator,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.unites_enseignement_translator import (
+    UnitesEnseignementTranslator,
 )
 from admission.infrastructure.utils import get_requested_documents_html_lists
 from admission.mail_templates import (
@@ -148,7 +157,7 @@ class Notification(INotification):
     @classmethod
     def _confirmer_soumission_contingente(cls, proposition: Proposition, admission: GeneralEducationAdmission):
         PDFGeneration.generer_accuse_de_reception_contingente(
-            PropositionRepository(), ProfilCandidatTranslator(), proposition
+            PropositionRepository(), ProfilCandidatTranslator(), UnitesEnseignementTranslator(), proposition
         )
         admission.quota_admission_receipt = proposition.accuse_de_reception_contingente
         admission.save(update_fields=['quota_admission_receipt'])
@@ -626,6 +635,27 @@ class Notification(INotification):
     def notifier_candidat_derogation_financabilite(
         cls,
         proposition: Proposition,
+        objet_message: str,
+        corps_message: str,
+    ) -> EmailMessage:
+        candidate = Person.objects.get(global_id=proposition.matricule_candidat)
+
+        email_notification = EmailNotification(
+            recipient=candidate.private_email,
+            subject=objet_message,
+            html_content=corps_message,
+            plain_text_content=transform_html_to_text(corps_message),
+        )
+
+        candidate_email_message = EmailNotificationHandler.build(email_notification)
+        EmailNotificationHandler.create(candidate_email_message, person=candidate)
+
+        return candidate_email_message
+
+    @classmethod
+    def notifier_candidat_contingente_acceptation(
+        cls,
+        proposition: PropositionContingenteResume,
         objet_message: str,
         corps_message: str,
     ) -> EmailMessage:

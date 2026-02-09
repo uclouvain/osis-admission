@@ -35,6 +35,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     BesoinDeDerogation,
     ChoixStatutChecklist,
     ChoixStatutPropositionGenerale,
+    TypeDeRefus,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     StatutChecklist,
@@ -81,8 +82,17 @@ from admission.ddd.admission.formation_generale.domain.validator._should_informa
     ShouldParcoursAnterieurEtreSuffisant,
     ShouldSicPeutDonnerDecision,
 )
+from admission.ddd.admission.formation_generale.domain.validator._should_proposition_decision_sic_etre_ok_pour_notification_contingente import (
+    ShouldPropositionDecisionSicEtreOkPourNotificationContingente,
+)
 from admission.ddd.admission.formation_generale.domain.validator._should_proposition_etre_en_cours import (
     ShouldPropositionEtreEnCours,
+)
+from admission.ddd.admission.formation_generale.domain.validator._should_refus_documents_manquants_avoir_documents_demandes import (
+    ShouldRefusDocumentsManquantsAvoirDocumentsDemandes,
+)
+from admission.ddd.admission.formation_generale.domain.validator._should_refus_non_financable_avoir_une_regle import (
+    ShouldRefusNonFinancableAvoirUneRegle,
 )
 from admission.ddd.admission.shared_kernel.domain.model.complement_formation import (
     ComplementFormationIdentity,
@@ -127,6 +137,7 @@ from base.ddd.utils.business_validator import (
     TwoStepsMultipleBusinessExceptionListValidator,
 )
 from base.models.enums.education_group_types import TrainingType
+from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
     AcademicYear,
 )
@@ -785,6 +796,9 @@ class SpecifierInformationsApprobationInscriptionValidatorList(TwoStepsMultipleB
 @attr.dataclass(frozen=True, slots=True)
 class RefuserParSicAValiderValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     statut: ChoixStatutPropositionGenerale
+    type_de_refus: TypeDeRefus
+    financabilite_regle: SituationFinancabilite
+    documents_demandes: Dict
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -793,6 +807,14 @@ class RefuserParSicAValiderValidatorList(TwoStepsMultipleBusinessExceptionListVa
         return [
             ShouldSicPeutDonnerDecision(
                 statut=self.statut,
+            ),
+            ShouldRefusNonFinancableAvoirUneRegle(
+                type_de_refus=self.type_de_refus,
+                financabilite_regle=self.financabilite_regle,
+            ),
+            ShouldRefusDocumentsManquantsAvoirDocumentsDemandes(
+                type_de_refus=self.type_de_refus,
+                documents_demandes=self.documents_demandes,
             ),
         ]
 
@@ -825,5 +847,20 @@ class SupprimerPropositionValidatorList(TwoStepsMultipleBusinessExceptionListVal
         return [
             ShouldPropositionEtreEnCours(
                 statut=self.proposition.statut,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class NotifierCandidatNonResidentContingenteValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    proposition: 'Proposition'
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
+            ShouldPropositionDecisionSicEtreOkPourNotificationContingente(
+                decision_sic=self.proposition.checklist_actuelle.decision_sic,
             ),
         ]
