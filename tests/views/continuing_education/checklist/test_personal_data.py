@@ -26,18 +26,17 @@
 from django.shortcuts import resolve_url
 from django.test import TestCase
 
-from admission.ddd.admission.formation_generale.domain.model.enums import (
+from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutChecklist,
-    ChoixStatutPropositionGenerale,
     OngletsChecklist,
 )
-from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
+from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
 )
-from admission.models import GeneralEducationAdmission
-from admission.tests.factories.general_education import (
-    GeneralEducationAdmissionFactory,
-    GeneralEducationTrainingFactory,
+from admission.models import DoctorateAdmission
+from admission.tests.factories.continuing_education import (
+    ContinuingEducationAdmissionFactory,
+    ContinuingEducationTrainingFactory,
 )
 from admission.tests.factories.roles import (
     CentralManagerRoleFactory,
@@ -51,17 +50,17 @@ class PersonalDataChangeStatusViewTestCase(TestCase):
     def setUpTestData(cls):
         cls.entity = EntityWithVersionFactory()
 
-        cls.training = GeneralEducationTrainingFactory(management_entity=cls.entity)
+        cls.training = ContinuingEducationTrainingFactory(management_entity=cls.entity)
         cls.program_manager = ProgramManagerRoleFactory(education_group=cls.training.education_group).person
         cls.central_manager = CentralManagerRoleFactory(entity=cls.entity).person
         cls.default_headers = {'HTTP_HX-Request': 'true'}
-        cls.base_url = 'admission:general-education:personal-data-change-status'
+        cls.base_url = 'admission:continuing-education:personal-data-change-status'
         cls.checklist_statuses = ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT[OngletsChecklist.donnees_personnelles.name]
 
     def setUp(self) -> None:
-        self.admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
+        self.admission: DoctorateAdmission = ContinuingEducationAdmissionFactory(
             training=self.training,
-            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+            submitted=True,
         )
 
     def test_change_the_checklist_status_with_program_manager_user(self):
@@ -71,9 +70,6 @@ class PersonalDataChangeStatusViewTestCase(TestCase):
 
         response = self.client.post(url, **self.default_headers)
         self.assertEqual(response.status_code, 403)
-
-        self.admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
-        self.admission.save()
 
         # Cleaned
         status = self.checklist_statuses['TOILETTEES']

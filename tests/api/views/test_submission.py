@@ -39,18 +39,12 @@ from osis_notification.models import EmailNotification
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutPropositionContinue,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
-)
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     EtudesSecondairesNonCompleteesException,
 )
-from admission.ddd.admission.shared_kernel.domain.service.i_elements_confirmation import (
-    IElementsConfirmation,
-)
+from admission.ddd.admission.shared_kernel.domain.service.i_elements_confirmation import IElementsConfirmation
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     HorsPeriodeSpecifiqueInscription,
     NombrePropositionsSoumisesDepasseException,
@@ -70,13 +64,9 @@ from admission.tests.factories.calendar import (
     AdmissionAcademicCalendarFactory,
     AdmissionMedDentEnrollmentAcademicCalendarFactory,
 )
-from admission.tests.factories.continuing_education import (
-    ContinuingEducationAdmissionFactory,
-)
+from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.curriculum import ProfessionalExperienceFactory
-from admission.tests.factories.faculty_decision import (
-    FreeAdditionalApprovalConditionFactory,
-)
+from admission.tests.factories.faculty_decision import FreeAdditionalApprovalConditionFactory
 from admission.tests.factories.form_item import (
     AdmissionFormItemFactory,
     AdmissionFormItemInstantiationFactory,
@@ -86,10 +76,7 @@ from admission.tests.factories.general_education import (
     GeneralEducationAdmissionFactory,
     GeneralEducationTrainingFactory,
 )
-from admission.tests.factories.person import (
-    IncompletePersonForBachelorFactory,
-    IncompletePersonForIUFCFactory,
-)
+from admission.tests.factories.person import IncompletePersonForBachelorFactory, IncompletePersonForIUFCFactory
 from admission.tests.factories.roles import ProgramManagerRoleFactory
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.academic_year import AcademicYear
@@ -100,9 +87,11 @@ from base.models.enums.person_address_type import PersonAddressType
 from base.models.enums.state_iufc import StateIUFC
 from base.models.person_address import PersonAddress
 from base.tests import QueriesAssertionsMixin
+from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
+from ddd.logic.financabilite.dtos.financabilite import FinancabiliteDTO
 from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
 from epc.tests.factories.email_fonction_programme import EmailFonctionProgrammeFactory
-from infrastructure.financabilite.domain.service.financabilite import PASS_ET_LAS_LABEL
+from infrastructure.financabilite.domain.service.fetcher import PASS_ET_LAS_LABEL
 from osis_profile import BE_ISO_CODE
 from osis_profile.models import EducationalExperience, ProfessionalExperience
 from reference.tests.factories.country import CountryFactory
@@ -118,6 +107,14 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         )
         self.mock_publish = patcher.start()
         self.addCleanup(patcher.stop)
+        patcher = mock.patch(
+            'admission.ddd.admission.formation_generale.use_case.write.soumettre_proposition_service.Financabilite'
+        )
+        mock_financabilite = patcher.start()
+        self.addCleanup(patcher.stop)
+        mock_financabilite.return_value.determiner.return_value = FinancabiliteDTO(
+            etat=EtatFinancabilite.NON_FINANCABLE.name, details=[]
+        )
 
     @classmethod
     def setUpTestData(cls):
@@ -191,6 +188,7 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
                 'reglement_general': IElementsConfirmation.REGLEMENT_GENERAL,
                 'protection_donnees': IElementsConfirmation.PROTECTION_DONNEES,
                 'professions_reglementees': IElementsConfirmation.PROFESSIONS_REGLEMENTEES,
+                'verification_donnees_tiers': IElementsConfirmation.VERIFICATION_DONNEES_TIERS,
                 'justificatifs': IElementsConfirmation.JUSTIFICATIFS % {'by_service': _("by the Enrolment Office")},
                 'declaration_sur_lhonneur': IElementsConfirmation.DECLARATION_SUR_LHONNEUR
                 % {'to_service': _("to the UCLouvain Registration Service")},
@@ -662,6 +660,7 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
                 'reglement_general': IElementsConfirmation.REGLEMENT_GENERAL,
                 'protection_donnees': IElementsConfirmation.PROTECTION_DONNEES,
                 'professions_reglementees': IElementsConfirmation.PROFESSIONS_REGLEMENTEES,
+                'verification_donnees_tiers': IElementsConfirmation.VERIFICATION_DONNEES_TIERS,
                 'justificatifs': IElementsConfirmation.JUSTIFICATIFS % {'by_service': _("by the Enrolment Office")},
                 'declaration_sur_lhonneur': IElementsConfirmation.DECLARATION_SUR_LHONNEUR
                 % {'to_service': _("to the UCLouvain Registration Service")},
