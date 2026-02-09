@@ -53,6 +53,7 @@ from osis_history.utilities import add_history_entry
 from osis_mail_template.exceptions import EmptyMailTemplateContent
 from osis_mail_template.models import MailTemplate
 
+from admission.calendar.admission_calendar import SIGLES_WITH_QUOTA
 from admission.constants import COMMENT_TAG_FAC, COMMENT_TAG_SIC
 from admission.ddd import MAIL_VERIFICATEUR_CURSUS, MONTANT_FRAIS_DOSSIER
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
@@ -75,6 +76,7 @@ from admission.ddd.admission.formation_generale.commands import (
     ModifierChecklistChoixFormationCommand,
     ModifierStatutChecklistExperienceParcoursAnterieurCommand,
     ModifierStatutChecklistParcoursAnterieurCommand,
+    NotifierCandidatContingenteNonResidentAcceptationCommand,
     NotifierCandidatDerogationFinancabiliteCommand,
     RecupererListePaiementsPropositionQuery,
     RecupererPdfTemporaireDecisionSicQuery,
@@ -168,6 +170,7 @@ from admission.forms.admission.checklist import (
     AssimilationForm,
     ChoixFormationForm,
     CommentForm,
+    ContingenteNotificationForm,
     ExperienceStatusForm,
     FacDecisionApprovalForm,
     FacDecisionRefusalForm,
@@ -191,6 +194,9 @@ from admission.forms.admission.checklist import (
     StatusForm,
     can_edit_experience_authentication,
 )
+from admission.infrastructure.admission.formation_generale.domain.service.contingente import (
+    Contingente,
+)
 from admission.infrastructure.utils import CHAMPS_DOCUMENTS_EXPERIENCES_CURRICULUM
 from admission.mail_templates import (
     ADMISSION_EMAIL_FINANCABILITY_DISPENSATION_NOTIFICATION,
@@ -207,7 +213,8 @@ from admission.mail_templates.checklist import (
     EMAIL_TEMPLATE_ENROLLMENT_AUTHORIZATION_DOCUMENT_URL_TOKEN,
     EMAIL_TEMPLATE_VISA_APPLICATION_DOCUMENT_URL_TOKEN,
 )
-from admission.models import EPCInjection
+from admission.models import EPCInjection, GeneralEducationAdmission
+from admission.models.contingente import ContingenteTraining
 from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
 from admission.models.online_payment import PaymentMethod, PaymentStatus
 from admission.templatetags.admission import (
@@ -304,6 +311,7 @@ __all__ = [
     'SicDecisionChangeStatusView',
     'SicDecisionPdfPreviewView',
     'PersonalDataChangeStatusView',
+    'SpecificiteContingenteNotificationView',
 ]
 
 
@@ -3052,12 +3060,132 @@ class SinglePastExperienceChangeAuthenticationView(SinglePastExperienceMixin):
         )
 
 
+# Contingente
+class ContingenteContextMixin(CheckListDefaultContextMixin):
+    @cached_property
+    def contingente_notification_form(self):
+        candidate = self.admission.candidate
+
+        form_kwargs = {
+            'prefix': 'contingente-notification',
+        }
+        if self.request.method == 'POST' and 'contingente-notification-body' in self.request.POST:
+            form_kwargs['data'] = self.request.POST
+        else:
+            subject, body = Contingente._get_notification_email_strings(
+                admission=self.get_permission_object(),
+                deadline_calendar=Contingente._get_deadline_calendar(),
+            )
+            form_kwargs['initial'] = {
+                'subject': subject,
+                'body': body,
+            }
+
+        return ContingenteNotificationForm(**form_kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        admission = self.get_permission_object()
+
+        context['contingente_notification_form'] = self.contingente_notification_form
+
+        if self.proposition.formation.sigle in SIGLES_WITH_QUOTA and self.proposition.est_non_resident_au_sens_decret:
+            contingente_training = ContingenteTraining.objects.filter(training=self.admission.training).first()
+            if contingente_training:
+                nombre_places = contingente_training.places_number
+            else:
+                nombre_places = 0
+            nombre_places_refus = GeneralEducationAdmission.objects.filter(
+                draw_number__lte=nombre_places,
+                status=ChoixStatutPropositionGenerale.INSCRIPTION_REFUSEE.name,
+            ).count()
+            nombre_places_abandon = GeneralEducationAdmission.objects.filter(
+                draw_number__lte=nombre_places,
+                status=ChoixStatutPropositionGenerale.CLOTUREE.name,
+            ).count()
+            context['contingente_places'] = {
+                'position': self.proposition.numero_de_tirage_contingente,
+                'nombre_places': nombre_places,
+                'nombre_places_refus': nombre_places_refus,
+                'nombre_places_abandon': nombre_places_abandon,
+                'derniere_place': nombre_places + nombre_places_refus + nombre_places_abandon,
+            }
+
+        if self.request.htmx:
+            documents = self.proposition_resume.emplacements_documents
+            context['requested_documents_dtos'] = [
+                document for document in documents if document.est_reclamable and document.est_a_reclamer
+            ]
+            context['resume_proposition'] = self.proposition_resume.resume
+
+            context['comment_forms'] = {
+                'specificites_formation__delegue_contingente': CommentForm(
+                    comment=(
+                        CommentEntry.objects.filter(
+                            object_uuid=self.admission_uuid,
+                            tags__contains=['specificites_formation', 'delegue_contingente'],
+                        )
+                        .select_related('author')
+                        .first()
+                    ),
+                    form_url=resolve_url(
+                        f'{self.base_namespace}:save-comment',
+                        uuid=self.admission_uuid,
+                        tab='specificites_formation__delegue_contingente',
+                    ),
+                    prefix='specificites_formation__delegue_contingente',
+                    label=_('Delegate comment'),
+                    permission='admission.checklist_change_limited_enrolment_delegate_comment',
+                )
+            }
+
+        return context
+
+
+class SpecificiteContingenteNotificationView(
+    AdmissionFormMixin,
+    ContingenteContextMixin,
+    HtmxPermissionRequiredMixin,
+    FormView,
+):
+    urlpatterns = {'contingente-notification': 'contingente-notification'}
+    permission_required = 'admission.change_checklist'
+    template_name = htmx_template_name = (
+        'admission/general_education/includes/checklist/specificites_formation_contingente_notification_form.html'
+    )
+    htmx_template_name = (
+        'admission/general_education/includes/checklist/specificites_formation_contingente_notification_form.html'
+    )
+
+    def get_form(self, form_class=None):
+        return self.contingente_notification_form
+
+    def form_valid(self, form):
+        try:
+            message_bus_instance.invoke(
+                NotifierCandidatContingenteNonResidentAcceptationCommand(
+                    uuid_proposition=self.admission_uuid,
+                    gestionnaire=self.request.user.person.global_id,
+                    objet_message=form.cleaned_data['subject'],
+                    corps_message=form.cleaned_data['body'],
+                )
+            )
+        except MultipleBusinessExceptions as multiple_exceptions:
+            for exception in multiple_exceptions.exceptions:
+                form.add_error(None, exception.message)
+            return self.form_invalid(form)
+
+        return super().form_valid(form)
+
+
 class ChecklistView(
     PropositionFromResumeMixin,
     PastExperiencesMixin,
     FacultyDecisionMixin,
     FinancabiliteContextMixin,
     SicDecisionMixin,
+    ContingenteContextMixin,
     RequestApplicationFeesContextDataMixin,
     TemplateView,
 ):
@@ -3106,7 +3234,12 @@ class ChecklistView(
             },
             'donnees_personnelles': assimilation_documents,
             'specificites_formation': {
+                'DOSSIER_NON_RESIDENT',
+                'FORMULAIRE_DE_DEMANDE_NON_RESIDENT_ADMISSION_EN_SECONDE_ANNEE',
+                'CERTIFICAT_DE_RESIDENCE',
+                'DOSSIER_RESIDENT',
                 'ACCUSE_DE_RECEPTION_FORMATION_CONTINGENTE',
+                'ACCEPTATION_FORMATION_CONTINGENTE',
                 'ADDITIONAL_DOCUMENTS',
             },
             'decision_facultaire': {
@@ -3196,13 +3329,16 @@ class ChecklistView(
                 tab_names += [f'{tab}__{COMMENT_TAG_SIC}', f'{tab}__{COMMENT_TAG_FAC}']
             tab_names.append('decision_sic__derogation')
             tab_names.append('financabilite__derogation')
+            tab_names.append('specificites_formation__delegue_contingente')
 
             comments_labels = {
                 'decision_sic__derogation': _('Non-progression dispensation comment'),
                 'financabilite__derogation': _('Faculty comment about financability dispensation'),
+                'specificites_formation__delegue_contingente': _('Delegate comment'),
             }
             comments_permissions = {
                 'financabilite__derogation': 'admission.checklist_change_fac_comment',
+                'specificites_formation__delegue_contingente': 'admission.checklist_change_limited_enrolment_delegate_comment',
             }
 
             context['comment_forms'] = {
@@ -3453,6 +3589,10 @@ class ChecklistView(
                 ),
                 'admission.checklist_change_sic_comment': self.request.user.has_perm(
                     'admission.checklist_change_sic_comment',
+                    original_admission,
+                ),
+                'admission.checklist_change_limited_enrolment_delegate_comment': self.request.user.has_perm(
+                    'admission.checklist_change_limited_enrolment_delegate_comment',
                     original_admission,
                 ),
             }

@@ -61,6 +61,8 @@ from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 
 __all__ = [
+    "AdmissionNonResidentQuotaAnswerDeadline",
+    "AdmissionNonResidentQuotaResultDrawing",
     "AdmissionNonResidentQuotaResultPublication",
     "AdmissionPoolExternalEnrollmentChangeCalendar",
     "AdmissionPoolExternalReorientationCalendar",
@@ -607,7 +609,7 @@ class AdmissionPoolMedicineDentistryStandardPeriodCalendar(PoolCalendar):
         )
 
 
-class AdmissionNonResidentQuotaResultPublication(AcademicEventSessionCalendarHelper):
+class AdmissionNonResidentQuotaResultDrawing(AcademicEventSessionCalendarHelper):
     event_reference = AcademicCalendarTypes.ADMISSION_NON_RESIDENT_QUOTA_RESULT_PUBLICATION.name
     cutover_date = Date(jour=2, mois=9, annee=0)
     end_date = None
@@ -619,5 +621,37 @@ class AdmissionNonResidentQuotaResultPublication(AcademicEventSessionCalendarHel
             cutover_date=cls.cutover_date,
             start_time=datetime.time(18, 0),
             end_date=cls.end_date,
+            title="Admission: date of the random drawing for the non-resident quota holder trainings",
+        )
+
+
+class AdmissionNonResidentQuotaResultPublication(AcademicEventSessionCalendarHelper):
+    event_reference = AcademicCalendarTypes.ADMISSION_NON_RESIDENT_QUOTA_RESULT_PUBLICATION.name
+    cutover_date = Date(jour=7, mois=9, annee=0)
+    end_date = None
+
+    @classmethod
+    def ensure_consistency_until_n_plus_6(cls):
+        ensure_consistency_until_n_plus_6(
+            event_reference=cls.event_reference,
+            cutover_date=cls.cutover_date,
+            start_time=datetime.time(18, 0),
+            end_date=cls.end_date,
             title="Admission: publication of the result of the random draw for the non-resident quota holder trainings",
+        )
+
+
+class AdmissionNonResidentQuotaAnswerDeadline(AcademicEventSessionCalendarHelper):
+    event_reference = AcademicCalendarTypes.ADMISSION_NON_RESIDENT_QUOTA_ANSWER_DEADLINE.name
+    cutover_date = Date(jour=15, mois=9, annee=0)
+    end_date = None
+
+    @classmethod
+    def ensure_consistency_until_n_plus_6(cls):
+        ensure_consistency_until_n_plus_6(
+            event_reference=cls.event_reference,
+            cutover_date=cls.cutover_date,
+            start_time=datetime.time(18, 0),
+            end_date=cls.end_date,
+            title="Admission: deadline for the candidates to send back the signed acceptance PDF",
         )

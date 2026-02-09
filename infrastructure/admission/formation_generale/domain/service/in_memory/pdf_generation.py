@@ -82,6 +82,7 @@ class PDFGenerationInMemory(IPDFGeneration):
         proposition_repository: IPropositionRepository,
         profil_candidat_translator: IProfilCandidatTranslator,
         campus_repository: IUclouvainCampusRepository,
+        unites_enseignement_translator: IUnitesEnseignementTranslator,
         proposition: Proposition,
         gestionnaire: str,
         pdf: str,
@@ -104,6 +105,7 @@ class PDFGenerationInMemory(IPDFGeneration):
         cls,
         proposition_repository: IPropositionRepository,
         profil_candidat_translator: IProfilCandidatTranslator,
+        unites_enseignement_translator: IUnitesEnseignementTranslator,
         proposition: Proposition,
         gestionnaire: str,
         temporaire: bool = False,
@@ -116,6 +118,7 @@ class PDFGenerationInMemory(IPDFGeneration):
         proposition_repository: IPropositionRepository,
         profil_candidat_translator: IProfilCandidatTranslator,
         campus_repository: IUclouvainCampusRepository,
+        unites_enseignement_translator: IUnitesEnseignementTranslator,
         proposition: Proposition,
         gestionnaire: str,
         temporaire: bool = False,
@@ -127,6 +130,7 @@ class PDFGenerationInMemory(IPDFGeneration):
         cls,
         proposition_repository: IPropositionRepository,
         profil_candidat_translator: IProfilCandidatTranslator,
+        unites_enseignement_translator: IUnitesEnseignementTranslator,
         proposition: Proposition,
     ) -> Optional[str]:
         pass

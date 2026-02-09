@@ -118,6 +118,11 @@ msgid ""
 "valodoc/confirmation-eligibility-doctoral-programme.html</a>"
 msgstr ""
 
+msgid ""
+"<p>After verification, we have found that some documents are still missing "
+"from your application.</p>"
+msgstr ""
+
 #, python-brace-format
 msgid "<p>Contact person for setting up your annual programme: {contact}</p>"
 msgstr ""
@@ -198,6 +203,9 @@ msgid ""
 msgstr ""
 
 msgid "A new version of the analysis folder has been generated."
+msgstr ""
+
+msgid "A non-financability rule must be selected."
 msgstr ""
 
 msgid "A or B card"
@@ -297,6 +305,14 @@ msgid "Academic year:"
 msgstr ""
 
 msgid "Academics trainings view"
+msgstr ""
+
+msgid "Acceptance notification"
+msgstr ""
+
+#, python-format
+msgid ""
+"Acceptance notification mail send the %(notified_on)s by %(notified_by)s"
 msgstr ""
 
 msgid "Acceptation condition"
@@ -1068,6 +1084,9 @@ msgstr ""
 msgid "Brief justification"
 msgstr ""
 
+msgid "Bulk acceptance notification"
+msgstr ""
+
 #, python-format
 msgid "Bulk action for academic year %(academic_year)s"
 msgstr ""
@@ -1279,6 +1298,9 @@ msgctxt "gender"
 msgid "Candidate"
 msgstr ""
 
+msgid "Candidate approval notification"
+msgstr ""
+
 msgid "Candidate information"
 msgstr ""
 
@@ -1316,6 +1338,11 @@ msgid "Carbon-copy the CA members"
 msgstr "Carbon-copy the supervision committee members"
 
 msgid "Carbon-copy the supervisors"
+msgstr ""
+
+msgid ""
+"Careful, one or more candidates have already received an acceptance "
+"notification."
 msgstr ""
 
 msgid "Category"
@@ -1914,7 +1941,13 @@ msgstr ""
 msgid "Date and time of the results publication"
 msgstr ""
 
+msgid "Date for the response to the notification"
+msgstr ""
+
 msgid "Date of birth"
+msgstr ""
+
+msgid "Date of the drawing"
 msgstr ""
 
 msgid "Date the application is sent to the supervision group"
@@ -2031,6 +2064,9 @@ msgid "Delegate VRAE dispensation certificate"
 msgstr ""
 
 msgid "Delegate VRAE dispensation comment"
+msgstr ""
+
+msgid "Delegate comment"
 msgstr ""
 
 msgid "Delegate/VRAE dispensation"
@@ -3920,6 +3956,10 @@ msgstr ""
 msgid "Last bulk notification by"
 msgstr ""
 
+#, python-format
+msgid "Last bulk notification done the %(date)s by %(author)s."
+msgstr ""
+
 msgid "Last degree level"
 msgstr ""
 
@@ -4016,6 +4056,9 @@ msgstr ""
 msgid "Limited-enrolment application no."
 msgstr ""
 
+msgid "Limited-enrolment application number"
+msgstr ""
+
 msgid "Limited-enrolments"
 msgstr ""
 
@@ -4050,6 +4093,9 @@ msgstr ""
 msgid ""
 "Link to the page of the faculty decision in the checklist of the admission "
 "(back-office)"
+msgstr ""
+
+msgid "Link to the request documents tab (front-office)"
 msgstr ""
 
 msgctxt "ways_hear_about_training"
@@ -4231,6 +4277,11 @@ msgstr ""
 msgid ""
 "Mail sent to the candidate to inform him that some requested documents have "
 "been received and some are still missing for general education"
+msgstr ""
+
+msgid ""
+"Mail sent to the candidate to notify him of the acceptance of their "
+"admission."
 msgstr ""
 
 msgid ""
@@ -4559,6 +4610,9 @@ msgstr ""
 msgid "No document is defined as requestable. At least one is required."
 msgstr ""
 
+msgid "No documents are requested."
+msgstr ""
+
 msgid "No education group has been found for:"
 msgstr ""
 
@@ -4637,6 +4691,9 @@ msgid ""
 "applications being rejected."
 msgstr ""
 
+msgid "Non-resident contingent training acceptance"
+msgstr ""
+
 msgid "Non-resident contingent training receipt"
 msgstr ""
 
@@ -4647,10 +4704,22 @@ msgstr ""
 msgid "Non-resident file"
 msgstr ""
 
+msgid "Non-resident limited enrolment acceptance file"
+msgstr ""
+
+msgid "Non-resident limited enrolment admission acceptance notification"
+msgstr ""
+
 msgid "Non-resident limited-enrolment"
 msgstr ""
 
 msgid "Non-resident limited-enrolment management"
+msgstr ""
+
+msgid "Non-resident notified at"
+msgstr ""
+
+msgid "Non-resident notified by"
 msgstr ""
 
 msgid "Non-retrievable attachment"
@@ -4712,6 +4781,9 @@ msgstr ""
 msgid "Not limited-enrolment"
 msgstr ""
 
+msgid "Not notified"
+msgstr ""
+
 msgid "Not specified"
 msgstr ""
 
@@ -4725,6 +4797,24 @@ msgstr ""
 
 msgctxt "equivalence_type"
 msgid "Not specified"
+msgstr ""
+
+msgid "Not yet notified"
+msgstr ""
+
+msgid "Notifications sent successfully."
+msgstr ""
+
+msgid "Notify"
+msgstr ""
+
+msgid "Notify candidate"
+msgstr ""
+
+#, python-format
+msgid ""
+"Notify these %(admissions_count)s %(training)s candidates for "
+"%(academic_year)s?"
 msgstr ""
 
 msgctxt "address"
@@ -5196,6 +5286,11 @@ msgstr ""
 msgid "Please specify your old NOMA (matriculation number)."
 msgstr ""
 
+msgid ""
+"Position / last position to notify (= places + refusal in business order + "
+"withdrawal in business order )"
+msgstr ""
+
 msgctxt "admission"
 msgid "Postal address"
 msgstr ""
@@ -5258,6 +5353,9 @@ msgid "Processing by Fac"
 msgstr ""
 
 msgid "Processing by Fac/CDD"
+msgstr ""
+
+msgid "Processing of the non-resident limited-enrolment application"
 msgstr ""
 
 msgid "Produce xls"
@@ -5416,6 +5514,18 @@ msgid "REFUS_ARTICLE_95_ACCES_S5"
 msgstr ""
 
 msgid "REFUS_ARTICLE_95_CERTIFICAT"
+msgstr ""
+
+msgid "REFUS_ARTICLE_95_CONTINGENTES_NR_DOSSIER_INCOMPLET"
+msgstr ""
+
+msgid "REFUS_ARTICLE_95_CONTINGENTES_NR_EXCLUSION"
+msgstr ""
+
+msgid "REFUS_ARTICLE_95_CONTINGENTES_NR_NON_FINANCABLE"
+msgstr ""
+
+msgid "REFUS_ARTICLE_95_CONTINGENTES_NR_TITRE_D_ACCES"
 msgstr ""
 
 msgid "REFUS_ARTICLE_95_GENERIQUE_IRRECEVABILITE"
@@ -6553,6 +6663,9 @@ msgstr ""
 msgid "The data import has been completed."
 msgstr ""
 
+msgid "The date before which the candidate must answer"
+msgstr ""
+
 msgid "The decision of the signing actor"
 msgstr ""
 
@@ -6723,6 +6836,9 @@ msgid "The last name of the signing actor"
 msgstr ""
 
 msgid "The limited training you are enrolling into is not opened yet."
+msgstr ""
+
+msgid "The link to the acceptance document"
 msgstr ""
 
 msgid "The link to the receipt"
@@ -6968,6 +7084,11 @@ msgstr ""
 msgid "There is no required exam for this training."
 msgstr ""
 
+msgid ""
+"There need to be at least one document with the request status to "
+"\"Immediately\"."
+msgstr ""
+
 #, python-brace-format
 msgid "There was an error while importing the file: {error}."
 msgstr ""
@@ -7204,6 +7325,12 @@ msgstr ""
 msgid ""
 "To move to this state, an admission requirement must have been selected and "
 "at least one access title line must be selected in the past experience views."
+msgstr ""
+
+msgid ""
+"To send the acceptance notification, the SIC decision must be in one of the "
+"following status: To be processed, Manager follow-up, Dispensation needed or "
+"Approval to validate"
 msgstr ""
 
 msgid "To the attention of"

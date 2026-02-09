@@ -215,7 +215,14 @@ DocumentsQuestionsSpecifiques = {
     'FORMULAIRE_REORIENTATION': _('Your completed and signed reorientation form'),
     'FORMULAIRE_MODIFICATION_INSCRIPTION': _('Change of enrolment form'),
     'ATTESTATION_INSCRIPTION_REGULIERE_POUR_MODIFICATION_INSCRIPTION': _('Certificate of regular enrolment'),
+    'DOSSIER_NON_RESIDENT': _('Non-resident file'),
+    'FORMULAIRE_DE_DEMANDE_NON_RESIDENT_ADMISSION_EN_SECONDE_ANNEE': _(
+        'Non-resident enrolment form for an enrolment beyond the first 60 credits'
+    ),
+    'CERTIFICAT_DE_RESIDENCE': _('Resident student form'),
+    'DOSSIER_RESIDENT': _('Residence certificate'),
     'ACCUSE_DE_RECEPTION_FORMATION_CONTINGENTE': _('Non-resident contingent training receipt'),
+    'ACCEPTATION_FORMATION_CONTINGENTE': _('Non-resident contingent training acceptance'),
     'ADDITIONAL_DOCUMENTS': _(
         'You can add any document you feel is relevant to your application '
         '(supporting documents, proof of language level, etc.).'
@@ -336,3 +343,21 @@ DocumentsSuiteAutorisation = {
 DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION = {
     f'{OngletsDemande.IDENTIFICATION.name}.PHOTO_IDENTITE',
 }
+
+ALL_DOCUMENTS_LABEL = (
+    DocumentsIdentification
+    | DocumentsSystemeFAC
+    | DocumentsSystemeSIC
+    | DocumentsSysteme
+    | DocumentsEtudesSecondaires
+    | DocumentsExamens
+    | DocumentsConnaissancesLangues
+    | DocumentsCurriculum
+    | DocumentsQuestionsSpecifiques
+    | DocumentsAssimilation
+    | DocumentsComptabilite
+    | DocumentsProjetRecherche
+    | DocumentsCotutelle
+    | DocumentsSupervision
+    | DocumentsSuiteAutorisation
+)

@@ -115,7 +115,7 @@ class WorkingList(CommonWorkingList):
     )
 
     admission_contingentes = ArrayField(
-        default=[ContingenteFiltre.NON_CONTINGENTE.name, ContingenteFiltre.CONTINGENTE_RESIDENT.name],
+        default=lambda: [ContingenteFiltre.NON_CONTINGENTE.name, ContingenteFiltre.CONTINGENTE_RESIDENT.name],
         verbose_name=_('Admission limited enrolment'),
         base_field=models.CharField(
             choices=ContingenteFiltre.choices(),

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -733,3 +733,24 @@ class RetyperDocumentCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class RecupererPeriodeInscriptionSpecifiqueBachelierMedecineDentisterieQuery(interface.QueryRequest):
     annee: Optional[int]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererAdmissionContingenteNonResidentANotifierQuery(interface.QueryRequest):
+    sigle_formation: str
+    annee_formation: int
+
+
+@attr.dataclass(frozen=True, slots=True)
+class NotifierEnLotFormationContingenteCommand(interface.CommandRequest):
+    sigle_formation: str
+    annee_formation: int
+    gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class NotifierCandidatContingenteNonResidentAcceptationCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+    objet_message: str
+    corps_message: str

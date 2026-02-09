@@ -31,6 +31,9 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     OngletsChecklist,
 )
 from admission.ddd.admission.formation_generale.use_case.read import *
+from admission.ddd.admission.formation_generale.use_case.read.recuperer_admission_contingente_non_resident_a_notifier_service import (
+    recuperer_admission_contingente_non_resident_a_notifier,
+)
 from admission.ddd.admission.formation_generale.use_case.read.recuperer_pdf_temporaire_decision_sic_service import (
     recuperer_pdf_temporaire_decision_sic,
 )
@@ -40,6 +43,12 @@ from admission.ddd.admission.formation_generale.use_case.write.approuver_admissi
 )
 from admission.ddd.admission.formation_generale.use_case.write.approuver_inscription_par_sic_service import (
     approuver_inscription_par_sic,
+)
+from admission.ddd.admission.formation_generale.use_case.write.notifier_candidat_formation_contingente_service import (
+    notifier_candidat_formation_contingente,
+)
+from admission.ddd.admission.formation_generale.use_case.write.notifier_en_lot_formation_contingente_service import (
+    notifier_en_lot_formation_contingente,
 )
 from admission.ddd.admission.formation_generale.use_case.write.refuser_admission_par_sic_service import (
     refuser_admission_par_sic,
@@ -711,6 +720,7 @@ COMMAND_HANDLERS = {
             personne_connue_translator=PersonneConnueUclTranslator(),
             experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
             matricule_etudiant_service=MatriculeEtudiantService(),
+            unites_enseignement_translator=UnitesEnseignementTranslator(),
         )
     ),
     ApprouverInscriptionParSicCommand: (
@@ -743,6 +753,7 @@ COMMAND_HANDLERS = {
             proposition_repository=PropositionRepository(),
             profil_candidat_translator=ProfilCandidatTranslator(),
             campus_repository=UclouvainCampusRepository(),
+            unites_enseignement_translator=UnitesEnseignementTranslator(),
             pdf_generation=PDFGeneration(),
         )
     ),
@@ -820,6 +831,34 @@ COMMAND_HANDLERS = {
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
             emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
+        )
+    ),
+    RecupererAdmissionContingenteNonResidentANotifierQuery: (
+        lambda msg_bus, cmd: recuperer_admission_contingente_non_resident_a_notifier(
+            cmd=cmd,
+            contingente_service=Contingente(),
+        )
+    ),
+    NotifierEnLotFormationContingenteCommand: (
+        lambda msg_bus, cmd: notifier_en_lot_formation_contingente(
+            cmd=cmd,
+            proposition_repository=PropositionRepository(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
+            contingente_service=Contingente(),
+            pdf_generation=PDFGeneration(),
+            notification=Notification(),
+            historique=HistoriqueFormationGenerale(),
+        )
+    ),
+    NotifierCandidatContingenteNonResidentAcceptationCommand: (
+        lambda msg_bus, cmd: notifier_candidat_formation_contingente(
+            cmd=cmd,
+            proposition_repository=PropositionRepository(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
+            contingente_service=Contingente(),
+            pdf_generation=PDFGeneration(),
+            notification=Notification(),
+            historique=HistoriqueFormationGenerale(),
         )
     ),
 }

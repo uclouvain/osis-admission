@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -262,6 +262,10 @@ class TypeDeRefus(ChoiceEnum):
     REFUS_DOSSIER_TARDIF = _("REFUS_DOSSIER_TARDIF")
     REFUS_COMPLEMENT_TARDIF = _("REFUS_COMPLEMENT_TARDIF")
     REFUS_ARTICLE_96_HUE_NON_PROGRESSION = _("REFUS_ARTICLE_96_HUE_NON_PROGRESSION")
+    REFUS_ARTICLE_95_CONTINGENTES_NR_NON_FINANCABLE = _("REFUS_ARTICLE_95_CONTINGENTES_NR_NON_FINANCABLE")
+    REFUS_ARTICLE_95_CONTINGENTES_NR_DOSSIER_INCOMPLET = _("REFUS_ARTICLE_95_CONTINGENTES_NR_DOSSIER_INCOMPLET")
+    REFUS_ARTICLE_95_CONTINGENTES_NR_TITRE_D_ACCES = _("REFUS_ARTICLE_95_CONTINGENTES_NR_TITRE_D_ACCES")
+    REFUS_ARTICLE_95_CONTINGENTES_NR_EXCLUSION = _("REFUS_ARTICLE_95_CONTINGENTES_NR_EXCLUSION")
     REFUS_LIBRE = _("REFUS_LIBRE")
 
 

@@ -48,6 +48,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     DerogationFinancement,
     PoursuiteDeCycle,
+    TypeDeRefus,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import (
     Proposition,
@@ -318,6 +319,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 ),
                 'is_non_resident': entity.est_non_resident_au_sens_decret,
                 'ares_application_number': entity.numero_dossier_ares,
+                'non_resident_limited_enrolment_acceptance_file': entity.acceptation_contingente,
                 'status': entity.statut.name,
                 'curriculum': entity.curriculum,
                 'diploma_equivalence': entity.equivalence_diplome,
@@ -409,7 +411,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'mobility_months_amount': entity.nombre_de_mois_de_mobilite,
                 'must_report_to_sic': entity.doit_se_presenter_en_sic,
                 'communication_to_the_candidate': entity.communication_au_candidat,
-                'refusal_type': entity.type_de_refus,
+                'refusal_type': entity.type_de_refus.name if entity.type_de_refus else '',
                 'must_provide_student_visa_d': entity.doit_fournir_visa_etudes,
                 'student_visa_d': entity.visa_etudes_d,
                 'signed_enrollment_authorization': entity.certificat_autorisation_signe,
@@ -618,6 +620,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             formulaire_modification_inscription=admission.registration_change_form,
             est_non_resident_au_sens_decret=admission.is_non_resident,
             numero_dossier_ares=admission.ares_application_number,
+            accuse_de_reception_contingente=admission.non_resident_with_second_year_enrolment_form,
+            acceptation_contingente=admission.non_resident_limited_enrolment_acceptance_file,
             curriculum=admission.curriculum,
             equivalence_diplome=admission.diploma_equivalence,
             comptabilite=get_accounting_from_admission(admission=admission),
@@ -630,7 +634,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             echeance_demande_documents=admission.requested_documents_deadline,
             checklist_initiale=checklist_initiale and StatutsChecklistGenerale.from_dict(checklist_initiale),
             checklist_actuelle=checklist_actuelle and StatutsChecklistGenerale.from_dict(checklist_actuelle),
-            type_de_refus=admission.refusal_type,
+            type_de_refus=TypeDeRefus[admission.refusal_type] if admission.refusal_type else '',
             motifs_refus=[MotifRefusIdentity(uuid=motif.uuid) for motif in admission.refusal_reasons.all()],
             autres_motifs_refus=admission.other_refusal_reasons,
             financabilite_regle_calcule=(
@@ -876,9 +880,18 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             curriculum=admission.curriculum,
             equivalence_diplome=admission.diploma_equivalence,
             est_bachelier_belge=admission.is_belgian_bachelor,
+            # Contingenté
             est_non_resident_au_sens_decret=admission.is_non_resident,
+            certificat_de_residence=admission.residence_certificate,
+            dossier_resident=admission.residence_student_form,
             accuse_de_reception_contingente=admission.quota_admission_receipt,
+            acceptation_contingente=admission.non_resident_limited_enrolment_acceptance_file,
             numero_dossier_ares=admission.ares_application_number,
+            numero_de_tirage_contingente=admission.draw_number,
+            dossier_non_resident=admission.non_resident_file,
+            non_resident_admission_en_seconde_annee=admission.non_resident_with_second_year_enrolment,
+            formulaire_de_demande_non_resident_admission_en_seconde_annee=admission.non_resident_with_second_year_enrolment_form,
+            non_resident_notifie_a=admission.non_resident_notified_at,
             elements_confirmation=admission.confirmation_elements,
             est_modification_inscription_externe=admission.is_external_modification,
             formulaire_modification_inscription=admission.registration_change_form,
@@ -1069,7 +1082,6 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             communication_au_candidat=admission.communication_to_the_candidate,
         )
 
-    @classmethod
     def get_dto_for_gestionnaire(
         cls,
         entity_id: 'PropositionIdentity',

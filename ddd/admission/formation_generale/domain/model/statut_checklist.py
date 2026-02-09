@@ -50,25 +50,6 @@ class StatutChecklist(interface.ValueObject):
     statut: Optional[ChoixStatutChecklist] = None
     extra: Dict[str, any] = attr.Factory(dict)
 
-    # @property
-    # def statut(self) -> Optional[ChoixStatutChecklist]:
-    #     if self.enfants:
-    #         # Si tous les enfants sont ok, alors c'est ok
-    #         if all(c.statut == ChoixStatutChecklist.GEST_REUSSITE for c in self.enfants):
-    #             return ChoixStatutChecklist.GEST_REUSSITE
-    #
-    #         # Puis c'est selon la présence du plus urgent
-    #         ordre = [
-    #             ChoixStatutChecklist.GEST_BLOCAGE,
-    #             ChoixStatutChecklist.GEST_EN_COURS,
-    #             ChoixStatutChecklist.GEST_BLOCAGE_ULTERIEUR,
-    #             ChoixStatutChecklist.INITIAL_CANDIDAT,
-    #             ChoixStatutChecklist.INITIAL_NON_CONCERNE,
-    #         ]
-    #         for statut in ordre:
-    #             if any(c.statut == statut for c in self.enfants):
-    #                 return statut
-    #     return self.statut
     @classmethod
     def from_dict(cls, item: Dict[str, any]):
         return cls(
@@ -89,6 +70,39 @@ class StatutChecklist(interface.ValueObject):
 
 
 @attr.dataclass
+class DecisionSicStatutChecklist(StatutChecklist):
+    @property
+    def est_valeur_initial(self):
+        return self.statut == ChoixStatutChecklist.INITIAL_CANDIDAT
+
+    @property
+    def est_a_completer(self):
+        return (
+            self.statut == ChoixStatutChecklist.GEST_BLOCAGE
+            and self.extra.get('blocage') == 'to_be_completed'
+        )
+
+    @property
+    def est_en_derogation(self):
+        return (
+            self.statut == ChoixStatutChecklist.GEST_EN_COURS
+            and self.extra.get('en_cours') == 'derogation'
+        )
+
+    @property
+    def est_a_approuver(self):
+        return (
+            self.statut == ChoixStatutChecklist.GEST_EN_COURS
+            and self.extra.get('en_cours') == 'approval'
+        )
+
+
+CLASSE_PAR_ONGLET = {
+    'decision_sic': DecisionSicStatutChecklist,
+}
+
+
+@attr.dataclass
 class StatutsChecklistGenerale:
     donnees_personnelles: StatutChecklist
     assimilation: StatutChecklist
@@ -98,14 +112,17 @@ class StatutsChecklistGenerale:
     choix_formation: StatutChecklist
     specificites_formation: StatutChecklist
     decision_facultaire: StatutChecklist
-    decision_sic: StatutChecklist
+    decision_sic: DecisionSicStatutChecklist
+
+
 
     @classmethod
     def from_dict(cls, checklist_en_tant_que_dict: Dict[str, Dict[str, any]]):
         checklist_by_tab = {}
         for key in INDEX_ONGLETS_CHECKLIST:
             item = checklist_en_tant_que_dict.get(key, {})
-            checklist_by_tab[key] = StatutChecklist.from_dict(item=item)
+            statut_class = CLASSE_PAR_ONGLET.get(key, StatutChecklist)
+            checklist_by_tab[key] = statut_class.from_dict(item=item)
         return cls(**checklist_by_tab)
 
     def recuperer_enfant(self, onglet, identifiant_enfant) -> StatutChecklist:

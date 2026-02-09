@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -32,6 +32,9 @@ from django.conf import settings
 from django.utils import formats
 from osis_history.utilities import add_history_entry
 
+from admission.ddd.admission.formation_generale.domain.model.contingente import (
+    PropositionContingenteResume,
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
@@ -431,4 +434,29 @@ class Historique(IHistorique):
             message_en,
             '{gestionnaire_dto.prenom} {gestionnaire_dto.nom}'.format(gestionnaire_dto=gestionnaire_dto),
             tags=['proposition', 'financabilite', 'financabilite-derogation'],
+        )
+
+    @classmethod
+    def historiser_notification_acceptance_contingente(
+        cls,
+        proposition: PropositionContingenteResume,
+        gestionnaire: str,
+        message: Optional[EmailMessage] = None,
+    ):
+        gestionnaire_dto = PersonneConnueUclTranslator().get(gestionnaire)
+        gestionnaire_name = f"{gestionnaire_dto.prenom} {gestionnaire_dto.nom}"
+
+        now = formats.date_format(datetime.datetime.now(), "DATETIME_FORMAT")
+
+        recipient = message['To']
+        message_a_historiser = get_message_to_historize(message)
+
+        add_history_entry(
+            proposition.entity_id.uuid,
+            f'Mail de notification d\'acceptation envoyé à "{recipient}" le {now} par {gestionnaire_name}.\n\n'
+            f'{message_a_historiser[settings.LANGUAGE_CODE_FR]}',
+            f'Acceptance notification mail sent to "{recipient}" on {now} by {gestionnaire_name}.\n\n'
+            f'{message_a_historiser[settings.LANGUAGE_CODE_EN]}',
+            gestionnaire_name,
+            tags=['proposition', 'contingente', 'message'],
         )

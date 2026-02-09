@@ -198,6 +198,7 @@ class Proposition(interface.RootEntity):
     est_non_resident_au_sens_decret: Optional[bool] = None
     numero_dossier_ares: str = ''
     accuse_de_reception_contingente: List[str] = attr.Factory(list)
+    acceptation_contingente: List[str] = attr.Factory(list)
 
     reponses_questions_specifiques: Dict = attr.Factory(dict)
 
@@ -1175,7 +1176,12 @@ class Proposition(interface.RootEntity):
         uuids_motifs: List[str],
         autres_motifs: List[str],
     ):
-        RefuserParSicAValiderValidatorList(statut=self.statut).validate()
+        RefuserParSicAValiderValidatorList(
+            statut=self.statut,
+            type_de_refus=type_de_refus,
+            financabilite_regle=self.financabilite_regle,
+            documents_demandes=self.documents_demandes,
+        ).validate()
         self.statut = ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION
         self.checklist_actuelle.decision_sic = StatutChecklist(
             statut=ChoixStatutChecklist.GEST_EN_COURS,
