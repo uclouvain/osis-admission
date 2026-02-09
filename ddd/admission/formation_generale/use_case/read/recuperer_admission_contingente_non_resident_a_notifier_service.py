@@ -25,33 +25,17 @@
 ##############################################################################
 from typing import List
 
-from osis_common.ddd import interface
+from admission.ddd.admission.formation_generale.commands import (
+    RecupererAdmissionContingenteNonResidentANotifierQuery,
+)
+from admission.ddd.admission.shared_kernel.domain.builder.formation_identity import (
+    FormationIdentityBuilder,
+)
 
 
-class IContingente(interface.DomainService):
-    @classmethod
-    def generer_numero_de_dossier_ares_si_necessaire(cls, proposition: 'Proposition', annee: int) -> str:
-        raise NotImplementedError
-
-    @classmethod
-    def verifier_proposition_contingente_unique(cls, proposition_candidat: 'PropositionFormationGenerale'):
-        raise NotImplementedError
-
-    @classmethod
-    def recuperer_admissions_a_notifier(
-        cls, formation: 'Formation', proposition_repository: 'IPropositionRepository'
-    ) -> List['PropositionDTO']:
-        raise NotImplementedError
-
-    @classmethod
-    def notifier_admissions_en_lot(
-        cls,
-        formation_id: 'FormationIdentity',
-        gestionnaire: str,
-        proposition_repository: 'IPropositionRepository',
-        profil_candidat_translator: 'IProfilCandidatTranslator',
-        pdf_generation: 'IPDFGeneration',
-        notification: 'INotification',
-        historique: 'IHistorique',
-    ) -> List['PropositionDTO']:
-        raise NotImplementedError
+def recuperer_admission_contingente_non_resident_a_notifier(
+    cmd: 'RecupererAdmissionContingenteNonResidentANotifierQuery',
+    contingente_service: 'IContingente',
+) -> List['AdmissionContingenteNonResidenteNotificationDTO']:
+    formation_id = FormationIdentityBuilder.build(sigle=cmd.sigle_formation, annee=cmd.annee_formation)
+    return contingente_service.recuperer_admissions_a_notifier(formation_id)

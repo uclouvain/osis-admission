@@ -1,0 +1,101 @@
+{% load bootstrap3 enums field_data i18n %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+<div id="contingente-bulk-notification">
+  <dd>
+    <dt>{% translate "Bulk acceptance notification" %}</dt>
+    <dl>
+      <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#contingente-bulk-notification-modal">{% translate "Notify" %}</button>
+      {% if contingente_training.last_bulk_notification_at %}
+        <p>{% blocktranslate with date=contingente_training.last_bulk_notification_at|date:"SHORT_DATETIME_FORMAT" author=contingente_training.non_resident_notified_by trimmed %}
+          Last bulk notification done the {{ date }} by {{ author }}.
+        {% endblocktranslate %}</p>
+      {% endif %}
+      {% if bulk_notification_success %}
+        <div class="alert alert-success">{% translate "Notifications sent successfully." %}</div>
+      {% endif %}
+      {% if bulk_notification_error %}
+        <div class="alert alert-danger">{{ bulk_notification_error }}</div>
+      {% endif %}
+    </dl>
+  </dd>
+
+  <div id="contingente-bulk-notification-modal" class="modal fade" role="dialog" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+          <h4 class="modal-title">{% translate "Bulk acceptance notification" %}</h4>
+        </div>
+        <div class="modal-body">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>{% translate "Training" %}</th>
+                <th>{% translate "Draw number" %}</th>
+                <th>{% translate "First name" %}</th>
+                <th>{% translate "Last name" %}</th>
+                <th>{% translate "Application status" %}</th>
+                <th>{% translate "Requested documents" %}</th>
+                <th>{% translate "Acceptance notification" %}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for admission in bulk_notification_admissions %}
+                <tr>
+                  <td><a href="{% url 'admission:general-education' admission.uuid %}" target="_blank">{{ admission.sigle_formation }} {{ admission.annee_formation }}</a></td>
+                  <td>{{ admission.numero_tirage }}</td>
+                  <td>{{ admission.prenom_candidat }}</td>
+                  <td>{{ admission.nom_candidat }}</td>
+                  <td>{{ admission.statut|enum_display:"ChoixStatutPropositionGenerale" }}</td>
+                  <td>{% for document in admission.documents_reclames_libelles %}{{ document }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</td>
+                  <td>{% if admission.notification_acceptation %}{{ admission.notification_acceptation|date:"DATETIME_FORMAT" }}{% else %}{% translate "Not yet notified" %}{% endif %}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+
+          {% field_data _("Date for the response to the notification") bulk_notification_deadline_calendar.start_date|date:"SHORT_DATE_FORMAT" %}
+
+          <p>{% blocktranslate with admissions_count=bulk_notification_admissions|length training=training academic_year=academic_year trimmed %}
+          	Notify these {{ admissions_count }} {{ training }} candidates for {{ academic_year }}?
+          {% endblocktranslate %}</p>
+
+          {% if are_admissions_already_notified %}<div class="alert alert-warning">{% translate "Careful, one or more candidates have already received an acceptance notification." %}</div>{% endif %}
+        </div>
+        <form hx-post="{% url "admission:contingente:training_bulk_notification" training %}" hx-target="#contingente-bulk-notification">
+          {% csrf_token %}
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">{% trans 'Confirm'%} </button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">{% trans 'Cancel'%} </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

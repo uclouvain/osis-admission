@@ -1,3 +1,4 @@
+{% extends "admission/modal/modal.html" %}
 {% load i18n %}
 
 {% comment "License" %}
@@ -24,24 +25,13 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-<div class="panel panel-default">
-    <div class="panel-heading">
-      {{ training }} {{ academic_year }}
-    </div>
-    <div class="panel-body">
-      <form hx-post="{% url "admission:contingente:training_change" training %}">
-        {% include "admission/general_education/contingente/contingente_training_form.html" %}
-      </form>
 
-      <dd>
-        <dt>{% translate "Excel export for the court bailiff" %}</dt>
-        <dl><a href="{% url "admission:contingente:training_export" training %}" class="btn btn-primary">{% translate "Export" %}</a></dl>
-      </dd>
+{% block modal_id %}contingente-notification-modal{% endblock %}
 
-      <form hx-post="{% url "admission:contingente:training_import" training %}" enctype="multipart/form-data">
-        {% include "admission/general_education/contingente/manage_training_import.html" %}
-      </form>
+{% block modal_title %}{% translate "Non-resident limited enrolment admission acceptance notification" %}{% endblock %}
 
-      {% include "admission/general_education/contingente/manage_bulk_notification.html" %}
-    </div>
-</div>
+{% block modal_class %}admission-modal-lg decision-modal{% endblock %}
+
+{% block modal_content %}
+  {% include 'admission/general_education/includes/checklist/specificites_formation_contingente_notification_form.html' %}
+{% endblock %}

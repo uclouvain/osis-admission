@@ -29,13 +29,18 @@ from typing import Dict, List, Optional, Union
 
 from django.conf import settings
 from django.utils import timezone, translation
+from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override
 from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
 
 from admission.constants import ORDERED_CAMPUSES_UUIDS
 from admission.ddd.admission.formation_generale.commands import (
+    RecupererDocumentsReclamesPropositionQuery,
     RecupererResumeEtEmplacementsDocumentsPropositionQuery,
+)
+from admission.ddd.admission.formation_generale.domain.model.contingente import (
+    PropositionContingenteResume,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import TypeDeRefus
 from admission.ddd.admission.formation_generale.domain.model.proposition import (
@@ -66,18 +71,25 @@ from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat impo
 from admission.ddd.admission.shared_kernel.domain.service.i_unites_enseignement_translator import (
     IUnitesEnseignementTranslator,
 )
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
+    EmplacementDocumentDTO,
+)
 from admission.ddd.admission.shared_kernel.dtos.resume import (
     ResumeEtEmplacementsDocumentsPropositionDTO,
 )
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    ALL_DOCUMENTS_LABEL,
+    IdentifiantBaseEmplacementDocument,
     OngletsDemande,
+    StatutReclamationEmplacementDocument,
 )
 from admission.exports.utils import admission_generate_pdf
 from admission.infrastructure.admission.shared_kernel.domain.service.unites_enseignement_translator import (
     UnitesEnseignementTranslator,
 )
 from admission.infrastructure.utils import CHAMPS_DOCUMENTS_EXPERIENCES_CURRICULUM
-from admission.utils import WeasyprintStylesheets
+from admission.models import AdmissionFormItem
+from admission.utils import WeasyprintStylesheets, get_portal_admission_url
 from base.models.academic_calendar import AcademicCalendar
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.mandate_type import MandateTypes
@@ -337,6 +349,7 @@ class PDFGeneration(IPDFGeneration):
         proposition_repository: IPropositionRepository,
         profil_candidat_translator: IProfilCandidatTranslator,
         campus_repository: IUclouvainCampusRepository,
+        unites_enseignement_translator: IUnitesEnseignementTranslator,
         proposition: Proposition,
         gestionnaire: str,
         pdf: str,
@@ -346,26 +359,30 @@ class PDFGeneration(IPDFGeneration):
                 proposition_repository=proposition_repository,
                 profil_candidat_translator=profil_candidat_translator,
                 campus_repository=campus_repository,
+                unites_enseignement_translator=unites_enseignement_translator,
                 proposition=proposition,
                 gestionnaire=gestionnaire,
                 temporaire=True,
             )
-
-        PDF_GENERATION_METHOD = {
-            'accord': cls.generer_attestation_accord_sic,
-            'accord_annexe': cls.generer_attestation_accord_annexe_sic,
-        }
-
-        pdf_generation_method = PDF_GENERATION_METHOD.get(pdf)
-        if pdf_generation_method is None:
+        elif pdf == 'accord':
+            return cls.generer_attestation_accord_sic(
+                proposition_repository=proposition_repository,
+                profil_candidat_translator=profil_candidat_translator,
+                proposition=proposition,
+                gestionnaire=gestionnaire,
+                temporaire=True,
+            )
+        elif pdf == 'accord_annexe':
+            cls.generer_attestation_accord_annexe_sic(
+                proposition_repository=proposition_repository,
+                profil_candidat_translator=profil_candidat_translator,
+                unites_enseignement_translator=unites_enseignement_translator,
+                proposition=proposition,
+                gestionnaire=gestionnaire,
+                temporaire=True,
+            )
+        else:
             raise PdfSicInconnu()
-        return pdf_generation_method(
-            proposition_repository=proposition_repository,
-            profil_candidat_translator=profil_candidat_translator,
-            proposition=proposition,
-            gestionnaire=gestionnaire,
-            temporaire=True,
-        )
 
     @classmethod
     def generer_attestation_accord_sic(
@@ -453,6 +470,7 @@ class PDFGeneration(IPDFGeneration):
         cls,
         proposition_repository: IPropositionRepository,
         profil_candidat_translator: IProfilCandidatTranslator,
+        unites_enseignement_translator: IUnitesEnseignementTranslator,
         proposition: Proposition,
         gestionnaire: str,
         temporaire: bool = False,
@@ -461,7 +479,7 @@ class PDFGeneration(IPDFGeneration):
 
         with translation.override(settings.LANGUAGE_CODE_FR):
             proposition_dto = proposition_repository.get_dto_for_gestionnaire(
-                proposition.entity_id, UnitesEnseignementTranslator
+                proposition.entity_id, unites_enseignement_translator
             )
 
             nombre_credits_formation = message_bus_instance.invoke(
@@ -502,6 +520,7 @@ class PDFGeneration(IPDFGeneration):
         proposition_repository: IPropositionRepository,
         profil_candidat_translator: IProfilCandidatTranslator,
         campus_repository: IUclouvainCampusRepository,
+        unites_enseignement_translator: IUnitesEnseignementTranslator,
         proposition: Proposition,
         gestionnaire: str,
         temporaire: bool = False,
@@ -509,9 +528,25 @@ class PDFGeneration(IPDFGeneration):
         if proposition.type_de_refus == TypeDeRefus.REFUS_LIBRE.name:
             return None
 
+        if proposition.type_de_refus == TypeDeRefus.REFUS_ARTICLE_95_CONTINGENTES_NR_DOSSIER_INCOMPLET.name:
+            from infrastructure.messages_bus import message_bus_instance
+
+            documents_reclames: List[EmplacementDocumentDTO] = message_bus_instance.invoke(
+                RecupererDocumentsReclamesPropositionQuery(
+                    uuid_proposition=proposition.entity_id.uuid,
+                )
+            )
+            documents_reclames = [
+                document_reclame
+                for document_reclame in documents_reclames
+                if document_reclame.statut_reclamation == StatutReclamationEmplacementDocument.IMMEDIATEMENT.name
+            ]
+        else:
+            documents_reclames: None = None
+
         with translation.override(settings.LANGUAGE_CODE_FR):
             proposition_dto = proposition_repository.get_dto_for_gestionnaire(
-                proposition.entity_id, UnitesEnseignementTranslator
+                proposition.entity_id, unites_enseignement_translator
             )
             profil_candidat_identification = profil_candidat_translator.get_identification(
                 proposition.matricule_candidat
@@ -525,6 +560,7 @@ class PDFGeneration(IPDFGeneration):
                     'proposition': proposition_dto,
                     'profil_candidat_identification': profil_candidat_identification,
                     'profil_candidat_coordonnees': profil_candidat_coordonnees,
+                    'documents_reclames': documents_reclames,
                     'director': cls._get_sic_director(proposition_dto),
                     'footer_campus': cls._get_refusal_certificate_footer_campus(proposition_dto, campus_repository),
                     'ORDERED_CAMPUSES_UUIDS': ORDERED_CAMPUSES_UUIDS,
@@ -540,6 +576,7 @@ class PDFGeneration(IPDFGeneration):
         cls,
         proposition_repository: IPropositionRepository,
         profil_candidat_translator: IProfilCandidatTranslator,
+        unites_enseignement_translator: IUnitesEnseignementTranslator,
         proposition: Proposition,
     ) -> Optional[str]:
         result_publication_calendar = (
@@ -553,7 +590,7 @@ class PDFGeneration(IPDFGeneration):
 
         with translation.override(settings.LANGUAGE_CODE_FR):
             proposition_dto = proposition_repository.get_dto_for_gestionnaire(
-                proposition.entity_id, UnitesEnseignementTranslator
+                proposition.entity_id, unites_enseignement_translator
             )
             profil_candidat_identification = profil_candidat_translator.get_identification(
                 proposition.matricule_candidat
@@ -570,3 +607,65 @@ class PDFGeneration(IPDFGeneration):
                 },
             )
         proposition.accuse_de_reception_contingente = [token]
+
+    @classmethod
+    def generer_acceptation_contingente(
+        cls,
+        proposition_repository: IPropositionRepository,
+        profil_candidat_translator: IProfilCandidatTranslator,
+        proposition: PropositionContingenteResume,
+    ) -> None:
+        answer_deadline_calendar = (
+            AcademicCalendar.objects.filter(
+                reference=AcademicCalendarTypes.ADMISSION_NON_RESIDENT_QUOTA_ANSWER_DEADLINE.name,
+                end_date__gte=datetime.date.today(),
+            )
+            .order_by('end_date')
+            .first()
+        )
+        drawing_calendar = (
+            AcademicCalendar.objects.filter(
+                reference=AcademicCalendarTypes.ADMISSION_NON_RESIDENT_QUOTA_RESULT_PUBLICATION.name,
+                start_date__lte=datetime.date.today(),
+            )
+            .order_by('start_date')
+            .last()
+        )
+
+        with translation.override(settings.LANGUAGE_CODE_FR):
+            proposition_dto = proposition_repository.get_dto_for_gestionnaire(
+                proposition.entity_id, UnitesEnseignementTranslator
+            )
+            profil_candidat_identification = profil_candidat_translator.get_identification(
+                proposition.matricule_candidat
+            )
+
+            documents_demandes = []
+            for document_id, document in proposition_dto.documents_demandes.items():
+                if document_id in ALL_DOCUMENTS_LABEL:
+                    libelle = ALL_DOCUMENTS_LABEL[document_id]
+                else:
+                    uuid = document_id.split('.')[-1]
+                    try:
+                        admission_form_item = AdmissionFormItem.objects.get(uuid=uuid)
+                        libelle = admission_form_item.title.get('fr-be', _('Document'))
+                    except AdmissionFormItem.DoesNotExist:
+                        libelle = _('Document')
+                documents_demandes.append(libelle)
+
+            token = admission_generate_pdf(
+                admission=None,
+                template='admission/exports/contingente_acceptation.html',
+                filename=f'Notification d’acceptation {proposition_dto.reference}.pdf',
+                context={
+                    'proposition': proposition_dto,
+                    'profil_candidat_identification': profil_candidat_identification,
+                    'director': cls._get_sic_director(proposition_dto),
+                    'drawing_calendar': drawing_calendar,
+                    'answer_deadline_calendar': answer_deadline_calendar,
+                    'documents_demandes': documents_demandes,
+                    'admission_link_front': get_portal_admission_url('general-education', proposition.entity_id.uuid)
+                    + 'update/documents',
+                },
+            )
+        proposition.acceptation_contingente = [token]

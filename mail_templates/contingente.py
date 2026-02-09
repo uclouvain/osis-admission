@@ -52,3 +52,47 @@ templates.register(
         ),
     ],
 )
+
+
+ADMISSION_EMAIL_CONTINGENTE_ACCEPTATION = 'osis-admission-contingente-acceptation'
+templates.register(
+    ADMISSION_EMAIL_CONTINGENTE_ACCEPTATION,
+    description=_('Mail sent to the candidate to notify him of the acceptance of their admission.'),
+    tag=GENERAL_ADMISSION_TAG,
+    tokens=admission_common_tokens
+    + [
+        Token(
+            name='ares_application_number',
+            description=_("The ares application number of the admission"),
+            example="UCLouvain/K-250001",
+        ),
+        Token(
+            name='required_documents_paragraph',
+            description=_('Paragraph including the required documents'),
+            example=(
+                'Par ailleurs, nous profitons de ce courrier pour vous signaler que les documents complémentaires '
+                'ci-dessous sont à nous fournir dès que possible à l’adresse info-mons@uclouvain.be :'
+            ),
+        ),
+        Token(
+            name='acceptance_document_link',
+            description=_("The link to the acceptance document"),
+            example="https://...",
+        ),
+        Token(
+            name='admission_link_front_requested_documents',
+            description=_("Link to the request documents tab (front-office)"),
+            example="http://dev.studies.uclouvain.be/somewhere",
+        ),
+        Token(
+            name='academic_year',
+            description=_("Academic year of the admission"),
+            example="2023-2024",
+        ),
+        Token(
+            name='deadline_date',
+            description=_("The date before which the candidate must answer"),
+            example="10/09/2026",
+        ),
+    ],
+)

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,15 +23,30 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.commands import (
     RefuserInscriptionParSicCommand,
 )
-from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
-from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation import IPDFGeneration
-from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
-from ddd.logic.shared_kernel.campus.repository.i_uclouvain_campus import IUclouvainCampusRepository
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    PropositionIdentity,
+)
+from admission.ddd.admission.formation_generale.domain.service.i_historique import (
+    IHistorique,
+)
+from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation import (
+    IPDFGeneration,
+)
+from admission.ddd.admission.formation_generale.repository.i_proposition import (
+    IPropositionRepository,
+)
+from admission.ddd.admission.shared_kernel.domain.model.proposition import (
+    PropositionIdentity,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_unites_enseignement_translator import (
+    IUnitesEnseignementTranslator,
+)
+from ddd.logic.shared_kernel.campus.repository.i_uclouvain_campus import (
+    IUclouvainCampusRepository,
+)
 
 
 def refuser_inscription_par_sic(
@@ -42,6 +57,7 @@ def refuser_inscription_par_sic(
     notification: 'INotification',
     pdf_generation: 'IPDFGeneration',
     campus_repository: IUclouvainCampusRepository,
+    unites_enseignement_translator: IUnitesEnseignementTranslator,
 ) -> PropositionIdentity:
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
@@ -52,6 +68,7 @@ def refuser_inscription_par_sic(
         proposition_repository=proposition_repository,
         profil_candidat_translator=profil_candidat_translator,
         campus_repository=campus_repository,
+        unites_enseignement_translator=unites_enseignement_translator,
         proposition=proposition,
         gestionnaire=cmd.auteur,
     )

@@ -23,15 +23,11 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+from typing import List
+
 from admission.calendar.admission_calendar import SIGLES_WITH_QUOTA
-from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
-    PropositionIdentityBuilder,
-)
 from admission.ddd.admission.formation_generale.domain.service.i_contingente import (
     IContingente,
-)
-from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
-    PropositionInMemoryRepository,
 )
 
 
@@ -44,4 +40,23 @@ class ContingenteInMemory(IContingente):
 
     @classmethod
     def verifier_proposition_contingente_unique(cls, proposition_candidat: 'PropositionFormationGenerale'):
+        pass
+
+    @classmethod
+    def recuperer_admissions_a_notifier(
+        cls, formation: 'Formation', proposition_repository: 'IPropositionRepository'
+    ) -> List['PropositionDTO']:
+        return []
+
+    @classmethod
+    def notifier_admissions_en_lot(
+        cls,
+        formation_id: 'FormationIdentity',
+        gestionnaire: str,
+        proposition_repository: 'IPropositionRepository',
+        profil_candidat_translator: 'IProfilCandidatTranslator',
+        pdf_generation: 'IPDFGeneration',
+        notification: 'INotification',
+        historique: 'IHistorique',
+    ) -> List['PropositionDTO']:
         pass

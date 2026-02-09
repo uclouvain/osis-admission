@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -1434,6 +1434,25 @@ class FinancabiliteDispensationForm(forms.Form):
 
 
 class FinancabiliteNotificationForm(forms.Form):
+    subject = forms.CharField(
+        label=_('Message subject'),
+    )
+    body = forms.CharField(
+        label=_('Message for the candidate'),
+        widget=forms.Textarea(),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['body'].widget.attrs['data-config'] = json.dumps(
+            {
+                **settings.CKEDITOR_CONFIGS['osis_mail_template'],
+                'language': get_language(),
+            }
+        )
+
+
+class ContingenteNotificationForm(forms.Form):
     subject = forms.CharField(
         label=_('Message subject'),
     )

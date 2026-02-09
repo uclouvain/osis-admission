@@ -24,43 +24,40 @@
 #
 ##############################################################################
 from admission.ddd.admission.formation_generale.commands import (
-    RecupererPdfTemporaireDecisionSicQuery,
+    NotifierEnLotFormationContingenteCommand,
 )
-from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
-    PropositionIdentityBuilder,
+from admission.ddd.admission.formation_generale.domain.service.i_formation import (
+    IFormationGeneraleTranslator,
 )
-from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation import (
-    IPDFGeneration,
-)
-from admission.ddd.admission.formation_generale.dtos import PropositionDTO
 from admission.ddd.admission.formation_generale.repository.i_proposition import (
     IPropositionRepository,
 )
-from admission.ddd.admission.shared_kernel.domain.service.i_unites_enseignement_translator import (
-    IUnitesEnseignementTranslator,
-)
-from ddd.logic.shared_kernel.campus.repository.i_uclouvain_campus import (
-    IUclouvainCampusRepository,
+from admission.ddd.admission.shared_kernel.domain.builder.formation_identity import (
+    FormationIdentityBuilder,
 )
 
 
-def recuperer_pdf_temporaire_decision_sic(
-    cmd: 'RecupererPdfTemporaireDecisionSicQuery',
+def notifier_en_lot_formation_contingente(
+    cmd: 'NotifierEnLotFormationContingenteCommand',
     proposition_repository: 'IPropositionRepository',
     profil_candidat_translator: 'IProfilCandidatTranslator',
-    campus_repository: IUclouvainCampusRepository,
-    unites_enseignement_translator: IUnitesEnseignementTranslator,
+    contingente_service: 'IContingente',
     pdf_generation: 'IPDFGeneration',
-) -> 'PropositionDTO':
-    proposition = proposition_repository.get(PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition))
+    notification: 'INotification',
+    historique: 'IHistorique',
+) -> None:
+    # GIVEN
+    formation_id = FormationIdentityBuilder.build(sigle=cmd.sigle_formation, annee=cmd.annee_formation)
 
-    token = pdf_generation.generer_sic_temporaire(
+    # WHEN
+
+    # THEN
+    contingente_service.notifier_admissions_en_lot(
+        formation_id=formation_id,
+        gestionnaire=cmd.gestionnaire,
         proposition_repository=proposition_repository,
         profil_candidat_translator=profil_candidat_translator,
-        campus_repository=campus_repository,
-        unites_enseignement_translator=unites_enseignement_translator,
-        proposition=proposition,
-        gestionnaire=cmd.auteur,
-        pdf=cmd.pdf,
+        pdf_generation=pdf_generation,
+        notification=notification,
+        historique=historique,
     )
-    return token

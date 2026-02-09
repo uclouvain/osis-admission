@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -51,6 +51,9 @@ from admission.ddd.admission.shared_kernel.domain.model.proposition import (
 from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import (
     IMatriculeEtudiantService,
 )
+from admission.ddd.admission.shared_kernel.domain.service.i_unites_enseignement_translator import (
+    IUnitesEnseignementTranslator,
+)
 from admission.ddd.admission.shared_kernel.domain.service.resume_proposition import (
     ResumeProposition,
 )
@@ -85,6 +88,7 @@ def approuver_admission_par_sic(
     personne_connue_translator: 'IPersonneConnueUclTranslator',
     experience_parcours_interne_translator: 'IExperienceParcoursInterneTranslator',
     matricule_etudiant_service: 'IMatriculeEtudiantService',
+    unites_enseignement_translator: 'IUnitesEnseignementTranslator',
 ) -> PropositionIdentity:
     # GIVEN
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
@@ -132,6 +136,7 @@ def approuver_admission_par_sic(
     pdf_generation.generer_attestation_accord_annexe_sic(
         proposition_repository=proposition_repository,
         profil_candidat_translator=profil_candidat_translator,
+        unites_enseignement_translator=unites_enseignement_translator,
         proposition=proposition,
         gestionnaire=cmd.auteur,
     )
