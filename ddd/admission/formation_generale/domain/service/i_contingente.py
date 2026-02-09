@@ -23,6 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+from typing import List
+
 from osis_common.ddd import interface
 
 
@@ -33,4 +35,36 @@ class IContingente(interface.DomainService):
 
     @classmethod
     def verifier_proposition_contingente_unique(cls, proposition_candidat: 'PropositionFormationGenerale'):
+        raise NotImplementedError
+
+    @classmethod
+    def recuperer_admissions_a_notifier(
+        cls, formation_id: 'FormationIdentity'
+    ) -> List['AdmissionContingenteNonResidenteNotificationDTO']:
+        raise NotImplementedError
+
+    @classmethod
+    def notifier_admissions_en_lot(
+        cls,
+        formation_id: 'FormationIdentity',
+        gestionnaire: str,
+        proposition_repository: 'IPropositionRepository',
+        profil_candidat_translator: 'IProfilCandidatTranslator',
+        pdf_generation: 'IPDFGeneration',
+        notification: 'INotification',
+        historique: 'IHistorique',
+    ) -> List['PropositionDTO']:
+        raise NotImplementedError
+
+    @classmethod
+    def notifier_admission(
+        cls,
+        proposition_id: 'PropositionIdentity',
+        gestionnaire: str,
+        proposition_repository: 'IPropositionRepository',
+        profil_candidat_translator: 'IProfilCandidatTranslator',
+        pdf_generation: 'IPDFGeneration',
+        notification: 'INotification',
+        historique: 'IHistorique',
+    ) -> None:
         raise NotImplementedError

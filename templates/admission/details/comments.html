@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -55,6 +55,16 @@
             {% concat checklist_tag '__SIC' as sic_checklist_tag %}
             {% include 'admission/includes/comment_entry.html' with title=_('SIC comment for the faculty') comment=comments|get_item_or_none:sic_checklist_tag panel_class="panel-default" %}
             {% include 'admission/includes/comment_entry.html' with title=_('Faculty comment for the SIC') comment=comments|get_item_or_none:fac_checklist_tag panel_class="panel-default" %}
+          </div>
+        </div>
+      {% elif checklist_tag == 'specificites_formation' %}
+        <div class="comment-panel panel panel-panel panel-info">
+          <div class="panel-heading clearfix">
+            {{ checklist_title }}
+          </div>
+          <div class="panel-body">
+            {% include 'admission/includes/comment_entry.html' with title=_('Global') comment=comments.specificites_formation panel_class="panel-default" %}
+            {% include 'admission/includes/comment_entry.html' with title=_('Delegate comment') comment=comments.specificites_formation__delegue_contingente panel_class="panel-default" %}
           </div>
         </div>
       {% elif checklist_tag == 'financabilite' %}

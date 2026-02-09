@@ -41,6 +41,10 @@ from openpyxl.styles import Font
 from openpyxl.utils.exceptions import InvalidFileException
 
 from admission.calendar.admission_calendar import SIGLES_WITH_QUOTA
+from admission.ddd.admission.formation_generale.commands import (
+    NotifierEnLotFormationContingenteCommand,
+    RecupererAdmissionContingenteNonResidentANotifierQuery,
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
@@ -54,6 +58,7 @@ from admission.utils import (
     add_close_modal_into_htmx_response,
     add_messages_into_htmx_response,
 )
+from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.academic_calendar import AcademicCalendar
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
@@ -67,7 +72,10 @@ __all__ = [
     "ContingenteTrainingUpdateView",
     "ContingenteTrainingExportView",
     "ContingenteTrainingImportView",
+    "ContingenteBulkNotificationView",
 ]
+
+from infrastructure.messages_bus import message_bus_instance
 
 INSTITUTION_UCL_EXPORT = 'UCLouvain'
 
@@ -83,6 +91,30 @@ class ContingenteMixin(PermissionRequiredMixin):
         ).data_year
 
 
+class ContingenteBulkNotificationMixin:
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        admissions = message_bus_instance.invoke(
+            RecupererAdmissionContingenteNonResidentANotifierQuery(
+                sigle_formation=self.request.GET.get('training'),
+                annee_formation=self.academic_year.year,
+            )
+        )
+
+        context['training'] = self.request.GET.get('training')
+        context['academic_year'] = format_academic_year(self.academic_year, short=True)
+        context['bulk_notification_admissions'] = admissions
+        context['bulk_notification_deadline_calendar'] = AcademicCalendar.objects.filter(
+            reference=AcademicCalendarTypes.ADMISSION_NON_RESIDENT_QUOTA_ANSWER_DEADLINE.name,
+            data_year=self.academic_year,
+        ).first()
+        context['are_admissions_already_notified'] = any(
+            admission.notification_acceptation is not None for admission in admissions
+        )
+        return context
+
+
 class ContingenteManageView(ContingenteMixin, TemplateView):
     permission_required = 'admission.view_contingente_management'
     template_name = 'admission/general_education/contingente/manage.html'
@@ -91,6 +123,10 @@ class ContingenteManageView(ContingenteMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['academic_year'] = format_academic_year(self.academic_year, short=True)
+        context['drawing_calendar'] = AcademicCalendar.objects.filter(
+            reference=AcademicCalendarTypes.ADMISSION_NON_RESIDENT_QUOTA_RESULT_PUBLICATION.name,
+            data_year=self.academic_year,
+        ).first()
         context['publication_calendar'] = AcademicCalendar.objects.filter(
             reference=AcademicCalendarTypes.ADMISSION_NON_RESIDENT_QUOTA_RESULT_PUBLICATION.name,
             data_year=self.academic_year,
@@ -99,7 +135,7 @@ class ContingenteManageView(ContingenteMixin, TemplateView):
         return context
 
 
-class ContingenteTrainingManageView(ContingenteMixin, TemplateView):
+class ContingenteTrainingManageView(ContingenteMixin, ContingenteBulkNotificationMixin, TemplateView):
     permission_required = 'admission.view_contingente_management'
     template_name = 'admission/general_education/contingente/manage_training.html'
     urlpatterns = 'training'
@@ -315,4 +351,37 @@ class ContingenteTrainingImportView(ContingenteMixin, FormView):
 
         response = self.render_to_response(self.get_context_data())
         add_messages_into_htmx_response(self.request, response)
+        return response
+
+
+class ContingenteBulkNotificationView(ContingenteMixin, ContingenteBulkNotificationMixin, TemplateView):
+    permission_required = 'admission.view_contingente_management'
+    urlpatterns = {'training_bulk_notification': 'training/<str:training>/bulk_notification'}
+    template_name = "admission/general_education/contingente/manage_bulk_notification.html"
+
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+
+        try:
+            message_bus_instance.invoke(
+                NotifierEnLotFormationContingenteCommand(
+                    sigle_formation=self.kwargs['training'],
+                    annee_formation=self.academic_year.year,
+                    gestionnaire=request.user.person.global_id,
+                )
+            )
+            extra_context = {
+                'bulk_notification_success': True,
+            }
+        except MultipleBusinessExceptions as multiple_exceptions:
+            message = multiple_exceptions.exceptions.pop().message
+            extra_context = {
+                'bulk_notification_error': message,
+            }
+
+        context = self.get_context_data(**kwargs)
+        context.update(extra_context)
+        response = self.render_to_response(context)
+        add_close_modal_into_htmx_response(response)
         return response

@@ -44,6 +44,15 @@
     </div>
     <div class="panel-body">
       <dd>
+        <dt>{% translate "Date of the drawing" %}</dt>
+        <dl>
+          {% if drawing_calendar %}
+            {{ drawing_calendar.start_date|date:"DATE_FORMAT" }}
+          {% else %}
+            {% translate "No date configured yet." %}
+          {% endif %}
+        </dl>
+
         <dt>{% translate "Date and time of the results publication" %}</dt>
         <dl>
           {% if publication_calendar %}

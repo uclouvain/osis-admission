@@ -1,0 +1,59 @@
+{% load admission i18n field_data panel %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+<div
+  id="specificites-formation-contingente-container"
+  hx-swap-oob="true"
+>
+  {% if resume_proposition.proposition.est_non_resident_au_sens_decret is True %}
+    {% panel _("Processing of the non-resident limited-enrolment application") %}
+      {% field_data _('Limited-enrolment application number') resume_proposition.proposition.numero_dossier_ares %}
+
+      <dl>
+        <dt>{% translate "Position / last position to notify (= places + refusal in business order + withdrawal in business order )" %}</dt>
+        <dd>{{ contingente_places.position }} / {{ contingente_places.derniere_place }} (= {{ contingente_places.nombre_places }} + {{ contingente_places.nombre_places_refus }} + {{ contingente_places.nombre_places_abandon }})</dd>
+      </dl>
+
+      {% htmx_comment_form comment_forms.specificites_formation__delegue_contingente %}
+
+      {% if resume_proposition.proposition.non_resident_notifie_a %}
+        <dl>
+          <dt>{% translate "Candidate approval notification" %}</dt>
+          <dd><div class="alert alert-success">
+            {% blocktranslate with notified_on=resume_proposition.proposition.non_resident_notifie_a|date:"SHORT_DATETIME_FORMAT" notified_by=original_admission.non_resident_notified_by trimmed %}
+              Acceptance notification mail send the {{ notified_on }} by {{ notified_by }}
+            {% endblocktranslate %}
+          </div></dd>
+        </dl>
+      {% else %}
+        {% field_data _('Candidate approval notification') _('Not notified') %}
+      {% endif %}
+
+      <button class="btn btn-primary" data-toggle="modal" data-target="#contingente-notification-modal">{% translate "Notify candidate" %}</button>
+    {% endpanel %}
+
+  {% endif %}
+</div>
