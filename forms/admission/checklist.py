@@ -1458,6 +1458,36 @@ class FinancabiliteNotificationForm(forms.Form):
         )
 
 
+class ContingenteNotificationForm(forms.Form):
+    subject = forms.CharField(
+        label=_('Message subject'),
+    )
+    body = forms.CharField(
+        label=_('Message for the candidate'),
+        widget=forms.Textarea(),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['body'].widget.attrs['data-config'] = json.dumps(
+            {
+                **settings.CKEDITOR_CONFIGS['osis_mail_template'],
+                'language': get_language(),
+            }
+        )
+
+
+def can_edit_experience_authentication(checklist_experience_data):
+    checklist_experience_data = checklist_experience_data or {}
+
+    extra = checklist_experience_data.get('extra', {})
+
+    return (
+        checklist_experience_data.get('statut') == ChoixStatutChecklist.GEST_EN_COURS.name
+        and extra.get('authentification') == '1'
+    )
+
+
 class SinglePastExperienceAuthenticationForm(forms.Form):
     state = forms.ChoiceField(
         label=_('Past experiences authentication'),

@@ -51,6 +51,7 @@ class LimitedEnrolmentDelegate(RoleModel):
     def rule_set(cls):
         ruleset = {
             'admission.view_enrolment_applications': rules.always_allow,
+            'admission.checklist_change_limited_enrolment_delegate_comment': rules.always_allow,
             'admission.view_enrolment_application': is_contingent_non_resident,
             'admission.view_admission_person': is_contingent_non_resident,
             'admission.view_admission_coordinates': is_contingent_non_resident,

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,12 +27,14 @@ import datetime
 from math import ceil, floor
 
 import factory
+from gestion_des_comptes.calendar.admission_digit_ticket_submission import (
+    AdmissionDigitTicketSubmissionCalendar,
+)
 
 from admission.calendar.admission_calendar import *
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.tests.factories.academic_calendar import AcademicCalendarFactory
 from base.tests.factories.academic_year import AcademicYearFactory, get_current_year
-from gestion_des_comptes.calendar.admission_digit_ticket_submission import AdmissionDigitTicketSubmissionCalendar
 
 
 class AdmissionAcademicCalendarFactory(AcademicCalendarFactory):
@@ -62,6 +64,9 @@ class AdmissionAcademicCalendarFactory(AcademicCalendarFactory):
                 AdmissionAccessConditionsUrl,
                 GeneralEducationAdmissionCalendar,
                 AdmissionDigitTicketSubmissionCalendar,
+                AdmissionNonResidentQuotaResultDrawing,
+                AdmissionNonResidentQuotaResultPublication,
+                AdmissionNonResidentQuotaAnswerDeadline,
             ]
         ]
 

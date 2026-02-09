@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,13 +23,22 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.commands import (
     SpecifierMotifsRefusPropositionParSicCommand,
 )
-from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
-from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.formation_generale.domain.model.enums import TypeDeRefus
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    PropositionIdentity,
+)
+from admission.ddd.admission.formation_generale.domain.service.i_historique import (
+    IHistorique,
+)
+from admission.ddd.admission.formation_generale.repository.i_proposition import (
+    IPropositionRepository,
+)
+from admission.ddd.admission.shared_kernel.domain.model.proposition import (
+    PropositionIdentity,
+)
 
 
 def specifier_motifs_refus_proposition_par_sic(
@@ -43,7 +52,7 @@ def specifier_motifs_refus_proposition_par_sic(
 
     proposition.specifier_motifs_refus_par_sic(
         auteur_modification=cmd.gestionnaire,
-        type_de_refus=cmd.type_de_refus,
+        type_de_refus=TypeDeRefus[cmd.type_de_refus],
         uuids_motifs=cmd.uuids_motifs,
         autres_motifs=cmd.autres_motifs,
     )

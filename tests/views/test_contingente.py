@@ -25,12 +25,15 @@
 # ##############################################################################
 import datetime
 import io
+import uuid
 from tempfile import NamedTemporaryFile
+from unittest import mock
 
 import freezegun
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from openpyxl import Workbook, load_workbook
+from osis_notification.models import EmailNotification
 
 from admission.auth.scope import Scope
 from admission.calendar.admission_calendar import SIGLES_WITH_QUOTA
@@ -38,6 +41,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
 from admission.models.contingente import ContingenteTraining
+from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.contingente import ContingenteTrainingFactory
 from admission.tests.factories.general_education import (
     GeneralEducationAdmissionFactory,
@@ -63,13 +67,10 @@ class ContingenteManageViewTestCase(TestCase):
             academic_year__year=2026,
             acronym=SIGLES_WITH_QUOTA[1],
         )
-        AcademicCalendarFactory(
-            reference=AcademicCalendarTypes.GENERAL_EDUCATION_ENROLLMENT.name,
-            start_date=datetime.date(2025, 9, 15),
-            end_date=datetime.date(2026, 9, 15),
-            data_year=cls.first_training.academic_year,
-        )
-        cls.contingente_training = ContingenteTrainingFactory(training=cls.second_training)
+
+        AdmissionAcademicCalendarFactory.produce_all_required()
+
+        cls.contingente_training = ContingenteTrainingFactory(training=cls.second_training, places_number=1)
         cls.admission = GeneralEducationAdmissionFactory(
             candidate__birth_date=datetime.date(2000, 1, 1),
             training=cls.second_training,
@@ -77,6 +78,65 @@ class ContingenteManageViewTestCase(TestCase):
             is_non_resident=True,
             ares_application_number='ARES_NUMBER',
         )
+
+    def setUp(self) -> None:
+        self.file_uuid = uuid.UUID('4bdffb42-552d-415d-9e4c-725f10dce228')
+
+        self.confirm_remote_upload_patcher = mock.patch('osis_document_components.services.confirm_remote_upload')
+        patched = self.confirm_remote_upload_patcher.start()
+        patched.return_value = str(self.file_uuid)
+        self.addCleanup(self.confirm_remote_upload_patcher.stop)
+
+        self.confirm_several_remote_upload_patcher = mock.patch(
+            'osis_document_components.fields.FileField._confirm_multiple_upload'
+        )
+        patched = self.confirm_several_remote_upload_patcher.start()
+        patched.side_effect = lambda _, value, __: [str(self.file_uuid)] if value else []
+        self.addCleanup(self.confirm_several_remote_upload_patcher.stop)
+
+        self.get_remote_metadata_patcher = mock.patch('osis_document_components.services.get_remote_metadata')
+        patched = self.get_remote_metadata_patcher.start()
+        patched.return_value = {"name": "test.pdf", "size": 1, "mimetype": "application/pdf"}
+        self.addCleanup(self.get_remote_metadata_patcher.stop)
+
+        self.get_several_remote_metadata_patcher = mock.patch(
+            'osis_document_components.services.get_several_remote_metadata'
+        )
+        patched = self.get_several_remote_metadata_patcher.start()
+        patched.return_value = {"foo": {"name": "test.pdf", "size": 1, "mimetype": "application/pdf"}}
+        self.addCleanup(self.get_several_remote_metadata_patcher.stop)
+
+        self.get_remote_token_patcher = mock.patch('osis_document_components.services.get_remote_token')
+        patched = self.get_remote_token_patcher.start()
+        patched.return_value = 'foobar'
+        self.addCleanup(self.get_remote_token_patcher.stop)
+
+        self.save_raw_content_remotely_patcher = mock.patch(
+            'osis_document_components.services.save_raw_content_remotely'
+        )
+        patched = self.save_raw_content_remotely_patcher.start()
+        patched.return_value = 'a-token'
+        self.addCleanup(self.save_raw_content_remotely_patcher.stop)
+
+        patcher = mock.patch('admission.exports.utils.change_remote_metadata')
+        self.change_remote_metadata_patcher = patcher.start()
+        self.change_remote_metadata_patcher.return_value = 'a-token'
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch(
+            'admission.infrastructure.admission.formation_generale.domain.service.contingente.get_remote_token'
+        )
+        patched = patcher.start()
+        patched.return_value = 'foobar'
+        self.addCleanup(patcher.stop)
+
+        # Mock weasyprint
+        patcher = mock.patch(
+            'admission.exports.utils.get_pdf_from_template',
+            return_value=b'some content',
+        )
+        self.get_pdf_from_template_patcher = patcher.start()
+        self.addCleanup(patcher.stop)
 
     def test_contingente_manage_view_get(self):
         self.client.force_login(user=self.user)
@@ -188,3 +248,20 @@ class ContingenteManageViewTestCase(TestCase):
         self.assertEqual(self.contingente_training.last_import_at, datetime.datetime.now())
         self.assertEqual(self.contingente_training.last_import_by, self.user.person)
         self.assertEqual(self.admission.draw_number, 1)
+
+    def test_contingente_bulk_notification_post(self):
+        self.client.force_login(user=self.user)
+
+        response = self.client.post(
+            reverse('admission:contingente:training_bulk_notification', kwargs={'training': SIGLES_WITH_QUOTA[1]}),
+            data={},
+            headers={'HX-Request': "true"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'admission/general_education/contingente/manage_bulk_notification.html')
+        self.admission.refresh_from_db()
+        self.assertTrue(self.admission.non_resident_limited_enrolment_acceptance_file)
+        self.assertEqual(EmailNotification.objects.count(), 1)
+        email_notification: EmailNotification = EmailNotification.objects.first()
+        self.assertEqual(email_notification.person, self.admission.candidate)

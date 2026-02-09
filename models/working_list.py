@@ -79,6 +79,10 @@ UNCHANGED_KEY = 'INCHANGE'
 UNCHANGED_VALUE = _('INCHANGE')
 
 
+def get_admission_contingentes_default():
+    return [ContingenteFiltre.NON_CONTINGENTE.name, ContingenteFiltre.CONTINGENTE_RESIDENT.name]
+
+
 class WorkingList(CommonWorkingList):
     quarantine = models.BooleanField(null=True)
 
@@ -115,7 +119,7 @@ class WorkingList(CommonWorkingList):
     )
 
     admission_contingentes = ArrayField(
-        default=[ContingenteFiltre.NON_CONTINGENTE.name, ContingenteFiltre.CONTINGENTE_RESIDENT.name],
+        default=get_admission_contingentes_default,
         verbose_name=_('Admission limited enrolment'),
         base_field=models.CharField(
             choices=ContingenteFiltre.choices(),
