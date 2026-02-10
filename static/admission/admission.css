@@ -512,6 +512,14 @@ a.no-link {
   display: block;
 }
 
+.p-0 {
+    padding: 0;
+}
+
+.mb-0 {
+    margin-bottom: 0;
+}
+
 .element-with-spinner.htmx-request, .inline-element-with-spinner {
   position: relative;
 }

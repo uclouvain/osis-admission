@@ -60,7 +60,9 @@ from admission.ddd.admission.shared_kernel.enums.valorisation_experience import 
 from admission.views.common.mixins import LoadDossierViewMixin
 from backoffice.settings.base import CKEDITOR_CONFIGS
 from base.auth.roles.program_manager import ProgramManager
+from ddd.logic.shared_kernel.profil.commands import RecupererExamensQuery
 from infrastructure.messages_bus import message_bus_instance
+from osis_profile.models import Exam
 from osis_role.contrib.permissions import _get_roles_assigned_to_user
 
 __all__ = [

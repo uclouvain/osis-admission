@@ -64,6 +64,7 @@ from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from osis_profile import BE_ISO_CODE, FR_ISO_CODE
 from osis_profile.models import EducationalExperience, EducationalExperienceYear
+from osis_profile.tests.factories.high_school_diploma import HighSchoolDiplomaFactory
 from reference.tests.factories.country import CountryFactory
 
 
@@ -104,11 +105,12 @@ class AdmissionCurriculumGlobalFormViewForContinuingTestCase(TestCase):
         cls.text_question_uuid = str(cls.text_question_instantiation.form_item.uuid)
         cls.other_question_uuid = str(uuid.uuid4())
 
-        cls.candidate = CandidateFactory(
-            person__graduated_from_high_school=GotDiploma.YES.name,
-            person__graduated_from_high_school_year=cls.academic_years[1],
-        ).person
-
+        cls.candidate = CandidateFactory().person
+        HighSchoolDiplomaFactory(
+            got_diploma=GotDiploma.YES.name,
+            academic_graduation_year=cls.academic_years[1],
+            person=cls.candidate,
+        )
         cls.educational_experience: EducationalExperience = EducationalExperienceFactory(
             person=cls.candidate,
             obtained_diploma=True,

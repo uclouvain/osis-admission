@@ -1,0 +1,60 @@
+{% load admission i18n strings %}
+
+{% comment "License" %}
+* OSIS stands for Open Student Information System. It's an application
+* designed to manage the core business of higher education institutions,
+* such as universities, faculties, institutes and professional schools.
+* The core business involves the administration of students, teachers,
+* courses, programs and so on.
+*
+* Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* A copy of this license - GNU General Public License - is available
+* at the root of the source code of this program.  If not,
+* see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+<div class="alert alert-warning">
+  <p>
+    {% translate "For some reason, the experience isn't yet initialized. However, this is required to edit its status, its comments, etc." %}
+  </p>
+
+  {% has_perm 'admission.change_checklist' as can_change_checklist %}
+  {% experience_urls experience=experience as experience_urls %}
+  {% url base_namespace|add:":checklist" view.kwargs.uuid as checklist_url %}
+  {% concat experience_urls.edit_url '?next=' checklist_url '&next_hash_url=parcours_anterieur' as edit_experience_url %}
+
+  {% if can_change_checklist %}
+    <form method="post" action="{% url base_namespace|add:':initialize-experience' view.kwargs.uuid experience.type_experience %}">
+      {% csrf_token %}
+      <p class="mb-0">
+        {% blocktranslate trimmed %}
+          You can do it automatically be clicking <button type="submit" class="btn btn-link p-0">here</button>
+        {% endblocktranslate %}
+        {% if experience_urls.edit_url %}
+          {% blocktranslate trimmed with experience_url=experience_url%}
+            or manually through the <a href="{{ edit_experience_url }}">edit form</a>
+          {% endblocktranslate %}
+        {% endif %}
+        .
+      </p>
+    </form>
+
+  {% elif experience_urls.edit_url %}
+    <p>
+      {% blocktranslate trimmed with experience_url=experience_url%}
+        You can do it manually through the <a href="{{ edit_experience_url }}">edit form</a>.
+      {% endblocktranslate %}
+    </p>
+  {% endif %}
+</div>

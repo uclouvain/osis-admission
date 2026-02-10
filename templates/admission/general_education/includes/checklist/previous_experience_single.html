@@ -1,3 +1,4 @@
+{% load field_data %}
 {% load i18n static enums admission bootstrap3 strings %}
 
 {% comment "License" %}
@@ -24,21 +25,22 @@
 * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% with tab_statuses_configurations=checklist_tabs_organization.experiences_parcours_anterieur %}
-  {% with selected_status_configuration=tab_statuses_configurations|get_item:experience.statut_validation %}
-  {% concat 'parcours_anterieur__' experience.uuid|stringformat:'s' as checklist_item_name %}
+{% with tab_statuses_configurations=checklist_tabs_organization.experiences_parcours_anterieur experience_uuid=experience.uuid|stringformat:'s' %}
+{% with selected_status_configuration=tab_statuses_configurations|get_item:experience.statut_validation %}
+  {% concat 'parcours_anterieur__' experience_uuid as checklist_item_name %}
   <div
-    id="previous-experience-container-{{ experience.uuid }}"
+    id="previous-experience-container-{{ experience_uuid }}"
     hx-target="this"
   >
+    {% url view.base_namespace|add:':single-past-experience-change-status' uuid=view.kwargs.uuid experience_type=experience.type_experience experience_uuid=experience_uuid as change_status_url %}
+
     <div class="form-group btn-group status-group" role="group">
-      {% url view.base_namespace|add:':single-past-experience-change-status' uuid=view.kwargs.uuid experience_type=experience.type_experience experience_uuid=experience.uuid as change_status_url %}
       {% checklist_macro_state_button tab=checklist_item_name status_configuration=tab_statuses_configurations.A_TRAITER selected_status_configuration=selected_status_configuration icon='user' class='muted' htmx_post=change_status_url %}
       {% checklist_macro_state_button tab=checklist_item_name status_configuration=tab_statuses_configurations.A_COMPLETER selected_status_configuration=selected_status_configuration icon='circle-stop' class='danger' htmx_post=change_status_url %}
       {% checklist_macro_state_button tab=checklist_item_name status_configuration=tab_statuses_configurations.AUTHENTIFICATION selected_status_configuration=selected_status_configuration icon='pencil' class='warning' htmx_post=change_status_url %}
       {% checklist_macro_state_button tab=checklist_item_name status_configuration=tab_statuses_configurations.AVIS_EXPERT selected_status_configuration=selected_status_configuration icon='pencil' class='warning' htmx_post=change_status_url %}
       {% checklist_macro_state_button tab=checklist_item_name status_configuration=tab_statuses_configurations.A_COMPLETER_APRES_INSCRIPTION selected_status_configuration=selected_status_configuration icon='circle-arrow-right' class='info' htmx_post=change_status_url %}
-      {% if experience.uuid|stringformat:'s' in view.incomplete_curriculum_experiences %}
+      {% if experience_uuid in view.incomplete_curriculum_experiences %}
         {% translate "This experience can't be validated if mandatory information is missing." as incomplete_experience_tooltip %}
         {% checklist_macro_state_button tab=checklist_item_name status_configuration=tab_statuses_configurations.VALIDEE selected_status_configuration=selected_status_configuration icon='check' class='success' disabled=True tooltip=incomplete_experience_tooltip %}
       {% else %}
@@ -46,11 +48,7 @@
       {% endif %}
     </div>
 
-    <div id="comment-{{ experience.uuid }}" hx-preserve="true">
-      {% if comment_forms and checklist_item_name in comment_forms %}
-        {% bootstrap_form comment_forms|get_item:checklist_item_name %}
-      {% endif %}
-    </div>
+    {% htmx_comment_form comment_forms|get_item_or_none:checklist_item_name %}
 
     {% include "admission/general_education/includes/checklist/previous_experience_single_authentication_form.html" with experience=experience authentication_form=authentication_form experience_authentication_history_entry=experience_authentication_history_entry %}
   </div>

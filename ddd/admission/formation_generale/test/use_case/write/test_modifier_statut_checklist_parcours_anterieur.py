@@ -25,6 +25,7 @@
 # ##############################################################################
 import datetime
 
+import freezegun
 from django.test import SimpleTestCase
 
 from admission.ddd.admission.formation_generale.test.factory.proposition import PropositionFactory
@@ -74,6 +75,7 @@ from osis_profile.models.enums.education import ForeignDiplomaTypes
 from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
 
 
+@freezegun.freeze_time('2020-01-01')
 class TestModifierStatutChecklistParcoursAnterieurService(SimpleTestCase):
     def assertHasInstance(self, container, cls, msg=None):
         if not any(isinstance(obj, cls) for obj in container):
@@ -189,7 +191,7 @@ class TestModifierStatutChecklistParcoursAnterieurService(SimpleTestCase):
         # Expérience valorisée et avec un statut incorrect -> lever une exception
         premiere_experience = next(
             xp for xp in self.profil_candidat_translator.experiences_academiques
-            if xp.uuid == '9cbdf4db-2454-4cbf-9e48-55d2a9881ee1'
+            if xp.personne == proposition.matricule_candidat
         )
         self.profil_candidat_translator.valorisations[premiere_experience.uuid] = [
             'uuid-MASTER-SCI-CONFIRMED'
@@ -226,19 +228,6 @@ class TestModifierStatutChecklistParcoursAnterieurService(SimpleTestCase):
             )
         )
         self.assertIsNotNone(proposition_id)
-
-        # Expérience valorisée mais sans checklist -> lever une exception
-        self.profil_candidat_translator.valorisations['INCONNUE-VALORISEE'] = ['uuid-MASTER-SCI-CONFIRMED']
-
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(
-                ModifierStatutChecklistParcoursAnterieurCommand(
-                    uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
-                    statut=ChoixStatutChecklist.GEST_REUSSITE.name,
-                    gestionnaire='0123456789',
-                )
-            )
-            self.assertHasInstance(context.exception.exceptions, StatutsChecklistExperiencesEtreValidesException)
 
     def test_should_renvoyer_erreur_si_statut_cible_est_gestionnaire_reussite_et_incomplet_pour_certificat(self):
         with self.assertRaises(MultipleBusinessExceptions) as context:

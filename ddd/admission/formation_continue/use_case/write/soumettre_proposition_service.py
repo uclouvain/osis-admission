@@ -120,8 +120,8 @@ def soumettre_proposition(
     )
     proposition_repository.save(proposition)
 
-    validation_experience_parcours_anterieur_service.mettre_a_jour_experiences_en_brouillon(proposition=proposition)
-    raccrocher_experiences_curriculum.raccrocher(proposition)
+    raccrocher_experiences_curriculum.raccrocher(proposition=proposition)
+    validation_experience_parcours_anterieur_service.passer_experiences_en_brouillon_en_a_traiter(proposition=proposition)
     notification.confirmer_soumission(proposition, email_destinataire_repository)
     historique.historiser_soumission(proposition)
 

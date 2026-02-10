@@ -94,6 +94,7 @@ from epc.tests.factories.email_fonction_programme import EmailFonctionProgrammeF
 from infrastructure.financabilite.domain.service.fetcher import PASS_ET_LAS_LABEL
 from osis_profile import BE_ISO_CODE
 from osis_profile.models import EducationalExperience, ProfessionalExperience
+from osis_profile.tests.factories.high_school_diploma import HighSchoolDiplomaFactory
 from reference.tests.factories.country import CountryFactory
 
 
@@ -1191,7 +1192,8 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
         self.assertIn(NombrePropositionsSoumisesDepasseException.status_code, [e["status_code"] for e in ret['errors']])
 
     def test_continuing_proposition_submission_with_secondary_studies(self):
-        admission = ContinuingEducationAdmissionFactory(candidate__graduated_from_high_school=GotDiploma.YES.name)
+        admission = ContinuingEducationAdmissionFactory()
+        high_school_diploma = HighSchoolDiplomaFactory(person=admission.candidate, got_diploma=GotDiploma.YES.name)
         url = resolve_url("admission_api_v1:submit-continuing-proposition", uuid=admission.uuid)
         self.client.force_authenticate(user=admission.candidate.user)
         response = self.client.get(url)

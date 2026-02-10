@@ -102,7 +102,7 @@ class ValidationExperienceParcoursAnterieurInMemoryService(IValidationExperience
         )
 
     @classmethod
-    def mettre_a_jour_experiences_en_brouillon(
+    def passer_experiences_en_brouillon_en_a_traiter(
         cls,
         proposition: PropositionContinue | PropositionDoctorale | PropositionGenerale,
     ):

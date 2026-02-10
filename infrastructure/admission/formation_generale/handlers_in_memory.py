@@ -138,6 +138,8 @@ from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.p
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
 )
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.raccrocher_experiences_curriculum import \
+    RaccrocherExperiencesCurriculumInMemory
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.recuperer_documents_proposition import (
     EmplacementsDocumentsPropositionInMemoryTranslator,
 )
@@ -196,6 +198,7 @@ _matricule_etudiant_service = MatriculeEtudiantInMemoryService()
 _compteur_noma = CompteurAnnuelPourNomaInMemoryRepository()
 _experience_parcours_interne_translator = ExperienceParcoursInterneInMemoryTranslator()
 _validation_experience_parcours_anterieur_service = ValidationExperienceParcoursAnterieurInMemoryService()
+_raccrocher_experiences_curriculum = RaccrocherExperiencesCurriculumInMemory()
 
 
 COMMAND_HANDLERS = {
@@ -264,6 +267,7 @@ COMMAND_HANDLERS = {
         inscription_tardive_service=InscriptionTardiveInMemory(),
         paiement_frais_dossier_service=_paiement_frais_dossier,
         historique=_historique_global,
+        raccrocher_experiences_curriculum=_raccrocher_experiences_curriculum,
         validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur_service,
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(

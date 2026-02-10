@@ -121,6 +121,8 @@ from admission.infrastructure.admission.shared_kernel.domain.service.poste_diplo
     PosteDiplomatiqueTranslator,
 )
 from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidatTranslator
+from admission.infrastructure.admission.shared_kernel.domain.service.raccrocher_experiences_curriculum import \
+    RaccrocherExperiencesCurriculum
 from admission.infrastructure.admission.shared_kernel.domain.service.titres_acces import TitresAcces
 from admission.infrastructure.admission.shared_kernel.domain.service.unites_enseignement_translator import (
     UnitesEnseignementTranslator,
@@ -214,6 +216,8 @@ COMMAND_HANDLERS = {
         inscription_tardive_service=InscriptionTardive(),
         paiement_frais_dossier_service=PaiementFraisDossier(),
         historique=HistoriqueGlobal(),
+        raccrocher_experiences_curriculum=RaccrocherExperiencesCurriculum(),
+        validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,

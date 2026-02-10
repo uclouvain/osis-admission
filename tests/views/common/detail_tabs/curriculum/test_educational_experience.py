@@ -61,6 +61,9 @@ from base.tests.factories.entity_version import EntityVersionFactory
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO
 from osis_profile import FR_ISO_CODE
 from osis_profile.models import EducationalExperience, EducationalExperienceYear
+from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience, \
+    EtatAuthentificationParcours
+from parcours_doctoral.ddd.autorisation_diffusion_these.domain.model.enums import ChoixStatutAutorisationDiffusionThese
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.language import LanguageFactory
 
@@ -90,6 +93,8 @@ class CurriculumEducationalExperienceDetailViewTestCase(TestCase):
             person=cls.other_candidate,
             linguistic_regime=cls.linguistic_regime,
             country=cls.be_country,
+            validation_status=ChoixStatutValidationExperience.AUTHENTIFICATION.name,
+            authentication_status=EtatAuthentificationParcours.VRAI.name,
         )
 
         cls.educational_experience_year: EducationalExperienceYear = EducationalExperienceYearFactory(
@@ -198,6 +203,8 @@ class CurriculumEducationalExperienceDetailViewTestCase(TestCase):
 
         self.assertIsInstance(experience, ExperienceAcademiqueDTO)
         self.assertEqual(experience.uuid, self.other_educational_experience.uuid)
+        self.assertEqual(experience.statut_validation, ChoixStatutValidationExperience.AUTHENTIFICATION.name)
+        self.assertEqual(experience.statut_authentification, EtatAuthentificationParcours.VRAI.name)
         self.assertFalse(response.context['translation_required'])
         self.assertFalse(response.context['is_foreign_experience'])
         self.assertFalse(response.context['evaluation_system_with_credits'])

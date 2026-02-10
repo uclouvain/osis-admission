@@ -79,7 +79,6 @@ class CurriculumNonEducationalExperienceDeleteViewTestCase(TestCase):
             training__academic_year=cls.academic_years[0],
             candidate__language=settings.LANGUAGE_CODE_EN,
             candidate__country_of_citizenship=CountryFactory(european_union=False),
-            candidate__graduated_from_high_school_year=None,
             candidate__last_registration_year=None,
             candidate__id_photo=[],
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,

@@ -70,6 +70,8 @@ from osis_profile.models.enums.curriculum import (
     Result,
     TranscriptType,
 )
+from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience, \
+    EtatAuthentificationParcours
 from reference.models.enums.cycle import Cycle
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.diploma_title import DiplomaTitleFactory
@@ -163,6 +165,8 @@ class CurriculumEducationalExperienceFormViewForContinuingTestCase(TestCase):
             with_complement=True,
             complement_registered_credit_number=40,
             complement_acquired_credit_number=39,
+            validation_status=ChoixStatutValidationExperience.AUTHENTIFICATION.name,
+            authentication_status=EtatAuthentificationParcours.VRAI.name,
         )
         self.first_experience_year: EducationalExperienceYear = EducationalExperienceYearFactory(
             educational_experience=self.experience,
@@ -370,6 +374,8 @@ class CurriculumEducationalExperienceFormViewForContinuingTestCase(TestCase):
         self.assertEqual(experience.with_complement, None)
         self.assertEqual(experience.complement_registered_credit_number, None)
         self.assertEqual(experience.complement_acquired_credit_number, None)
+        self.assertEqual(experience.validation_status, ChoixStatutValidationExperience.A_TRAITER.name)
+        self.assertEqual(experience.authentication_status, EtatAuthentificationParcours.NON_CONCERNE.name)
 
         years = experience.educationalexperienceyear_set.all().order_by('academic_year__year')
 
@@ -473,6 +479,8 @@ class CurriculumEducationalExperienceFormViewForContinuingTestCase(TestCase):
         self.assertEqual(experience.with_complement, None)
         self.assertEqual(experience.complement_registered_credit_number, None)
         self.assertEqual(experience.complement_acquired_credit_number, None)
+        self.assertEqual(experience.validation_status, ChoixStatutValidationExperience.AUTHENTIFICATION.name)
+        self.assertEqual(experience.authentication_status, EtatAuthentificationParcours.VRAI.name)
 
         years = experience.educationalexperienceyear_set.all().order_by('academic_year__year')
 

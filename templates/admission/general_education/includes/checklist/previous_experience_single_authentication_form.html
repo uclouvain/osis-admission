@@ -24,47 +24,53 @@
 * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% if experience.authentification_en_cours or experience.statut_authentification != 'NON_CONCERNE' %}
-  {% url view.base_namespace|add:':single-past-experience-change-authentication' uuid=view.kwargs.uuid experience_type=experience.type_experience experience_uuid=experience.uuid as current_experience_authentication_url %}
-  <form
-      id="authentication-form-{{ experience.uuid }}"
+<div
+  {% if not experience.authentification_en_cours and experience.statut_authentification == 'NON_CONCERNE' %}
+    class="hidden"
+  {% endif %}
+>
+  {% with experience_uuid=experience.uuid|stringformat:'s' %}
+    {% url view.base_namespace|add:':single-past-experience-change-authentication' uuid=view.kwargs.uuid experience_type=experience.type_experience experience_uuid=experience_uuid as current_experience_authentication_url %}
+    <form
+      id="authentication-form-{{ experience_uuid }}"
       method="post"
       action="{{ current_experience_authentication_url }}"
       hx-post="{{ current_experience_authentication_url }}"
-      hx-trigger='change from:input[name="{{ experience.uuid }}-state"]'
+      hx-trigger='change from:input[name="{{ experience_uuid }}-state"]'
       hx-swap="outerHTML"
-      hx-target="this"
+      hx-target="closest div"
       class="authentication-form"
       data-default-state-value="{{ authentication_form.state.value }}"
-  >
-    {% csrf_token %}
-    {% bootstrap_form_errors authentication_form %}
-    {% bootstrap_field authentication_form.state %}
+    >
+      {% csrf_token %}
+      {% bootstrap_form_errors authentication_form %}
+      {% bootstrap_field authentication_form.state %}
 
-    {% if authentication_form.state.value == 'AUTHENTIFICATION_DEMANDEE' or authentication_form.state.value == 'ETABLISSEMENT_CONTACTE' %}
-      {% if experience_authentication_history_entry %}
-        <div class="alert alert-warning">
-          <button
+      {% if authentication_form.state.value == 'AUTHENTIFICATION_DEMANDEE' or authentication_form.state.value == 'ETABLISSEMENT_CONTACTE' %}
+        {% if experience_authentication_history_entry %}
+          <div class="alert alert-warning">
+            <button
               type="button"
               class="btn btn-xs btn-default admission-collapse-button pull-right"
               data-toggle="collapse"
-              data-target="#experience-authentication-message-{{ experience.uuid }}"
+              data-target="#experience-authentication-message-{{ experience_uuid }}"
               aria-expanded="false"
-          >
-            <i class="fa-solid fa-chevron-up"></i>
-            <i class="fa-solid fa-chevron-down"></i>
-          </button>
-          <p id="experience-authentication-message-{{ experience.uuid }}" class="experience-authentication-message">{{ experience_authentication_history_entry|history_entry_message }}</p>
-        </div>
+            >
+              <i class="fa-solid fa-chevron-up"></i>
+              <i class="fa-solid fa-chevron-down"></i>
+            </button>
+            <p id="experience-authentication-message-{{ experience_uuid }}" class="experience-authentication-message">{{ experience_authentication_history_entry|history_entry_message }}</p>
+          </div>
+        {% endif %}
       {% endif %}
-    {% endif %}
+    </form>
 
-    {% concat 'parcours_anterieur__' experience.uuid|stringformat:'s' '__authentication' as current_authentication_form %}
+    {% concat 'parcours_anterieur__' experience_uuid '__authentication' as current_authentication_form %}
     {% htmx_comment_form comment_forms|get_item_or_none:current_authentication_form %}
 
     {% if request.htmx %}
       {# Update the checklist menu item authentication #}
-      {% concat 'parcours_anterieur__' experience.uuid|stringformat:'s' as item_name %}
+      {% concat 'parcours_anterieur__' experience_uuid as item_name %}
       {# Update the checklist menu tab icons #}
       {% with item_icons=checklist_additional_icons|get_item_or_none:item_name %}
         {% if item_icons %}
@@ -73,7 +79,6 @@
           {% endfor %}
         {% endif %}
       {% endwith %}
-
     {% endif %}
-  </form>
-{% endif %}
+  {% endwith %}
+</div>

@@ -117,7 +117,6 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
             training__academic_year=cls.academic_years[0],
             candidate__language=settings.LANGUAGE_CODE_EN,
             candidate__country_of_citizenship=CountryFactory(european_union=False),
-            candidate__graduated_from_high_school_year=None,
             candidate__last_registration_year=None,
             candidate__id_photo=[],
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
@@ -164,6 +163,8 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
             with_complement=True,
             complement_registered_credit_number=30,
             complement_acquired_credit_number=29,
+            validation_status=ChoixStatutValidationExperience.AUTHENTIFICATION.name,
+            authentication_status=EtatAuthentificationParcours.VRAI.name,
         )
         self.first_experience_year: EducationalExperienceYear = EducationalExperienceYearFactory(
             educational_experience=self.experience,
@@ -1797,6 +1798,8 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
         self.assertEqual(self.experience.transcript_type, TranscriptType.ONE_FOR_ALL_YEARS.name)
         self.assertEqual(self.experience.obtained_diploma, False)
         self.assertEqual(self.experience.transcript, [file_uuid])
+        self.assertEqual(self.experience.validation_status, ChoixStatutValidationExperience.AUTHENTIFICATION.name)
+        self.assertEqual(self.experience.authentication_status, EtatAuthentificationParcours.VRAI.name)
 
         # Check the years
         years = self.experience.educationalexperienceyear_set.all().order_by('academic_year__year')

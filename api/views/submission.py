@@ -83,26 +83,6 @@ __all__ = [
 ]
 
 
-def valuate_experiences(instance: Union[GeneralEducationAdmission, ContinuingEducationAdmission, DoctorateAdmission]):
-    # Valuate the secondary studies of the candidate
-    if isinstance(
-        instance,
-        (GeneralEducationAdmission, ContinuingEducationAdmission),
-    ):
-        instance.valuated_secondary_studies_person_id = instance.candidate_id
-        instance.save(update_fields=['valuated_secondary_studies_person_id'])
-
-    # Valuate curriculum experiences
-    instance.educational_valuated_experiences.add(
-        *EducationalExperience.objects.filter(person_id=instance.candidate_id)
-    )
-
-    # Valuate curriculum experiences
-    instance.professional_valuated_experiences.add(
-        *ProfessionalExperience.objects.filter(person_id=instance.candidate_id)
-    )
-
-
 class VerifyDoctoralProjectView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, GenericAPIView):
     name = "verify-project"
     permission_mapping = {
@@ -198,7 +178,6 @@ class SubmitDoctoralPropositionView(
         serializer.is_valid(raise_exception=True)
         cmd = SoumettrePropositionDoctoratCommand(**serializer.data, uuid_proposition=str(kwargs['uuid']))
         proposition_id = message_bus_instance.invoke(cmd)
-        valuate_experiences(self.get_permission_object())
         serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -263,7 +242,6 @@ class SubmitGeneralEducationPropositionView(
         cmd = SoumettrePropositionGeneraleCommand(**serializer.data, uuid_proposition=str(kwargs['uuid']))
         message_bus_instance.invoke(cmd)
         admission = self.get_permission_object()
-        valuate_experiences(admission)
         serializer = serializers.GeneralEducationPropositionIdentityWithStatusSerializer(instance=admission)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

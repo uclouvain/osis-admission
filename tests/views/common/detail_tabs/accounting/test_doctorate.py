@@ -76,7 +76,6 @@ class DoctorateAccountingDetailViewTestCase(TestCase):
             training__academic_year=self.academic_years[0],
             candidate__language=settings.LANGUAGE_CODE_EN,
             candidate__country_of_citizenship=CountryFactory(european_union=False),
-            candidate__graduated_from_high_school_year=None,
             candidate__last_registration_year=None,
             admitted=True,
         )

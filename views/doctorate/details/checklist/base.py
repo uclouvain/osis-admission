@@ -429,7 +429,6 @@ class ChecklistView(
                     ),
                     prefix=authentication_comment_identifier,
                     disabled=not current_experience.authentification_en_cours,
-                    label=_('Comment about the authentication'),
                 )
 
                 # Get the last valuated admission for this experience

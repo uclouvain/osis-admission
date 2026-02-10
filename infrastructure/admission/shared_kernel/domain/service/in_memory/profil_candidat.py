@@ -1130,7 +1130,11 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
 
             experiences_dtos = []
             for experience in cls.experiences_academiques:
-                if experience.personne == matricule:
+                if experience.personne == matricule and (
+                    experiences_cv_recuperees == ExperiencesCVRecuperees.TOUTES
+                    or experiences_cv_recuperees == ExperiencesCVRecuperees.SEULEMENT_VALORISEES and experience.uuid in cls.valorisations
+                    or experiences_cv_recuperees == ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION and uuid_proposition in cls.valorisations.get(experience.uuid, [])
+                ):
                     experiences_dtos.append(
                         ExperienceAcademiqueDTO(
                             uuid=experience.uuid,
@@ -1202,7 +1206,11 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                     statut_authentification=experience.statut_authentification,
                 )
                 for experience in cls.experiences_non_academiques
-                if experience.personne == matricule
+                if experience.personne == matricule  and (
+                    experiences_cv_recuperees == ExperiencesCVRecuperees.TOUTES
+                    or experiences_cv_recuperees == ExperiencesCVRecuperees.SEULEMENT_VALORISEES and experience.uuid in cls.valorisations
+                    or experiences_cv_recuperees == ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION and uuid_proposition in cls.valorisations.get(experience.uuid, [])
+                )
             ]
 
             etudes_secondaires = cls.etudes_secondaires.get(matricule)

@@ -296,12 +296,22 @@ class SinglePastExperienceMixin(
     HtmxPermissionRequiredMixin,
     FormView,
 ):
+    @cached_property
+    def experience_uuid(self):
+        return str(self.kwargs['experience_uuid'])
+
     def get_experience_validation_dto(self) -> ValidationExperienceParcoursAnterieurDTO:
-        return message_bus_instance.invoke(RecupererInformationsValidationExperienceParcoursAnterieurQuery(
-            matricule_candidat=self.admission.candidate.global_id,
-            type_experience=self.kwargs['experience_type'],
-            uuid_experience=self.kwargs['experience_uuid'],
-        ))
+        try:
+            return message_bus_instance.invoke(RecupererInformationsValidationExperienceParcoursAnterieurQuery(
+                matricule_candidat=self.admission.candidate.global_id,
+                type_experience=self.kwargs['experience_type'],
+                uuid_experience=self.experience_uuid,
+            ))
+        except ExperienceNonTrouveeException:
+            return ValidationExperienceParcoursAnterieurDTO(
+                uuid=self.experience_uuid,
+                type_experience=self.kwargs['experience_type'],
+            )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -309,34 +319,37 @@ class SinglePastExperienceMixin(
         experience_validation_dto = self.get_experience_validation_dto()
         context['experience'] = experience_validation_dto
 
-        tab_identifier = f'parcours_anterieur__{self.kwargs["experience_uuid"]}'
+        tab_identifier = f'parcours_anterieur__{self.experience_uuid}'
 
         context.setdefault('comment_forms', {})
 
         authentication_comment_identifier = f'{tab_identifier}__authentication'
+
+        comment_permission = self.request.user.has_perm(
+            'admission.checklist_change_comment',
+            self.admission,
+        )
+
+        # The contents of the comment forms are preserved with htmx so we don't need to retrieve the data here
+        context['comment_forms'][tab_identifier] = CommentForm(
+            comment=None,
+            form_url='',
+            prefix=tab_identifier,
+            disabled=not comment_permission,
+        )
+
         context['comment_forms'][authentication_comment_identifier] = CommentForm(
-            comment=CommentEntry.objects.filter(
-                object_uuid=self.kwargs['experience_uuid'],
-                tags=['parcours_anterieur', str(self.kwargs['experience_uuid']), 'authentication'],
-            )
-            .select_related('author')
-            .first(),
-            form_url=resolve_url(
-                f'{self.base_namespace}:save-comment',
-                uuid=self.admission_uuid,
-                object_uuid=self.kwargs['experience_uuid'],
-                tab=authentication_comment_identifier,
-            ),
+            comment=None,
+            form_url='',
             prefix=authentication_comment_identifier,
-            disabled=not experience_validation_dto.authentification_en_cours,
-            label=_('Comment about the authentication'),
+            disabled=not comment_permission or not experience_validation_dto.authentification_en_cours,
         )
 
         context['experience_authentication_history_entry'] = (
             HistoryEntry.objects.filter(
                 object_uuid=self.admission_uuid,
                 tags__contains=['proposition', 'experience-authentication', 'message'],
-                extra_data__experience_id=str(self.kwargs['experience_uuid']),
+                extra_data__experience_id=self.experience_uuid,
             )
             .order_by('-created')
             .first()
@@ -378,7 +391,7 @@ class SinglePastExperienceMixin(
             message_bus_instance.invoke(
                 VerifierExperienceCurriculumApresSoumissionQuery(
                     uuid_proposition=self.admission_uuid,
-                    uuid_experience=self.kwargs['experience_uuid'],
+                    uuid_experience=self.experience_uuid,
                     type_experience=self.kwargs['experience_type'],
                 )
             )
@@ -408,7 +421,7 @@ class SinglePastExperienceChangeStatusView(SinglePastExperienceMixin):
         message_bus_instance.invoke(
             ModifierStatutChecklistExperienceParcoursAnterieurCommand(
                 uuid_proposition=self.admission_uuid,
-                uuid_experience=self.kwargs['experience_uuid'],
+                uuid_experience=self.experience_uuid,
                 type_experience=self.kwargs['experience_type'],
                 gestionnaire=self.request.user.person.global_id,
                 statut=form.cleaned_data['status'],
@@ -440,7 +453,7 @@ class SinglePastExperienceChangeAuthenticationView(SinglePastExperienceMixin):
         message_bus_instance.invoke(
             ModifierAuthentificationExperienceParcoursAnterieurCommand(
                 uuid_proposition=self.admission_uuid,
-                uuid_experience=self.kwargs['experience_uuid'],
+                uuid_experience=self.experience_uuid,
                 type_experience=self.kwargs['experience_type'],
                 gestionnaire=self.request.user.person.global_id,
                 etat_authentification=form.cleaned_data['state'],

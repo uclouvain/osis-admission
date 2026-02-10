@@ -32,6 +32,7 @@ from rest_framework import status
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
+from admission.models.exam import AdmissionExam
 from admission.tests.factories.general_education import (
     GeneralEducationAdmissionFactory,
     GeneralEducationTrainingFactory,
@@ -39,6 +40,10 @@ from admission.tests.factories.general_education import (
 from admission.tests.factories.roles import SicManagementRoleFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity_version import EntityVersionFactory
+from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
+from osis_profile.models import Exam
+from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience, \
+    EtatAuthentificationParcours
 from osis_profile.tests.factories.exam import ExamFactory, ExamTypeFactory
 
 
@@ -77,12 +82,27 @@ class ExamDetailViewTestCase(TestCase):
 
     def test_get_with_exam_existing(self):
         self.client.force_login(self.sic_manager_user)
-        ExamFactory(
+
+        exam = ExamFactory(
             person=self.general_admission.candidate,
             type=self.exam_type,
             year=self.academic_years[0],
+            validation_status=ChoixStatutValidationExperience.AUTHENTIFICATION.name,
+            authentication_status=EtatAuthentificationParcours.VRAI.name,
         )
+
+        AdmissionExam.objects.create(admission=self.general_admission, exam=exam)
+
         response = self.client.get(self.url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertContains(response, str(self.academic_years[0].year + 1))
+
+        exam: ExamenDTO | None = response.context['examen']
+
+        self.assertIsNotNone(exam)
+
+        self.assertEqual(exam.titre, self.exam_type.title)
+        self.assertEqual(exam.annee, self.academic_years[0].year)
+        self.assertEqual(exam.statut_validation, ChoixStatutValidationExperience.AUTHENTIFICATION.name)
+        self.assertEqual(exam.statut_authentification, EtatAuthentificationParcours.VRAI.name)

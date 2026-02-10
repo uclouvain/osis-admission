@@ -173,7 +173,7 @@ def soumettre_proposition(
 
     proposition_repository.save(proposition)
     demande_repository.save(demande)
-    validation_experience_parcours_anterieur_service.mettre_a_jour_experiences_en_brouillon(proposition=proposition)
+    validation_experience_parcours_anterieur_service.passer_experiences_en_brouillon_en_a_traiter(proposition=proposition)
     historique.historiser_soumission(proposition)
     notification.notifier_soumission(proposition, email_destinataire_repository)
 

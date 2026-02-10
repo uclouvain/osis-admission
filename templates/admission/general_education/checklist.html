@@ -358,7 +358,11 @@
                   {% experience_details_template resume_proposition=resume_proposition experience=experience with_edit_link_button=False specific_questions=specific_questions_by_tab %}
                 </div>
               {% else %}
-                {% include 'admission/general_education/includes/checklist/previous_experience_single.html' with experience=experience authentication_form=authentication_forms|get_item_or_none:experience_uuid experience_authentication_history_entry=all_experience_authentication_history_entries|get_item_or_none:experience_uuid %}
+                {% if experience.uuid %}
+                  {% include 'admission/general_education/includes/checklist/previous_experience_single.html' with experience=experience authentication_form=authentication_forms|get_item_or_none:experience_uuid experience_authentication_history_entry=all_experience_authentication_history_entries|get_item_or_none:experience_uuid %}
+                {% else %}
+                  {% include 'admission/general_education/includes/checklist/previous_experience_single_non_existent.html' with experience=experience %}
+                {% endif %}
                 <div>
                   {% experience_details_template resume_proposition=resume_proposition experience=experience with_edit_link_button=True specific_questions=specific_questions_by_tab %}
                 </div>

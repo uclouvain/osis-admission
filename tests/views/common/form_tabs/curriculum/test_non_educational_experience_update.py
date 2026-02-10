@@ -100,7 +100,6 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
             training__academic_year=cls.academic_years[0],
             candidate__language=settings.LANGUAGE_CODE_EN,
             candidate__country_of_citizenship=CountryFactory(european_union=False),
-            candidate__graduated_from_high_school_year=None,
             candidate__last_registration_year=None,
             candidate__id_photo=[],
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
@@ -145,6 +144,8 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
             institute_name='Institute',
             certificate=[self.file_uuid],
             activity='Activity',
+            validation_status=ChoixStatutValidationExperience.AUTHENTIFICATION.name,
+            authentication_status=EtatAuthentificationParcours.VRAI.name,
         )
 
         # Mock osis document api
@@ -425,6 +426,8 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
         self.assertEqual(self.experience.sector, ActivitySector.PRIVATE.name)
         self.assertEqual(self.experience.institute_name, 'Institute')
         self.assertEqual(self.experience.activity, '')
+        self.assertEqual(self.experience.validation_status, ChoixStatutValidationExperience.AUTHENTIFICATION.name)
+        self.assertEqual(self.experience.authentication_status, EtatAuthentificationParcours.VRAI.name)
 
         # Check the admission
         self.general_admission.refresh_from_db()
@@ -468,6 +471,8 @@ class CurriculumNonEducationalExperienceFormViewTestCase(TestCase):
         self.assertEqual(self.experience.sector, '')
         self.assertEqual(self.experience.institute_name, '')
         self.assertEqual(self.experience.activity, 'Activity')
+        self.assertEqual(self.experience.validation_status, ChoixStatutValidationExperience.AUTHENTIFICATION.name)
+        self.assertEqual(self.experience.authentication_status, EtatAuthentificationParcours.VRAI.name)
 
     def test_general_submit_valid_form_for_create_a_new_work_activity(self):
         self.client.force_login(self.sic_manager_user)

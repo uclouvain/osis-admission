@@ -1471,7 +1471,7 @@ class SinglePastExperienceAuthenticationForm(forms.Form):
 
         self.initial['state'] = experience_validation_data.statut_authentification
 
-        self.prefix = experience_validation_data.uuid
+        self.prefix = str(experience_validation_data.uuid or experience_validation_data.type_experience)
 
         self.fields['state'].disabled = not experience_validation_data.authentification_en_cours
 

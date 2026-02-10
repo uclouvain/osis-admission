@@ -56,6 +56,7 @@ from base.tests.factories.education_group_year import Master120TrainingFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from osis_profile import BE_ISO_CODE, FR_ISO_CODE
 from osis_profile.models import EducationalExperience, EducationalExperienceYear
+from osis_profile.tests.factories.high_school_diploma import HighSchoolDiplomaFactory
 from reference.tests.factories.country import CountryFactory
 
 
@@ -95,12 +96,16 @@ class AdmissionCurriculumGlobalFormViewForGeneralTestCase(TestCase):
 
         self.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             training=self.training,
-            candidate__graduated_from_high_school=GotDiploma.THIS_YEAR.name,
-            candidate__graduated_from_high_school_year=self.academic_years[1],
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
             specific_question_answers={
                 self.text_question_uuid: 'My first answer',
             },
+        )
+
+        HighSchoolDiplomaFactory(
+            got_diploma=GotDiploma.THIS_YEAR.name,
+            academic_graduation_year=self.academic_years[1],
+            person=self.general_admission.candidate,
         )
 
         # Url

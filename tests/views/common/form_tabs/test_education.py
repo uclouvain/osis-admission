@@ -107,6 +107,7 @@ from osis_profile.models.epc_injection import (
 from osis_profile.models.epc_injection import ExperienceType
 from osis_profile.models.exam import EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
 from osis_profile.tests.factories.exam import ExamFactory
+from osis_profile.tests.factories.high_school_diploma import HighSchoolDiplomaFactory
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.domain import DomainFactory
 from reference.tests.factories.language import FrenchLanguageFactory, LanguageFactory
@@ -136,10 +137,13 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         # Mocked data
         self.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             training=self.training,
-            candidate__graduated_from_high_school=GotDiploma.THIS_YEAR.name,
-            candidate__graduated_from_high_school_year=self.academic_years[1],
             candidate__id_photo=[],
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+
+        HighSchoolDiplomaFactory(
+            got_diploma=GotDiploma.THIS_YEAR.name,
+            academic_graduation_year=self.academic_years[1],
         )
 
         # Url
@@ -783,13 +787,16 @@ class AdmissionEducationFormViewForContinuingTestCase(TestCase):
         # Mocked data
         self.continuing_admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
             training=self.training,
-            candidate__graduated_from_high_school=GotDiploma.THIS_YEAR.name,
-            candidate__graduated_from_high_school_year=self.academic_years[1],
             candidate__id_photo=[],
             status=ChoixStatutPropositionContinue.CONFIRMEE.name,
             specific_question_answers={
                 self.other_specific_question_uuid: 'My other answer',
             },
+        )
+
+        HighSchoolDiplomaFactory(
+            got_diploma=GotDiploma.THIS_YEAR.name,
+            academic_graduation_year=self.academic_years[1],
         )
 
         # Url
@@ -897,8 +904,8 @@ class AdmissionEducationFormViewForContinuingTestCase(TestCase):
         self.continuing_admission.refresh_from_db()
         candidate = self.continuing_admission.candidate
 
-        self.assertEqual(self.general_admission.candidate.highschooldiploma.got_diploma, GotDiploma.YES.name)
-        self.assertEqual(self.general_admission.candidate.highschooldiploma.academic_graduation_year, self.academic_years[0])
+        self.assertEqual(self.continuing_admission.candidate.highschooldiploma.got_diploma, GotDiploma.YES.name)
+        self.assertEqual(self.continuing_admission.candidate.highschooldiploma.academic_graduation_year, self.academic_years[0])
 
         self.assertFalse(BelgianHighSchoolDiploma.objects.filter(person=candidate).exists())
         self.assertFalse(ForeignHighSchoolDiploma.objects.filter(person=candidate).exists())
@@ -976,9 +983,12 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
         # Mocked data
         self.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             training=self.training,
-            candidate__graduated_from_high_school=GotDiploma.THIS_YEAR.name,
-            candidate__graduated_from_high_school_year=self.academic_years[1],
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+
+        HighSchoolDiplomaFactory(
+            got_diploma=GotDiploma.THIS_YEAR.name,
+            academic_graduation_year=self.academic_years[1],
         )
 
         # Url

@@ -50,6 +50,7 @@ from epc.tests.factories.inscription_programme_annuel import (
 from epc.tests.factories.inscription_programme_cycle import (
     InscriptionProgrammeCycleFactory,
 )
+from osis_profile.tests.factories.high_school_diploma import HighSchoolDiplomaFactory
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
@@ -174,9 +175,11 @@ class GetMissingCurriculumPeriodsTestCase(TestCase):
         )
 
     def test_with_secondary_studies(self):
-        self.admission.candidate.highschooldiploma.got_diploma = GotDiploma.YES.name
-        self.admission.candidate.highschooldiploma.academic_graduation_year = self.academic_years[2012]
-        self.admission.candidate.save()
+        high_school_diploma = HighSchoolDiplomaFactory(
+            person=self.admission.candidate,
+            got_diploma=GotDiploma.YES.name,
+            academic_graduation_year=self.academic_years[2012],
+        )
 
         result = get_missing_curriculum_periods(proposition_uuid=self.admission.uuid)
 

@@ -25,7 +25,7 @@
 # ##############################################################################
 
 from django.db import transaction
-from django.db.models import QuerySet, Subquery
+from django.db.models import QuerySet, Subquery, Q
 
 from admission.ddd.admission.shared_kernel.domain.service.i_modifier_checklist_experience_parcours_anterieur import \
     IValidationExperienceParcoursAnterieurService
@@ -85,84 +85,32 @@ class ValidationExperienceParcoursAnterieurService(IValidationExperienceParcours
 
     @classmethod
     @transaction.atomic
-    def _update_or_create_high_school_diploma(cls, global_id: str, data: dict):
-        person_id = Person.objects.get(global_id=global_id).values_list('id', flat=True).first()
-
-        high_school_diploma, created =  HighSchoolDiploma.objects.update_or_create(person_id=person_id, defaults=data)
-
-        if high_school_diploma.got_diploma == GotDiploma.NO.name:
-            Exam.objects.filter(
-                type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR,
-                person_id=person_id,
-            ).update(**data)
-
-        return 1
-
-    @classmethod
-    @transaction.atomic
-    def _update_or_create_exam(cls, experience_uuid: str, global_id: str, uuid_proposition: str, data: dict):
-        if experience_uuid != TypeExperience.EXAMEN.name:
-            return cls._get_exam_qs(experience_uuid=experience_uuid, global_id=global_id).update(**data)
-
-        # else:
-        admission: BaseAdmission = BaseAdmission.objects.get(uuid=uuid_proposition, candidate__global_id=global_id).select_related('exam__exam')
-
-        exam_type = ExamType.objects.filter(education_group_years__id=admission.training_id).first()
-
-        if exam_type is None:
-            return 0
-
-        if hasattr(admission, 'exam'):
-            for field, field_value in data:
-                setattr(admission.exam.exam, field, field_value)
-
-            admission.exam.exam.save(update_fields=data.keys())
-
-            return 1
-
-        exam = Exam.objects.create(
-            person_id=admission.candidate_id,
-            type=exam_type,
-            **data,
-        )
-
-        admission_exam = AdmissionExam.objects.create(admission=admission, exam=exam)
-
-        return 1
-
-    @classmethod
-    def _update_experience(cls, experience_type: str, proposition_uuid: str, experience_uuid: str, global_id: str, **data,):
-        if experience_type == TypeExperience.ETUDES_SECONDAIRES.name:
-            updates_number = cls._update_or_create_high_school_diploma(global_id=global_id, data=data)
-        elif experience_type == TypeExperience.EXAMEN.name:
-            updates_number = cls._update_or_create_exam(
-                experience_uuid=experience_uuid,
-                global_id=global_id,
-                proposition_uuid=proposition_uuid,
-                data=data,
-            )
-        else:
-            updates_number = cls._get_experience_qs(
-                global_id=global_id,
-                experience_uuid=experience_uuid,
-                experience_type=experience_type,
-            ).update(**data)
+    def _update_experience(cls, experience_type: str, experience_uuid: str, global_id: str, **data,):
+        updates_number = cls._get_experience_qs(
+            global_id=global_id,
+            experience_uuid=experience_uuid,
+            experience_type=experience_type,
+        ).update(**data)
 
         if not updates_number:
             raise ExperienceNonTrouveeException
+
+        if experience_type == TypeExperience.ETUDES_SECONDAIRES.name:
+            Exam.objects.filter(
+                type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR,
+                person__global_id=global_id,
+            ).update(**data)
 
     @classmethod
     def modifier_statut(
         cls,
         matricule_candidat: str,
-        uuid_proposition: str,
         uuid_experience: str,
         type_experience: str,
         statut: str,
     ):
         cls._update_experience(
             global_id=matricule_candidat,
-            proposition_uuid=uuid_proposition,
             experience_uuid=uuid_experience,
             experience_type=type_experience,
             validation_status=statut,
@@ -172,7 +120,6 @@ class ValidationExperienceParcoursAnterieurService(IValidationExperienceParcours
     def modifier_authentification(
         cls,
         matricule_candidat: str,
-        uuid_proposition: str,
         uuid_experience: str,
         type_experience: str,
         etat_authentification: str,
@@ -212,7 +159,7 @@ class ValidationExperienceParcoursAnterieurService(IValidationExperienceParcours
 
     @classmethod
     @transaction.atomic
-    def mettre_a_jour_experiences_en_brouillon(
+    def passer_experiences_en_brouillon_en_a_traiter(
         cls,
         proposition: PropositionContinue | PropositionDoctorale | PropositionGenerale,
     ):
@@ -221,38 +168,38 @@ class ValidationExperienceParcoursAnterieurService(IValidationExperienceParcours
 
         candidate_id = Person.objects.filter(global_id=proposition.matricule_candidat).values_list('pk', flat=True).get()
 
+        exams_conditions = Q()
+
         if isinstance(proposition, (PropositionContinue, PropositionGenerale)):
-            # In the rare case where the highschooldiploma is not specified, we create it here
             high_school_diploma, created = HighSchoolDiploma.objects.get_or_create(person_id=candidate_id)
 
             if high_school_diploma.validation_status == in_draft_status:
                 high_school_diploma.objects.filter(pk=high_school_diploma.pk).update(validation_status=to_be_processed_status)
 
             if high_school_diploma.got_diploma == GotDiploma.NO.name:
-                Exam.objects.filter(
-                    type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR,
-                    person_id=candidate_id,
-                    validation_status=in_draft_status
-                ).update(
-                    validation_status=to_be_processed_status
-                )
+                exams_conditions |= Q(type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR)
 
         if isinstance(proposition, PropositionGenerale):
+            exams_conditions |= Q(admissions__admission__uuid=proposition.entity_id.uuid)
+
+        if exams_conditions:
             Exam.objects.filter(
+                exams_conditions,
                 person_id=candidate_id,
-                admissions__admission__uuid=proposition.entity_id.uuid,
-                validation_status=in_draft_status
+                validation_status=in_draft_status,
             ).update(validation_status=to_be_processed_status)
 
         EducationalExperience.objects.filter(
             person_id=candidate_id,
-            validation_status=in_draft_status
+            validation_status=in_draft_status,
+            educational_valuated_experiences__baseadmission_id=proposition.entity_id.uuid,
         ).update(
             validation_status=to_be_processed_status
         )
 
         ProfessionalExperience.objects.filter(
             person_id=candidate_id,
-            validation_status=in_draft_status
+            validation_status=in_draft_status,
+            professional_valuated_experiences__baseadmission_id=proposition.entity_id.uuid,
         ).update(validation_status=to_be_processed_status)
 

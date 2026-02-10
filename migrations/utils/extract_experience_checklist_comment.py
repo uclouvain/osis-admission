@@ -35,6 +35,11 @@ class ArrayReplace(Func):
     function = "array_replace"
     output_field = ArrayField(base_field=CharField(max_length=50))
 
+class ArrayRemove(Func):
+    function = " array_remove"
+    output_field = ArrayField(base_field=CharField(max_length=50))
+
+
 @transaction.atomic
 def extract_experience_checklist_comment(comment_model, base_admission_model):
     experience_condition = Q(
@@ -49,7 +54,9 @@ def extract_experience_checklist_comment(comment_model, base_admission_model):
     # Update the object uuid to specify the experience uuid instead of the admission uuid
     comment_model.objects.annotate(
         tags_1_len=Length('tags__1'),
-    ).filter(experience_condition).update(object_uuid=Cast(F('tags__1'), output_field=UUIDField()))
+    ).filter(experience_condition).update(
+        object_uuid=Cast(F('tags__1'), output_field=UUIDField()),
+    )
 
     # Update the object uuid to specify the secondary studies uuid instead of the admission uuid
     matching_admission = base_admission_model.objects.filter(uuid=OuterRef('object_uuid'), candidate__highschooldiploma__isnull=False)
@@ -57,7 +64,7 @@ def extract_experience_checklist_comment(comment_model, base_admission_model):
         high_school_diploma_uuid=Subquery(matching_admission.values('candidate__highschooldiploma__uuid')[:1]),
     ).filter(high_school_diploma_uuid__isnull=False).update(
         object_uuid=F('high_school_diploma_uuid'),
-        tags=ArrayReplace('tags', Value('ETUDES_SECONDAIRES'), Cast(F('high_school_diploma_uuid'), output_field=CharField())),
+        tags=ArrayReplace('tags', Value('ETUDES_SECONDAIRES'), Cast('high_school_diploma_uuid', output_field=CharField())),
     )
 
     # Now we can have several comments by object uuid by tags but we want only unique comments so we merge them

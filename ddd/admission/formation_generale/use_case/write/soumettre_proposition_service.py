@@ -47,6 +47,8 @@ from admission.ddd.admission.shared_kernel.domain.service.i_elements_confirmatio
 from admission.ddd.admission.shared_kernel.domain.service.i_historique import IHistorique
 from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_raccrocher_experiences_curriculum import \
+    IRaccrocherExperiencesCurriculum
 from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import ITitresAcces
 from admission.ddd.admission.shared_kernel.domain.service.profil_soumis_candidat import ProfilSoumisCandidatTranslator
 from admission.ddd.admission.shared_kernel.domain.service.i_modifier_checklist_experience_parcours_anterieur import \
@@ -76,6 +78,7 @@ def soumettre_proposition(
     inscription_tardive_service: 'IInscriptionTardive',
     paiement_frais_dossier_service: 'IPaiementFraisDossier',
     historique: 'IHistorique',
+    raccrocher_experiences_curriculum: 'IRaccrocherExperiencesCurriculum',
     validation_experience_parcours_anterieur_service: 'IValidationExperienceParcoursAnterieurService',
 ) -> 'PropositionIdentity':
     # GIVEN
@@ -186,7 +189,8 @@ def soumettre_proposition(
     )
     proposition_repository.save(proposition)
 
-    validation_experience_parcours_anterieur_service.mettre_a_jour_experiences_en_brouillon(proposition=proposition)
+    raccrocher_experiences_curriculum.raccrocher(proposition=proposition)
+    validation_experience_parcours_anterieur_service.passer_experiences_en_brouillon_en_a_traiter(proposition=proposition)
     notification.confirmer_soumission(proposition)
     historique.historiser_soumission(proposition)
 

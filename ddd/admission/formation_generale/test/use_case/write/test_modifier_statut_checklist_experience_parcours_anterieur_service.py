@@ -76,7 +76,7 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
         self.experience_uuid = '9cbdf4db-2454-4cbf-9e48-55d2a9881ee3'
         self.validation_experience_parcours_anterieur_service = ValidationExperienceParcoursAnterieurInMemoryService()
 
-    def test_should_modifier_vers_statut_checklist_sans_indication_authentification(self):
+    def test_should_modifier_vers_statut_checklist_validee(self):
         proposition_id = self.message_bus.invoke(
             ModifierStatutChecklistExperienceParcoursAnterieurCommand(
                 uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
@@ -149,7 +149,7 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
         self.assertEqual(proposition.entity_id, proposition_id)
         self.assertEqual(informations_validation.uuid, self.experience_uuid)
         self.assertEqual(informations_validation.type_experience, TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name)
-        self.assertEqual(informations_validation.statut_validation, ChoixStatutValidationExperience.AVIS_EXPERT.name)
+        self.assertEqual(informations_validation.statut_validation, ChoixStatutValidationExperience.A_COMPLETER.name)
         self.assertEqual(informations_validation.statut_authentification, EtatAuthentificationParcours.NON_CONCERNE.name)
 
     def test_should_verifier_experience_academique_complete_pour_passage_a_valide(self):
@@ -276,7 +276,7 @@ class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
                 ModifierStatutChecklistExperienceParcoursAnterieurCommand(
                     uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                     uuid_experience=self.experience_uuid,
-                    type_experience=TypeExperience.ACTIVITE_NON_ACADEMIQUE.name,
+                    type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
                     statut=ChoixStatutValidationExperience.A_COMPLETER.name,
                     gestionnaire='0123456789',
                 )

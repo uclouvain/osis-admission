@@ -62,8 +62,11 @@ from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     ValorisationEtudesSecondairesDTO,
 )
 from osis_profile import BE_ISO_CODE
-from osis_profile.models import BelgianHighSchoolDiploma, ForeignHighSchoolDiploma
+from osis_profile.models import BelgianHighSchoolDiploma, ForeignHighSchoolDiploma, Exam
 from osis_profile.models.enums.education import Equivalence, ForeignDiplomaTypes
+from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience, \
+    EtatAuthentificationParcours
+from osis_profile.tests.factories.high_school_diploma import HighSchoolDiplomaFactory
 from reference.tests.factories.country import CountryFactory
 
 
@@ -108,8 +111,6 @@ class AdmissionEducationDetailViewForContinuingEducationTestCase(TestCase):
         self.continuing_admission = ContinuingEducationAdmissionFactory(
             training=self.training,
             status=ChoixStatutPropositionContinue.CONFIRMEE.name,
-            candidate__graduated_from_high_school='',
-            candidate__graduated_from_high_school_year=None,
         )
 
         self.url = resolve_url('admission:continuing-education:education', uuid=self.continuing_admission.uuid)
@@ -149,15 +150,21 @@ class AdmissionEducationDetailViewForContinuingEducationTestCase(TestCase):
                 types_formations_admissions_valorisees=[],
             ),
         )
+        self.assertEqual(secondary_studies.statut_validation, ChoixStatutValidationExperience.A_TRAITER.name)
+        self.assertEqual(secondary_studies.statut_authentification, EtatAuthentificationParcours.NON_CONCERNE.name)
 
     def test_get_secondary_studies_with_belgian_diploma(self):
         diploma: BelgianHighSchoolDiploma = BelgianHighSchoolDiplomaFactory(
             person=self.continuing_admission.candidate,
         )
 
-        self.continuing_admission.candidate.highschooldiploma.got_diploma = GotDiploma.YES.name
-        self.continuing_admission.candidate.highschooldiploma.academic_graduation_year = self.academic_years[2]
-        self.continuing_admission.candidate.highschooldiploma.save()
+        high_school_diploma = HighSchoolDiplomaFactory(
+            person=self.continuing_admission.candidate,
+            got_diploma=GotDiploma.YES.name,
+            academic_graduation_year=self.academic_years[2],
+            validation_status=ChoixStatutValidationExperience.AUTHENTIFICATION.name,
+            authentication_status=EtatAuthentificationParcours.VRAI.name,
+        )
 
         self.client.force_login(self.program_manager_user)
 
@@ -192,6 +199,8 @@ class AdmissionEducationDetailViewForContinuingEducationTestCase(TestCase):
                 types_formations_admissions_valorisees=[],
             ),
         )
+        self.assertEqual(secondary_studies.statut_validation, ChoixStatutValidationExperience.AUTHENTIFICATION.name)
+        self.assertEqual(secondary_studies.statut_authentification, EtatAuthentificationParcours.VRAI.name)
 
         # With institute
         diploma.institute = self.first_institute
@@ -243,9 +252,13 @@ class AdmissionEducationDetailViewForContinuingEducationTestCase(TestCase):
             restrictive_equivalence_admission_test=[uuid.uuid4()],
         )
 
-        self.continuing_admission.candidate.highschooldiploma.got_diploma = GotDiploma.THIS_YEAR.name
-        self.continuing_admission.candidate.highschooldiploma.academic_graduation_year = self.academic_years[2]
-        self.continuing_admission.candidate.highschooldiploma.save()
+        high_school_diploma = HighSchoolDiplomaFactory(
+            person=self.continuing_admission.candidate,
+            got_diploma=GotDiploma.THIS_YEAR.name,
+            academic_graduation_year=self.academic_years[2],
+            validation_status=ChoixStatutValidationExperience.AVIS_EXPERT.name,
+            authentication_status=EtatAuthentificationParcours.FAUX.name,
+        )
 
         self.client.force_login(self.program_manager_user)
 
@@ -292,15 +305,20 @@ class AdmissionEducationDetailViewForContinuingEducationTestCase(TestCase):
                 types_formations_admissions_valorisees=[],
             ),
         )
+        self.assertEqual(secondary_studies.statut_validation, ChoixStatutValidationExperience.AVIS_EXPERT.name)
+        self.assertEqual(secondary_studies.statut_authentification, EtatAuthentificationParcours.FAUX.name)
 
     def test_get_secondary_studies_with_diploma_alternative(self):
-        diploma: HighSchoolDiplomaAlternative = HighSchoolDiplomaAlternativeFactory(
+        diploma: Exam = HighSchoolDiplomaAlternativeFactory(
             person=self.continuing_admission.candidate,
             certificate=[uuid.uuid4()],
         )
 
-        self.continuing_admission.candidate.graduated_from_high_school = GotDiploma.NO.name
-        self.continuing_admission.candidate.save()
+        HighSchoolDiplomaFactory(
+            person=self.continuing_admission.candidate,
+            got_diploma=GotDiploma.NO.name,
+            academic_graduation_year=None,
+        )
 
         self.client.force_login(self.program_manager_user)
 

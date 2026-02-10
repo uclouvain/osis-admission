@@ -155,6 +155,7 @@ from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceNonAcademiqueDTO, ExperienceAcademiqueDTO
 from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd import interface
+from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -773,7 +774,7 @@ class Proposition(interface.RootEntity):
             profil_candidat_translator: IProfilCandidatTranslator,
             grade_academique_formation_proposition: str,
     ):
-        if statut_checklist_cible == ChoixStatutValidationDonneesPersonnelles.VALIDEES.name:
+        if statut_checklist_cible == ChoixStatutValidationExperience.VALIDEE.name:
             # Une expérience académique ne peut passer à l'état "Validé" que si elle est complète
             ProfilCandidatService.verifier_experience_curriculum_formation_generale_apres_soumission(
                 proposition=self,

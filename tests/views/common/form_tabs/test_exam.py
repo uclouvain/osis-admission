@@ -32,6 +32,7 @@ from rest_framework import status
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
+from admission.models.exam import AdmissionExam
 from admission.tests.factories.general_education import (
     GeneralEducationAdmissionFactory,
     GeneralEducationTrainingFactory,
@@ -39,6 +40,9 @@ from admission.tests.factories.general_education import (
 from admission.tests.factories.roles import SicManagementRoleFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity_version import EntityVersionFactory
+from osis_profile.models import Exam, ExamType
+from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience, \
+    EtatAuthentificationParcours
 from osis_profile.tests.factories.exam import ExamFactory, ExamTypeFactory
 
 
@@ -95,11 +99,43 @@ class ExamFormViewTestCase(TestCase):
 
     def test_post_with_exam_existing(self):
         self.client.force_login(self.sic_manager_user)
-        ExamFactory(
+
+        exam: Exam = ExamFactory(
             person=self.general_admission.candidate,
             type=self.exam_type,
             year=self.academic_years[0],
+            validation_status=ChoixStatutValidationExperience.AUTHENTIFICATION.name,
+            authentication_status=EtatAuthentificationParcours.VRAI.name,
         )
+
+        AdmissionExam.objects.create(admission=self.general_admission, exam=exam)
+
         response = self.client.post(self.url, data={'certificate': [], 'year': self.academic_years[1].id})
 
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+        exam.refresh_from_db()
+
+        self.assertEqual(exam.certificate, [])
+        self.assertEqual(exam.year, self.academic_years[1])
+        self.assertEqual(exam.type, self.exam_type)
+        self.assertEqual(exam.validation_status, ChoixStatutValidationExperience.AUTHENTIFICATION.name)
+        self.assertEqual(exam.authentication_status, EtatAuthentificationParcours.VRAI.name)
+
+    def test_post_with_new_exam(self):
+        self.client.force_login(self.sic_manager_user)
+
+        response = self.client.post(self.url, data={'certificate': [], 'year': self.academic_years[1].id})
+
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+
+        exam = Exam.objects.filter(person=self.general_admission.candidate, type=self.exam_type).first()
+
+        exam.refresh_from_db()
+
+        self.assertEqual(exam.certificate, [])
+        self.assertEqual(exam.year, self.academic_years[1])
+        self.assertEqual(exam.type, self.exam_type)
+        self.assertEqual(exam.validation_status, ChoixStatutValidationExperience.A_TRAITER.name)
+        self.assertEqual(exam.authentication_status, EtatAuthentificationParcours.NON_CONCERNE.name)
+

@@ -67,6 +67,7 @@ class RaccrocherExperiencesCurriculum(IRaccrocherExperiencesCurriculum):
             ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE,
             ChoixStatutPropositionContinue.CONFIRMEE,
             ChoixStatutPropositionGenerale.CONFIRMEE,
+            ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE,
         }:
             return
 
