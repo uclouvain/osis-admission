@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -411,7 +411,7 @@ class FacultyDecisionSendToFacultyViewTestCase(TestCase):
         response = self.client.post(self.url, **self.default_headers)
 
         # Check the response
-        program_email = EmailFonctionProgrammeFactory(
+        EmailFonctionProgrammeFactory(
             programme=self.general_admission.training.education_group,
             type=TypeEmailFonctionProgramme.DESTINATAIRE_ADMISSION.name,
             premiere_annee=False,
@@ -515,7 +515,9 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         patched.return_value = 'foobar'
         self.addCleanup(self.get_remote_token_patcher.stop)
 
-        self.save_raw_content_remotely_patcher = mock.patch('osis_document_components.services.save_raw_content_remotely')
+        self.save_raw_content_remotely_patcher = mock.patch(
+            'osis_document_components.services.save_raw_content_remotely'
+        )
         patched = self.save_raw_content_remotely_patcher.start()
         patched.return_value = 'a-token'
         self.addCleanup(self.save_raw_content_remotely_patcher.stop)
@@ -870,9 +872,19 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         response = self.client.post(self.url + '?approval=1', **self.default_headers)
         self.assertEqual(response.status_code, 200)
 
-        # Check that the admission has not been updated
+        # Check that the admission has been updated
         self.general_admission.refresh_from_db()
-        self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name)
+        self.assertEqual(self.general_admission.status, ChoixStatutPropositionGenerale.RETOUR_DE_FAC.name)
+
+        self.get_pdf_from_template_patcher.assert_called_once()
+        pdf_context = self.get_pdf_from_template_patcher.call_args_list[0][0][2]
+
+        self.assertIn('access_titles_names', pdf_context)
+        self.assertEqual(len(pdf_context['access_titles_names']), 1)
+        self.assertEqual(pdf_context['access_titles_names'][0], secondary_studies_base_title)
+
+        self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
+        self.general_admission.save()
 
         diploma_alternative.certificate = ['token.pdf']
         diploma_alternative.save()
@@ -1041,7 +1053,7 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
             decision=DecisionResultatCycle.DISTINCTION.name,
             sigle_formation="SF1",
         )
-        pce_a_uuid = str(uuid.UUID(int=pce_a.pk))
+        str(uuid.UUID(int=pce_a.pk))
         pce_a_pae_a = InscriptionProgrammeAnnuelFactory(
             programme_cycle=pce_a,
             statut=StatutInscriptionProgrammAnnuel.ETUDIANT_UCL.name,
@@ -1051,8 +1063,6 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         )
 
         self.general_admission.internal_access_titles.add(pce_a)
-
-        candidate = self.general_admission.candidate
 
         response = self.client.post(self.url + '?approval=1', **self.default_headers)
         self.assertEqual(response.status_code, 200)
@@ -1073,9 +1083,9 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         self.client.force_login(user=self.fac_manager_user)
 
         self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
-        self.general_admission.checklist['current']['decision_facultaire'][
-            'statut'
-        ] = ChoixStatutChecklist.GEST_REUSSITE.name
+        self.general_admission.checklist['current']['decision_facultaire']['statut'] = (
+            ChoixStatutChecklist.GEST_REUSSITE.name
+        )
         self.general_admission.save()
 
         # Invalid request -> We need to be in the right status
@@ -1089,9 +1099,9 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         frozen_time.move_to('2022-01-02')
 
         # Valid request
-        self.general_admission.checklist['current']['decision_facultaire'][
-            'statut'
-        ] = ChoixStatutChecklist.INITIAL_CANDIDAT.name
+        self.general_admission.checklist['current']['decision_facultaire']['statut'] = (
+            ChoixStatutChecklist.INITIAL_CANDIDAT.name
+        )
         self.general_admission.save()
 
         response = self.client.post(self.url, **self.default_headers)
@@ -1131,9 +1141,9 @@ class FacultyDecisionSendToSicViewTestCase(TestCase):
         self.client.force_login(user=self.sic_manager_user)
 
         self.general_admission.status = ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name
-        self.general_admission.checklist['current']['decision_facultaire'][
-            'statut'
-        ] = ChoixStatutChecklist.GEST_REUSSITE.name
+        self.general_admission.checklist['current']['decision_facultaire']['statut'] = (
+            ChoixStatutChecklist.GEST_REUSSITE.name
+        )
         self.general_admission.save()
 
         frozen_time.move_to('2022-01-02')
@@ -1224,7 +1234,9 @@ class FacultyRefusalDecisionViewTestCase(TestCase):
         patched.return_value = 'foobar'
         self.addCleanup(self.get_remote_token_patcher.stop)
 
-        self.save_raw_content_remotely_patcher = mock.patch('osis_document_components.services.save_raw_content_remotely')
+        self.save_raw_content_remotely_patcher = mock.patch(
+            'osis_document_components.services.save_raw_content_remotely'
+        )
         patched = self.save_raw_content_remotely_patcher.start()
         patched.return_value = 'a-token'
         self.addCleanup(self.save_raw_content_remotely_patcher.stop)
@@ -1573,7 +1585,9 @@ class FacultyApprovalDecisionViewTestCase(TestCase):
         patched.return_value = 'foobar'
         self.addCleanup(self.get_remote_token_patcher.stop)
 
-        self.save_raw_content_remotely_patcher = mock.patch('osis_document_components.services.save_raw_content_remotely')
+        self.save_raw_content_remotely_patcher = mock.patch(
+            'osis_document_components.services.save_raw_content_remotely'
+        )
         patched = self.save_raw_content_remotely_patcher.start()
         patched.return_value = 'a-token'
         self.addCleanup(self.save_raw_content_remotely_patcher.stop)
@@ -2353,7 +2367,9 @@ class LateFacultyApprovalDecisionViewTestCase(TestCase):
         patched.return_value = 'foobar'
         self.addCleanup(self.get_remote_token_patcher.stop)
 
-        self.save_raw_content_remotely_patcher = mock.patch('osis_document_components.services.save_raw_content_remotely')
+        self.save_raw_content_remotely_patcher = mock.patch(
+            'osis_document_components.services.save_raw_content_remotely'
+        )
         patched = self.save_raw_content_remotely_patcher.start()
         patched.return_value = 'a-token'
         self.addCleanup(self.save_raw_content_remotely_patcher.stop)
@@ -2564,7 +2580,9 @@ class CourseChangeFacultyApprovalDecisionViewTestCase(TestCase):
         patched.return_value = 'foobar'
         self.addCleanup(self.get_remote_token_patcher.stop)
 
-        self.save_raw_content_remotely_patcher = mock.patch('osis_document_components.services.save_raw_content_remotely')
+        self.save_raw_content_remotely_patcher = mock.patch(
+            'osis_document_components.services.save_raw_content_remotely'
+        )
         patched = self.save_raw_content_remotely_patcher.start()
         patched.return_value = 'a-token'
         self.addCleanup(self.save_raw_content_remotely_patcher.stop)

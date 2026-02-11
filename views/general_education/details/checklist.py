@@ -87,7 +87,6 @@ from admission.ddd.admission.formation_generale.commands import (
     SpecifierDerogationFinancabiliteCommand,
     SpecifierDerogationVraeFinancabiliteCommand,
     SpecifierEquivalenceTitreAccesEtrangerPropositionCommand,
-    SpecifierExperienceEnTantQueTitreAccesCommand,
     SpecifierFinancabiliteNonConcerneeCommand,
     SpecifierFinancabiliteRegleCommand,
     SpecifierInformationsAcceptationInscriptionParSicCommand,
@@ -131,6 +130,7 @@ from admission.ddd.admission.shared_kernel.commands import (
     ListerToutesDemandesQuery,
     RechercherParcoursAnterieurQuery,
     RecupererInformationsDestinataireQuery,
+    SpecifierExperienceEnTantQueTitreAccesCommand,
 )
 from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
     EtatAuthentificationParcours,
@@ -2205,7 +2205,9 @@ class PastExperiencesAccessTitleView(
                 )
             )
 
-        except BusinessException as exception:
+        except (MultipleBusinessExceptions, BusinessException) as exception:
+            if isinstance(exception, MultipleBusinessExceptions):
+                exception = exception.exceptions.pop()
             self.message_on_failure = exception.message
             self.checked = not self.checked
             return super().form_invalid(form)

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -129,3 +129,16 @@ class TypeTitreAccesSelectionnable(ChoiceEnum):
     ETUDES_SECONDAIRES = _('Secondary studies')
     EXPERIENCE_PARCOURS_INTERNE = _('Internal experience')
     EXAMENS = _('Exams')
+
+    def est_academique(self):
+        return self in {
+            self.EXPERIENCE_ACADEMIQUE,
+            self.ETUDES_SECONDAIRES,
+            self.EXPERIENCE_PARCOURS_INTERNE,
+            self.EXAMENS,
+        }
+
+    def est_non_academique(self):
+        return self in {
+            self.EXPERIENCE_NON_ACADEMIQUE,
+        }

@@ -6371,6 +6371,11 @@ msgstr ""
 msgid "The academic year of the period"
 msgstr ""
 
+msgid ""
+"The access titles can either be a single academic course or one or several "
+"non-academic activities."
+msgstr ""
+
 msgid "The admission must be approved by the CDD."
 msgstr ""
 
