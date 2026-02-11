@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -41,7 +41,6 @@ from admission.models import SupervisionActor
 from admission.models.enums.actor_type import ActorType
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
-from admission.tests.factories.person import InternalPersonFactory
 from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.supervision import (
     CaMemberFactory,
@@ -51,7 +50,12 @@ from admission.tests.factories.supervision import (
 from base.models.enums.entity_type import EntityType
 from base.tests import QueriesAssertionsMixin
 from base.tests.factories.entity_version import EntityVersionFactory
-from base.tests.factories.person import ExternalPersonFactory, PersonFactory
+from base.tests.factories.person import (
+    ExternalPersonFactory,
+    PersonFactory,
+    EmployeeInternalPersonFactory,
+    InternalPersonFactory,
+)
 from base.tests.factories.student import StudentFactory
 from base.tests.factories.tutor import TutorFactory
 from reference.tests.factories.country import CountryFactory
@@ -166,7 +170,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         self.assertIsNone(admission.supervision_group)
         url = resolve_url("admission_api_v1:supervision", uuid=admission.uuid)
         data = {
-            'matricule': InternalPersonFactory(first_name="John").global_id,
+            'matricule': EmployeeInternalPersonFactory(first_name="John").global_id,
             'actor_type': ActorType.CA_MEMBER.name,
             **self.empty_external_data,
         }
@@ -183,7 +187,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         self.client.force_authenticate(user=self.candidate.user)
 
         data = {
-            'matricule': InternalPersonFactory(first_name="John").global_id,
+            'matricule': EmployeeInternalPersonFactory(first_name="John").global_id,
             'actor_type': ActorType.CA_MEMBER.name,
             **self.empty_external_data,
         }
@@ -197,7 +201,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
     def test_supervision_ajouter_membre_ca_etudiant_tuteur(self):
         self.client.force_authenticate(user=self.candidate.user)
 
-        person = InternalPersonFactory(first_name="Jim")
+        person = EmployeeInternalPersonFactory(first_name="Jim")
 
         data = {
             'matricule': person.global_id,
@@ -223,6 +227,27 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         created_actor = SupervisionActor.objects.filter(person=person).first()
         self.assertIsNotNone(created_actor)
         self.assertEqual(created_actor.state, SignatureState.NOT_INVITED.name)
+
+    def test_supervision_ajouter_membre_ca_employe_uniquement(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        person = InternalPersonFactory(first_name="Jim", employee=False)
+
+        data = {
+            'matricule': person.global_id,
+            'actor_type': ActorType.CA_MEMBER.name,
+            **self.empty_external_data,
+        }
+
+        response = self.client.put(self.url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.json()['non_field_errors'][0]['status_code'], MembreCANonTrouveException.status_code)
+
+        person.employee = True
+        person.save(update_fields=['employee'])
+
+        response = self.client.put(self.url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
     def test_supervision_ajouter_membre_ca_externe(self):
         self.client.force_authenticate(user=self.candidate.user)
@@ -271,7 +296,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         self.client.force_authenticate(user=self.candidate.user)
 
         data = {
-            'matricule': TutorFactory(person=InternalPersonFactory(first_name="John")).person.global_id,
+            'matricule': TutorFactory(person=EmployeeInternalPersonFactory(first_name="John")).person.global_id,
             'actor_type': ActorType.PROMOTER.name,
             **self.empty_external_data,
         }
@@ -286,7 +311,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
     def test_supervision_ajouter_promoteur_etudiant_tuteur(self):
         self.client.force_authenticate(user=self.candidate.user)
 
-        person = InternalPersonFactory(first_name="Jim")
+        person = EmployeeInternalPersonFactory(first_name="Jim")
 
         data = {
             'matricule': person.global_id,
@@ -313,6 +338,27 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
         created_actor = SupervisionActor.objects.filter(person=person).first()
         self.assertIsNotNone(created_actor)
         self.assertEqual(created_actor.state, SignatureState.NOT_INVITED.name)
+
+    def test_supervision_ajouter_promoteur_employe_uniquement(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        person = InternalPersonFactory(first_name="Jim", employee=False)
+
+        data = {
+            'matricule': person.global_id,
+            'actor_type': ActorType.PROMOTER.name,
+            **self.empty_external_data,
+        }
+
+        response = self.client.put(self.url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.json()['non_field_errors'][0]['status_code'], PromoteurNonTrouveException.status_code)
+
+        person.employee = True
+        person.save(update_fields=['employee'])
+
+        response = self.client.put(self.url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
     def test_supervision_ajouter_promoteur_externe(self):
         self.client.force_authenticate(user=self.candidate.user)
@@ -567,7 +613,7 @@ class SupervisionApiTestCase(QueriesAssertionsMixin, APITestCase):
 
         # Add CA member
         data = {
-            'matricule': InternalPersonFactory(first_name="Joe").global_id,
+            'matricule': EmployeeInternalPersonFactory(first_name="Joe").global_id,
             'actor_type': ActorType.CA_MEMBER.name,
             **self.empty_external_data,
         }
