@@ -237,6 +237,7 @@ from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
+from base.services.fraudeurs import FraudeursService
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from base.utils.utils import format_academic_year
 from ddd.logic.shared_kernel.profil.commands import (
@@ -563,6 +564,17 @@ class PersonalDataChangeStatusView(
         extra = {}
         if 'fraud' in self.request.POST:
             extra['fraud'] = self.request.POST['fraud']
+
+        if 'en_cours' in self.request.POST:
+            extra['en_cours'] = self.request.POST['en_cours']
+
+        checklist_actuelle = admission.checklist.get('current')
+        if self.request.POST.get('fraud') == '1' or (
+            checklist_actuelle
+            and checklist_actuelle['donnees_personnelles']['statut'] == ChoixStatutChecklist.GEST_BLOCAGE.name
+            and checklist_actuelle['donnees_personnelles']['extra'].get('fraud') == '1'
+        ):
+            self.htmx_refresh = True
 
         change_admission_status(
             tab=OngletsChecklist.donnees_personnelles.name,

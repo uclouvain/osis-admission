@@ -172,10 +172,8 @@ class PropositionGestionnaireDTO(PropositionDTO):
 
     candidat_a_plusieurs_demandes: bool
 
-    titre_acces: str
     candidat_assimile: bool
-    fraudeur_ares: bool
-    non_financable: bool
+    est_fraudeur: bool
     est_inscription_tardive: bool
 
     profil_soumis_candidat: Optional[ProfilCandidatDTO]

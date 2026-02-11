@@ -173,10 +173,11 @@ msgstr ""
 "l’adresse <a href=\"mailto:{mail}\">{mail}</a> :</p>"
 
 msgid ""
-"<strong>Warning</strong> the candidate is reported as a <strong>fraudster</"
-"strong>"
+"<strong>Warning</strong> the candidate is reported as <strong>fraudster</"
+"strong> by the ARES"
 msgstr ""
-"<strong>Attention</strong> le candidat est signalé <strong>fraudeur</strong>"
+"<strong>Attention</strong> le candidat est signalé <strong>fraudeur</strong> "
+"par l'ARES"
 
 #, python-format
 msgid ""
@@ -3373,14 +3374,8 @@ msgstr "Ancien·ne étudiant·e UCLouvain"
 msgid "Fraudster"
 msgstr "Fraudeur"
 
-msgid "Fraudster (ARES)"
-msgstr "Fraudeur (ARES)"
-
 msgid "Fraudster status from ARES"
 msgstr "Statut fraudeur d'après l'ARES"
-
-msgid "Fraudster status from SIC"
-msgstr "Statut fraudeur d'après SIC"
 
 msgid "Free additional approval condition"
 msgstr "Condition complémentaire d'acceptation libre"
@@ -5049,9 +5044,6 @@ msgstr "Aucune formation n'a été trouvée pour :"
 msgid "No enrolment application"
 msgstr "Aucune demande d'inscription n'a été trouvée"
 
-msgid "No fraud identified"
-msgstr "Pas de fraude identifiée"
-
 msgid "No general enrolment"
 msgstr "Aucune inscription en formation générale n'a été trouvée"
 
@@ -5159,9 +5151,6 @@ msgstr "Non finançable - %(rule)s (Établi par %(established_by)s)"
 
 msgid "Not free"
 msgstr "Non libre"
-
-msgid "Not fundable"
-msgstr "Non-finançable"
 
 msgctxt "dashboard-indicator admission"
 msgid "Not in order of registration"
@@ -6211,6 +6200,9 @@ msgstr "Liste des documents réclamés"
 msgid "Requested on"
 msgstr "Réclamé le"
 
+msgid "Requesting fraud status from the ARES"
+msgstr "Demande du statut fraudeur depuis l'ARES"
+
 #, python-format
 msgid "Require changes for \"%(object)s\""
 msgstr "Demander des changements pour \"%(object)s\""
@@ -6493,6 +6485,13 @@ msgstr "Envoyer en faculté"
 
 msgid "Sender"
 msgstr "Expéditeur"
+
+msgid ""
+"Sending the authorization is impossible while the personal data are in the "
+"\"Fraudster\" status."
+msgstr ""
+"L’envoi de l’autorisation est impossible lorsque les données personnelles "
+"sont à l'état \"Fraudeur\"."
 
 msgid "Sent to EPC"
 msgstr "Envoyée à EPC"
@@ -8068,6 +8067,9 @@ msgstr "UE"
 
 msgid "UUID"
 msgstr "UUID"
+
+msgid "Unable to get fraud status from the ARES at the moment"
+msgstr "Impossible de récupérer l'état fraudeur depuis l'ARES"
 
 msgid "Unavailable"
 msgstr "Non disponible"

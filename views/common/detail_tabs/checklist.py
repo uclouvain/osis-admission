@@ -26,9 +26,10 @@
 import datetime
 
 from django.contrib import messages
+from django.core.cache import cache
 from django.shortcuts import resolve_url
 from django.utils.functional import cached_property
-from django.views.generic import FormView
+from django.views.generic import FormView, TemplateView
 from osis_comment.models import CommentEntry
 from rest_framework import serializers, status
 from rest_framework.authentication import SessionAuthentication
@@ -50,16 +51,21 @@ from admission.views.common.detail_tabs.comments import (
     COMMENT_TAG_IUFC_FOR_FAC,
     COMMENT_TAG_SIC_FOR_CDD,
 )
-from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
+from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin, AdmissionViewMixin
 
 __all__ = [
     'ChangeStatusView',
     'SaveCommentView',
     'PropositionFromResumeMixin',
     'ChecklistTabIcon',
+    'FraudsterCheckView',
 ]
 
 __namespace__ = False
+
+from base.services.fraudeurs import FraudeursService
+
+from base.utils.htmx import HtmxPermissionRequiredMixin
 
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
@@ -226,3 +232,36 @@ class ChecklistTabIcon:
         self.title = title
         self.identifier = identifier
         self.displayed = displayed
+
+
+class FraudsterCheckView(AdmissionViewMixin, HtmxPermissionRequiredMixin, TemplateView):
+    urlpatterns = {'fraudster-check': 'fraudster-check'}
+    template_name = 'admission/details/includes/checklist/fraud_ares_status.html'
+    permission_required = 'admission.change_checklist'
+    http_method_names = ['post']
+
+    WEBSERVICE_UNAVAILABLE_CACHE_KEY = 'admission-checklist-fraudster-webservice-unavailable'
+    WEBSERVICE_UNAVAILABLE_TIMEOUT = 7200
+
+    def post(self, request, *args, **kwargs):
+        if cache.get(self.WEBSERVICE_UNAVAILABLE_CACHE_KEY):
+            is_fraudster_from_ares = None
+        else:
+            admission = self.get_permission_object()
+            is_fraudster_from_ares = FraudeursService.verifier(
+                niss=admission.candidate.national_number,
+                nom=admission.candidate.last_name,
+                prenom=admission.candidate.first_name,
+                autres_prenoms=admission.candidate.middle_name,
+                date_naissance=admission.candidate.birth_date,
+            )
+            if is_fraudster_from_ares is None:
+                cache.set(
+                    self.WEBSERVICE_UNAVAILABLE_CACHE_KEY,
+                    True,
+                    timeout=self.WEBSERVICE_UNAVAILABLE_TIMEOUT,
+                )
+        return self.render_to_response(self.get_context_data(
+            is_fraudster_from_ares_error=is_fraudster_from_ares is None,
+            is_fraudster_from_ares=is_fraudster_from_ares,
+        ))

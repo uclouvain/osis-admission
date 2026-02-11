@@ -142,8 +142,8 @@ msgid ""
 msgstr ""
 
 msgid ""
-"<strong>Warning</strong> the candidate is reported as a <strong>fraudster</"
-"strong>"
+"<strong>Warning</strong> the candidate is reported as <strong>fraudster</"
+"strong> by the ARES"
 msgstr ""
 
 #, python-format
@@ -3078,13 +3078,7 @@ msgstr ""
 msgid "Fraudster"
 msgstr ""
 
-msgid "Fraudster (ARES)"
-msgstr ""
-
 msgid "Fraudster status from ARES"
-msgstr ""
-
-msgid "Fraudster status from SIC"
 msgstr ""
 
 msgid "Free additional approval condition"
@@ -4533,9 +4527,6 @@ msgstr ""
 msgid "No enrolment application"
 msgstr ""
 
-msgid "No fraud identified"
-msgstr ""
-
 msgid "No general enrolment"
 msgstr ""
 
@@ -4642,9 +4633,6 @@ msgid "Not financeable - %(rule)s (Established by %(established_by)s)"
 msgstr ""
 
 msgid "Not free"
-msgstr ""
-
-msgid "Not fundable"
 msgstr ""
 
 msgctxt "dashboard-indicator admission"
@@ -5622,6 +5610,9 @@ msgstr ""
 msgid "Requested on"
 msgstr ""
 
+msgid "Requesting fraud status from the ARES"
+msgstr ""
+
 #, python-format
 msgid "Require changes for \"%(object)s\""
 msgstr ""
@@ -5897,6 +5888,11 @@ msgid "Send to faculty"
 msgstr ""
 
 msgid "Sender"
+msgstr ""
+
+msgid ""
+"Sending the authorization is impossible while the personal data are in the "
+"\"Fraudster\" status."
 msgstr ""
 
 msgid "Sent to EPC"
@@ -7234,6 +7230,9 @@ msgid "UE"
 msgstr ""
 
 msgid "UUID"
+msgstr ""
+
+msgid "Unable to get fraud status from the ARES at the moment"
 msgstr ""
 
 msgid "Unavailable"
