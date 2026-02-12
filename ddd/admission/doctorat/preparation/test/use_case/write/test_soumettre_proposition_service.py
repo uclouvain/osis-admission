@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,21 +29,13 @@ import freezegun
 import mock
 from django.test import TestCase
 
-from admission.ddd.admission.doctorat.preparation.commands import (
-    SoumettrePropositionCommand,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixStatutPropositionDoctorale,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
-    ChoixStatutChecklist,
-)
+from admission.ddd.admission.doctorat.preparation.commands import SoumettrePropositionCommand
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import ChoixStatutChecklist
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
     PropositionAdmissionSC3DPConfirmeeFactory,
 )
-from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
-    EtatAuthentificationParcours,
-)
+from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.groupe_de_supervision import (
     GroupeDeSupervisionInMemoryRepository,
 )
@@ -53,56 +45,25 @@ from admission.infrastructure.admission.doctorat.preparation.repository.in_memor
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.elements_confirmation import (
     ElementsConfirmationInMemory,
 )
-from admission.infrastructure.message_bus_in_memory import (
-    message_bus_in_memory_instance,
-)
+from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
-from base.models.enums.education_group_types import TrainingType
-from ddd.logic.financabilite.domain.model.catalogue import Formation
-from ddd.logic.financabilite.domain.model.parcours import (
-    Parcours,
-    ParcoursAcademiqueExterne,
-    ParcoursAcademiqueInterne,
-)
-from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
-    AcademicYear,
-    AcademicYearIdentity,
-)
-from infrastructure.financabilite.domain.service.in_memory.financabilite import (
-    FinancabiliteInMemoryFetcher,
-)
-from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import (
-    AcademicYearInMemoryRepository,
-)
+from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
+from ddd.logic.financabilite.dtos.financabilite import FinancabiliteDTO
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 
 
 @freezegun.freeze_time('2020-11-01')
 class TestVerifierPropositionServiceCommun(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.financabilite_fetcher = FinancabiliteInMemoryFetcher()
-        cls.financabilite_fetcher.save(
-            Parcours(
-                matricule_fgs='0123456789',
-                parcours_academique_interne=ParcoursAcademiqueInterne(programmes_cycles=[]),
-                parcours_academique_externe=ParcoursAcademiqueExterne(experiences=[]),
-                annee_diplome_etudes_secondaires=2015,
-                nombre_tentative_de_passer_concours_pass_et_las=0,
-            )
-        )
-        cls.financabilite_fetcher.formations.append(
-            Formation(
-                sigle='SC3DP',
-                annee=2020,
-                type=TrainingType.PHD.name,
-                code_etude_ares='1',
-                credits=0,
-                cycle=3,
-            )
-        )
-
     def setUp(self) -> None:
+        patcher = mock.patch(
+            'admission.ddd.admission.doctorat.preparation.use_case.write.soumettre_proposition_service.Financabilite'
+        )
+        mock_financabilite = patcher.start()
+        self.addCleanup(patcher.stop)
+        mock_financabilite.return_value.determiner.return_value = FinancabiliteDTO(
+            etat=EtatFinancabilite.NON_FINANCABLE.name, details=[]
+        )
         self.proposition_repository = PropositionInMemoryRepository()
         self.proposition = PropositionAdmissionSC3DPConfirmeeFactory(
             statut=ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE

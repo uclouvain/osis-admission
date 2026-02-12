@@ -54,39 +54,20 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     PromoteurDeReferenceManquantException,
     PromoteurManquantException,
 )
-from admission.ddd.admission.doctorat.validation.domain.model.enums import (
-    ChoixStatutCDD,
-    ChoixStatutSIC,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_elements_confirmation import (
-    IElementsConfirmation,
-)
+from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.shared_kernel.domain.service.i_elements_confirmation import IElementsConfirmation
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     QuestionsSpecifiquesChoixFormationNonCompleteesException,
 )
-from admission.ddd.admission.shared_kernel.enums.question_specifique import (
-    Onglets,
-    TypeItemFormulaire,
-)
-from admission.models import (
-    AdmissionFormItemInstantiation,
-    AdmissionTask,
-    DoctorateAdmission,
-)
+from admission.ddd.admission.shared_kernel.enums.question_specifique import Onglets, TypeItemFormulaire
+from admission.models import AdmissionFormItemInstantiation, AdmissionTask, DoctorateAdmission
 from admission.models.specific_question import SpecificQuestionAnswer
 from admission.tests import CheckActionLinksMixin
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
-from admission.tests.factories.continuing_education import (
-    ContinuingEducationAdmissionFactory,
-)
-from admission.tests.factories.curriculum import (
-    EducationalExperienceFactory,
-    EducationalExperienceYearFactory,
-)
+from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from admission.tests.factories.curriculum import EducationalExperienceFactory, EducationalExperienceYearFactory
 from admission.tests.factories.form_item import (
     AdmissionFormItemFactory,
     AdmissionFormItemInstantiationFactory,
@@ -95,11 +76,7 @@ from admission.tests.factories.form_item import (
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.person import CompletePersonFactory
 from admission.tests.factories.roles import CandidateFactory, ProgramManagerRoleFactory
-from admission.tests.factories.supervision import (
-    CaMemberFactory,
-    PromoterFactory,
-    _ProcessFactory,
-)
+from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory, _ProcessFactory
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.community import CommunityEnum
 from base.models.enums.entity_type import EntityType
@@ -108,9 +85,11 @@ from base.tests.factories.academic_year import AcademicYearFactory, get_current_
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
 from base.tests.factories.person import PersonFactory
+from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
+from ddd.logic.financabilite.dtos.financabilite import FinancabiliteDTO
 from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
 from epc.tests.factories.email_fonction_programme import EmailFonctionProgrammeFactory
-from infrastructure.financabilite.domain.service.financabilite import PASS_ET_LAS_LABEL
+from infrastructure.financabilite.domain.service.fetcher import PASS_ET_LAS_LABEL
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.language import FrenchLanguageFactory
 
@@ -160,7 +139,9 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
             candidate=cls.admission.candidate,
             training__management_entity=cls.other_commission.entity,
         )
-        cls.continuing_campus = cls.continuing_education_admission.training.educationgroupversion_set.first().root_group.main_teaching_campus
+        cls.continuing_campus = (
+            cls.continuing_education_admission.training.educationgroupversion_set.first().root_group.main_teaching_campus
+        )
 
         # Users
         cls.candidate = cls.admission.candidate
@@ -866,6 +847,16 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         self.assertFalse(
             any(exc for exc in errors if exc['status_code'] == exception.status_code),
             f'{exception.status_code} found in {errors}',
+        )
+
+    def setUp(self):
+        patcher = mock.patch(
+            'admission.ddd.admission.doctorat.preparation.use_case.write.soumettre_proposition_service.Financabilite'
+        )
+        mock_financabilite = patcher.start()
+        self.addCleanup(patcher.stop)
+        mock_financabilite.return_value.determiner.return_value = FinancabiliteDTO(
+            etat=EtatFinancabilite.NON_FINANCABLE.name, details=[]
         )
 
     def test_assert_methods_not_allowed(self):

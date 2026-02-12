@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2021 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -30,18 +30,18 @@ import attr
 from admission.ddd.admission.doctorat.preparation.business_types import *
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixEtatSignature
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
-    SignataireDejaInviteException,
+    SignataireADejaApprouveException,
 )
 from base.ddd.utils.business_validator import BusinessValidator
 
 
 @attr.dataclass(frozen=True, slots=True)
-class ShouldSignatairePasDejaInvite(BusinessValidator):
+class ShouldSignataireAPasDejaApprouve(BusinessValidator):
     groupe_de_supervision: 'GroupeDeSupervision'
     signataire_id: Union['PromoteurIdentity', 'MembreCAIdentity']
 
     def validate(self, *args, **kwargs):  # pragma: no cover
-        etats_initiaux = [ChoixEtatSignature.NOT_INVITED, ChoixEtatSignature.DECLINED]
+        etats_initiaux = [ChoixEtatSignature.INVITED, ChoixEtatSignature.NOT_INVITED, ChoixEtatSignature.DECLINED]
         if any(
             signature
             for signature in self.groupe_de_supervision.signatures_promoteurs
@@ -51,4 +51,4 @@ class ShouldSignatairePasDejaInvite(BusinessValidator):
             for signature in self.groupe_de_supervision.signatures_membres_CA
             if signature.membre_CA_id == self.signataire_id and signature.etat not in etats_initiaux
         ):
-            raise SignataireDejaInviteException
+            raise SignataireADejaApprouveException

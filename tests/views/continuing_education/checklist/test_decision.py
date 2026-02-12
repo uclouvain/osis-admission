@@ -80,9 +80,9 @@ from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
-from osis_common.ddd.interface import EventConsumptionMode
 from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
 from epc.tests.factories.email_fonction_programme import EmailFonctionProgrammeFactory
+from osis_common.ddd.interface import EventConsumptionMode
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
@@ -540,6 +540,12 @@ class ChecklistViewTestCase(TestCase):
             'enfants': [],
             'extra': {'en_cours': 'fac_approval'},
             'statut': ChoixStatutChecklist.GEST_EN_COURS.name,
+        }
+        self.continuing_admission.checklist['current']['donnees_personnelles'] = {
+            'libelle': '',
+            'enfants': [],
+            'extra': {},
+            'statut': ChoixStatutChecklist.GEST_REUSSITE.name,
         }
         self.continuing_admission.save(update_fields=['checklist'])
         self.client.force_login(user=self.iufc_manager_user)

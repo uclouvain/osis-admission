@@ -115,6 +115,7 @@ class PromoteurInMemoryTranslator(IPromoteurTranslator):
             ville=promoteur.ville,
             pays=promoteur.pays,
             est_externe=promoteur.externe,
+            langue=promoteur.langue,
         )
 
     @classmethod

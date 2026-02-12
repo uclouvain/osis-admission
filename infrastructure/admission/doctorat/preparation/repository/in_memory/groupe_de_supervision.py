@@ -312,4 +312,5 @@ class GroupeDeSupervisionInMemoryRepository(InMemoryGenericRepository, IGroupeDe
                 institute=member.institution,
                 city=member.ville,
                 country_code=member.code_pays,
+                language=member.langue,
             )

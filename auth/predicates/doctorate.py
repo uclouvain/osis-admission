@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CANDIDAT,
     STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD,
     STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_CDD_ETENDUS,
+    STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_GESTIONNAIRE,
     STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_SIC,
     STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_SIC_ETENDUS,
     ChoixStatutPropositionDoctorale,
@@ -235,3 +236,11 @@ def can_send_to_fac_faculty_decision(self, user: User, obj: DoctorateAdmission):
 @predicate_failed_msg(message=_("The admission must not follow a pre-admission"))
 def must_not_follow_a_pre_admission(self, user: User, obj: DoctorateAdmission):
     return not bool(obj.related_pre_admission_id)
+
+
+@predicate(bind=True)
+@predicate_failed_msg(
+    not_in_doctorate_statuses_predicate_message(STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_GESTIONNAIRE)
+)
+def in_manager_status(self, user: User, obj: DoctorateAdmission):
+    return isinstance(obj, DoctorateAdmission) and obj.status in STATUTS_PROPOSITION_DOCTORALE_SOUMISE_POUR_GESTIONNAIRE

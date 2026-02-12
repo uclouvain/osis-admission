@@ -44,18 +44,27 @@ from base.tests.factories.user import UserFactory
 class AutocompleteTestCase(TestCase):
     def test_autocomplete_learning_unit_year_and_classes(self):
         self.client.force_login(UserFactory())
-        LearningUnitYearFactory(acronym="FOOBAR1", academic_year__year=2022)
+        LearningUnitYearFactory(acronym="FOOBAR1", academic_year__year=2022, specific_title="Informatique A")
         LearningUnitYearFactory(
             acronym="FOOBAR2",
             academic_year__year=2022,
             learning_container_year__container_type=LearningContainerYearType.EXTERNAL.name,
+            specific_title="Informatique B"
         )
         url = resolve_url('admission:autocomplete:learning-unit-years-and-classes')
-        data = {'forward': '{"annee": "2022"}', 'q': 'FO'}
         response = self.client.get(url, format="json")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json()['results']), 0)
 
+        data = {'forward': '{"annee": "2022"}', 'q': 'FO'}
+        response = self.client.get(url, data=data, format="json")
+        self.assertEqual(response.status_code, 200)
+        results = response.json()['results']
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['id'], "FOOBAR1")
+
+        # Search by title and exclude the learning unit year with mobility
+        data = {'forward': '{"annee": "2022"}', 'q': 'Informatique'}
         response = self.client.get(url, data=data, format="json")
         self.assertEqual(response.status_code, 200)
         results = response.json()['results']

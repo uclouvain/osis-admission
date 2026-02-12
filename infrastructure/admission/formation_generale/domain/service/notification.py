@@ -155,7 +155,7 @@ class Notification(INotification):
             common_tokens['admission_reference'] = admission.formatted_reference
             common_tokens['salutation'] = get_salutation_prefix(person=admission.candidate)
             common_tokens['payment_sentence'] = (
-                "<p>{}</p>".format(_('Application fees where also received.'))
+                "<p>{}</p>".format(_('Application fees were also received.'))
                 if proposition.checklist_actuelle.frais_dossier.statut == ChoixStatutChecklist.SYST_REUSSITE
                 else ''
             )

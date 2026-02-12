@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -105,11 +105,11 @@ from ._should_promoteur_etre_dans_groupe_de_supervision import (
 from ._should_proposition_statut_etre_correct_pour_soumission_ca import (
     ShouldPropositionStatutEtreCorrectPourSoumissionCA,
 )
+from ._should_signataire_a_pas_deja_approuve import ShouldSignataireAPasDejaApprouve
 from ._should_signataire_etre_dans_groupe_de_supervision import (
     ShouldSignataireEtreDansGroupeDeSupervision,
 )
 from ._should_signataire_etre_invite import ShouldSignataireEtreInvite
-from ._should_signataire_pas_invite import ShouldSignatairePasDejaInvite
 from ._should_signatures_pas_etre_envoyees import ShouldSignaturesPasEtreEnvoyees
 from ._should_type_contrat_travail_dependre_type_financement import (
     ShouldTypeContratTravailDependreTypeFinancement,
@@ -123,7 +123,7 @@ __all__ = [
     "ShouldPromoteurEtreDansGroupeDeSupervision",
     "ShouldSignataireEtreDansGroupeDeSupervision",
     "ShouldSignataireEtreInvite",
-    "ShouldSignatairePasDejaInvite",
+    "ShouldSignataireAPasDejaApprouve",
     "ShouldTypeContratTravailDependreTypeFinancement",
     "ShouldGroupeDeSupervisionNonCompletPourMembresCA",
     "ShouldGroupeDeSupervisionNonCompletPourPromoteurs",

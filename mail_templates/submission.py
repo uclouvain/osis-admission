@@ -126,7 +126,7 @@ templates.register(
             name='late_enrolment_sentence',
             description=_('Sentence indicating the late enrolment (if applicable).'),
             example="Nous attirons votre attention sur le fait que vous avez introduit une demande d'inscription "
-            "tardive. Le jury d'admission se réserve le droit d'accepter ou de refuser cette demande en raison "
+            "tardive. Le jury se réserve le droit d'accepter ou de refuser cette demande en raison "
             "des impératifs pédagogiques.",
         ),
         Token(

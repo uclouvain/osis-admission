@@ -38,8 +38,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.proposition impor
 )
 from admission.ddd.admission.formation_continue.commands import (
     RecupererElementsConfirmationQuery as RecupererElementsConfirmationContinueQuery,
-)
-from admission.ddd.admission.formation_continue.commands import (
     SoumettrePropositionCommand as SoumettrePropositionContinueCommand,
 )
 from admission.ddd.admission.formation_continue.domain.model.proposition import (
@@ -47,8 +45,6 @@ from admission.ddd.admission.formation_continue.domain.model.proposition import 
 )
 from admission.ddd.admission.formation_generale.commands import (
     RecupererElementsConfirmationQuery as RecupererElementsConfirmationGeneraleQuery,
-)
-from admission.ddd.admission.formation_generale.commands import (
     SoumettrePropositionCommand as SoumettrePropositionGeneraleCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import (
@@ -80,7 +76,7 @@ from base.models.enums.education_group_types import TrainingType
 from ddd.logic.financabilite.domain.model.parcours import Parcours, ParcoursAcademiqueExterne, ParcoursAcademiqueInterne
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
-from infrastructure.financabilite.domain.service.in_memory.financabilite import FinancabiliteInMemoryFetcher
+from infrastructure.financabilite.domain.service.in_memory.fetcher import InMemoryFetcher
 
 
 @freezegun.freeze_time('2020-10-15')
@@ -89,7 +85,6 @@ class ElementsConfirmationTestCase(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         ProfilCandidatInMemoryTranslator.reset()
-        FinancabiliteInMemoryFetcher.reset()
         PropositionDoctoraleRepository.reset()
         PropositionContinueRepository.reset()
         PropositionGeneraleRepository.reset()
@@ -400,7 +395,7 @@ class ElementsConfirmationTestCase(TestCase):
 
     @freezegun.freeze_time('2024-10-15')
     def test_soumettre_elements_confirmation_differents_radio(self):
-        FinancabiliteInMemoryFetcher.save(
+        InMemoryFetcher.save(
             Parcours(
                 matricule_fgs='0000000001',
                 parcours_academique_interne=ParcoursAcademiqueInterne(programmes_cycles=[]),

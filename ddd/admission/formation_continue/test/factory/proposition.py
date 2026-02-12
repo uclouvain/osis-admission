@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -74,6 +74,7 @@ class StatutsChecklistContinueFactory(factory.Factory):
 
     fiche_etudiant = factory.SubFactory(StatutChecklistFactory)
     decision = factory.SubFactory(StatutChecklistFactory)
+    donnees_personnelles = factory.SubFactory(StatutChecklistFactory)
 
 
 class PropositionFactory(factory.Factory):
@@ -106,5 +107,6 @@ class PropositionFactory(factory.Factory):
                 StatutsChecklistContinueFactory,
                 decision__statut=ChoixStatutChecklist.GEST_EN_COURS,
                 decision__extra={'en_cours': 'fac_approval'},
+                donnees_personnelles__statut=ChoixStatutChecklist.GEST_REUSSITE,
             ),
         )

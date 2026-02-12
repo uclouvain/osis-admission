@@ -64,6 +64,7 @@ from admission.views.common.mixins import AdmissionFormMixin
 from admission.views.continuing_education.details.checklist.base import (
     CheckListDefaultContextMixin,
 )
+from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
@@ -251,7 +252,9 @@ class ValidationFormView(CheckListDefaultContextMixin, AdmissionFormMixin, HtmxP
                     gestionnaire=self.request.user.person.global_id,
                 )
             )
-        except BusinessException as exception:
+        except (BusinessException, MultipleBusinessExceptions) as exception:
+            if isinstance(exception, MultipleBusinessExceptions):
+                exception = exception.exceptions.pop()
             self.message_on_failure = exception.message
             return super().form_invalid(form)
 
