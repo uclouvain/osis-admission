@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -46,13 +46,13 @@ from admission.api.serializers import PersonSerializer
 from admission.ddd.admission.doctorat.preparation.commands import (
     RechercherDoctoratQuery,
 )
-from admission.ddd.admission.shared_kernel.domain.enums import LISTE_TYPES_FORMATION_GENERALE
 from admission.ddd.admission.formation_continue.commands import (
     RechercherFormationContinueQuery,
 )
 from admission.ddd.admission.formation_generale.commands import (
     RechercherFormationGeneraleQuery,
 )
+from admission.ddd.admission.shared_kernel.domain.enums import LISTE_TYPES_FORMATION_GENERALE
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
@@ -334,8 +334,9 @@ class AutocompleteTutorView(ListAPIView):
             last_name=F("person__last_name"),
             global_id=F("person__global_id"),
         )
-        # Keep only persons with internal account and email address
+        # Keep only employees with internal account and email address
         .filter(
+            person__employee=True,
             person__global_id__startswith='0',
             person__email__endswith=settings.INTERNAL_EMAIL_SUFFIX,
         )
@@ -359,7 +360,8 @@ class AutocompletePersonView(ListAPIView):
             is_student_and_not_tutor=Exists(Student.objects.filter(person=OuterRef('pk'), person__tutor__isnull=True)),
         )
         .filter(
-            # Keep only persons with internal account and email address
+            # Keep only employees with internal account and email address
+            employee=True,
             global_id__startswith='0',
             email__endswith=settings.INTERNAL_EMAIL_SUFFIX,
             # Remove students who aren't tutors
