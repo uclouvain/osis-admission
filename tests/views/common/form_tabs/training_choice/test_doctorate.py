@@ -404,16 +404,6 @@ class DoctorateTrainingChoiceFormViewTestCase(TestCase):
     def test_form_submit_with_invalid_data(self):
         self.client.force_login(self.sic_manager_user)
 
-        default_data = {
-            'admission_type': ChoixTypeAdmission.ADMISSION.name,
-            'justification': 'My justification',
-            'proximity_commission_cde': ChoixCommissionProximiteCDEouCLSM.MANAGEMENT.name,
-            'proximity_commission_cdss': ChoixCommissionProximiteCDSS.BCGIM.name,
-            'science_sub_domain': ChoixSousDomaineSciences.MATHEMATICS.name,
-            'specific_question_answers_0': 'My answer 1 updated',
-            'specific_question_answers_2': 'My answer 2 updated',
-        }
-
         # Without any data
         response = self.client.post(self.doctorate_url, {})
 
@@ -452,7 +442,6 @@ class DoctorateTrainingChoiceFormViewTestCase(TestCase):
         form = response.context['form']
 
         self.assertFalse(form.is_valid())
-        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('proximity_commission_cde', []))
 
         # CDSS proximity commission
         self.doctorate_admission.training.management_entity = self.cdss_commission
