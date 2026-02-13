@@ -73,43 +73,40 @@
 <body>
 <div>
   <div id="title">
-    <h1>Document annexe à l'autorisation d'inscription dans le cadre d'une pré-admission</h1>
+    <h1>{% translate 'Document attached to the pre-admission enrolment authorisation' %}</h1>
   </div>
 
   {% concat proposition.nom_candidat " " proposition.prenom_candidat as full_name %}
-  {% field_data "Doctorant·e" full_name inline=True %}
-  {% field_data "Noma" proposition.noma_candidat inline=True %}
-  {% field_data "Titre provisoire de la thèse" proposition.titre_projet inline=True %}
+  {% field_data _('PhD student') full_name inline=True %}
+  {% field_data _('Noma') proposition.noma_candidat inline=True %}
+  {% field_data _('Provisional thesis title') proposition.titre_projet inline=True %}
 
   <p>
-    La Commission doctorale de domaine a approuvé votre demande de pré-admission.
+    {% translate 'The PhD Field Committee has approved your application for pre-admission.' %}
   </p>
 
   <p>
-    Votre demande d’admission complète devra nous parvenir dans un délai de maximum 12 mois. Pour cela, vous devez dès à présent :
+    {% translate 'Your complete application must be received by us within a maximum of 12 months. If it is not already attached to your application for admission, please:' %}
   </p>
   <ul>
     <li>
-      définir et préparer un projet de thèse sous la direction de votre promoteur.trice.
+      {% translate 'define and prepare a thesis project in collaboration with your supervisor;' %}
     </li>
     <li>
-      définir et proposer un programme de formation doctorale en collaboration avec votre promoteur.trice. Des crédits
-      sont accordés pour les cours et les séminaires de lecture et autres activités de recherche suivis durant la période de pré-admission.</li>
+      {% translate 'define and propose a PhD programme in collaboration with your supervisor; credits are awarded for modules, reading seminars and other research activities completed during the pre-admission period;' %}
     <li>
-      identifier et établir une collaboration scientifique avec votre promoteur, y compris les contacts nécessaires
-      pour proposer un comité d’accompagnement.
+      {% translate 'identify and establish scientific collaboration with your supervisor, including the necessary contacts for a Supervisory Committee.' %}
     </li>
   </ul>
 
   <p>
-    Vous trouverez sur le site de votre Commission doctorale de domaine le règlement doctoral, les dispositions
-    particulières de votre domaine, les étapes du parcours doctoral ainsi que toute autre information utile.
+    {% translate 'You will find the PhD Regulations, specific provisions for your field, PhD programme stages and other helpful information on your PhD Field Committee website.' %}
   </p>
 
   <div id="signature">
     <p>
       {% now "d/m/Y" as today_date %}
-      Pour le·la président·e de CDD : {{ gestionnaire.prenom }} {{ gestionnaire.nom }} le {{ today_date }}
+      {% translate 'For the PhD Committee President CDD:' %} {{ gestionnaire.prenom }} {{ gestionnaire.nom }} {% translate 'on' %} {{ today_date }}
     </p>
   </div>
 </div>
