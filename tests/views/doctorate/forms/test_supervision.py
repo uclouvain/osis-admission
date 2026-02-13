@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -53,7 +53,6 @@ from admission.tests.factories.curriculum import (
     EducationalExperienceYearFactory,
     ProfessionalExperienceFactory,
 )
-from admission.tests.factories.person import InternalPersonFactory
 from admission.tests.factories.roles import (
     DoctorateCommitteeMemberRoleFactory,
     ProgramManagerRoleFactory,
@@ -67,7 +66,7 @@ from admission.tests.factories.supervision import (
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
-from base.tests.factories.person import ExternalPersonFactory
+from base.tests.factories.person import ExternalPersonFactory, InternalPersonFactory, EmployeeInternalPersonFactory
 from base.tests.factories.tutor import TutorFactory
 from reference.tests.factories.country import CountryFactory
 
@@ -107,7 +106,7 @@ class SupervisionTestCase(TestCase):
 
         cls.country = CountryFactory()
 
-        cls.person = InternalPersonFactory()
+        cls.person = EmployeeInternalPersonFactory()
         TutorFactory(person=cls.person)
 
         cls.external_person = ExternalPersonFactory()
@@ -190,6 +189,40 @@ class SupervisionTestCase(TestCase):
             'email': "test@test.fr",
         }
         response = self.client.post(self.update_url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('__all__', response.context['add_form'].errors)
+
+    def test_should_not_add_promoter_who_is_not_employee(self):
+        self.client.force_login(user=self.program_manager_user)
+
+        person_not_employee = InternalPersonFactory(employee=False)
+
+        data = {
+            'type': ActorType.PROMOTER.name,
+            'internal_external': "INTERNAL",
+            'person': person_not_employee.global_id,
+            'email': "test@test.fr",
+        }
+
+        response = self.client.post(self.update_url, data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('__all__', response.context['add_form'].errors)
+
+    def test_should_not_add_ca_member_who_is_not_employee(self):
+        self.client.force_login(user=self.program_manager_user)
+
+        person_not_employee = InternalPersonFactory(employee=False)
+
+        data = {
+            'type': ActorType.CA_MEMBER.name,
+            'internal_external': "INTERNAL",
+            'person': person_not_employee.global_id,
+            'email': "test@test.fr",
+        }
+
+        response = self.client.post(self.update_url, data)
+
         self.assertEqual(response.status_code, 200)
         self.assertIn('__all__', response.context['add_form'].errors)
 
