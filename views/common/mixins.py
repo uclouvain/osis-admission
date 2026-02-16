@@ -68,7 +68,6 @@ from admission.ddd.admission.formation_continue.dtos.proposition import (
 )
 from admission.ddd.admission.formation_generale.commands import (
     RecupererPropositionGestionnaireQuery,
-    RecupererTitresAccesSelectionnablesPropositionQuery,
 )
 from admission.ddd.admission.formation_generale.commands import (
     RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionGeneraleQuery,
@@ -78,6 +77,9 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 )
 from admission.ddd.admission.formation_generale.dtos.proposition import (
     PropositionGestionnaireDTO,
+)
+from admission.ddd.admission.shared_kernel.commands import (
+    RecupererTitresAccesSelectionnablesPropositionQuery,
 )
 from admission.ddd.admission.shared_kernel.domain.model.enums.type_gestionnaire import (
     TypeGestionnaire,
@@ -107,6 +109,7 @@ from admission.utils import (
 from admission.views.list import BaseAdmissionList
 from base.models.person_merge_proposal import PersonMergeStatus
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
+from ddd.logic.gestion_des_comptes.dto.periode_soumission_ticket import PeriodeSoumissionTicketDigitDTO
 from ddd.logic.gestion_des_comptes.queries import GetPeriodeActiveSoumissionTicketQuery, GetPropositionFusionQuery
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import PermissionRequiredMixin
@@ -264,7 +267,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         if self.admission.status != ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name:
             return False, "Le dossier doit être en 'Inscription autorisée'"
         periodes_actives: list[PeriodeSoumissionTicketDigitDTO] = message_bus_instance.invoke(
-            GetPeriodeActiveSoumissionTicketQuery()
+            GetPeriodeActiveSoumissionTicketQuery(),
         )
         annees_ouvertes = [p.annee for p in periodes_actives]
         if annees_ouvertes and self.admission.determined_academic_year.year not in annees_ouvertes:

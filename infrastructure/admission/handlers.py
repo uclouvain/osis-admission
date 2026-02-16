@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -91,6 +91,7 @@ COMMAND_HANDLERS = {
     SpecifierExperienceEnTantQueTitreAccesCommand: lambda msg_bus, cmd: specifier_experience_en_tant_que_titre_acces(
         cmd,
         titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
+        experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
     ),
     RechercherFormationsGereesQuery: lambda msg_bus, cmd: rechercher_formations_gerees(
         cmd,

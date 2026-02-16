@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -52,12 +52,12 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
 )
 from admission.models import ContinuingEducationAdmission
 from admission.models import EPCInjection as AdmissionEPCInjection
-from admission.models.specific_question import SpecificQuestionAnswer
 from admission.models.epc_injection import (
     EPCInjectionStatus as AdmissionEPCInjectionStatus,
 )
 from admission.models.epc_injection import EPCInjectionType
 from admission.models.general_education import GeneralEducationAdmission
+from admission.models.specific_question import SpecificQuestionAnswer
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import (
     ContinuingEducationAdmissionFactory,
@@ -192,7 +192,7 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         # The experience has been injected from another admission
         other_admission = GeneralEducationAdmissionFactory(candidate=self.general_admission.candidate)
 
-        other_admission_injection = AdmissionEPCInjection.objects.create(
+        AdmissionEPCInjection.objects.create(
             admission=other_admission,
             type=EPCInjectionType.DEMANDE.name,
             status=AdmissionEPCInjectionStatus.OK.name,
@@ -204,7 +204,7 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         other_admission.delete()
 
         # The current admission has been injected
-        admission_injection = AdmissionEPCInjection.objects.create(
+        AdmissionEPCInjection.objects.create(
             admission=self.general_admission,
             type=EPCInjectionType.DEMANDE.name,
             status=AdmissionEPCInjectionStatus.OK.name,
@@ -388,7 +388,7 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
         admission_url = resolve_url('admission:all-list')
         expected_url = f'{admission_url}#custom_hash'
 
-        high_school_diploma_alternative = HighSchoolDiplomaAlternativeFactory(person=self.general_admission.candidate)
+        HighSchoolDiplomaAlternativeFactory(person=self.general_admission.candidate)
 
         response = self.client.post(
             f'{self.form_url}?next={admission_url}&next_hash_url=custom_hash',
@@ -517,7 +517,7 @@ class AdmissionEducationFormViewForMasterTestCase(TestCase):
     def test_submit_valid_data_when_the_candidate_will_have_a_diploma_with_existing_alternative_diploma(self):
         self.client.force_login(self.sic_manager_user)
 
-        high_school_diploma_alternative = HighSchoolDiplomaAlternativeFactory(person=self.general_admission.candidate)
+        HighSchoolDiplomaAlternativeFactory(person=self.general_admission.candidate)
 
         response = self.client.post(
             self.form_url,
@@ -821,7 +821,7 @@ class AdmissionEducationFormViewForContinuingTestCase(TestCase):
         response = self.client.get(self.form_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        continuing_admission = ContinuingEducationAdmissionFactory(
+        ContinuingEducationAdmissionFactory(
             candidate=self.continuing_admission.candidate,
             status=ChoixStatutPropositionContinue.CONFIRMEE.name,
         )
@@ -839,7 +839,7 @@ class AdmissionEducationFormViewForContinuingTestCase(TestCase):
 
         doctorate_admission.delete()
 
-        general_admission = GeneralEducationAdmissionFactory(
+        GeneralEducationAdmissionFactory(
             candidate=self.continuing_admission.candidate,
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
@@ -853,7 +853,7 @@ class AdmissionEducationFormViewForContinuingTestCase(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        continuing_admission = ContinuingEducationAdmissionFactory(
+        ContinuingEducationAdmissionFactory(
             candidate=self.continuing_admission.candidate,
             status=ChoixStatutPropositionContinue.CONFIRMEE.name,
         )
@@ -871,7 +871,7 @@ class AdmissionEducationFormViewForContinuingTestCase(TestCase):
 
         doctorate_admission.delete()
 
-        general_admission = GeneralEducationAdmissionFactory(
+        GeneralEducationAdmissionFactory(
             candidate=self.continuing_admission.candidate,
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
         )
@@ -1176,7 +1176,7 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
     def test_form_initialization_with_existing_belgian_diploma(self):
         self.client.force_login(self.sic_manager_user)
 
-        belgian_diploma = BelgianHighSchoolDiplomaFactory(
+        BelgianHighSchoolDiplomaFactory(
             person=self.general_admission.candidate,
             high_school_diploma=[self.files_uuids['high_school_diploma']],
             community=CommunityEnum.FRENCH_SPEAKING.name,
@@ -1281,7 +1281,7 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
     def test_form_initialization_with_existing_foreign_diploma(self):
         self.client.force_login(self.sic_manager_user)
 
-        foreign_diploma = ForeignHighSchoolDiplomaFactory(
+        ForeignHighSchoolDiplomaFactory(
             person=self.general_admission.candidate,
             high_school_diploma=[self.files_uuids['high_school_diploma']],
             foreign_diploma_type=ForeignDiplomaTypes.EUROPEAN_BACHELOR.name,
@@ -1428,7 +1428,7 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
     def test_form_initialization_with_existing_diploma_alternative(self):
         self.client.force_login(self.sic_manager_user)
 
-        alternative = HighSchoolDiplomaAlternativeFactory(
+        HighSchoolDiplomaAlternativeFactory(
             person=self.general_admission.candidate,
             certificate=[self.files_uuids['first_cycle_admission_exam']],
         )
@@ -1773,7 +1773,7 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
     def test_submit_valid_data_for_belgian_diploma_with_existing_foreign_diploma(self):
         self.client.force_login(self.sic_manager_user)
 
-        foreign_diploma = ForeignHighSchoolDiplomaFactory(
+        ForeignHighSchoolDiplomaFactory(
             person=self.general_admission.candidate,
             high_school_diploma=[self.files_uuids['high_school_diploma']],
             foreign_diploma_type=ForeignDiplomaTypes.EUROPEAN_BACHELOR.name,
@@ -1846,7 +1846,7 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
     def test_submit_valid_data_for_belgian_diploma_with_existing_alternative(self):
         self.client.force_login(self.sic_manager_user)
 
-        alternative = HighSchoolDiplomaAlternativeFactory(
+        HighSchoolDiplomaAlternativeFactory(
             person=self.general_admission.candidate,
             certificate=[self.files_uuids['first_cycle_admission_exam']],
         )
@@ -1898,7 +1898,7 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
     def test_submit_valid_data_for_foreign_diploma_with_existing_belgian_diploma(self):
         self.client.force_login(self.sic_manager_user)
 
-        belgian_diploma = BelgianHighSchoolDiplomaFactory(
+        BelgianHighSchoolDiplomaFactory(
             person=self.general_admission.candidate,
             academic_graduation_year=self.academic_years[1],
             high_school_diploma=[self.files_uuids['high_school_diploma']],
@@ -2098,7 +2098,7 @@ class AdmissionEducationFormViewForBachelorTestCase(TestCase):
     def test_submit_valid_data_for_foreign_diploma_with_existing_diploma_alternative(self):
         self.client.force_login(self.sic_manager_user)
 
-        diploma_alternative = HighSchoolDiplomaAlternativeFactory(
+        HighSchoolDiplomaAlternativeFactory(
             person=self.general_admission.candidate,
             certificate=[self.files_uuids['first_cycle_admission_exam']],
         )

@@ -558,17 +558,6 @@ COMMAND_HANDLERS = {
             proposition_repository=PropositionRepository(),
         )
     ),
-    SpecifierExperienceEnTantQueTitreAccesCommand: lambda msg_bus, cmd: specifier_experience_en_tant_que_titre_acces(
-        cmd,
-        titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
-    ),
-    RecupererTitresAccesSelectionnablesPropositionQuery: (
-        lambda msg_bus, cmd: recuperer_titres_acces_selectionnables_proposition(
-            cmd,
-            titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
-            experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
-        )
-    ),
     SpecifierFinancabiliteResultatCalculCommand: lambda msg_bus, cmd: specifier_financabilite_resultat_calcul(
         cmd,
         proposition_repository=PropositionRepository(),
