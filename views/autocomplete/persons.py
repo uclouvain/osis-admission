@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,10 +27,8 @@ import json
 
 from dal import autocomplete
 from django.conf import settings
-from django.contrib.auth.decorators import login_not_required
 from django.contrib.postgres.search import SearchVector
 from django.db.models import Exists, F, OuterRef, Q
-from django.utils.decorators import method_decorator
 
 from admission.admission_utils.get_actor_option_text import get_actor_option_text
 from admission.auth.roles.candidate import Candidate
@@ -140,7 +138,8 @@ class PersonAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetView):
         qs = (
             qs.exclude(Q(first_name='') | Q(last_name=''))
             .filter(
-                # Keep only persons with internal account and email address
+                # Keep only employees with internal account and email address
+                employee=True,
                 global_id__startswith='0',
                 email__endswith=settings.INTERNAL_EMAIL_SUFFIX,
             )
@@ -172,7 +171,8 @@ class TutorAutocomplete(PersonsAutocomplete, autocomplete.Select2QuerySetView):
                 global_id=F("person__global_id"),
             )
             .filter(
-                # Keep only persons with internal account and email address
+                # Keep only employees with internal account and email address
+                person__employee=True,
                 global_id__startswith='0',
                 email__endswith=settings.INTERNAL_EMAIL_SUFFIX,
             )

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -78,6 +78,7 @@ class PromoteurTranslator(IPromoteurTranslator):
             code_pays=actor.country_id and actor.country.iso_code or '',
             pays=actor.country_id and getattr(actor.country, 'name_en' if get_language() == 'en' else 'name') or '',
             est_externe=actor.is_external,
+            langue=actor.language,
         )
 
     @classmethod
@@ -134,7 +135,8 @@ class PromoteurTranslator(IPromoteurTranslator):
             is_student_and_not_tutor=Exists(Student.objects.filter(person=OuterRef('pk'), person__tutor__isnull=True)),
         ).filter(
             global_id=matricule,
-            # Keep only persons with internal account and email address
+            # Keep only employees with internal account and email address
+            employee=True,
             global_id__startswith='0',
             email__endswith=settings.INTERNAL_EMAIL_SUFFIX,
             # Remove students who aren't tutors

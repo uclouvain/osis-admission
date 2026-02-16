@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 import uuid
 from typing import List, Optional
 
@@ -147,14 +148,22 @@ class GroupeDeSupervisionSC3DPAvecPromoteurEtMembreEtCotutelleFactory(_GroupeDeS
     proposition_id = factory.SubFactory(_PropositionIdentityFactory, uuid='uuid-SC3DP-promoteur-membre-cotutelle')
     signatures_promoteurs = factory.LazyFunction(
         lambda: [
-            _SignaturePromoteurFactory(promoteur_id__uuid='promoteur-SC3DP-externe'),
-            _SignaturePromoteurFactory(promoteur_id__uuid='promoteur-SC3DP'),
+            _SignaturePromoteurFactory(promoteur_id__uuid='promoteur-SC3DP-externe', date=datetime.datetime.now()),
+            _SignaturePromoteurFactory(promoteur_id__uuid='promoteur-SC3DP', date=datetime.datetime.now()),
         ]
     )
     signatures_membres_CA = factory.LazyFunction(
         lambda: [
-            _SignatureMembreCAFactory(membre_CA_id__uuid='membre-ca-SC3DP', etat=ChoixEtatSignature.INVITED),
-            _SignatureMembreCAFactory(membre_CA_id__uuid='membre-ca-SC3DP2', etat=ChoixEtatSignature.INVITED),
+            _SignatureMembreCAFactory(
+                membre_CA_id__uuid='membre-ca-SC3DP',
+                etat=ChoixEtatSignature.INVITED,
+                date=datetime.datetime.now(),
+            ),
+            _SignatureMembreCAFactory(
+                membre_CA_id__uuid='membre-ca-SC3DP2',
+                etat=ChoixEtatSignature.INVITED,
+                date=datetime.datetime.now(),
+            ),
         ]
     )
     cotutelle = factory.SubFactory(

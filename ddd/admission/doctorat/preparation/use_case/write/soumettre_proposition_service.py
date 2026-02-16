@@ -142,12 +142,11 @@ def soumettre_proposition(
     )
 
     # THEN
-    financabilite = Financabilite(
+    financabilite = Financabilite(annee=formation.entity_id.annee).determiner(
         sigle_formation=formation.entity_id.sigle,
-        annee=formation.entity_id.annee,
         est_en_reorientation=False,
         matricule_fgs=proposition.matricule_candidat,
-    ).determiner()
+    )
 
     proposition.nettoyer_reponses_questions_specifiques(questions_specifiques)
 

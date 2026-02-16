@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -42,6 +42,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixEtatSignature,
     ChoixStatutPropositionDoctorale,
 )
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     CotutelleDoitAvoirAuMoinsUnPromoteurExterneException,
     CotutelleNonCompleteException,
@@ -133,17 +134,65 @@ class TestDemanderSignaturesService(AdmissionTestMixin, TestCase):
         self.assertEqual(signatures[0].etat, ChoixEtatSignature.INVITED)
 
     def test_should_reinviter_si_membre_refuse(self):
-        cmd = attr.evolve(self.cmd, uuid_proposition="uuid-SC3DP-promoteur-refus-membre-deja-approuve")
+        proposition_identity = PropositionIdentity(uuid='uuid-SC3DP-promoteur-refus-membre-deja-approuve')
+
+        groupe_original = self.groupe_de_supervision_repository.get_by_proposition_id(proposition_identity)
+
+        signatures_originales_promoteurs = groupe_original.signatures_promoteurs
+        signatures_originales_membres_ca = groupe_original.signatures_membres_CA
+
+        cmd = attr.evolve(self.cmd, uuid_proposition=proposition_identity.uuid)
+
         proposition_id = self.message_bus.invoke(cmd)
-        self.assertEqual(proposition_id.uuid, "uuid-SC3DP-promoteur-refus-membre-deja-approuve")
-        groupe = self.groupe_de_supervision_repository.get_by_proposition_id(proposition_id)
+        self.assertEqual(proposition_id, proposition_identity)
+
+        groupe_a_jour = self.groupe_de_supervision_repository.get_by_proposition_id(proposition_id)
         proposition = self.proposition_repository.get(proposition_id)
+
         self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE)
         self.assertTrue(proposition.est_verrouillee_pour_signature)
-        self.assertEqual(len(groupe.signatures_promoteurs), 1)
-        self.assertEqual(len(groupe.signatures_membres_CA), 2)
-        self.assertEqual(groupe.signatures_promoteurs[0].etat, ChoixEtatSignature.INVITED)
-        self.assertEqual(groupe.signatures_membres_CA[0].etat, ChoixEtatSignature.APPROVED)
+
+        self.assertEqual(len(groupe_a_jour.signatures_promoteurs), 1)
+        self.assertEqual(len(groupe_a_jour.signatures_membres_CA), 2)
+
+        self.assertEqual(groupe_a_jour.signatures_promoteurs[0].etat, ChoixEtatSignature.INVITED)
+        self.assertEqual(groupe_a_jour.signatures_membres_CA[0].etat, ChoixEtatSignature.APPROVED)
+        self.assertEqual(groupe_a_jour.signatures_membres_CA[1].etat, ChoixEtatSignature.APPROVED)
+
+        self.assertNotEqual(signatures_originales_promoteurs[0], groupe_a_jour.signatures_promoteurs[0])
+        self.assertEqual(signatures_originales_membres_ca[0], groupe_a_jour.signatures_membres_CA[0])
+        self.assertEqual(signatures_originales_membres_ca[1], groupe_a_jour.signatures_membres_CA[1])
+
+    def test_should_reinviter_si_membre_deja_invite(self):
+        proposition_identity = PropositionIdentity(uuid=self.uuid_proposition)
+
+        groupe_original = self.groupe_de_supervision_repository.get_by_proposition_id(proposition_identity)
+
+        signatures_originales_promoteurs = groupe_original.signatures_promoteurs
+        signatures_originales_membres_ca = groupe_original.signatures_membres_CA
+
+        proposition_id = self.message_bus.invoke(self.cmd)
+
+        self.assertEqual(proposition_id, proposition_identity)
+
+        groupe_a_jour = self.groupe_de_supervision_repository.get_by_proposition_id(proposition_id)
+        proposition = self.proposition_repository.get(proposition_identity)
+
+        self.assertEqual(proposition.statut, ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE)
+        self.assertTrue(proposition.est_verrouillee_pour_signature)
+
+        self.assertEqual(len(groupe_a_jour.signatures_promoteurs), 2)
+        self.assertEqual(len(groupe_a_jour.signatures_membres_CA), 2)
+
+        self.assertEqual(groupe_a_jour.signatures_promoteurs[0].etat, ChoixEtatSignature.INVITED)
+        self.assertEqual(groupe_a_jour.signatures_promoteurs[1].etat, ChoixEtatSignature.INVITED)
+        self.assertEqual(groupe_a_jour.signatures_membres_CA[0].etat, ChoixEtatSignature.INVITED)
+        self.assertEqual(groupe_a_jour.signatures_membres_CA[1].etat, ChoixEtatSignature.INVITED)
+
+        self.assertNotEqual(signatures_originales_promoteurs[0], groupe_a_jour.signatures_promoteurs[0])
+        self.assertNotEqual(signatures_originales_promoteurs[1], groupe_a_jour.signatures_promoteurs[1])
+        self.assertNotEqual(signatures_originales_membres_ca[0], groupe_a_jour.signatures_membres_CA[0])
+        self.assertNotEqual(signatures_originales_membres_ca[1], groupe_a_jour.signatures_membres_CA[1])
 
     def test_should_pas_demander_si_detail_projet_pas_complete_pour_admission(self):
         cmd = attr.evolve(self.cmd, uuid_proposition='uuid-SC3DP-no-project')

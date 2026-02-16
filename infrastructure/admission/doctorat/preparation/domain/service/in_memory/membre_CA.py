@@ -43,6 +43,7 @@ class MembreCA:
     institution: str = ''
     ville: str = ''
     pays: str = ''
+    langue: str = 'fr-be'
 
 
 class MembreCAInMemoryTranslator(IMembreCATranslator):
@@ -87,6 +88,7 @@ class MembreCAInMemoryTranslator(IMembreCATranslator):
                 institution=p.institution,
                 ville=p.ville,
                 pays=p.pays,
+                langue=p.langue,
             )
         except StopIteration:  # pragma: no cover
             raise MembreCANonTrouveException
