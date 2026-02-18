@@ -6151,14 +6151,6 @@ paths:
       - $ref: '#/components/parameters/X-User-GlobalID'
 components:
   schemas:
-    ActorTypeEnum:
-      enum:
-      - PROMOTER
-      - CA_MEMBER
-      type: string
-      description: |-
-        * `PROMOTER` - Promoteur
-        * `CA_MEMBER` - Membre du comité d'accompagnement
     AdressePersonnelleDTONested:
       type: object
       description: |-
@@ -6243,20 +6235,42 @@ components:
           title: Diplôme d'études secondaires
           maxItems: 1
         community:
+          enum:
+          - FRENCH_SPEAKING
+          - FLEMISH_SPEAKING
+          - GERMAN_SPEAKING
+          - ''
+          - null
+          type: string
+          description: |-
+            * `FRENCH_SPEAKING` - Communauté française
+            * `FLEMISH_SPEAKING` - Communauté flamande
+            * `GERMAN_SPEAKING` - Communauté germanophone
+          x-spec-enum-id: ff8b579ee2213ef4
           nullable: true
           title: Dans quelle communauté avez-vous suivi la dernière année d'études
             secondaires (ou suivez-vous actuellement) ?
-          oneOf:
-          - $ref: '#/components/schemas/CommunityEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-          - $ref: '#/components/schemas/NullEnum'
         educational_type:
+          enum:
+          - TEACHING_OF_GENERAL_EDUCATION
+          - TRANSITION_METHOD
+          - ARTISTIC_TRANSITION
+          - QUALIFICATION_METHOD
+          - ARTISTIC_QUALIFICATION
+          - PROFESSIONAL_EDUCATION
+          - ''
+          - null
+          type: string
+          description: |-
+            * `TEACHING_OF_GENERAL_EDUCATION` - Enseignement de formation générale
+            * `TRANSITION_METHOD` - Technique de transition
+            * `ARTISTIC_TRANSITION` - Artistique de transition
+            * `QUALIFICATION_METHOD` - Technique de qualification
+            * `ARTISTIC_QUALIFICATION` - Artistique de qualification
+            * `PROFESSIONAL_EDUCATION` - Enseignement professionnel
+          x-spec-enum-id: ee0ed7d356e5bc63
           nullable: true
           title: Quel type d'enseignement avez-vous suivi (ou suivez-vous actuellement) ?
-          oneOf:
-          - $ref: '#/components/schemas/EducationalTypeEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-          - $ref: '#/components/schemas/NullEnum'
         educational_other:
           type: string
           title: Autre enseignement, précisez
@@ -6276,9 +6290,6 @@ components:
           maxLength: 500
       required:
       - academic_graduation_year
-    BlankEnum:
-      enum:
-      - ''
     BourseDTONested:
       type: object
       description: |-
@@ -6971,8 +6982,14 @@ components:
           format: date
           nullable: true
         doctorat_deja_realise:
-          allOf:
-          - $ref: '#/components/schemas/DoctoratDejaRealiseEnum'
+          enum:
+          - 'YES'
+          - 'NO'
+          type: string
+          description: |-
+            * `YES` - Oui
+            * `NO` - Non
+          x-spec-enum-id: a9b6c1085b7b02df
           default: 'NO'
         institution:
           type: string
@@ -7594,14 +7611,6 @@ components:
       - sigle
       - sigle_entite_gestion
       - type
-    DoctoratDejaRealiseEnum:
-      enum:
-      - 'YES'
-      - 'NO'
-      type: string
-      description: |-
-        * `YES` - Oui
-        * `NO` - Non
     DoctoratSearchDTO:
       type: object
       description: |-
@@ -8400,28 +8409,58 @@ components:
           title: Intitulé de la formation
           maxLength: 255
         study_system:
+          enum:
+          - SOCIAL_PROMOTION
+          - FULL_TIME
+          - ''
+          type: string
+          description: |-
+            * `SOCIAL_PROMOTION` - Promotion sociale
+            * `FULL_TIME` - Plein exercice
+          x-spec-enum-id: 9b6f5f8c47ca11bf
           title: Système d'études
-          oneOf:
-          - $ref: '#/components/schemas/StudySystemEnum'
-          - $ref: '#/components/schemas/BlankEnum'
         evaluation_type:
+          enum:
+          - ECTS_CREDITS
+          - NON_EUROPEAN_CREDITS
+          - NO_CREDIT_SYSTEM
+          - ''
+          type: string
+          description: "* `ECTS_CREDITS` - Crédits ECTS\n* `NON_EUROPEAN_CREDITS`
+            - Crédits non-européens\n* `NO_CREDIT_SYSTEM` - Pas de système de crédits "
+          x-spec-enum-id: 6762643a4bb208cc
           title: Système d'évaluation
-          oneOf:
-          - $ref: '#/components/schemas/EvaluationTypeEnum'
-          - $ref: '#/components/schemas/BlankEnum'
         transcript_type:
+          enum:
+          - ONE_A_YEAR
+          - ONE_FOR_ALL_YEARS
+          - ''
+          type: string
+          description: |-
+            * `ONE_A_YEAR` - Un relevé de notes pour chaque année
+            * `ONE_FOR_ALL_YEARS` - Un relevé de notes couvrant l'ensemble des années
+          x-spec-enum-id: 19250fc44aea7ce5
           title: Type de relevé de notes
-          oneOf:
-          - $ref: '#/components/schemas/TranscriptTypeEnum'
-          - $ref: '#/components/schemas/BlankEnum'
         obtained_diploma:
           type: boolean
           title: Avez-vous obtenu un diplôme au terme de cette formation ?
         obtained_grade:
+          enum:
+          - GREATER_DISTINCTION
+          - GREAT_DISTINCTION
+          - DISTINCTION
+          - SATISFACTION
+          - SUCCESS_WITHOUT_DISTINCTION
+          - ''
+          type: string
+          description: |-
+            * `GREATER_DISTINCTION` - La plus grande distinction (90-100%)
+            * `GREAT_DISTINCTION` - Grande distinction (80-89%)
+            * `DISTINCTION` - Distinction (70-79%)
+            * `SATISFACTION` - Satisfaction (60-69%)
+            * `SUCCESS_WITHOUT_DISTINCTION` - Réussite sans mention (50-59%)
+          x-spec-enum-id: 50747ff1654e3db8
           title: Grade obtenu
-          oneOf:
-          - $ref: '#/components/schemas/ObtainedGradeEnum'
-          - $ref: '#/components/schemas/BlankEnum'
         graduate_degree:
           type: array
           items:
@@ -8491,10 +8530,20 @@ components:
           nullable: true
           title: Crédits acquis
         result:
+          enum:
+          - SUCCESS
+          - SUCCESS_WITH_RESIDUAL_CREDITS
+          - FAILURE
+          - WAITING_RESULT
+          - ''
+          type: string
+          description: |-
+            * `SUCCESS` - Réussite
+            * `SUCCESS_WITH_RESIDUAL_CREDITS` - Réussite avec crédits résiduels
+            * `FAILURE` - Échec
+            * `WAITING_RESULT` - En attente de résultat
+          x-spec-enum-id: 8896832946529dbf
           title: Résultat
-          oneOf:
-          - $ref: '#/components/schemas/ResultEnum'
-          - $ref: '#/components/schemas/BlankEnum'
         transcript:
           type: array
           items:
@@ -8509,22 +8558,6 @@ components:
           maxItems: 1
       required:
       - academic_year
-    EducationalTypeEnum:
-      enum:
-      - TEACHING_OF_GENERAL_EDUCATION
-      - TRANSITION_METHOD
-      - ARTISTIC_TRANSITION
-      - QUALIFICATION_METHOD
-      - ARTISTIC_QUALIFICATION
-      - PROFESSIONAL_EDUCATION
-      type: string
-      description: |-
-        * `TEACHING_OF_GENERAL_EDUCATION` - Enseignement de formation générale
-        * `TRANSITION_METHOD` - Technique de transition
-        * `ARTISTIC_TRANSITION` - Artistique de transition
-        * `QUALIFICATION_METHOD` - Technique de qualification
-        * `ARTISTIC_QUALIFICATION` - Artistique de qualification
-        * `PROFESSIONAL_EDUCATION` - Enseignement professionnel
     ElementConfirmation:
       type: object
       description: |-
@@ -8550,24 +8583,6 @@ components:
       - texte
       - titre
       - type
-    EquivalenceEnum:
-      enum:
-      - 'YES'
-      - PENDING
-      - 'NO'
-      type: string
-      description: |-
-        * `YES` - Oui
-        * `PENDING` - En cours de demande
-        * `NO` - Non
-    EvaluationTypeEnum:
-      enum:
-      - ECTS_CREDITS
-      - NON_EUROPEAN_CREDITS
-      - NO_CREDIT_SYSTEM
-      type: string
-      description: "* `ECTS_CREDITS` - Crédits ECTS\n* `NON_EUROPEAN_CREDITS` - Crédits
-        non-européens\n* `NO_CREDIT_SYSTEM` - Pas de système de crédits "
     Exam:
       type: object
       properties:
@@ -8651,16 +8666,6 @@ components:
       required:
       - proposition
       - supervision
-    ForeignDiplomaTypeEnum:
-      enum:
-      - NATIONAL_BACHELOR
-      - EUROPEAN_BACHELOR
-      - INTERNATIONAL_BACCALAUREATE
-      type: string
-      description: |-
-        * `NATIONAL_BACHELOR` - Baccalauréat national (ou diplôme d'état, ...)
-        * `EUROPEAN_BACHELOR` - Baccalauréat européen (Schola Europaea)
-        * `INTERNATIONAL_BACCALAUREATE` - Baccalauréat international (IBO)
     ForeignHighSchoolDiploma:
       type: object
       properties:
@@ -8682,11 +8687,19 @@ components:
           title: Diplôme d'études secondaires
           maxItems: 1
         foreign_diploma_type:
+          enum:
+          - NATIONAL_BACHELOR
+          - EUROPEAN_BACHELOR
+          - INTERNATIONAL_BACCALAUREATE
+          - null
+          type: string
+          description: |-
+            * `NATIONAL_BACHELOR` - Baccalauréat national (ou diplôme d'état, ...)
+            * `EUROPEAN_BACHELOR` - Baccalauréat européen (Schola Europaea)
+            * `INTERNATIONAL_BACCALAUREATE` - Baccalauréat international (IBO)
+          x-spec-enum-id: 302c4cc541cb08e7
           nullable: true
           title: Quel diplôme avez-vous obtenu (ou obtiendrez-vous) ?
-          oneOf:
-          - $ref: '#/components/schemas/ForeignDiplomaTypeEnum'
-          - $ref: '#/components/schemas/NullEnum'
         linguistic_regime:
           type: string
           nullable: true
@@ -8698,11 +8711,19 @@ components:
           type: string
           nullable: true
         equivalence:
+          enum:
+          - 'YES'
+          - PENDING
+          - 'NO'
+          - ''
+          type: string
+          description: |-
+            * `YES` - Oui
+            * `PENDING` - En cours de demande
+            * `NO` - Non
+          x-spec-enum-id: 7360fdaf9720ffcb
           title: Ce diplôme a-t-il fait l'objet d'une décision d'équivalence par les
             services de la Communauté française de Belgique ?
-          oneOf:
-          - $ref: '#/components/schemas/EquivalenceEnum'
-          - $ref: '#/components/schemas/BlankEnum'
         high_school_transcript_translation:
           type: array
           items:
@@ -8869,16 +8890,6 @@ components:
       - sigle
       - sigle_entite_gestion
       - type
-    GenderEnum:
-      enum:
-      - F
-      - H
-      - X
-      type: string
-      description: |-
-        * `F` - Femme
-        * `H` - Homme
-        * `X` - Autre
     GeneralEducationAccountingDTO:
       type: object
       description: |-
@@ -9301,7 +9312,38 @@ components:
           type: string
           readOnly: true
         status:
-          $ref: '#/components/schemas/StatusEnum'
+          enum:
+          - EN_BROUILLON
+          - FRAIS_DOSSIER_EN_ATTENTE
+          - CONFIRMEE
+          - ANNULEE
+          - A_COMPLETER_POUR_SIC
+          - COMPLETEE_POUR_SIC
+          - TRAITEMENT_FAC
+          - A_COMPLETER_POUR_FAC
+          - COMPLETEE_POUR_FAC
+          - RETOUR_DE_FAC
+          - ATTENTE_VALIDATION_DIRECTION
+          - INSCRIPTION_AUTORISEE
+          - INSCRIPTION_REFUSEE
+          - CLOTUREE
+          type: string
+          description: |-
+            * `EN_BROUILLON` - En brouillon
+            * `FRAIS_DOSSIER_EN_ATTENTE` - Frais de dossier en attente
+            * `CONFIRMEE` - Demande confirmée
+            * `ANNULEE` - Demande annulée
+            * `A_COMPLETER_POUR_SIC` - A compléter pour SIC
+            * `COMPLETEE_POUR_SIC` - Complétée pour SIC
+            * `TRAITEMENT_FAC` - Traitement en Fac
+            * `A_COMPLETER_POUR_FAC` - A compléter pour Fac
+            * `COMPLETEE_POUR_FAC` - Complétée pour Fac
+            * `RETOUR_DE_FAC` - Retour de FAC
+            * `ATTENTE_VALIDATION_DIRECTION` - En attente de validation de la direction
+            * `INSCRIPTION_AUTORISEE` - Inscription autorisée
+            * `INSCRIPTION_REFUSEE` - Inscription refusée
+            * `CLOTUREE` - Clôturée
+          x-spec-enum-id: ab8e41f62d01da32
     GeneralEducationPropositionSearchDTO:
       type: object
       description: |-
@@ -9395,6 +9437,21 @@ components:
       - prenom_candidat
       - reference
       - uuid
+    HighSchoolDiploma:
+      type: object
+      properties:
+        graduated_from_high_school:
+          enum:
+          - 'YES'
+          - THIS_YEAR
+          - 'NO'
+          - ''
+          type: string
+          description: |-
+            * `YES` - Oui
+            * `THIS_YEAR` - Cette année
+            * `NO` - Non
+          x-spec-enum-id: 136e12d2bbd4e95c
     GeneralIdentificationDTO:
       type: object
       description: |-
@@ -9701,7 +9758,14 @@ components:
         langue:
           type: string
         actor_type:
-          $ref: '#/components/schemas/ActorTypeEnum'
+          enum:
+          - PROMOTER
+          - CA_MEMBER
+          type: string
+          description: |-
+            * `PROMOTER` - Promoteur
+            * `CA_MEMBER` - Membre du comité d'accompagnement
+          x-spec-enum-id: 32f83b997c0f9a99
       required:
       - actor_type
     InformationsSpecifiquesFormationContinueDTO:
@@ -9741,7 +9805,14 @@ components:
         * All fields are set to read-only if needed when Meta.read_only is True.
       properties:
         type_admission:
-          $ref: '#/components/schemas/TypeAdmissionEnum'
+          enum:
+          - ADMISSION
+          - PRE_ADMISSION
+          type: string
+          description: |-
+            * `ADMISSION` - Admission
+            * `PRE_ADMISSION` - Pré-admission
+          x-spec-enum-id: 4b5a83c8217504b6
         matricule_candidat:
           type: string
         sigle_formation:
@@ -9754,9 +9825,41 @@ components:
         justification:
           type: string
         commission_proximite:
-          oneOf:
-          - $ref: '#/components/schemas/CommissionProximiteEnum'
-          - $ref: '#/components/schemas/BlankEnum'
+          enum:
+          - ECONOMY
+          - MANAGEMENT
+          - ECLI
+          - BCGIM
+          - NRSC
+          - SPSS
+          - DENT
+          - DFAR
+          - MOTR
+          - PHYSICS
+          - CHEMISTRY
+          - MATHEMATICS
+          - STATISTICS
+          - BIOLOGY
+          - GEOGRAPHY
+          - ''
+          type: string
+          description: |-
+            * `ECONOMY` - Economie
+            * `MANAGEMENT` - Gestion
+            * `ECLI` - Commission de proximité de recherche expérimentale et clinique (ECLI)
+            * `BCGIM` - Commission de proximité de biochimie, biologie cellulaire et moléculaire, génétique, immunologie (BCGIM)
+            * `NRSC` - Commission de proximité de neurosciences (NRSC)
+            * `SPSS` - Commission de proximité de santé publique, santé et société (SPSS)
+            * `DENT` - Commission de proximité de sciences dentaires (DENT)
+            * `DFAR` - Commission de proximité de sciences pharmaceutiques (DFAR)
+            * `MOTR` - Commission de proximité de sciences de la motricité (MOTR)
+            * `PHYSICS` - Physique
+            * `CHEMISTRY` - Chimie
+            * `MATHEMATICS` - Mathématiques
+            * `STATISTICS` - Statistiques
+            * `BIOLOGY` - Biologie
+            * `GEOGRAPHY` - Géographie
+          x-spec-enum-id: 2199160ce189cd05
       required:
       - commission_proximite
       - matricule_candidat
@@ -9825,14 +9928,6 @@ components:
       - annee_formation
       - matricule_candidat
       - sigle_formation
-    LanguageEnum:
-      enum:
-      - fr-be
-      - en
-      type: string
-      description: |-
-        * `fr-be` - Français
-        * `en` - Anglais
     LanguageKnowledge:
       type: object
       properties:
@@ -9840,23 +9935,65 @@ components:
           type: string
           nullable: true
         listening_comprehension:
+          enum:
+          - A1
+          - A2
+          - B1
+          - B2
+          - C1
+          - C2
+          - null
+          type: string
+          description: |-
+            * `A1` - A1
+            * `A2` - A2
+            * `B1` - B1
+            * `B2` - B2
+            * `C1` - C1
+            * `C2` - C2
+          x-spec-enum-id: 2013ebaba7562937
           nullable: true
           title: Veuillez évaluer votre compréhension à l'audition
-          oneOf:
-          - $ref: '#/components/schemas/WritingAbilityEnum'
-          - $ref: '#/components/schemas/NullEnum'
         speaking_ability:
+          enum:
+          - A1
+          - A2
+          - B1
+          - B2
+          - C1
+          - C2
+          - null
+          type: string
+          description: |-
+            * `A1` - A1
+            * `A2` - A2
+            * `B1` - B1
+            * `B2` - B2
+            * `C1` - C1
+            * `C2` - C2
+          x-spec-enum-id: 2013ebaba7562937
           nullable: true
           title: Évaluez votre capacité orale
-          oneOf:
-          - $ref: '#/components/schemas/WritingAbilityEnum'
-          - $ref: '#/components/schemas/NullEnum'
         writing_ability:
+          enum:
+          - A1
+          - A2
+          - B1
+          - B2
+          - C1
+          - C2
+          - null
+          type: string
+          description: |-
+            * `A1` - A1
+            * `A2` - A2
+            * `B1` - B1
+            * `B2` - B2
+            * `C1` - C1
+            * `C2` - C2
+          x-spec-enum-id: 2013ebaba7562937
           nullable: true
           title: Évaluez votre capacité d'écriture
-          oneOf:
-          - $ref: '#/components/schemas/WritingAbilityEnum'
-          - $ref: '#/components/schemas/NullEnum'
         certificate:
           type: array
           items:
@@ -9918,10 +10055,20 @@ components:
           minimum: -2147483648
           nullable: true
         result:
+          enum:
+          - SUCCESS
+          - SUCCESS_WITH_RESIDUAL_CREDITS
+          - FAILURE
+          - WAITING_RESULT
+          - ''
+          type: string
+          description: |-
+            * `SUCCESS` - Réussite
+            * `SUCCESS_WITH_RESIDUAL_CREDITS` - Réussite avec crédits résiduels
+            * `FAILURE` - Échec
+            * `WAITING_RESULT` - En attente de résultat
+          x-spec-enum-id: 8896832946529dbf
           title: Résultat
-          oneOf:
-          - $ref: '#/components/schemas/ResultEnum'
-          - $ref: '#/components/schemas/BlankEnum'
       required:
       - academic_year
     LiteProfessionalExperience:
@@ -9943,7 +10090,22 @@ components:
           format: date
           title: Fin
         type:
-          $ref: '#/components/schemas/TypeEnum'
+          enum:
+          - WORK
+          - INTERNSHIP
+          - VOLUNTEERING
+          - UNEMPLOYMENT
+          - LANGUAGE_TRAVEL
+          - OTHER
+          type: string
+          description: |-
+            * `WORK` - Travail
+            * `INTERNSHIP` - Stage
+            * `VOLUNTEERING` - Volontariat
+            * `UNEMPLOYMENT` - Chômage
+            * `LANGUAGE_TRAVEL` - Séjour linguistique
+            * `OTHER` - Autre
+          x-spec-enum-id: c02b03f228aed45e
         certificate:
           type: array
           items:
@@ -10006,16 +10168,6 @@ components:
       - prenom
       - uuid
       - ville
-    MethodEnum:
-      enum:
-      - BANCONTACT
-      - CREDIT_CARD
-      - BANK_TRANSFER
-      type: string
-      description: |-
-        * `BANCONTACT` - bancontact
-        * `CREDIT_CARD` - creditcard
-        * `BANK_TRANSFER` - banktransfer
     ModifierChoixFormationContinueCommand:
       type: object
       description: |-
@@ -10180,23 +10332,6 @@ components:
       - sigle_formation
       - type_admission
       - uuid_proposition
-    NullEnum:
-      enum:
-      - null
-    ObtainedGradeEnum:
-      enum:
-      - GREATER_DISTINCTION
-      - GREAT_DISTINCTION
-      - DISTINCTION
-      - SATISFACTION
-      - SUCCESS_WITHOUT_DISTINCTION
-      type: string
-      description: |-
-        * `GREATER_DISTINCTION` - La plus grande distinction (90-100%)
-        * `GREAT_DISTINCTION` - Grande distinction (80-89%)
-        * `DISTINCTION` - Distinction (70-79%)
-        * `SATISFACTION` - Satisfaction (60-69%)
-        * `SUCCESS_WITHOUT_DISTINCTION` - Réussite sans mention (50-59%)
     PDFRecap:
       type: object
       properties:
@@ -10351,9 +10486,17 @@ components:
       type: object
       properties:
         method:
-          oneOf:
-          - $ref: '#/components/schemas/MethodEnum'
-          - $ref: '#/components/schemas/BlankEnum'
+          enum:
+          - BANCONTACT
+          - CREDIT_CARD
+          - BANK_TRANSFER
+          - ''
+          type: string
+          description: |-
+            * `BANCONTACT` - bancontact
+            * `CREDIT_CARD` - creditcard
+            * `BANK_TRANSFER` - banktransfer
+          x-spec-enum-id: 3b19e97332db5888
     Period:
       type: object
       description: |-
@@ -10441,21 +10584,55 @@ components:
           type: string
           nullable: true
         language:
-          oneOf:
-          - $ref: '#/components/schemas/LanguageEnum'
-          - $ref: '#/components/schemas/BlankEnum'
+          enum:
+          - fr-be
+          - en
+          - ''
+          type: string
+          description: |-
+            * `fr-be` - Français
+            * `en` - Anglais
+          x-spec-enum-id: 2e8eb686e1c6a8e0
         sex:
-          oneOf:
-          - $ref: '#/components/schemas/SexEnum'
-          - $ref: '#/components/schemas/BlankEnum'
+          enum:
+          - F
+          - M
+          - ''
+          type: string
+          description: |-
+            * `F` - Féminin
+            * `M` - Masculin
+          x-spec-enum-id: c635cc8917205934
         gender:
-          oneOf:
-          - $ref: '#/components/schemas/GenderEnum'
-          - $ref: '#/components/schemas/BlankEnum'
+          enum:
+          - F
+          - H
+          - X
+          - ''
+          type: string
+          description: |-
+            * `F` - Femme
+            * `H` - Homme
+            * `X` - Autre
+          x-spec-enum-id: 6673b24f8aec60e4
         civil_state:
-          oneOf:
-          - $ref: '#/components/schemas/CivilStateEnum'
-          - $ref: '#/components/schemas/BlankEnum'
+          enum:
+          - LEGAL_COHABITANT
+          - SINGLE
+          - DIVORCED
+          - MARRIED
+          - SEPARATE
+          - WIDOWED
+          - ''
+          type: string
+          description: |-
+            * `LEGAL_COHABITANT` - Cohabitant·e légal·e
+            * `SINGLE` - Célibataire
+            * `DIVORCED` - Divorcé·e
+            * `MARRIED` - Marié·e
+            * `SEPARATE` - Séparé·e
+            * `WIDOWED` - Veuf·ve
+          x-spec-enum-id: dda50cc445a4683c
         id_photo:
           type: array
           items:
@@ -10521,36 +10698,6 @@ components:
         last_registration_id:
           type: string
           maxLength: 10
-    PoolEnum:
-      enum:
-      - ADMISSION_POOL_EXTERNAL_REORIENTATION
-      - DOCTORATE_EDUCATION_ENROLLMENT
-      - CONTINUING_EDUCATION_ENROLLMENT
-      - ADMISSION_POOL_EXTERNAL_ENROLLMENT_CHANGE
-      - ADMISSION_POOL_PREFERENTIAL_FOR_MEDICINE_DENTISTRY
-      - ADMISSION_POOL_VIP
-      - ADMISSION_POOL_HUE_UCL_PATHWAY_CHANGE
-      - ADMISSION_POOL_INSTITUT_CHANGE
-      - ADMISSION_POOL_UE5_BELGIAN
-      - ADMISSION_POOL_UE5_NON_BELGIAN
-      - ADMISSION_POOL_HUE5_BELGIUM_RESIDENCY
-      - ADMISSION_POOL_HUE5_FOREIGN_RESIDENCY
-      - ADMISSION_POOL_NON_RESIDENT_QUOTA
-      type: string
-      description: |-
-        * `ADMISSION_POOL_EXTERNAL_REORIENTATION` - ADMISSION_POOL_EXTERNAL_REORIENTATION
-        * `DOCTORATE_EDUCATION_ENROLLMENT` - DOCTORATE_EDUCATION_ENROLLMENT
-        * `CONTINUING_EDUCATION_ENROLLMENT` - CONTINUING_EDUCATION_ENROLLMENT
-        * `ADMISSION_POOL_EXTERNAL_ENROLLMENT_CHANGE` - ADMISSION_POOL_EXTERNAL_ENROLLMENT_CHANGE
-        * `ADMISSION_POOL_PREFERENTIAL_FOR_MEDICINE_DENTISTRY` - ADMISSION_POOL_PREFERENTIAL_FOR_MEDICINE_DENTISTRY
-        * `ADMISSION_POOL_VIP` - ADMISSION_POOL_VIP
-        * `ADMISSION_POOL_HUE_UCL_PATHWAY_CHANGE` - ADMISSION_POOL_HUE_UCL_PATHWAY_CHANGE
-        * `ADMISSION_POOL_INSTITUT_CHANGE` - ADMISSION_POOL_INSTITUT_CHANGE
-        * `ADMISSION_POOL_UE5_BELGIAN` - ADMISSION_POOL_UE5_BELGIAN
-        * `ADMISSION_POOL_UE5_NON_BELGIAN` - ADMISSION_POOL_UE5_NON_BELGIAN
-        * `ADMISSION_POOL_HUE5_BELGIUM_RESIDENCY` - ADMISSION_POOL_HUE5_BELGIUM_RESIDENCY
-        * `ADMISSION_POOL_HUE5_FOREIGN_RESIDENCY` - ADMISSION_POOL_HUE5_FOREIGN_RESIDENCY
-        * `ADMISSION_POOL_NON_RESIDENT_QUOTA` - ADMISSION_POOL_NON_RESIDENT_QUOTA
     PoolQuestions:
       type: object
       properties:
@@ -10665,7 +10812,22 @@ components:
           format: date
           title: Fin
         type:
-          $ref: '#/components/schemas/TypeEnum'
+          enum:
+          - WORK
+          - INTERNSHIP
+          - VOLUNTEERING
+          - UNEMPLOYMENT
+          - LANGUAGE_TRAVEL
+          - OTHER
+          type: string
+          description: |-
+            * `WORK` - Travail
+            * `INTERNSHIP` - Stage
+            * `VOLUNTEERING` - Volontariat
+            * `UNEMPLOYMENT` - Chômage
+            * `LANGUAGE_TRAVEL` - Séjour linguistique
+            * `OTHER` - Autre
+          x-spec-enum-id: c02b03f228aed45e
         certificate:
           type: array
           items:
@@ -10676,10 +10838,18 @@ components:
           title: Fonction
           maxLength: 255
         sector:
+          enum:
+          - PUBLIC
+          - PRIVATE
+          - ASSOCIATIVE
+          - ''
+          type: string
+          description: |-
+            * `PUBLIC` - Public
+            * `PRIVATE` - Privé
+            * `ASSOCIATIVE` - Associatif
+          x-spec-enum-id: 2d62421088ff69d9
           title: Secteur
-          oneOf:
-          - $ref: '#/components/schemas/SectorEnum'
-          - $ref: '#/components/schemas/BlankEnum'
         activity:
           type: string
           title: Activité
@@ -10853,18 +11023,6 @@ components:
           type: string
       required:
       - uuid_membre
-    ResultEnum:
-      enum:
-      - SUCCESS
-      - SUCCESS_WITH_RESIDUAL_CREDITS
-      - FAILURE
-      - WAITING_RESULT
-      type: string
-      description: |-
-        * `SUCCESS` - Réussite
-        * `SUCCESS_WITH_RESIDUAL_CREDITS` - Réussite avec crédits résiduels
-        * `FAILURE` - Échec
-        * `WAITING_RESULT` - En attente de résultat
     SectorDTO:
       type: object
       properties:
@@ -10874,24 +11032,6 @@ components:
         intitule:
           type: string
           readOnly: true
-    SectorEnum:
-      enum:
-      - PUBLIC
-      - PRIVATE
-      - ASSOCIATIVE
-      type: string
-      description: |-
-        * `PUBLIC` - Public
-        * `PRIVATE` - Privé
-        * `ASSOCIATIVE` - Associatif
-    SexEnum:
-      enum:
-      - F
-      - M
-      type: string
-      description: |-
-        * `F` - Féminin
-        * `M` - Masculin
     SpecificEnrolmentPeriods:
       type: object
       properties:
@@ -11002,7 +11142,36 @@ components:
         annee:
           type: integer
         pool:
-          $ref: '#/components/schemas/PoolEnum'
+          enum:
+          - ADMISSION_POOL_EXTERNAL_REORIENTATION
+          - DOCTORATE_EDUCATION_ENROLLMENT
+          - CONTINUING_EDUCATION_ENROLLMENT
+          - ADMISSION_POOL_EXTERNAL_ENROLLMENT_CHANGE
+          - ADMISSION_POOL_PREFERENTIAL_FOR_MEDICINE_DENTISTRY
+          - ADMISSION_POOL_VIP
+          - ADMISSION_POOL_HUE_UCL_PATHWAY_CHANGE
+          - ADMISSION_POOL_INSTITUT_CHANGE
+          - ADMISSION_POOL_UE5_BELGIAN
+          - ADMISSION_POOL_UE5_NON_BELGIAN
+          - ADMISSION_POOL_HUE5_BELGIUM_RESIDENCY
+          - ADMISSION_POOL_HUE5_FOREIGN_RESIDENCY
+          - ADMISSION_POOL_NON_RESIDENT_QUOTA
+          type: string
+          description: |-
+            * `ADMISSION_POOL_EXTERNAL_REORIENTATION` - ADMISSION_POOL_EXTERNAL_REORIENTATION
+            * `DOCTORATE_EDUCATION_ENROLLMENT` - DOCTORATE_EDUCATION_ENROLLMENT
+            * `CONTINUING_EDUCATION_ENROLLMENT` - CONTINUING_EDUCATION_ENROLLMENT
+            * `ADMISSION_POOL_EXTERNAL_ENROLLMENT_CHANGE` - ADMISSION_POOL_EXTERNAL_ENROLLMENT_CHANGE
+            * `ADMISSION_POOL_PREFERENTIAL_FOR_MEDICINE_DENTISTRY` - ADMISSION_POOL_PREFERENTIAL_FOR_MEDICINE_DENTISTRY
+            * `ADMISSION_POOL_VIP` - ADMISSION_POOL_VIP
+            * `ADMISSION_POOL_HUE_UCL_PATHWAY_CHANGE` - ADMISSION_POOL_HUE_UCL_PATHWAY_CHANGE
+            * `ADMISSION_POOL_INSTITUT_CHANGE` - ADMISSION_POOL_INSTITUT_CHANGE
+            * `ADMISSION_POOL_UE5_BELGIAN` - ADMISSION_POOL_UE5_BELGIAN
+            * `ADMISSION_POOL_UE5_NON_BELGIAN` - ADMISSION_POOL_UE5_NON_BELGIAN
+            * `ADMISSION_POOL_HUE5_BELGIUM_RESIDENCY` - ADMISSION_POOL_HUE5_BELGIUM_RESIDENCY
+            * `ADMISSION_POOL_HUE5_FOREIGN_RESIDENCY` - ADMISSION_POOL_HUE5_FOREIGN_RESIDENCY
+            * `ADMISSION_POOL_NON_RESIDENT_QUOTA` - ADMISSION_POOL_NON_RESIDENT_QUOTA
+          x-spec-enum-id: 231e60d41ef5fdbf
         elements_confirmation: {}
       required:
       - annee
@@ -11012,7 +11181,14 @@ components:
       type: object
       properties:
         actor_type:
-          $ref: '#/components/schemas/ActorTypeEnum'
+          enum:
+          - PROMOTER
+          - CA_MEMBER
+          type: string
+          description: |-
+            * `PROMOTER` - Promoteur
+            * `CA_MEMBER` - Membre du comité d'accompagnement
+          x-spec-enum-id: 32f83b997c0f9a99
         uuid_membre:
           type: string
       required:
@@ -11039,14 +11215,6 @@ components:
       required:
       - signatures_membres_CA
       - signatures_promoteurs
-    TranscriptTypeEnum:
-      enum:
-      - ONE_A_YEAR
-      - ONE_FOR_ALL_YEARS
-      type: string
-      description: |-
-        * `ONE_A_YEAR` - Un relevé de notes pour chaque année
-        * `ONE_FOR_ALL_YEARS` - Un relevé de notes couvrant l'ensemble des années
     Tutor:
       type: object
       properties:
@@ -11064,46 +11232,6 @@ components:
           type: string
           format: email
           readOnly: true
-    TypeAdmissionEnum:
-      enum:
-      - ADMISSION
-      - PRE_ADMISSION
-      type: string
-      description: |-
-        * `ADMISSION` - Admission
-        * `PRE_ADMISSION` - Pré-admission
-    TypeEnum:
-      enum:
-      - WORK
-      - INTERNSHIP
-      - VOLUNTEERING
-      - UNEMPLOYMENT
-      - LANGUAGE_TRAVEL
-      - OTHER
-      type: string
-      description: |-
-        * `WORK` - Travail
-        * `INTERNSHIP` - Stage
-        * `VOLUNTEERING` - Volontariat
-        * `UNEMPLOYMENT` - Chômage
-        * `LANGUAGE_TRAVEL` - Séjour linguistique
-        * `OTHER` - Autre
-    WritingAbilityEnum:
-      enum:
-      - A1
-      - A2
-      - B1
-      - B2
-      - C1
-      - C2
-      type: string
-      description: |-
-        * `A1` - A1
-        * `A2` - A2
-        * `B1` - B1
-        * `B2` - B2
-        * `C1` - C1
-        * `C2` - C2
     Error:
       type: object
       properties:
