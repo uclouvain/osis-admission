@@ -312,7 +312,10 @@ class PersonalDataChangeStatusView(
         candidate.personal_data_validation_status = form.cleaned_data['status']
         candidate.save(update_fields=['personal_data_validation_status'])
 
-        if form.cleaned_data['status'] == ChoixStatutValidationDonneesPersonnelles.VALIDEES.name:
+        if form.cleaned_data['status'] in (
+            ChoixStatutValidationDonneesPersonnelles.TOILETTEES.name,
+            ChoixStatutValidationDonneesPersonnelles.VALIDEES.name,
+        ):
             message_bus_instance.publish(DonneesPersonellesCandidatValidee(matricule=candidate.global_id))
 
         return super().form_valid(form)

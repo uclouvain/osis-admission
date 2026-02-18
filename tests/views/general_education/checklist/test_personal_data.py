@@ -129,7 +129,10 @@ class PersonalDataChangeStatusViewTestCase(TestCase):
 
             self.assertEqual(self.admission.candidate.personal_data_validation_status, status)
 
-            if status == ChoixStatutValidationDonneesPersonnelles.VALIDEES.name:
+            if status in [
+                ChoixStatutValidationDonneesPersonnelles.VALIDEES.name,
+                ChoixStatutValidationDonneesPersonnelles.TOILETTEES.name,
+            ]:
                 self.publish_mock.assert_called_once_with(
                     DonneesPersonellesCandidatValidee(
                         matricule=self.admission.candidate.global_id,
