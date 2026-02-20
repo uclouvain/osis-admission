@@ -99,8 +99,26 @@ COMMAND_HANDLERS = {
         cmd,
         repository=GestionnaireRepository(),
     ),
-    RecupererInformationsValidationExperienceParcoursAnterieurQuery: (
-        lambda msg_bus, cmd: recuperer_informations_validation_experience_parcours_anterieur(
+    RecupererInformationsValidationExperienceAcademiqueQuery: (
+        lambda msg_bus, cmd: recuperer_informations_validation_experience_academique(
+            cmd,
+            validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
+        )
+    ),
+    RecupererInformationsValidationExperienceNonAcademiqueQuery: (
+        lambda msg_bus, cmd: recuperer_informations_validation_experience_non_academique(
+            cmd,
+            validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
+        )
+    ),
+    RecupererInformationsValidationEtudesSecondairesQuery: (
+        lambda msg_bus, cmd: recuperer_informations_validation_etudes_secondaires(
+            cmd,
+            validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
+        )
+    ),
+    RecupererInformationsValidationExamenQuery: (
+        lambda msg_bus, cmd: recuperer_informations_validation_examen(
             cmd,
             validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
         )

@@ -1468,11 +1468,13 @@ class SinglePastExperienceAuthenticationForm(forms.Form):
 
     def __init__(
         self,
-        experience_validation_data: ValidationExperienceParcoursAnterieurDTO
-        | EtudesSecondairesAdmissionDTO
-        | ExperienceAcademiqueDTO
-        | ExperienceNonAcademiqueDTO
-        | ExamenDTO,
+        experience_validation_data: Union[
+            ValidationExperienceParcoursAnterieurDTO,
+            EtudesSecondairesAdmissionDTO,
+            ExperienceAcademiqueDTO,
+            ExperienceNonAcademiqueDTO,
+            ExamenDTO,
+        ],
         *args,
         **kwargs,
     ):

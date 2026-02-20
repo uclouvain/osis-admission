@@ -7826,11 +7826,6 @@ msgstr ""
 "logement auprès du service LOGE : <a href=\"https://www.uclouvain.be/fr/"
 "logement\">www.uclouvain.be/fr/logement</a>."
 
-msgid "This experience can't be validated if mandatory information is missing."
-msgstr ""
-"Cette expérience ne peut pas être validée tant que des informations "
-"obligatoires en sont manquantes."
-
 msgid "This experience cannot be updated as it has already been valuated."
 msgstr ""
 "Cette expérience ne peut être mise à jour car elle a déjà été valorisée."
@@ -8543,12 +8538,22 @@ msgstr ""
 "Vous avez la possibilité d'ajouter tout document que vous jugez pertinent "
 "pour votre dossier (justificatifs, preuve de niveau de langue, ...)."
 
+#, python-format
 msgid ""
-"You can do it automatically be clicking <button type=\"submit\" class=\"btn "
-"btn-link p-0\">here</button>"
+"You can do it automatically by clicking <button type=\"submit\" class=\"btn-"
+"link p-0 no-border\">here</button> or manually through the <a "
+"href=\"%(edit_experience_url)s\">edit form</a>."
 msgstr ""
 "Vous pouvez le faire automatiquement en cliquant <button type=\"submit\" "
-"class=\"btn btn-link p-0\">ici</button>"
+"class=\"btn-link p-0 no-border\">ici</button> ou manuellement via le <a href=\"%(edit_experience_url)s\">formulaire "
+"d'édition</a>."
+
+msgid ""
+"You can do it automatically by clicking <button type=\"submit\" class=\"btn-"
+"link p-0 no-border\">here</button>."
+msgstr ""
+"Vous pouvez le faire automatiquement en cliquant <button type=\"submit\" "
+"class=\"btn-link p-0 no-border\">ici</button>."
 
 #, python-format
 msgid ""
@@ -9054,13 +9059,6 @@ msgstr "le %(date)s at %(hour)s"
 msgctxt "payment"
 msgid "open"
 msgstr "Ouvert"
-
-#, python-format
-msgid ""
-"or manually through the <a href=\"%(edit_experience_url)s\">edit form</a>"
-msgstr ""
-"ou manuellement via le <a href=\"%(edit_experience_url)s\">formulaire "
-"d'édition</a>."
 
 msgctxt "payment"
 msgid "paid"

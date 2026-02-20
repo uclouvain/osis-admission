@@ -23,21 +23,18 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
 from admission.ddd.admission.shared_kernel.commands import (
-    RecupererInformationsValidationExperienceParcoursAnterieurQuery,
+    RecupererInformationsValidationExperienceAcademiqueQuery,
 )
 from admission.ddd.admission.shared_kernel.domain.service.i_modifier_checklist_experience_parcours_anterieur import (
     IValidationExperienceParcoursAnterieurService,
 )
 
 
-def recuperer_informations_validation_experience_parcours_anterieur(
-    cmd: 'RecupererInformationsValidationExperienceParcoursAnterieurQuery',
+def recuperer_informations_validation_experience_academique(
+    cmd: 'RecupererInformationsValidationExperienceAcademiqueQuery',
     validation_experience_parcours_anterieur_service: 'IValidationExperienceParcoursAnterieurService',
 ):
-    return validation_experience_parcours_anterieur_service.recuperer_information_validation(
-        matricule_candidat=cmd.matricule_candidat,
+    return validation_experience_parcours_anterieur_service.recuperer_information_validation_experience_academique(
         uuid_experience=cmd.uuid_experience,
-        type_experience=cmd.type_experience,
     )

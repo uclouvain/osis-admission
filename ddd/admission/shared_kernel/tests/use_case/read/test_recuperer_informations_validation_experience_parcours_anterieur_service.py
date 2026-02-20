@@ -28,7 +28,10 @@ import uuid
 from django.test import TestCase
 
 from admission.ddd.admission.shared_kernel.commands import (
-    RecupererInformationsValidationExperienceParcoursAnterieurQuery,
+    RecupererInformationsValidationEtudesSecondairesQuery,
+    RecupererInformationsValidationExamenQuery,
+    RecupererInformationsValidationExperienceAcademiqueQuery,
+    RecupererInformationsValidationExperienceNonAcademiqueQuery,
 )
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import ExperienceNonTrouveeException
 from admission.ddd.admission.shared_kernel.dtos.validation_experience_parcours_anterieur import (
@@ -54,49 +57,14 @@ class RecupererInformationsValidationExperienceParcoursAnterieurTestCase(TestCas
     def setUpTestData(cls):
         cls.personne: Person = PersonFactory()
 
-    def test_lever_exception_si_uuid_experience_non_reconnu(self):
-        with self.assertRaises(ExperienceNonTrouveeException):
-            message_bus_instance.invoke(
-                RecupererInformationsValidationExperienceParcoursAnterieurQuery(
-                    uuid_experience=str(uuid.uuid4()),
-                    type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
-                    matricule_candidat=self.personne.global_id,
-                )
-            )
-
-    def test_lever_exception_si_type_experience_non_conforme(self):
-        experience: EducationalExperience = EducationalExperienceFactory(
-            person=self.personne,
-            validation_status=ChoixStatutValidationExperience.AVIS_EXPERT.name,
-            authentication_status=EtatAuthentificationParcours.VRAI.name,
-        )
-
-        with self.assertRaises(ExperienceNonTrouveeException):
-            message_bus_instance.invoke(
-                RecupererInformationsValidationExperienceParcoursAnterieurQuery(
-                    uuid_experience=str(experience.uuid),
-                    type_experience=TypeExperience.ACTIVITE_NON_ACADEMIQUE.name,
-                    matricule_candidat=self.personne.global_id,
-                )
-            )
-
-    def test_lever_exception_si_matricule_candidat_non_conforme(self):
-        experience: EducationalExperience = EducationalExperienceFactory(
-            person=self.personne,
-            validation_status=ChoixStatutValidationExperience.AVIS_EXPERT.name,
-            authentication_status=EtatAuthentificationParcours.VRAI.name,
-        )
-
-        with self.assertRaises(ExperienceNonTrouveeException):
-            message_bus_instance.invoke(
-                RecupererInformationsValidationExperienceParcoursAnterieurQuery(
-                    uuid_experience=str(experience.uuid),
-                    type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
-                    matricule_candidat='INCONNU',
-                )
-            )
-
     def test_recuperer_informations_experience_academique(self):
+        with self.assertRaises(ExperienceNonTrouveeException):
+            message_bus_instance.invoke(
+                RecupererInformationsValidationExperienceAcademiqueQuery(
+                    uuid_experience=str(uuid.uuid4()),
+                )
+            )
+
         experience: EducationalExperience = EducationalExperienceFactory(
             person=self.personne,
             validation_status=ChoixStatutValidationExperience.AVIS_EXPERT.name,
@@ -104,10 +72,8 @@ class RecupererInformationsValidationExperienceParcoursAnterieurTestCase(TestCas
         )
 
         experience_dto: ValidationExperienceParcoursAnterieurDTO = message_bus_instance.invoke(
-            RecupererInformationsValidationExperienceParcoursAnterieurQuery(
+            RecupererInformationsValidationExperienceAcademiqueQuery(
                 uuid_experience=str(experience.uuid),
-                type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
-                matricule_candidat=self.personne.global_id,
             )
         )
 
@@ -117,6 +83,13 @@ class RecupererInformationsValidationExperienceParcoursAnterieurTestCase(TestCas
         self.assertEqual(experience_dto.statut_authentification, EtatAuthentificationParcours.VRAI.name)
 
     def test_recuperer_informations_experience_non_academique(self):
+        with self.assertRaises(ExperienceNonTrouveeException):
+            message_bus_instance.invoke(
+                RecupererInformationsValidationExperienceNonAcademiqueQuery(
+                    uuid_experience=str(uuid.uuid4()),
+                )
+            )
+
         experience: ProfessionalExperience = ProfessionalExperienceFactory(
             person=self.personne,
             validation_status=ChoixStatutValidationExperience.AVIS_EXPERT.name,
@@ -124,10 +97,8 @@ class RecupererInformationsValidationExperienceParcoursAnterieurTestCase(TestCas
         )
 
         experience_dto: ValidationExperienceParcoursAnterieurDTO = message_bus_instance.invoke(
-            RecupererInformationsValidationExperienceParcoursAnterieurQuery(
+            RecupererInformationsValidationExperienceNonAcademiqueQuery(
                 uuid_experience=str(experience.uuid),
-                type_experience=TypeExperience.ACTIVITE_NON_ACADEMIQUE.name,
-                matricule_candidat=self.personne.global_id,
             )
         )
 
@@ -137,6 +108,13 @@ class RecupererInformationsValidationExperienceParcoursAnterieurTestCase(TestCas
         self.assertEqual(experience_dto.statut_authentification, EtatAuthentificationParcours.VRAI.name)
 
     def test_recuperer_informations_examen(self):
+        with self.assertRaises(ExperienceNonTrouveeException):
+            message_bus_instance.invoke(
+                RecupererInformationsValidationExamenQuery(
+                    uuid_experience=str(uuid.uuid4()),
+                )
+            )
+
         experience: Exam = ExamFactory(
             person=self.personne,
             validation_status=ChoixStatutValidationExperience.AVIS_EXPERT.name,
@@ -144,10 +122,8 @@ class RecupererInformationsValidationExperienceParcoursAnterieurTestCase(TestCas
         )
 
         experience_dto: ValidationExperienceParcoursAnterieurDTO = message_bus_instance.invoke(
-            RecupererInformationsValidationExperienceParcoursAnterieurQuery(
+            RecupererInformationsValidationExamenQuery(
                 uuid_experience=str(experience.uuid),
-                type_experience=TypeExperience.EXAMEN.name,
-                matricule_candidat=self.personne.global_id,
             )
         )
 
@@ -157,6 +133,13 @@ class RecupererInformationsValidationExperienceParcoursAnterieurTestCase(TestCas
         self.assertEqual(experience_dto.statut_authentification, EtatAuthentificationParcours.VRAI.name)
 
     def test_recuperer_informations_etudes_secondaires(self):
+        with self.assertRaises(ExperienceNonTrouveeException):
+            message_bus_instance.invoke(
+                RecupererInformationsValidationEtudesSecondairesQuery(
+                    uuid_experience=str(uuid.uuid4()),
+                )
+            )
+
         experience: HighSchoolDiploma = HighSchoolDiplomaFactory(
             person=self.personne,
             validation_status=ChoixStatutValidationExperience.AVIS_EXPERT.name,
@@ -164,10 +147,8 @@ class RecupererInformationsValidationExperienceParcoursAnterieurTestCase(TestCas
         )
 
         experience_dto: ValidationExperienceParcoursAnterieurDTO = message_bus_instance.invoke(
-            RecupererInformationsValidationExperienceParcoursAnterieurQuery(
+            RecupererInformationsValidationEtudesSecondairesQuery(
                 uuid_experience=str(experience.uuid),
-                type_experience=TypeExperience.ETUDES_SECONDAIRES.name,
-                matricule_candidat=self.personne.global_id,
             )
         )
 

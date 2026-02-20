@@ -105,19 +105,16 @@ from admission.views.doctorate.details.checklist.projet_recherche import (
     ProjetRechercheContextMixin,
 )
 from admission.views.doctorate.details.checklist.sic_decision import SicDecisionMixin
-from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import EtudesSecondairesDTO
-from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
-    MessageCurriculumDTO,
 )
 from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
     ExperienceParcoursInterneDTO,
 )
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile.models.enums.experience_validation import EtatAuthentificationParcours
-from osis_profile.utils.curriculum import groupe_curriculum_par_annee_decroissante
+from osis_profile.utils.curriculum import ElementCurriculumDTO, groupe_curriculum_par_annee_decroissante
 from parcours_interne import etudiants_PCE_avant_2015
 
 __namespace__ = False
@@ -588,20 +585,7 @@ class ChecklistView(
             'inscription_supplementaire': 1,
         }
 
-    def _get_experiences_by_uuid(
-        self,
-        experiences_by_year: dict[
-            int,
-            list[
-                ExperienceAcademiqueDTO
-                | ExperienceNonAcademiqueDTO
-                | EtudesSecondairesDTO
-                | ExamenDTO
-                | ExperienceParcoursInterneDTO
-                | MessageCurriculumDTO
-            ],
-        ],
-    ):
+    def _get_experiences_by_uuid(self, experiences_by_year: dict[int, list[ElementCurriculumDTO]]):
         # Get the experiences by uuid in chronological order
         experiences: dict[str, ExperienceAcademiqueDTO | ExperienceNonAcademiqueDTO] = {}
         for year_experiences in experiences_by_year.values():

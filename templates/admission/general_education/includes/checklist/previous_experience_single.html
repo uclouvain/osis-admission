@@ -40,12 +40,7 @@
       {% checklist_macro_state_button tab=checklist_item_name status_configuration=tab_statuses_configurations.AUTHENTIFICATION selected_status_configuration=selected_status_configuration icon='pencil' class='warning' htmx_post=change_status_url %}
       {% checklist_macro_state_button tab=checklist_item_name status_configuration=tab_statuses_configurations.AVIS_EXPERT selected_status_configuration=selected_status_configuration icon='pencil' class='warning' htmx_post=change_status_url %}
       {% checklist_macro_state_button tab=checklist_item_name status_configuration=tab_statuses_configurations.A_COMPLETER_APRES_INSCRIPTION selected_status_configuration=selected_status_configuration icon='circle-arrow-right' class='info' htmx_post=change_status_url %}
-      {% if experience_uuid in view.incomplete_curriculum_experiences %}
-        {% translate "This experience can't be validated if mandatory information is missing." as incomplete_experience_tooltip %}
-        {% checklist_macro_state_button tab=checklist_item_name status_configuration=tab_statuses_configurations.VALIDEE selected_status_configuration=selected_status_configuration icon='check' class='success' disabled=True tooltip=incomplete_experience_tooltip %}
-      {% else %}
-        {% checklist_macro_state_button tab=checklist_item_name status_configuration=tab_statuses_configurations.VALIDEE selected_status_configuration=selected_status_configuration icon='check' class='success' htmx_post=change_status_url %}
-      {% endif %}
+      {% checklist_macro_state_button tab=checklist_item_name status_configuration=tab_statuses_configurations.VALIDEE selected_status_configuration=selected_status_configuration icon='check' class='success' htmx_post=change_status_url %}
     </div>
 
     {% htmx_comment_form comment_forms|get_item_or_none:checklist_item_name %}
