@@ -32,7 +32,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervi
     GroupeDeSupervision,
     SignataireIdentity,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.dtos import AvisDTO, PropositionDTO
 from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import EmplacementDocument
 from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import IMatriculeEtudiantService
@@ -99,7 +99,7 @@ class INotification(interface.DomainService):
     @classmethod
     def modifier_authentification_experience_parcours(
         cls,
-        proposition: Proposition,
+        proposition_id: PropositionIdentity,
         etat_authentification: str,
         gestionnaire: PersonneConnueUclDTO,
     ) -> Optional[EmailMessage]:
@@ -111,13 +111,13 @@ class INotification(interface.DomainService):
         }.get(etat_authentification)
 
         if methode_notification:
-            return methode_notification(proposition, gestionnaire)
+            return methode_notification(proposition_id, gestionnaire)
 
     @classmethod
     @abstractmethod
     def demande_verification_titre_acces(
         cls,
-        proposition: Proposition,
+        proposition_id: PropositionIdentity,
         gestionnaire: PersonneConnueUclDTO,
     ) -> EmailMessage:
         raise NotImplementedError
@@ -126,7 +126,7 @@ class INotification(interface.DomainService):
     @abstractmethod
     def informer_candidat_verification_parcours_en_cours(
         cls,
-        proposition: Proposition,
+        proposition_id: PropositionIdentity,
         gestionnaire: PersonneConnueUclDTO,
     ) -> EmailMessage:
         raise NotImplementedError

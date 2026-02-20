@@ -7014,9 +7014,6 @@ msgid ""
 "uclouvain.be/en/logement</a>."
 msgstr ""
 
-msgid "This experience can't be validated if mandatory information is missing."
-msgstr ""
-
 msgid "This experience cannot be updated as it has already been valuated."
 msgstr ""
 
@@ -7643,9 +7640,16 @@ msgid ""
 "(supporting documents, proof of language level, etc.)."
 msgstr ""
 
+#, python-format
 msgid ""
-"You can do it automatically be clicking <button type=\"submit\" class=\"btn "
-"btn-link p-0\">here</button>"
+"You can do it automatically by clicking <button type=\"submit\" class=\"btn-"
+"link p-0 no-border\">here</button> or manually through the <a "
+"href=\"%(edit_experience_url)s\">edit form</a>."
+msgstr ""
+
+msgid ""
+"You can do it automatically by clicking <button type=\"submit\" class=\"btn-"
+"link p-0 no-border\">here</button>."
 msgstr ""
 
 #, python-format
@@ -8051,11 +8055,6 @@ msgstr ""
 msgctxt "payment"
 msgid "open"
 msgstr "Open"
-
-#, python-format
-msgid ""
-"or manually through the <a href=\"%(edit_experience_url)s\">edit form</a>"
-msgstr ""
 
 msgctxt "payment"
 msgid "paid"

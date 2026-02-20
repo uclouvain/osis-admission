@@ -26,7 +26,7 @@
 import datetime
 import itertools
 from collections import defaultdict
-from typing import Dict, List, Optional, Set, Union
+from typing import Dict, List, Optional, Set, Type, Union
 
 import attr
 from django.conf import settings
@@ -56,7 +56,6 @@ from admission.constants import COMMENT_TAG_FAC, COMMENT_TAG_SIC
 from admission.ddd import MAIL_VERIFICATEUR_CURSUS, MONTANT_FRAIS_DOSSIER
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AnneesCurriculumNonSpecifieesException,
-    ExperiencesAcademiquesNonCompleteesException,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     message_candidat_avec_pae_avant_2015,
@@ -70,8 +69,16 @@ from admission.ddd.admission.formation_generale.commands import (
     EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand,
     EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand,
     EnvoyerRappelPaiementCommand,
+    ModifierAuthentificationEtudesSecondairesCommand,
+    ModifierAuthentificationExamenCommand,
+    ModifierAuthentificationExperienceAcademiqueCommand,
+    ModifierAuthentificationExperienceNonAcademiqueCommand,
     ModifierAuthentificationExperienceParcoursAnterieurCommand,
     ModifierChecklistChoixFormationCommand,
+    ModifierStatutChecklistEtudesSecondairesCommand,
+    ModifierStatutChecklistExamenCommand,
+    ModifierStatutChecklistExperienceAcademiqueCommand,
+    ModifierStatutChecklistExperienceNonAcademiqueCommand,
     ModifierStatutChecklistExperienceParcoursAnterieurCommand,
     ModifierStatutChecklistParcoursAnterieurCommand,
     NotifierCandidatDerogationFinancabiliteCommand,
@@ -98,7 +105,6 @@ from admission.ddd.admission.formation_generale.commands import (
     SpecifierPaiementNecessaireCommand,
     SpecifierPaiementPlusNecessaireCommand,
     VerifierCurriculumApresSoumissionQuery,
-    VerifierExperienceCurriculumApresSoumissionQuery,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_ENVOYABLE_EN_FAC_POUR_DECISION,
@@ -128,7 +134,10 @@ from admission.ddd.admission.shared_kernel.commands import (
     ListerToutesDemandesQuery,
     RechercherParcoursAnterieurQuery,
     RecupererInformationsDestinataireQuery,
-    RecupererInformationsValidationExperienceParcoursAnterieurQuery,
+    RecupererInformationsValidationEtudesSecondairesQuery,
+    RecupererInformationsValidationExamenQuery,
+    RecupererInformationsValidationExperienceAcademiqueQuery,
+    RecupererInformationsValidationExperienceNonAcademiqueQuery,
 )
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     ExperienceNonTrouveeException,
@@ -239,12 +248,12 @@ from base.utils.utils import format_academic_year
 from ddd.logic.shared_kernel.profil.commands import (
     RecupererExperiencesParcoursInterneQuery,
 )
+from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import EtudesSecondairesDTO
 from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
-    MessageCurriculumDTO,
 )
 from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
     ExperienceParcoursInterneDTO,
@@ -255,7 +264,7 @@ from osis_common.ddd.interface import BusinessException
 from osis_profile.models import EducationalExperience
 from osis_profile.models.enums.experience_validation import EtatAuthentificationParcours
 from osis_profile.models.enums.person import ChoixGenre
-from osis_profile.utils.curriculum import groupe_curriculum_par_annee_decroissante
+from osis_profile.utils.curriculum import ElementCurriculumDTO, groupe_curriculum_par_annee_decroissante
 from osis_role.templatetags.osis_role import has_perm
 from parcours_interne import etudiants_PCE_avant_2015
 
@@ -378,20 +387,6 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
                 reverse=True,
             )
         ]
-
-    @cached_property
-    def incomplete_curriculum_experiences(self):
-        experiences = {
-            str(experience.uuid)
-            for experience in self.proposition_resume.resume.curriculum.experiences_academiques
-            if experience.champs_credits_bloc_1_et_complements_non_remplis(
-                self.proposition_resume.resume.proposition.formation.grade_academique,
-            )
-        }
-        examen = self.proposition_resume.resume.examens
-        if examen.requis and (not examen.attestation or not examen.annee):
-            experiences.add(OngletsDemande.EXAMS.name)
-        return experiences
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -2867,19 +2862,22 @@ class SinglePastExperienceMixin(
     HtmxPermissionRequiredMixin,
     FormView,
 ):
+    update_admission_author = True
+
     @cached_property
     def experience_uuid(self):
         return str(self.kwargs['experience_uuid'])
 
     def get_experience_validation_dto(self) -> ValidationExperienceParcoursAnterieurDTO:
+        retrieve_experience_cmd = {
+            TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name: RecupererInformationsValidationExperienceAcademiqueQuery,
+            TypeExperience.ACTIVITE_NON_ACADEMIQUE.name: RecupererInformationsValidationExperienceNonAcademiqueQuery,
+            TypeExperience.ETUDES_SECONDAIRES.name: RecupererInformationsValidationEtudesSecondairesQuery,
+            TypeExperience.EXAMEN.name: RecupererInformationsValidationExamenQuery,
+        }[self.kwargs['experience_type']]
+
         try:
-            return message_bus_instance.invoke(
-                RecupererInformationsValidationExperienceParcoursAnterieurQuery(
-                    matricule_candidat=self.admission.candidate.global_id,
-                    type_experience=self.kwargs['experience_type'],
-                    uuid_experience=self.experience_uuid,
-                )
-            )
+            return message_bus_instance.invoke(retrieve_experience_cmd(uuid_experience=self.experience_uuid))
         except ExperienceNonTrouveeException:
             return ValidationExperienceParcoursAnterieurDTO(
                 uuid=self.experience_uuid,
@@ -2928,17 +2926,14 @@ class SinglePastExperienceMixin(
             .first()
         )
 
-        if experience_validation_dto:
-            context['checklist_additional_icons'][tab_identifier].append(
-                ChecklistTabIcon(
-                    identifier='authentication_state',
-                    icon=authentication_css_class(
-                        authentication_status=experience_validation_dto.statut_authentification
-                    ),
-                    title=EtatAuthentificationParcours.get_value(experience_validation_dto.statut_authentification),
-                    displayed=bool(experience_validation_dto.statut_authentification),
-                )
+        context['checklist_additional_icons'][tab_identifier].append(
+            ChecklistTabIcon(
+                identifier='authentication_state',
+                icon=authentication_css_class(authentication_status=experience_validation_dto.statut_authentification),
+                title=EtatAuthentificationParcours.get_value(experience_validation_dto.statut_authentification),
+                displayed=bool(experience_validation_dto.statut_authentification),
             )
+        )
 
         return context
 
@@ -2959,25 +2954,6 @@ class SinglePastExperienceMixin(
             return super().form_invalid(form)
         return super().form_valid(form)
 
-    @cached_property
-    def incomplete_curriculum_experiences(self):
-        # Override it to only check a single experience
-        try:
-            message_bus_instance.invoke(
-                VerifierExperienceCurriculumApresSoumissionQuery(
-                    uuid_proposition=self.admission_uuid,
-                    uuid_experience=self.experience_uuid,
-                    type_experience=self.kwargs['experience_type'],
-                )
-            )
-            return set()
-        except MultipleBusinessExceptions as multiple_exceptions:
-            return {
-                str(e.reference)
-                for e in multiple_exceptions.exceptions
-                if isinstance(e, ExperiencesAcademiquesNonCompleteesException)
-            }
-
 
 class SinglePastExperienceChangeStatusView(SinglePastExperienceMixin):
     name = 'single-past-experience-change-status'
@@ -2997,11 +2973,17 @@ class SinglePastExperienceChangeStatusView(SinglePastExperienceMixin):
         return context
 
     def command(self, form):
+        update_status_experience_cmd: Type[ModifierStatutChecklistExperienceParcoursAnterieurCommand] = {
+            TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name: ModifierStatutChecklistExperienceAcademiqueCommand,
+            TypeExperience.ACTIVITE_NON_ACADEMIQUE.name: ModifierStatutChecklistExperienceNonAcademiqueCommand,
+            TypeExperience.ETUDES_SECONDAIRES.name: ModifierStatutChecklistEtudesSecondairesCommand,
+            TypeExperience.EXAMEN.name: ModifierStatutChecklistExamenCommand,
+        }[self.kwargs['experience_type']]
+
         message_bus_instance.invoke(
-            ModifierStatutChecklistExperienceParcoursAnterieurCommand(
+            update_status_experience_cmd(
                 uuid_proposition=self.admission_uuid,
                 uuid_experience=self.experience_uuid,
-                type_experience=self.kwargs['experience_type'],
                 gestionnaire=self.request.user.person.global_id,
                 statut=form.cleaned_data['status'],
             )
@@ -3033,11 +3015,17 @@ class SinglePastExperienceChangeAuthenticationView(SinglePastExperienceMixin):
         return context
 
     def command(self, form):
+        update_cmd: Type[ModifierAuthentificationExperienceParcoursAnterieurCommand] = {
+            TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name: ModifierAuthentificationExperienceAcademiqueCommand,
+            TypeExperience.ACTIVITE_NON_ACADEMIQUE.name: ModifierAuthentificationExperienceNonAcademiqueCommand,
+            TypeExperience.ETUDES_SECONDAIRES.name: ModifierAuthentificationEtudesSecondairesCommand,
+            TypeExperience.EXAMEN.name: ModifierAuthentificationExamenCommand,
+        }[self.kwargs['experience_type']]
+
         message_bus_instance.invoke(
-            ModifierAuthentificationExperienceParcoursAnterieurCommand(
+            update_cmd(
                 uuid_proposition=self.admission_uuid,
                 uuid_experience=self.experience_uuid,
-                type_experience=self.kwargs['experience_type'],
                 gestionnaire=self.request.user.person.global_id,
                 etat_authentification=form.cleaned_data['state'],
             )
@@ -3515,20 +3503,7 @@ class ChecklistView(
             'inscription_supplementaire': 1,
         }
 
-    def _get_experiences_by_uuid(
-        self,
-        experiences_by_year: dict[
-            int,
-            list[
-                ExperienceAcademiqueDTO
-                | ExperienceNonAcademiqueDTO
-                | EtudesSecondairesDTO
-                | ExamenDTO
-                | ExperienceParcoursInterneDTO
-                | MessageCurriculumDTO
-            ],
-        ],
-    ):
+    def _get_experiences_by_uuid(self, experiences_by_year: dict[int, list[ElementCurriculumDTO]]):
         # Get the experiences by uuid in chronological order
         experiences: dict[
             str,

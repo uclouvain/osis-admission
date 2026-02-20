@@ -184,7 +184,7 @@ class IHistorique(interface.DomainService):
     @classmethod
     def historiser_modification_authentification_experience_parcours(
         cls,
-        proposition: Proposition,
+        proposition_id: PropositionIdentity,
         gestionnaire: PersonneConnueUclDTO,
         etat_authentification: str,
         message: Optional[EmailMessage],
@@ -201,7 +201,7 @@ class IHistorique(interface.DomainService):
 
         if historize_method:
             historize_method(
-                proposition=proposition,
+                proposition_id=proposition_id,
                 gestionnaire=gestionnaire,
                 message=message,
                 uuid_experience=uuid_experience,
@@ -210,7 +210,7 @@ class IHistorique(interface.DomainService):
     @classmethod
     def historiser_demande_verification_titre_acces(
         cls,
-        proposition: Proposition,
+        proposition_id: PropositionIdentity,
         gestionnaire: PersonneConnueUclDTO,
         message: EmailMessage,
         uuid_experience: str,
@@ -220,7 +220,7 @@ class IHistorique(interface.DomainService):
     @classmethod
     def historiser_information_candidat_verification_parcours_en_cours(
         cls,
-        proposition: Proposition,
+        proposition_id: PropositionIdentity,
         gestionnaire: PersonneConnueUclDTO,
         message: EmailMessage,
         uuid_experience: str,

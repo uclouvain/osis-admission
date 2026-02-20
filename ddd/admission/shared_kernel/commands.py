@@ -201,5 +201,29 @@ class RecupererInformationsDestinataireQuery(QueryRequest):
 @attr.dataclass(frozen=True, slots=True)
 class RecupererInformationsValidationExperienceParcoursAnterieurQuery(interface.CommandRequest):
     uuid_experience: str
-    type_experience: str
-    matricule_candidat: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererInformationsValidationExperienceAcademiqueQuery(
+    RecupererInformationsValidationExperienceParcoursAnterieurQuery
+):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererInformationsValidationExperienceNonAcademiqueQuery(
+    RecupererInformationsValidationExperienceParcoursAnterieurQuery
+):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererInformationsValidationEtudesSecondairesQuery(
+    RecupererInformationsValidationExperienceParcoursAnterieurQuery
+):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererInformationsValidationExamenQuery(RecupererInformationsValidationExperienceParcoursAnterieurQuery):
+    pass

@@ -25,6 +25,7 @@
 # ##############################################################################
 import datetime
 import uuid
+from unittest import mock
 
 import freezegun
 from django.conf import settings
@@ -40,6 +41,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
 from admission.models import GeneralEducationAdmission
+from admission.models.exam import AdmissionExam
 from admission.tests.factories.curriculum import (
     EducationalExperienceFactory,
     EducationalExperienceYearFactory,
@@ -54,6 +56,7 @@ from admission.tests.factories.roles import (
     SicManagementRoleFactory,
 )
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
+from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.enums.got_diploma import GotDiploma
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
@@ -99,6 +102,42 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
         self.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
             training=self.training,
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+
+        # Mock documents
+        patcher = mock.patch("osis_document_components.services.get_remote_token", return_value="foobar")
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch(
+            "osis_document_components.services.get_remote_metadata",
+            return_value={
+                "name": "myfile",
+                "explicit_name": "My file",
+                "author": "0123456",
+                "mimetype": PDF_MIME_TYPE,
+                "size": 1,
+            },
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch(
+            "osis_document_components.services.confirm_remote_upload",
+            side_effect=lambda token, *args, **kwargs: token,
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        patcher = mock.patch(
+            "osis_document_components.fields.FileField._confirm_multiple_upload",
+            side_effect=lambda _, tokens, __: tokens,
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        self.admission = GeneralEducationAdmissionFactory(
+            submitted_at=datetime.datetime(2015, 1, 15),
+            training__academic_year__year=2015,
         )
 
     def test_change_the_checklist_status_is_forbidden_with_fac_user(self):
@@ -247,6 +286,8 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
             type__education_group_years=[self.general_admission.training],
         )
 
+        AdmissionExam.objects.create(exam=exam, admission=self.general_admission)
+
         url = resolve_url(
             self.url_name,
             uuid=self.general_admission.uuid,
@@ -331,7 +372,7 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
         exam.refresh_from_db()
         self.assertEqual(exam.validation_status, ChoixStatutValidationExperience.VALIDEE.name)
 
-    def test_change_the_checklist_status_to_the_validated_status_needs_a_complete_experience(self):
+    def test_change_the_checklist_status_to_the_validated_status_needs_a_complete_academic_experience(self):
         self.client.force_login(user=self.sic_manager_user)
 
         # Add an incomplete experience
@@ -439,6 +480,82 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
             "L'expérience académique 'Computer science' est incomplète.",
             [m.message for m in response.context['messages']],
         )
+
+    def test_change_the_checklist_status_to_the_validated_status_needs_a_complete_exam(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        exam = ExamFactory(
+            person=self.general_admission.candidate,
+            type__education_group_years=[self.general_admission.training],
+            certificate=[uuid.uuid4()],
+        )
+
+        AdmissionExam.objects.create(exam=exam, admission=self.general_admission)
+
+        url = resolve_url(
+            self.url_name,
+            uuid=self.general_admission.uuid,
+            experience_type=TypeExperience.EXAMEN.name,
+            experience_uuid=exam.uuid,
+        )
+
+        response = self.client.post(
+            url,
+            **self.default_headers,
+            data={'status': ChoixStatutValidationExperience.VALIDEE.name},
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.assertIn(
+            "L'examen est nécessaire pour cette formation.",
+            [m.message for m in response.context['messages']],
+        )
+
+        exam.refresh_from_db()
+
+        self.assertEqual(exam.validation_status, ChoixStatutValidationExperience.A_TRAITER.name)
+
+        exam.certificate = []
+        exam.year = self.academic_years[0]
+        exam.save()
+
+        response = self.client.post(
+            url,
+            **self.default_headers,
+            data={'status': ChoixStatutValidationExperience.VALIDEE.name},
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.assertIn(
+            "L'examen est nécessaire pour cette formation.",
+            [m.message for m in response.context['messages']],
+        )
+
+        exam.refresh_from_db()
+
+        self.assertEqual(exam.validation_status, ChoixStatutValidationExperience.A_TRAITER.name)
+
+        exam.certificate = [uuid.uuid4()]
+        exam.save()
+
+        response = self.client.post(
+            url,
+            **self.default_headers,
+            data={'status': ChoixStatutValidationExperience.VALIDEE.name},
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.assertNotIn(
+            "L'examen est nécessaire pour cette formation.",
+            [m.message for m in response.context['messages']],
+        )
+
+        exam.refresh_from_db()
+
+        self.assertEqual(exam.validation_status, ChoixStatutValidationExperience.VALIDEE.name)
 
 
 @freezegun.freeze_time('2023-01-01')

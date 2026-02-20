@@ -23,57 +23,27 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import (
+from admission.ddd.admission.formation_generale.commands import ModifierStatutChecklistEtudesSecondairesCommand
+from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
-from admission.ddd.admission.doctorat.preparation.commands import (
-    ModifierStatutChecklistExperienceParcoursAnterieurCommand,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
     PropositionIdentity,
-)
-from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import (
-    IDoctoratTranslator,
-)
-from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
-    IPropositionRepository,
 )
 from admission.ddd.admission.shared_kernel.domain.service.i_modifier_checklist_experience_parcours_anterieur import (
     IValidationExperienceParcoursAnterieurService,
 )
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
-    IProfilCandidatTranslator,
-)
 
 
-def modifier_statut_checklist_experience_parcours_anterieur(
-    cmd: 'ModifierStatutChecklistExperienceParcoursAnterieurCommand',
-    proposition_repository: 'IPropositionRepository',
-    profil_candidat_translator: 'IProfilCandidatTranslator',
-    doctorat_translator: 'IDoctoratTranslator',
+def modifier_statut_checklist_etudes_secondaires(
+    cmd: 'ModifierStatutChecklistEtudesSecondairesCommand',
     validation_experience_parcours_anterieur_service: 'IValidationExperienceParcoursAnterieurService',
 ) -> 'PropositionIdentity':
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
-    proposition = proposition_repository.get(entity_id=proposition_id)
 
-    formation = doctorat_translator.get(sigle=proposition.formation_id.sigle, annee=proposition.formation_id.annee)
-
-    proposition.specifier_statut_checklist_experience_parcours_anterieur(
-        statut_checklist_cible=cmd.statut,
+    validation_experience_parcours_anterieur_service.modifier_statut_etudes_secondaires(
         uuid_experience=cmd.uuid_experience,
-        auteur_modification=cmd.gestionnaire,
-        type_experience=cmd.type_experience,
-        profil_candidat_translator=profil_candidat_translator,
-        grade_academique_formation_proposition=formation.grade_academique,
-    )
-
-    validation_experience_parcours_anterieur_service.modifier_statut(
-        matricule_candidat=proposition.matricule_candidat,
-        uuid_experience=cmd.uuid_experience,
-        type_experience=cmd.type_experience,
         statut=cmd.statut,
     )
-
-    proposition_repository.save(proposition)
 
     return proposition_id
