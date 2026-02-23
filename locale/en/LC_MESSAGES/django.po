@@ -2282,6 +2282,9 @@ msgstr ""
 msgid "Document"
 msgstr ""
 
+msgid "Document attached to the pre-admission enrolment authorisation"
+msgstr ""
+
 msgid "Document category"
 msgstr ""
 
@@ -3030,6 +3033,9 @@ msgid ""
 msgstr ""
 
 msgid "For the CDD Chair:"
+msgstr ""
+
+msgid "For the PhD Committee President CDD:"
 msgstr ""
 
 msgid "For the attention of"
@@ -6348,6 +6354,10 @@ msgid "The NOMA must contain 8 digits."
 msgstr ""
 
 msgid ""
+"The PhD Field Committee has approved your application for pre-admission."
+msgstr ""
+
+msgid ""
 "The PhD Field Committee has approved your proposal for a <span class=\"bold-"
 "text\">supervisor</span> and <span class=\"bold-text\">supervisory "
 "committee</span>, composed as follows:"
@@ -7854,6 +7864,12 @@ msgid "You specified that no Belgian student status situation applies to you."
 msgstr ""
 
 msgid ""
+"You will find the PhD Regulations, specific provisions for your field, PhD "
+"programme stages and other helpful information on your PhD Field Committee "
+"website."
+msgstr ""
+
+msgid ""
 "You will find the PhD regulations, specific provisions for your field, the "
 "stages of the PhD programme and more helpful information on the website of "
 "your PhD Field Committee."
@@ -7880,6 +7896,12 @@ msgid "Your application is currently being reviewed by the course exam board"
 msgstr ""
 
 msgid "Your background is not suited to this course"
+msgstr ""
+
+msgid ""
+"Your complete application must be received by us within a maximum of 12 "
+"months. If it is not already attached to your application for admission, "
+"please:"
 msgstr ""
 
 msgid "Your completed and signed reorientation form"
@@ -7967,6 +7989,16 @@ msgctxt "payment"
 msgid "creditcard"
 msgstr "Credit card"
 
+msgid ""
+"define and prepare a thesis project in collaboration with your supervisor;"
+msgstr ""
+
+msgid ""
+"define and propose a PhD programme in collaboration with your supervisor; "
+"credits are awarded for modules, reading seminars and other research "
+"activities completed during the pre-admission period;"
+msgstr ""
+
 msgid "education group type"
 msgstr ""
 
@@ -7980,6 +8012,11 @@ msgstr ""
 msgctxt "payment"
 msgid "failed"
 msgstr "Failed"
+
+msgid ""
+"identify and establish scientific collaboration with your supervisor, "
+"including the necessary contacts for a Supervisory Committee."
+msgstr ""
 
 msgid "items per page"
 msgstr ""
