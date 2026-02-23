@@ -25,13 +25,10 @@
 # ##############################################################################
 
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
     Proposition as PropositionDoctorale,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
-    PropositionIdentity,
 )
 from admission.ddd.admission.formation_continue.domain.model.proposition import (
     Proposition as PropositionContinue,
@@ -42,11 +39,11 @@ from admission.ddd.admission.formation_generale.domain.model.proposition import 
 from admission.ddd.admission.shared_kernel.domain.service.i_modifier_checklist_experience_parcours_anterieur import (
     IValidationExperienceParcoursAnterieurService,
 )
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import ExperienceNonTrouveeException
 from admission.ddd.admission.shared_kernel.dtos.validation_experience_parcours_anterieur import (
     ValidationExperienceParcoursAnterieurDTO,
 )
+from base.models.person import Person
 from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
 from osis_profile.models import (
     EXAM_TYPE_PREMIER_CYCLE_LABEL_FR,
@@ -60,164 +57,106 @@ from osis_profile.models.enums.experience_validation import ChoixStatutValidatio
 
 class ValidationExperienceParcoursAnterieurService(IValidationExperienceParcoursAnterieurService):
     @staticmethod
-    def _get_educational_experience_qs(experience_uuid: str):
-        return EducationalExperience.objects.filter(uuid=experience_uuid)
+    def _get_professional_experience_qs(experience_uuid: str, global_id: str):
+        return ProfessionalExperience.objects.filter(uuid=experience_uuid, person__global_id=global_id)
+
+    @staticmethod
+    def _get_educational_experience_qs(experience_uuid: str, global_id: str):
+        return EducationalExperience.objects.filter(uuid=experience_uuid, person__global_id=global_id)
+
+    @staticmethod
+    def _get_exam_qs(experience_uuid: str, global_id: str):
+        return Exam.objects.filter(uuid=experience_uuid, person__global_id=global_id)
+
+    @staticmethod
+    def _get_secondary_studies_qs(experience_uuid: str, global_id: str):
+        return HighSchoolDiploma.objects.filter(uuid=experience_uuid, person__global_id=global_id)
 
     @classmethod
-    def recuperer_information_validation_experience_academique(cls, uuid_experience: str):
-        experience = (
-            cls._get_educational_experience_qs(experience_uuid=uuid_experience)
-            .values('validation_status', 'authentication_status')
-            .first()
-        )
-
-        if not experience:
-            raise ExperienceNonTrouveeException
-
-        return ValidationExperienceParcoursAnterieurDTO(
-            uuid=uuid_experience,
-            type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
-            statut_validation=experience['validation_status'],
-            statut_authentification=experience['authentication_status'],
-        )
-
-    @classmethod
-    def modifier_statut_experience_academique(
+    def _get_experience_qs(
         cls,
-        proposition_id: PropositionIdentity,
-        matricule_candidat: str,
-        uuid_experience: str,
-        statut: str,
-        profil_candidat_translator: IProfilCandidatTranslator,
-        grade_academique_formation_proposition: str,
-    ):
-        super().modifier_statut_experience_academique(
-            proposition_id=proposition_id,
-            matricule_candidat=matricule_candidat,
-            uuid_experience=uuid_experience,
-            statut=statut,
-            profil_candidat_translator=profil_candidat_translator,
-            grade_academique_formation_proposition=grade_academique_formation_proposition,
-        )
-
-        updates_number = cls._get_educational_experience_qs(experience_uuid=uuid_experience).update(
-            validation_status=statut
-        )
-
-        if not updates_number:
-            raise ExperienceNonTrouveeException
-
-    @classmethod
-    def modifier_authentification_experience_academique(cls, uuid_experience: str, etat_authentification: str):
-        updates_number = cls._get_educational_experience_qs(experience_uuid=uuid_experience).update(
-            authentication_status=etat_authentification
-        )
-
-        if not updates_number:
-            raise ExperienceNonTrouveeException
-
-    @staticmethod
-    def _get_professional_experience_qs(experience_uuid: str):
-        return ProfessionalExperience.objects.filter(uuid=experience_uuid)
-
-    @classmethod
-    def recuperer_information_validation_experience_non_academique(cls, uuid_experience: str):
-        experience = (
-            cls._get_professional_experience_qs(experience_uuid=uuid_experience)
-            .values('validation_status', 'authentication_status')
-            .first()
-        )
-
-        if not experience:
-            raise ExperienceNonTrouveeException
-
-        return ValidationExperienceParcoursAnterieurDTO(
-            uuid=uuid_experience,
-            type_experience=TypeExperience.ACTIVITE_NON_ACADEMIQUE.name,
-            statut_validation=experience['validation_status'],
-            statut_authentification=experience['authentication_status'],
-        )
-
-    @classmethod
-    def modifier_statut_experience_non_academique(cls, uuid_experience: str, statut: str):
-        updates_number = cls._get_professional_experience_qs(experience_uuid=uuid_experience).update(
-            validation_status=statut
-        )
-
-        if not updates_number:
-            raise ExperienceNonTrouveeException
-
-    @classmethod
-    def modifier_authentification_experience_non_academique(cls, uuid_experience: str, etat_authentification: str):
-        updates_number = cls._get_professional_experience_qs(experience_uuid=uuid_experience).update(
-            authentication_status=etat_authentification
-        )
-
-        if not updates_number:
-            raise ExperienceNonTrouveeException
-
-    @staticmethod
-    def _get_secondary_studies_qs(experience_uuid: str):
-        return HighSchoolDiploma.objects.filter(uuid=experience_uuid)
-
-    @classmethod
-    def recuperer_information_validation_etudes_secondaires(cls, uuid_experience: str):
-        experience = (
-            cls._get_secondary_studies_qs(experience_uuid=uuid_experience)
-            .values('validation_status', 'authentication_status')
-            .first()
-        )
-
-        if not experience:
-            raise ExperienceNonTrouveeException
-
-        return ValidationExperienceParcoursAnterieurDTO(
-            uuid=uuid_experience,
-            type_experience=TypeExperience.ETUDES_SECONDAIRES.name,
-            statut_validation=experience['validation_status'],
-            statut_authentification=experience['authentication_status'],
-        )
-
-    @classmethod
-    def modifier_statut_etudes_secondaires(cls, uuid_experience: str, statut: str):
-        updates_number = cls._get_secondary_studies_qs(experience_uuid=uuid_experience).update(validation_status=statut)
-
-        if not updates_number:
-            raise ExperienceNonTrouveeException
-
-        Exam.objects.filter(
-            type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR,
-            person__highschooldiploma__uuid=uuid_experience,
-        ).update(validation_status=statut)
+        global_id: str,
+        experience_uuid: str,
+        experience_type: str,
+    ) -> QuerySet[ProfessionalExperience | HighSchoolDiploma | EducationalExperience | Exam]:
+        return {
+            TypeExperience.ACTIVITE_NON_ACADEMIQUE.name: cls._get_professional_experience_qs,
+            TypeExperience.ETUDES_SECONDAIRES.name: cls._get_secondary_studies_qs,
+            TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name: cls._get_educational_experience_qs,
+            TypeExperience.EXAMEN.name: cls._get_exam_qs,
+        }[experience_type](experience_uuid=experience_uuid, global_id=global_id)
 
     @classmethod
     @transaction.atomic
-    def modifier_authentification_etudes_secondaires(
+    def _update_experience(
         cls,
-        uuid_experience: str,
-        etat_authentification: str,
+        experience_type: str,
+        experience_uuid: str,
+        global_id: str,
+        **data,
     ):
-        updates_number = cls._get_secondary_studies_qs(experience_uuid=uuid_experience).update(
-            authentication_status=etat_authentification
-        )
+        updates_number = cls._get_experience_qs(
+            global_id=global_id,
+            experience_uuid=experience_uuid,
+            experience_type=experience_type,
+        ).update(**data)
 
         if not updates_number:
             raise ExperienceNonTrouveeException
 
-        Exam.objects.filter(
-            type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR,
-            person__highschooldiploma__uuid=uuid_experience,
-        ).update(validation_status=etat_authentification)
-
-    @staticmethod
-    def _get_exam_qs(experience_uuid: str):
-        return Exam.objects.filter(uuid=experience_uuid)
+        if experience_type == TypeExperience.ETUDES_SECONDAIRES.name:
+            Exam.objects.filter(
+                type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR,
+                person__global_id=global_id,
+            ).update(**data)
 
     @classmethod
-    def recuperer_information_validation_examen(cls, uuid_experience: str):
+    def modifier_statut(
+        cls,
+        matricule_candidat: str,
+        uuid_experience: str,
+        type_experience: str,
+        statut: str,
+    ):
+        cls._update_experience(
+            global_id=matricule_candidat,
+            experience_uuid=uuid_experience,
+            experience_type=type_experience,
+            validation_status=statut,
+        )
+
+    @classmethod
+    def modifier_authentification(
+        cls,
+        matricule_candidat: str,
+        uuid_experience: str,
+        type_experience: str,
+        etat_authentification: str,
+    ):
+        cls._update_experience(
+            global_id=matricule_candidat,
+            experience_uuid=uuid_experience,
+            experience_type=type_experience,
+            authentication_status=etat_authentification,
+        )
+
+    @classmethod
+    def recuperer_information_validation(
+        cls,
+        matricule_candidat: str,
+        uuid_experience: str,
+        type_experience: str,
+    ):
         experience = (
-            cls._get_exam_qs(experience_uuid=uuid_experience)
-            .values('validation_status', 'authentication_status')
+            cls._get_experience_qs(
+                global_id=matricule_candidat,
+                experience_uuid=uuid_experience,
+                experience_type=type_experience,
+            )
+            .values(
+                'validation_status',
+                'authentication_status',
+            )
             .first()
         )
 
@@ -226,49 +165,10 @@ class ValidationExperienceParcoursAnterieurService(IValidationExperienceParcours
 
         return ValidationExperienceParcoursAnterieurDTO(
             uuid=uuid_experience,
-            type_experience=TypeExperience.EXAMEN.name,
+            type_experience=type_experience,
             statut_validation=experience['validation_status'],
             statut_authentification=experience['authentication_status'],
         )
-
-    @classmethod
-    def modifier_statut_examen(
-        cls,
-        proposition_id,
-        sigle_formation: str,
-        annee_formation: int,
-        matricule_candidat: str,
-        uuid_experience: str,
-        statut: str,
-        profil_candidat_translator: IProfilCandidatTranslator,
-    ):
-        super().modifier_statut_examen(
-            proposition_id=proposition_id,
-            sigle_formation=sigle_formation,
-            annee_formation=annee_formation,
-            matricule_candidat=matricule_candidat,
-            uuid_experience=uuid_experience,
-            statut=statut,
-            profil_candidat_translator=profil_candidat_translator,
-        )
-
-        updates_number = cls._get_exam_qs(experience_uuid=uuid_experience).update(validation_status=statut)
-
-        if not updates_number:
-            raise ExperienceNonTrouveeException
-
-    @classmethod
-    def modifier_authentification_examen(
-        cls,
-        uuid_experience: str,
-        etat_authentification: str,
-    ):
-        updates_number = cls._get_exam_qs(experience_uuid=uuid_experience).update(
-            authentication_status=etat_authentification
-        )
-
-        if not updates_number:
-            raise ExperienceNonTrouveeException
 
     @classmethod
     @transaction.atomic
@@ -279,11 +179,15 @@ class ValidationExperienceParcoursAnterieurService(IValidationExperienceParcours
         in_draft_status = ChoixStatutValidationExperience.EN_BROUILLON.name
         to_be_processed_status = ChoixStatutValidationExperience.A_TRAITER.name
 
+        candidate_id = (
+            Person.objects.filter(global_id=proposition.matricule_candidat).values_list('pk', flat=True).get()
+        )
+
         exams_conditions = Q()
 
         if isinstance(proposition, (PropositionContinue, PropositionGenerale)):
             HighSchoolDiploma.objects.filter(
-                person__global_id=proposition.matricule_candidat,
+                person_id=candidate_id,
                 validation_status=in_draft_status,
             ).update(validation_status=to_be_processed_status)
 
@@ -295,18 +199,18 @@ class ValidationExperienceParcoursAnterieurService(IValidationExperienceParcours
         if exams_conditions:
             Exam.objects.filter(
                 exams_conditions,
-                person__global_id=proposition.matricule_candidat,
+                person_id=candidate_id,
                 validation_status=in_draft_status,
             ).update(validation_status=to_be_processed_status)
 
         EducationalExperience.objects.filter(
-            person__global_id=proposition.matricule_candidat,
+            person_id=candidate_id,
             validation_status=in_draft_status,
             educational_valuated_experiences__baseadmission_id=proposition.entity_id.uuid,
         ).update(validation_status=to_be_processed_status)
 
         ProfessionalExperience.objects.filter(
-            person__global_id=proposition.matricule_candidat,
+            person_id=candidate_id,
             validation_status=in_draft_status,
             professional_valuated_experiences__baseadmission_id=proposition.entity_id.uuid,
         ).update(validation_status=to_be_processed_status)

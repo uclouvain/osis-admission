@@ -28,9 +28,6 @@ import itertools
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
     Proposition as PropositionDoctorale,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
-    PropositionIdentity,
-)
 from admission.ddd.admission.formation_continue.domain.model.proposition import (
     Proposition as PropositionContinue,
 )
@@ -40,7 +37,6 @@ from admission.ddd.admission.formation_generale.domain.model.proposition import 
 from admission.ddd.admission.shared_kernel.domain.service.i_modifier_checklist_experience_parcours_anterieur import (
     IValidationExperienceParcoursAnterieurService,
 )
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import ExperienceNonTrouveeException
 from admission.ddd.admission.shared_kernel.dtos.validation_experience_parcours_anterieur import (
     ValidationExperienceParcoursAnterieurDTO,
@@ -54,138 +50,55 @@ from osis_profile.models.enums.experience_validation import ChoixStatutValidatio
 
 class ValidationExperienceParcoursAnterieurInMemoryService(IValidationExperienceParcoursAnterieurService):
     @classmethod
-    def _recuperer_experience_academique(cls, uuid_experience: str):
+    def _recuperer_experience(cls, uuid_experience: str, type_experience: str):
+        experiences = {
+            TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name: ProfilCandidatInMemoryTranslator.experiences_academiques,
+            TypeExperience.ACTIVITE_NON_ACADEMIQUE.name: ProfilCandidatInMemoryTranslator.experiences_non_academiques,
+            TypeExperience.ETUDES_SECONDAIRES.name: ProfilCandidatInMemoryTranslator.etudes_secondaires.values(),
+        }.get(type_experience, [])
+
         try:
-            return next(
-                experience
-                for experience in ProfilCandidatInMemoryTranslator.experiences_academiques
-                if experience.uuid == uuid_experience
-            )
+            return next(experience for experience in experiences if experience.uuid == uuid_experience)
         except StopIteration:
             raise ExperienceNonTrouveeException
 
     @classmethod
-    def _recuperer_experience_non_academique(cls, uuid_experience: str):
-        try:
-            return next(
-                experience
-                for experience in ProfilCandidatInMemoryTranslator.experiences_non_academiques
-                if experience.uuid == uuid_experience
-            )
-        except StopIteration:
-            raise ExperienceNonTrouveeException
-
-    @classmethod
-    def _recuperer_etudes_secondaires(cls, uuid_experience: str):
-        try:
-            return next(
-                experience
-                for experience in ProfilCandidatInMemoryTranslator.etudes_secondaires.values()
-                if experience.uuid == uuid_experience
-            )
-        except StopIteration:
-            raise ExperienceNonTrouveeException
-
-    @classmethod
-    def recuperer_information_validation_experience_academique(
+    def modifier_statut(
         cls,
-        uuid_experience: str,
-    ) -> ValidationExperienceParcoursAnterieurDTO:
-        experience = cls._recuperer_experience_academique(uuid_experience=uuid_experience)
-        return ValidationExperienceParcoursAnterieurDTO(
-            uuid=uuid_experience,
-            type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
-            statut_validation=experience.statut_validation,
-            statut_authentification=experience.statut_authentification,
-        )
-
-    @classmethod
-    def modifier_statut_experience_academique(
-        cls,
-        proposition_id: PropositionIdentity,
         matricule_candidat: str,
         uuid_experience: str,
+        type_experience: str,
         statut: str,
-        profil_candidat_translator: IProfilCandidatTranslator,
-        grade_academique_formation_proposition: str,
     ):
-        super().modifier_statut_experience_academique(
-            proposition_id=proposition_id,
-            matricule_candidat=matricule_candidat,
-            uuid_experience=uuid_experience,
-            statut=statut,
-            profil_candidat_translator=profil_candidat_translator,
-            grade_academique_formation_proposition=grade_academique_formation_proposition,
-        )
-        experience = cls._recuperer_experience_academique(uuid_experience=uuid_experience)
+        experience = cls._recuperer_experience(uuid_experience=uuid_experience, type_experience=type_experience)
         experience.statut_validation = statut
 
     @classmethod
-    def modifier_authentification_experience_academique(
+    def modifier_authentification(
         cls,
+        matricule_candidat: str,
         uuid_experience: str,
+        type_experience: str,
         etat_authentification: str,
     ):
-        experience = cls._recuperer_experience_academique(uuid_experience=uuid_experience)
+        experience = cls._recuperer_experience(uuid_experience=uuid_experience, type_experience=type_experience)
         experience.statut_authentification = etat_authentification
 
     @classmethod
-    def recuperer_information_validation_experience_non_academique(
+    def recuperer_information_validation(
         cls,
+        matricule_candidat: str,
         uuid_experience: str,
+        type_experience: str,
     ) -> ValidationExperienceParcoursAnterieurDTO:
-        experience = cls._recuperer_experience_non_academique(uuid_experience=uuid_experience)
+        experience = cls._recuperer_experience(uuid_experience=uuid_experience, type_experience=type_experience)
+
         return ValidationExperienceParcoursAnterieurDTO(
             uuid=uuid_experience,
-            type_experience=TypeExperience.ACTIVITE_NON_ACADEMIQUE.name,
+            type_experience=type_experience,
             statut_validation=experience.statut_validation,
             statut_authentification=experience.statut_authentification,
         )
-
-    @classmethod
-    def modifier_statut_experience_non_academique(
-        cls,
-        uuid_experience: str,
-        statut: str,
-    ):
-        experience = cls._recuperer_experience_non_academique(uuid_experience=uuid_experience)
-        experience.statut_validation = statut
-
-    @classmethod
-    def modifier_authentification_experience_non_academique(cls, uuid_experience: str, etat_authentification: str):
-        experience = cls._recuperer_experience_non_academique(uuid_experience=uuid_experience)
-        experience.statut_authentification = etat_authentification
-
-    @classmethod
-    def recuperer_information_validation_etudes_secondaires(
-        cls, uuid_experience: str
-    ) -> ValidationExperienceParcoursAnterieurDTO:
-        experience = cls._recuperer_etudes_secondaires(uuid_experience=uuid_experience)
-        return ValidationExperienceParcoursAnterieurDTO(
-            uuid=uuid_experience,
-            type_experience=TypeExperience.ETUDES_SECONDAIRES.name,
-            statut_validation=experience.statut_validation,
-            statut_authentification=experience.statut_authentification,
-        )
-
-    @classmethod
-    def recuperer_information_validation_examen(cls, uuid_experience: str) -> ValidationExperienceParcoursAnterieurDTO:
-        return ValidationExperienceParcoursAnterieurDTO(
-            uuid=uuid_experience,
-            type_experience=TypeExperience.EXAMEN.name,
-        )
-
-    @classmethod
-    def modifier_statut_etudes_secondaires(cls, uuid_experience: str, statut: str):
-        pass
-
-    @classmethod
-    def modifier_authentification_etudes_secondaires(cls, uuid_experience: str, etat_authentification: str):
-        pass
-
-    @classmethod
-    def modifier_authentification_examen(cls, uuid_experience: str, etat_authentification: str):
-        pass
 
     @classmethod
     def passer_experiences_en_brouillon_en_a_traiter(

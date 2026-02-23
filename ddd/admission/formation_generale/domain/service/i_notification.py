@@ -27,7 +27,7 @@ from abc import abstractmethod
 from email.message import EmailMessage
 from typing import List, Optional
 
-from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
+from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
 from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import EmplacementDocument
 from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import IMatriculeEtudiantService
@@ -99,7 +99,7 @@ class INotification(interface.DomainService):
     @classmethod
     def modifier_authentification_experience_parcours(
         cls,
-        proposition_id: PropositionIdentity,
+        proposition: Proposition,
         etat_authentification: str,
     ) -> Optional[EmailMessage]:
         methode_notification = {
@@ -110,16 +110,16 @@ class INotification(interface.DomainService):
         }.get(etat_authentification)
 
         if methode_notification:
-            return methode_notification(proposition_id)
+            return methode_notification(proposition)
 
     @classmethod
     @abstractmethod
-    def demande_verification_titre_acces(cls, proposition_id: PropositionIdentity) -> EmailMessage:
+    def demande_verification_titre_acces(cls, proposition: Proposition) -> EmailMessage:
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
-    def informer_candidat_verification_parcours_en_cours(cls, proposition_id: PropositionIdentity) -> EmailMessage:
+    def informer_candidat_verification_parcours_en_cours(cls, proposition: Proposition) -> EmailMessage:
         raise NotImplementedError
 
     @classmethod

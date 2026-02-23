@@ -590,32 +590,12 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=PropositionRepository(),
     ),
-    ModifierStatutChecklistExperienceAcademiqueCommand: (
-        lambda msg_bus, cmd: modifier_statut_checklist_experience_academique(
+    ModifierStatutChecklistExperienceParcoursAnterieurCommand: (
+        lambda msg_bus, cmd: modifier_statut_checklist_experience_parcours_anterieur(
             cmd,
             proposition_repository=PropositionRepository(),
             profil_candidat_translator=ProfilCandidatTranslator(),
             formation_translator=FormationGeneraleTranslator(),
-            validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
-        )
-    ),
-    ModifierStatutChecklistExperienceNonAcademiqueCommand: (
-        lambda msg_bus, cmd: modifier_statut_checklist_experience_non_academique(
-            cmd,
-            validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
-        )
-    ),
-    ModifierStatutChecklistEtudesSecondairesCommand: (
-        lambda msg_bus, cmd: modifier_statut_checklist_etudes_secondaires(
-            cmd,
-            validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
-        )
-    ),
-    ModifierStatutChecklistExamenCommand: (
-        lambda msg_bus, cmd: modifier_statut_checklist_examen(
-            cmd,
-            proposition_repository=PropositionRepository(),
-            profil_candidat_translator=ProfilCandidatTranslator(),
             validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
         )
     ),
@@ -632,33 +612,10 @@ COMMAND_HANDLERS = {
             personne_connue_translator=PersonneConnueUclTranslator(),
         )
     ),
-    ModifierAuthentificationExperienceAcademiqueCommand: (
-        lambda msg_bus, cmd: modifier_authentification_experience_academique(
+    ModifierAuthentificationExperienceParcoursAnterieurCommand: (
+        lambda msg_bus, cmd: modifier_authentification_experience_parcours_anterieur(
             cmd,
-            notification=Notification(),
-            historique=HistoriqueFormationGenerale(),
-            validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
-        )
-    ),
-    ModifierAuthentificationExperienceNonAcademiqueCommand: (
-        lambda msg_bus, cmd: modifier_authentification_experience_non_academique(
-            cmd,
-            notification=Notification(),
-            historique=HistoriqueFormationGenerale(),
-            validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
-        )
-    ),
-    ModifierAuthentificationEtudesSecondairesCommand: (
-        lambda msg_bus, cmd: modifier_authentification_etudes_secondaires(
-            cmd,
-            notification=Notification(),
-            historique=HistoriqueFormationGenerale(),
-            validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
-        )
-    ),
-    ModifierAuthentificationExamenCommand: (
-        lambda msg_bus, cmd: modifier_authentification_examen(
-            cmd,
+            proposition_repository=PropositionRepository(),
             notification=Notification(),
             historique=HistoriqueFormationGenerale(),
             validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),

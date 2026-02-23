@@ -23,21 +23,22 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from unittest import mock
-
+import mock
 from django.test import SimpleTestCase
 
-from admission.ddd.admission.doctorat.preparation.commands import (
-    ModifierStatutChecklistExperienceAcademiqueCommand,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
-    PropositionIdentity,
-)
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     ExperiencesAcademiquesNonCompleteesException,
+)
+from admission.ddd.admission.formation_generale.commands import (
+    ModifierStatutChecklistExperienceParcoursAnterieurCommand,
+)
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    PropositionIdentity,
+)
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     PropositionNonTrouveeException,
 )
-from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
+from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.modifier_checklist_experience_parcours_anterieur import (
@@ -59,25 +60,25 @@ from osis_profile.models.enums.experience_validation import (
 from reference.models.enums.cycle import Cycle
 
 
-class TestModifierStatutChecklistExperienceAcademique(SimpleTestCase):
+class TestModifierStatutChecklistExperienceParcoursAnterieur(SimpleTestCase):
     def setUp(self) -> None:
         self.proposition_repository = PropositionInMemoryRepository()
         self.addCleanup(self.proposition_repository.reset)
         self.message_bus = message_bus_in_memory_instance
-        self.proposition_entity_id = PropositionIdentity(uuid='uuid-SC3DP-confirmee')
-        self.experience_academique_uuid = '9cbdf4db-2454-4cbf-9e48-55d2a9881ee1'
+        self.proposition_identity = PropositionIdentity(uuid='uuid-MASTER-SCI-CONFIRMED')
         self.candidat_translator = ProfilCandidatInMemoryTranslator()
         self.experiences_academiques = self.candidat_translator.experiences_academiques
-        self.experience_academique = next(
-            exp for exp in self.experiences_academiques if exp.uuid == self.experience_academique_uuid
-        )
-        self.validation_experience_service = ValidationExperienceParcoursAnterieurInMemoryService()
+        self.experience = next(exp for exp in self.experiences_academiques if exp.personne == '0000000001')
+
+        self.experience_uuid = '9cbdf4db-2454-4cbf-9e48-55d2a9881ee3'
+        self.validation_experience_parcours_anterieur_service = ValidationExperienceParcoursAnterieurInMemoryService()
 
     def test_should_modifier_vers_statut_checklist_validee(self):
         proposition_id = self.message_bus.invoke(
-            ModifierStatutChecklistExperienceAcademiqueCommand(
-                uuid_proposition='uuid-SC3DP-confirmee',
-                uuid_experience=self.experience_academique_uuid,
+            ModifierStatutChecklistExperienceParcoursAnterieurCommand(
+                uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
+                uuid_experience=self.experience_uuid,
+                type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
                 statut=ChoixStatutValidationExperience.VALIDEE.name,
                 gestionnaire='0123456789',
             )
@@ -86,13 +87,15 @@ class TestModifierStatutChecklistExperienceAcademique(SimpleTestCase):
         proposition = self.proposition_repository.get(proposition_id)
 
         informations_validation = (
-            self.validation_experience_service.recuperer_information_validation_experience_academique(
-                uuid_experience=self.experience_academique_uuid,
+            self.validation_experience_parcours_anterieur_service.recuperer_information_validation(
+                matricule_candidat=proposition.matricule_candidat,
+                uuid_experience=self.experience_uuid,
+                type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
             )
         )
 
         self.assertEqual(proposition.entity_id, proposition_id)
-        self.assertEqual(informations_validation.uuid, self.experience_academique_uuid)
+        self.assertEqual(informations_validation.uuid, self.experience_uuid)
         self.assertEqual(informations_validation.type_experience, TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name)
         self.assertEqual(informations_validation.statut_validation, ChoixStatutValidationExperience.VALIDEE.name)
         self.assertEqual(
@@ -101,9 +104,10 @@ class TestModifierStatutChecklistExperienceAcademique(SimpleTestCase):
 
     def test_should_modifier_vers_statut_checklist_d_authentification(self):
         proposition_id = self.message_bus.invoke(
-            ModifierStatutChecklistExperienceAcademiqueCommand(
-                uuid_proposition='uuid-SC3DP-confirmee',
-                uuid_experience=self.experience_academique_uuid,
+            ModifierStatutChecklistExperienceParcoursAnterieurCommand(
+                uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
+                uuid_experience=self.experience_uuid,
+                type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
                 statut=ChoixStatutValidationExperience.AUTHENTIFICATION.name,
                 gestionnaire='0123456789',
             )
@@ -112,13 +116,15 @@ class TestModifierStatutChecklistExperienceAcademique(SimpleTestCase):
         proposition = self.proposition_repository.get(proposition_id)
 
         informations_validation = (
-            self.validation_experience_service.recuperer_information_validation_experience_academique(
-                uuid_experience=self.experience_academique_uuid,
+            self.validation_experience_parcours_anterieur_service.recuperer_information_validation(
+                matricule_candidat=proposition.matricule_candidat,
+                uuid_experience=self.experience_uuid,
+                type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
             )
         )
 
         self.assertEqual(proposition.entity_id, proposition_id)
-        self.assertEqual(informations_validation.uuid, self.experience_academique_uuid)
+        self.assertEqual(informations_validation.uuid, self.experience_uuid)
         self.assertEqual(informations_validation.type_experience, TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name)
         self.assertEqual(
             informations_validation.statut_validation, ChoixStatutValidationExperience.AUTHENTIFICATION.name
@@ -129,9 +135,10 @@ class TestModifierStatutChecklistExperienceAcademique(SimpleTestCase):
 
     def test_should_modifier_vers_statut_checklist_pas_d_authentification(self):
         proposition_id = self.message_bus.invoke(
-            ModifierStatutChecklistExperienceAcademiqueCommand(
-                uuid_proposition='uuid-SC3DP-confirmee',
-                uuid_experience=self.experience_academique_uuid,
+            ModifierStatutChecklistExperienceParcoursAnterieurCommand(
+                uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
+                uuid_experience=self.experience_uuid,
+                type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
                 statut=ChoixStatutValidationExperience.A_COMPLETER.name,
                 gestionnaire='0123456789',
             )
@@ -140,33 +147,24 @@ class TestModifierStatutChecklistExperienceAcademique(SimpleTestCase):
         proposition = self.proposition_repository.get(proposition_id)
 
         informations_validation = (
-            self.validation_experience_service.recuperer_information_validation_experience_academique(
-                uuid_experience=self.experience_academique_uuid,
+            self.validation_experience_parcours_anterieur_service.recuperer_information_validation(
+                matricule_candidat=proposition.matricule_candidat,
+                uuid_experience=self.experience_uuid,
+                type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
             )
         )
 
         self.assertEqual(proposition.entity_id, proposition_id)
-        self.assertEqual(informations_validation.uuid, self.experience_academique_uuid)
+        self.assertEqual(informations_validation.uuid, self.experience_uuid)
         self.assertEqual(informations_validation.type_experience, TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name)
         self.assertEqual(informations_validation.statut_validation, ChoixStatutValidationExperience.A_COMPLETER.name)
         self.assertEqual(
             informations_validation.statut_authentification, EtatAuthentificationParcours.NON_CONCERNE.name
         )
 
-    def test_should_empecher_si_proposition_non_trouvee(self):
-        with self.assertRaises(PropositionNonTrouveeException):
-            self.message_bus.invoke(
-                ModifierStatutChecklistExperienceAcademiqueCommand(
-                    uuid_proposition='INCONNUE',
-                    uuid_experience=self.experience_academique_uuid,
-                    statut=ChoixStatutValidationExperience.AVIS_EXPERT.name,
-                    gestionnaire='0123456789',
-                )
-            )
-
     def test_should_verifier_experience_academique_complete_pour_passage_a_valide(self):
         with mock.patch.multiple(
-            self.experience_academique,
+            self.experience,
             a_obtenu_diplome=False,
             communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
             cycle_formation=Cycle.SECOND_CYCLE.name,
@@ -174,9 +172,10 @@ class TestModifierStatutChecklistExperienceAcademique(SimpleTestCase):
         ):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(
-                    ModifierStatutChecklistExperienceAcademiqueCommand(
-                        uuid_proposition='uuid-SC3DP-confirmee',
-                        uuid_experience=self.experience_academique_uuid,
+                    ModifierStatutChecklistExperienceParcoursAnterieurCommand(
+                        uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
+                        uuid_experience=self.experience_uuid,
+                        type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
                         statut=ChoixStatutValidationExperience.VALIDEE.name,
                         gestionnaire='0123456789',
                     )
@@ -188,7 +187,7 @@ class TestModifierStatutChecklistExperienceAcademique(SimpleTestCase):
             )
 
         with mock.patch.multiple(
-            self.experience_academique,
+            self.experience,
             a_obtenu_diplome=False,
             communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
             cycle_formation=Cycle.SECOND_CYCLE.name,
@@ -196,17 +195,19 @@ class TestModifierStatutChecklistExperienceAcademique(SimpleTestCase):
             grade_academique_formation='2',
         ):
             proposition_id = self.message_bus.invoke(
-                ModifierStatutChecklistExperienceAcademiqueCommand(
-                    uuid_proposition='uuid-SC3DP-confirmee',
-                    uuid_experience=self.experience_academique_uuid,
+                ModifierStatutChecklistExperienceParcoursAnterieurCommand(
+                    uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
+                    uuid_experience=self.experience_uuid,
+                    type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
                     statut=ChoixStatutValidationExperience.VALIDEE.name,
                     gestionnaire='0123456789',
                 )
             )
-            self.assertEqual(proposition_id, self.proposition_entity_id)
+
+            self.assertEqual(proposition_id, self.proposition_identity)
 
         with mock.patch.multiple(
-            self.experience_academique,
+            self.experience,
             a_obtenu_diplome=False,
             communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
             cycle_formation=Cycle.SECOND_CYCLE.name,
@@ -216,9 +217,10 @@ class TestModifierStatutChecklistExperienceAcademique(SimpleTestCase):
         ):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(
-                    ModifierStatutChecklistExperienceAcademiqueCommand(
-                        uuid_proposition='uuid-SC3DP-confirmee',
-                        uuid_experience=self.experience_academique_uuid,
+                    ModifierStatutChecklistExperienceParcoursAnterieurCommand(
+                        uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
+                        uuid_experience=self.experience_uuid,
+                        type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
                         statut=ChoixStatutValidationExperience.VALIDEE.name,
                         gestionnaire='0123456789',
                     )
@@ -230,7 +232,7 @@ class TestModifierStatutChecklistExperienceAcademique(SimpleTestCase):
             )
 
         with mock.patch.multiple(
-            self.experience_academique,
+            self.experience,
             a_obtenu_diplome=False,
             communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
             cycle_formation=Cycle.SECOND_CYCLE.name,
@@ -240,9 +242,10 @@ class TestModifierStatutChecklistExperienceAcademique(SimpleTestCase):
         ):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(
-                    ModifierStatutChecklistExperienceAcademiqueCommand(
-                        uuid_proposition='uuid-SC3DP-confirmee',
-                        uuid_experience=self.experience_academique_uuid,
+                    ModifierStatutChecklistExperienceParcoursAnterieurCommand(
+                        uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
+                        uuid_experience=self.experience_uuid,
+                        type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
                         statut=ChoixStatutValidationExperience.VALIDEE.name,
                         gestionnaire='0123456789',
                     )
@@ -254,61 +257,64 @@ class TestModifierStatutChecklistExperienceAcademique(SimpleTestCase):
             )
 
         with mock.patch.multiple(
-            self.experience_academique,
+            self.experience,
             a_obtenu_diplome=False,
             communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
             cycle_formation=Cycle.FIRST_CYCLE.name,
             credits_acquis_bloc_1=None,
         ):
             proposition_id = self.message_bus.invoke(
-                ModifierStatutChecklistExperienceAcademiqueCommand(
-                    uuid_proposition='uuid-SC3DP-confirmee',
-                    uuid_experience=self.experience_academique_uuid,
+                ModifierStatutChecklistExperienceParcoursAnterieurCommand(
+                    uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
+                    uuid_experience=self.experience_uuid,
+                    type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
                     statut=ChoixStatutValidationExperience.A_COMPLETER.name,
                     gestionnaire='0123456789',
                 )
             )
 
-            self.assertEqual(proposition_id.uuid, 'uuid-SC3DP-confirmee')
+            self.assertEqual(proposition_id.uuid, 'uuid-MASTER-SCI-CONFIRMED')
 
         with mock.patch.multiple(
-            self.experience_academique,
+            self.experience,
             a_obtenu_diplome=False,
             communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
             cycle_formation=Cycle.FIRST_CYCLE.name,
             credits_acquis_bloc_1=None,
         ):
             proposition_id = self.message_bus.invoke(
-                ModifierStatutChecklistExperienceAcademiqueCommand(
-                    uuid_proposition='uuid-SC3DP-confirmee',
-                    uuid_experience=self.experience_academique_uuid,
+                ModifierStatutChecklistExperienceParcoursAnterieurCommand(
+                    uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
+                    uuid_experience=self.experience_uuid,
+                    type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
                     statut=ChoixStatutValidationExperience.A_COMPLETER.name,
                     gestionnaire='0123456789',
                 )
             )
 
-            self.assertEqual(proposition_id.uuid, 'uuid-SC3DP-confirmee')
+            self.assertEqual(proposition_id.uuid, 'uuid-MASTER-SCI-CONFIRMED')
 
         with mock.patch.multiple(
-            self.experience_academique,
+            self.experience,
             a_obtenu_diplome=False,
             communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
             cycle_formation=Cycle.FIRST_CYCLE.name,
             credits_acquis_bloc_1=10,
         ):
             proposition_id = self.message_bus.invoke(
-                ModifierStatutChecklistExperienceAcademiqueCommand(
-                    uuid_proposition='uuid-SC3DP-confirmee',
-                    uuid_experience=self.experience_academique_uuid,
+                ModifierStatutChecklistExperienceParcoursAnterieurCommand(
+                    uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
+                    uuid_experience=self.experience_uuid,
+                    type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
                     statut=ChoixStatutValidationExperience.A_COMPLETER.name,
                     gestionnaire='0123456789',
                 )
             )
 
-            self.assertEqual(proposition_id.uuid, 'uuid-SC3DP-confirmee')
+            self.assertEqual(proposition_id.uuid, 'uuid-MASTER-SCI-CONFIRMED')
 
         with mock.patch.multiple(
-            self.experience_academique,
+            self.experience,
             a_obtenu_diplome=False,
             communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
             cycle_formation=Cycle.SECOND_CYCLE.name,
@@ -317,18 +323,19 @@ class TestModifierStatutChecklistExperienceAcademique(SimpleTestCase):
             credits_acquis_complements=10,
         ):
             proposition_id = self.message_bus.invoke(
-                ModifierStatutChecklistExperienceAcademiqueCommand(
-                    uuid_proposition='uuid-SC3DP-confirmee',
-                    uuid_experience=self.experience_academique_uuid,
+                ModifierStatutChecklistExperienceParcoursAnterieurCommand(
+                    uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
+                    uuid_experience=self.experience_uuid,
+                    type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
                     statut=ChoixStatutValidationExperience.A_COMPLETER.name,
                     gestionnaire='0123456789',
                 )
             )
 
-            self.assertEqual(proposition_id.uuid, 'uuid-SC3DP-confirmee')
+            self.assertEqual(proposition_id.uuid, 'uuid-MASTER-SCI-CONFIRMED')
 
         with mock.patch.multiple(
-            self.experience_academique,
+            self.experience,
             a_obtenu_diplome=False,
             communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
             cycle_formation=Cycle.SECOND_CYCLE.name,
@@ -337,12 +344,25 @@ class TestModifierStatutChecklistExperienceAcademique(SimpleTestCase):
             credits_acquis_complements=None,
         ):
             proposition_id = self.message_bus.invoke(
-                ModifierStatutChecklistExperienceAcademiqueCommand(
-                    uuid_proposition='uuid-SC3DP-confirmee',
-                    uuid_experience=self.experience_academique_uuid,
+                ModifierStatutChecklistExperienceParcoursAnterieurCommand(
+                    uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
+                    uuid_experience=self.experience_uuid,
+                    type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
                     statut=ChoixStatutValidationExperience.A_COMPLETER.name,
                     gestionnaire='0123456789',
                 )
             )
 
-            self.assertEqual(proposition_id.uuid, 'uuid-SC3DP-confirmee')
+            self.assertEqual(proposition_id.uuid, 'uuid-MASTER-SCI-CONFIRMED')
+
+    def test_should_empecher_si_proposition_non_trouvee(self):
+        with self.assertRaises(PropositionNonTrouveeException):
+            self.message_bus.invoke(
+                ModifierStatutChecklistExperienceParcoursAnterieurCommand(
+                    uuid_proposition='INCONNUE',
+                    uuid_experience=self.experience_uuid,
+                    type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
+                    statut=ChoixStatutValidationExperience.A_COMPLETER.name,
+                    gestionnaire='0123456789',
+                )
+            )

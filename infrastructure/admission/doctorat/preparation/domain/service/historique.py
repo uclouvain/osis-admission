@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -519,7 +519,7 @@ class Historique(IHistorique):
     @classmethod
     def historiser_demande_verification_titre_acces(
         cls,
-        proposition_id: PropositionIdentity,
+        proposition: Proposition,
         gestionnaire: PersonneConnueUclDTO,
         message: EmailMessage,
         uuid_experience: str,
@@ -538,7 +538,7 @@ class Historique(IHistorique):
         message_a_historiser = get_message_to_historize(message)
 
         add_history_entry(
-            proposition_id.uuid,
+            proposition.entity_id.uuid,
             f'Mail envoyé à "{recipient}" le {now_fr} par {manager_name}.\n\n'
             f'{message_a_historiser[settings.LANGUAGE_CODE_FR]}',
             f'Mail sent to "{recipient}" on {now_en} by {manager_name}.\n\n'
@@ -551,7 +551,7 @@ class Historique(IHistorique):
     @classmethod
     def historiser_information_candidat_verification_parcours_en_cours(
         cls,
-        proposition_id: PropositionIdentity,
+        proposition: Proposition,
         gestionnaire: PersonneConnueUclDTO,
         message: EmailMessage,
         uuid_experience: str,
@@ -569,7 +569,7 @@ class Historique(IHistorique):
         message_a_historiser = get_message_to_historize(message)
 
         add_history_entry(
-            proposition_id.uuid,
+            proposition.entity_id.uuid,
             f'Mail envoyé à le/la candidat·e le {now_fr} par {manager_name}.\n\n'
             f'{message_a_historiser[settings.LANGUAGE_CODE_FR]}',
             f'Mail sent to the candidate on {now_en} by {manager_name}.\n\n'
@@ -643,7 +643,8 @@ class Historique(IHistorique):
             proposition.entity_id.uuid,
             f"Demande au candidat de modifier le comité d'accompagnement par {gestionnaire_dto.prenom} "
             f'{gestionnaire_dto.nom}.',
-            f'Candidate asked to modify the supervision committee by {gestionnaire_dto.prenom} {gestionnaire_dto.nom}.',
+            f'Candidate asked to modify the supervision committee by {gestionnaire_dto.prenom} '
+            f'{gestionnaire_dto.nom}.',
             '{gestionnaire_dto.prenom} {gestionnaire_dto.nom}'.format(gestionnaire_dto=gestionnaire_dto),
             tags=['proposition', 'supervision', 'status-changed'],
         )

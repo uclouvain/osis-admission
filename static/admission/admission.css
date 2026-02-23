@@ -520,10 +520,6 @@ a.no-link {
     margin-bottom: 0;
 }
 
-.no-border {
-    border: none;
-}
-
 .element-with-spinner.htmx-request, .inline-element-with-spinner {
   position: relative;
 }

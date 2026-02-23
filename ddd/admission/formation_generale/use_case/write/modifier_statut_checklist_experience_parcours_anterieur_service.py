@@ -24,43 +24,56 @@
 #
 # ##############################################################################
 from admission.ddd.admission.formation_generale.commands import (
-    ModifierAuthentificationExperienceNonAcademiqueCommand,
+    ModifierStatutChecklistExperienceParcoursAnterieurCommand,
 )
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
-from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
-from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    PropositionIdentity,
+)
+from admission.ddd.admission.formation_generale.domain.service.i_formation import (
+    IFormationGeneraleTranslator,
+)
+from admission.ddd.admission.formation_generale.repository.i_proposition import (
+    IPropositionRepository,
+)
 from admission.ddd.admission.shared_kernel.domain.service.i_modifier_checklist_experience_parcours_anterieur import (
     IValidationExperienceParcoursAnterieurService,
 )
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
+    IProfilCandidatTranslator,
+)
 
 
-def modifier_authentification_experience_non_academique(
-    cmd: 'ModifierAuthentificationExperienceNonAcademiqueCommand',
-    notification: 'INotification',
-    historique: 'IHistorique',
+def modifier_statut_checklist_experience_parcours_anterieur(
+    cmd: 'ModifierStatutChecklistExperienceParcoursAnterieurCommand',
+    proposition_repository: 'IPropositionRepository',
+    profil_candidat_translator: 'IProfilCandidatTranslator',
+    formation_translator: 'IFormationGeneraleTranslator',
     validation_experience_parcours_anterieur_service: 'IValidationExperienceParcoursAnterieurService',
 ) -> 'PropositionIdentity':
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
+    proposition = proposition_repository.get(entity_id=proposition_id)
 
-    validation_experience_parcours_anterieur_service.modifier_authentification_experience_non_academique(
+    formation = formation_translator.get(entity_id=proposition.formation_id)
+
+    proposition.specifier_statut_checklist_experience_parcours_anterieur(
+        statut_checklist_cible=cmd.statut,
         uuid_experience=cmd.uuid_experience,
-        etat_authentification=cmd.etat_authentification,
+        auteur_modification=cmd.gestionnaire,
+        type_experience=cmd.type_experience,
+        profil_candidat_translator=profil_candidat_translator,
+        grade_academique_formation_proposition=formation.grade_academique,
     )
 
-    message = notification.modifier_authentification_experience_parcours(
-        proposition_id=proposition_id,
-        etat_authentification=cmd.etat_authentification,
-    )
-
-    historique.historiser_modification_authentification_experience_parcours(
-        proposition_id=proposition_id,
-        gestionnaire=cmd.gestionnaire,
-        etat_authentification=cmd.etat_authentification,
-        message=message,
+    validation_experience_parcours_anterieur_service.modifier_statut(
+        matricule_candidat=proposition.matricule_candidat,
         uuid_experience=cmd.uuid_experience,
+        type_experience=cmd.type_experience,
+        statut=cmd.statut,
     )
+
+    proposition_repository.save(proposition)
 
     return proposition_id

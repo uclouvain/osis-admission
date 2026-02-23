@@ -23,41 +23,55 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.formation_generale.commands import (
-    ModifierAuthentificationEtudesSecondairesCommand,
+from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
+from admission.ddd.admission.doctorat.preparation.commands import (
+    ModifierAuthentificationExperienceParcoursAnterieurCommand,
 )
-from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
-    PropositionIdentityBuilder,
-)
-from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
-from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
+from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import INotification
+from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.shared_kernel.domain.service.i_modifier_checklist_experience_parcours_anterieur import (
     IValidationExperienceParcoursAnterieurService,
 )
+from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
 
 
-def modifier_authentification_etudes_secondaires(
-    cmd: 'ModifierAuthentificationEtudesSecondairesCommand',
+def modifier_authentification_experience_parcours_anterieur(
+    cmd: 'ModifierAuthentificationExperienceParcoursAnterieurCommand',
+    proposition_repository: 'IPropositionRepository',
     notification: 'INotification',
     historique: 'IHistorique',
+    personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
     validation_experience_parcours_anterieur_service: 'IValidationExperienceParcoursAnterieurService',
 ) -> 'PropositionIdentity':
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
+    proposition = proposition_repository.get(entity_id=proposition_id)
 
-    validation_experience_parcours_anterieur_service.modifier_authentification_etudes_secondaires(
+    proposition.specifier_authentification_experience_parcours_anterieur(
+        auteur_modification=cmd.gestionnaire,
+    )
+
+    validation_experience_parcours_anterieur_service.modifier_authentification(
+        matricule_candidat=proposition.matricule_candidat,
         uuid_experience=cmd.uuid_experience,
+        type_experience=cmd.type_experience,
         etat_authentification=cmd.etat_authentification,
     )
 
+    proposition_repository.save(proposition)
+
+    gestionnaire_dto = personne_connue_ucl_translator.get(cmd.gestionnaire)
+
     message = notification.modifier_authentification_experience_parcours(
-        proposition_id=proposition_id,
+        proposition=proposition,
         etat_authentification=cmd.etat_authentification,
+        gestionnaire=gestionnaire_dto,
     )
 
     historique.historiser_modification_authentification_experience_parcours(
-        proposition_id=proposition_id,
-        gestionnaire=cmd.gestionnaire,
+        proposition=proposition,
+        gestionnaire=gestionnaire_dto,
         etat_authentification=cmd.etat_authentification,
         message=message,
         uuid_experience=cmd.uuid_experience,

@@ -27,7 +27,7 @@ from email.message import EmailMessage
 from typing import List, Optional
 
 from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervision import SignataireIdentity
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition, PropositionIdentity
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
 from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import INotification
 from admission.ddd.admission.doctorat.preparation.dtos import AvisDTO, PropositionDTO
 from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import EmplacementDocument
@@ -86,7 +86,7 @@ class NotificationInMemory(INotification):
     @classmethod
     def demande_verification_titre_acces(
         cls,
-        proposition_id: PropositionIdentity,
+        proposition: Proposition,
         gestionnaire: PersonneConnueUclDTO,
     ) -> EmailMessage:
         pass
@@ -94,7 +94,7 @@ class NotificationInMemory(INotification):
     @classmethod
     def informer_candidat_verification_parcours_en_cours(
         cls,
-        proposition_id: PropositionIdentity,
+        proposition: Proposition,
         gestionnaire: PersonneConnueUclDTO,
     ) -> EmailMessage:
         pass

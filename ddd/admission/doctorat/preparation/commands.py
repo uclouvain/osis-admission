@@ -706,38 +706,18 @@ class NotifierCandidatDerogationFinancabiliteCommand(interface.CommandRequest):
 class ModifierStatutChecklistExperienceParcoursAnterieurCommand(interface.CommandRequest):
     uuid_proposition: str
     uuid_experience: str
+    type_experience: str
     gestionnaire: str
     statut: str
-
-
-@attr.dataclass(frozen=True, slots=True)
-class ModifierStatutChecklistExperienceAcademiqueCommand(ModifierStatutChecklistExperienceParcoursAnterieurCommand):
-    pass
-
-
-@attr.dataclass(frozen=True, slots=True)
-class ModifierStatutChecklistExperienceNonAcademiqueCommand(ModifierStatutChecklistExperienceParcoursAnterieurCommand):
-    pass
 
 
 @attr.dataclass(frozen=True, slots=True)
 class ModifierAuthentificationExperienceParcoursAnterieurCommand(interface.CommandRequest):
     uuid_proposition: str
     uuid_experience: str
+    type_experience: str
     gestionnaire: str
     etat_authentification: str
-
-
-@attr.dataclass(frozen=True, slots=True)
-class ModifierAuthentificationExperienceAcademiqueCommand(ModifierAuthentificationExperienceParcoursAnterieurCommand):
-    pass
-
-
-@attr.dataclass(frozen=True, slots=True)
-class ModifierAuthentificationExperienceNonAcademiqueCommand(
-    ModifierAuthentificationExperienceParcoursAnterieurCommand
-):
-    pass
 
 
 @attr.dataclass(frozen=True, slots=True)

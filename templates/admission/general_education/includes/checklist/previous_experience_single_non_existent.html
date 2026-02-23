@@ -38,16 +38,15 @@
     <form method="post" action="{% url base_namespace|add:':initialize-experience' view.kwargs.uuid experience.type_experience %}">
       {% csrf_token %}
       <p class="mb-0">
+        {% blocktranslate trimmed %}
+          You can do it automatically be clicking <button type="submit" class="btn btn-link p-0">here</button>
+        {% endblocktranslate %}
         {% if experience_urls.edit_url %}
           {% blocktranslate trimmed with experience_url=experience_url%}
-            You can do it automatically by clicking <button type="submit" class="btn-link p-0 no-border">here</button>
-            or manually through the <a href="{{ edit_experience_url }}">edit form</a>.
-          {% endblocktranslate %}
-        {% else %}
-          {% blocktranslate trimmed %}
-            You can do it automatically by clicking <button type="submit" class="btn-link p-0 no-border">here</button>.
+            or manually through the <a href="{{ edit_experience_url }}">edit form</a>
           {% endblocktranslate %}
         {% endif %}
+        .
       </p>
     </form>
 

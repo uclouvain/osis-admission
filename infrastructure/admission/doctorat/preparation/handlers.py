@@ -563,18 +563,12 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=PropositionRepository(),
     ),
-    ModifierStatutChecklistExperienceAcademiqueCommand: (
-        lambda msg_bus, cmd: modifier_statut_checklist_experience_academique(
+    ModifierStatutChecklistExperienceParcoursAnterieurCommand: (
+        lambda msg_bus, cmd: modifier_statut_checklist_experience_parcours_anterieur(
             cmd,
             proposition_repository=PropositionRepository(),
             profil_candidat_translator=ProfilCandidatTranslator(),
             doctorat_translator=DoctoratTranslator(),
-            validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
-        )
-    ),
-    ModifierStatutChecklistExperienceNonAcademiqueCommand: (
-        lambda msg_bus, cmd: modifier_statut_checklist_experience_non_academique(
-            cmd,
             validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
         )
     ),
@@ -592,18 +586,10 @@ COMMAND_HANDLERS = {
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
         )
     ),
-    ModifierAuthentificationExperienceAcademiqueCommand: (
-        lambda msg_bus, cmd: modifier_authentification_experience_academique(
+    ModifierAuthentificationExperienceParcoursAnterieurCommand: (
+        lambda msg_bus, cmd: modifier_authentification_experience_parcours_anterieur(
             cmd,
-            notification=Notification(),
-            historique=Historique(),
-            personne_connue_ucl_translator=PersonneConnueUclTranslator(),
-            validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
-        )
-    ),
-    ModifierAuthentificationExperienceNonAcademiqueCommand: (
-        lambda msg_bus, cmd: modifier_authentification_experience_non_academique(
-            cmd,
+            proposition_repository=PropositionRepository(),
             notification=Notification(),
             historique=Historique(),
             personne_connue_ucl_translator=PersonneConnueUclTranslator(),

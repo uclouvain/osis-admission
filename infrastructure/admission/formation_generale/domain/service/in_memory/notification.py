@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,12 +26,12 @@
 from email.message import EmailMessage
 from typing import List, Optional
 
-from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
+from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import EmplacementDocument
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
-from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import EmplacementDocument
 from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import IMatriculeEtudiantService
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.shared_kernel.repository.i_email_destinataire import (
     IEmailDestinataireRepository,
 )
@@ -88,11 +88,11 @@ class NotificationInMemory(INotification):
         pass
 
     @classmethod
-    def demande_verification_titre_acces(cls, proposition_id: PropositionIdentity) -> EmailMessage:
+    def demande_verification_titre_acces(cls, proposition: Proposition) -> EmailMessage:
         pass
 
     @classmethod
-    def informer_candidat_verification_parcours_en_cours(cls, proposition_id: PropositionIdentity) -> EmailMessage:
+    def informer_candidat_verification_parcours_en_cours(cls, proposition: Proposition) -> EmailMessage:
         pass
 
     @classmethod

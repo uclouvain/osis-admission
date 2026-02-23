@@ -27,9 +27,12 @@
 from django.test import SimpleTestCase
 
 from admission.ddd.admission.formation_generale.commands import (
-    ModifierAuthentificationExperienceAcademiqueCommand,
+    ModifierAuthentificationExperienceParcoursAnterieurCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
+    PropositionNonTrouveeException,
+)
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import ExperienceNonTrouveeException
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
@@ -54,13 +57,14 @@ class TestModifierAuthentificationExperienceParcoursAnterieur(SimpleTestCase):
             PropositionIdentity(uuid='uuid-MASTER-SCI-CONFIRMED'),
         )
         self.experience_uuid = '9cbdf4db-2454-4cbf-9e48-55d2a9881ee3'
-        self.validation_experience_service = ValidationExperienceParcoursAnterieurInMemoryService()
+        self.validation_experience_parcours_anterieur_service = ValidationExperienceParcoursAnterieurInMemoryService()
 
     def test_should_modifier_vers_statut_checklist_sans_indication_authentification(self):
         proposition_id = self.message_bus.invoke(
-            ModifierAuthentificationExperienceAcademiqueCommand(
+            ModifierAuthentificationExperienceParcoursAnterieurCommand(
                 uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                 uuid_experience=self.experience_uuid,
+                type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
                 etat_authentification=EtatAuthentificationParcours.VRAI.name,
                 gestionnaire='0123456789',
             )
@@ -69,8 +73,10 @@ class TestModifierAuthentificationExperienceParcoursAnterieur(SimpleTestCase):
         proposition = self.proposition_repository.get(proposition_id)
 
         informations_validation = (
-            self.validation_experience_service.recuperer_information_validation_experience_academique(
+            self.validation_experience_parcours_anterieur_service.recuperer_information_validation(
+                matricule_candidat=proposition.matricule_candidat,
                 uuid_experience=self.experience_uuid,
+                type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
             )
         )
 
@@ -80,12 +86,25 @@ class TestModifierAuthentificationExperienceParcoursAnterieur(SimpleTestCase):
         self.assertEqual(informations_validation.statut_validation, ChoixStatutValidationExperience.EN_BROUILLON.name)
         self.assertEqual(informations_validation.statut_authentification, EtatAuthentificationParcours.VRAI.name)
 
+    def test_should_empecher_si_proposition_non_trouvee(self):
+        with self.assertRaises(PropositionNonTrouveeException):
+            self.message_bus.invoke(
+                ModifierAuthentificationExperienceParcoursAnterieurCommand(
+                    uuid_proposition='INCONNUE',
+                    uuid_experience=self.experience_uuid,
+                    type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
+                    etat_authentification=EtatAuthentificationParcours.VRAI.name,
+                    gestionnaire='0123456789',
+                )
+            )
+
     def test_should_empecher_si_experience_non_trouvee(self):
         with self.assertRaises(ExperienceNonTrouveeException):
             self.message_bus.invoke(
-                ModifierAuthentificationExperienceAcademiqueCommand(
+                ModifierAuthentificationExperienceParcoursAnterieurCommand(
                     uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                     uuid_experience='INCONNUE',
+                    type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
                     etat_authentification=EtatAuthentificationParcours.VRAI.name,
                     gestionnaire='0123456789',
                 )
