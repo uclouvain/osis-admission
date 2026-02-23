@@ -74,7 +74,6 @@ class StatutsChecklistContinueFactory(factory.Factory):
 
     fiche_etudiant = factory.SubFactory(StatutChecklistFactory)
     decision = factory.SubFactory(StatutChecklistFactory)
-    donnees_personnelles = factory.SubFactory(StatutChecklistFactory)
 
 
 class PropositionFactory(factory.Factory):
@@ -107,6 +106,5 @@ class PropositionFactory(factory.Factory):
                 StatutsChecklistContinueFactory,
                 decision__statut=ChoixStatutChecklist.GEST_EN_COURS,
                 decision__extra={'en_cours': 'fac_approval'},
-                donnees_personnelles__statut=ChoixStatutChecklist.GEST_REUSSITE,
             ),
         )

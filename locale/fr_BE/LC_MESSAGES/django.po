@@ -173,10 +173,11 @@ msgstr ""
 "l’adresse <a href=\"mailto:{mail}\">{mail}</a> :</p>"
 
 msgid ""
-"<strong>Warning</strong> the candidate is reported as a <strong>fraudster</"
-"strong>"
+"<strong>Warning</strong> the candidate is reported as <strong>fraudster</"
+"strong> by the ARES"
 msgstr ""
-"<strong>Attention</strong> le candidat est signalé <strong>fraudeur</strong>"
+"<strong>Attention</strong> le candidat est signalé <strong>fraudeur</strong> "
+"par l'ARES"
 
 #, python-format
 msgid ""
@@ -1590,10 +1591,6 @@ msgstr "Réclamation annulée le"
 
 msgid "Cleaned"
 msgstr "Toiletté"
-
-msgctxt "plural"
-msgid "Cleaned"
-msgstr "Toilettées"
 
 msgid "Clear the reason"
 msgstr "Effacer le motif"
@@ -3378,9 +3375,6 @@ msgstr "Ancien·ne étudiant·e UCLouvain"
 
 msgid "Fraudster"
 msgstr "Fraudeur"
-
-msgid "Fraudster (ARES)"
-msgstr "Fraudeur (ARES)"
 
 msgid "Fraudster status from ARES"
 msgstr "Statut fraudeur d'après l'ARES"
@@ -5171,9 +5165,6 @@ msgstr "Non finançable - %(rule)s (Établi par %(established_by)s)"
 msgid "Not free"
 msgstr "Non libre"
 
-msgid "Not fundable"
-msgstr "Non-finançable"
-
 msgctxt "dashboard-indicator admission"
 msgid "Not in order of registration"
 msgstr "Pas en ordre d’inscription"
@@ -6222,6 +6213,9 @@ msgstr "Liste des documents réclamés"
 msgid "Requested on"
 msgstr "Réclamé le"
 
+msgid "Requesting fraud status from the ARES"
+msgstr "Demande du statut fraudeur depuis l'ARES"
+
 #, python-format
 msgid "Require changes for \"%(object)s\""
 msgstr "Demander des changements pour \"%(object)s\""
@@ -6504,6 +6498,13 @@ msgstr "Envoyer en faculté"
 
 msgid "Sender"
 msgstr "Expéditeur"
+
+msgid ""
+"Sending the authorization is impossible while the personal data are in the "
+"\"Fraudster\" status."
+msgstr ""
+"L’envoi de l’autorisation est impossible lorsque les données personnelles "
+"sont à l'état \"Fraudeur\"."
 
 msgid "Sent to EPC"
 msgstr "Envoyée à EPC"
@@ -8086,6 +8087,9 @@ msgstr "UE"
 msgid "UUID"
 msgstr "UUID"
 
+msgid "Unable to get fraud status from the ARES at the moment"
+msgstr "Impossible de récupérer l'état fraudeur depuis l'ARES"
+
 msgid "Unavailable"
 msgstr "Non disponible"
 
@@ -8101,6 +8105,9 @@ msgstr "Inconnu·e"
 
 msgid "Unknown PDF type."
 msgstr "Type de PDF inconnu."
+
+msgid "Unknown author"
+msgstr "Auteur inconnu"
 
 msgid "Unknown citizenship"
 msgstr "Nationalité inconnue"
@@ -8166,10 +8173,6 @@ msgstr "Validée"
 msgctxt "decision-checklist"
 msgid "Validated"
 msgstr "Validée"
-
-msgctxt "plural"
-msgid "Validated"
-msgstr "Validées"
 
 msgid "Valuated diplomas or experiences:"
 msgstr "Diplômes ou expériences valorisées :"
@@ -8933,6 +8936,9 @@ msgstr "année académique"
 
 msgid "actions"
 msgstr "actions"
+
+msgid "an unknown author"
+msgstr "un auteur inconnu"
 
 msgid "approval"
 msgstr "accord"

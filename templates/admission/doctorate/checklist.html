@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -131,7 +131,7 @@
         </div>
       {% endwith %}
 
-      {% with initial=original_admission.checklist.initial.donnees_personnelles current=original_admission.checklist.current.donnees_personnelles next_url=next_base_url|add:'donnees_personnelles' %}
+      {% with next_url=next_base_url|add:'donnees_personnelles' %}
         <div role="tabpanel" class="tab-pane" id="donnees_personnelles">
           {% has_perm 'admission.merge_candidate_with_known_person' as can_merge_candidate %}
           {% has_perm 'admission.double_check_decision_informations_signaletique' as can_give_decision_double_check %}
@@ -959,6 +959,19 @@
                 const editor = CKEDITOR.instances[$(this).attr('id')];
                 if (editor) editor.updateElement();
             });
+          });
+
+          // Update ares result
+          $('#list-group-link-donnees_personnelles').on('show.bs.tab', function() {
+            if (document.getElementById('ares-fraudster-result-donnees_personnelles') !== null) {
+              htmx.trigger('#ares-fraudster-result-donnees_personnelles', 'fraudAresResult');
+            }
+          });
+
+          $('#list-group-link-decision_sic').on('show.bs.tab', function() {
+              if (document.getElementById('ares-fraudster-result-decision_sic') !== null) {
+                htmx.trigger('#ares-fraudster-result-decision_sic', 'fraudAresResult');
+              }
           });
 
       })(jQuery)

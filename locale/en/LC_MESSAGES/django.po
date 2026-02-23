@@ -142,8 +142,8 @@ msgid ""
 msgstr ""
 
 msgid ""
-"<strong>Warning</strong> the candidate is reported as a <strong>fraudster</"
-"strong>"
+"<strong>Warning</strong> the candidate is reported as <strong>fraudster</"
+"strong> by the ARES"
 msgstr ""
 
 #, python-format
@@ -1459,10 +1459,6 @@ msgstr ""
 msgid "Claim cancelled on"
 msgstr ""
 
-msgid "Cleaned"
-msgstr ""
-
-msgctxt "plural"
 msgid "Cleaned"
 msgstr ""
 
@@ -3084,9 +3080,6 @@ msgstr ""
 msgid "Fraudster"
 msgstr ""
 
-msgid "Fraudster (ARES)"
-msgstr ""
-
 msgid "Fraudster status from ARES"
 msgstr ""
 
@@ -4650,9 +4643,6 @@ msgstr ""
 msgid "Not free"
 msgstr ""
 
-msgid "Not fundable"
-msgstr ""
-
 msgctxt "dashboard-indicator admission"
 msgid "Not in order of registration"
 msgstr ""
@@ -5628,6 +5618,9 @@ msgstr ""
 msgid "Requested on"
 msgstr ""
 
+msgid "Requesting fraud status from the ARES"
+msgstr ""
+
 #, python-format
 msgid "Require changes for \"%(object)s\""
 msgstr ""
@@ -5903,6 +5896,11 @@ msgid "Send to faculty"
 msgstr ""
 
 msgid "Sender"
+msgstr ""
+
+msgid ""
+"Sending the authorization is impossible while the personal data are in the "
+"\"Fraudster\" status."
 msgstr ""
 
 msgid "Sent to EPC"
@@ -7246,6 +7244,9 @@ msgstr ""
 msgid "UUID"
 msgstr ""
 
+msgid "Unable to get fraud status from the ARES at the moment"
+msgstr ""
+
 msgid "Unavailable"
 msgstr ""
 
@@ -7260,6 +7261,9 @@ msgid "Unknown"
 msgstr ""
 
 msgid "Unknown PDF type."
+msgstr ""
+
+msgid "Unknown author"
 msgstr ""
 
 msgid "Unknown citizenship"
@@ -7322,10 +7326,6 @@ msgid "Validated"
 msgstr ""
 
 msgctxt "decision-checklist"
-msgid "Validated"
-msgstr ""
-
-msgctxt "plural"
 msgid "Validated"
 msgstr ""
 
@@ -7950,6 +7950,9 @@ msgid "academic year"
 msgstr ""
 
 msgid "actions"
+msgstr ""
+
+msgid "an unknown author"
 msgstr ""
 
 msgid "approval"

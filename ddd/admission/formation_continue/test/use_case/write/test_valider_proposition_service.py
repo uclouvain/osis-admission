@@ -60,6 +60,7 @@ from admission.infrastructure.message_bus_in_memory import (
     message_bus_in_memory_instance,
 )
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from base.models.enums.personal_data import ChoixStatutValidationDonneesPersonnelles
 from base.models.person_merge_proposal import PersonMergeStatus
 
 
@@ -112,12 +113,17 @@ class ValiderPropositionTestCase(SimpleTestCase):
         self.assertIsInstance(context.exception.exceptions.pop(), ApprouverPropositionTransitionStatutException)
 
     def test_should_renvoyer_erreur_si_donnees_personnelles_non_validees(self):
-        proposition: Proposition = self.proposition_repository.get(PropositionIdentity(uuid='uuid-USCC22'))
-        proposition.checklist_actuelle.donnees_personnelles.statut = ChoixStatutChecklist.GEST_EN_COURS
-        proposition.checklist_actuelle.donnees_personnelles.extra = {}
-
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(self.cmd)
+        index = next(
+            i
+            for i, c in enumerate(ProfilCandidatInMemoryTranslator.profil_candidats)
+            if c.matricule == 'candidat_checklist'
+        )
+        with patch.multiple(
+            ProfilCandidatInMemoryTranslator.profil_candidats[index],
+            statut_validation_donnees_personnelles=ChoixStatutValidationDonneesPersonnelles.A_COMPLETER.name,
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd)
 
         self.assertIsInstance(
             context.exception.exceptions.pop(),

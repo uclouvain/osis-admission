@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -84,6 +84,7 @@ from admission.views.list import BaseAdmissionList
 from base.models.academic_year import AcademicYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.entity_type import EntityType
+from base.models.enums.personal_data import ChoixStatutValidationDonneesPersonnelles
 from base.models.person_merge_proposal import PersonMergeProposal
 from base.tests import QueriesAssertionsMixin
 from base.tests.factories.academic_calendar import AcademicCalendarFactory
@@ -943,7 +944,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(result[0].uuid, second_admission.uuid)
         self.assertEqual(result[1].uuid, self.admissions[0].uuid)
 
-    def test_list_sort_by_identification_checklist_status(self):
+    def test_list_filter_by_identification_checklist_status(self):
         self.client.force_login(user=self.sic_management_user)
 
         second_admission = GeneralEducationAdmissionFactory(
@@ -956,10 +957,9 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
             'numero': str(second_admission),
         }
 
-        current_checklist = second_admission.checklist['current'][OngletsChecklist.donnees_personnelles.name]
-        current_checklist['statut'] = ChoixStatutChecklist.INITIAL_NON_CONCERNE.name
-        current_checklist['extra'] = {}
-        second_admission.save(update_fields=['checklist'])
+        candidate = second_admission.candidate
+        candidate.personal_data_validation_status = ChoixStatutValidationDonneesPersonnelles.A_COMPLETER.name
+        candidate.save(update_fields=['personal_data_validation_status'])
 
         # To be processed
         response = self._do_request(
@@ -971,9 +971,8 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         self.assertEqual(len(response.context['object_list']), 0)
 
-        current_checklist['statut'] = ChoixStatutChecklist.INITIAL_CANDIDAT.name
-        current_checklist['extra'] = {}
-        second_admission.save(update_fields=['checklist'])
+        candidate.personal_data_validation_status = ChoixStatutValidationDonneesPersonnelles.A_TRAITER.name
+        candidate.save(update_fields=['personal_data_validation_status'])
 
         response = self._do_request(
             **default_cmd_params,
@@ -995,9 +994,8 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         self.assertEqual(len(response.context['object_list']), 0)
 
-        current_checklist['statut'] = ChoixStatutChecklist.GEST_BLOCAGE.name
-        current_checklist['extra'] = {'fraud': '0'}
-        second_admission.save(update_fields=['checklist'])
+        candidate.personal_data_validation_status = ChoixStatutValidationDonneesPersonnelles.A_COMPLETER.name
+        candidate.save(update_fields=['personal_data_validation_status'])
 
         response = self._do_request(
             **default_cmd_params,
@@ -1019,9 +1017,8 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         self.assertEqual(len(response.context['object_list']), 0)
 
-        current_checklist['statut'] = ChoixStatutChecklist.GEST_BLOCAGE.name
-        current_checklist['extra'] = {'fraud': '1'}
-        second_admission.save(update_fields=['checklist'])
+        candidate.personal_data_validation_status = ChoixStatutValidationDonneesPersonnelles.FRAUDEUR.name
+        candidate.save(update_fields=['personal_data_validation_status'])
 
         response = self._do_request(
             **default_cmd_params,
@@ -1043,9 +1040,8 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
 
         self.assertEqual(len(response.context['object_list']), 0)
 
-        current_checklist['statut'] = ChoixStatutChecklist.GEST_REUSSITE.name
-        current_checklist['extra'] = {}
-        second_admission.save(update_fields=['checklist'])
+        candidate.personal_data_validation_status = ChoixStatutValidationDonneesPersonnelles.VALIDEES.name
+        candidate.save(update_fields=['personal_data_validation_status'])
 
         response = self._do_request(
             **default_cmd_params,
@@ -2492,13 +2488,13 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         default_cmd_params = {
             'mode_filtres_etats_checklist': ModeFiltrageChecklist.EXCLUSION.name,
             'numero': str(second_admission),
-            'filtres_etats_checklist_0': ['FRAUDEUR'],
+            'filtres_etats_checklist_5': ['AVIS_EXPERT'],
         }
 
         # The admission has the specific status and extra info so we exclude it
-        second_admission.checklist['current'][OngletsChecklist.donnees_personnelles.name] = {
-            'statut': ChoixStatutChecklist.GEST_BLOCAGE.name,
-            'extra': {'fraud': '1'},
+        second_admission.checklist['current'][OngletsChecklist.financabilite.name] = {
+            'statut': ChoixStatutChecklist.GEST_EN_COURS.name,
+            'extra': {'en_cours': 'expert'},
         }
         second_admission.save(update_fields=['checklist'])
 
@@ -2508,9 +2504,9 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(len(response.context['object_list']), 0)
 
         # The admission has the specific status but not the right extra info so we don't exclude it
-        second_admission.checklist['current'][OngletsChecklist.donnees_personnelles.name] = {
-            'statut': ChoixStatutChecklist.GEST_BLOCAGE.name,
-            'extra': {'fraud': '0'},
+        second_admission.checklist['current'][OngletsChecklist.financabilite.name] = {
+            'statut': ChoixStatutChecklist.GEST_EN_COURS.name,
+            'extra': {'en_cours': 'derogation'},
         }
         second_admission.save(update_fields=['checklist'])
 
@@ -2521,9 +2517,9 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(second_admission.uuid, response.context['object_list'][0].uuid)
 
         # The admission has the specific extra info but not the right status so we don't exclude it
-        second_admission.checklist['current'][OngletsChecklist.donnees_personnelles.name] = {
-            'statut': ChoixStatutChecklist.GEST_EN_COURS.name,
-            'extra': {'fraud': '1'},
+        second_admission.checklist['current'][OngletsChecklist.financabilite.name] = {
+            'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
+            'extra': {'en_cours': 'expert'},
         }
         second_admission.save(update_fields=['checklist'])
 
@@ -2534,8 +2530,8 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(second_admission.uuid, response.context['object_list'][0].uuid)
 
         # The admission has not any specified status for this tab so we don't exclude it
-        second_admission.checklist['current'][OngletsChecklist.donnees_personnelles.name] = {
-            'extra': {'fraud': '1'},
+        second_admission.checklist['current'][OngletsChecklist.financabilite.name] = {
+            'extra': {'en_cours': 'expert'},
         }
         second_admission.save(update_fields=['checklist'])
 
@@ -2546,8 +2542,8 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(second_admission.uuid, response.context['object_list'][0].uuid)
 
         # The admission has not any specified extra info for this tab so we don't exclude it
-        second_admission.checklist['current'][OngletsChecklist.donnees_personnelles.name] = {
-            'statut': ChoixStatutChecklist.GEST_BLOCAGE.name,
+        second_admission.checklist['current'][OngletsChecklist.financabilite.name] = {
+            'statut': ChoixStatutChecklist.GEST_EN_COURS.name,
         }
 
         response = self._do_request(**default_cmd_params)
@@ -2557,7 +2553,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(second_admission.uuid, response.context['object_list'][0].uuid)
 
         # The admission has empty info for the specific tab so we don't exclude it
-        second_admission.checklist['current'][OngletsChecklist.donnees_personnelles.name] = {}
+        second_admission.checklist['current'][OngletsChecklist.financabilite.name] = {}
         second_admission.save(update_fields=['checklist'])
 
         response = self._do_request(**default_cmd_params)
@@ -2567,7 +2563,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
         self.assertEqual(second_admission.uuid, response.context['object_list'][0].uuid)
 
         # The admission has no info for the specific tab so we don't exclude it
-        second_admission.checklist['current'].pop(OngletsChecklist.donnees_personnelles.name)
+        second_admission.checklist['current'].pop(OngletsChecklist.financabilite.name)
         second_admission.save(update_fields=['checklist'])
 
         response = self._do_request(**default_cmd_params)

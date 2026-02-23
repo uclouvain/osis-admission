@@ -30,7 +30,7 @@ from typing import Dict, List, Optional, Set, Union
 
 import attr
 from django.conf import settings
-from django.db.models import QuerySet
+from django.db.models import Q, QuerySet
 from django.forms import Form
 from django.forms.formsets import formset_factory
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
@@ -302,7 +302,6 @@ __all__ = [
     'SicDecisionDispensationView',
     'SicDecisionChangeStatusView',
     'SicDecisionPdfPreviewView',
-    'PersonalDataChangeStatusView',
 ]
 
 
@@ -537,43 +536,6 @@ def get_email(template_identifier, language, proposition_dto: PropositionGestion
             mail_template.render_subject(tokens),
             mail_template.body_as_html(tokens),
         )
-
-
-class PersonalDataChangeStatusView(
-    AdmissionFormMixin,
-    LoadDossierViewMixin,
-    HtmxPermissionRequiredMixin,
-    FormView,
-):
-    urlpatterns = {'personal-data-change-status': 'personal-data-change-status/<str:status>'}
-    template_name = 'admission/general_education/includes/checklist/personal_data.html'
-    form_class = Form
-
-    def get_permission_required(self):
-        return (
-            {
-                'INITIAL_CANDIDAT': 'admission.change_personal_data_checklist_status_to_be_processed',
-                'GEST_EN_COURS': 'admission.change_personal_data_checklist_status_cleaned',
-            }.get(self.kwargs.get('status'), 'admission.change_checklist'),
-        )
-
-    def form_valid(self, form):
-        admission = self.get_permission_object()
-
-        extra = {}
-        if 'fraud' in self.request.POST:
-            extra['fraud'] = self.request.POST['fraud']
-
-        change_admission_status(
-            tab=OngletsChecklist.donnees_personnelles.name,
-            admission_status=self.kwargs['status'],
-            extra=extra,
-            admission=admission,
-            author=self.request.user.person,
-            replace_extra=True,
-        )
-
-        return super().form_valid(form)
 
 
 class PaymentsListView(AdmissionViewMixin, TemplateView):
@@ -1170,14 +1132,20 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
                 'decision_sic': CommentForm(
                     comment=comment,
                     form_url=resolve_url(
-                        f'{self.base_namespace}:save-comment', uuid=self.admission_uuid, tab='decision_sic'
+                        f'{self.base_namespace}:save-comment',
+                        uuid=self.admission_uuid,
+                        object_uuid=self.admission_uuid,
+                        tab='decision_sic',
                     ),
                     prefix='decision_sic',
                 ),
                 'decision_sic__derogation': CommentForm(
                     comment=comment_derogation,
                     form_url=resolve_url(
-                        f'{self.base_namespace}:save-comment', uuid=self.admission_uuid, tab='decision_sic__derogation'
+                        f'{self.base_namespace}:save-comment',
+                        uuid=self.admission_uuid,
+                        object_uuid=self.admission_uuid,
+                        tab='decision_sic__derogation',
                     ),
                     prefix='decision_sic__derogation',
                     label=_('Non-progression dispensation comment'),
@@ -2525,6 +2493,7 @@ class FinancabiliteContextMixin(CheckListDefaultContextMixin):
                     form_url=resolve_url(
                         f'{self.base_namespace}:save-comment',
                         uuid=self.admission_uuid,
+                        object_uuid=self.admission_uuid,
                         tab='financabilite',
                     ),
                     prefix='financabilite',
@@ -2532,7 +2501,10 @@ class FinancabiliteContextMixin(CheckListDefaultContextMixin):
                 'financabilite__derogation': CommentForm(
                     comment=comments.get('financabilite__derogation'),
                     form_url=resolve_url(
-                        f'{self.base_namespace}:save-comment', uuid=self.admission_uuid, tab='financabilite__derogation'
+                        f'{self.base_namespace}:save-comment',
+                        uuid=self.admission_uuid,
+                        object_uuid=self.admission_uuid,
+                        tab='financabilite__derogation',
                     ),
                     prefix='financabilite__derogation',
                     label=_('Faculty comment about financability dispensation'),
@@ -2931,6 +2903,7 @@ class SinglePastExperienceMixin(
             form_url=resolve_url(
                 f'{self.base_namespace}:save-comment',
                 uuid=self.admission_uuid,
+                object_uuid=self.admission_uuid,
                 tab=authentication_comment_identifier,
             ),
             prefix=authentication_comment_identifier,
@@ -3183,20 +3156,30 @@ class ChecklistView(
             context['specific_questions_by_tab'] = get_dynamic_questions_by_tab(specific_questions)
 
             # Initialize forms
-            tab_names = list(self.extra_context['checklist_tabs'].keys())
+            profile_tabs = [
+                OngletsChecklist.donnees_personnelles.name,
+            ]
+            admission_tabs = list(tab for tab in self.extra_context['checklist_tabs'] if tab not in profile_tabs)
 
             comments = {
                 ('__'.join(c.tags)): c
                 for c in CommentEntry.objects.filter(
-                    object_uuid=self.admission_uuid, tags__overlap=tab_names
+                    Q(
+                        object_uuid=self.admission_uuid,
+                        tags__overlap=admission_tabs,
+                    )
+                    | Q(
+                        object_uuid=self.admission.candidate.uuid,
+                        tags__overlap=profile_tabs,
+                    ),
                 ).select_related('author')
             }
 
             for tab in TABS_WITH_SIC_AND_FAC_COMMENTS:
-                tab_names.remove(tab)
-                tab_names += [f'{tab}__{COMMENT_TAG_SIC}', f'{tab}__{COMMENT_TAG_FAC}']
-            tab_names.append('decision_sic__derogation')
-            tab_names.append('financabilite__derogation')
+                admission_tabs.remove(tab)
+                admission_tabs += [f'{tab}__{COMMENT_TAG_SIC}', f'{tab}__{COMMENT_TAG_FAC}']
+            admission_tabs.append('decision_sic__derogation')
+            admission_tabs.append('financabilite__derogation')
 
             comments_labels = {
                 'decision_sic__derogation': _('Non-progression dispensation comment'),
@@ -3209,12 +3192,17 @@ class ChecklistView(
             context['comment_forms'] = {
                 tab_name: CommentForm(
                     comment=comments.get(tab_name, None),
-                    form_url=resolve_url(f'{self.base_namespace}:save-comment', uuid=self.admission_uuid, tab=tab_name),
+                    form_url=resolve_url(
+                        f'{self.base_namespace}:save-comment',
+                        uuid=self.admission_uuid,
+                        object_uuid=self.admission.candidate.uuid if tab_name in profile_tabs else self.admission_uuid,
+                        tab=tab_name,
+                    ),
                     prefix=tab_name,
                     label=comments_labels.get(tab_name, None),
                     permission=comments_permissions.get(tab_name, None),
                 )
-                for tab_name in tab_names
+                for tab_name in itertools.chain(admission_tabs, profile_tabs)
             }
             context['assimilation_form'] = AssimilationForm(
                 initial=self.admission.checklist.get('current', {}).get('assimilation', {}).get('extra'),
@@ -3334,6 +3322,7 @@ class ChecklistView(
                     form_url=resolve_url(
                         f'{self.base_namespace}:save-comment',
                         uuid=self.admission_uuid,
+                        object_uuid=self.admission_uuid,
                         tab=tab_identifier,
                     ),
                     prefix=tab_identifier,
@@ -3344,6 +3333,7 @@ class ChecklistView(
                     form_url=resolve_url(
                         f'{self.base_namespace}:save-comment',
                         uuid=self.admission_uuid,
+                        object_uuid=self.admission_uuid,
                         tab=authentication_comment_identifier,
                     ),
                     prefix=authentication_comment_identifier,
