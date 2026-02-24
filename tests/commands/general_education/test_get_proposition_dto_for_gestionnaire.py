@@ -83,6 +83,12 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
     def setUpTestData(cls):
         super().setUpTestData()
         cls.country = CountryFactory()
+        cls.file_uuids = {
+            file_name: [uuid.uuid4()]
+            for file_name in [
+                'bama_15_proof',
+            ]
+        }
 
     def setUp(self) -> None:
         school = EntityFactory()
@@ -97,6 +103,8 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
             candidate__private_email='john.doe@example.com',
             training__credits=180,
             candidate__country_of_citizenship=self.country,
+            is_concerned_by_bama_15=True,
+            bama_15_proof=self.file_uuids['bama_15_proof'],
         )
         self.hops = HopsFactory(
             education_group_year=self.admission.training,
@@ -203,6 +211,8 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         self.assertEqual(result.est_inscription_tardive, None)
         self.assertEqual(result.candidat_vip, False)
         self.assertEqual(result.candidat_assimile, False)
+        self.assertEqual(result.est_concerne_par_le_bama_15, True)
+        self.assertEqual(result.preuve_bama_15, self.file_uuids['bama_15_proof'])
 
     def test_get_proposition_with_country_of_citizenship(self):
         self.admission.candidate.country_of_citizenship = CountryFactory()

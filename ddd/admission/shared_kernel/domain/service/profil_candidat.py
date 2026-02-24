@@ -52,6 +52,7 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
     FormationGeneraleExperienceAcademiquePostSoumissionValidatorList,
     FormationGeneraleInformationsComplementairesValidatorList,
 )
+from admission.ddd.admission.formation_generale.dtos import PropositionDTO as PropositionGeneraleDTO
 from admission.ddd.admission.shared_kernel.domain.model._candidat_adresse import (
     CandidatAdresse,
 )
@@ -73,6 +74,7 @@ from admission.ddd.admission.shared_kernel.domain.validator.validator_by_busines
 from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
     ExperiencesCVRecuperees,
 )
+from base.models.enums.community import CommunityEnum
 from base.models.enums.education_group_types import TrainingType
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
     AcademicYear,
@@ -81,7 +83,9 @@ from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
 from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
     IExperienceParcoursInterneTranslator,
 )
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO
 from osis_common.ddd import interface
+from reference.models.enums.cycle import Cycle
 
 
 class ProfilCandidat(interface.DomainService):
@@ -252,15 +256,10 @@ class ProfilCandidat(interface.DomainService):
         cls,
         proposition,
         type_formation: TrainingType,
-        profil_candidat_translator: 'IProfilCandidatTranslator',
         annee_courante: int,
         annee_formation: AcademicYear,
+        curriculum: CurriculumAdmissionDTO,
     ) -> None:
-        curriculum = profil_candidat_translator.get_curriculum(
-            matricule=proposition.matricule_candidat,
-            annee_courante=annee_courante,
-            uuid_proposition=proposition.entity_id.uuid,
-        )
         experiences_academiques_incompletes = VerifierCurriculum.recuperer_experiences_academiques_incompletes(
             experiences=curriculum.experiences_academiques,
         )
@@ -496,6 +495,8 @@ class ProfilCandidat(interface.DomainService):
         cls,
         proposition,
         profil_candidat_translator: 'IProfilCandidatTranslator',
+        experiences_academiques: list[ExperienceAcademiqueDTO],
+        formation: Formation,
     ):
         identification = profil_candidat_translator.get_identification(proposition.matricule_candidat)
         FormationGeneraleInformationsComplementairesValidatorList(
@@ -503,6 +504,11 @@ class ProfilCandidat(interface.DomainService):
             pays_nationalite=identification.pays_nationalite,
             pays_nationalite_europeen=identification.pays_nationalite_europeen,
             pays_residence=identification.pays_residence,
+            formation=formation,
+            annee_formation=proposition.annee_calculee or proposition.formation_id.annee,
+            experiences_academiques=experiences_academiques,
+            est_concerne_par_le_bama_15=proposition.est_concerne_par_le_bama_15,
+            preuve_bama_15=proposition.preuve_bama_15,
         ).validate()
 
     @classmethod
@@ -515,3 +521,21 @@ class ProfilCandidat(interface.DomainService):
         QuarantaineValidatorList(
             merge_proposal=merge_proposal,
         ).validate()
+
+    @classmethod
+    def est_potentiellement_concerne_par_le_bama_15(
+        cls,
+        proposition: PropositionGeneraleDTO,
+        experiences_academiques: list[ExperienceAcademiqueDTO],
+    ):
+        annee_demande = proposition.annee_demande
+        demande_non_soumise = proposition.est_non_soumise
+        return proposition.formation.est_formation_pour_bama_15 and any(
+            (demande_non_soumise or xp.valorisee_par_admissions and proposition.uuid in xp.valorisee_par_admissions)
+            and xp.cycle_formation == Cycle.FIRST_CYCLE.name
+            and xp.communaute_institut == CommunityEnum.FRENCH_SPEAKING.name
+            and not xp.a_obtenu_diplome
+            and not xp.est_autre_formation
+            and any(annee for annee in xp.annees if annee.annee == annee_demande)
+            for xp in experiences_academiques
+        )

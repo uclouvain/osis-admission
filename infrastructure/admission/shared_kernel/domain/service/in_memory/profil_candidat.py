@@ -219,6 +219,7 @@ class ExperienceAcademique:
     credits_acquis_complements = None
     statut_validation: str = ChoixStatutValidationExperience.EN_BROUILLON.name
     statut_authentification: str = EtatAuthentificationParcours.NON_CONCERNE.name
+    est_autre_formation: bool | None = None
 
 
 @dataclass
@@ -1183,7 +1184,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                             nom_regime_linguistique=experience.nom_regime_linguistique,
                             type_enseignement=experience.type_enseignement,
                             valorisee_par_admissions=[],
-                            est_autre_formation=None,
+                            est_autre_formation=experience.est_autre_formation,
                             credits_acquis_bloc_1=experience.credits_acquis_bloc_1,
                             avec_complements=experience.avec_complements,
                             credits_inscrits_complements=experience.credits_inscrits_complements,

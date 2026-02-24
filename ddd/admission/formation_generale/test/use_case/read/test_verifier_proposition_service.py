@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -56,6 +56,7 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
     EtudesSecondairesNonCompleteesPourDiplomeBelgeException,
     EtudesSecondairesNonCompleteesPourDiplomeEtrangerException,
     FichierCurriculumNonRenseigneException,
+    InformationsBama15NonCompleteesException,
     InformationsVisaNonCompleteesException,
 )
 from admission.ddd.admission.formation_generale.test.factory.proposition import (
@@ -101,6 +102,7 @@ from admission.infrastructure.message_bus_in_memory import (
     message_bus_in_memory_instance,
 )
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from base.models.enums.community import CommunityEnum
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import GotDiploma
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
@@ -126,6 +128,7 @@ from osis_profile.models.enums.curriculum import (
     TranscriptType,
 )
 from osis_profile.models.enums.education import Equivalence, ForeignDiplomaTypes
+from reference.models.enums.cycle import Cycle
 
 
 class TestVerifierPropositionService(TestCase):
@@ -220,6 +223,7 @@ class TestVerifierPropositionService(TestCase):
             nom_formation_equivalente_communaute_fr='',
             cycle_formation='',
             grade_academique_formation='1',
+            est_autre_formation=False,
         )
 
         cls.params_defaut_experience_non_academique = {
@@ -1839,7 +1843,6 @@ class TestVerifierPropositionService(TestCase):
 
     def test_should_verification_renvoyer_erreur_si_diplome_non_renseigne(self):
         with mock.patch.multiple(self.experience_academiques_complete, a_obtenu_diplome=True, diplome=[]):
-
             self.experiences_academiques.append(self.experience_academiques_complete)
 
             with self.assertRaises(MultipleBusinessExceptions) as context:
@@ -1954,3 +1957,118 @@ class TestVerifierPropositionService(TestCase):
             with freezegun.freeze_time('2021-02-15'):
                 proposition_id = self.message_bus.invoke(self.cmd(self.bachelier_veto_proposition.entity_id.uuid))
                 self.assertEqual(proposition_id.uuid, self.bachelier_veto_proposition.entity_id.uuid)
+
+    def test_should_verification_renvoyer_erreur_si_questions_bama_15_non_completees(self):
+        cmd = self.cmd(uuid='uuid-MASTER-SCI')
+
+        formation_id = FormationIdentity(sigle=self.master_proposition.formation_id.sigle, annee=2020)
+
+        self.experiences_academiques.append(self.experience_academiques_complete)
+
+        # En situation potentielle de bama 15 mais les informations associées sont manquantes
+        with mock.patch.multiple(
+            self.experience_academiques_complete,
+            a_obtenu_diplome=False,
+            communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
+            cycle_formation=Cycle.FIRST_CYCLE.name,
+        ):
+            with mock.patch.multiple(
+                self.master_proposition,
+                preuve_bama_15=['uuid-file'],
+                est_concerne_par_le_bama_15=None,
+                formation_id=formation_id,
+            ):
+                with self.assertRaises(MultipleBusinessExceptions) as context:
+                    self.message_bus.invoke(cmd)
+
+                self.assertHasInstance(context.exception.exceptions, InformationsBama15NonCompleteesException)
+
+            with mock.patch.multiple(
+                self.master_proposition,
+                preuve_bama_15=[],
+                est_concerne_par_le_bama_15=True,
+                formation_id=formation_id,
+            ):
+                with self.assertRaises(MultipleBusinessExceptions) as context:
+                    self.message_bus.invoke(cmd)
+
+                self.assertHasInstance(context.exception.exceptions, InformationsBama15NonCompleteesException)
+
+        # Pas en situation potentielle de bama 15 et les informations associées sont manquantes
+        with mock.patch.multiple(
+            self.master_proposition,
+            preuve_bama_15=[],
+            est_concerne_par_le_bama_15=None,
+            formation_id=formation_id,
+        ):
+            # Le bama 15 ne concerne que les expériences avant un institut de la communauté française
+            with mock.patch.multiple(
+                self.experience_academiques_complete,
+                a_obtenu_diplome=False,
+                communaute_institut=CommunityEnum.GERMAN_SPEAKING.name,
+                cycle_formation=Cycle.FIRST_CYCLE.name,
+            ):
+                result = self.message_bus.invoke(cmd)
+                self.assertEqual(result, self.master_proposition.entity_id)
+
+            # Le bama 15 ne concerne que les expériences avec un programme de premier cycle
+            with mock.patch.multiple(
+                self.experience_academiques_complete,
+                a_obtenu_diplome=False,
+                communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
+                cycle_formation=Cycle.SECOND_CYCLE.name,
+            ):
+                result = self.message_bus.invoke(cmd)
+                self.assertEqual(result, self.master_proposition.entity_id)
+
+            # Le bama 15 ne concerne que les expériences sans autre programme
+            with mock.patch.multiple(
+                self.experience_academiques_complete,
+                a_obtenu_diplome=False,
+                communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
+                cycle_formation=Cycle.FIRST_CYCLE.name,
+                est_autre_formation=True,
+            ):
+                result = self.message_bus.invoke(cmd)
+                self.assertEqual(result, self.master_proposition.entity_id)
+
+            # Le bama 15 ne concerne que les expériences dont le diplôme n'a pas été obtenu
+            with mock.patch.multiple(
+                self.experience_academiques_complete,
+                a_obtenu_diplome=True,
+                communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
+                cycle_formation=Cycle.FIRST_CYCLE.name,
+            ):
+                result = self.message_bus.invoke(cmd)
+                self.assertEqual(result, self.master_proposition.entity_id)
+
+        # Le bama 15 ne concerne que les expériences ayant une année commune avec la formation demandée
+        with mock.patch.multiple(
+            self.master_proposition,
+            preuve_bama_15=[],
+            est_concerne_par_le_bama_15=None,
+        ):
+            with mock.patch.multiple(
+                self.experience_academiques_complete,
+                a_obtenu_diplome=True,
+                communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
+                cycle_formation=Cycle.FIRST_CYCLE.name,
+            ):
+                result = self.message_bus.invoke(cmd)
+                self.assertEqual(result, self.master_proposition.entity_id)
+
+        # Le bama 15 ne concerne que les masters
+        with mock.patch.multiple(
+            self.bachelier_proposition,
+            preuve_bama_15=[],
+            est_concerne_par_le_bama_15=None,
+            formation_id=FormationIdentity(sigle=self.bachelier_proposition.formation_id.sigle, annee=2020),
+        ):
+            with mock.patch.multiple(
+                self.experience_academiques_complete,
+                a_obtenu_diplome=True,
+                communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
+                cycle_formation=Cycle.FIRST_CYCLE.name,
+            ):
+                result = self.message_bus.invoke(cmd)
+                self.assertEqual(result, self.master_proposition.entity_id)

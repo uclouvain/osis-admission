@@ -24,20 +24,27 @@
 #
 # ##############################################################################
 from django.db import models
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
+from admission.ddd.admission.formation_generale.domain.model.enums import STATUTS_PROPOSITION_GENERALE_NON_SOUMISE
 from admission.ddd.admission.shared_kernel.dtos import IdentificationDTO
 from base.api.serializers.academic_year import RelatedAcademicYearField
+from base.models.enums.community import CommunityEnum
 from base.models.person import Person
 from base.utils.serializers import DTOSerializer
+from osis_profile.models import EducationalExperienceYear
 from reference.api.serializers.country import RelatedCountryField
+from reference.models.enums.cycle import Cycle
+from reference.services.belgian_niss_validator import BelgianNISSValidatorService
 
 __all__ = [
     "PersonIdentificationSerializer",
     "IdentificationDTOSerializer",
+    "GeneralIdentificationDTOSerializer",
+    "candidate_has_first_cycle_fwb_experience_with_no_diploma_for_the_enrolment_training",
 ]
-
-from reference.services.belgian_niss_validator import BelgianNISSValidatorService
 
 
 class PersonIdentificationSerializer(serializers.ModelSerializer):
@@ -105,3 +112,30 @@ class IdentificationDTOSerializer(DTOSerializer):
 
     class Meta:
         source = IdentificationDTO
+
+
+def candidate_has_first_cycle_fwb_experience_with_no_diploma_for_the_enrolment_training(admission):
+    qs = EducationalExperienceYear.objects.filter(
+        educational_experience__person_id=admission.candidate_id,
+        academic_year_id=admission.determined_academic_year_id or admission.training.academic_year_id,
+        educational_experience__obtained_diploma=False,
+        educational_experience__institute__community=CommunityEnum.FRENCH_SPEAKING.name,
+        educational_experience__program__cycle=Cycle.FIRST_CYCLE.name,
+    )
+
+    if admission.status not in STATUTS_PROPOSITION_GENERALE_NON_SOUMISE:
+        qs = qs.filter(educational_experience__educational_valuated_experiences__baseadmission_id=admission.uuid)
+
+    return qs.exists()
+
+
+class GeneralIdentificationDTOSerializer(IdentificationDTOSerializer):
+    a_une_experience_fwb_non_diplomee_de_premier_cycle_pour_annee_formation = serializers.SerializerMethodField(
+        method_name='candidate_has_first_cycle_fwb_experience_with_no_diploma_for_the_enrolment_year',
+    )
+
+    @extend_schema_field(OpenApiTypes.BOOL)
+    def candidate_has_first_cycle_fwb_experience_with_no_diploma_for_the_enrolment_year(self, _):
+        return candidate_has_first_cycle_fwb_experience_with_no_diploma_for_the_enrolment_training(
+            admission=self.context['admission']
+        )

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -80,6 +80,7 @@ class GeneralIdentificationViewTestCase(APITestCase):
         self.assertEqual(result['pays_nationalite_europeen'], True)
         self.assertEqual(result['pays_nationalite'], BE_ISO_CODE)
         self.assertEqual(result['pays_residence'], BE_ISO_CODE)
+        self.assertEqual(result['a_une_experience_fwb_non_diplomee_de_premier_cycle_pour_annee_formation'], False)
 
         # Nationality => Not European country (US)
         # Residential country => US

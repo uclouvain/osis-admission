@@ -52,6 +52,7 @@ from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldEquivalenceEtreSpecifiee,
     ShouldFacPeutDonnerDecision,
     ShouldFacPeutSoumettreAuSicLorsDeLaDecisionFacultaire,
+    ShouldInformationsBama15EtreCompletees,
     ShouldInformationsEquivalenceEtreRenseignees,
     ShouldPeutSpecifierInformationsDecisionFacultaire,
     ShouldPropositionEtreInscriptionTardiveAvecConditionAcces,
@@ -736,6 +737,12 @@ class FormationGeneraleInformationsComplementairesValidatorList(TwoStepsMultiple
 
     poste_diplomatique: Optional[PosteDiplomatiqueIdentity]
 
+    experiences_academiques: list[ExperienceAcademiqueDTO]
+    formation: Formation
+    est_concerne_par_le_bama_15: bool | None
+    preuve_bama_15: list[str]
+    annee_formation: int
+
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
@@ -746,6 +753,13 @@ class FormationGeneraleInformationsComplementairesValidatorList(TwoStepsMultiple
                 pays_nationalite_europeen=self.pays_nationalite_europeen,
                 pays_residence=self.pays_residence,
                 poste_diplomatique=self.poste_diplomatique,
+            ),
+            ShouldInformationsBama15EtreCompletees(
+                experiences_academiques=self.experiences_academiques,
+                formation=self.formation,
+                annee_formation=self.annee_formation,
+                est_concerne_par_le_bama_15=self.est_concerne_par_le_bama_15,
+                preuve_bama_15=self.preuve_bama_15,
             ),
         ]
 

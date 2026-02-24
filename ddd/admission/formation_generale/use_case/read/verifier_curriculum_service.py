@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -71,13 +71,19 @@ def verifier_curriculum(
         entity_id=AcademicYearIdentity(year=proposition.annee_calculee or proposition.formation_id.annee)
     )
 
+    curriculum = profil_candidat_translator.get_curriculum(
+        matricule=proposition.matricule_candidat,
+        annee_courante=annee_courante,
+        uuid_proposition=proposition.entity_id.uuid,
+    )
+
     # WHEN
     ProfilCandidat().verifier_curriculum_formation_generale(
         proposition=proposition,
         type_formation=formation.type,
-        profil_candidat_translator=profil_candidat_translator,
         annee_courante=annee_courante,
         annee_formation=annee_formation,
+        curriculum=curriculum,
     )
 
     # THEN

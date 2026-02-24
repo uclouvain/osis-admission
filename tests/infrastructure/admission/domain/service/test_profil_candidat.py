@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+
 from django.test import TestCase
 
 from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import (

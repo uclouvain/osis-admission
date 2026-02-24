@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -163,7 +163,7 @@ class GeneralIdentificationView(APIPermissionRequiredMixin, RetrieveAPIView):
         return get_cached_general_education_admission_perm_obj(self.kwargs['uuid'])
 
     @extend_schema(
-        responses=serializers.IdentificationDTOSerializer,
+        responses=serializers.GeneralIdentificationDTOSerializer,
         operation_id='retrieve_general_identification',
     )
     def get(self, request, *args, **kwargs):
@@ -171,7 +171,10 @@ class GeneralIdentificationView(APIPermissionRequiredMixin, RetrieveAPIView):
         identification_dto = ProfilCandidatTranslator.get_identification(
             matricule=admission.candidate.global_id,
         )
-        serializer = serializers.IdentificationDTOSerializer(instance=identification_dto)
+        serializer = serializers.GeneralIdentificationDTOSerializer(
+            instance=identification_dto,
+            context={'admission': admission},
+        )
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
