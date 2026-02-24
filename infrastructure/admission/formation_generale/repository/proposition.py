@@ -413,6 +413,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'must_provide_student_visa_d': entity.doit_fournir_visa_etudes,
                 'student_visa_d': entity.visa_etudes_d,
                 'signed_enrollment_authorization': entity.certificat_autorisation_signe,
+                'is_concerned_by_bama_15': entity.est_concerne_par_le_bama_15,
+                'bama_15_proof': entity.preuve_bama_15,
             },
         )
 
@@ -764,6 +766,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             doit_fournir_visa_etudes=admission.must_provide_student_visa_d,
             visa_etudes_d=admission.student_visa_d,
             certificat_autorisation_signe=admission.signed_enrollment_authorization,
+            est_concerne_par_le_bama_15=admission.is_concerned_by_bama_15,
+            preuve_bama_15=admission.bama_15_proof,
         )
 
     @classmethod
@@ -932,6 +936,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             visa_etudes_d=admission.student_visa_d,
             certificat_autorisation_signe=admission.signed_enrollment_authorization,
             type=admission.type_demande,
+            est_concerne_par_le_bama_15=admission.is_concerned_by_bama_15,
+            preuve_bama_15=admission.bama_15_proof,
         )
 
     @classmethod

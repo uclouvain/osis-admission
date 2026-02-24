@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -165,6 +165,10 @@ class PropositionDTO(interface.DTO):
     @property
     def est_admission_doctorat(self):
         return self.type_admission == ChoixTypeAdmission.ADMISSION.name
+
+    @property
+    def annee_demande(self):
+        return self.annee_calculee or self.doctorat.annee
 
 
 @attr.dataclass(frozen=True, slots=True)
