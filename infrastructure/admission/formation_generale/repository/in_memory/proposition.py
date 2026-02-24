@@ -388,6 +388,8 @@ class PropositionInMemoryRepository(
             visa_etudes_d=proposition.visa_etudes_d,
             certificat_autorisation_signe=proposition.certificat_autorisation_signe,
             type=proposition.type_demande.name if proposition.type_demande else '',
+            est_concerne_par_le_bama_15=proposition.est_concerne_par_le_bama_15,
+            preuve_bama_15=proposition.preuve_bama_15,
         )
 
     @classmethod

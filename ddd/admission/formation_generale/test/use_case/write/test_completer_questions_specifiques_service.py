@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,17 +25,16 @@
 # ##############################################################################
 from django.test import TestCase
 
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import PosteDiplomatiqueNonTrouveException
 from admission.ddd.admission.formation_generale.commands import (
     CompleterQuestionsSpecifiquesCommand,
 )
-from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
-from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.poste_diplomatique import (
-    PosteDiplomatiqueInMemoryFactory,
-)
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import PosteDiplomatiqueNonTrouveException
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.poste_diplomatique import (
+    PosteDiplomatiqueInMemoryFactory,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
@@ -58,6 +57,8 @@ class TestCompleterQuestionsSpecifiquesService(TestCase):
                 },
                 documents_additionnels=['5453f700-9c1a-4f3e-99b4-20ba6e638299'],
                 poste_diplomatique=1,
+                est_concerne_par_le_bama_15=True,
+                preuve_bama_15=['5453f700-9c1a-4f3e-99b4-20ba6e638297'],
             )
         )
         proposition = self.proposition_repository.get(proposition_id)  # type: Proposition
@@ -74,6 +75,8 @@ class TestCompleterQuestionsSpecifiquesService(TestCase):
         )
         self.assertEqual(proposition.documents_additionnels, ['5453f700-9c1a-4f3e-99b4-20ba6e638299'])
         self.assertEqual(proposition.poste_diplomatique.code, 1)
+        self.assertEqual(proposition.est_concerne_par_le_bama_15, True)
+        self.assertEqual(proposition.preuve_bama_15, ['5453f700-9c1a-4f3e-99b4-20ba6e638297'])
 
     def test_should_lever_exception_si_proposition_non_trouvee(self):
         with self.assertRaises(PropositionNonTrouveeException):

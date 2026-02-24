@@ -280,6 +280,9 @@ class Proposition(interface.RootEntity):
     etat_equivalence_titre_acces: Optional[EtatEquivalenceTitreAcces] = None
     date_prise_effet_equivalence_titre_acces: Optional[datetime.date] = None
 
+    est_concerne_par_le_bama_15: Optional[bool] = None
+    preuve_bama_15: List[str] = attr.Factory(list)
+
     @property
     def premiere_annee_de_bachelier(self) -> bool:
         return bool(self.poursuite_de_cycle_a_specifier and self.poursuite_de_cycle != PoursuiteDeCycle.YES)
@@ -827,11 +830,15 @@ class Proposition(interface.RootEntity):
         reponses_questions_specifiques: Dict,
         documents_additionnels: List[str],
         poste_diplomatique: Optional[PosteDiplomatiqueIdentity],
+        est_concerne_par_le_bama_15: Optional[bool],
+        preuve_bama_15: List[str],
     ):
         self.auteur_derniere_modification = self.matricule_candidat
         self.reponses_questions_specifiques = reponses_questions_specifiques
         self.documents_additionnels = documents_additionnels
         self.poste_diplomatique = poste_diplomatique
+        self.est_concerne_par_le_bama_15 = est_concerne_par_le_bama_15
+        self.preuve_bama_15 = preuve_bama_15
 
     def completer_informations_complementaires_par_gestionnaire(
         self,
@@ -839,6 +846,8 @@ class Proposition(interface.RootEntity):
         reponses_questions_specifiques: Dict,
         documents_additionnels: List[str],
         poste_diplomatique: Optional[PosteDiplomatiqueIdentity],
+        est_concerne_par_le_bama_15: Optional[bool],
+        preuve_bama_15: List[str],
         est_bachelier_belge: Optional[bool],
         est_reorientation_inscription_externe: Optional[bool],
         attestation_inscription_reguliere: List[str],
@@ -853,6 +862,9 @@ class Proposition(interface.RootEntity):
         self.documents_additionnels = documents_additionnels
 
         self.poste_diplomatique = poste_diplomatique
+
+        self.est_concerne_par_le_bama_15 = est_concerne_par_le_bama_15
+        self.preuve_bama_15 = preuve_bama_15
 
         self.est_non_resident_au_sens_decret = est_non_resident_au_sens_decret
         self.est_bachelier_belge = est_bachelier_belge

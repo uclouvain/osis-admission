@@ -263,6 +263,9 @@ class CompleterQuestionsSpecifiquesCommand(interface.CommandRequest):
     documents_additionnels: List[str] = attr.Factory(list)
     poste_diplomatique: Optional[int] = None
 
+    est_concerne_par_le_bama_15: Optional[bool] = None
+    preuve_bama_15: List[str] = attr.Factory(list)
+
 
 @attr.dataclass(frozen=True, slots=True)
 class CompleterQuestionsSpecifiquesParGestionnaireCommand(interface.CommandRequest):
@@ -273,6 +276,9 @@ class CompleterQuestionsSpecifiquesParGestionnaireCommand(interface.CommandReque
     documents_additionnels: List[str] = attr.Factory(list)
 
     poste_diplomatique: Optional[int] = None
+
+    est_concerne_par_le_bama_15: Optional[bool] = None
+    preuve_bama_15: List[str] = attr.Factory(list)
 
     est_bachelier_belge: Optional[bool] = None
     est_reorientation_inscription_externe: Optional[bool] = None
