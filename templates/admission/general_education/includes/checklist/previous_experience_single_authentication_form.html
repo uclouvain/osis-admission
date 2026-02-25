@@ -41,6 +41,7 @@
       hx-target="closest div"
       class="authentication-form"
       data-default-state-value="{{ authentication_form.state.value }}"
+      autocomplete="off"
     >
       {% csrf_token %}
       {% bootstrap_form_errors authentication_form %}

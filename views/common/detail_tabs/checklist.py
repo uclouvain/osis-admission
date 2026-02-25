@@ -238,7 +238,7 @@ class ChecklistTabIcon:
 class FraudsterCheckView(AdmissionViewMixin, HtmxPermissionRequiredMixin, TemplateView):
     urlpatterns = {'fraudster-check': 'fraudster-check'}
     template_name = 'admission/details/includes/checklist/fraud_ares_status.html'
-    permission_required = 'admission.change_checklist'
+    permission_required = 'admission.view_checklist'
     http_method_names = ['post']
 
     WEBSERVICE_UNAVAILABLE_CACHE_KEY = 'admission-checklist-fraudster-webservice-unavailable'
