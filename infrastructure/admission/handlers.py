@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -38,6 +38,9 @@ from admission.ddd.admission.shared_kernel.use_case.write import (
 )
 from admission.infrastructure.admission.shared_kernel.domain.service.lister_toutes_demandes import (
     ListerToutesDemandes,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.modifier_checklist_experience_parcours_anterieur import (
+    ValidationExperienceParcoursAnterieurService,
 )
 from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import (
     ProfilCandidatTranslator,
@@ -95,6 +98,30 @@ COMMAND_HANDLERS = {
     RechercherFormationsGereesQuery: lambda msg_bus, cmd: rechercher_formations_gerees(
         cmd,
         repository=GestionnaireRepository(),
+    ),
+    RecupererInformationsValidationExperienceAcademiqueQuery: (
+        lambda msg_bus, cmd: recuperer_informations_validation_experience_academique(
+            cmd,
+            validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
+        )
+    ),
+    RecupererInformationsValidationExperienceNonAcademiqueQuery: (
+        lambda msg_bus, cmd: recuperer_informations_validation_experience_non_academique(
+            cmd,
+            validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
+        )
+    ),
+    RecupererInformationsValidationEtudesSecondairesQuery: (
+        lambda msg_bus, cmd: recuperer_informations_validation_etudes_secondaires(
+            cmd,
+            validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
+        )
+    ),
+    RecupererInformationsValidationExamenQuery: (
+        lambda msg_bus, cmd: recuperer_informations_validation_examen(
+            cmd,
+            validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
+        )
     ),
 }
 

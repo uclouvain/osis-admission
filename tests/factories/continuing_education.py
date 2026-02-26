@@ -158,12 +158,10 @@ class ContinuingEducationAdmissionFactory(factory.django.DjangoModelFactory):
 def get_checklist():
     default_content = {
         'libelle': '',
-        'enfants': [],
         'extra': {},
         'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
     }
     return {
         'fiche_etudiant': default_content,
         'decision': default_content,
-        'donnees_personnelles': default_content,
     }

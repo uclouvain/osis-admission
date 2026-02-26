@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -48,11 +48,11 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     OngletsDemande,
 )
 from admission.models import GeneralEducationAdmission
+from admission.models.exam import AdmissionExam
 from admission.models.valuated_epxeriences import (
     AdmissionEducationalValuatedExperiences,
     AdmissionProfessionalValuatedExperiences,
 )
-from admission.models.exam import AdmissionExam
 from admission.tests.factories.curriculum import (
     EducationalExperienceFactory,
     EducationalExperienceYearFactory,
@@ -91,6 +91,7 @@ from osis_profile import BE_ISO_CODE
 from osis_profile.models.enums.curriculum import Result
 from osis_profile.models.enums.education import ForeignDiplomaTypes
 from osis_profile.tests.factories.exam import ExamFactory
+from osis_profile.tests.factories.high_school_diploma import HighSchoolDiplomaFactory
 from reference.tests.factories.diploma_title import DiplomaTitleFactory
 
 
@@ -493,9 +494,11 @@ class GetAccessTitlesViewTestCase(TestCase):
         high_school_diploma_alternative.delete()
 
         # The candidate specified that he has a secondary education but without more information
-        general_admission.candidate.graduated_from_high_school = GotDiploma.YES.name
-        general_admission.candidate.graduated_from_high_school_year = general_admission.training.academic_year
-        general_admission.candidate.save()
+        high_school_diploma = HighSchoolDiplomaFactory(
+            person=general_admission.candidate,
+            got_diploma=GotDiploma.YES.name,
+            academic_graduation_year=general_admission.training.academic_year,
+        )
 
         access_titles = message_bus_instance.invoke(
             RecupererTitresAccesSelectionnablesPropositionQuery(
@@ -510,11 +513,13 @@ class GetAccessTitlesViewTestCase(TestCase):
         current_access_title = access_titles[OngletsDemande.ETUDES_SECONDAIRES.name]
 
         self.assertEqual(current_access_title.type_titre, TypeTitreAccesSelectionnable.ETUDES_SECONDAIRES.name)
-        self.assertEqual(current_access_title.annee, general_admission.candidate.graduated_from_high_school_year.year)
+        self.assertEqual(
+            current_access_title.annee, general_admission.candidate.highschooldiploma.academic_graduation_year.year
+        )
         self.assertEqual(current_access_title.selectionne, True)
 
-        general_admission.candidate.graduated_from_high_school = GotDiploma.THIS_YEAR.name
-        general_admission.candidate.save()
+        high_school_diploma.got_diploma = GotDiploma.THIS_YEAR.name
+        high_school_diploma.save()
 
         access_titles = message_bus_instance.invoke(
             RecupererTitresAccesSelectionnablesPropositionQuery(
@@ -529,13 +534,13 @@ class GetAccessTitlesViewTestCase(TestCase):
         current_access_title = access_titles[OngletsDemande.ETUDES_SECONDAIRES.name]
 
         self.assertEqual(current_access_title.type_titre, TypeTitreAccesSelectionnable.ETUDES_SECONDAIRES.name)
-        self.assertEqual(current_access_title.annee, general_admission.candidate.graduated_from_high_school_year.year)
+        self.assertEqual(current_access_title.annee, high_school_diploma.academic_graduation_year.year)
         self.assertEqual(current_access_title.selectionne, True)
 
         # The candidate specified that he had no secondary education
-        general_admission.candidate.graduated_from_high_school = GotDiploma.NO.name
-        general_admission.candidate.graduated_from_high_school_year = None
-        general_admission.candidate.save()
+        high_school_diploma.got_diploma = GotDiploma.NO.name
+        high_school_diploma.academic_graduation_year = None
+        high_school_diploma.save()
 
         access_titles = message_bus_instance.invoke(
             RecupererTitresAccesSelectionnablesPropositionQuery(
@@ -618,7 +623,7 @@ class GetAccessTitlesViewTestCase(TestCase):
             sigle_formation="SF1",
         )
         pce_a_uuid = str(UUID(int=pce_a.pk))
-        pce_a_pae_a = InscriptionProgrammeAnnuelFactory(
+        InscriptionProgrammeAnnuelFactory(
             programme_cycle=pce_a,
             statut=StatutInscriptionProgrammAnnuel.ETUDIANT_UCL.name,
             etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
@@ -655,15 +660,15 @@ class GetAccessTitlesViewTestCase(TestCase):
             decision='',
             sigle_formation="SF3",
         )
-        pce_c_uuid = str(UUID(int=pce_c.pk))
-        pce_c_pae_a = InscriptionProgrammeAnnuelFactory(
+        str(UUID(int=pce_c.pk))
+        InscriptionProgrammeAnnuelFactory(
             programme_cycle=pce_c,
             statut='',
             etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
             programme__root_group__academic_year=self.academic_years[0],
             type_duree=TypeDuree.NORMAL.name,
         )
-        pce_c_pae_b = InscriptionProgrammeAnnuelFactory(
+        InscriptionProgrammeAnnuelFactory(
             programme_cycle=pce_c,
             statut=StatutInscriptionProgrammAnnuel.INTERUNIVERSITAIRE.name,
             etat_inscription=EtatInscriptionFormation.FIN_DE_CYCLE.name,
@@ -678,7 +683,7 @@ class GetAccessTitlesViewTestCase(TestCase):
             sigle_formation="SF4",
         )
         pce_d_uuid = str(UUID(int=pce_d.pk))
-        pce_d_pae_a = InscriptionProgrammeAnnuelFactory(
+        InscriptionProgrammeAnnuelFactory(
             programme_cycle=pce_d,
             statut='',
             etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
@@ -693,7 +698,7 @@ class GetAccessTitlesViewTestCase(TestCase):
             sigle_formation="SF5",
         )
         pce_e_uuid = str(UUID(int=pce_e.pk))
-        pce_e_pae_a = InscriptionProgrammeAnnuelFactory(
+        InscriptionProgrammeAnnuelFactory(
             programme_cycle=pce_e,
             statut='',
             etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
@@ -708,8 +713,8 @@ class GetAccessTitlesViewTestCase(TestCase):
             decision='',
             sigle_formation="SF6",
         )
-        pce_f_uuid = str(UUID(int=pce_f.pk))
-        pce_f_pae_a = InscriptionProgrammeAnnuelFactory(
+        str(UUID(int=pce_f.pk))
+        InscriptionProgrammeAnnuelFactory(
             programme_cycle=pce_f,
             statut='',
             etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,

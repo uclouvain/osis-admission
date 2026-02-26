@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -130,7 +130,7 @@
         </div>
       {% endwith %}
 
-      {% with initial=original_admission.checklist.initial.donnees_personnelles current=original_admission.checklist.current.donnees_personnelles next_url=next_base_url|add:'donnees_personnelles' %}
+      {% with next_url=next_base_url|add:'donnees_personnelles' %}
         <div role="tabpanel" class="tab-pane" id="donnees_personnelles">
           {% has_perm 'admission.merge_candidate_with_known_person' as can_merge_candidate %}
           {% has_perm 'admission.double_check_decision_informations_signaletique' as can_give_decision_double_check %}
@@ -319,11 +319,11 @@
           {% include 'admission/general_education/includes/checklist/previous_experiences_prevent_to_choose_success_modal.html' %}
         </div>
 
-        {% for child in current.enfants %}
-          <div role="tabpanel" class="tab-pane single-past-experience-container" id="parcours_anterieur__{{ child.extra.identifiant }}">
-            {% with experience=experiences_by_uuid|get_item:child.extra.identifiant %}
+        {% for experience_uuid, experience in experiences_by_uuid.items %}
+          {% concat 'parcours_anterieur__' experience_uuid as checklist_tab_name %}
+          <div role="tabpanel" class="tab-pane single-past-experience-container" id="{{ checklist_tab_name }}">
               {% if experience.valorisee_par_admissions != None and view.kwargs.uuid not in experience.valorisee_par_admissions %}
-                {% with last_valuated_admission_by_experience_uuid|get_item:child.extra.identifiant as last_valuated_admission %}
+                {% with last_valuated_admission_by_experience_uuid|get_item:experience_uuid as last_valuated_admission %}
                   <div class="flex-content alert alert-warning">
                     <p>
                       {% if last_valuated_admission %}
@@ -340,7 +340,7 @@
                     </p>
                     {% experience_valuation_url experience=experience as valuate_experience_url %}
                     {% if can_update_curriculum and valuate_experience_url %}
-                      {% concat 'valuate-experience-modal-single-' child.extra.identifiant as valuate_modal_id %}
+                      {% concat 'valuate-experience-modal-single-' experience_uuid as valuate_modal_id %}
                       <button
                         class="btn btn-warning"
                         data-toggle="modal"
@@ -358,12 +358,15 @@
                   {% experience_details_template resume_proposition=resume_proposition experience=experience with_edit_link_button=False specific_questions=specific_questions_by_tab %}
                 </div>
               {% else %}
-                {% include 'admission/general_education/includes/checklist/previous_experience_single.html' with current=child authentication_form=authentication_forms|get_item_or_none:child.extra.identifiant experience_authentication_history_entry=all_experience_authentication_history_entries|get_item_or_none:child.extra.identifiant experience_type=experience.type_experience %}
+                {% if experience.uuid %}
+                  {% include 'admission/general_education/includes/checklist/previous_experience_single.html' with experience=experience authentication_form=authentication_forms|get_item_or_none:experience_uuid experience_authentication_history_entry=all_experience_authentication_history_entries|get_item_or_none:experience_uuid %}
+                {% else %}
+                  {% include 'admission/general_education/includes/checklist/previous_experience_single_non_existent.html' with experience=experience %}
+                {% endif %}
                 <div>
                   {% experience_details_template resume_proposition=resume_proposition experience=experience with_edit_link_button=True specific_questions=specific_questions_by_tab %}
                 </div>
               {% endif %}
-            {% endwith %}
           </div>
         {% endfor %}
 
@@ -438,22 +441,16 @@
         {% include "admission/general_education/includes/checklist/sic_decision_approval_final_modal.html" %}
         {% include "admission/general_education/includes/checklist/sic_decision_delegate_vrae_dispensation_modal.html" %}
 
+        {% if autres_demandes %}
         <div class="info-part">
-          {% include 'admission/general_education/includes/checklist/sic_decision_sic_fraud_status.html' %}
           <dl>
-            <dt>{% trans "Fraudster status from ARES" %}</dt>
-            <dd class="mb-15">
-              Not implemented yet.
-            </dd>
-
-            {% if autres_demandes %}
               <dt>{% trans "Other demand(s) by the candidate." %}</dt>
               <dd>
                 {% include 'admission/includes/lite_admission_list.html' with with_title=True %}
               </dd>
-            {% endif %}
           </dl>
         </div>
+        {% endif %}
 
       </div>
 
@@ -1067,6 +1064,19 @@
           // Update computed rule on financabilite tab show
           $('#list-group-link-financabilite').on('show.bs.tab', function() {
               htmx.trigger('#financabilite-computed-rule', 'financabiliteComputeRule');
+          });
+
+          // Update ares result
+          $('#list-group-link-donnees_personnelles').on('show.bs.tab', function() {
+            if (document.getElementById('ares-fraudster-result-donnees_personnelles') !== null) {
+              htmx.trigger('#ares-fraudster-result-donnees_personnelles', 'fraudAresResult');
+            }
+          });
+
+          $('#list-group-link-decision_sic').on('show.bs.tab', function() {
+              if (document.getElementById('ares-fraudster-result-decision_sic') !== null) {
+                htmx.trigger('#ares-fraudster-result-decision_sic', 'fraudAresResult');
+              }
           });
 
           // Pass the ckeditor data to the form data if necessary

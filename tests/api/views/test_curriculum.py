@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -75,7 +75,12 @@ from osis_profile.models.enums.curriculum import (
     Result,
     TranscriptType,
 )
+from osis_profile.models.enums.experience_validation import (
+    ChoixStatutValidationExperience,
+    EtatAuthentificationParcours,
+)
 from osis_profile.tests.factories.exam import FirstCycleExamFactory
+from osis_profile.tests.factories.high_school_diploma import HighSchoolDiplomaFactory
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.diploma_title import DiplomaTitleFactory
 from reference.tests.factories.language import LanguageFactory
@@ -183,8 +188,6 @@ class BaseCurriculumTestCase:
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        self.user.person.graduated_from_high_school = ''
-        self.user.person.graduated_from_high_school_year = None
         self.user.person.last_registration_year = None
         self.user.person.save()
 
@@ -392,9 +395,9 @@ class AdmissionBaseCurriculumTestCase(BaseCurriculumTestCase):
         create_educational_experiences(person=self.user.person, country=self.country)
         create_professional_experiences(person=self.user.person)
 
-        self.user.person.graduated_from_high_school = GotDiploma.YES.name
-        self.user.person.graduated_from_high_school_year = self.academic_year_2018
-        self.user.person.save()
+        self.user.person.highschooldiploma.got_diploma = GotDiploma.YES.name
+        self.user.person.highschooldiploma.academic_graduation_year = self.academic_year_2018
+        self.user.person.highschooldiploma.save()
 
         response = self.client.get(self.url)
 
@@ -931,9 +934,11 @@ class PersonCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
         create_educational_experiences(person=self.user.person, country=self.country)
         create_professional_experiences(person=self.user.person)
 
-        self.user.person.graduated_from_high_school = GotDiploma.YES.name
-        self.user.person.graduated_from_high_school_year = self.academic_year_2018
-        self.user.person.save()
+        HighSchoolDiplomaFactory(
+            person=self.user.person,
+            got_diploma=GotDiploma.YES.name,
+            academic_graduation_year=self.academic_year_2018,
+        )
 
         response = self.client.get(self.url)
 
@@ -1008,6 +1013,8 @@ class ProfessionalExperienceTestCase(APITestCase):
             role='Librarian',
             sector=ActivitySector.PUBLIC.name,
             activity='Work - activity',
+            validation_status=ChoixStatutValidationExperience.A_TRAITER.name,
+            authentication_status=EtatAuthentificationParcours.VRAI.name,
         )
 
         self.admission_details_url = resolve_url(
@@ -1141,6 +1148,8 @@ class ProfessionalExperienceTestCase(APITestCase):
         self.assertEqual(experience.sector, ActivitySector.PRIVATE.name)
         self.assertEqual(experience.activity, 'Volunteering - activity')
         self.assertEqual(experience.external_id, None)
+        self.assertEqual(experience.validation_status, ChoixStatutValidationExperience.EN_BROUILLON.name)
+        self.assertEqual(experience.authentication_status, EtatAuthentificationParcours.NON_CONCERNE.name)
 
         self.admission.refresh_from_db()
         self.assertEqual(self.admission.modified_at, self.today_datetime)
@@ -1203,6 +1212,8 @@ class ProfessionalExperienceTestCase(APITestCase):
         )
 
         self.assertEqual(experience.sector, ActivitySector.PRIVATE.name)
+        self.assertEqual(experience.validation_status, ChoixStatutValidationExperience.A_TRAITER.name)
+        self.assertEqual(experience.authentication_status, EtatAuthentificationParcours.VRAI.name)
 
     def test_put_professional_experience_with_general_admission(self):
         self.client.force_authenticate(user=self.user)
@@ -1467,6 +1478,8 @@ class EducationalExperienceTestCase(APITestCase):
             dissertation_title='Title',
             dissertation_score='15/20',
             dissertation_summary=[],
+            validation_status=ChoixStatutValidationExperience.A_TRAITER.name,
+            authentication_status=EtatAuthentificationParcours.VRAI.name,
         )
 
         EducationalExperienceYearFactory(
@@ -1690,6 +1703,8 @@ class EducationalExperienceTestCase(APITestCase):
         self.assertEqual(experience.dissertation_title, 'Title')
         self.assertEqual(experience.dissertation_score, '15/20')
         self.assertEqual(experience.dissertation_summary, [])
+        self.assertEqual(experience.validation_status, ChoixStatutValidationExperience.EN_BROUILLON.name)
+        self.assertEqual(experience.authentication_status, EtatAuthentificationParcours.NON_CONCERNE.name)
 
         first_educational_experience_year = EducationalExperienceYear.objects.filter(
             educational_experience=experience
@@ -1790,6 +1805,8 @@ class EducationalExperienceTestCase(APITestCase):
         )
 
         self.assertEqual(experience.obtained_grade, Grade.GREATER_DISTINCTION.name)
+        self.assertEqual(experience.validation_status, ChoixStatutValidationExperience.A_TRAITER.name)
+        self.assertEqual(experience.authentication_status, EtatAuthentificationParcours.VRAI.name)
 
         educational_experience_years = EducationalExperienceYear.objects.filter(educational_experience=experience)
 

@@ -1,0 +1,60 @@
+{% load dictionary admission %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+<div
+  class="btn-group"
+  role="group"
+  {% if tooltip %}
+  title="{{ tooltip }}"
+  data-toggle="tooltip"
+  data-placement="bottom"
+  data-container="body"
+  {% endif %}
+>
+  <button
+      autocomplete = "off"
+      id="{{ tab }}-{{ status_configuration.identifiant }}"
+      type="button"
+      class="checklist-state-button btn btn-default {% if selected_status_configuration == status_configuration %}btn-{{ class }} active{% endif %}"
+      data-status="{{ status_configuration.statut.name }}"
+      data-class="btn-{{ class }}"
+      data-icon="{{ icon }}"
+      {% if disabled or selected_status_configuration == status_configuration %}disabled="disabled"{% endif %}
+      value="{{ status_configuration.identifiant }}"
+      name="status"
+      {% if open_modal %}
+      data-toggle="modal"
+      data-target="{{ open_modal }}"
+      data-backdrop="static"
+      data-keyboard="false"
+      {% elif htmx_post %}
+        hx-post="{{ htmx_post }}"
+      {% endif %}
+  >
+    <i class="fas fa-{{ icon }}"></i>
+    {{ status_configuration.libelle }}
+  </button>
+</div>
