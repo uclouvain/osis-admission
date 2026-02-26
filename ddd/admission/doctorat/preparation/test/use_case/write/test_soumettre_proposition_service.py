@@ -35,7 +35,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
 from admission.ddd.admission.doctorat.preparation.test.factory.proposition import (
     PropositionAdmissionSC3DPConfirmeeFactory,
 )
-from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.groupe_de_supervision import (
     GroupeDeSupervisionInMemoryRepository,
 )
@@ -45,12 +44,26 @@ from admission.infrastructure.admission.doctorat.preparation.repository.in_memor
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.elements_confirmation import (
     ElementsConfirmationInMemory,
 )
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
+    ProfilCandidatInMemoryTranslator,
+)
+from admission.infrastructure.message_bus_in_memory import (
+    message_bus_in_memory_instance,
+)
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.dtos.financabilite import FinancabiliteDTO
-from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
-from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
+    AcademicYear,
+    AcademicYearIdentity,
+)
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import (
+    AcademicYearInMemoryRepository,
+)
+from osis_profile.models.enums.experience_validation import (
+    ChoixStatutValidationExperience,
+    EtatAuthentificationParcours,
+)
 
 
 @freezegun.freeze_time('2020-11-01')
@@ -74,6 +87,7 @@ class TestVerifierPropositionServiceCommun(TestCase):
         self.message_bus = message_bus_in_memory_instance
 
         self.academic_year_repository = AcademicYearInMemoryRepository()
+        self.profil_candidat_translator = ProfilCandidatInMemoryTranslator()
 
         for annee in range(2016, 2021):
             self.academic_year_repository.save(
@@ -109,10 +123,6 @@ class TestVerifierPropositionServiceCommun(TestCase):
 
         # Check the checklist values
         self.assertEqual(
-            updated_proposition.checklist_initiale.donnees_personnelles.statut,
-            ChoixStatutChecklist.INITIAL_CANDIDAT,
-        )
-        self.assertEqual(
             updated_proposition.checklist_initiale.assimilation.statut,
             ChoixStatutChecklist.INITIAL_NON_CONCERNE,
         )
@@ -120,31 +130,55 @@ class TestVerifierPropositionServiceCommun(TestCase):
             updated_proposition.checklist_initiale.parcours_anterieur.statut,
             ChoixStatutChecklist.INITIAL_CANDIDAT,
         )
+
+        experiences_academiques = [
+            xp
+            for xp in self.profil_candidat_translator.experiences_academiques
+            if xp.personne == self.proposition.matricule_candidat
+        ]
+        experiences_non_academiques = [
+            xp
+            for xp in self.profil_candidat_translator.experiences_non_academiques
+            if xp.personne == self.proposition.matricule_candidat
+        ]
+
+        self.assertEqual(len(experiences_academiques), 2)
+        self.assertEqual(len(experiences_non_academiques), 2)
+
         self.assertEqual(
-            len(updated_proposition.checklist_initiale.parcours_anterieur.enfants),
-            4,
+            experiences_academiques[0].statut_validation,
+            ChoixStatutValidationExperience.A_TRAITER.name,
+        )
+        self.assertEqual(
+            experiences_academiques[0].statut_authentification,
+            EtatAuthentificationParcours.NON_CONCERNE.name,
         )
 
-        experience_ids = []
-        for experience_checklist in updated_proposition.checklist_initiale.parcours_anterieur.enfants:
-            self.assertEqual(experience_checklist.statut, ChoixStatutChecklist.INITIAL_CANDIDAT)
-            self.assertEqual(
-                experience_checklist.extra,
-                {
-                    'identifiant': mock.ANY,
-                    'etat_authentification': EtatAuthentificationParcours.NON_CONCERNE.name,
-                },
-            )
-            experience_ids.append(experience_checklist.extra['identifiant'])
+        self.assertEqual(
+            experiences_academiques[1].statut_validation,
+            ChoixStatutValidationExperience.A_TRAITER.name,
+        )
+        self.assertEqual(
+            experiences_academiques[1].statut_authentification,
+            EtatAuthentificationParcours.NON_CONCERNE.name,
+        )
 
-        self.assertCountEqual(
-            experience_ids,
-            [
-                '0cbdf4db-2454-4cbf-9e48-55d2a9881ee1',
-                '9cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
-                '9cbdf4db-2454-4cbf-9e48-55d2a9881ee1',
-                '0cbdf4db-2454-4cbf-9e48-55d2a9881ee2',
-            ],
+        self.assertEqual(
+            experiences_non_academiques[0].statut_validation,
+            ChoixStatutValidationExperience.A_TRAITER.name,
+        )
+        self.assertEqual(
+            experiences_non_academiques[0].statut_authentification,
+            EtatAuthentificationParcours.NON_CONCERNE.name,
+        )
+
+        self.assertEqual(
+            experiences_non_academiques[1].statut_validation,
+            ChoixStatutValidationExperience.A_TRAITER.name,
+        )
+        self.assertEqual(
+            experiences_non_academiques[1].statut_authentification,
+            EtatAuthentificationParcours.NON_CONCERNE.name,
         )
 
         self.assertEqual(

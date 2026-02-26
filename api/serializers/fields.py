@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@ from rest_framework import serializers
 
 from base.models.entity_version import EntityVersion
 from base.models.enums.entity_type import INSTITUTE
+from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
 
 
 class TranslatedField(serializers.SerializerMethodField):
@@ -81,6 +82,12 @@ AnswerToSpecificQuestionField = partial(
     serializers.JSONField,
     encoder=DjangoJSONEncoder,
     default=dict,
+)
+
+
+ExperienceDefaultValidationStatusField = partial(
+    serializers.HiddenField,
+    default=serializers.CreateOnlyDefault(ChoixStatutValidationExperience.EN_BROUILLON.name),
 )
 
 

@@ -142,8 +142,8 @@ msgid ""
 msgstr ""
 
 msgid ""
-"<strong>Warning</strong> the candidate is reported as a <strong>fraudster</"
-"strong>"
+"<strong>Warning</strong> the candidate is reported as <strong>fraudster</"
+"strong> by the ARES"
 msgstr ""
 
 #, python-format
@@ -1459,10 +1459,6 @@ msgstr ""
 msgid "Claim cancelled on"
 msgstr ""
 
-msgid "Cleaned"
-msgstr ""
-
-msgctxt "plural"
 msgid "Cleaned"
 msgstr ""
 
@@ -2849,9 +2845,6 @@ msgstr ""
 msgid "Faculty process"
 msgstr ""
 
-msgid "False"
-msgstr ""
-
 msgid "Feedback from Fac"
 msgstr ""
 
@@ -3032,6 +3025,11 @@ msgid ""
 "showing that you have been awarded the scholarship on the dates indicated."
 msgstr ""
 
+msgid ""
+"For some reason, the experience isn't yet initialized. However, this is "
+"required to edit its status, its comments, etc."
+msgstr ""
+
 msgid "For the CDD Chair:"
 msgstr ""
 
@@ -3082,9 +3080,6 @@ msgid "Former UCLouvain student"
 msgstr ""
 
 msgid "Fraudster"
-msgstr ""
-
-msgid "Fraudster (ARES)"
 msgstr ""
 
 msgid "Fraudster status from ARES"
@@ -3791,9 +3786,6 @@ msgid "Institution"
 msgstr ""
 
 msgid "Institution Federation Wallonie-Bruxelles"
-msgstr ""
-
-msgid "Institution contacted"
 msgstr ""
 
 msgid "Institution in which the PhD thesis has been realised / started"
@@ -4648,9 +4640,6 @@ msgid "Not financeable - %(rule)s (Established by %(established_by)s)"
 msgstr ""
 
 msgid "Not free"
-msgstr ""
-
-msgid "Not fundable"
 msgstr ""
 
 msgctxt "dashboard-indicator admission"
@@ -5628,6 +5617,9 @@ msgstr ""
 msgid "Requested on"
 msgstr ""
 
+msgid "Requesting fraud status from the ARES"
+msgstr ""
+
 #, python-format
 msgid "Require changes for \"%(object)s\""
 msgstr ""
@@ -5903,6 +5895,11 @@ msgid "Send to faculty"
 msgstr ""
 
 msgid "Sender"
+msgstr ""
+
+msgid ""
+"Sending the authorization is impossible while the personal data are in the "
+"\"Fraudster\" status."
 msgstr ""
 
 msgid "Sent to EPC"
@@ -6574,6 +6571,9 @@ msgstr ""
 msgid "The element has not been found."
 msgstr ""
 
+msgid "The experience has been initialized"
+msgstr ""
+
 msgid "The experience has been valuated."
 msgstr ""
 
@@ -7014,9 +7014,6 @@ msgid ""
 "uclouvain.be/en/logement</a>."
 msgstr ""
 
-msgid "This experience can't be validated if mandatory information is missing."
-msgstr ""
-
 msgid "This experience cannot be updated as it has already been valuated."
 msgstr ""
 
@@ -7186,9 +7183,6 @@ msgstr ""
 msgid "Trigger the payment hook"
 msgstr ""
 
-msgid "True"
-msgstr ""
-
 msgid "Tuition fees amount"
 msgstr ""
 
@@ -7246,6 +7240,9 @@ msgstr ""
 msgid "UUID"
 msgstr ""
 
+msgid "Unable to get fraud status from the ARES at the moment"
+msgstr ""
+
 msgid "Unavailable"
 msgstr ""
 
@@ -7260,6 +7257,9 @@ msgid "Unknown"
 msgstr ""
 
 msgid "Unknown PDF type."
+msgstr ""
+
+msgid "Unknown author"
 msgstr ""
 
 msgid "Unknown citizenship"
@@ -7322,10 +7322,6 @@ msgid "Validated"
 msgstr ""
 
 msgctxt "decision-checklist"
-msgid "Validated"
-msgstr ""
-
-msgctxt "plural"
 msgid "Validated"
 msgstr ""
 
@@ -7644,6 +7640,24 @@ msgid ""
 "(supporting documents, proof of language level, etc.)."
 msgstr ""
 
+#, python-format
+msgid ""
+"You can do it automatically by clicking <button type=\"submit\" class=\"btn-"
+"link p-0 no-border\">here</button> or manually through the <a "
+"href=\"%(edit_experience_url)s\">edit form</a>."
+msgstr ""
+
+msgid ""
+"You can do it automatically by clicking <button type=\"submit\" class=\"btn-"
+"link p-0 no-border\">here</button>."
+msgstr ""
+
+#, python-format
+msgid ""
+"You can do it manually through the <a href=\"%(edit_experience_url)s\">edit "
+"form</a>."
+msgstr ""
+
 msgid ""
 "You can find more information on the French Community webpage <a "
 "href=\"https://equisup.cfwb.be/\" target=\"_blank\">https://equisup.cfwb.be/"
@@ -7950,6 +7964,9 @@ msgid "academic year"
 msgstr ""
 
 msgid "actions"
+msgstr ""
+
+msgid "an unknown author"
 msgstr ""
 
 msgid "approval"

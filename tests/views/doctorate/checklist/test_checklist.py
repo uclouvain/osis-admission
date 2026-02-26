@@ -151,12 +151,7 @@ class ChecklistViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-        past_experiences = [
-            experience['extra']['identifiant']
-            for experience in response.context['original_admission'].checklist['current']['parcours_anterieur'][
-                'enfants'
-            ]
-        ]
+        past_experiences = response.context['experiences_by_uuid']
 
         documents = response.context['documents']
 
@@ -189,12 +184,7 @@ class ChecklistViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-        past_experiences = [
-            experience['extra']['identifiant']
-            for experience in response.context['original_admission'].checklist['current']['parcours_anterieur'][
-                'enfants'
-            ]
-        ]
+        past_experiences = response.context['experiences_by_uuid']
 
         documents = response.context['documents']
 
@@ -243,12 +233,7 @@ class ChecklistViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-        past_experiences = [
-            experience['extra']['identifiant']
-            for experience in response.context['original_admission'].checklist['current']['parcours_anterieur'][
-                'enfants'
-            ]
-        ]
+        past_experiences = response.context['experiences_by_uuid']
 
         documents = response.context['documents']
 

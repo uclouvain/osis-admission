@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -47,21 +47,18 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
-from admission.ddd.admission.formation_generale.domain.service.checklist import (
-    Checklist,
-)
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     OngletsDemande,
 )
 from admission.models import DoctorateAdmission
 from admission.models import EPCInjection as AdmissionEPCInjection
-from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences
 from admission.models.continuing_education import ContinuingEducationAdmission
 from admission.models.epc_injection import (
     EPCInjectionStatus as AdmissionEPCInjectionStatus,
 )
 from admission.models.epc_injection import EPCInjectionType
 from admission.models.general_education import GeneralEducationAdmission
+from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import (
     ContinuingEducationAdmissionFactory,
@@ -115,7 +112,6 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
             training__academic_year=cls.academic_years[0],
             candidate__language=settings.LANGUAGE_CODE_EN,
             candidate__country_of_citizenship=CountryFactory(european_union=False),
-            candidate__graduated_from_high_school_year=None,
             candidate__last_registration_year=None,
             candidate__id_photo=[],
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
@@ -204,7 +200,9 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
         )
 
         # Mock osis document api
-        patcher = mock.patch("osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value)
+        patcher = mock.patch(
+            "osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
@@ -263,7 +261,7 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
         # The experience has been injected from another admission
         other_admission = GeneralEducationAdmissionFactory(candidate=self.general_admission.candidate)
 
-        other_admission_injection = AdmissionEPCInjection.objects.create(
+        AdmissionEPCInjection.objects.create(
             admission=other_admission,
             type=EPCInjectionType.DEMANDE.name,
             status=AdmissionEPCInjectionStatus.OK.name,
@@ -284,7 +282,7 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
         other_valuation.delete()
 
         # The current admission has been injected
-        admission_injection = AdmissionEPCInjection.objects.create(
+        AdmissionEPCInjection.objects.create(
             admission=self.general_admission,
             type=EPCInjectionType.DEMANDE.name,
             status=AdmissionEPCInjectionStatus.OK.name,
@@ -347,12 +345,6 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
             educationalexperience_id=self.experience.uuid,
         )
 
-        self.general_admission.checklist['current']['parcours_anterieur']['enfants'] = [
-            Checklist.initialiser_checklist_experience(experience_uuid=self.experience.uuid).to_dict()
-        ]
-
-        self.general_admission.save()
-
         response = self.client.post(self.delete_url)
 
         self.assertFalse(EducationalExperience.objects.filter(uuid=self.experience.uuid).exists())
@@ -370,11 +362,6 @@ class CurriculumEducationalExperienceDeleteViewTestCase(TestCase):
         )
 
         self.general_admission.refresh_from_db()
-
-        self.assertEqual(
-            self.general_admission.checklist['current']['parcours_anterieur']['enfants'],
-            [],
-        )
 
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)

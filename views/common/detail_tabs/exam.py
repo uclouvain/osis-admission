@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -63,6 +63,8 @@ class ExamDetailView(LoadDossierViewMixin, TemplateView):
                 titre=titre,
                 attestation=exam.certificate,
                 annee=exam.year.year if exam.year else None,
+                statut_validation=exam.validation_status,
+                statut_authentification=exam.authentication_status,
             )
         except Exam.DoesNotExist:
             context_data['examen'] = None

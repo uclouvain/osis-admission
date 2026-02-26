@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -52,6 +52,9 @@ from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.p
     ExperienceAcademique,
     ExperienceNonAcademique,
     ProfilCandidatInMemoryTranslator,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.raccrocher_experiences_curriculum import (
+    RaccrocherExperiencesCurriculumInMemory,
 )
 from admission.infrastructure.message_bus_in_memory import (
     message_bus_in_memory_instance,
@@ -243,6 +246,8 @@ class TestVerifierCurriculumApresSoumissionService(TestCase):
             annee_diplome_etudes_secondaires=2005,
         )
 
+        RaccrocherExperiencesCurriculumInMemory.raccrocher(self.proposition_doctorale)
+
         for annee in range(2005, 2023):
             self.academic_year_repository.save(
                 AcademicYear(
@@ -415,6 +420,9 @@ class TestVerifierCurriculumApresSoumissionService(TestCase):
 
     def test_should_retourner_erreur_en_fonction_experiences_academiques_candidat(self):
         self.experiences_academiques.append(self.experience_academiques_complete)
+        self.candidat_translator.valorisations[self.experience_academiques_complete.uuid] = [
+            self.proposition_doctorale.entity_id.uuid
+        ]
 
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
@@ -429,6 +437,9 @@ class TestVerifierCurriculumApresSoumissionService(TestCase):
 
     def test_should_pas_retourner_erreur_en_fonction_experiences_academiques_incompletes_candidat(self):
         self.experiences_academiques.append(self.experience_academiques_complete)
+        self.candidat_translator.valorisations[self.experience_academiques_complete.uuid] = [
+            self.proposition_doctorale.entity_id.uuid
+        ]
 
         with mock.patch.multiple(
             self.experience_academiques_complete,
@@ -487,6 +498,10 @@ class TestVerifierCurriculumApresSoumissionService(TestCase):
                 date_fin=datetime.date(2012, 8, 31),
             )
         )
+
+        self.candidat_translator.valorisations[self.params_defaut_experience_non_academique['uuid']] = [
+            self.proposition_doctorale.entity_id.uuid
+        ]
 
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(self.cmd)
@@ -547,6 +562,12 @@ class TestVerifierCurriculumApresSoumissionService(TestCase):
                 date_fin=datetime.date(2012, 11, 30),
             )
         )
+        self.candidat_translator.valorisations[self.experience_academiques_complete.uuid] = [
+            self.proposition_doctorale.entity_id.uuid
+        ]
+        self.candidat_translator.valorisations[self.params_defaut_experience_non_academique['uuid']] = [
+            self.proposition_doctorale.entity_id.uuid
+        ]
 
         with mock.patch.object(
             ExperienceParcoursInterneInMemoryTranslator,

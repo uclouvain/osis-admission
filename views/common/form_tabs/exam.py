@@ -65,15 +65,17 @@ class ExamFormView(AdmissionFormMixin, LoadDossierViewMixin, EditExamenView):
     @property
     def can_be_updated(self):
         admission_injections = AdmissionEPCInjection.objects.filter(
-            admission__candidate_id=self.admission.candidate.pk,
+            admission=self.admission,
             type=EPCInjectionType.DEMANDE.name,
             status__in=AdmissionEPCInjectionStatus.blocking_statuses_for_experience(),
         )
+
         cv_injections = CurriculumEPCInjection.objects.filter(
             person_id=self.admission.candidate.pk,
             type_experience=ExperienceType.HIGH_SCHOOL.name,
             status__in=CurriculumEPCInjectionStatus.blocking_statuses_for_experience(),
-        )
+            payload__examens__contains=[{"osis_uuid": str(self.exam.uuid)}]
+        ) if self.exam else CurriculumEPCInjection.objects.none()
 
         return not (self.exam_type is None or cv_injections.exists() or admission_injections.exists())
 

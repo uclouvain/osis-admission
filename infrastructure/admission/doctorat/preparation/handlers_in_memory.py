@@ -88,6 +88,9 @@ from infrastructure.shared_kernel.profil.domain.service.in_memory.parcours_inter
     ExperienceParcoursInterneInMemoryTranslator,
 )
 
+from ...shared_kernel.domain.service.in_memory.modifier_checklist_experience_parcours_anterieur import (
+    ValidationExperienceParcoursAnterieurInMemoryService,
+)
 from ...shared_kernel.domain.service.in_memory.raccrocher_experiences_curriculum import (
     RaccrocherExperiencesCurriculumInMemory,
 )
@@ -139,6 +142,7 @@ _titre_acces_selectionnable_repository = TitreAccesSelectionnableInMemoryReposit
 _experience_parcours_interne_translator = ExperienceParcoursInterneInMemoryTranslator()
 _matricule_etudiant_service = MatriculeEtudiantService()
 _raccrocher_experiences_curriculum = RaccrocherExperiencesCurriculumInMemory()
+_validation_experience_parcours_anterieur_service = ValidationExperienceParcoursAnterieurInMemoryService()
 
 
 COMMAND_HANDLERS = {
@@ -272,6 +276,7 @@ COMMAND_HANDLERS = {
         element_confirmation=ElementsConfirmationInMemory(),
         maximum_propositions_service=_maximum_propositions_autorisees,
         email_destinataire_repository=_email_destinataire_repository,
+        validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur_service,
     ),
     DefinirCotutelleCommand: lambda msg_bus, cmd: definir_cotutelle(
         cmd,
@@ -583,6 +588,7 @@ COMMAND_HANDLERS = {
         titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
         experience_parcours_interne_translator=_experience_parcours_interne_translator,
         profil_candidat_translator=_profil_candidat_translator,
+        academic_year_repository=_academic_year_repository,
     ),
     SpecifierConditionAccesPropositionCommand: lambda msg_bus, cmd: specifier_condition_acces_proposition(
         cmd,
@@ -608,12 +614,19 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=_proposition_repository,
     ),
-    ModifierStatutChecklistExperienceParcoursAnterieurCommand: (
-        lambda msg_bus, cmd: modifier_statut_checklist_experience_parcours_anterieur(
+    ModifierStatutChecklistExperienceAcademiqueCommand: (
+        lambda msg_bus, cmd: modifier_statut_checklist_experience_academique(
             cmd,
             proposition_repository=_proposition_repository,
             profil_candidat_translator=_profil_candidat_translator,
             doctorat_translator=_doctorat_translator,
+            validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur_service,
+        )
+    ),
+    ModifierStatutChecklistExperienceNonAcademiqueCommand: (
+        lambda msg_bus, cmd: modifier_statut_checklist_experience_non_academique(
+            cmd,
+            validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur_service,
         )
     ),
     SpecifierInformationsAcceptationPropositionParSicCommand: (
@@ -630,13 +643,22 @@ COMMAND_HANDLERS = {
             groupe_supervision_repository=_groupe_supervision_repository,
         )
     ),
-    ModifierAuthentificationExperienceParcoursAnterieurCommand: (
-        lambda msg_bus, cmd: modifier_authentification_experience_parcours_anterieur(
+    ModifierAuthentificationExperienceAcademiqueCommand: (
+        lambda msg_bus, cmd: modifier_authentification_experience_academique(
             cmd,
-            proposition_repository=_proposition_repository,
             notification=_notification,
             historique=_historique,
             personne_connue_ucl_translator=_personne_connue_ucl_translator,
+            validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur_service,
+        )
+    ),
+    ModifierAuthentificationExperienceNonAcademiqueCommand: (
+        lambda msg_bus, cmd: modifier_authentification_experience_non_academique(
+            cmd,
+            notification=_notification,
+            historique=_historique,
+            personne_connue_ucl_translator=_personne_connue_ucl_translator,
+            validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur_service,
         )
     ),
     SpecifierMotifsRefusPropositionParSicCommand: (

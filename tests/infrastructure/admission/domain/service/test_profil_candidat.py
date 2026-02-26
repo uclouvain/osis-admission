@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -28,13 +28,6 @@ from django.test import TestCase
 from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import (
     ProfilCandidatTranslator,
 )
-from admission.models.exam import AdmissionExam
-from admission.tests.factories.curriculum import (
-    AdmissionEducationalValuatedExperiencesFactory,
-    AdmissionProfessionalValuatedExperiencesFactory,
-    EducationalExperienceFactory,
-    ProfessionalExperienceFactory,
-)
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.secondary_studies import (
     BelgianHighSchoolDiplomaFactory,
@@ -42,7 +35,6 @@ from admission.tests.factories.secondary_studies import (
     HighSchoolDiplomaAlternativeFactory,
 )
 from base.tests.factories.person import PersonFactory
-from osis_profile.tests.factories.exam import ExamFactory
 
 
 class ValorisationEtudesSecondairesTestCase(TestCase):
@@ -113,7 +105,7 @@ class ValorisationEtudesSecondairesTestCase(TestCase):
         self.assertTrue(valuation.est_valorise)
 
     def test_with_a_person_with_high_school_diploma_alternative_but_no_admission(self):
-        admission = GeneralEducationAdmissionFactory(
+        GeneralEducationAdmissionFactory(
             candidate=self.person,
             valuated_secondary_studies_person=self.person,
         )
@@ -171,7 +163,7 @@ class ValorisationEtudesSecondairesTestCase(TestCase):
         self.assertTrue(valuation.est_valorise)
 
     def test_with_a_person_with_belgian_high_school_diploma_but_no_admission(self):
-        admission = GeneralEducationAdmissionFactory(
+        GeneralEducationAdmissionFactory(
             candidate=self.person,
             valuated_secondary_studies_person=self.person,
         )
@@ -181,7 +173,7 @@ class ValorisationEtudesSecondairesTestCase(TestCase):
         self.assertEqual(valuation.types_formations_admissions_valorisees, [])
         self.assertFalse(valuation.est_valorise)
 
-        other_diploma = BelgianHighSchoolDiplomaFactory(external_id='EPC-0')
+        BelgianHighSchoolDiplomaFactory(external_id='EPC-0')
         valuation = ProfilCandidatTranslator.valorisation_etudes_secondaires(diploma.person.global_id)
         self.assertFalse(valuation.est_valorise_par_epc)
         self.assertEqual(valuation.types_formations_admissions_valorisees, [])
@@ -243,7 +235,7 @@ class ValorisationEtudesSecondairesTestCase(TestCase):
         self.assertTrue(valuation.est_valorise)
 
     def test_with_a_person_with_foreign_high_school_diploma_but_no_admission(self):
-        admission = GeneralEducationAdmissionFactory(
+        GeneralEducationAdmissionFactory(
             candidate=self.person,
             valuated_secondary_studies_person=self.person,
         )
@@ -253,7 +245,7 @@ class ValorisationEtudesSecondairesTestCase(TestCase):
         self.assertEqual(valuation.types_formations_admissions_valorisees, [])
         self.assertFalse(valuation.est_valorise)
 
-        other_diploma = ForeignHighSchoolDiplomaFactory(external_id='EPC-0')
+        ForeignHighSchoolDiplomaFactory(external_id='EPC-0')
         valuation = ProfilCandidatTranslator.valorisation_etudes_secondaires(diploma.person.global_id)
         self.assertFalse(valuation.est_valorise_par_epc)
         self.assertEqual(valuation.types_formations_admissions_valorisees, [])
@@ -266,65 +258,3 @@ class ValorisationEtudesSecondairesTestCase(TestCase):
         self.assertTrue(valuation.est_valorise_par_epc)
         self.assertEqual(valuation.types_formations_admissions_valorisees, [])
         self.assertTrue(valuation.est_valorise)
-
-
-class RecupererUuidsExperiencesCurriculumValoriseesParAdmissionTestCase(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.candidate = PersonFactory()
-        cls.admission = GeneralEducationAdmissionFactory(candidate=cls.candidate)
-        cls.other_admission = GeneralEducationAdmissionFactory(candidate=cls.candidate)
-
-    def test_retrieve_valuated_academic_experiences(self):
-        educational_experience = EducationalExperienceFactory(person=self.candidate)
-        other_educational_experience = EducationalExperienceFactory(person=self.candidate)
-        AdmissionEducationalValuatedExperiencesFactory(
-            baseadmission_id=self.other_admission.uuid,
-            educationalexperience_id=other_educational_experience.uuid,
-        )
-
-        uuids = ProfilCandidatTranslator.get_uuids_experiences_curriculum_valorisees_par_admission(self.admission.uuid)
-        self.assertEqual(len(uuids), 0)
-
-        uuids = ProfilCandidatTranslator.get_uuids_experiences_curriculum_valorisees_par_admission(
-            self.other_admission.uuid
-        )
-        self.assertCountEqual(
-            uuids,
-            [str(other_educational_experience.uuid)],
-        )
-        self.assertEqual(uuids.pop(), str(other_educational_experience.uuid))
-
-        professional_experience = ProfessionalExperienceFactory(person=self.candidate)
-        other_professional_experience = ProfessionalExperienceFactory(person=self.candidate)
-        AdmissionProfessionalValuatedExperiencesFactory(
-            baseadmission_id=self.other_admission.uuid,
-            professionalexperience_id=other_professional_experience.uuid,
-        )
-
-        uuids = ProfilCandidatTranslator.get_uuids_experiences_curriculum_valorisees_par_admission(self.admission.uuid)
-        self.assertEqual(len(uuids), 0)
-
-        uuids = ProfilCandidatTranslator.get_uuids_experiences_curriculum_valorisees_par_admission(
-            self.other_admission.uuid
-        )
-        self.assertCountEqual(
-            uuids,
-            [str(other_educational_experience.uuid), str(other_professional_experience.uuid)],
-        )
-
-    def test_retrieve_valuated_exam_requis(self):
-        exam = ExamFactory(
-            person=self.admission.candidate,
-            type__education_group_years=[self.admission.training],
-        )
-        admission_exam = AdmissionExam.objects.create(
-            admission=self.admission,
-            exam=exam,
-        )
-        uuids = ProfilCandidatTranslator.get_uuids_experiences_curriculum_valorisees_par_admission(self.admission.uuid)
-        self.assertCountEqual(uuids, [str(exam.uuid)])
-
-        exam.delete()
-        uuids = ProfilCandidatTranslator.get_uuids_experiences_curriculum_valorisees_par_admission(self.admission.uuid)
-        self.assertEqual(uuids, {'EXAMS'})
