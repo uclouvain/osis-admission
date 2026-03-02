@@ -25,28 +25,56 @@
 # ##############################################################################
 from abc import abstractmethod
 
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import FormationNonTrouveeException
-from admission.ddd.admission.shared_kernel.dtos.formation import FormationInscriteDTO
+from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import (
+    IAnneeInscriptionFormationTranslator,
+)
+from admission.ddd.admission.shared_kernel.dtos.inscription import InscriptionDTO
 from osis_common.ddd import interface
 
 
-class IBaseFormationTranslator(interface.DomainService):
+class IInscriptionsTranslatorService(interface.DomainService):
     @classmethod
     @abstractmethod
-    def recuperer_informations_formations_inscrites(
+    def recuperer(
         cls,
-        sigles_annees: list[tuple[str, int]],
-    ) -> dict[tuple[str, int], FormationInscriteDTO]:
+        matricule_candidat: str,
+        annees: list[int] | None = None,
+    ) -> list[InscriptionDTO]:
         raise NotImplementedError
 
-
-class IFormationTranslator(interface.DomainService):
     @classmethod
     @abstractmethod
-    def verifier_existence(cls, sigle: str, annee: int) -> bool:
+    def recuperer_inscriptions_deliberables(
+        cls,
+        matricule_candidat: str,
+        annee: int,
+    ) -> list[InscriptionDTO]:
         raise NotImplementedError
 
     @classmethod
-    def lever_exception_si_formation_inexistante(cls, sigle: str, annee: int):
-        if not cls.verifier_existence(sigle=sigle, annee=annee):
-            raise FormationNonTrouveeException
+    @abstractmethod
+    def est_inscrit_recemment(
+        cls,
+        matricule_candidat: str,
+        annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
+    ) -> bool:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def est_en_poursuite(
+        cls,
+        matricule_candidat: str,
+        sigle_formation: str,
+    ) -> bool:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def est_en_poursuite_directe(
+        cls,
+        matricule_candidat: str,
+        sigle_formation: str,
+        annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
+    ) -> bool:
+        raise NotImplementedError

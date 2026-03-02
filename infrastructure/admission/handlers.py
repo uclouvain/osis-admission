@@ -36,6 +36,20 @@ from admission.ddd.admission.shared_kernel.use_case.read import *
 from admission.ddd.admission.shared_kernel.use_case.write import (
     specifier_experience_en_tant_que_titre_acces,
 )
+from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
+    AnneeInscriptionFormationTranslator,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.deliberation_translator import (
+    DeliberationTranslator,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.diffusion_notes_translator import (
+    DiffusionNotesTranslator,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.formation_translator import BaseFormationTranslator
+from admission.infrastructure.admission.shared_kernel.domain.service.inscriptions import InscriptionsTranslatorService
+from admission.infrastructure.admission.shared_kernel.domain.service.inscriptions_evaluations_translator import (
+    InscriptionsEvaluationsTranslator,
+)
 from admission.infrastructure.admission.shared_kernel.domain.service.lister_toutes_demandes import (
     ListerToutesDemandes,
 )
@@ -122,6 +136,30 @@ COMMAND_HANDLERS = {
             cmd,
             validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
         )
+    ),
+    RecupererInscriptionsCandidatQuery: lambda msg_bus, cmd: recuperer_inscriptions_candidat(
+        cmd,
+        inscriptions_translator=InscriptionsTranslatorService(),
+        formation_translator=BaseFormationTranslator(),
+        deliberation_translator=DeliberationTranslator(),
+    ),
+    CandidatEstInscritRecemmentUCLQuery: lambda msg_bus, cmd: candidat_est_inscrit_recemment_ucl(
+        cmd,
+        annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
+        inscriptions_translator=InscriptionsTranslatorService(),
+    ),
+    CandidatEstEligibleALaReinscriptionQuery: lambda msg_bus, cmd: candidat_est_eligible_a_la_reinscription(
+        cmd,
+        annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
+        inscriptions_translator=InscriptionsTranslatorService(),
+        deliberation_translator=DeliberationTranslator(),
+        diffusion_notes_translator=DiffusionNotesTranslator(),
+        inscriptions_evaluations_translator=InscriptionsEvaluationsTranslator(),
+    ),
+    RecupererPeriodeReinscriptionQuery: lambda msg_bus, cmd: recuperer_periode_reinscription(
+        cmd,
+        annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
+        deliberation_translator=DeliberationTranslator(),
     ),
 }
 

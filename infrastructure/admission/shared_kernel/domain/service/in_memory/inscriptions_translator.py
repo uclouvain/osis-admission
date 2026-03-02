@@ -23,30 +23,50 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from abc import abstractmethod
 
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import FormationNonTrouveeException
-from admission.ddd.admission.shared_kernel.dtos.formation import FormationInscriteDTO
-from osis_common.ddd import interface
+from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import (
+    IAnneeInscriptionFormationTranslator,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
+)
+from admission.ddd.admission.shared_kernel.dtos.inscription import InscriptionDTO
 
 
-class IBaseFormationTranslator(interface.DomainService):
+class InscriptionsInMemoryTranslator(IInscriptionsTranslatorService):
     @classmethod
-    @abstractmethod
-    def recuperer_informations_formations_inscrites(
+    def recuperer(
         cls,
-        sigles_annees: list[tuple[str, int]],
-    ) -> dict[tuple[str, int], FormationInscriteDTO]:
-        raise NotImplementedError
-
-
-class IFormationTranslator(interface.DomainService):
-    @classmethod
-    @abstractmethod
-    def verifier_existence(cls, sigle: str, annee: int) -> bool:
-        raise NotImplementedError
+        matricule_candidat: str,
+        annees: list[int] | None = None,
+    ) -> list[InscriptionDTO]:
+        return []
 
     @classmethod
-    def lever_exception_si_formation_inexistante(cls, sigle: str, annee: int):
-        if not cls.verifier_existence(sigle=sigle, annee=annee):
-            raise FormationNonTrouveeException
+    def recuperer_inscriptions_deliberables(cls, matricule_candidat: str, annee: int) -> list[InscriptionDTO]:
+        return []
+
+    @classmethod
+    def est_inscrit_recemment(
+        cls,
+        matricule_candidat: str,
+        annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
+    ) -> bool:
+        return False
+
+    @classmethod
+    def est_en_poursuite(
+        cls,
+        matricule_candidat: str,
+        sigle_formation: str,
+    ) -> bool:
+        return False
+
+    @classmethod
+    def est_en_poursuite_directe(
+        cls,
+        matricule_candidat: str,
+        sigle_formation: str,
+        annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
+    ) -> bool:
+        return False

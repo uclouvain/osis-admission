@@ -85,3 +85,13 @@ class BaseFormationDTO(interface.DTO):
 
     def __str__(self):
         return f'{self.sigle} - {self.intitule} ({self.lieu_enseignement})'
+
+
+@attr.dataclass(frozen=True, slots=True)
+class FormationInscriteDTO(interface.DTO):
+    sigle: str
+    annee: int
+    intitule_fr: str
+    intitule_en: str
+    lieu_enseignement: str
+    type: str
