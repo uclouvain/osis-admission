@@ -273,6 +273,7 @@ class DoctoratePropositionSearchDTOSerializer(IncludedFieldsMixin, DoctorateProp
             'statut',
             'links',
             'pdf_recapitulatif',
+            'annee_calculee',
         ]
 
 
@@ -338,6 +339,7 @@ class GeneralEducationPropositionSearchDTOSerializer(
             'statut',
             'links',
             'pdf_recapitulatif',
+            'annee_calculee',
         ]
 
 
@@ -396,6 +398,7 @@ class ContinuingEducationPropositionSearchDTOSerializer(
             'statut',
             'links',
             'pdf_recapitulatif',
+            'annee_calculee',
         ]
 
 

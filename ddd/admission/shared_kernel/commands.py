@@ -194,3 +194,24 @@ class RecupererInformationsDestinataireQuery(QueryRequest):
     annee: int
     sigle_formation: str
     est_premiere_annee: bool
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererInscriptionsCandidatQuery(QueryRequest):
+    matricule_candidat: str
+    annees: list[int] | None = None
+
+
+@attr.dataclass(frozen=True, slots=True)
+class CandidatEstInscritRecemmentUCLQuery(QueryRequest):
+    matricule_candidat: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class CandidatEstEligibleALaReinscriptionQuery(QueryRequest):
+    matricule_candidat: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererPeriodeReinscriptionQuery(QueryRequest):
+    pass
