@@ -36,6 +36,12 @@ from admission.ddd.admission.shared_kernel.use_case.read import *
 from admission.ddd.admission.shared_kernel.use_case.write import (
     specifier_experience_en_tant_que_titre_acces,
 )
+from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
+    AnneeInscriptionFormationTranslator,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.inscriptions_ucl_candidat import (
+    InscriptionsUCLCandidatService,
+)
 from admission.infrastructure.admission.shared_kernel.domain.service.lister_toutes_demandes import (
     ListerToutesDemandes,
 )
@@ -122,6 +128,25 @@ COMMAND_HANDLERS = {
             cmd,
             validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
         )
+    ),
+    RecupererInscriptionsCandidatQuery: lambda msg_bus, cmd: recuperer_inscriptions_candidat(
+        cmd,
+        inscriptions_ucl_candidat_service=InscriptionsUCLCandidatService(),
+    ),
+    CandidatEstInscritRecemmentUCLQuery: lambda msg_bus, cmd: candidat_est_inscrit_recemment_ucl(
+        cmd,
+        inscriptions_ucl_candidat_service=InscriptionsUCLCandidatService(),
+        annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
+    ),
+    CandidatEstDelibereQuery: lambda msg_bus, cmd: candidat_est_delibere(
+        cmd,
+        inscriptions_ucl_candidat_service=InscriptionsUCLCandidatService(),
+        annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
+    ),
+    RecupererPeriodeReinscriptionQuery: lambda msg_bus, cmd: recuperer_periode_reinscription(
+        cmd,
+        annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
+        inscriptions_ucl_candidat_service=InscriptionsUCLCandidatService(),
     ),
 }
 
