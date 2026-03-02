@@ -23,30 +23,28 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from abc import abstractmethod
 
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import FormationNonTrouveeException
-from admission.ddd.admission.shared_kernel.dtos.formation import FormationInscriteDTO
-from osis_common.ddd import interface
-
-
-class IBaseFormationTranslator(interface.DomainService):
-    @classmethod
-    @abstractmethod
-    def recuperer_informations_formations_inscrites(
-        cls,
-        sigles_annees: list[tuple[str, int]],
-    ) -> dict[tuple[str, int], FormationInscriteDTO]:
-        raise NotImplementedError
+from admission.ddd.admission.shared_kernel.commands import RecupererInscriptionsCandidatQuery
+from admission.ddd.admission.shared_kernel.domain.service.i_deliberation_translator import IDeliberationTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_formation_translator import IBaseFormationTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
+)
+from admission.ddd.admission.shared_kernel.domain.service.inscriptions_ucl_candidat import (
+    InscriptionsUCLCandidatService,
+)
 
 
-class IFormationTranslator(interface.DomainService):
-    @classmethod
-    @abstractmethod
-    def verifier_existence(cls, sigle: str, annee: int) -> bool:
-        raise NotImplementedError
-
-    @classmethod
-    def lever_exception_si_formation_inexistante(cls, sigle: str, annee: int):
-        if not cls.verifier_existence(sigle=sigle, annee=annee):
-            raise FormationNonTrouveeException
+def recuperer_inscriptions_candidat(
+    cmd: RecupererInscriptionsCandidatQuery,
+    inscriptions_translator: IInscriptionsTranslatorService,
+    formation_translator: IBaseFormationTranslator,
+    deliberation_translator: IDeliberationTranslator,
+):
+    return InscriptionsUCLCandidatService.recuperer(
+        matricule_candidat=cmd.matricule_candidat,
+        annees=cmd.annees,
+        inscriptions_translator=inscriptions_translator,
+        formation_translator=formation_translator,
+        deliberation_translator=deliberation_translator,
+    )

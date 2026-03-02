@@ -23,18 +23,30 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from .candidat_est_eligible_a_la_reinscription_service import candidat_est_eligible_a_la_reinscription
-from .candidat_est_inscrit_recemment_ucl_service import candidat_est_inscrit_recemment_ucl
-from .lister_demandes_service import lister_demandes
-from .rechercher_formations_gerees_service import rechercher_formations_gerees
-from .recuperer_connaissances_langues_service import recuperer_connaissances_langues
-from .recuperer_etudes_secondaires_service import recuperer_etudes_secondaires
-from .recuperer_experience_academique_service import recuperer_experience_academique
-from .recuperer_experience_non_academique_service import recuperer_experience_non_academique
-from .recuperer_informations_destinataire_service import recuperer_informations_destinataire
-from .recuperer_inscriptions_candidat_service import recuperer_inscriptions_candidat
-from .recuperer_periode_reinscription_service import recuperer_periode_reinscription
-from .recuperer_questions_specifiques_proposition_service import recuperer_questions_specifiques_proposition
-from .recuperer_titres_acces_selectionnables_proposition_service import (
-    recuperer_titres_acces_selectionnables_proposition,
-)
+from admission.ddd.admission.shared_kernel.domain.service.i_formation_translator import IBaseFormationTranslator
+from admission.ddd.admission.shared_kernel.dtos.formation import FormationInscriteDTO
+from ddd.logic.formation_catalogue.commands import SearchFormationsCommand
+from ddd.logic.formation_catalogue.dtos.training import TrainingDto
+
+
+class BaseFormationTranslator(IBaseFormationTranslator):
+    @classmethod
+    def recuperer_informations_formations_inscrites(
+        cls,
+        sigles_annees: list[tuple[str, int]],
+    ) -> dict[tuple[str, int], FormationInscriteDTO]:
+        from infrastructure.messages_bus import message_bus_instance
+
+        trainings: list[TrainingDto] = message_bus_instance.invoke(SearchFormationsCommand(sigles_annees=sigles_annees))
+
+        return {
+            (training.acronym, training.year): FormationInscriteDTO(
+                sigle=training.acronym,
+                annee=training.year,
+                intitule_fr=training.title_fr,
+                intitule_en=training.title_en,
+                lieu_enseignement=training.main_teaching_campus_name,
+                type=training.type,
+            )
+            for training in trainings
+        }
