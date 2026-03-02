@@ -23,30 +23,32 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from abc import abstractmethod
+import datetime
 
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import FormationNonTrouveeException
-from admission.ddd.admission.shared_kernel.dtos.formation import FormationInscriteDTO
-from osis_common.ddd import interface
+from admission.ddd.admission.shared_kernel.domain.service.i_deliberation_translator import IDeliberationTranslator
+from ddd.logic.deliberation.cloture.dto.deliberation import DeliberationCycleDTO, DeliberationProgrammeAnnuelDTO
 
 
-class IBaseFormationTranslator(interface.DomainService):
+class DeliberationInMemoryTranslator(IDeliberationTranslator):
     @classmethod
-    @abstractmethod
-    def recuperer_informations_formations_inscrites(
+    def recuperer_deliberations_cycles(
         cls,
-        sigles_annees: list[tuple[str, int]],
-    ) -> dict[tuple[str, int], FormationInscriteDTO]:
-        raise NotImplementedError
-
-
-class IFormationTranslator(interface.DomainService):
-    @classmethod
-    @abstractmethod
-    def verifier_existence(cls, sigle: str, annee: int) -> bool:
-        raise NotImplementedError
+        nomas: list[str],
+        annee: int | None = None,
+    ) -> dict[tuple[str, str], DeliberationCycleDTO]:
+        return {}
 
     @classmethod
-    def lever_exception_si_formation_inexistante(cls, sigle: str, annee: int):
-        if not cls.verifier_existence(sigle=sigle, annee=annee):
-            raise FormationNonTrouveeException
+    def recuperer_deliberations_annuelles(
+        cls,
+        nomas: list[str],
+        annee: int,
+    ) -> dict[tuple[str, str], dict[int, DeliberationProgrammeAnnuelDTO | None]]:
+        return {}
+
+    @classmethod
+    def recuperer_date_debut_periode_deliberation_deuxieme_session(
+        cls,
+        annee: int,
+    ) -> datetime.date:
+        return datetime.date(year=annee, month=4, day=15)

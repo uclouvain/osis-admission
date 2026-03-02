@@ -23,30 +23,23 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from abc import abstractmethod
-
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import FormationNonTrouveeException
-from admission.ddd.admission.shared_kernel.dtos.formation import FormationInscriteDTO
-from osis_common.ddd import interface
-
-
-class IBaseFormationTranslator(interface.DomainService):
-    @classmethod
-    @abstractmethod
-    def recuperer_informations_formations_inscrites(
-        cls,
-        sigles_annees: list[tuple[str, int]],
-    ) -> dict[tuple[str, int], FormationInscriteDTO]:
-        raise NotImplementedError
+from admission.ddd.admission.shared_kernel.commands import (
+    CandidatEstInscritRecemmentUCLQuery,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import (
+    IAnneeInscriptionFormationTranslator,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
+)
 
 
-class IFormationTranslator(interface.DomainService):
-    @classmethod
-    @abstractmethod
-    def verifier_existence(cls, sigle: str, annee: int) -> bool:
-        raise NotImplementedError
-
-    @classmethod
-    def lever_exception_si_formation_inexistante(cls, sigle: str, annee: int):
-        if not cls.verifier_existence(sigle=sigle, annee=annee):
-            raise FormationNonTrouveeException
+def candidat_est_inscrit_recemment_ucl(
+    cmd: CandidatEstInscritRecemmentUCLQuery,
+    annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
+    inscriptions_translator: IInscriptionsTranslatorService,
+):
+    return inscriptions_translator.est_inscrit_recemment(
+        matricule_candidat=cmd.matricule_candidat,
+        annee_inscription_formation_translator=annee_inscription_formation_translator,
+    )
