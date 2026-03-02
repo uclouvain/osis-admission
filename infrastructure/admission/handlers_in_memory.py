@@ -49,6 +49,10 @@ from infrastructure.shared_kernel.profil.domain.service.in_memory.parcours_inter
     ExperienceParcoursInterneInMemoryTranslator,
 )
 
+from .shared_kernel.domain.service.in_memory.annee_inscription_formation import (
+    AnneeInscriptionFormationInMemoryTranslator,
+)
+from .shared_kernel.domain.service.in_memory.inscriptions_ucl_candidat import InscriptionsUCLCandidatInMemoryService
 from .shared_kernel.domain.service.in_memory.modifier_checklist_experience_parcours_anterieur import (
     ValidationExperienceParcoursAnterieurInMemoryService,
 )
@@ -59,6 +63,8 @@ _titre_acces_selectionnable_repository = TitreAccesSelectionnableInMemoryReposit
 _experience_parcours_interne_translator = ExperienceParcoursInterneInMemoryTranslator()
 _gestionnaire_repository = GestionnaireInMemoryRepository()
 _validation_experience_parcours_anterieur = ValidationExperienceParcoursAnterieurInMemoryService()
+_annee_inscription_formation_translator = AnneeInscriptionFormationInMemoryTranslator()
+_inscriptions_ucl_candidat_service = InscriptionsUCLCandidatInMemoryService()
 
 
 COMMAND_HANDLERS = {
@@ -124,5 +130,24 @@ COMMAND_HANDLERS = {
             cmd,
             validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur,
         )
+    ),
+    RecupererInscriptionsCandidatQuery: lambda msg_bus, cmd: recuperer_inscriptions_candidat(
+        cmd,
+        inscriptions_ucl_candidat_service=_inscriptions_ucl_candidat_service,
+    ),
+    CandidatEstInscritRecemmentUCLQuery: lambda msg_bus, cmd: candidat_est_inscrit_recemment_ucl(
+        cmd,
+        inscriptions_ucl_candidat_service=_inscriptions_ucl_candidat_service,
+        annee_inscription_formation_translator=_annee_inscription_formation_translator,
+    ),
+    CandidatEstDelibereQuery: lambda msg_bus, cmd: candidat_est_delibere(
+        cmd,
+        inscriptions_ucl_candidat_service=_inscriptions_ucl_candidat_service,
+        annee_inscription_formation_translator=_annee_inscription_formation_translator,
+    ),
+    RecupererPeriodeReinscriptionQuery: lambda msg_bus, cmd: recuperer_periode_reinscription(
+        cmd,
+        annee_inscription_formation_translator=_annee_inscription_formation_translator,
+        inscriptions_ucl_candidat_service=_inscriptions_ucl_candidat_service,
     ),
 }

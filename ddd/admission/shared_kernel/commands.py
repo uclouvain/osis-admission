@@ -227,3 +227,24 @@ class RecupererInformationsValidationEtudesSecondairesQuery(
 @attr.dataclass(frozen=True, slots=True)
 class RecupererInformationsValidationExamenQuery(RecupererInformationsValidationExperienceParcoursAnterieurQuery):
     pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererInscriptionsCandidatQuery(QueryRequest):
+    matricule_candidat: str
+    annees: list[int] | None = None
+
+
+@attr.dataclass(frozen=True, slots=True)
+class CandidatEstInscritRecemmentUCLQuery(QueryRequest):
+    matricule_candidat: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class CandidatEstDelibereQuery(QueryRequest):
+    matricule_candidat: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererPeriodeReinscriptionQuery(QueryRequest):
+    pass

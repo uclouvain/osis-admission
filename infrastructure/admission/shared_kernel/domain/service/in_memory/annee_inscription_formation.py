@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,13 +24,12 @@
 #
 ##############################################################################
 import datetime
-from datetime import timedelta, date
-from typing import Optional
+from datetime import date, timedelta
 
 from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import (
-    IAnneeInscriptionFormationTranslator,
     CalendrierAcademique,
     Date,
+    IAnneeInscriptionFormationTranslator,
 )
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 
@@ -49,9 +48,10 @@ class AnneeInscriptionFormationInMemoryTranslator(IAnneeInscriptionFormationTran
         ]
 
     @classmethod
-    def recuperer(cls, type_calendrier_academique: AcademicCalendarTypes, annee: Optional[int] = None) -> Optional[int]:
-        if annee is not None:
-            return annee
+    def recuperer_calendrier_academique_courant(
+        cls,
+        type_calendrier_academique: AcademicCalendarTypes,
+    ) -> CalendrierAcademique | None:
         date_jour = date.today()
         calendriers = []
         if type_calendrier_academique == AcademicCalendarTypes.GENERAL_EDUCATION_ENROLLMENT:
@@ -71,10 +71,6 @@ class AnneeInscriptionFormationInMemoryTranslator(IAnneeInscriptionFormationTran
             )
 
         return next(
-            (
-                calendrier.annee
-                for calendrier in calendriers
-                if calendrier.date_debut <= date_jour <= calendrier.date_fin
-            ),
+            (calendrier for calendrier in calendriers if calendrier.date_debut <= date_jour <= calendrier.date_fin),
             None,
         )
