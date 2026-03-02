@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -28,17 +28,17 @@ from typing import Union
 from django.contrib import messages
 from django.http import Http404, HttpResponse
 from django.utils.functional import cached_property
-from django.utils.translation import get_language
-from django.utils.translation import gettext as _
+from django.utils.translation import get_language, gettext as _
 from django.views.generic import FormView, RedirectView, TemplateView
 from osis_document_components.enums import PostProcessingWanted
+from osis_document_components.services import get_student_files_from_epc
 from osis_document_components.utils import get_file_url
 from rest_framework.status import HTTP_204_NO_CONTENT
 
 from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
-from admission.ddd.admission.doctorat.preparation import (
-    commands as doctorate_education_commands,
-)
+from admission.ddd.admission.doctorat.preparation import commands as doctorate_education_commands
+from admission.ddd.admission.formation_continue import commands as continuing_education_commands
+from admission.ddd.admission.formation_generale import commands as general_education_commands
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     DOCUMENTS_A_NE_PAS_CONVERTIR_A_LA_SOUMISSION,
     EMPLACEMENTS_DOCUMENTS_INTERNES,
@@ -47,12 +47,6 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     EMPLACEMENTS_FAC,
     EMPLACEMENTS_SIC,
     TypeEmplacementDocument,
-)
-from admission.ddd.admission.formation_continue import (
-    commands as continuing_education_commands,
-)
-from admission.ddd.admission.formation_generale import (
-    commands as general_education_commands,
 )
 from admission.exports.admission_recap.admission_recap import admission_pdf_recap
 from admission.forms.admission.document import (
@@ -65,10 +59,7 @@ from admission.forms.admission.document import (
     UploadDocumentForm,
     UploadManagerDocumentForm,
 )
-from admission.infrastructure.utils import (
-    AdmissionDocument,
-    get_document_from_identifier,
-)
+from admission.infrastructure.utils import AdmissionDocument, get_document_from_identifier
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from infrastructure.messages_bus import message_bus_instance
@@ -81,6 +72,7 @@ __all__ = [
     'AnalysisFolderGenerationView',
     'DeleteDocumentView',
     'DocumentDetailView',
+    'DocumentEpcDetailView',
     'RequestCandidateDocumentView',
     'ReplaceDocumentView',
     'RequestFreeCandidateDocumentView',
@@ -310,6 +302,34 @@ class DocumentDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, Htmx
         context['replace_form'] = ReplaceDocumentForm(mimetypes=document.mimetypes, identifier=document_identifier)
         context['upload_form'] = UploadDocumentForm(mimetypes=document.mimetypes, identifier=document_identifier)
 
+        return context
+
+
+class DocumentEpcDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, HtmxMixin, TemplateView):
+    template_name = 'admission/document/document_epc_detail.html'
+    htmx_template_name = 'admission/document/document_epc_detail.html'
+    permission_required = 'admission.view_documents_management'
+    urlpatterns = {'epc_detail': 'epc_detail/<str:token>'}
+    name = 'document-epc-detail'
+
+    def get_document_metadata(self):
+        try:
+            documents = get_student_files_from_epc(self.proposition.noma_candidat)
+            for document in documents:
+                if document.get('token') == self.kwargs['token']:
+                    return {
+                        'mimetype': document.get('type_contenu'),
+                        'url': get_file_url(self.kwargs['token']),
+                        'name': document.get('description_detaillee', document.get('description', document.get('nom'))),
+                    }
+        except Exception as e:
+            pass
+        return None
+
+    def get_context_data(self, **kwargs):
+        context = TemplateView().get_context_data(**kwargs)
+        context['document_token'] = self.kwargs['token']
+        context['document_metadata'] = self.get_document_metadata()
         return context
 
 
