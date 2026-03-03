@@ -7,7 +7,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -78,6 +78,21 @@
         {% translate 'UCLouvain' %}
       </a>
     </li>
+    <li
+        id="epc-item"
+        role="presentation"
+        class="{% if next == 'epc' %}active{% endif %}"
+    >
+      <a
+          class="btn btn-primary"
+          href="#epc"
+          data-toggle="pill"
+          aria-controls="epc"
+          role="tab"
+      >
+        <div class="badge">{% translate 'EPC' %}</div>
+      </a>
+    </li>
   </ul>
 </div>
 <div id="document-tab-content" class="tab-content">
@@ -89,6 +104,9 @@
   </div>
   <div role="tabpanel" class="tab-pane {% if next == 'uclouvain' %}active{% endif %}" id="uclouvain">
     {% include 'admission/document/uclouvain_documents.html' %}
+  </div>
+  <div role="tabpanel" class="tab-pane {% if next == 'epc' %}active{% endif %}" id="epc">
+    {% include 'admission/document/epc_documents.html' %}
   </div>
 
   {% include 'admission/document/request_all_documents_modal.html' %}

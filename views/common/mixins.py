@@ -34,6 +34,7 @@ from django.utils.functional import cached_property
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from django.views.generic.base import ContextMixin
+from osis_document_components.services import get_student_files_count_from_epc
 
 from admission.constants import (
     COMMENT_TAG_FAC,
@@ -46,61 +47,36 @@ from admission.constants import (
 from admission.ddd.admission.doctorat.preparation.commands import (
     GetCotutelleCommand,
     RecupererAdmissionDoctoratQuery,
-)
-from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererPropositionGestionnaireQuery as RecupererPropositionDoctoraleGestionnaireQuery,
-)
-from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionDoctoraleQuery,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_DOCTORALE_PAR_STATUT,
 )
-from admission.ddd.admission.doctorat.preparation.dtos import (
-    PropositionDTO,
-)
+from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO
 from admission.ddd.admission.doctorat.validation.commands import RecupererDemandeQuery
 from admission.ddd.admission.formation_continue.commands import (
     RecupererPropositionQuery,
-)
-from admission.ddd.admission.formation_continue.commands import (
     RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionContinueQuery,
 )
 from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_CONTINUE_PAR_STATUT,
 )
-from admission.ddd.admission.formation_continue.dtos.proposition import (
-    PropositionDTO as PropositionContinueDTO,
-)
+from admission.ddd.admission.formation_continue.dtos.proposition import PropositionDTO as PropositionContinueDTO
 from admission.ddd.admission.formation_generale.commands import (
     RecupererPropositionGestionnaireQuery,
+    RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionGeneraleQuery,
     RecupererTitresAccesSelectionnablesPropositionQuery,
 )
-from admission.ddd.admission.formation_generale.commands import (
-    RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionGeneraleQuery,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
-)
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_GENERALE_PAR_STATUT,
 )
-from admission.ddd.admission.formation_generale.dtos.proposition import (
-    PropositionGestionnaireDTO,
-)
-from admission.ddd.admission.shared_kernel.domain.model.enums.type_gestionnaire import (
-    TypeGestionnaire,
-)
-from admission.ddd.admission.shared_kernel.dtos.titre_acces_selectionnable import (
-    TitreAccesSelectionnableDTO,
-)
+from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
+from admission.ddd.admission.shared_kernel.domain.model.enums.type_gestionnaire import TypeGestionnaire
+from admission.ddd.admission.shared_kernel.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
 from admission.ddd.admission.shared_kernel.enums import Onglets
-from admission.models import (
-    ContinuingEducationAdmission,
-    DoctorateAdmission,
-    EPCInjection,
-    GeneralEducationAdmission,
-)
+from admission.models import ContinuingEducationAdmission, DoctorateAdmission, EPCInjection, GeneralEducationAdmission
 from admission.models.base import AdmissionViewer, BaseAdmission
 from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
 from admission.utils import (
@@ -423,6 +399,15 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         # Add icon when folder in quarantine
         if self.demande_est_en_quarantaine:
             tab_label_suffixes['person'] = mark_safe('<span class="fa fa-fas fa-warning text-warning"></span>')
+
+        # Add EPC badge if there are EPC documents
+        try:
+            if self.proposition.noma_candidat:
+                documents_count = get_student_files_count_from_epc(self.proposition.noma_candidat).get('count', 0)
+                if documents_count > 0:
+                    tab_label_suffixes['documents'] = mark_safe('<div class="badge">EPC</div>')
+        except Exception as e:
+            pass
 
         return tab_label_suffixes
 
