@@ -2415,6 +2415,9 @@ msgstr ""
 msgid "ENROLMENT AUTHORISATION<br>for the %(academic_year)s academic year"
 msgstr ""
 
+msgid "EPC"
+msgstr ""
+
 msgid "EPC injection"
 msgstr ""
 
@@ -6897,6 +6900,9 @@ msgid ""
 msgstr ""
 
 msgid "There is no required exam for this training."
+msgstr ""
+
+msgid "There was an error while getting the EPC documents list."
 msgstr ""
 
 msgid "Thesis field"
