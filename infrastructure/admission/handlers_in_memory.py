@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -30,22 +30,27 @@ from admission.ddd.admission.shared_kernel.use_case.write import specifier_exper
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.lister_toutes_demandes import (
     ListerToutesDemandesInMemory,
 )
-from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
-
-from admission.infrastructure.admission.shared_kernel.repository.in_memory.emplacement_document import (
-    emplacement_document_in_memory_repository,
-)
-from admission.infrastructure.admission.shared_kernel.repository.in_memory.titre_acces_selectionnable import (
-    TitreAccesSelectionnableInMemoryRepository,
-)
-from admission.infrastructure.admission.shared_kernel.repository.in_memory.gestionnaire import (
-    GestionnaireInMemoryRepository,
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
+    ProfilCandidatInMemoryTranslator,
 )
 from admission.infrastructure.admission.shared_kernel.repository.in_memory.email_destinataire import (
     EmailDestinataireInMemoryRepository,
 )
+from admission.infrastructure.admission.shared_kernel.repository.in_memory.emplacement_document import (
+    emplacement_document_in_memory_repository,
+)
+from admission.infrastructure.admission.shared_kernel.repository.in_memory.gestionnaire import (
+    GestionnaireInMemoryRepository,
+)
+from admission.infrastructure.admission.shared_kernel.repository.in_memory.titre_acces_selectionnable import (
+    TitreAccesSelectionnableInMemoryRepository,
+)
 from infrastructure.shared_kernel.profil.domain.service.in_memory.parcours_interne import (
     ExperienceParcoursInterneInMemoryTranslator,
+)
+
+from .shared_kernel.domain.service.in_memory.modifier_checklist_experience_parcours_anterieur import (
+    ValidationExperienceParcoursAnterieurInMemoryService,
 )
 
 _emplacement_document_repository = emplacement_document_in_memory_repository
@@ -53,6 +58,7 @@ _profil_candidat_translator = ProfilCandidatInMemoryTranslator()
 _titre_acces_selectionnable_repository = TitreAccesSelectionnableInMemoryRepository()
 _experience_parcours_interne_translator = ExperienceParcoursInterneInMemoryTranslator()
 _gestionnaire_repository = GestionnaireInMemoryRepository()
+_validation_experience_parcours_anterieur = ValidationExperienceParcoursAnterieurInMemoryService()
 
 
 COMMAND_HANDLERS = {
@@ -94,5 +100,29 @@ COMMAND_HANDLERS = {
     RechercherFormationsGereesQuery: lambda msg_bus, cmd: rechercher_formations_gerees(
         cmd,
         repository=_gestionnaire_repository,
+    ),
+    RecupererInformationsValidationExperienceAcademiqueQuery: (
+        lambda msg_bus, cmd: recuperer_informations_validation_experience_academique(
+            cmd,
+            validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur,
+        )
+    ),
+    RecupererInformationsValidationExperienceNonAcademiqueQuery: (
+        lambda msg_bus, cmd: recuperer_informations_validation_experience_non_academique(
+            cmd,
+            validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur,
+        )
+    ),
+    RecupererInformationsValidationExamenQuery: (
+        lambda msg_bus, cmd: recuperer_informations_validation_examen(
+            cmd,
+            validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur,
+        )
+    ),
+    RecupererInformationsValidationEtudesSecondairesQuery: (
+        lambda msg_bus, cmd: recuperer_informations_validation_etudes_secondaires(
+            cmd,
+            validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur,
+        )
     ),
 }

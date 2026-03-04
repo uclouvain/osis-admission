@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -55,8 +55,13 @@ from .envoyer_proposition_au_sic_lors_de_la_decision_facultaire_service import (
 )
 from .envoyer_rappel_paiement_service import envoyer_rappel_paiement
 from .initier_proposition_service import initier_proposition
-from .modifier_authentification_experience_parcours_anterieur_service import (
-    modifier_authentification_experience_parcours_anterieur,
+from .modifier_authentification_etudes_secondaires_service import modifier_authentification_etudes_secondaires
+from .modifier_authentification_examen_service import modifier_authentification_examen
+from .modifier_authentification_experience_academique_service import (
+    modifier_authentification_experience_academique,
+)
+from .modifier_authentification_experience_non_academique_service import (
+    modifier_authentification_experience_non_academique,
 )
 from .modifier_checklist_choix_formation_service import (
     modifier_checklist_choix_formation,
@@ -65,12 +70,15 @@ from .modifier_choix_formation_par_gestionnaire_service import (
     modifier_choix_formation_par_gestionnaire,
 )
 from .modifier_choix_formation_service import modifier_choix_formation
-from .modifier_statut_checklist_experience_parcours_anterieur_service import (
-    modifier_statut_checklist_experience_parcours_anterieur,
+from .modifier_statut_checklist_etudes_secondaires_service import modifier_statut_checklist_etudes_secondaires
+from .modifier_statut_checklist_examen_service import modifier_statut_checklist_examen
+from .modifier_statut_checklist_experience_academique_service import (
+    modifier_statut_checklist_experience_academique,
 )
-from .modifier_statut_checklist_parcours_anterieur_service import (
-    modifier_statut_checklist_parcours_anterieur,
+from .modifier_statut_checklist_experience_non_academique_service import (
+    modifier_statut_checklist_experience_non_academique,
 )
+from .modifier_statut_checklist_parcours_anterieur_service import modifier_statut_checklist_parcours_anterieur
 from .notifier_candidat_derogation_financabilite_service import (
     notifier_candidat_derogation_financabilite,
 )

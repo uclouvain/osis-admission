@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,7 +24,6 @@
 #
 # ##############################################################################
 import copy
-import itertools
 from typing import Optional
 
 from django.utils.translation import gettext_noop as _
@@ -32,14 +31,14 @@ from django.utils.translation import gettext_noop as _
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import ChoixStatutChecklist
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
 from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
-    StatutsChecklistDoctorale,
     StatutChecklist,
+    StatutsChecklistDoctorale,
 )
-from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import EtatAuthentificationParcours
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from osis_common.ddd import interface
+from osis_profile.models.enums.experience_validation import EtatAuthentificationParcours
 
 
 class Checklist(interface.DomainService):
@@ -48,12 +47,10 @@ class Checklist(interface.DomainService):
         cls,
         proposition: Proposition,
         profil_candidat_translator: 'IProfilCandidatTranslator',
-        annee_courante: int,
     ):
         checklist_initiale = cls.recuperer_checklist_initiale(
             proposition=proposition,
             profil_candidat_translator=profil_candidat_translator,
-            annee_courante=annee_courante,
         )
         proposition.checklist_initiale = checklist_initiale
         proposition.checklist_actuelle = copy.deepcopy(checklist_initiale)
@@ -63,20 +60,10 @@ class Checklist(interface.DomainService):
         cls,
         proposition: Proposition,
         profil_candidat_translator: 'IProfilCandidatTranslator',
-        annee_courante: int = None,
     ) -> Optional[StatutsChecklistDoctorale]:
         identification_dto = profil_candidat_translator.get_identification(proposition.matricule_candidat)
-        curriculum_dto = profil_candidat_translator.get_curriculum(
-            proposition.matricule_candidat,
-            annee_courante,
-            proposition.entity_id.uuid,
-        )
 
         return StatutsChecklistDoctorale(
-            donnees_personnelles=StatutChecklist(
-                libelle=_("To be processed"),
-                statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
-            ),
             assimilation=StatutChecklist(
                 libelle=_("Not concerned")
                 if identification_dto.pays_nationalite_europeen
@@ -91,13 +78,6 @@ class Checklist(interface.DomainService):
             parcours_anterieur=StatutChecklist(
                 libelle=_("To be processed"),
                 statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
-                enfants=[
-                    cls.initialiser_checklist_experience(experience.uuid)
-                    for experience in itertools.chain(
-                        curriculum_dto.experiences_academiques,
-                        curriculum_dto.experiences_non_academiques,
-                    )
-                ],
             ),
             financabilite=StatutChecklist(
                 libelle=_("Not concerned"),

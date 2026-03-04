@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -34,10 +34,10 @@ from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formatio
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.models import GeneralEducationAdmission
 from admission.tests.factories.general_education import (
-    GeneralEducationTrainingFactory,
     GeneralEducationAdmissionFactory,
+    GeneralEducationTrainingFactory,
 )
-from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
+from admission.tests.factories.roles import ProgramManagerRoleFactory, SicManagementRoleFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -80,6 +80,7 @@ class SaveCommentViewTestCase(TestCase):
         url = resolve_url(
             'admission:general-education:save-comment',
             uuid=self.general_admission.uuid,
+            object_uuid=self.general_admission.uuid,
             tab='donnees_personnelles',
         )
 
@@ -90,7 +91,7 @@ class SaveCommentViewTestCase(TestCase):
         form = response.context['form']
         self.assertEqual(
             form.fields['comment'].label,
-            f'Commentaire (dernière modification par {self.sic_manager_user.person} ' f'le 31/12/2021 à 08:15) :',
+            f'Commentaire (dernière modification par {self.sic_manager_user.person} le 31/12/2021 à 08:15) :',
         )
 
         # Check the added comment
@@ -107,12 +108,48 @@ class SaveCommentViewTestCase(TestCase):
         self.assertEqual(self.general_admission.modified_at, datetime.datetime(2021, 12, 1))
         self.assertEqual(self.general_admission.last_update_author, self.fac_manager_user.person)
 
+    @freezegun.freeze_time('2021-12-31T08:15')
+    def test_submit_a_new_comment_on_the_profile(self):
+        self.client.force_login(user=self.sic_manager_user)
+        url = resolve_url(
+            'admission:general-education:save-comment',
+            uuid=self.general_admission.uuid,
+            object_uuid=self.general_admission.candidate.uuid,
+            tab='donnees_personnelles',
+        )
+
+        # Check the response
+        response = self.client.post(url, data={'donnees_personnelles-comment': 'Comment 0'}, **self.default_headers)
+
+        self.assertEqual(response.status_code, 200)
+        form = response.context['form']
+        self.assertEqual(
+            form.fields['comment'].label,
+            f'Commentaire (dernière modification par {self.sic_manager_user.person} le 31/12/2021 à 08:15) :',
+        )
+
+        # Check the added comment
+        self.assertFalse(CommentEntry.objects.filter(object_uuid=self.general_admission.uuid))
+        comment_entry = CommentEntry.objects.filter(
+            object_uuid=self.general_admission.candidate.uuid,
+            tags=['donnees_personnelles'],
+        ).first()
+
+        self.assertIsNotNone(comment_entry)
+        self.assertEqual(comment_entry.content, 'Comment 0')
+
+        # Check that the last modification information of the admission have not been updated
+        self.general_admission.refresh_from_db()
+        self.assertEqual(self.general_admission.modified_at, datetime.datetime(2021, 12, 1))
+        self.assertEqual(self.general_admission.last_update_author, self.fac_manager_user.person)
+
     def test_submit_an_updated_comment(self):
         self.client.force_login(user=self.sic_manager_user)
 
         url = resolve_url(
             'admission:general-education:save-comment',
             uuid=self.general_admission.uuid,
+            object_uuid=self.general_admission.uuid,
             tab='donnees_personnelles',
         )
 
@@ -137,7 +174,7 @@ class SaveCommentViewTestCase(TestCase):
             form = response.context['form']
             self.assertEqual(
                 form.fields['comment'].label,
-                f'Commentaire (dernière modification par {self.sic_manager_user.person} ' f'le 31/12/2021 à 08:20) :',
+                f'Commentaire (dernière modification par {self.sic_manager_user.person} le 31/12/2021 à 08:20) :',
             )
 
             # Check the added comment

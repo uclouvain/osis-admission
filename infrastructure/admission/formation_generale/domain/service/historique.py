@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import (
     Proposition,
+    PropositionIdentity,
 )
 from admission.ddd.admission.formation_generale.domain.service.i_historique import (
     IHistorique,
@@ -303,7 +304,7 @@ class Historique(IHistorique):
     @classmethod
     def historiser_demande_verification_titre_acces(
         cls,
-        proposition: Proposition,
+        proposition_id: PropositionIdentity,
         gestionnaire: str,
         message: EmailMessage,
         uuid_experience: str,
@@ -316,7 +317,7 @@ class Historique(IHistorique):
         message_a_historiser = get_message_to_historize(message)
 
         add_history_entry(
-            proposition.entity_id.uuid,
+            proposition_id.uuid,
             f'Mail envoyé à "{recipient}" le {now} par {manager_name}.\n\n'
             f'{message_a_historiser[settings.LANGUAGE_CODE_FR]}',
             f'Mail sent to "{recipient}" on {now} by {manager_name}.\n\n'
@@ -329,7 +330,7 @@ class Historique(IHistorique):
     @classmethod
     def historiser_information_candidat_verification_parcours_en_cours(
         cls,
-        proposition: Proposition,
+        proposition_id: PropositionIdentity,
         gestionnaire: str,
         message: EmailMessage,
         uuid_experience: str,
@@ -341,7 +342,7 @@ class Historique(IHistorique):
         message_a_historiser = get_message_to_historize(message)
 
         add_history_entry(
-            proposition.entity_id.uuid,
+            proposition_id.uuid,
             f'Mail envoyé à le/la candidat·e le {now} par {manager_name}.\n\n'
             f'{message_a_historiser[settings.LANGUAGE_CODE_FR]}',
             f'Mail sent to the candidate on {now} by {manager_name}.\n\n'

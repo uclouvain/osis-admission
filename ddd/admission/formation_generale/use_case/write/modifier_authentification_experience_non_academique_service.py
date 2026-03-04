@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,47 +23,44 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
-    IProfilCandidatTranslator,
-)
 from admission.ddd.admission.formation_generale.commands import (
-    ModifierStatutChecklistExperienceParcoursAnterieurCommand,
+    ModifierAuthentificationExperienceNonAcademiqueCommand,
 )
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
-from admission.ddd.admission.formation_generale.domain.model.proposition import (
-    PropositionIdentity,
-)
-from admission.ddd.admission.formation_generale.domain.service.i_formation import (
-    IFormationGeneraleTranslator,
-)
-from admission.ddd.admission.formation_generale.repository.i_proposition import (
-    IPropositionRepository,
+from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
+from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
+from admission.ddd.admission.shared_kernel.domain.service.i_modifier_checklist_experience_parcours_anterieur import (
+    IValidationExperienceParcoursAnterieurService,
 )
 
 
-def modifier_statut_checklist_experience_parcours_anterieur(
-    cmd: 'ModifierStatutChecklistExperienceParcoursAnterieurCommand',
-    proposition_repository: 'IPropositionRepository',
-    profil_candidat_translator: 'IProfilCandidatTranslator',
-    formation_translator: 'IFormationGeneraleTranslator',
+def modifier_authentification_experience_non_academique(
+    cmd: 'ModifierAuthentificationExperienceNonAcademiqueCommand',
+    notification: 'INotification',
+    historique: 'IHistorique',
+    validation_experience_parcours_anterieur_service: 'IValidationExperienceParcoursAnterieurService',
 ) -> 'PropositionIdentity':
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
-    proposition = proposition_repository.get(entity_id=proposition_id)
 
-    formation = formation_translator.get(entity_id=proposition.formation_id)
-
-    proposition.specifier_statut_checklist_experience_parcours_anterieur(
-        statut_checklist_cible=cmd.statut,
-        statut_checklist_authentification=cmd.statut_authentification,
+    validation_experience_parcours_anterieur_service.modifier_authentification_experience_non_academique(
         uuid_experience=cmd.uuid_experience,
-        auteur_modification=cmd.gestionnaire,
-        type_experience=cmd.type_experience,
-        profil_candidat_translator=profil_candidat_translator,
-        grade_academique_formation_proposition=formation.grade_academique,
+        etat_authentification=cmd.etat_authentification,
     )
 
-    proposition_repository.save(proposition)
+    message = notification.modifier_authentification_experience_parcours(
+        proposition_id=proposition_id,
+        etat_authentification=cmd.etat_authentification,
+    )
+
+    historique.historiser_modification_authentification_experience_parcours(
+        proposition_id=proposition_id,
+        gestionnaire=cmd.gestionnaire,
+        etat_authentification=cmd.etat_authentification,
+        message=message,
+        uuid_experience=cmd.uuid_experience,
+    )
 
     return proposition_id

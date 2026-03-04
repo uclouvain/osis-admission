@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -207,7 +207,7 @@ class HistoriqueInMemory(IHistorique):
     @classmethod
     def historiser_demande_verification_titre_acces(
         cls,
-        proposition: Proposition,
+        proposition_id: PropositionIdentity,
         gestionnaire: PersonneConnueUclDTO,
         message: EmailMessage,
         uuid_experience: str,
@@ -217,7 +217,7 @@ class HistoriqueInMemory(IHistorique):
     @classmethod
     def historiser_information_candidat_verification_parcours_en_cours(
         cls,
-        proposition: Proposition,
+        proposition_id: PropositionIdentity,
         gestionnaire: PersonneConnueUclDTO,
         message: EmailMessage,
         uuid_experience: str,

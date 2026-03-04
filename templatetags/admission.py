@@ -81,9 +81,6 @@ from admission.ddd.admission.formation_generale.dtos.proposition import (
 from admission.ddd.admission.formation_generale.dtos.proposition import (
     PropositionGestionnaireDTO,
 )
-from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
-    EtatAuthentificationParcours,
-)
 from admission.ddd.admission.shared_kernel.dtos import (
     CoordonneesDTO,
     EtudesSecondairesAdmissionDTO,
@@ -144,13 +141,13 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
     ExperienceParcoursInterneDTO,
 )
 from osis_profile.constants import IMAGE_MIME_TYPES
+from osis_profile.models.enums.experience_validation import EtatAuthentificationParcours
 from osis_profile.models.enums.person import ChoixSexe
 from osis_profile.utils.utils import (
     format_address,
     format_school_title,
     get_superior_institute_queryset,
 )
-from osis_role.templatetags.osis_role import has_perm
 from reference.models.country import Country
 from reference.models.language import Language
 
@@ -654,19 +651,28 @@ def country_name_from_iso_code(iso_code: str):
 @register.filter
 def get_ordered_checklist_items_general_education(checklist_items: dict):
     """Return the ordered checklist items."""
-    return sorted(checklist_items.items(), key=lambda tab: INDEX_ONGLETS_CHECKLIST_GENERALE[tab[0]])
+    return sorted(
+        [(key, value) for key, value in checklist_items.items() if key in INDEX_ONGLETS_CHECKLIST_GENERALE],
+        key=lambda tab: INDEX_ONGLETS_CHECKLIST_GENERALE[tab[0]],
+    )
 
 
 @register.filter
 def get_ordered_checklist_items_doctorate(checklist_items: dict):
     """Return the ordered checklist items."""
-    return sorted(checklist_items.items(), key=lambda tab: INDEX_ONGLETS_CHECKLIST_DOCTORALE[tab[0]])
+    return sorted(
+        [(key, value) for key, value in checklist_items.items() if key in INDEX_ONGLETS_CHECKLIST_DOCTORALE],
+        key=lambda tab: INDEX_ONGLETS_CHECKLIST_DOCTORALE[tab[0]],
+    )
 
 
 @register.filter
 def get_ordered_checklist_items_continuing_education(checklist_items: dict):
     """Return the ordered checklist items."""
-    return sorted(checklist_items.items(), key=lambda tab: INDEX_ONGLETS_CHECKLIST_CONTINUE[tab[0]])
+    return sorted(
+        [(key, value) for key, value in checklist_items.items() if key in INDEX_ONGLETS_CHECKLIST_CONTINUE],
+        key=lambda tab: INDEX_ONGLETS_CHECKLIST_CONTINUE[tab[0]],
+    )
 
 
 @register.filter
@@ -702,11 +708,32 @@ def checklist_state_button(context, **kwargs):
         **expected_attrs,
         'extra': kwargs,
         'view': context['view'],
-        'submitted_extra': {
-            **kwargs,
-            'status': expected_attrs['state'],
-        },
     }
+
+
+@register.inclusion_tag('admission/checklist_macro_state_button.html', takes_context=True)
+def checklist_macro_state_button(context, **kwargs):
+    tag_context = {
+        arg_name: kwargs.pop(arg_name, None)
+        for arg_name in [
+            'icon',
+            'class',
+            'tab',
+            'tooltip',
+            'disabled',
+            'open_modal',
+            'htmx_post',
+            'sub_id',
+            'status_configuration',
+            'selected_status_configuration',
+        ]
+    }
+
+    force_enabled = kwargs.pop('force_enabled', False)
+    if context.get('can_update_checklist_tab') is False and not force_enabled:
+        tag_context['disabled'] = True
+
+    return tag_context
 
 
 @register.filter
@@ -997,8 +1024,9 @@ def experience_details_template(
     :param hide_files: Specify if the files should be hidden
     :return: The rendered template
     """
-    next_url_suffix = f'?next={context.get("request").path}&next_hash_url=parcours_anterieur__{experience.uuid}'
-    delete_next_url_suffix = f'?next={context.get("request").path}&next_hash_url=parcours_anterieur'
+    default_url_suffix = f'?next={context.get("request").path}&next_hash_url=parcours_anterieur'
+    next_url_suffix = f'{default_url_suffix}__{experience.uuid}' if experience.uuid else default_url_suffix
+    delete_next_url_suffix = default_url_suffix
     res_context = {
         'is_general': resume_proposition.est_proposition_generale,
         'is_continuing': resume_proposition.est_proposition_continue,

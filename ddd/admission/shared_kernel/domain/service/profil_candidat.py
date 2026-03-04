@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -199,13 +199,14 @@ class ProfilCandidat(interface.DomainService):
         uuid_proposition: str,
         matricule: str,
         profil_candidat_translator: 'IProfilCandidatTranslator',
-        formation: Formation,
+        sigle_formation: str,
+        annee_formation: int,
     ) -> None:
         examen = profil_candidat_translator.get_examen(
             uuid_proposition,
             matricule,
-            formation.entity_id.sigle,
-            formation.entity_id.annee,
+            sigle_formation,
+            annee_formation,
         )
 
         ExamenValidatorList(
@@ -320,6 +321,26 @@ class ProfilCandidat(interface.DomainService):
             verification_experiences_completees=verification_experiences_completees,
             grade_academique_formation_proposition=grade_academique_formation_proposition,
             annee_formation=annee_formation,
+        ).validate()
+
+    @classmethod
+    def verifier_experience_academique_curriculum_apres_soumission(
+        cls,
+        proposition_id,
+        matricule_candidat: str,
+        uuid_experience: str,
+        profil_candidat_translator: 'IProfilCandidatTranslator',
+        grade_academique_formation_proposition: str,
+    ) -> None:
+        experience = profil_candidat_translator.get_experience_academique(
+            matricule=matricule_candidat,
+            uuid_proposition=proposition_id.uuid,
+            uuid_experience=uuid_experience,
+        )
+
+        ExperienceAcademiquePostSoumissionValidatorList(
+            experience_academique=experience,
+            grade_academique_formation_proposition=grade_academique_formation_proposition,
         ).validate()
 
     @classmethod

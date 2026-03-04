@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,44 +24,40 @@
 #
 # ##############################################################################
 from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
-from admission.ddd.admission.doctorat.preparation.commands import (
-    ModifierAuthentificationExperienceParcoursAnterieurCommand,
-)
+from admission.ddd.admission.doctorat.preparation.commands import ModifierAuthentificationExperienceAcademiqueCommand
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
 from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import INotification
-from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.shared_kernel.domain.service.i_modifier_checklist_experience_parcours_anterieur import (
+    IValidationExperienceParcoursAnterieurService,
+)
 from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
 
 
-def modifier_authentification_experience_parcours_anterieur(
-    cmd: 'ModifierAuthentificationExperienceParcoursAnterieurCommand',
-    proposition_repository: 'IPropositionRepository',
+def modifier_authentification_experience_academique(
+    cmd: 'ModifierAuthentificationExperienceAcademiqueCommand',
     notification: 'INotification',
     historique: 'IHistorique',
     personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
+    validation_experience_parcours_anterieur_service: 'IValidationExperienceParcoursAnterieurService',
 ) -> 'PropositionIdentity':
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
-    proposition = proposition_repository.get(entity_id=proposition_id)
 
-    proposition.specifier_authentification_experience_parcours_anterieur(
+    validation_experience_parcours_anterieur_service.modifier_authentification_experience_academique(
         uuid_experience=cmd.uuid_experience,
-        auteur_modification=cmd.gestionnaire,
         etat_authentification=cmd.etat_authentification,
     )
-
-    proposition_repository.save(proposition)
 
     gestionnaire_dto = personne_connue_ucl_translator.get(cmd.gestionnaire)
 
     message = notification.modifier_authentification_experience_parcours(
-        proposition=proposition,
+        proposition_id=proposition_id,
         etat_authentification=cmd.etat_authentification,
         gestionnaire=gestionnaire_dto,
     )
 
     historique.historiser_modification_authentification_experience_parcours(
-        proposition=proposition,
+        proposition_id=proposition_id,
         gestionnaire=gestionnaire_dto,
         etat_authentification=cmd.etat_authentification,
         message=message,

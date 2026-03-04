@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -56,8 +56,11 @@ from .envoyer_proposition_au_sic_lors_de_la_decision_cdd_service import (
 from .identifier_membre_CA_service import identifier_membre_ca
 from .identifier_promoteur_service import identifier_promoteur
 from .initier_proposition_service import initier_proposition
-from .modifier_authentification_experience_parcours_anterieur_service import (
-    modifier_authentification_experience_parcours_anterieur,
+from .modifier_authentification_experience_academique_service import (
+    modifier_authentification_experience_academique,
+)
+from .modifier_authentification_experience_non_academique_service import (
+    modifier_authentification_experience_non_academique,
 )
 from .modifier_checklist_choix_formation_service import (
     modifier_checklist_choix_formation,
@@ -68,12 +71,13 @@ from .modifier_choix_formation_par_gestionnaire_service import (
 from .modifier_membre_supervision_externe_service import (
     modifier_membre_supervision_externe,
 )
-from .modifier_statut_checklist_experience_parcours_anterieur_service import (
-    modifier_statut_checklist_experience_parcours_anterieur,
+from .modifier_statut_checklist_experience_academique_service import (
+    modifier_statut_checklist_experience_academique,
 )
-from .modifier_statut_checklist_parcours_anterieur_service import (
-    modifier_statut_checklist_parcours_anterieur,
+from .modifier_statut_checklist_experience_non_academique_service import (
+    modifier_statut_checklist_experience_non_academique,
 )
+from .modifier_statut_checklist_parcours_anterieur_service import modifier_statut_checklist_parcours_anterieur
 from .modifier_type_admission_service import modifier_type_admission
 from .notifier_candidat_derogation_financabilite_service import (
     notifier_candidat_derogation_financabilite,
