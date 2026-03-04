@@ -42,7 +42,6 @@ from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.campus import CampusFactory
 from base.tests.factories.education_group_year import EducationGroupYearFactory
 from base.tests.factories.entity_version import EntityVersionFactory
-from base.tests.factories.specific_iufc_informations import SpecificIUFCInformationsFactory
 from base.tests.factories.user import UserFactory
 from program_management.tests.factories.education_group_version import EducationGroupVersionFactory
 
@@ -457,10 +456,6 @@ class ContinuingEducationAutocompleteTestCase(TrainingDateMockTestCase):
             root_group__main_teaching_campus=cls.first_campus,
             offer=cls.last_year_training,
         )
-        SpecificIUFCInformationsFactory(
-            training=cls.last_year_training,
-            show_to_candidate=True,
-        )
 
         cls.current_year_computer_certificate_of_success = EducationGroupYearFactory(
             academic_year=cls.current_year,
@@ -470,10 +465,6 @@ class ContinuingEducationAutocompleteTestCase(TrainingDateMockTestCase):
         EducationGroupVersionFactory(
             root_group__main_teaching_campus=cls.second_campus,
             offer=cls.current_year_computer_certificate_of_success,
-        )
-        SpecificIUFCInformationsFactory(
-            training=cls.current_year_computer_certificate_of_success,
-            show_to_candidate=True,
         )
 
         cls.current_year_biologist_certificate_of_success = EducationGroupYearFactory(
@@ -486,10 +477,6 @@ class ContinuingEducationAutocompleteTestCase(TrainingDateMockTestCase):
             root_group__main_teaching_campus=cls.second_campus,
             offer=cls.current_year_biologist_certificate_of_success,
         )
-        SpecificIUFCInformationsFactory(
-            training=cls.current_year_biologist_certificate_of_success,
-            show_to_candidate=True,
-        )
 
         cls.current_year_computer_certificate_of_participation = EducationGroupYearFactory(
             academic_year=cls.current_year,
@@ -500,10 +487,6 @@ class ContinuingEducationAutocompleteTestCase(TrainingDateMockTestCase):
             root_group__main_teaching_campus=cls.first_campus,
             offer=cls.current_year_computer_certificate_of_participation,
         )
-        SpecificIUFCInformationsFactory(
-            training=cls.current_year_computer_certificate_of_participation,
-            show_to_candidate=True,
-        )
 
         cls.next_year_training = EducationGroupYearFactory(
             academic_year=cls.next_year,
@@ -513,10 +496,6 @@ class ContinuingEducationAutocompleteTestCase(TrainingDateMockTestCase):
         EducationGroupVersionFactory(
             root_group__main_teaching_campus=cls.second_campus,
             offer=cls.next_year_training,
-        )
-        SpecificIUFCInformationsFactory(
-            training=cls.next_year_training,
-            show_to_candidate=True,
         )
 
     def test_autocomplete_continuing_education_with_acronym_or_name(self):
@@ -535,58 +514,6 @@ class ContinuingEducationAutocompleteTestCase(TrainingDateMockTestCase):
                 self.current_year_computer_certificate_of_participation.acronym,
             ],
         )
-
-    def test_autocomplete_continuing_education_with_hidden_trainings(self):
-        self.client.force_authenticate(user=self.user)
-
-        new_certificate = EducationGroupYearFactory(
-            academic_year=self.current_year,
-            education_group_type__name=TrainingType.CERTIFICATE_OF_SUCCESS.name,
-            title='Nouveau certificat',
-        )
-        EducationGroupVersionFactory(
-            root_group__main_teaching_campus=self.second_campus,
-            offer=self.current_year_computer_certificate_of_success,
-        )
-
-        # No specific iufc information -> hidden training
-        response = self.client.get(
-            resolve_url('autocomplete-continuing-education'),
-            format='json',
-            data={'acronym_or_name': 'Nouveau certificat'},
-        )
-        self.assertEqual(response.status_code, 200, response.content)
-        self.assertEqual(len(response.json()), 0)
-
-        # Specific iufc information but we don't show the training -> hidden training
-        new_certificate_informations = SpecificIUFCInformationsFactory(
-            training=new_certificate,
-            show_to_candidate=False,
-        )
-
-        response = self.client.get(
-            resolve_url('autocomplete-continuing-education'),
-            format='json',
-            data={'acronym_or_name': 'Nouveau certificat'},
-        )
-        self.assertEqual(response.status_code, 200, response.content)
-        self.assertEqual(len(response.json()), 0)
-
-        new_certificate_informations.show_to_candidate = True
-        new_certificate_informations.save()
-
-        response = self.client.get(
-            resolve_url('autocomplete-continuing-education'),
-            format='json',
-            data={'acronym_or_name': 'Nouveau certificat'},
-        )
-        self.assertEqual(response.status_code, 200, response.content)
-
-        json_response = response.json()
-
-        self.assertEqual(len(json_response), 1)
-
-        self.assertEqual(json_response[0]['sigle'], new_certificate.acronym)
 
     def test_autocomplete_continuing_education_with_campus(self):
         self.client.force_authenticate(user=self.user)
