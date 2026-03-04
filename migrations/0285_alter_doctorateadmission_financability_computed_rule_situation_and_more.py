@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0283_initialize_iufc_personal_data_checklist'),
+        ('admission', '0284_alter_doctorateadmission_admission_requirement_and_more'),
     ]
 
     operations = [
