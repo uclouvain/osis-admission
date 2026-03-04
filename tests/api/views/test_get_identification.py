@@ -80,7 +80,7 @@ class GeneralIdentificationViewTestCase(APITestCase):
         self.assertEqual(result['pays_nationalite_europeen'], True)
         self.assertEqual(result['pays_nationalite'], BE_ISO_CODE)
         self.assertEqual(result['pays_residence'], BE_ISO_CODE)
-        self.assertEqual(result['a_une_experience_fwb_non_diplomee_de_premier_cycle_pour_annee_formation'], False)
+        self.assertEqual(result['est_potentiellement_concerne_par_le_bama_15'], False)
 
         # Nationality => Not European country (US)
         # Residential country => US

@@ -29,6 +29,7 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from admission.ddd.admission.formation_generale.domain.model.enums import STATUTS_PROPOSITION_GENERALE_NON_SOUMISE
+from admission.ddd.admission.shared_kernel.domain.model.formation import FORMATIONS_POUR_BAMA_15
 from admission.ddd.admission.shared_kernel.dtos import IdentificationDTO
 from base.api.serializers.academic_year import RelatedAcademicYearField
 from base.models.enums.community import CommunityEnum
@@ -43,7 +44,7 @@ __all__ = [
     "PersonIdentificationSerializer",
     "IdentificationDTOSerializer",
     "GeneralIdentificationDTOSerializer",
-    "candidate_has_first_cycle_fwb_experience_with_no_diploma_for_the_enrolment_training",
+    "candidate_is_potentially_concerned_by_bama_15",
 ]
 
 
@@ -114,7 +115,10 @@ class IdentificationDTOSerializer(DTOSerializer):
         source = IdentificationDTO
 
 
-def candidate_has_first_cycle_fwb_experience_with_no_diploma_for_the_enrolment_training(admission):
+def candidate_is_potentially_concerned_by_bama_15(admission):
+    if admission.training.education_group_type.name not in FORMATIONS_POUR_BAMA_15:
+        return False
+
     qs = EducationalExperienceYear.objects.filter(
         educational_experience__person_id=admission.candidate_id,
         academic_year_id=admission.determined_academic_year_id or admission.training.academic_year_id,
@@ -130,12 +134,8 @@ def candidate_has_first_cycle_fwb_experience_with_no_diploma_for_the_enrolment_t
 
 
 class GeneralIdentificationDTOSerializer(IdentificationDTOSerializer):
-    a_une_experience_fwb_non_diplomee_de_premier_cycle_pour_annee_formation = serializers.SerializerMethodField(
-        method_name='candidate_has_first_cycle_fwb_experience_with_no_diploma_for_the_enrolment_year',
-    )
+    est_potentiellement_concerne_par_le_bama_15 = serializers.SerializerMethodField()
 
     @extend_schema_field(OpenApiTypes.BOOL)
-    def candidate_has_first_cycle_fwb_experience_with_no_diploma_for_the_enrolment_year(self, _):
-        return candidate_has_first_cycle_fwb_experience_with_no_diploma_for_the_enrolment_training(
-            admission=self.context['admission']
-        )
+    def get_est_potentiellement_concerne_par_le_bama_15(self, _):
+        return candidate_is_potentially_concerned_by_bama_15(admission=self.context['admission'])

@@ -9141,7 +9141,7 @@ components:
           nullable: true
         noma_derniere_inscription_ucl:
           type: string
-        a_une_experience_fwb_non_diplomee_de_premier_cycle_pour_annee_formation:
+        est_potentiellement_concerne_par_le_bama_15:
           type: boolean
           readOnly: true
       required:

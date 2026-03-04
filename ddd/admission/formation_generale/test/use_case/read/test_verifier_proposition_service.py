@@ -223,7 +223,7 @@ class TestVerifierPropositionService(TestCase):
             nom_formation_equivalente_communaute_fr='',
             cycle_formation='',
             grade_academique_formation='1',
-            est_autre_formation=False,
+            formation_non_selectionnee_dans_liste_de_reference=False,
         )
 
         cls.params_defaut_experience_non_academique = {
@@ -2027,7 +2027,7 @@ class TestVerifierPropositionService(TestCase):
                 a_obtenu_diplome=False,
                 communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
                 cycle_formation=Cycle.FIRST_CYCLE.name,
-                est_autre_formation=True,
+                formation_non_selectionnee_dans_liste_de_reference=True,
             ):
                 result = self.message_bus.invoke(cmd)
                 self.assertEqual(result, self.master_proposition.entity_id)

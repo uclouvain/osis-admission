@@ -1165,7 +1165,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             grade_academique_formation='1',
             type_institut=EstablishmentTypeEnum.UNIVERSITY.name,
             nom_formation_equivalente_communaute_fr='',
-            est_autre_formation=False,
+            formation_non_selectionnee_dans_liste_de_reference=False,
             identifiant_externe='123456789',
             credits_acquis_bloc_1=None,
             avec_complements=None,
@@ -1214,7 +1214,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             grade_academique_formation='1',
             type_institut=EstablishmentTypeEnum.UNIVERSITY.name,
             nom_formation_equivalente_communaute_fr='',
-            est_autre_formation=False,
+            formation_non_selectionnee_dans_liste_de_reference=False,
             identifiant_externe='123456789',
             credits_acquis_bloc_1=None,
             avec_complements=None,
@@ -3260,7 +3260,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                     attr.evolve(
                         self.belgian_academic_curriculum_experience,
                         a_obtenu_diplome=False,
-                        est_autre_formation=True,
+                        formation_non_selectionnee_dans_liste_de_reference=True,
                         communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
                         cycle_formation=Cycle.FIRST_CYCLE.name,
                     )

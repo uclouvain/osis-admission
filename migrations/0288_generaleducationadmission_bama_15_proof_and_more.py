@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("admission", "0286_extract_experience_checklists"),
+        ("admission", "0287_merge_20260304_1039"),
     ]
 
     operations = [

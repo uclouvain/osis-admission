@@ -442,7 +442,10 @@ def get_specific_questions_section(
     display_bama_15_questions = (
         context.est_proposition_generale
         and ProfilCandidat.est_potentiellement_concerne_par_le_bama_15(
-            proposition=context.proposition,
+            uuid_proposition=context.proposition.uuid,
+            annee_formation=context.proposition.annee_demande,
+            statut_proposition=context.proposition.statut,
+            formation=context.proposition.formation,
             experiences_academiques=context.curriculum.experiences_academiques,
         )
     )

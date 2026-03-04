@@ -41,6 +41,7 @@ from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
 from admission.ddd.admission.formation_continue.domain.validator.validator_by_business_actions import (
     FormationContinueCurriculumValidatorList,
 )
+from admission.ddd.admission.formation_generale.domain.model.enums import STATUTS_PROPOSITION_GENERALE_NON_SOUMISE
 from admission.ddd.admission.formation_generale.domain.validator.validator_by_business_actions import (
     BachelierEtudesSecondairesValidatorList,
     ChoixFormationValidatorList,
@@ -52,7 +53,6 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
     FormationGeneraleExperienceAcademiquePostSoumissionValidatorList,
     FormationGeneraleInformationsComplementairesValidatorList,
 )
-from admission.ddd.admission.formation_generale.dtos import PropositionDTO as PropositionGeneraleDTO
 from admission.ddd.admission.shared_kernel.domain.model._candidat_adresse import (
     CandidatAdresse,
 )
@@ -71,6 +71,7 @@ from admission.ddd.admission.shared_kernel.domain.validator.validator_by_busines
     IdentificationValidatorList,
     QuarantaineValidatorList,
 )
+from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
     ExperiencesCVRecuperees,
 )
@@ -499,14 +500,21 @@ class ProfilCandidat(interface.DomainService):
         formation: Formation,
     ):
         identification = profil_candidat_translator.get_identification(proposition.matricule_candidat)
+        est_potentiellement_concerne_par_le_bama_15 = cls.est_potentiellement_concerne_par_le_bama_15(
+            uuid_proposition=proposition.entity_id.uuid,
+            statut_proposition=proposition.statut.name,
+            annee_formation=proposition.annee_calculee or proposition.formation_id.annee,
+            experiences_academiques=experiences_academiques,
+            formation=formation,
+        )
+
         FormationGeneraleInformationsComplementairesValidatorList(
             poste_diplomatique=proposition.poste_diplomatique,
             pays_nationalite=identification.pays_nationalite,
             pays_nationalite_europeen=identification.pays_nationalite_europeen,
             pays_residence=identification.pays_residence,
-            formation=formation,
-            annee_formation=proposition.annee_calculee or proposition.formation_id.annee,
             experiences_academiques=experiences_academiques,
+            est_potentiellement_concerne_par_le_bama_15=est_potentiellement_concerne_par_le_bama_15,
             est_concerne_par_le_bama_15=proposition.est_concerne_par_le_bama_15,
             preuve_bama_15=proposition.preuve_bama_15,
         ).validate()
@@ -525,17 +533,19 @@ class ProfilCandidat(interface.DomainService):
     @classmethod
     def est_potentiellement_concerne_par_le_bama_15(
         cls,
-        proposition: PropositionGeneraleDTO,
+        uuid_proposition: str,
+        annee_formation: int,
+        statut_proposition: str,
+        formation: Formation | FormationDTO,
         experiences_academiques: list[ExperienceAcademiqueDTO],
     ):
-        annee_demande = proposition.annee_demande
-        demande_non_soumise = proposition.est_non_soumise
-        return proposition.formation.est_formation_pour_bama_15 and any(
-            (demande_non_soumise or xp.valorisee_par_admissions and proposition.uuid in xp.valorisee_par_admissions)
+        demande_non_soumise = statut_proposition in STATUTS_PROPOSITION_GENERALE_NON_SOUMISE
+        return formation.est_formation_pour_bama_15 and any(
+            (demande_non_soumise or xp.valorisee_par_admissions and uuid_proposition in xp.valorisee_par_admissions)
             and xp.cycle_formation == Cycle.FIRST_CYCLE.name
             and xp.communaute_institut == CommunityEnum.FRENCH_SPEAKING.name
             and not xp.a_obtenu_diplome
-            and not xp.est_autre_formation
-            and any(annee for annee in xp.annees if annee.annee == annee_demande)
+            and not xp.formation_non_selectionnee_dans_liste_de_reference
+            and any(annee for annee in xp.annees if annee.annee == annee_formation)
             for xp in experiences_academiques
         )

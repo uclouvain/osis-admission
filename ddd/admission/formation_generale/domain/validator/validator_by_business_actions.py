@@ -738,10 +738,9 @@ class FormationGeneraleInformationsComplementairesValidatorList(TwoStepsMultiple
     poste_diplomatique: Optional[PosteDiplomatiqueIdentity]
 
     experiences_academiques: list[ExperienceAcademiqueDTO]
-    formation: Formation
+    est_potentiellement_concerne_par_le_bama_15: bool
     est_concerne_par_le_bama_15: bool | None
     preuve_bama_15: list[str]
-    annee_formation: int
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -756,8 +755,7 @@ class FormationGeneraleInformationsComplementairesValidatorList(TwoStepsMultiple
             ),
             ShouldInformationsBama15EtreCompletees(
                 experiences_academiques=self.experiences_academiques,
-                formation=self.formation,
-                annee_formation=self.annee_formation,
+                est_potentiellement_concerne_par_le_bama_15=self.est_potentiellement_concerne_par_le_bama_15,
                 est_concerne_par_le_bama_15=self.est_concerne_par_le_bama_15,
                 preuve_bama_15=self.preuve_bama_15,
             ),

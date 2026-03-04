@@ -3167,7 +3167,10 @@ class ChecklistView(
             specific_questions = command_result.resume.questions_specifiques_dtos
 
             context['display_bama_15_questions'] = ProfilCandidat.est_potentiellement_concerne_par_le_bama_15(
-                proposition=command_result.resume.proposition,
+                uuid_proposition=command_result.resume.proposition.uuid,
+                annee_formation=command_result.resume.proposition.annee_demande,
+                statut_proposition=command_result.resume.proposition.statut,
+                formation=command_result.resume.proposition.formation,
                 experiences_academiques=command_result.resume.curriculum.experiences_academiques,
             )
 

@@ -27,7 +27,7 @@
 from django.test import TestCase
 
 from admission.api.serializers import (
-    candidate_has_first_cycle_fwb_experience_with_no_diploma_for_the_enrolment_training,
+    candidate_is_potentially_concerned_by_bama_15,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.tests.factories.curriculum import (
@@ -37,6 +37,7 @@ from admission.tests.factories.curriculum import (
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from base.models.enums.community import CommunityEnum
+from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.organization import OrganizationFactory
 from reference.models.enums.cycle import Cycle
@@ -60,7 +61,7 @@ class CandidateHasFirstCycleFwbExperienceWithNoDiplomaForTheEnrolmentTrainingTes
         )
 
         # No experience
-        res = candidate_has_first_cycle_fwb_experience_with_no_diploma_for_the_enrolment_training(admission)
+        res = candidate_is_potentially_concerned_by_bama_15(admission)
 
         self.assertFalse(res)
 
@@ -77,7 +78,7 @@ class CandidateHasFirstCycleFwbExperienceWithNoDiplomaForTheEnrolmentTrainingTes
             academic_year=self.academic_years[2020],
         )
 
-        res = candidate_has_first_cycle_fwb_experience_with_no_diploma_for_the_enrolment_training(admission)
+        res = candidate_is_potentially_concerned_by_bama_15(admission)
 
         self.assertTrue(res)
 
@@ -85,7 +86,7 @@ class CandidateHasFirstCycleFwbExperienceWithNoDiplomaForTheEnrolmentTrainingTes
         experience.program = self.second_cycle_program
         experience.save()
 
-        res = candidate_has_first_cycle_fwb_experience_with_no_diploma_for_the_enrolment_training(admission)
+        res = candidate_is_potentially_concerned_by_bama_15(admission)
 
         self.assertFalse(res)
 
@@ -94,7 +95,7 @@ class CandidateHasFirstCycleFwbExperienceWithNoDiplomaForTheEnrolmentTrainingTes
         experience.institute = self.german_speaking_institute
         experience.save()
 
-        res = candidate_has_first_cycle_fwb_experience_with_no_diploma_for_the_enrolment_training(admission)
+        res = candidate_is_potentially_concerned_by_bama_15(admission)
 
         self.assertFalse(res)
 
@@ -103,7 +104,7 @@ class CandidateHasFirstCycleFwbExperienceWithNoDiplomaForTheEnrolmentTrainingTes
         experience.obtained_diploma = True
         experience.save()
 
-        res = candidate_has_first_cycle_fwb_experience_with_no_diploma_for_the_enrolment_training(admission)
+        res = candidate_is_potentially_concerned_by_bama_15(admission)
 
         self.assertFalse(res)
 
@@ -113,14 +114,14 @@ class CandidateHasFirstCycleFwbExperienceWithNoDiplomaForTheEnrolmentTrainingTes
         experience_year.academic_year = self.academic_years[2021]
         experience_year.save()
 
-        res = candidate_has_first_cycle_fwb_experience_with_no_diploma_for_the_enrolment_training(admission)
+        res = candidate_is_potentially_concerned_by_bama_15(admission)
 
         self.assertFalse(res)
 
         admission.determined_academic_year = self.academic_years[2021]
         admission.save()
 
-        res = candidate_has_first_cycle_fwb_experience_with_no_diploma_for_the_enrolment_training(admission)
+        res = candidate_is_potentially_concerned_by_bama_15(admission)
 
         self.assertTrue(res)
 
@@ -129,9 +130,8 @@ class CandidateHasFirstCycleFwbExperienceWithNoDiplomaForTheEnrolmentTrainingTes
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
             training__academic_year=self.academic_years[2020],
             determined_academic_year=self.academic_years[2020],
+            training__education_group_type__name=TrainingType.MASTER_MA_120.name,
         )
-
-        str(admission.uuid)
 
         # Created experience with the valid criteria
         experience = EducationalExperienceFactory(
@@ -151,12 +151,12 @@ class CandidateHasFirstCycleFwbExperienceWithNoDiplomaForTheEnrolmentTrainingTes
             educationalexperience=experience,
         )
 
-        res = candidate_has_first_cycle_fwb_experience_with_no_diploma_for_the_enrolment_training(admission)
+        res = candidate_is_potentially_concerned_by_bama_15(admission)
 
         self.assertTrue(res)
 
         experience_valuation.delete()
 
-        res = candidate_has_first_cycle_fwb_experience_with_no_diploma_for_the_enrolment_training(admission)
+        res = candidate_is_potentially_concerned_by_bama_15(admission)
 
         self.assertFalse(res)

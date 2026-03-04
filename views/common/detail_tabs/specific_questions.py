@@ -28,7 +28,7 @@ from django.utils.functional import cached_property
 from django.views.generic import TemplateView
 
 from admission.api.serializers.person import (
-    candidate_has_first_cycle_fwb_experience_with_no_diploma_for_the_enrolment_training,
+    candidate_is_potentially_concerned_by_bama_15,
 )
 from admission.calendar.admission_calendar import (
     AdmissionPoolExternalEnrollmentChangeCalendar,
@@ -61,11 +61,7 @@ class SpecificQuestionsMixinView(AdmissionFormMixin, LoadDossierViewMixin):
 
     @cached_property
     def display_bama_15_questions(self):
-        return (
-            self.is_general
-            and self.proposition.formation.est_formation_pour_bama_15
-            and candidate_has_first_cycle_fwb_experience_with_no_diploma_for_the_enrolment_training(self.admission)
-        )
+        return self.is_general and candidate_is_potentially_concerned_by_bama_15(self.admission)
 
     @property
     def display_pool_questions(self):

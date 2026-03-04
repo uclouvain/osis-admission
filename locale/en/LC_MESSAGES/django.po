@@ -6926,9 +6926,6 @@ msgstr ""
 msgid "There is no required exam for this training."
 msgstr ""
 
-msgid "There was an error while getting the EPC documents list."
-msgstr ""
-
 msgid "Thesis field"
 msgstr ""
 
