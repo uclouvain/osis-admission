@@ -28,6 +28,12 @@
 {% block actions-group %}{% endblock %}
 
 {% block tab_content %}
+  <h2>Calcul de la financabilité</h2>
+  <p>
+    <strong>Etat</strong>: {{ financabilite.etat }}<br/>
+    {% if financabilite.situation %}<strong>Situation</strong>: {{ financabilite.situation }}{% endif %}
+  </p>
+  <pre>{{ financabilite_logs }}</pre>
   <h2>Calcul du pot</h2>
   {% if exception %}
     <p>
@@ -41,12 +47,6 @@
     </p>
   {% endif %}
   <pre>{{ pool_logs }}</pre>
-  <h2>Calcul de la financabilité</h2>
-  <p>
-    <strong>Etat</strong>: {{ financabilite.etat }}<br/>
-    {% if financabilite.situation %}<strong>Situation</strong>: {{ financabilite.situation }}{% endif %}
-  </p>
-  <pre>{{ financabilite_logs }}</pre>
 
   <h2>Vérification du projet (non recalculé au chargement de cette page)</h2>
   <pre>{{ verify_project|pprint }}</pre>
