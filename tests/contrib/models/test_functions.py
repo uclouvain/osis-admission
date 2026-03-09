@@ -23,26 +23,29 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.db import models
+import datetime
+
+from django.contrib.auth.models import User
+from django.db.models import F
+from django.test import TestCase
+
+from admission.models.functions import AddMonths
+from base.tests.factories.user import UserFactory
 
 
-class ToChar(models.Func):
-    function = 'TO_CHAR'
-    output_field = models.CharField()
+class FunctionsTestCase(TestCase):
+    def test_add_months(self):
+        created_user = UserFactory(
+            date_joined=datetime.datetime(2020, 1, 1),
+        )
+        user = User.objects.annotate(
+            date_joined_plus_0_month=AddMonths(F('date_joined'), months=0),
+            date_joined_plus_1_month=AddMonths(F('date_joined'), months=1),
+            date_joined_plus_5_months=AddMonths(F('date_joined'), months=5),
+            date_joined_plus_12_months=AddMonths(F('date_joined'), months=12),
+        ).get(pk=created_user.pk)
 
-
-class ArrayLength(models.Func):
-    function = 'CARDINALITY'
-
-
-class AddMonths(models.Func):
-    """
-    Adds a specific interval of months to a datetime value
-    """
-
-    function = 'INTERVAL'
-    template = "%(expressions)s + %(function)s '%(months)s MONTH'"
-    output_field = models.DateTimeField()
-
-    def __init__(self, expression, months, **kwargs):
-        super().__init__(expression, months=months, **kwargs)
+        self.assertEqual(user.date_joined_plus_0_month, datetime.datetime(2020, 1, 1))
+        self.assertEqual(user.date_joined_plus_1_month, datetime.datetime(2020, 2, 1))
+        self.assertEqual(user.date_joined_plus_5_months, datetime.datetime(2020, 6, 1))
+        self.assertEqual(user.date_joined_plus_12_months, datetime.datetime(2021, 1, 1))
