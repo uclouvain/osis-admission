@@ -915,23 +915,6 @@ def input_field_data(label, value, editable=True, mask=None, select_key=None):
     }
 
 
-@register.inclusion_tag(
-    'admission/general_education/includes/checklist/parcours_row_access_title.html',
-    takes_context=True,
-)
-def access_title_checkbox(context, experience_uuid, experience_type, current_year):
-    access_title: Optional[TitreAccesSelectionnableDTO] = context['access_titles'].get(experience_uuid)
-    if access_title and access_title.annee == current_year:
-        return {
-            'url': f'{context["access_title_url"]}?experience_uuid={experience_uuid}&experience_type={experience_type}',
-            'checked': access_title.selectionne,
-            'experience_uuid': experience_uuid,
-            'can_choose_access_title': context['can_choose_access_title'],
-            'can_choose_access_title_tooltip': context.get('can_choose_access_title_tooltip'),
-        }
-    return {}
-
-
 @register.filter
 def document_request_status_css_class(document_request_status):
     return {
