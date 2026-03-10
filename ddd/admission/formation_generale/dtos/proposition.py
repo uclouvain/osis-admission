@@ -128,6 +128,9 @@ class PropositionDTO(interface.DTO):
 
     type: str
 
+    est_concerne_par_le_bama_15: Optional[bool]
+    preuve_bama_15: List[str]
+
     @property
     def candidat_vip(self) -> bool:
         return any(
@@ -150,6 +153,10 @@ class PropositionDTO(interface.DTO):
     @property
     def est_admission(self):
         return self.type == TypeDemande.ADMISSION.name
+
+    @property
+    def annee_demande(self):
+        return self.annee_calculee or self.formation.annee
 
 
 @attr.dataclass(frozen=True, slots=True)

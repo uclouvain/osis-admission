@@ -186,7 +186,7 @@ class ExperienceAcademiqueDTOFactory(factory.Factory):
     nom_formation_equivalente_communaute_fr = ''
     cycle_formation = ''
     grade_academique_formation = '1'
-    est_autre_formation = None
+    formation_non_selectionnee_dans_liste_de_reference = None
     credits_acquis_bloc_1 = None
     avec_complements = None
     credits_inscrits_complements = None

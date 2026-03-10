@@ -24,20 +24,28 @@
 #
 # ##############################################################################
 from django.db import models
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
+from admission.ddd.admission.formation_generale.domain.model.enums import STATUTS_PROPOSITION_GENERALE_NON_SOUMISE
+from admission.ddd.admission.shared_kernel.domain.model.formation import FORMATIONS_POUR_BAMA_15
 from admission.ddd.admission.shared_kernel.dtos import IdentificationDTO
 from base.api.serializers.academic_year import RelatedAcademicYearField
+from base.models.enums.community import CommunityEnum
 from base.models.person import Person
 from base.utils.serializers import DTOSerializer
+from osis_profile.models import EducationalExperienceYear
 from reference.api.serializers.country import RelatedCountryField
+from reference.models.enums.cycle import Cycle
+from reference.services.belgian_niss_validator import BelgianNISSValidatorService
 
 __all__ = [
     "PersonIdentificationSerializer",
     "IdentificationDTOSerializer",
+    "GeneralIdentificationDTOSerializer",
+    "candidate_is_potentially_concerned_by_bama_15",
 ]
-
-from reference.services.belgian_niss_validator import BelgianNISSValidatorService
 
 
 class PersonIdentificationSerializer(serializers.ModelSerializer):
@@ -105,3 +113,34 @@ class IdentificationDTOSerializer(DTOSerializer):
 
     class Meta:
         source = IdentificationDTO
+
+
+def candidate_is_potentially_concerned_by_bama_15(admission):
+    if admission.training.education_group_type.name not in FORMATIONS_POUR_BAMA_15:
+        return False
+
+    target_year = (
+      admission.determined_academic_year.year
+      if admission.determined_academic_year_id else admission.training.academic_year.year
+    ) - 1
+
+    qs = EducationalExperienceYear.objects.filter(
+        educational_experience__person_id=admission.candidate_id,
+        academic_year__year=target_year,
+        educational_experience__obtained_diploma=False,
+        educational_experience__institute__community=CommunityEnum.FRENCH_SPEAKING.name,
+        educational_experience__program__cycle=Cycle.FIRST_CYCLE.name,
+    )
+
+    if admission.status not in STATUTS_PROPOSITION_GENERALE_NON_SOUMISE:
+        qs = qs.filter(educational_experience__educational_valuated_experiences__baseadmission_id=admission.uuid)
+
+    return qs.exists()
+
+
+class GeneralIdentificationDTOSerializer(IdentificationDTOSerializer):
+    est_potentiellement_concerne_par_le_bama_15 = serializers.SerializerMethodField()
+
+    @extend_schema_field(OpenApiTypes.BOOL)
+    def get_est_potentiellement_concerne_par_le_bama_15(self, _):
+        return candidate_is_potentially_concerned_by_bama_15(admission=self.context['admission'])

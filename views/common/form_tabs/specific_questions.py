@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,14 +27,14 @@ from attr import asdict
 from django.urls import reverse
 from django.views.generic import FormView
 
+from admission.constants import CONTEXT_CONTINUING, CONTEXT_GENERAL
 from admission.ddd.admission.formation_continue.commands import (
     CompleterQuestionsSpecifiquesParGestionnaireCommand as CompleterQuestionsSpecifiquesContinuesParGestionnaireCommand,
 )
 from admission.ddd.admission.formation_generale.commands import (
     CompleterQuestionsSpecifiquesParGestionnaireCommand as CompleterQuestionsSpecifiquesGeneralesParGestionnaireCommand,
 )
-from admission.forms.admission.specific_questions import GeneralSpecificQuestionsForm, ContinuingSpecificQuestionsForm
-from admission.constants import CONTEXT_GENERAL, CONTEXT_CONTINUING
+from admission.forms.admission.specific_questions import ContinuingSpecificQuestionsForm, GeneralSpecificQuestionsForm
 from admission.views.common.detail_tabs.specific_questions import SpecificQuestionsMixinView
 from infrastructure.messages_bus import message_bus_instance
 
@@ -97,6 +97,8 @@ class SpecificQuestionsFormView(SpecificQuestionsMixinView, FormView):
             kwargs['residential_country'] = self.identification_dto.pays_residence
             kwargs['display_pool_questions'] = self.display_pool_questions
             kwargs['enrolled_for_contingent_training'] = self.enrolled_for_contingent_training
+            kwargs['display_bama_15_questions'] = self.display_bama_15_questions
+            kwargs['training_year'] = self.proposition.annee_demande
 
         elif self.is_continuing:
             kwargs['display_residence_permit_question'] = self.display_residence_permit_question

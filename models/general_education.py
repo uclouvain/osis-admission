@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -520,6 +520,16 @@ class GeneralEducationAdmission(BaseAdmission):
         blank=True,
         null=True,
         verbose_name=_('Foreign access title equivalence effective date'),
+    )
+    is_concerned_by_bama_15 = models.BooleanField(
+        blank=True,
+        null=True,
+        verbose_name=_('Is concerned by BAMA15'),
+    )
+    bama_15_proof = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('Proof of re-enrolment for the bachelor\'s degree (BAMA15)'),
     )
 
     class Meta:
