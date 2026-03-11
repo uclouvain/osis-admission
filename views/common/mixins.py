@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import json
+import logging
 from typing import Dict, Optional, Union
 
 from django.contrib import messages
@@ -96,6 +97,8 @@ from ddd.logic.gestion_des_comptes.dto.periode_soumission_ticket import PeriodeS
 from ddd.logic.gestion_des_comptes.queries import GetPeriodeActiveSoumissionTicketQuery, GetPropositionFusionQuery
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import PermissionRequiredMixin
+
+logger = logging.getLogger(__name__)
 
 
 class AdmissionViewMixin(PermissionRequiredMixin, ContextMixin):
@@ -407,7 +410,10 @@ class LoadDossierViewMixin(AdmissionViewMixin):
                 if documents_count > 0:
                     tab_label_suffixes['documents'] = mark_safe('<div class="badge">EPC</div>')
         except Exception as e:
-            pass
+            logger.exception(
+                f"[Documents EPC] Erreur lors de la récupération du nombre de documents EPC pour le noma"
+                f" '{self.proposition.noma_candidat}'"
+            )
 
         return tab_label_suffixes
 

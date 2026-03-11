@@ -7658,6 +7658,9 @@ msgstr "Le type de l'élément du formulaire d'admission est inconnu (%(type)s).
 msgid "The university tuition fee is EURO %(montant)s."
 msgstr "Les droits d'inscription à l'Université s'élèvent à %(montant)s EUR."
 
+msgid "There are no EPC documents for this student."
+msgstr "Il n'y a pas de documents EPC pour cet étudiant."
+
 msgid "There can be no more CA members in the supervision group."
 msgstr ""
 "Il ne peut y avoir davantage de membres du comité d'accompagnement dans le "
