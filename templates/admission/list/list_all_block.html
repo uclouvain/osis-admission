@@ -8,7 +8,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -42,11 +42,14 @@
 {% block list_block_header %}
   {% translate 'Course' context 'admission' as course_label %}
   {% sortable_header_div 'numero_demande' _('Application no.') %}
+  {% sortable_header_div 'numero_demande_contingente' _('Limited-enrolment application no.') %}
+  {% sortable_header_div 'numero_tirage' _('Draw number') %}
   {% sortable_header_div 'nom_candidat' _('Name') %}
   {% sortable_header_div 'formation' course_label %}
   {% sortable_header_div 'nationalite_candidat' _('Nationality') %}
   {% sortable_header_div 'vip' _('VIP') %}
   {% sortable_header_div 'type_demande' _('Application status') %}
+  {% sortable_header_div 'etat_decision_sic' _('SIC decision status') %}
   {% sortable_header_div 'derniere_modification_le' _('Last modif.') %}
   {% sortable_header_div 'derniere_modification_par' _('Modification author') %}
   {% sortable_header_div 'date_confirmation' _('Confirmation date') %}
@@ -82,6 +85,12 @@
         ></span>
       </div>
     {% endif %}
+  </td>
+  <td>
+    {{ admission.numero_demande_contingente }}
+  </td>
+  <td>
+    {{ admission.numero_tirage|default_if_none:"" }}
   </td>
   <td>
     <div class="flex-content-no-wrap">
@@ -131,6 +140,9 @@
   <td>
     {% admission_status admission.etat_demande admission.type_formation as type_demande %}
     {{ type_demande }}
+  </td>
+  <td>
+    {{ admission. }}
   </td>
   <td>{{ admission.derniere_modification_le|date:'d/m/Y H:i' }}</td>
   {% if admission.derniere_modification_par_candidat %}

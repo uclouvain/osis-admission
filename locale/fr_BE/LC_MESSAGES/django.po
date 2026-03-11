@@ -140,6 +140,13 @@ msgstr ""
 "doctorat.html' target='_blank'>https://uclouvain.be/fr/chercher/valodoc/"
 "attestation-acces-au-doctorat.html</a>"
 
+msgid ""
+"<p>After verification, we have found that some documents are still missing "
+"from your application.</p>"
+msgstr ""
+"<p>Après vérification, nous constatons qu'il manque encore certains éléments "
+"indispensables à votre dossier.</p>"
+
 #, python-brace-format
 msgid "<p>Contact person for setting up your annual programme: {contact}</p>"
 msgstr ""
@@ -262,6 +269,9 @@ msgstr ""
 msgid "A new version of the analysis folder has been generated."
 msgstr "Une nouvelle version du dossier d'analyse a été générée."
 
+msgid "A non-financability rule must be selected."
+msgstr "Une règle de non-finançabilité doit être sélectionnée."
+
 msgid "A or B card"
 msgstr "Carte A ou B"
 
@@ -363,6 +373,14 @@ msgstr "Année académique :"
 
 msgid "Academics trainings view"
 msgstr "Vue formations académiques"
+
+msgid "Acceptance notification"
+msgstr "Notification d'acceptation"
+
+#, python-format
+msgid ""
+"Acceptance notification mail send the %(notified_on)s by %(notified_by)s"
+msgstr "Mail de notification d'acceptation envoyé le %(notified_on)s par %(notified_by)s"
 
 msgid "Acceptation condition"
 msgstr "Condition d'acceptation"
@@ -577,6 +595,9 @@ msgstr "Éléments de formulaire pour admission"
 msgid "Admission has been sent to EPC."
 msgstr "L'admission a été envoyé en EPC."
 
+msgid "Admission limited enrolment"
+msgstr "Admission contingenté"
+
 #, python-format
 msgid ""
 "Admission request for the academic year %(academic_year)s to the program:"
@@ -668,6 +689,16 @@ msgstr "Un type de formation"
 
 msgid "An holding mail has already been sent to the candidate."
 msgstr "Un courrier  de mise en attente a déjà été envoyé au candidat."
+
+#, python-format
+msgid ""
+"An import was already realized for %(training)s for the year "
+"%(academic_year)s, a new import will overwrite the data already present. Do "
+"you confirm the overwriting of the data ?"
+msgstr ""
+"Un import a déjà été réalisé pour %(training)s pour l’année "
+"%(academic_year)s, importer à nouveau écrasera les données actuellement "
+"présentes. Confirmez-vous l’écrasement des données ? "
 
 msgid ""
 "An integer greater than zero indicating the position of the item in relation "
@@ -977,6 +1008,9 @@ msgstr ""
 "Êtes-vous l'enfant d'un membre du personnel de l'UCLouvain ou de l'entité "
 "Martin V ?"
 
+msgid "Ares application number for trainings with quota"
+msgstr "Numéro d'application Ares pour les formations contingentées"
+
 msgid ""
 "As the email address of the faculty recipient is not defined, no email will "
 "be sent. Do you still want to send the application to the faculty?"
@@ -1180,6 +1214,13 @@ msgstr "Boîte"
 
 msgid "Brief justification"
 msgstr "Motivation succincte"
+
+msgid "Bulk acceptance notification"
+msgstr "Notification d'acceptation en lot'"
+
+#, python-format
+msgid "Bulk action for academic year %(academic_year)s"
+msgstr "Action en lot pour %(academic_year)s"
 
 msgid ""
 "By finalising my application, I undertake to pay the registration fees upon "
@@ -1396,6 +1437,9 @@ msgctxt "gender"
 msgid "Candidate"
 msgstr "Candidat·e"
 
+msgid "Candidate approval notification"
+msgstr "Notification d'acceptation du candidat"
+
 msgid "Candidate information"
 msgstr "Information du candidat"
 
@@ -1438,6 +1482,13 @@ msgstr "Mettre en copie les membres du comité d'accompagnement"
 
 msgid "Carbon-copy the supervisors"
 msgstr "Mettre en copie les promoteurs"
+
+msgid ""
+"Careful, one or more candidates have already received an acceptance "
+"notification."
+msgstr ""
+"Attention, un ou plusieurs candidats ont déjà reçu une notification "
+"d'acceptation."
 
 msgid "Category"
 msgstr "Catégorie"
@@ -1611,6 +1662,12 @@ msgstr "Fermer"
 
 msgid "Closed"
 msgstr "Clôturée"
+
+msgid "Columns"
+msgstr "Colonnes"
+
+msgid "Columns selection"
+msgstr "Sélection des colonnes"
 
 msgid "Comment"
 msgstr "Commentaire"
@@ -2098,8 +2155,17 @@ msgstr "Vérification de données auprès de tiers"
 msgid "Date"
 msgstr "Date"
 
+msgid "Date and time of the results publication"
+msgstr "Date et heure de la publication des résultats"
+
+msgid "Date for the response to the notification"
+msgstr "Date pour la réponse à la notification"
+
 msgid "Date of birth"
 msgstr "Date de naissance"
+
+msgid "Date of the drawing"
+msgstr "Date du tirage au sort"
 
 msgid "Date the application is sent to the supervision group"
 msgstr "Date d’envoi de la demande au comité d’accompagnement"
@@ -2219,6 +2285,9 @@ msgstr "Justificatif de la dérogation délégué·e/VRAE"
 
 msgid "Delegate VRAE dispensation comment"
 msgstr "Commentaire de la dérogation délégué·e/VRAE"
+
+msgid "Delegate comment"
+msgstr "Commentaire du délégué"
 
 msgid "Delegate/VRAE dispensation"
 msgstr "Dérogation délégué·e/VRAE"
@@ -2387,6 +2456,11 @@ msgstr "Avez-vous obtenu un diplôme de fin d'études secondaires ?"
 
 msgid "Do you have an international scholarship?"
 msgstr "Bénéficiez-vous d'une bourse internationale ?"
+
+msgid "Do you intend to make an enrolment directly for the second year?"
+msgstr ""
+"Désirez-vous faire une demande d’admission directement pour la deuxième "
+"année ?"
 
 msgid "Do you want to continue?"
 msgstr "Souhaitez-vous continuer ?"
@@ -2582,6 +2656,9 @@ msgstr "Télécharger un document"
 
 msgid "Dr"
 msgstr "Dr."
+
+msgid "Draw number"
+msgstr "Numéro de tirage"
 
 msgid "Dual degree scholarship"
 msgstr "Bourse double diplomation"
@@ -2952,11 +3029,17 @@ msgstr "L'examen est nécessaire pour cette formation."
 msgid "Exams"
 msgstr "Examens"
 
+msgid "Excel export for the court bailiff"
+msgstr "Export Excel pour l'huissier"
+
 msgid "Excel export of admission"
 msgstr "Export excel à partir d'admission"
 
 msgid "Excel export of admission applications"
 msgstr "Export excel des demandes d'admission"
+
+msgid "Excel import completed by the court bailiff"
+msgstr "Import de l'Excel complété"
 
 msgid "Exclude"
 msgstr "Exclure"
@@ -3119,6 +3202,9 @@ msgstr "Retour de FAC/CDD"
 
 msgid "File"
 msgstr "Fichier"
+
+msgid "File to import"
+msgstr "Fichier à importer"
 
 msgid "File with header"
 msgstr "Fichier avec en-tête"
@@ -4054,6 +4140,9 @@ msgstr ""
 msgid "Immediately"
 msgstr "Immédiatement"
 
+msgid "Import"
+msgstr "Importer"
+
 msgid "Import from csv file"
 msgstr "Importer depuis un fichier CSV"
 
@@ -4285,6 +4374,9 @@ msgstr "Convention cadre de stages"
 msgid "Invalid date"
 msgstr "Date invalide"
 
+msgid "Invalid file format ."
+msgstr "Date invalide"
+
 #, python-format
 msgid "Invalid property: %(config_params)s"
 msgid_plural "Invalid properties: %(config_params)s"
@@ -4370,6 +4462,16 @@ msgstr ""
 msgid "Language regime"
 msgstr "Régime linguistique"
 
+msgid "Last bulk notification at"
+msgstr "Dernière notification en lot à"
+
+msgid "Last bulk notification by"
+msgstr "Dernière notification en lot par"
+
+#, python-format
+msgid "Last bulk notification done the %(date)s by %(author)s."
+msgstr "Dernière notification en lot faite le %(date)s par %(author)s."
+
 msgid "Last degree level"
 msgstr "Niveau du dernier diplôme"
 
@@ -4381,6 +4483,16 @@ msgstr "Dernière email envoyé le"
 
 msgid "Last hour views:"
 msgstr "Vues de la dernière heure :"
+
+msgid "Last import at"
+msgstr "Dernier import à"
+
+msgid "Last import by"
+msgstr "Dernier import par"
+
+#, python-format
+msgid "Last import done the %(date)s by %(author)s."
+msgstr "Dernier import fait le %(date)s par %(author)s."
 
 #, python-format
 msgid "Last mail sent to the candidate on %(date)s by %(sender)s."
@@ -4453,6 +4565,15 @@ msgctxt "equivalence_type"
 msgid "Level equivalence"
 msgstr "Equivalence de niveau"
 
+msgid "Limited-enrolment application no."
+msgstr "Numéro de la demande contingenté"
+
+msgid "Limited-enrolment application number"
+msgstr "Numéro de la demande contingenté"
+
+msgid "Limited-enrolments"
+msgstr "Inscription tardive"
+
 msgid ""
 "Link to download a copy of the file related to the admission (frontoffice)."
 msgstr "Lien pour télécharger une copie du dossier (back-office)."
@@ -4487,6 +4608,10 @@ msgid ""
 msgstr ""
 "Lien vers la page de décision facultaire dans la checklist de l'admission "
 "(back-office)"
+
+msgid "Link to the request documents tab (front-office)"
+msgstr ""
+"Lien vers l'onglet des documents demandés de l'admission (front-office)"
 
 msgctxt "ways_hear_about_training"
 msgid "Linkedin"
@@ -4629,6 +4754,13 @@ msgstr ""
 "demande par l'UCLouvain"
 
 msgid ""
+"Mail sent to the candidate to confirm the submission of his training with "
+"quota."
+msgstr ""
+"E-mail envoyé au candidat pour confirmer la soumission de sa formation "
+"contingenté."
+
+msgid ""
 "Mail sent to the candidate to inform him that all requested documents have "
 "been received for continuing education"
 msgstr ""
@@ -4707,6 +4839,12 @@ msgstr ""
 "E-mail envoyé au candidat pour l'informer que certains documents réclamés "
 "ont été reçus et que d'autres sont encore manquants pour sa demande en "
 "formation générale"
+
+msgid ""
+"Mail sent to the candidate to notify him of the acceptance of their "
+"admission."
+msgstr ""
+"E-mail envoyé au candidat pour le notifier de l'acceptation de son admission."
 
 msgid ""
 "Mail sent to the manager to inform him that an application has been "
@@ -5032,6 +5170,9 @@ msgstr "Aucune étude en français"
 msgid "No PhD found."
 msgstr "Pas de doctorat trouvé."
 
+msgid "No date configured yet."
+msgstr "Aucune date configurée."
+
 msgid "No defense"
 msgstr "Non soutenue"
 
@@ -5053,6 +5194,9 @@ msgstr "Aucun document n'est spécifié comme réclamable."
 msgid "No document is defined as requestable. At least one is required."
 msgstr ""
 "Aucun document n'est spécifié comme réclamable. Au-moins un est requis."
+
+msgid "No documents are requested."
+msgstr "Auncun document n'est réclamé."
 
 msgid "No education group has been found for:"
 msgstr "Aucune formation n'a été trouvée pour :"
@@ -5126,6 +5270,46 @@ msgstr "Besoin dérogation non-progression"
 msgid "Non-resident (as defined by government decree)"
 msgstr "Non-résident (au sens du Décret)"
 
+msgid ""
+"Non-resident applicants may submit only one application among the limited "
+"enrollment courses. Any duplicate application will result in all "
+"applications being rejected."
+msgstr ""
+"Les candidats non-résidents ne peuvent introduire qu’une seule demande parmi "
+"les programmes contingentés. Toute double demande entraînera le rejet des "
+"candidatures."
+
+msgid "Non-resident contingent training acceptance"
+msgstr "Acceptation pour la formation contingentée non-résidente"
+
+msgid "Non-resident contingent training receipt"
+msgstr "Accusé de réception pour la formation contingentée non-résidente"
+
+msgid ""
+"Non-resident enrolment form for an enrolment beyond the first 60 credits"
+msgstr "Formulaire de demande d’admission au-delà des 60 premiers crédits"
+
+msgid "Non-resident file"
+msgstr "Dossier non-résident"
+
+msgid "Non-resident limited enrolment acceptance file"
+msgstr "Fichier d'acceptation du contingenté non-résident"
+
+msgid "Non-resident limited enrolment admission acceptance notification"
+msgstr "Notification d'acceptation de l'admission contingenté non-résidente"
+
+msgid "Non-resident limited-enrolment"
+msgstr "Contingenté non-résident"
+
+msgid "Non-resident limited-enrolment management"
+msgstr "Gestion des contingentés non-résident"
+
+msgid "Non-resident notified at"
+msgstr "Non-résident notifié le"
+
+msgid "Non-resident notified by"
+msgstr "Non-résident notifié par"
+
 msgid "Non-retrievable attachment"
 msgstr "Pièce jointe non récupérable"
 
@@ -5179,6 +5363,12 @@ msgctxt "dashboard-indicator pre-admission"
 msgid "Not in order of registration"
 msgstr "Pas en ordre d’inscription"
 
+msgid "Not limited-enrolment"
+msgstr "Non contingenté"
+
+msgid "Not notified"
+msgstr "Non notifié"
+
 msgid "Not specified"
 msgstr "Non précisée"
 
@@ -5194,6 +5384,26 @@ msgctxt "equivalence_type"
 msgid "Not specified"
 msgstr "Non renseigné"
 
+msgid "Not yet notified"
+msgstr "Non notifié"
+
+msgid "Notifications sent successfully."
+msgstr "Notification envoyé avec succès"
+
+msgid "Notify"
+msgstr "Notifier"
+
+msgid "Notify candidate"
+msgstr "Notifier le candidat"
+
+#, python-format
+msgid ""
+"Notify these %(admissions_count)s %(training)s candidates for "
+"%(academic_year)s?"
+msgstr ""
+"Notifier ces %(admissions_count)s %(training)s candidats pour "
+"%(academic_year)s?"
+
 msgctxt "address"
 msgid "Number"
 msgstr "Numéro"
@@ -5201,6 +5411,9 @@ msgstr "Numéro"
 msgctxt "admission"
 msgid "Number of additional years the candidate can have"
 msgstr "Nombre d'années supplémentaires auxquelles le candidat a droit"
+
+msgid "Number of places"
+msgstr "Nombre de places"
 
 msgctxt "admission"
 msgid "Number of previous registration"
@@ -5720,6 +5933,13 @@ msgstr "Merci de spécifier votre numéro de registre national belge."
 msgid "Please specify your old NOMA (matriculation number)."
 msgstr "Merci de spécifier votre ancien NOMA (numéro de matricule)."
 
+msgid ""
+"Position / last position to notify (= places + refusal in business order + "
+"withdrawal in business order )"
+msgstr ""
+"Position / dernière place à notifier (= places + refus en ordre utile + "
+"abandons en ordre utile)"
+
 msgctxt "admission"
 msgid "Postal address"
 msgstr "Adresse de correspondance"
@@ -5783,6 +6003,9 @@ msgstr "Traitement en Fac"
 
 msgid "Processing by Fac/CDD"
 msgstr "Traitement en Fac/CDD"
+
+msgid "Processing of the non-resident limited-enrolment application"
+msgstr "Traitement du dossier contingenté non-résident"
 
 msgid "Produce xls"
 msgstr "Produire un fichier xls"
@@ -5936,6 +6159,9 @@ msgstr ""
 "Document, Sélection et Texte. Contenu du message à afficher pour les "
 "éléments de type Message."
 
+msgid "Quota admission receipt"
+msgstr "Admission en doctorat"
+
 msgid "REDUCTION_VCRC"
 msgstr "Réduction VCRC"
 
@@ -5956,6 +6182,18 @@ msgstr "Refus 95 - accès S5"
 
 msgid "REFUS_ARTICLE_95_CERTIFICAT"
 msgstr "Refus 95 - certificat"
+
+msgid "REFUS_ARTICLE_95_CONTINGENTES_NR_DOSSIER_INCOMPLET"
+msgstr "Refus 95 contingentés NR - dossier incomplet"
+
+msgid "REFUS_ARTICLE_95_CONTINGENTES_NR_EXCLUSION"
+msgstr "Refus 95 contingentés NR - exclusion"
+
+msgid "REFUS_ARTICLE_95_CONTINGENTES_NR_NON_FINANCABLE"
+msgstr "Refus 95 contingentés NR - non-finançable"
+
+msgid "REFUS_ARTICLE_95_CONTINGENTES_NR_TITRE_D_ACCES"
+msgstr "Refus 95 contingentés NR - titre d’accès"
 
 msgid "REFUS_ARTICLE_95_GENERIQUE_IRRECEVABILITE"
 msgstr "Refus 95 générique - irrecevabilité"
@@ -6257,6 +6495,9 @@ msgstr ""
 "Carte de séjour permanent de membre de la famille d’un citoyen de l'Union "
 "européenne"
 
+msgid "Residence certificate"
+msgstr "Certificat de résidence"
+
 msgid "Residence permit covering the entire course"
 msgstr "Titre de séjour couvrant la totalité de la formation"
 
@@ -6275,6 +6516,12 @@ msgstr ""
 
 msgid "Resident (as defined by government decree)"
 msgstr "Résident (au sens du Décret)"
+
+msgid "Resident limited-enrolment"
+msgstr "Contingenté résident"
+
+msgid "Resident student form"
+msgstr "Dossier résident"
 
 msgid "Ressource not found."
 msgstr "Ressource introuvable."
@@ -6329,6 +6576,9 @@ msgstr "Rôle: Membre de la commission doctorale"
 msgid "Role: Doctorate committee members"
 msgstr "Rôle: Membres de la commission doctorale"
 
+msgid "Role: Limited enrolment delegate"
+msgstr "Rôle: Délégué contingenté"
+
 msgid "Role: Program manager"
 msgstr "Rôle: Gestionnaire d'admission d'un programme"
 
@@ -6367,6 +6617,9 @@ msgstr "Commentaire du SIC pour la Faculté"
 
 msgid "SIC decision"
 msgstr "Décision SIC"
+
+msgid "SIC decision status"
+msgstr "État de la décision SIC"
 
 msgid "SIGNING_IN_PROGRESS"
 msgstr "Signatures en cours"
@@ -6769,6 +7022,9 @@ msgstr "Date soumission"
 msgid "Submission date:"
 msgstr "Date de soumission :"
 
+msgid "Submit"
+msgstr "Soumis"
+
 msgid "Submit my decision"
 msgstr "Soumettre ma décision"
 
@@ -7106,6 +7362,9 @@ msgstr "La demande est actuellement en faculté"
 msgid "The application is in quarantine"
 msgstr "La demande est en quarantaine"
 
+msgid "The ares application number of the admission"
+msgstr "Le numéro d'application ares de la demande"
+
 msgid ""
 "The authorization can not be done while there is one or more documents to be "
 "requested immediately."
@@ -7210,6 +7469,9 @@ msgstr ""
 
 msgid "The data import has been completed."
 msgstr "L'import des données a été réalisé."
+
+msgid "The date before which the candidate must answer"
+msgstr "La date avant laquelle le candidat doit répondre"
 
 msgid "The decision of the signing actor"
 msgstr "La décision du signataire"
@@ -7412,6 +7674,12 @@ msgstr ""
 "La formation contingentée à laquelle vous vous inscrivez n'est pas encore "
 "ouverte."
 
+msgid "The link to the acceptance document"
+msgstr "Le lien vers le document d'acceptation"
+
+msgid "The link to the receipt"
+msgstr "Le lien vers l'accusé de réception"
+
 msgid "The maximum number of documents must be a positive number."
 msgstr "Le nombre maximum de documents doit être un nombre positif."
 
@@ -7491,6 +7759,9 @@ msgstr "Le programme est d'ores et déjà complet"
 msgid "The proposition has already been confirmed or is cancelled"
 msgstr "La proposition a déjà été confirmée ou est annulée"
 
+msgid "The proposition is not in progress."
+msgstr "La proposition n'est pas en cours."
+
 msgid ""
 "The proposition must be a late enrollment with a defined access condition."
 msgstr ""
@@ -7508,6 +7779,16 @@ msgstr "La proposition doit être une inscription."
 
 msgid "The proposition must be concerned by the payment."
 msgstr "La proposition doit être concernée par le paiement."
+
+msgid "The proposition must be confirmed to realize this action."
+msgstr "La proposition doit être confirmée pour réaliser cette action."
+
+msgid ""
+"The proposition must be for a contingent training for a non-resident "
+"candidat."
+msgstr ""
+"La proposition doit être pour une formation contingenté pour un candidat non-"
+"résident."
 
 msgid "The proposition must be in draft form to realize this action."
 msgstr "La proposition doit être en brouillon pour réaliser cette action."
@@ -7683,6 +7964,17 @@ msgstr "Il n'y a pas d'examen requis pour cette formation."
 
 msgid "There was an error while getting the EPC documents list."
 msgstr "Erreur lors de la récupération des documents EPC."
+
+msgid ""
+"There need to be at least one document with the request status to "
+"\"Immediately\"."
+msgstr ""
+"Il faut qu’au moins un document soit au statut de réclamation "
+"'immédiatement'. "
+
+#, python-brace-format
+msgid "There was an error while importing the file: {error}."
+msgstr "Erreur lors de l'importation du fichier : {error}."
 
 msgid "Thesis field"
 msgstr "Domaine de la thèse"
@@ -7981,6 +8273,15 @@ msgstr ""
 "sélectionnée et qu'au moins une ligne de titre d'accès soit cochée dans les "
 "vues du parcours."
 
+msgid ""
+"To send the acceptance notification, the SIC decision must be in one of the "
+"following status: To be processed, Manager follow-up, Dispensation needed or "
+"Approval to validate"
+msgstr ""
+"Pour réaliser la notification d’acceptation, la décision SIC doit être dans "
+"l’un des états suivants : A traiter, Suivi gestionnaire, Besoin dérogation "
+"ou Autorisation à valider."
+
 msgid "To the attention of"
 msgstr "A l'attention de"
 
@@ -7992,6 +8293,9 @@ msgid ""
 msgstr ""
 "Pour visualiser et éditer un document, merci d'en sélectionner un dans la "
 "liste ci-contre."
+
+msgid "Training"
+msgstr "Formation"
 
 msgctxt "admission"
 msgid "Training acronym"
@@ -8127,6 +8431,9 @@ msgstr ""
 "Jusqu'à ce que la proposition soit soumise, vous pouvez générer un "
 "récapitulatif de la proposition sur cette page."
 
+msgid "Update"
+msgstr "Mettre à jour"
+
 msgctxt "verb"
 msgid "Update"
 msgstr "Mettre à jour"
@@ -8142,6 +8449,9 @@ msgstr "Mettre à jour l'expérience"
 
 msgid "Update member"
 msgstr "Modifier le membre"
+
+msgid "Update saved successfully."
+msgstr "Modification sauvegardée avec succès"
 
 msgctxt "admission"
 msgid "Upload"
@@ -8645,23 +8955,6 @@ msgid ""
 msgstr ""
 "Vous ne pouvez pas demander la modification et la réorientation en même "
 "temps."
-
-#, python-format
-msgid ""
-"You cannot continue your application. The registration procedure for the "
-"<em>%(training_name)s</em> for non-resident students is not yet available. "
-"We invite you to consult the complete registration procedure on the "
-"following page: <a href=\"https://www.uclouvain.be/en/enrolment/limited-"
-"enrolment-courses\" target=\"_blank\">https://www.uclouvain.be/en/enrolment/"
-"limited-enrolment-courses</a>"
-msgstr ""
-"Vous ne pouvez pas poursuivre votre demande. La procédure d’inscription au "
-"programme de <em>%(training_name)s</em> pour les étudiants non-résidents "
-"n'est pas encore disponible. Nous vous invitons à prendre connaissance de la "
-"procédure d’inscription complète sur la page suivante : <a href=\"https://"
-"www.uclouvain.be/fr/inscriptions/etudes-contingentees\" "
-"target=\"_blank\">https://www.uclouvain.be/fr/inscriptions/etudes-"
-"contingentees</a>"
 
 msgid "You cannot enter a language more than once, please correct the form."
 msgstr ""

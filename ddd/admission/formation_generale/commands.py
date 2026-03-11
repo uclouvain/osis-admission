@@ -773,3 +773,24 @@ class RetyperDocumentCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class RecupererPeriodeInscriptionSpecifiqueBachelierMedecineDentisterieQuery(interface.QueryRequest):
     annee: Optional[int]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererAdmissionContingenteNonResidentANotifierQuery(interface.QueryRequest):
+    sigle_formation: str
+    annee_formation: int
+
+
+@attr.dataclass(frozen=True, slots=True)
+class NotifierEnLotFormationContingenteCommand(interface.CommandRequest):
+    sigle_formation: str
+    annee_formation: int
+    gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class NotifierCandidatContingenteNonResidentAcceptationCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+    objet_message: str
+    corps_message: str

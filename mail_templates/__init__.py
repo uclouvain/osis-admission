@@ -27,10 +27,11 @@ from osis_mail_template.exceptions import DuplicateMailTemplateIdentifier
 
 # When running tests, the test runner try to import it directly, re-registrering the identifiers
 try:
+    from .checklist import *
+    from .contingente import *
+    from .document import *
     from .signatures import *
     from .submission import *
-    from .document import *
-    from .checklist import *
 except DuplicateMailTemplateIdentifier:
     import sys
 

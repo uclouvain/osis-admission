@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -75,6 +75,7 @@ class WorkingListAutocomplete(autocomplete.Select2QuerySetView):
                 ],
                 'admission_statuses': result.admission_statuses,
                 'admission_education_types': result.admission_education_types,
+                'admission_contingentes': result.admission_contingentes,
                 'admission_type': result.admission_type,
                 'quarantine': result.quarantine,
             }

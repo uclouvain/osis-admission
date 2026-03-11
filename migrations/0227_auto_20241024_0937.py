@@ -24,6 +24,7 @@ def ajout_au_group_program_manager(apps, schema_editor):
     for gestionnaire in gestionnaires_iufc:
         gestionnaire.person.user.groups.add(group)
 
+
 class Migration(migrations.Migration):
 
     dependencies = [

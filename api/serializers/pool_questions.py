@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,9 +31,6 @@ from rest_framework import serializers
 from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription import (
     ICalendrierInscription,
 )
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
-    ResidenceAuSensDuDecretNonDisponiblePourInscriptionException,
-)
 from admission.models import GeneralEducationAdmission
 
 
@@ -42,26 +39,10 @@ class PoolQuestionsSerializer(serializers.ModelSerializer):
     reorientation_pool_academic_year = serializers.IntegerField(read_only=True, allow_null=True)
     modification_pool_end_date = serializers.DateTimeField(read_only=True, allow_null=True)
     modification_pool_academic_year = serializers.IntegerField(read_only=True, allow_null=True)
-    forbid_enrolment_limited_course_for_non_resident = serializers.SerializerMethodField()
-
-    @extend_schema_field(OpenApiTypes.STR)
-    def get_forbid_enrolment_limited_course_for_non_resident(self, obj):
-        return ResidenceAuSensDuDecretNonDisponiblePourInscriptionException.get_message(
-            nom_formation_fr=obj.training.title,
-            nom_formation_en=obj.training.title_english,
-        )
-
-    def get_field_names(self, *args, **kwargs):
-        field_names = super().get_field_names(*args, **kwargs)
-
-        # Add or remove the forbid enrolment limited course for non resident message depending of what is desired
-        if 'forbid_enrolment_limited_course_for_non_resident' in field_names:
-            if not ICalendrierInscription.INTERDIRE_INSCRIPTION_ETUDES_CONTINGENTES_POUR_NON_RESIDENT:
-                field_names.remove('forbid_enrolment_limited_course_for_non_resident')
-        elif ICalendrierInscription.INTERDIRE_INSCRIPTION_ETUDES_CONTINGENTES_POUR_NON_RESIDENT:
-            field_names.append('forbid_enrolment_limited_course_for_non_resident')
-
-        return field_names
+    non_resident_quota_pool_start_date = serializers.DateField(read_only=True, allow_null=True)
+    non_resident_quota_pool_start_time = serializers.TimeField(read_only=True, allow_null=True)
+    non_resident_quota_pool_end_date = serializers.DateField(read_only=True, allow_null=True)
+    non_resident_quota_pool_end_time = serializers.TimeField(read_only=True, allow_null=True)
 
     class Meta:
         model = GeneralEducationAdmission
@@ -74,9 +55,17 @@ class PoolQuestionsSerializer(serializers.ModelSerializer):
             'registration_change_form',
             'regular_registration_proof_for_registration_change',
             'is_non_resident',
+            'residence_certificate',
+            'residence_student_form',
+            'non_resident_file',
+            'non_resident_with_second_year_enrolment',
+            'non_resident_with_second_year_enrolment_form',
             'reorientation_pool_end_date',
             'reorientation_pool_academic_year',
             'modification_pool_end_date',
             'modification_pool_academic_year',
-            'forbid_enrolment_limited_course_for_non_resident',
+            'non_resident_quota_pool_start_date',
+            'non_resident_quota_pool_start_time',
+            'non_resident_quota_pool_end_date',
+            'non_resident_quota_pool_end_time',
         ]

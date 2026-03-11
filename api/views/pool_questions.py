@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -30,15 +30,17 @@ from rest_framework import status
 from rest_framework.generics import RetrieveAPIView
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
+from rest_framework.views import APIView
 
 from admission.api.serializers.pool_questions import PoolQuestionsSerializer
 from admission.calendar.admission_calendar import SIGLES_WITH_QUOTA
+from admission.ddd import CODE_BACHELIER_VETERINAIRE
+from admission.ddd.admission.formation_generale.commands import VerifierPropositionQuery
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     ModificationInscriptionExterneNonConfirmeeException,
     ReorientationInscriptionExterneNonConfirmeeException,
     ResidenceAuSensDuDecretNonRenseigneeException,
 )
-from admission.ddd.admission.formation_generale.commands import VerifierPropositionQuery
 from admission.models import GeneralEducationAdmission
 from admission.utils import (
     gather_business_exceptions,
@@ -129,8 +131,39 @@ class PoolQuestionsView(APIPermissionRequiredMixin, RetrieveAPIView):
             field_questions_to_display.append(academic_year_field_name)
 
         # Build relevant field list
-        if self.get_permission_object().training.acronym in SIGLES_WITH_QUOTA:
-            field_questions_to_display.append('is_non_resident')
+        if admission.training.acronym in SIGLES_WITH_QUOTA:
+            # Get dates for non-resident
+            calendar = (
+                AcademicCalendar.objects.filter(
+                    end_date__gte=datetime.date.today(),
+                    reference=AcademicCalendarTypes.ADMISSION_POOL_NON_RESIDENT_QUOTA.name,
+                )
+                .order_by('end_date')
+                .values('start_date', 'start_time', 'end_date', 'end_time')
+                .first()
+            )
+
+            setattr(admission, 'non_resident_quota_pool_start_date', calendar['start_date'])
+            setattr(admission, 'non_resident_quota_pool_start_time', calendar['start_time'])
+            setattr(admission, 'non_resident_quota_pool_end_date', calendar['end_date'])
+            setattr(admission, 'non_resident_quota_pool_end_time', calendar['end_time'])
+
+            field_questions_to_display += [
+                'is_non_resident',
+                'residence_certificate',
+                'residence_student_form',
+                'non_resident_file',
+                'non_resident_quota_pool_start_date',
+                'non_resident_quota_pool_start_time',
+                'non_resident_quota_pool_end_date',
+                'non_resident_quota_pool_end_time',
+            ]
+            if admission.training.acronym not in CODE_BACHELIER_VETERINAIRE:
+                field_questions_to_display += [
+                    'non_resident_with_second_year_enrolment',
+                    'non_resident_with_second_year_enrolment_form',
+                ]
+
         if admission.reorientation_pool_end_date is not None:
             field_questions_to_display += [
                 'is_belgian_bachelor',
@@ -161,6 +194,11 @@ class PoolQuestionsView(APIPermissionRequiredMixin, RetrieveAPIView):
         data = {
             # Reset to default if not defined
             'is_non_resident': None,
+            'residence_certificate': [],
+            'residence_student_form': [],
+            'non_resident_file': [],
+            'non_resident_with_second_year_enrolment': None,
+            'non_resident_with_second_year_enrolment_form': [],
             'is_belgian_bachelor': None,
             'is_external_modification': None,
             'is_external_reorientation': None,

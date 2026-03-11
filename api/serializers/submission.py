@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -53,6 +53,8 @@ class PropositionErrorsSerializer(serializers.Serializer):
     errors = PropositionErrorSerializer(many=True)
     pool_start_date = serializers.DateField(allow_null=True, required=False)
     pool_end_date = serializers.DateField(allow_null=True, required=False)
+    pool_start_time = serializers.TimeField(allow_null=True, required=False)
+    pool_end_time = serializers.TimeField(allow_null=True, required=False)
     access_conditions_url = serializers.CharField(allow_null=True, required=False)
     elements_confirmation = ElementConfirmationSerializer(many=True, allow_null=True, required=False)
 

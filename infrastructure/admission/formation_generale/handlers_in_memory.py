@@ -30,6 +30,9 @@ from admission.ddd.admission.formation_generale.test.factory.repository.paiement
     PaiementFraisDossierInMemoryRepositoryFactory,
 )
 from admission.ddd.admission.formation_generale.use_case.read import *
+from admission.ddd.admission.formation_generale.use_case.read.recuperer_admission_contingente_non_resident_a_notifier_service import (
+    recuperer_admission_contingente_non_resident_a_notifier,
+)
 from admission.ddd.admission.formation_generale.use_case.read.recuperer_pdf_temporaire_decision_sic_service import (
     recuperer_pdf_temporaire_decision_sic,
 )
@@ -42,6 +45,12 @@ from admission.ddd.admission.formation_generale.use_case.write.approuver_inscrip
 )
 from admission.ddd.admission.formation_generale.use_case.write.modifier_checklist_choix_formation_service import (
     modifier_checklist_choix_formation,
+)
+from admission.ddd.admission.formation_generale.use_case.write.notifier_candidat_formation_contingente_service import (
+    notifier_candidat_formation_contingente,
+)
+from admission.ddd.admission.formation_generale.use_case.write.notifier_en_lot_formation_contingente_service import (
+    notifier_en_lot_formation_contingente,
 )
 from admission.ddd.admission.formation_generale.use_case.write.refuser_admission_par_sic_service import (
     refuser_admission_par_sic,
@@ -84,6 +93,9 @@ from admission.ddd.admission.shared_kernel.use_case.write import (
 )
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.comptabilite import (
     ComptabiliteInMemoryTranslator,
+)
+from admission.infrastructure.admission.formation_generale.domain.service.in_memory.contingente import (
+    ContingenteInMemory,
 )
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.formation import (
     FormationGeneraleInMemoryTranslator,
@@ -201,6 +213,7 @@ _compteur_noma = CompteurAnnuelPourNomaInMemoryRepository()
 _experience_parcours_interne_translator = ExperienceParcoursInterneInMemoryTranslator()
 _validation_experience_parcours_anterieur_service = ValidationExperienceParcoursAnterieurInMemoryService()
 _raccrocher_experiences_curriculum = RaccrocherExperiencesCurriculumInMemory()
+_contingente = ContingenteInMemory()
 
 
 COMMAND_HANDLERS = {
@@ -252,6 +265,7 @@ COMMAND_HANDLERS = {
         academic_year_repository=_academic_year_repository,
         questions_specifiques_translator=_question_specific_translator,
         maximum_propositions_service=_maximum_propositions_autorisees,
+        contingente_service=_contingente,
     ),
     SoumettrePropositionCommand: lambda msg_bus, cmd: soumettre_proposition(
         msg_bus,
@@ -271,6 +285,7 @@ COMMAND_HANDLERS = {
         historique=_historique_global,
         raccrocher_experiences_curriculum=_raccrocher_experiences_curriculum,
         validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur_service,
+        contingente_service=_contingente,
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,
@@ -761,6 +776,7 @@ COMMAND_HANDLERS = {
             personne_connue_translator=_personne_connue_ucl_translator,
             experience_parcours_interne_translator=_experience_parcours_interne_translator,
             matricule_etudiant_service=_matricule_etudiant_service,
+            unites_enseignement_translator=_unites_enseignement_translator,
         )
     ),
     ApprouverInscriptionParSicCommand: (
@@ -793,6 +809,7 @@ COMMAND_HANDLERS = {
             proposition_repository=_proposition_repository,
             profil_candidat_translator=_profil_candidat_translator,
             campus_repository=_campus_repository,
+            unites_enseignement_translator=_unites_enseignement_translator,
             pdf_generation=_pdf_generation,
         )
     ),
@@ -865,6 +882,34 @@ COMMAND_HANDLERS = {
             academic_year_repository=_academic_year_repository,
             personne_connue_translator=_personne_connue_ucl_translator,
             emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
+        )
+    ),
+    RecupererAdmissionContingenteNonResidentANotifierQuery: (
+        lambda msg_bus, cmd: recuperer_admission_contingente_non_resident_a_notifier(
+            cmd=cmd,
+            contingente_service=_contingente,
+        )
+    ),
+    NotifierEnLotFormationContingenteCommand: (
+        lambda msg_bus, cmd: notifier_en_lot_formation_contingente(
+            cmd=cmd,
+            proposition_repository=_proposition_repository,
+            profil_candidat_translator=_profil_candidat_translator,
+            contingente_service=_contingente,
+            pdf_generation=_pdf_generation,
+            notification=_notification,
+            historique=_historique_formation_generale,
+        )
+    ),
+    NotifierCandidatContingenteNonResidentAcceptationCommand: (
+        lambda msg_bus, cmd: notifier_candidat_formation_contingente(
+            cmd=cmd,
+            proposition_repository=_proposition_repository,
+            profil_candidat_translator=_profil_candidat_translator,
+            contingente_service=_contingente,
+            pdf_generation=_pdf_generation,
+            notification=_notification,
+            historique=_historique_formation_generale,
         )
     ),
 }
