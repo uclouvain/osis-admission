@@ -321,7 +321,7 @@ class PropositionFactory(factory.Factory):
             ),
             nom_personne_contact_programme_annuel_annuel=factory.Faker('last_name'),
             email_personne_contact_programme_annuel_annuel=factory.Faker('email'),
-            droits_inscription_montant=DroitsInscriptionMontant.INSCRIPTION_REGULIERE,
+            droits_inscription_montant=DroitsInscriptionMontant.INSCRIPTION_REGULIERE_835,
             est_mobilite=False,
             doit_se_presenter_en_sic=False,
             checklist_actuelle=factory.SubFactory(
