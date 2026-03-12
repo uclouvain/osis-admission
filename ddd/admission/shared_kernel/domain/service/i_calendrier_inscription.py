@@ -212,6 +212,7 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
         formation_translator: 'IFormationTranslator',
         annee_soumise: int = None,
         pool_soumis: 'AcademicCalendarTypes' = None,
+        candidat_est_en_poursuite_directe: bool = None,
     ) -> None:
         determination = cls.determiner_annee_academique_et_pot(
             formation_id,
@@ -221,10 +222,14 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
             profil_candidat_translator,
             proposition,
         )
-        # Si le candidat s'inscrit pour une acad future, mais que la formation n'existe pas dans cette acad
-        if determination.annee != formation_id.annee:
-            if not formation_translator.verifier_existence(formation_id.sigle, determination.annee):
-                raise FormationNonTrouveeException(formation_id.sigle, determination.annee)
+        # Vérifier que la formation a bien lieu pendant l'année académique déterminée et que le candidat peut y
+        # participer dans le cas où la formation n'est accessible que dans le cadre d'une poursuite directe
+        if not formation_translator.verifier_existence(
+            sigle=formation_id.sigle,
+            annee=determination.annee,
+            candidat_est_en_poursuite_directe=candidat_est_en_poursuite_directe,
+        ):
+            raise FormationNonTrouveeException(formation_id.sigle, determination.annee)
 
         cls.verifier_periode_inscription_specifique(formation=formation, annee_determinee=determination.annee)
 

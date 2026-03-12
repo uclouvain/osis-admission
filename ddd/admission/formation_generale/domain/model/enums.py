@@ -145,9 +145,15 @@ STATUTS_PROPOSITION_GENERALE_SOUMISE = (
     }
 )
 
-STATUTS_PROPOSITION_GENERALE_SOUMISE_HORS_FRAIS_DOSSIER = (
+STATUTS_PROPOSITION_GENERALE_CONSIDEREE_COMME_ENVOYEE = (
     set(ChoixStatutPropositionGenerale.get_names())
-    - STATUTS_PROPOSITION_GENERALE_NON_SOUMISE_OU_FRAIS_DOSSIER_EN_ATTENTE
+    - {
+        ChoixStatutPropositionGenerale.EN_BROUILLON.name,
+        ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name,
+        ChoixStatutPropositionGenerale.ANNULEE.name,
+        ChoixStatutPropositionGenerale.CLOTUREE.name,
+        ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name,
+    }
 )
 
 # Le gestionnaire FAC ou SIC à la main hors inscription autorisée
@@ -285,3 +291,8 @@ class OngletsChecklist(ChoiceEnum):
     specificites_formation = _('Training specificities')
     decision_facultaire = _('Decision of the faculty')
     decision_sic = _('Decision of SIC')
+
+
+class RaisonPlusieursDemandesMemesCycleEtAnnee(ChoiceEnum):
+    ANNULER_PRECEDENTES_DEMANDES = _('Create this new application in and cancel your other ones')
+    SUIVRE_EN_PARALLELE = _('Take several courses at the same time')

@@ -75,6 +75,15 @@ class IInscriptionsUCLCandidatService(interface.DomainService):
 
     @classmethod
     @abstractmethod
+    def est_diplome(
+        cls,
+        matricule_candidat: str,
+        sigle_formation: str,
+    ) -> bool:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
     def est_en_poursuite_directe(
         cls,
         matricule_candidat: str,

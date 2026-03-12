@@ -47,15 +47,20 @@ from admission.ddd.admission.formation_continue.commands import (
     SoumettrePropositionCommand as SoumettrePropositionContinueCommand,
 )
 from admission.ddd.admission.formation_generale.commands import (
-    RecupererElementsConfirmationQuery as RecupererElementsConfirmationGeneralQuery,
+    RecupererElementsConfirmationQuery as RecupererElementsConfirmationGeneralQuery, RecupererTypeDemandeQuery,
+    SpecifierRaisonPlusieursDemandesMemeCycleMemeAnneeCommand,
 )
 from admission.ddd.admission.formation_generale.commands import (
     SoumettrePropositionCommand as SoumettrePropositionGeneraleCommand,
 )
+from admission.ddd.admission.formation_generale.domain.model.enums import \
+    STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC_OU_FRAIS_DOSSIER_EN_ATTENTE, STATUTS_PROPOSITION_GENERALE_SOUMISE
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     ConditionsAccessNonRempliesException,
     PoolNonResidentContingenteNonOuvertException,
 )
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
+from admission.models import GeneralEducationAdmission
 from admission.utils import (
     gather_business_exceptions,
     get_access_conditions_url,
@@ -185,6 +190,7 @@ class SubmitGeneralEducationPropositionView(
     permission_mapping = {
         'GET': 'admission.submit_generaleducationadmission',
         'POST': 'admission.submit_generaleducationadmission',
+        'PUT': 'admission.submit_generaleducationadmission',
     }
 
     def get_permission_object(self):
@@ -217,9 +223,26 @@ class SubmitGeneralEducationPropositionView(
             data['pool_end_date'] = period.end_date
 
         self.add_access_conditions_url(data)
+
+        data['display_several_applications_same_cycle_same_year_questions'] = False
+
         if not data['errors']:
             cmd = RecupererElementsConfirmationGeneralQuery(self.kwargs['uuid'])
             data['elements_confirmation'] = message_bus_instance.invoke(cmd)
+
+            application_type = message_bus_instance.invoke(
+                RecupererTypeDemandeQuery(uuid_proposition=self.kwargs['uuid'])
+            )
+
+            if application_type == TypeDemande.INSCRIPTION.name:
+                has_other_applications_same_cycle = GeneralEducationAdmission.objects.filter(
+                    candidate=admission.candidate,
+                    training__education_group_type__cycle=admission.training.education_group_type.cycle,
+                    training__academic_year_id=admission.training.academic_year_id,
+                    status__in=STATUTS_PROPOSITION_GENERALE_SOUMISE,
+                ).exclude(uuid=admission.uuid).exists()
+
+                data['display_several_applications_same_cycle_same_year_questions'] = has_other_applications_same_cycle
 
         return Response(PropositionErrorsSerializer(data).data, status=status.HTTP_200_OK)
 
@@ -236,6 +259,24 @@ class SubmitGeneralEducationPropositionView(
         message_bus_instance.invoke(cmd)
         admission = self.get_permission_object()
         serializer = serializers.GeneralEducationPropositionIdentityWithStatusSerializer(instance=admission)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        request=serializers.SpecifierRaisonPlusieursDemandesMemeCycleMemeAnneeCommandSerializer,
+        responses=serializers.PropositionIdentityDTOSerializer,
+        operation_id='specify_reason_multiple_applications_same_cycle_same_year',
+    )
+    def put(self, request, *args, **kwargs):
+        """Submit the proposition."""
+        serializer = serializers.SpecifierRaisonPlusieursDemandesMemeCycleMemeAnneeCommandSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        result = message_bus_instance.invoke(
+            SpecifierRaisonPlusieursDemandesMemeCycleMemeAnneeCommand(
+                **serializer.data,
+                uuid_proposition=str(kwargs['uuid']),
+            )
+        )
+        serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 

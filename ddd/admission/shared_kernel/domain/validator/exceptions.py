@@ -30,6 +30,7 @@ from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
 
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from base.utils.utils import format_academic_year
 from osis_common.ddd.interface import BusinessException
 
 
@@ -265,3 +266,17 @@ class DocumentsReclamesException(BusinessException):
     def __init__(self, **kwargs):
         message = _("Some documents are still requested.")
         super().__init__(message, **kwargs)
+
+
+class DemandePourCetteFormationDejaEnvoyeeException(BusinessException):
+    status_code = "ADMISSION-26"
+
+    def __init__(self, training_year: int, **kwargs):
+        message = _(
+            "You have already submitted a request for this course which will take place during "
+            "the year {training_year}."
+        ) % {
+            'training_year': format_academic_year(training_year, short=True)
+        }
+        super().__init__(message, **kwargs)
+

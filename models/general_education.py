@@ -45,7 +45,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     DroitsInscriptionMontant,
     MobiliteNombreDeMois,
     PoursuiteDeCycle,
-    TypeDeRefus,
+    TypeDeRefus, RaisonPlusieursDemandesMemesCycleEtAnnee,
 )
 from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import (
     EtatEquivalenceTitreAcces,
@@ -520,6 +520,20 @@ class GeneralEducationAdmission(BaseAdmission):
         blank=True,
         null=True,
         verbose_name=_('Foreign access title equivalence effective date'),
+    )
+
+    several_admissions_same_cycle_same_year_reason = models.CharField(
+        choices=RaisonPlusieursDemandesMemesCycleEtAnnee.choices(),
+        blank=True,
+        default='',
+        max_length=30,
+        verbose_name=_('Reason to create several applications for a same cycle and a same year.'),
+    )
+
+    several_admissions_same_cycle_same_year_justification = models.TextField(
+        blank=True,
+        verbose_name=_('Text justification to create several applications for a same cycle and a same year.'),
+        default='',
     )
 
     class Meta:

@@ -58,6 +58,7 @@ class PropositionBuilder(interface.RootEntityBuilder):
         proposition_repository: 'IPropositionRepository',
         formation_id: 'FormationIdentity',
         bourses_ids: Dict[str, BourseIdentity],
+        est_en_poursuite: bool,
     ) -> 'Proposition':
         return Proposition(
             entity_id=PropositionIdentityBuilder.build(),
@@ -71,4 +72,5 @@ class PropositionBuilder(interface.RootEntityBuilder):
             bourse_erasmus_mundus_id=bourses_ids.get(cmd.bourse_erasmus_mundus) if cmd.bourse_erasmus_mundus else None,
             reference=proposition_repository.recuperer_reference_suivante(),
             auteur_derniere_modification=cmd.matricule_candidat,
+            est_en_poursuite=est_en_poursuite,
         )

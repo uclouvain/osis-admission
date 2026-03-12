@@ -68,7 +68,7 @@ from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldSpecifieSiDiplomeEtudesSecondairesPourBachelier,
     ShouldStatutsChecklistExperiencesEtreValidees,
     ShouldTitreAccesEtreSelectionne,
-    ShouldVisaEtreComplete,
+    ShouldVisaEtreComplete, ShouldCandidatEtreDelibere, ShouldCandidatPasEtreDiplomeFormation,
 )
 from admission.ddd.admission.formation_generale.domain.validator._should_examen_etre_completees import (
     ShouldSpecifieExamenSiRequis,
@@ -809,6 +809,8 @@ class RefuserParSicAValiderValidatorList(TwoStepsMultipleBusinessExceptionListVa
 class ChoixFormationValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     formation: Formation
     proposition: 'Proposition'
+    candidat_est_delibere: bool
+    candidat_est_diplome_formation: bool
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -818,5 +820,11 @@ class ChoixFormationValidatorList(TwoStepsMultipleBusinessExceptionListValidator
             ShouldRenseignerBoursesEtudesSelonFormation(
                 proposition=self.proposition,
                 formation=self.formation,
-            )
+            ),
+            ShouldCandidatEtreDelibere(
+                candidat_est_delibere=self.candidat_est_delibere,
+            ),
+            ShouldCandidatPasEtreDiplomeFormation(
+                candidat_est_diplome_formation=self.candidat_est_diplome_formation,
+            ),
         ]

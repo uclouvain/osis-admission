@@ -59,6 +59,10 @@ from admission.ddd.admission.shared_kernel.domain.model._candidat_signaletique i
     CandidatSignaletique,
 )
 from admission.ddd.admission.shared_kernel.domain.model.formation import Formation
+from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import \
+    IAnneeInscriptionFormationTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_ucl_candidat import \
+    IInscriptionsUCLCandidatService
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
@@ -485,10 +489,26 @@ class ProfilCandidat(interface.DomainService):
         ).validate()
 
     @classmethod
-    def verifier_choix_formation_generale(cls, proposition, formation: Formation):
+    def verifier_choix_formation_generale(
+        cls,
+        proposition,
+        formation: Formation,
+        inscriptions_ucl_candidat_service: IInscriptionsUCLCandidatService,
+        annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
+    ):
+        candidat_est_delibere = inscriptions_ucl_candidat_service.est_delibere(
+            matricule_candidat=proposition.matricule_candidat,
+            annee_inscription_formation_translator=annee_inscription_formation_translator,
+        )
+        candidat_est_diplome_formation = inscriptions_ucl_candidat_service.est_diplome(
+            matricule_candidat=proposition.matricule_candidat,
+            sigle_formation=formation.entity_id.sigle,
+        )
         ChoixFormationValidatorList(
             proposition=proposition,
             formation=formation,
+            candidat_est_delibere=candidat_est_delibere,
+            candidat_est_diplome_formation=candidat_est_diplome_formation,
         ).validate()
 
     @classmethod

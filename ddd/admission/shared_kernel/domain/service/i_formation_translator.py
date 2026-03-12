@@ -32,10 +32,19 @@ from osis_common.ddd import interface
 class IFormationTranslator(interface.DomainService):
     @classmethod
     @abstractmethod
-    def verifier_existence(cls, sigle: str, annee: int) -> bool:
+    def verifier_existence(cls, sigle: str, annee: int, candidat_est_en_poursuite_directe: bool = None) -> bool:
         raise NotImplementedError
 
     @classmethod
-    def lever_exception_si_formation_inexistante(cls, sigle: str, annee: int):
-        if not cls.verifier_existence(sigle=sigle, annee=annee):
+    def lever_exception_si_formation_inexistante(
+        cls,
+        sigle: str,
+        annee: int,
+        candidat_est_en_poursuite_directe: bool = None,
+    ):
+        if not cls.verifier_existence(
+            sigle=sigle,
+            annee=annee,
+            candidat_est_en_poursuite_directe=candidat_est_en_poursuite_directe,
+        ):
             raise FormationNonTrouveeException

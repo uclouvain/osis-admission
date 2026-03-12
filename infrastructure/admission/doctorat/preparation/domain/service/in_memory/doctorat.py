@@ -188,5 +188,5 @@ class DoctoratInMemoryTranslator(IDoctoratTranslator):
         ]
 
     @classmethod
-    def verifier_existence(cls, sigle: str, annee: int) -> bool:  # pragma: no cover
+    def verifier_existence(cls, sigle: str, annee: int, candidat_est_en_poursuite_directe: bool = None) -> bool:
         return any(True for doc in cls.doctorats if doc.entity_id.sigle == sigle and doc.entity_id.annee == annee)

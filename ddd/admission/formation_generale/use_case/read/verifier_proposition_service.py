@@ -25,9 +25,13 @@
 # ##############################################################################
 import datetime
 
+from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import \
+    IAnneeInscriptionFormationTranslator
 from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription import (
     ICalendrierInscription,
 )
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_ucl_candidat import \
+    IInscriptionsUCLCandidatService
 from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions import (
     IMaximumPropositionsAutorisees,
 )
@@ -67,6 +71,8 @@ def verifier_proposition(
     academic_year_repository: 'IAcademicYearRepository',
     questions_specifiques_translator: 'IQuestionSpecifiqueTranslator',
     maximum_propositions_service: 'IMaximumPropositionsAutorisees',
+    inscriptions_ucl_candidat_service: IInscriptionsUCLCandidatService,
+    annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -95,6 +101,11 @@ def verifier_proposition(
         proposition.equivalence_diplome,
     )
 
+    candidat_est_inscrit_recemment_ucl = inscriptions_ucl_candidat_service.est_inscrit_recemment(
+        matricule_candidat=proposition.matricule_candidat,
+        annee_inscription_formation_translator=annee_inscription_formation_translator,
+    )
+
     # WHEN
     VerifierProposition.verifier(
         proposition_candidat=proposition,
@@ -108,6 +119,9 @@ def verifier_proposition(
         titres=titres,
         formation=formation,
         annee_formation=annee_formation,
+        annee_inscription_formation_translator=annee_inscription_formation_translator,
+        inscriptions_ucl_candidat_service=inscriptions_ucl_candidat_service,
+        candidat_est_inscrit_recemment_ucl=candidat_est_inscrit_recemment_ucl,
     )
 
     # THEN

@@ -41,7 +41,11 @@ from admission.ddd.admission.formation_generale.repository.i_proposition import 
 from admission.ddd.admission.shared_kernel.domain.builder.formation_identity import (
     FormationIdentityBuilder,
 )
+from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import \
+    IAnneeInscriptionFormationTranslator
 from admission.ddd.admission.shared_kernel.domain.service.i_historique import IHistorique
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_ucl_candidat import \
+    IInscriptionsUCLCandidatService
 from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions import (
     IMaximumPropositionsAutorisees,
 )
@@ -55,12 +59,22 @@ def initier_proposition(
     bourse_translator: 'IBourseTranslator',
     maximum_propositions_service: 'IMaximumPropositionsAutorisees',
     historique: 'IHistorique',
+    inscriptions_ucl_candidat_service: IInscriptionsUCLCandidatService,
+    annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
 ) -> 'PropositionIdentity':
     # GIVEN
     formation_id = FormationIdentityBuilder.build(sigle=cmd.sigle_formation, annee=cmd.annee_formation)
+
+    candidat_est_en_poursuite_directe = inscriptions_ucl_candidat_service.est_en_poursuite_directe(
+        matricule_candidat=cmd.matricule_candidat,
+        sigle_formation=cmd.sigle_formation,
+        annee_inscription_formation_translator=annee_inscription_formation_translator,
+    )
+
     formation_translator.lever_exception_si_formation_inexistante(
         sigle=cmd.sigle_formation,
         annee=cmd.annee_formation,
+        candidat_est_en_poursuite_directe=candidat_est_en_poursuite_directe
     )
     maximum_propositions_service.verifier_nombre_propositions_en_cours(cmd.matricule_candidat)
     bourses_ids = bourse_translator.search(
@@ -71,12 +85,18 @@ def initier_proposition(
         ]
     )
 
+    est_en_poursuite = inscriptions_ucl_candidat_service.est_en_poursuite(
+        matricule_candidat=cmd.matricule_candidat,
+        sigle_formation=formation_id.sigle,
+    )
+
     # WHEN
     proposition = PropositionBuilder().initier_proposition(
         cmd=cmd,
         proposition_repository=proposition_repository,
         formation_id=formation_id,
         bourses_ids=bourses_ids,
+        est_en_poursuite=est_en_poursuite,
     )
 
     # THEN

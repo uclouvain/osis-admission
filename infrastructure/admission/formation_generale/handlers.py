@@ -111,6 +111,8 @@ from admission.infrastructure.admission.shared_kernel.domain.service.emplacement
     EmplacementsDocumentsPropositionTranslator,
 )
 from admission.infrastructure.admission.shared_kernel.domain.service.historique import Historique as HistoriqueGlobal
+from admission.infrastructure.admission.shared_kernel.domain.service.inscriptions_ucl_candidat import \
+    InscriptionsUCLCandidatService
 from admission.infrastructure.admission.shared_kernel.domain.service.matricule_etudiant import MatriculeEtudiantService
 from admission.infrastructure.admission.shared_kernel.domain.service.maximum_propositions import (
     MaximumPropositionsAutorisees,
@@ -165,6 +167,8 @@ COMMAND_HANDLERS = {
         bourse_translator=BourseTranslator(),
         maximum_propositions_service=MaximumPropositionsAutorisees(),
         historique=HistoriqueGlobal(),
+        inscriptions_ucl_candidat_service=InscriptionsUCLCandidatService(),
+        annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
     ),
     ListerPropositionsCandidatQuery: lambda msg_bus, cmd: lister_propositions_candidat(
         cmd,
@@ -179,6 +183,7 @@ COMMAND_HANDLERS = {
         proposition_repository=PropositionRepository(),
         formation_translator=FormationGeneraleTranslator(),
         bourse_translator=BourseTranslator(),
+        inscriptions_ucl_candidat_service=InscriptionsUCLCandidatService(),
     ),
     ModifierChecklistChoixFormationCommand: lambda msg_bus, cmd: modifier_checklist_choix_formation(
         msg_bus,
@@ -201,6 +206,8 @@ COMMAND_HANDLERS = {
         academic_year_repository=AcademicYearRepository(),
         questions_specifiques_translator=QuestionSpecifiqueTranslator(),
         maximum_propositions_service=MaximumPropositionsAutorisees(),
+        inscriptions_ucl_candidat_service=InscriptionsUCLCandidatService(),
+        annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
     ),
     SoumettrePropositionCommand: lambda msg_bus, cmd: soumettre_proposition(
         msg_bus,
@@ -220,6 +227,8 @@ COMMAND_HANDLERS = {
         historique=HistoriqueGlobal(),
         raccrocher_experiences_curriculum=RaccrocherExperiencesCurriculum(),
         validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
+        inscriptions_ucl_candidat_service=InscriptionsUCLCandidatService(),
+        annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,
@@ -254,6 +263,8 @@ COMMAND_HANDLERS = {
         element_confirmation=ElementsConfirmation(),
         formation_translator=FormationGeneraleTranslator(),
         profil_candidat_translator=ProfilCandidatTranslator(),
+        inscriptions_ucl_candidat_service=InscriptionsUCLCandidatService(),
+        annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
     ),
     RecupererResumePropositionQuery: lambda msg_bus, cmd: recuperer_resume_proposition(
         cmd,
@@ -819,6 +830,22 @@ COMMAND_HANDLERS = {
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
             emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
+        )
+    ),
+    RecupererTypeDemandeQuery: lambda msg_bus, cmd: recuperer_type_demande(
+        cmd=cmd,
+        proposition_repository=PropositionRepository(),
+        formation_translator=FormationGeneraleTranslator(),
+        profil_candidat_translator=ProfilCandidatTranslator(),
+        titres_acces=TitresAcces(),
+        calendrier_inscription=CalendrierInscription(),
+        inscriptions_ucl_candidat_service=InscriptionsUCLCandidatService(),
+        annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
+    ),
+    SpecifierRaisonPlusieursDemandesMemeCycleMemeAnneeCommand: (
+        lambda msg_bus, cmd: specifier_raison_plusieurs_demandes_meme_cycle_meme_annee(
+            cmd=cmd,
+            proposition_repository=PropositionRepository(),
         )
     ),
 }

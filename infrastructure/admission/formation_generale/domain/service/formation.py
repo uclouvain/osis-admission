@@ -230,17 +230,24 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
         )
 
     @classmethod
-    def verifier_existence(cls, sigle: str, annee: int) -> bool:
+    def verifier_existence(cls, sigle: str, annee: int, candidat_est_en_poursuite_directe: bool = None) -> bool:
         from infrastructure.messages_bus import message_bus_instance
 
-        dtos = message_bus_instance.invoke(
+        dtos: list[TrainingDto] = message_bus_instance.invoke(
             SearchFormationsCommand(
                 sigles_annees=[(sigle, annee)],
                 est_inscriptible=True,
                 uclouvain_est_institution_reference=True,
                 inscription_web=True,
-                statut=ActiveStatusEnum.ACTIVE.name,
                 types=list(AnneeInscriptionFormationTranslator.GENERAL_EDUCATION_TYPES),
             )
         )
-        return bool(dtos)
+
+        valid_statuses = [
+            ActiveStatusEnum.ACTIVE.name,
+            ActiveStatusEnum.RE_REGISTRATION.name,
+        ] if candidat_est_en_poursuite_directe else [
+            ActiveStatusEnum.ACTIVE.name,
+        ]
+
+        return any(training.status in valid_statuses for training in dtos)

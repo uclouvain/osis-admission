@@ -124,6 +124,8 @@ from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.e
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.historique import (
     HistoriqueInMemory as HistoriqueGlobalInMemory,
 )
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.inscriptions_ucl_candidat import \
+    InscriptionsUCLCandidatInMemoryService
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.matricule_etudiant import (
     MatriculeEtudiantInMemoryService,
 )
@@ -201,6 +203,7 @@ _compteur_noma = CompteurAnnuelPourNomaInMemoryRepository()
 _experience_parcours_interne_translator = ExperienceParcoursInterneInMemoryTranslator()
 _validation_experience_parcours_anterieur_service = ValidationExperienceParcoursAnterieurInMemoryService()
 _raccrocher_experiences_curriculum = RaccrocherExperiencesCurriculumInMemory()
+_inscriptions_ucl_candidat_service = InscriptionsUCLCandidatInMemoryService()
 
 
 COMMAND_HANDLERS = {
@@ -216,6 +219,8 @@ COMMAND_HANDLERS = {
         bourse_translator=_bourse_translator,
         maximum_propositions_service=_maximum_propositions_autorisees,
         historique=_historique_global,
+        inscriptions_ucl_candidat_service=_inscriptions_ucl_candidat_service,
+        annee_inscription_formation_translator=_annee_inscription_formation_translator,
     ),
     ListerPropositionsCandidatQuery: lambda msg_bus, cmd: lister_propositions_candidat(
         cmd,
@@ -230,6 +235,7 @@ COMMAND_HANDLERS = {
         proposition_repository=_proposition_repository,
         formation_translator=_formation_generale_translator,
         bourse_translator=_bourse_translator,
+        inscriptions_ucl_candidat_service=_inscriptions_ucl_candidat_service,
     ),
     ModifierChecklistChoixFormationCommand: lambda msg_bus, cmd: modifier_checklist_choix_formation(
         msg_bus,
@@ -252,6 +258,8 @@ COMMAND_HANDLERS = {
         academic_year_repository=_academic_year_repository,
         questions_specifiques_translator=_question_specific_translator,
         maximum_propositions_service=_maximum_propositions_autorisees,
+        inscriptions_ucl_candidat_service=_inscriptions_ucl_candidat_service,
+        annee_inscription_formation_translator=_annee_inscription_formation_translator,
     ),
     SoumettrePropositionCommand: lambda msg_bus, cmd: soumettre_proposition(
         msg_bus,
@@ -271,6 +279,8 @@ COMMAND_HANDLERS = {
         historique=_historique_global,
         raccrocher_experiences_curriculum=_raccrocher_experiences_curriculum,
         validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur_service,
+        inscriptions_ucl_candidat_service=_inscriptions_ucl_candidat_service,
+        annee_inscription_formation_translator=_annee_inscription_formation_translator,
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,
@@ -305,6 +315,8 @@ COMMAND_HANDLERS = {
         element_confirmation=ElementsConfirmationInMemory(),
         formation_translator=_formation_generale_translator,
         profil_candidat_translator=_profil_candidat_translator,
+        inscriptions_ucl_candidat_service=_inscriptions_ucl_candidat_service,
+        annee_inscription_formation_translator=_annee_inscription_formation_translator,
     ),
     RecupererResumePropositionQuery: lambda msg_bus, cmd: recuperer_resume_proposition(
         cmd,
@@ -865,6 +877,22 @@ COMMAND_HANDLERS = {
             academic_year_repository=_academic_year_repository,
             personne_connue_translator=_personne_connue_ucl_translator,
             emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
+        )
+    ),
+    RecupererTypeDemandeQuery: lambda msg_bus, cmd: recuperer_type_demande(
+        cmd=cmd,
+        proposition_repository=_proposition_repository,
+        formation_translator=_formation_generale_translator,
+        profil_candidat_translator=_profil_candidat_translator,
+        titres_acces=_titres_acces,
+        calendrier_inscription=CalendrierInscriptionInMemory(),
+        inscriptions_ucl_candidat_service=_inscriptions_ucl_candidat_service,
+        annee_inscription_formation_translator=_annee_inscription_formation_translator,
+    ),
+    SpecifierRaisonPlusieursDemandesMemeCycleMemeAnneeCommand: (
+        lambda msg_bus, cmd: specifier_raison_plusieurs_demandes_meme_cycle_meme_annee(
+            cmd=cmd,
+            proposition_repository=_proposition_repository,
         )
     ),
 }

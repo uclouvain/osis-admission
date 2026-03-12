@@ -59,3 +59,4 @@ from .verifier_experience_curriculum_apres_soumission_service import (
     verifier_experience_curriculum_apres_soumission,
 )
 from .verifier_proposition_service import verifier_proposition
+from .recuperer_type_demande_service import recuperer_type_demande

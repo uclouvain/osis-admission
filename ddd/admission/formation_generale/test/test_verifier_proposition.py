@@ -57,6 +57,7 @@ class TypeDemandeTestCase(TestCase):
             titres,
             self.calendrier_inscription,
             self.profil_candidat_translator,
+            candidat_est_inscrit_recemment_ucl=False,
         )
         self.assertEqual(type_demande, TypeDemande.INSCRIPTION)
 
@@ -71,6 +72,7 @@ class TypeDemandeTestCase(TestCase):
             titres,
             self.calendrier_inscription,
             self.profil_candidat_translator,
+            candidat_est_inscrit_recemment_ucl=False,
         )
         self.assertEqual(type_demande, TypeDemande.ADMISSION)
 
@@ -85,6 +87,7 @@ class TypeDemandeTestCase(TestCase):
             titres,
             self.calendrier_inscription,
             self.profil_candidat_translator,
+            candidat_est_inscrit_recemment_ucl=False,
         )
         self.assertEqual(type_demande, TypeDemande.INSCRIPTION)
 
@@ -98,5 +101,6 @@ class TypeDemandeTestCase(TestCase):
             titres,
             self.calendrier_inscription,
             self.profil_candidat_translator,
+            candidat_est_inscrit_recemment_ucl=False,
         )
         self.assertEqual(type_demande, TypeDemande.ADMISSION)

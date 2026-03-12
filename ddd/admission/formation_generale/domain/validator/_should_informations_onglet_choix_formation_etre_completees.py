@@ -28,7 +28,7 @@ import attr
 
 from admission.ddd.admission.shared_kernel.domain.model.formation import Formation
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
-    BoursesEtudesNonRenseignees,
+    BoursesEtudesNonRenseignees, CandidatNonDelibereException, CandidatDejaDiplomeFormationException,
 )
 from base.ddd.utils.business_validator import BusinessValidator
 
@@ -54,3 +54,21 @@ class ShouldRenseignerBoursesEtudesSelonFormation(BusinessValidator):
             and not self.proposition.bourse_double_diplome_id
         ):
             raise BoursesEtudesNonRenseignees
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldCandidatEtreDelibere(BusinessValidator):
+    candidat_est_delibere: bool
+
+    def validate(self, *args, **kwargs):
+        if not self.candidat_est_delibere:
+            raise CandidatNonDelibereException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldCandidatPasEtreDiplomeFormation(BusinessValidator):
+    candidat_est_diplome_formation: bool
+
+    def validate(self, *args, **kwargs):
+        if self.candidat_est_diplome_formation:
+            raise CandidatDejaDiplomeFormationException

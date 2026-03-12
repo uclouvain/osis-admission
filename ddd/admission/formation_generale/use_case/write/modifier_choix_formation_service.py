@@ -41,6 +41,8 @@ from admission.ddd.admission.formation_generale.domain.service.i_formation impor
 from admission.ddd.admission.formation_generale.repository.i_proposition import (
     IPropositionRepository,
 )
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_ucl_candidat import \
+    IInscriptionsUCLCandidatService
 from ddd.logic.reference.domain.service.i_bourse import IBourseTranslator
 
 
@@ -49,11 +51,16 @@ def modifier_choix_formation(
     proposition_repository: 'IPropositionRepository',
     formation_translator: 'IFormationGeneraleTranslator',
     bourse_translator: 'IBourseTranslator',
+    inscriptions_ucl_candidat_service: IInscriptionsUCLCandidatService,
 ) -> 'PropositionIdentity':
     # GIVEN
     formation_id = FormationIdentityBuilder.build(sigle=cmd.sigle_formation, annee=cmd.annee_formation)
     formation = formation_translator.get(formation_id)
     proposition = proposition_repository.get(PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition))
+    est_en_poursuite = inscriptions_ucl_candidat_service.est_en_poursuite(
+        matricule_candidat=proposition.matricule_candidat,
+        sigle_formation=proposition.formation_id.sigle,
+    )
     bourses_ids = bourse_translator.search(
         [
             scholarship
@@ -73,6 +80,7 @@ def modifier_choix_formation(
         avec_bourse_erasmus_mundus=cmd.avec_bourse_erasmus_mundus,
         bourse_erasmus_mundus=cmd.bourse_erasmus_mundus,
         reponses_questions_specifiques=cmd.reponses_questions_specifiques,
+        est_en_poursuite=est_en_poursuite,
     )
 
     # THEN

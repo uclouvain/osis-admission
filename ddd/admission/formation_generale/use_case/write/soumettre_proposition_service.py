@@ -42,9 +42,13 @@ from admission.ddd.admission.formation_generale.domain.service.verifier_proposit
 from admission.ddd.admission.formation_generale.events import PropositionSoumiseEvent
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.shared_kernel.domain.builder.formation_identity import FormationIdentityBuilder
+from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import \
+    IAnneeInscriptionFormationTranslator
 from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.ddd.admission.shared_kernel.domain.service.i_elements_confirmation import IElementsConfirmation
 from admission.ddd.admission.shared_kernel.domain.service.i_historique import IHistorique
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_ucl_candidat import \
+    IInscriptionsUCLCandidatService
 from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
 from admission.ddd.admission.shared_kernel.domain.service.i_modifier_checklist_experience_parcours_anterieur import (
     IValidationExperienceParcoursAnterieurService,
@@ -82,6 +86,9 @@ def soumettre_proposition(
     historique: 'IHistorique',
     raccrocher_experiences_curriculum: 'IRaccrocherExperiencesCurriculum',
     validation_experience_parcours_anterieur_service: 'IValidationExperienceParcoursAnterieurService',
+    inscriptions_ucl_candidat_service: IInscriptionsUCLCandidatService,
+    annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
+
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -111,11 +118,16 @@ def soumettre_proposition(
         formation.type,
         proposition.equivalence_diplome,
     )
+    candidat_est_inscrit_recemment_ucl = inscriptions_ucl_candidat_service.est_inscrit_recemment(
+        matricule_candidat=proposition.matricule_candidat,
+        annee_inscription_formation_translator=annee_inscription_formation_translator,
+    )
     type_demande = VerifierProposition.determiner_type_demande(
-        proposition,
-        titres,
-        calendrier_inscription,
-        profil_candidat_translator,
+        proposition=proposition,
+        titres=titres,
+        calendrier_inscription=calendrier_inscription,
+        profil_candidat_translator=profil_candidat_translator,
+        candidat_est_inscrit_recemment_ucl=candidat_est_inscrit_recemment_ucl,
     )
     pool = AcademicCalendarTypes[cmd.pool]
 
@@ -136,6 +148,9 @@ def soumettre_proposition(
         formation=formation,
         titres=titres,
         annee_formation=annee_formation,
+        inscriptions_ucl_candidat_service=inscriptions_ucl_candidat_service,
+        annee_inscription_formation_translator=annee_inscription_formation_translator,
+        candidat_est_inscrit_recemment_ucl=candidat_est_inscrit_recemment_ucl,
     )
     element_confirmation.valider(
         soumis=cmd.elements_confirmation,
@@ -143,6 +158,7 @@ def soumettre_proposition(
         annee_soumise=cmd.annee,
         formation_translator=formation_translator,
         profil_candidat_translator=profil_candidat_translator,
+        candidat_est_inscrit_recemment_ucl=candidat_est_inscrit_recemment_ucl,
     )
 
     doit_payer_frais_dossier = paiement_frais_dossier_service.doit_payer(
@@ -175,6 +191,8 @@ def soumettre_proposition(
         est_inscription_tardive=est_inscription_tardive,
         profil_candidat_soumis=profil_candidat_soumis,
         doit_payer_frais_dossier=doit_payer_frais_dossier,
+        raison_plusieurs_demandes_meme_cycle_meme_annee=raison_plusieurs_demandes_meme_cycle_meme_annee,
+        justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee=justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee,
     )
 
     proposition.specifier_financabilite_resultat_calcul(

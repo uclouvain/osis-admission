@@ -73,6 +73,15 @@ class InscriptionsUCLCandidatInMemoryService(IInscriptionsUCLCandidatService):
         return any(inscription for inscription in inscriptions if inscription.sigle_formation == sigle_formation)
 
     @classmethod
+    def est_diplome(
+        cls,
+        matricule_candidat: str,
+        sigle_formation: str,
+    ) -> bool:
+        inscriptions = cls.recuperer(matricule_candidat=matricule_candidat)
+        return any(inscription.est_diplome for inscription in inscriptions if inscription.sigle_formation == sigle_formation)
+
+    @classmethod
     def est_en_poursuite_directe(
         cls,
         matricule_candidat: str,

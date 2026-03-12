@@ -652,6 +652,12 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         encoder=DjangoJSONEncoder,
     )
 
+    is_in_pursuit = models.BooleanField(
+        blank=True,
+        null=True,
+        verbose_name=_('Is in pursuit'),
+    )
+
     objects = BaseAdmissionManager()
 
     class Meta:

@@ -626,6 +626,8 @@ class GeneralEducationPropositionDTOSerializer(
             'pdf_recapitulatif',
             'documents_additionnels',
             'poste_diplomatique',
+            'raison_plusieurs_demandes_meme_cycle_meme_annee',
+            'justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee',
         ]
 
 

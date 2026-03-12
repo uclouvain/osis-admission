@@ -341,7 +341,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
         ]
 
     @classmethod
-    def verifier_existence(cls, sigle: str, annee: int) -> bool:
+    def verifier_existence(cls, sigle: str, annee: int, candidat_est_en_poursuite_directe: bool = None) -> bool:
         return any(
             training
             for training in cls.trainings

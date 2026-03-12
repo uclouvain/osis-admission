@@ -239,7 +239,7 @@ class DoctoratTranslator(IDoctoratTranslator):
         )
 
     @classmethod
-    def verifier_existence(cls, sigle: str, annee: int) -> bool:  # pragma: no cover
+    def verifier_existence(cls, sigle: str, annee: int, candidat_est_en_poursuite_directe: bool = None) -> bool:
         from infrastructure.messages_bus import message_bus_instance
 
         dtos = message_bus_instance.invoke(

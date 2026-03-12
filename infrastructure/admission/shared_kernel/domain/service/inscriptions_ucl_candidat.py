@@ -41,6 +41,7 @@ from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.academic_type import AcademicTypes
 from base.models.enums.education_group_types import TrainingType
 from base.models.session_exam_calendar import SessionExamCalendar
+from base.models.student import Student
 from ddd.logic.deliberation.cloture.dto.deliberation import (
     DeliberationCycleDTO,
     DeliberationProgrammeAnnuelDTO,
@@ -172,6 +173,22 @@ class InscriptionsUCLCandidatService(IInscriptionsUCLCandidatService):
             global_id=matricule_candidat,
             sigle_formation=sigle_formation,
         ).exists()
+
+    @classmethod
+    def est_diplome(
+        cls,
+        matricule_candidat: str,
+        sigle_formation: str,
+    ) -> bool:
+        from infrastructure.messages_bus import message_bus_instance
+
+        nomas = Student.objects.filter(person__global_id=matricule_candidat).values_list('registration_id', flat=True)
+
+        cycles_deliberations: list[DeliberationCycleDTO] = message_bus_instance.invoke(
+            RechercherDeliberationCycleQuery(nomas=nomas, sigle_formation=sigle_formation)
+        ) if nomas else []
+
+        return any(cycle_deliberation.est_diplome for cycle_deliberation in cycles_deliberations)
 
     @classmethod
     def est_en_poursuite_directe(

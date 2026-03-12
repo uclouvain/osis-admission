@@ -36,11 +36,13 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
+    ChoixStatutPropositionGenerale, STATUTS_PROPOSITION_GENERALE_NON_SOUMISE_OU_FRAIS_DOSSIER_EN_ATTENTE,
 )
 from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions import (
     IMaximumPropositionsAutorisees,
 )
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import \
+    DemandePourCetteFormationDejaEnvoyeeException
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository as PropositionDoctoraleInMemoryRepository,
 )
@@ -49,6 +51,9 @@ from admission.infrastructure.admission.formation_continue.repository.in_memory.
 )
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository as PropositionGeneraleInMemoryRepository,
+)
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    Proposition as PropositionGenerale,
 )
 
 
@@ -102,3 +107,25 @@ class MaximumPropositionsAutoriseesInMemory(IMaximumPropositionsAutorisees):
             and proposition.entity_id != proposition_identity
             for proposition in propositions_candidat
         )
+
+    @classmethod
+    def verifier_une_seule_demande_envoyee_par_formation_generale_par_annee(
+        cls,
+        proposition_candidat: PropositionGenerale,
+        annee_soumise: int = None,
+    ):
+        annee_cible = annee_soumise or proposition_candidat.annee_calculee or proposition_candidat.formation_id.annee
+
+        propositions_candidat = PropositionDoctoraleInMemoryRepository.search(
+            matricule_candidat=proposition_candidat.matricule_candidat,
+        )
+
+        a_demandes_similaires = any(
+            proposition.statut.name not in STATUTS_PROPOSITION_GENERALE_NON_SOUMISE_OU_FRAIS_DOSSIER_EN_ATTENTE
+            and proposition.entity_id != proposition_candidat.entity_id
+            and proposition.formation_id.annee == annee_cible
+            for proposition in propositions_candidat
+        )
+
+        if a_demandes_similaires:
+            raise DemandePourCetteFormationDejaEnvoyeeException(training_year=annee_cible)

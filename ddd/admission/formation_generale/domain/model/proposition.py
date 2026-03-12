@@ -47,7 +47,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     DecisionFacultaireEnum,
     DerogationFinancement,
     PoursuiteDeCycle,
-    TypeDeRefus,
+    TypeDeRefus, RaisonPlusieursDemandesMemesCycleEtAnnee,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     StatutChecklist,
@@ -280,6 +280,11 @@ class Proposition(interface.RootEntity):
     etat_equivalence_titre_acces: Optional[EtatEquivalenceTitreAcces] = None
     date_prise_effet_equivalence_titre_acces: Optional[datetime.date] = None
 
+    raison_plusieurs_demandes_meme_cycle_meme_annee: Optional[RaisonPlusieursDemandesMemesCycleEtAnnee] = None
+    justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee: str = ''
+
+    est_en_poursuite: Optional[bool] = None
+
     @property
     def premiere_annee_de_bachelier(self) -> bool:
         return bool(self.poursuite_de_cycle_a_specifier and self.poursuite_de_cycle != PoursuiteDeCycle.YES)
@@ -295,6 +300,7 @@ class Proposition(interface.RootEntity):
         avec_bourse_erasmus_mundus: Optional[bool],
         bourse_erasmus_mundus: Optional[str],
         reponses_questions_specifiques: Dict,
+        est_en_poursuite: bool,
     ):
         self.formation_id = formation_id
         self.reponses_questions_specifiques = reponses_questions_specifiques
@@ -305,6 +311,7 @@ class Proposition(interface.RootEntity):
         self.bourse_erasmus_mundus_id = bourses_ids.get(bourse_erasmus_mundus) if bourse_erasmus_mundus else None
         self.avec_bourse_erasmus_mundus = avec_bourse_erasmus_mundus
         self.auteur_derniere_modification = self.matricule_candidat
+        self.est_en_poursuite = est_en_poursuite
 
         self.comptabilite.affiliation_sport = None  # Ce choix dépend du campus de formation
 
@@ -357,6 +364,8 @@ class Proposition(interface.RootEntity):
         est_inscription_tardive: bool,
         profil_candidat_soumis: ProfilCandidat,
         doit_payer_frais_dossier: bool,
+        raison_plusieurs_demandes_meme_cycle_meme_annee: str,
+        justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee: str,
     ):
         if doit_payer_frais_dossier:
             self.statut = ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE
@@ -377,6 +386,8 @@ class Proposition(interface.RootEntity):
         self.est_inscription_tardive = est_inscription_tardive
         self.profil_soumis_candidat = profil_candidat_soumis
         self.auteur_derniere_modification = self.matricule_candidat
+        self.raison_plusieurs_demandes_meme_cycle_meme_annee = getattr(RaisonPlusieursDemandesMemesCycleEtAnnee, raison_plusieurs_demandes_meme_cycle_meme_annee, None)
+        self.justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee = justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee
 
     def payer_frais_dossier(self):
         self.statut = ChoixStatutPropositionGenerale.CONFIRMEE
@@ -1221,3 +1232,11 @@ class Proposition(interface.RootEntity):
             questions_specifiques,
             self.reponses_questions_specifiques,
         )
+
+    def specifier_raison_plusieurs_demandes_meme_cycle_meme_annee(
+        self,
+        raison_plusieurs_demandes_meme_cycle_meme_annee: str,
+        justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee: str,
+    ):
+        self.raison_plusieurs_demandes_meme_cycle_meme_annee = getattr(RaisonPlusieursDemandesMemesCycleEtAnnee, raison_plusieurs_demandes_meme_cycle_meme_annee, None)
+        self.justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee = justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee
