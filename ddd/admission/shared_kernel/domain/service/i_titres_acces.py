@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@ from typing import List, Mapping, Optional, Tuple
 
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import ConditionsAccessNonRempliesException
 from admission.ddd.admission.shared_kernel.dtos.conditions import AdmissionConditionsDTO
+from admission.ddd.admission.shared_kernel.dtos.inscription_ucl_candidat import InscriptionUCLCandidatDTO
 from base.models.enums.education_group_types import TrainingType
 from osis_common.ddd import interface
 
@@ -128,7 +129,12 @@ class ITitresAcces(interface.DomainService):
     }
 
     @classmethod
-    def conditions_remplies(cls, matricule_candidat: str, equivalence_diplome: List[str]) -> AdmissionConditionsDTO:
+    def conditions_remplies(
+        cls,
+        matricule_candidat: str,
+        equivalence_diplome: List[str],
+        inscriptions_ucl_candidat: List[InscriptionUCLCandidatDTO],
+    ) -> AdmissionConditionsDTO:
         raise NotImplementedError
 
     @classmethod
@@ -137,8 +143,13 @@ class ITitresAcces(interface.DomainService):
         matricule_candidat: str,
         type_formation: 'TrainingType',
         equivalence_diplome: Optional[List[str]] = None,
+        inscriptions_ucl_candidat: Optional[List[InscriptionUCLCandidatDTO]] = None,
     ) -> Titres:
-        conditions = cls.conditions_remplies(matricule_candidat, equivalence_diplome or [])
+        conditions = cls.conditions_remplies(
+            matricule_candidat=matricule_candidat,
+            equivalence_diplome=equivalence_diplome or [],
+            inscriptions_ucl_candidat=inscriptions_ucl_candidat or [],
+        )
         titres_requis: List[ConditionAccess] = next(
             (titres for types, titres in cls.condition_matrix.items() if type_formation in types), []
         )

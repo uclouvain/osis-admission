@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import uuid
+from unittest import mock
 
 import attr
 from django.test import SimpleTestCase
@@ -94,6 +95,18 @@ class TestInitierPropositionService(SimpleTestCase):
         self.assertEqual(proposition.bourse_internationale_id.uuid, self.cmd.bourse_internationale)
         self.assertEqual(proposition.avec_bourse_double_diplome, self.cmd.avec_bourse_double_diplome)
         self.assertEqual(proposition.bourse_double_diplome_id.uuid, self.cmd.bourse_double_diplome)
+        self.assertEqual(proposition.est_en_poursuite, False)
+
+    def test_should_initier_en_poursuite(self):
+        with mock.patch(
+            'admission.infrastructure.admission.shared_kernel.domain.service.in_memory.inscriptions_translator.'
+            'InscriptionsInMemoryTranslator.est_en_poursuite',
+            return_value=True,
+        ):
+            proposition_id = self.message_bus.invoke(self.cmd)
+            proposition = self.proposition_repository.get(proposition_id)
+            self.assertEqual(proposition.entity_id, proposition_id)
+            self.assertEqual(proposition.est_en_poursuite, True)
 
     def test_should_empecher_si_pas_formation_generale(self):
         not_doctorat = 'DROI1BA'

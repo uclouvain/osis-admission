@@ -2029,6 +2029,11 @@ msgstr ""
 msgid "Create the recap of the proposition"
 msgstr "Créer le récapitulatif de la la proposition"
 
+msgid "Create this new application and cancel your other ones"
+msgstr ""
+"Introduire cette nouvelle demande d'inscription et annuler vos autres "
+"demandes."
+
 msgid "Created"
 msgstr "Créé"
 
@@ -4331,6 +4336,9 @@ msgstr "Est bachelier belge"
 msgid "Is concerned by BAMA15"
 msgstr "Est concerné par le BAMA15"
 
+msgid "Is in pursuit"
+msgstr "Est en poursuite"
+
 msgid "Is it a Wallonia-Brussels Federation institution?"
 msgstr "S'agit-il d'une institution de la Fédération Wallonie-Bruxelles ?"
 
@@ -6061,6 +6069,10 @@ msgstr "Motif du dépassement de l’échéance"
 msgid "Reason for refusal"
 msgstr "Motif de refus"
 
+msgid "Reason to create several applications for a same cycle and a same year."
+msgstr ""
+"Raison pour créer plusieurs demandes pour un même cycle pour une même année."
+
 msgid "Reasons"
 msgstr "Motifs"
 
@@ -6922,6 +6934,9 @@ msgstr "Pour vérification"
 msgid "Tab"
 msgstr "Onglet"
 
+msgid "Take several courses at the same time"
+msgstr "Suivre plusieurs formations en parallèle."
+
 msgid "Taken in charge"
 msgstr "Pris en charge"
 
@@ -6965,6 +6980,13 @@ msgstr ""
 
 msgid "Text"
 msgstr "Texte"
+
+msgid ""
+"Text justification to create several applications for a same cycle and a "
+"same year."
+msgstr ""
+"Justification textuelle pour créer plusieurs demandes pour un même cycle "
+"pour une même année."
 
 msgid "Text size"
 msgstr "Taille du texte"
@@ -8680,6 +8702,11 @@ msgstr ""
 "ou bien coller une liste de codes séparés par le caractère \"%(separator)s\" "
 "et terminant par ce même caractère."
 
+msgid "You cannot apply for this course because you have already graduated."
+msgstr ""
+"Vous ne pouvez pas introduire de demande pour cette formation car vous en "
+"êtes déjà diplômé·e."
+
 msgid ""
 "You cannot ask for both modification and reorientation at the same time."
 msgstr ""
@@ -8756,6 +8783,14 @@ msgstr[1] ""
 "Vous ne pouvez pas soumettre cette demande pour une formation générale car "
 "vous en avez déjà envoyé %(maximum_number)s pour l'année %(annee_cible)s."
 
+msgid ""
+"You cannot yet apply for this course because you are currently enrolled in a "
+"course that has not yet been deliberated."
+msgstr ""
+"Vous ne pouvez pas encore introduire de demande pour cette formation car "
+"vous êtes actuellement inscrit·e à une formation qui n’a pas encore été "
+"délibérée."
+
 msgid "You do not meet the admission requirements"
 msgstr "Vous ne remplissez pas les conditions d'admission"
 
@@ -8765,6 +8800,14 @@ msgid ""
 msgstr ""
 "Vous n'avez pas indiqué si vous postulez en tant que résident ou non-"
 "résident (au sens du Décret)."
+
+#, python-format
+msgid ""
+"You have already submitted a request for this course which will take place "
+"during the year %(training_year)s."
+msgstr ""
+"Vous avez déjà envoyé une demande pour cette formation qui aura lieu durant "
+"l'année %(training_year)s."
 
 msgid "You have the option to integrate it in the current application."
 msgstr "Vous avez la possibilité de l'intégrer dans la demande actuelle."

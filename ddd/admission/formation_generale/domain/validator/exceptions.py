@@ -396,3 +396,22 @@ class InformationsBama15NonCompleteesException(BusinessException):
             ),
             **kwargs,
         )
+
+
+class CandidatNonEligibleALaReinscriptionException(BusinessException):
+    status_code = "FORMATION-GENERALE-43"
+
+    def __init__(self, **kwargs):
+        message = _(
+            "You cannot yet apply for this course because you are currently enrolled in a course that has "
+            "not yet been deliberated."
+        )
+        super().__init__(message, **kwargs)
+
+
+class CandidatDejaDiplomeFormationException(BusinessException):
+    status_code = "FORMATION-GENERALE-44"
+
+    def __init__(self, **kwargs):
+        message = _("You cannot apply for this course because you have already graduated.")
+        super().__init__(message, **kwargs)

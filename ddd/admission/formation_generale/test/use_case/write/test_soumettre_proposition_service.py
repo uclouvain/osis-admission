@@ -31,7 +31,10 @@ import mock
 from django.test import TestCase
 
 from admission.ddd.admission.formation_generale.commands import SoumettrePropositionCommand
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+    RaisonPlusieursDemandesMemesCycleEtAnnee,
+)
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.test.factory.proposition import PropositionFactory
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.formation import (
@@ -99,6 +102,10 @@ class TestSoumettrePropositionGenerale(TestCase):
                 pool=AcademicCalendarTypes.ADMISSION_POOL_VIP.name,
                 annee=2024,
                 elements_confirmation=elements_confirmation,
+                raison_plusieurs_demandes_meme_cycle_meme_annee=(
+                    RaisonPlusieursDemandesMemesCycleEtAnnee.SUIVRE_EN_PARALLELE.name
+                ),
+                justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee='1',
             ),
         )
 
@@ -110,6 +117,11 @@ class TestSoumettrePropositionGenerale(TestCase):
         self.assertEqual(updated_proposition.statut, ChoixStatutPropositionGenerale.CONFIRMEE)
         self.assertEqual(updated_proposition.est_inscription_tardive, False)
         self.assertEqual(updated_proposition.auteur_derniere_modification, self.candidat.matricule)
+        self.assertEqual(
+            updated_proposition.raison_plusieurs_demandes_meme_cycle_meme_annee,
+            RaisonPlusieursDemandesMemesCycleEtAnnee.SUIVRE_EN_PARALLELE,
+        )
+        self.assertEqual(updated_proposition.justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee, '1')
 
     @freezegun.freeze_time('22/10/2024')
     def test_should_soumettre_proposition_tardive(self):
@@ -144,6 +156,8 @@ class TestSoumettrePropositionGenerale(TestCase):
                     pool=AcademicCalendarTypes.ADMISSION_POOL_HUE_UCL_PATHWAY_CHANGE.name,
                     annee=2024,
                     elements_confirmation=elements_confirmation,
+                    raison_plusieurs_demandes_meme_cycle_meme_annee='',
+                    justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee='',
                 ),
             )
 
@@ -183,6 +197,8 @@ class TestSoumettrePropositionGenerale(TestCase):
                     pool=AcademicCalendarTypes.ADMISSION_POOL_HUE_UCL_PATHWAY_CHANGE.name,
                     annee=2024,
                     elements_confirmation=elements_confirmation,
+                    raison_plusieurs_demandes_meme_cycle_meme_annee='',
+                    justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee='',
                 ),
             )
 
@@ -201,6 +217,8 @@ class TestSoumettrePropositionGenerale(TestCase):
                 pool=AcademicCalendarTypes.ADMISSION_POOL_VIP.name,
                 annee=2024,
                 elements_confirmation=elements_confirmation,
+                raison_plusieurs_demandes_meme_cycle_meme_annee='',
+                justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee='',
             ),
         )
 
@@ -241,6 +259,8 @@ class TestSoumettrePropositionGenerale(TestCase):
                 pool=AcademicCalendarTypes.ADMISSION_POOL_VIP.name,
                 annee=2021,
                 elements_confirmation=elements_confirmation,
+                raison_plusieurs_demandes_meme_cycle_meme_annee='',
+                justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee='',
             ),
         )
 

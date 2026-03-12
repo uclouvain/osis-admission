@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -37,6 +37,9 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    Proposition as PropositionGenerale,
 )
 from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions import (
     IMaximumPropositionsAutorisees,
@@ -102,3 +105,11 @@ class MaximumPropositionsAutoriseesInMemory(IMaximumPropositionsAutorisees):
             and proposition.entity_id != proposition_identity
             for proposition in propositions_candidat
         )
+
+    @classmethod
+    def verifier_une_seule_demande_envoyee_par_formation_generale_par_annee(
+        cls,
+        proposition_candidat: PropositionGenerale,
+        annee_soumise: int = None,
+    ):
+        pass

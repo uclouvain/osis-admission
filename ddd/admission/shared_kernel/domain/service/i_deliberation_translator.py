@@ -37,6 +37,7 @@ class IDeliberationTranslator(interface.DomainService):
         cls,
         nomas: list[str],
         annee: int | None = None,
+        sigle_formation: str | None = None,
     ) -> dict[tuple[str, str], DeliberationCycleDTO]:
         raise NotImplementedError
 

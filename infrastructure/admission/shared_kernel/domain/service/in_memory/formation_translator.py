@@ -27,7 +27,7 @@ from admission.ddd.admission.shared_kernel.domain.service.i_formation_translator
 from admission.ddd.admission.shared_kernel.dtos.formation import FormationInscriteDTO
 
 
-class IBaseFormationInMemoryTranslator(IBaseFormationTranslator):
+class BaseFormationInMemoryTranslator(IBaseFormationTranslator):
     @classmethod
     def recuperer_informations_formations_inscrites(
         cls,

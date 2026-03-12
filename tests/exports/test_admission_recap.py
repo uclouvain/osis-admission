@@ -1583,6 +1583,8 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             financabilite_derogation_derniere_notification_par='',
             est_concerne_par_le_bama_15=None,
             preuve_bama_15=[],
+            justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee='',
+            raison_plusieurs_demandes_meme_cycle_meme_annee='',
         )
         doctorate_proposition_dto = _PropositionFormationDoctoraleDTO(
             uuid='uuid-proposition',

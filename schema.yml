@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Admission API
-  version: 1.1.18.dev1736
+  version: 1.1.18.dev1754
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -5656,7 +5656,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SubmitProposition'
+              $ref: '#/components/schemas/SubmitGeneralProposition'
         required: true
       security:
       - tokenAuth: []
@@ -5667,6 +5667,46 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GeneralEducationPropositionIdentityWithStatus'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      operationId: specify_reason_multiple_applications_same_cycle_same_year
+      description: Submit the reason to have multiple applications for the same cycle
+        for the same year.
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+      tags:
+      - propositions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SpecifierRaisonPlusieursDemandesMemeCycleMemeAnneeCommand'
+        required: true
+      security:
+      - tokenAuth: []
+      - Token: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropositionIdentityDTO'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -9087,6 +9127,10 @@ components:
           type: array
           items:
             type: string
+        raison_plusieurs_demandes_meme_cycle_meme_annee:
+          type: string
+        justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee:
+          type: string
       required:
       - creee_le
       - curriculum
@@ -9094,11 +9138,13 @@ components:
       - equivalence_diplome
       - erreurs
       - formation
+      - justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee
       - matricule_candidat
       - nom_candidat
       - pdf_recapitulatif
       - prenom_candidat
       - preuve_bama_15
+      - raison_plusieurs_demandes_meme_cycle_meme_annee
       - reference
       - uuid
     GeneralEducationPropositionIdentityWithStatus:
@@ -10588,6 +10634,9 @@ components:
           items:
             $ref: '#/components/schemas/ElementConfirmation'
           nullable: true
+        display_several_applications_same_cycle_same_year_questions:
+          type: boolean
+          nullable: true
       required:
       - errors
     PropositionIdentityDTO:
@@ -10729,6 +10778,19 @@ components:
       - type
       - uuid
       - values
+    SpecifierRaisonPlusieursDemandesMemeCycleMemeAnneeCommand:
+      type: object
+      description: |-
+        Serializer containing the answers to the questions asked when the candidate has several applications for the same
+        cycle for the same year.
+      properties:
+        raison_plusieurs_demandes_meme_cycle_meme_annee:
+          type: string
+        justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee:
+          type: string
+      required:
+      - justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee
+      - raison_plusieurs_demandes_meme_cycle_meme_annee
     StatusEnum:
       enum:
       - EN_BROUILLON
@@ -10769,6 +10831,24 @@ components:
       description: |-
         * `SOCIAL_PROMOTION` - Promotion sociale
         * `FULL_TIME` - Plein exercice
+    SubmitGeneralProposition:
+      type: object
+      properties:
+        annee:
+          type: integer
+        pool:
+          $ref: '#/components/schemas/PoolEnum'
+        elements_confirmation: {}
+        raison_plusieurs_demandes_meme_cycle_meme_annee:
+          type: string
+        justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee:
+          type: string
+      required:
+      - annee
+      - elements_confirmation
+      - justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee
+      - pool
+      - raison_plusieurs_demandes_meme_cycle_meme_annee
     SubmitProposition:
       type: object
       properties:

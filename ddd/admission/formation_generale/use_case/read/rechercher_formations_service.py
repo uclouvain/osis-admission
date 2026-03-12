@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,10 +25,12 @@
 # ##############################################################################
 from typing import List
 
-from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import IAnneeInscriptionFormationTranslator
-from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from admission.ddd.admission.formation_generale.commands import RechercherFormationGeneraleQuery
 from admission.ddd.admission.formation_generale.domain.service.i_formation import IFormationGeneraleTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import (
+    IAnneeInscriptionFormationTranslator,
+)
+from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 
 
@@ -51,4 +53,5 @@ def rechercher_formations(
         intitule=cmd.intitule_formation,
         terme_de_recherche=cmd.terme_de_recherche,
         campus=cmd.campus,
+        statuts=cmd.statuts,
     )

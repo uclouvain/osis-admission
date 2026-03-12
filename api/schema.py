@@ -25,7 +25,7 @@
 # ##############################################################################
 from drf_spectacular.generators import SchemaGenerator
 
-ADMISSION_SDK_VERSION = "1.1.18.dev1736"
+ADMISSION_SDK_VERSION = "1.1.18.dev1754"
 
 
 class AdmissionSchemaGenerator(SchemaGenerator):
