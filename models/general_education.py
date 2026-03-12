@@ -45,6 +45,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     DroitsInscriptionMontant,
     MobiliteNombreDeMois,
     PoursuiteDeCycle,
+    RaisonPlusieursDemandesMemesCycleEtAnnee,
     TypeDeRefus,
 )
 from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import (
@@ -526,6 +527,26 @@ class GeneralEducationAdmission(BaseAdmission):
         blank=True,
         upload_to=admission_directory_path,
         verbose_name=_('Proof of re-enrolment for the bachelor\'s degree (BAMA15)'),
+    )
+
+    several_admissions_same_cycle_same_year_reason = models.CharField(
+        choices=RaisonPlusieursDemandesMemesCycleEtAnnee.choices(),
+        blank=True,
+        default='',
+        max_length=30,
+        verbose_name=_('Reason to create several applications for a same cycle and a same year.'),
+    )
+
+    several_admissions_same_cycle_same_year_justification = models.TextField(
+        blank=True,
+        verbose_name=_('Text justification to create several applications for a same cycle and a same year.'),
+        default='',
+    )
+
+    is_in_pursuit = models.BooleanField(
+        blank=True,
+        null=True,
+        verbose_name=_('Is in pursuit'),
     )
 
     class Meta:

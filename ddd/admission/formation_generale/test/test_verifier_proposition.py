@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,13 +26,15 @@
 
 from django.test import TestCase
 
-from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.service.verifier_proposition import VerifierProposition
 from admission.ddd.admission.formation_generale.test.factory.proposition import PropositionFactory
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.calendrier_inscription import (
     CalendrierInscriptionInMemory,
 )
-from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
+    ProfilCandidatInMemoryTranslator,
+)
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.titres_acces import TitresAccesInMemory
 from admission.tests.factories.conditions import AdmissionConditionsDTOFactory
 from base.models.enums.education_group_types import TrainingType
@@ -57,6 +59,7 @@ class TypeDemandeTestCase(TestCase):
             titres,
             self.calendrier_inscription,
             self.profil_candidat_translator,
+            candidat_est_inscrit_recemment_ucl=False,
         )
         self.assertEqual(type_demande, TypeDemande.INSCRIPTION)
 
@@ -71,6 +74,7 @@ class TypeDemandeTestCase(TestCase):
             titres,
             self.calendrier_inscription,
             self.profil_candidat_translator,
+            candidat_est_inscrit_recemment_ucl=False,
         )
         self.assertEqual(type_demande, TypeDemande.ADMISSION)
 
@@ -85,6 +89,7 @@ class TypeDemandeTestCase(TestCase):
             titres,
             self.calendrier_inscription,
             self.profil_candidat_translator,
+            candidat_est_inscrit_recemment_ucl=False,
         )
         self.assertEqual(type_demande, TypeDemande.INSCRIPTION)
 
@@ -98,5 +103,84 @@ class TypeDemandeTestCase(TestCase):
             titres,
             self.calendrier_inscription,
             self.profil_candidat_translator,
+            candidat_est_inscrit_recemment_ucl=False,
         )
+        self.assertEqual(type_demande, TypeDemande.ADMISSION)
+
+    def test_type_demande_reinscription_belge_en_poursuite(self):
+        titres = self.titres_acces_in_memory.recuperer_titres_access('0000000001', TrainingType.CAPAES)
+
+        type_demande = VerifierProposition.determiner_type_demande(
+            PropositionFactory(matricule_candidat='0000000001', est_en_poursuite=True),
+            titres,
+            self.calendrier_inscription,
+            self.profil_candidat_translator,
+            candidat_est_inscrit_recemment_ucl=True,
+        )
+
+        self.assertEqual(type_demande, TypeDemande.INSCRIPTION)
+
+    def test_type_demande_reinscription_belge_pas_en_poursuite(self):
+        titres = self.titres_acces_in_memory.recuperer_titres_access('0000000001', TrainingType.CAPAES)
+
+        type_demande = VerifierProposition.determiner_type_demande(
+            PropositionFactory(matricule_candidat='0000000001', est_en_poursuite=False),
+            titres,
+            self.calendrier_inscription,
+            self.profil_candidat_translator,
+            candidat_est_inscrit_recemment_ucl=True,
+        )
+
+        self.assertEqual(type_demande, TypeDemande.INSCRIPTION)
+
+    def test_type_demande_reinscription_belge_poursuite_non_determinee(self):
+        titres = self.titres_acces_in_memory.recuperer_titres_access('0000000001', TrainingType.CAPAES)
+
+        type_demande = VerifierProposition.determiner_type_demande(
+            PropositionFactory(matricule_candidat='0000000001', est_en_poursuite=None),
+            titres,
+            self.calendrier_inscription,
+            self.profil_candidat_translator,
+            candidat_est_inscrit_recemment_ucl=True,
+        )
+
+        self.assertEqual(type_demande, TypeDemande.INSCRIPTION)
+
+    def test_type_demande_reinscription_etranger_en_poursuite(self):
+        titres = self.titres_acces_in_memory.recuperer_titres_access('0000000003', TrainingType.CAPAES)
+
+        type_demande = VerifierProposition.determiner_type_demande(
+            PropositionFactory(matricule_candidat='0000000003', est_en_poursuite=True),
+            titres,
+            self.calendrier_inscription,
+            self.profil_candidat_translator,
+            candidat_est_inscrit_recemment_ucl=True,
+        )
+
+        self.assertEqual(type_demande, TypeDemande.INSCRIPTION)
+
+    def test_type_demande_reinscription_etranger_pas_en_poursuite(self):
+        titres = self.titres_acces_in_memory.recuperer_titres_access('0000000003', TrainingType.CAPAES)
+
+        type_demande = VerifierProposition.determiner_type_demande(
+            PropositionFactory(matricule_candidat='0000000003', est_en_poursuite=False),
+            titres,
+            self.calendrier_inscription,
+            self.profil_candidat_translator,
+            candidat_est_inscrit_recemment_ucl=True,
+        )
+
+        self.assertEqual(type_demande, TypeDemande.ADMISSION)
+
+    def test_type_demande_reinscription_etranger_poursuite_non_determinee(self):
+        titres = self.titres_acces_in_memory.recuperer_titres_access('0000000003', TrainingType.CAPAES)
+
+        type_demande = VerifierProposition.determiner_type_demande(
+            PropositionFactory(matricule_candidat='0000000003', est_en_poursuite=None),
+            titres,
+            self.calendrier_inscription,
+            self.profil_candidat_translator,
+            candidat_est_inscrit_recemment_ucl=True,
+        )
+
         self.assertEqual(type_demande, TypeDemande.ADMISSION)

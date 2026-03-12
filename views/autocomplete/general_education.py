@@ -28,6 +28,7 @@ from dal_select2.views import Select2ListView
 from django.http import JsonResponse
 
 from admission.ddd.admission.formation_generale.commands import RechercherFormationGeneraleQuery
+from base.models.enums.active_status import ActiveStatusEnum
 from infrastructure.messages_bus import message_bus_instance
 
 __namespace__ = False
@@ -46,6 +47,7 @@ class GeneralEducationTrainingsAutocomplete(Select2ListView):
             RechercherFormationGeneraleQuery(
                 terme_de_recherche=self.q,
                 annee=self.forwarded.get('annee_academique'),
+                statuts=[ActiveStatusEnum.ACTIVE.name, ActiveStatusEnum.RE_REGISTRATION.name],
             )
         )
 

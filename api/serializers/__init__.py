@@ -69,7 +69,7 @@ from .specific_question import (
     ModifierQuestionsSpecifiquesFormationGeneraleCommandSerializer,
     SpecificQuestionSerializer,
 )
-from .submission import PropositionErrorsSerializer, SubmitPropositionSerializer
+from .submission import *
 from .supervision import *
 from .training_choice import (
     InitierPropositionContinueCommandSerializer,

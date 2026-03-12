@@ -43,6 +43,8 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
 from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldAffiliationsEtreCompletees,
     ShouldAlternativeSecondairesEtreCompletee,
+    ShouldCandidatEtreEligibleALaReinscription,
+    ShouldCandidatPasEtreDiplomeFormation,
     ShouldComplementsFormationEtreVidesSiPasDeComplementsFormation,
     ShouldConditionAccesEtreSelectionne,
     ShouldCurriculumFichierEtreSpecifie,
@@ -821,6 +823,8 @@ class RefuserParSicAValiderValidatorList(TwoStepsMultipleBusinessExceptionListVa
 class ChoixFormationValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     formation: Formation
     proposition: 'Proposition'
+    candidat_est_eligible_a_la_reinscription: bool
+    candidat_est_diplome_formation: bool
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -830,5 +834,11 @@ class ChoixFormationValidatorList(TwoStepsMultipleBusinessExceptionListValidator
             ShouldRenseignerBoursesEtudesSelonFormation(
                 proposition=self.proposition,
                 formation=self.formation,
-            )
+            ),
+            ShouldCandidatEtreEligibleALaReinscription(
+                candidat_est_eligible_a_la_reinscription=self.candidat_est_eligible_a_la_reinscription,
+            ),
+            ShouldCandidatPasEtreDiplomeFormation(
+                candidat_est_diplome_formation=self.candidat_est_diplome_formation,
+            ),
         ]

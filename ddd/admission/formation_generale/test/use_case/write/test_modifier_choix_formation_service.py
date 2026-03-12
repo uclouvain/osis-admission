@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import uuid
+from unittest import mock
 
 import attr
 from django.test import SimpleTestCase
@@ -81,6 +82,18 @@ class TestModifierChoixFormationPropositionService(SimpleTestCase):
         self.assertEqual(proposition.bourse_internationale_id.uuid, self.cmd.bourse_internationale)
         self.assertEqual(proposition.avec_bourse_double_diplome, self.cmd.avec_bourse_double_diplome)
         self.assertEqual(proposition.bourse_double_diplome_id.uuid, self.cmd.bourse_double_diplome)
+        self.assertEqual(proposition.est_en_poursuite, False)
+
+    def test_should_modifier_choix_formation_en_poursuite(self):
+        with mock.patch(
+            'admission.infrastructure.admission.shared_kernel.domain.service.in_memory.inscriptions_translator.'
+            'InscriptionsInMemoryTranslator.est_en_poursuite',
+            return_value=True,
+        ):
+            proposition_id = self.message_bus.invoke(self.cmd)
+            proposition = self.proposition_repository.get(proposition_id)
+            self.assertEqual(proposition.entity_id, proposition_id)
+            self.assertEqual(proposition.est_en_poursuite, True)
 
     def test_should_empecher_si_proposition_non_trouvee(self):
         cmd = attr.evolve(self.cmd, uuid_proposition='INCONNUE')

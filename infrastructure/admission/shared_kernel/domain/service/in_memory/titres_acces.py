@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@ from typing import List
 
 from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import ITitresAcces
 from admission.ddd.admission.shared_kernel.dtos.conditions import AdmissionConditionsDTO
+from admission.ddd.admission.shared_kernel.dtos.inscription_ucl_candidat import InscriptionUCLCandidatDTO
 from admission.tests.factories.conditions import AdmissionConditionsDTOFactory
 
 
@@ -52,5 +53,10 @@ class TitresAccesInMemory(ITitresAcces):
         }
 
     @classmethod
-    def conditions_remplies(cls, matricule_candidat: str, equivalence_diplome: List[str]) -> AdmissionConditionsDTO:
+    def conditions_remplies(
+        cls,
+        matricule_candidat: str,
+        equivalence_diplome: List[str],
+        inscriptions_ucl_candidat: List[InscriptionUCLCandidatDTO],
+    ) -> AdmissionConditionsDTO:
         return cls.results.get(matricule_candidat, AdmissionConditionsDTOFactory())

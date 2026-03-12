@@ -54,9 +54,9 @@ from .shared_kernel.domain.service.in_memory.annee_inscription_formation import 
 )
 from .shared_kernel.domain.service.in_memory.deliberation_translator import DeliberationInMemoryTranslator
 from .shared_kernel.domain.service.in_memory.diffusion_notes_translator import DiffusionNotesInMemoryTranslator
-from .shared_kernel.domain.service.in_memory.formation_translator import IBaseFormationInMemoryTranslator
+from .shared_kernel.domain.service.in_memory.formation_translator import BaseFormationInMemoryTranslator
 from .shared_kernel.domain.service.in_memory.inscriptions_evaluations_translator import (
-    InscriptionEvaluationsInMemoryTranslator,
+    InscriptionsEvaluationsInMemoryTranslator,
 )
 from .shared_kernel.domain.service.in_memory.inscriptions_translator import InscriptionsInMemoryTranslator
 from .shared_kernel.domain.service.in_memory.modifier_checklist_experience_parcours_anterieur import (
@@ -72,9 +72,9 @@ _validation_experience_parcours_anterieur = ValidationExperienceParcoursAnterieu
 _annee_inscription_formation_translator = AnneeInscriptionFormationInMemoryTranslator()
 _inscriptions_translator = InscriptionsInMemoryTranslator()
 _deliberation_translator = DeliberationInMemoryTranslator()
-_base_formation_translator = IBaseFormationInMemoryTranslator()
+_base_formation_translator = BaseFormationInMemoryTranslator()
 _diffusion_notes_translator = DiffusionNotesInMemoryTranslator()
-_inscriptions_evaluations_translator = InscriptionEvaluationsInMemoryTranslator()
+_inscriptions_evaluations_translator = InscriptionsEvaluationsInMemoryTranslator()
 
 COMMAND_HANDLERS = {
     ListerToutesDemandesQuery: lambda msg_bus, cmd: lister_demandes(

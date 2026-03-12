@@ -60,8 +60,23 @@ from admission.ddd.admission.shared_kernel.domain.model._candidat_signaletique i
     CandidatSignaletique,
 )
 from admission.ddd.admission.shared_kernel.domain.model.formation import Formation
+from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import (
+    IAnneeInscriptionFormationTranslator,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_deliberation_translator import IDeliberationTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_diffusion_notes_translator import IDiffusionNotesTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_evaluations_translator import (
+    IInscriptionsEvaluationsTranslator,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_noma_translator import INomasTranslator
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
+)
+from admission.ddd.admission.shared_kernel.domain.service.inscriptions_ucl_candidat import (
+    InscriptionsUCLCandidatService,
 )
 from admission.ddd.admission.shared_kernel.domain.service.verifier_curriculum import (
     VerifierCurriculum,
@@ -485,10 +500,36 @@ class ProfilCandidat(interface.DomainService):
         ).validate()
 
     @classmethod
-    def verifier_choix_formation_generale(cls, proposition, formation: Formation):
+    def verifier_choix_formation_generale(
+        cls,
+        proposition,
+        formation: Formation,
+        annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
+        inscriptions_translator: IInscriptionsTranslatorService,
+        deliberation_translator: IDeliberationTranslator,
+        diffusion_notes_translator: IDiffusionNotesTranslator,
+        inscriptions_evaluations_translator: IInscriptionsEvaluationsTranslator,
+        nomas_translator: INomasTranslator,
+    ):
+        candidat_est_eligible_a_la_reinscription = InscriptionsUCLCandidatService.est_eligible_a_la_reinscription(
+            matricule_candidat=proposition.matricule_candidat,
+            annee_inscription_formation_translator=annee_inscription_formation_translator,
+            inscriptions_translator=inscriptions_translator,
+            deliberation_translator=deliberation_translator,
+            diffusion_notes_translator=diffusion_notes_translator,
+            inscriptions_evaluations_translator=inscriptions_evaluations_translator,
+        )
+        candidat_est_diplome_formation = InscriptionsUCLCandidatService.est_diplome(
+            matricule_candidat=proposition.matricule_candidat,
+            sigle_formation=formation.entity_id.sigle,
+            deliberation_translator=deliberation_translator,
+            nomas_translator=nomas_translator,
+        )
         ChoixFormationValidatorList(
             proposition=proposition,
             formation=formation,
+            candidat_est_eligible_a_la_reinscription=candidat_est_eligible_a_la_reinscription,
+            candidat_est_diplome_formation=candidat_est_diplome_formation,
         ).validate()
 
     @classmethod

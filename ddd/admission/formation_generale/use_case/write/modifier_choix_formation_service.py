@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,9 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-from admission.ddd.admission.shared_kernel.domain.builder.formation_identity import (
-    FormationIdentityBuilder,
-)
 from admission.ddd.admission.formation_generale.commands import (
     ModifierChoixFormationCommand,
 )
@@ -41,6 +38,12 @@ from admission.ddd.admission.formation_generale.domain.service.i_formation impor
 from admission.ddd.admission.formation_generale.repository.i_proposition import (
     IPropositionRepository,
 )
+from admission.ddd.admission.shared_kernel.domain.builder.formation_identity import (
+    FormationIdentityBuilder,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
+)
 from ddd.logic.reference.domain.service.i_bourse import IBourseTranslator
 
 
@@ -49,11 +52,16 @@ def modifier_choix_formation(
     proposition_repository: 'IPropositionRepository',
     formation_translator: 'IFormationGeneraleTranslator',
     bourse_translator: 'IBourseTranslator',
+    inscriptions_translator: IInscriptionsTranslatorService,
 ) -> 'PropositionIdentity':
     # GIVEN
     formation_id = FormationIdentityBuilder.build(sigle=cmd.sigle_formation, annee=cmd.annee_formation)
     formation = formation_translator.get(formation_id)
     proposition = proposition_repository.get(PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition))
+    est_en_poursuite = inscriptions_translator.est_en_poursuite(
+        matricule_candidat=proposition.matricule_candidat,
+        sigle_formation=proposition.formation_id.sigle,
+    )
     bourses_ids = bourse_translator.search(
         [
             scholarship
@@ -73,6 +81,7 @@ def modifier_choix_formation(
         avec_bourse_erasmus_mundus=cmd.avec_bourse_erasmus_mundus,
         bourse_erasmus_mundus=cmd.bourse_erasmus_mundus,
         reponses_questions_specifiques=cmd.reponses_questions_specifiques,
+        est_en_poursuite=est_en_poursuite,
     )
 
     # THEN

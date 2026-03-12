@@ -23,33 +23,16 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
+from abc import abstractmethod
 
-from admission.ddd.admission.shared_kernel.domain.service.i_deliberation_translator import IDeliberationTranslator
-from ddd.logic.deliberation.cloture.dto.deliberation import DeliberationCycleDTO, DeliberationProgrammeAnnuelDTO
+from osis_common.ddd import interface
 
 
-class DeliberationInMemoryTranslator(IDeliberationTranslator):
+class INomasTranslator(interface.DomainService):
     @classmethod
-    def recuperer_deliberations_cycles(
+    @abstractmethod
+    def recuperer(
         cls,
-        nomas: list[str],
-        annee: int | None = None,
-        sigle_formation: str | None = None,
-    ) -> dict[tuple[str, str], DeliberationCycleDTO]:
-        return {}
-
-    @classmethod
-    def recuperer_deliberations_annuelles(
-        cls,
-        nomas: list[str],
-        annee: int,
-    ) -> dict[tuple[str, str], dict[int, DeliberationProgrammeAnnuelDTO | None]]:
-        return {}
-
-    @classmethod
-    def recuperer_date_debut_periode_deliberation_deuxieme_session(
-        cls,
-        annee: int,
-    ) -> datetime.date:
-        return datetime.date(year=annee, month=4, day=15)
+        matricule_candidat: str,
+    ) -> list[str]:
+        raise NotImplementedError

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -188,5 +188,5 @@ class DoctoratInMemoryTranslator(IDoctoratTranslator):
         ]
 
     @classmethod
-    def verifier_existence(cls, sigle: str, annee: int) -> bool:  # pragma: no cover
+    def verifier_existence(cls, sigle: str, annee: int, candidat_est_en_poursuite_directe: bool = None) -> bool:
         return any(True for doc in cls.doctorats if doc.entity_id.sigle == sigle and doc.entity_id.annee == annee)

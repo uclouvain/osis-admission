@@ -63,6 +63,14 @@ class InscriptionsInMemoryTranslator(IInscriptionsTranslatorService):
         return False
 
     @classmethod
+    def est_diplome(
+        cls,
+        matricule_candidat: str,
+        sigle_formation: str,
+    ) -> bool:
+        return False
+
+    @classmethod
     def est_en_poursuite_directe(
         cls,
         matricule_candidat: str,
