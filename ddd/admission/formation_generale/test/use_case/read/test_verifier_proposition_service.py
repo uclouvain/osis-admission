@@ -50,6 +50,8 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 )
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     BoursesEtudesNonRenseignees,
+    CandidatDejaDiplomeFormationException,
+    CandidatNonEligibleALaReinscriptionException,
     EquivalenceNonRenseigneeException,
     EtudesSecondairesNonCompleteesException,
     EtudesSecondairesNonCompleteesPourAlternativeException,
@@ -65,6 +67,7 @@ from admission.ddd.admission.formation_generale.test.factory.proposition import 
 from admission.ddd.admission.shared_kernel.domain.model.formation import FormationIdentity
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     ConditionsAccessNonRempliesException,
+    DemandePourCetteFormationDejaEnvoyeeException,
     HorsPeriodeSpecifiqueInscription,
     NombrePropositionsSoumisesDepasseException,
     QuestionsSpecifiquesChoixFormationNonCompleteesException,
@@ -1855,13 +1858,47 @@ class TestVerifierPropositionService(TestCase):
         for proposition in propositions:
             proposition.statut = ChoixStatutPropositionGenerale.EN_BROUILLON
 
-        for proposition_index in range(2):
+        for proposition_index in range(3):
             propositions[proposition_index].statut = ChoixStatutPropositionGenerale.CONFIRMEE
 
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(VerifierPropositionQuery(uuid_proposition=propositions[2].entity_id.uuid))
 
         self.assertHasInstance(context.exception.exceptions, NombrePropositionsSoumisesDepasseException)
+
+    def test_should_verification_renvoyer_erreur_si_trop_de_demandes_envoyees_cas_hors_ue_etranger(self):
+        propositions = self.proposition_in_memory.search(matricule_candidat='0000000001')
+        for proposition in propositions:
+            proposition.statut = ChoixStatutPropositionGenerale.EN_BROUILLON
+
+        for proposition_index in range(2):
+            propositions[proposition_index].statut = ChoixStatutPropositionGenerale.CONFIRMEE
+
+        # Nationalité UE
+        with mock.patch.multiple(self.candidat, pays_nationalite='FR', pays_nationalite_europeen=True):
+            # > Adresse en belgique
+            with mock.patch.multiple(self.adresse_residentielle, pays='BE'):
+                entity_id = self.message_bus.invoke(VerifierPropositionQuery(uuid_proposition='uuid-MASTER-SCI'))
+                self.assertEqual(entity_id, self.master_proposition.entity_id)
+
+            # > Adresse à l'étranger
+            with mock.patch.multiple(self.adresse_residentielle, pays='FR'):
+                entity_id = self.message_bus.invoke(VerifierPropositionQuery(uuid_proposition='uuid-MASTER-SCI'))
+                self.assertEqual(entity_id, self.master_proposition.entity_id)
+
+        # Nationalité hors UE
+        with mock.patch.multiple(self.candidat, pays_nationalite='CH', pays_nationalite_europeen=False):
+            # > Adresse en belgique
+            with mock.patch.multiple(self.adresse_residentielle, pays='BE'):
+                entity_id = self.message_bus.invoke(VerifierPropositionQuery(uuid_proposition='uuid-MASTER-SCI'))
+                self.assertEqual(entity_id, self.master_proposition.entity_id)
+
+            # > Adresse à l'étranger
+            with mock.patch.multiple(self.adresse_residentielle, pays='FR'):
+                with self.assertRaises(MultipleBusinessExceptions) as context:
+                    self.message_bus.invoke(VerifierPropositionQuery(uuid_proposition='uuid-MASTER-SCI'))
+
+                self.assertHasInstance(context.exception.exceptions, NombrePropositionsSoumisesDepasseException)
 
     def test_should_verification_renvoyer_erreur_si_visa_necessaire_et_non_renseigne(self):
         mock.patch.multiple(self.candidat, pays_nationalite='CA', pays_nationalite_europeen=False).start()
@@ -2072,3 +2109,54 @@ class TestVerifierPropositionService(TestCase):
             ):
                 result = self.message_bus.invoke(cmd)
                 self.assertEqual(result, self.master_proposition.entity_id)
+
+    def test_should_verifier_une_seule_demande_pour_une_meme_formation_par_annee(self):
+        with mock.patch(
+            'admission.infrastructure.admission.shared_kernel.domain.service.in_memory.maximum_propositions.'
+            'MaximumPropositionsAutoriseesInMemory.verifier_une_seule_demande_envoyee_par_formation_generale_par_annee',
+            side_effect=DemandePourCetteFormationDejaEnvoyeeException(2020),
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd(uuid=self.master_proposition.entity_id.uuid))
+
+                self.assertHasInstance(context.exception.exceptions, DemandePourCetteFormationDejaEnvoyeeException)
+
+    def test_should_verifier_candidat_pas_deja_diplome_de_la_formation(self):
+        with mock.patch(
+            'admission.ddd.admission.shared_kernel.domain.service.inscriptions_ucl_candidat.'
+            'InscriptionsUCLCandidatService.est_diplome',
+            return_value=True,
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                proposition_id = self.message_bus.invoke(self.cmd(uuid=self.master_proposition.entity_id.uuid))
+
+                self.assertHasInstance(context.exception.exceptions, CandidatDejaDiplomeFormationException)
+
+        with mock.patch(
+            'admission.ddd.admission.shared_kernel.domain.service.inscriptions_ucl_candidat.'
+            'InscriptionsUCLCandidatService.est_diplome',
+            return_value=False,
+        ):
+            proposition_id = self.message_bus.invoke(self.cmd(uuid=self.master_proposition.entity_id.uuid))
+
+            self.assertEqual(proposition_id, self.master_proposition.entity_id)
+
+    def test_should_verifier_candidat_etre_delibere(self):
+        with mock.patch(
+            'admission.ddd.admission.shared_kernel.domain.service.inscriptions_ucl_candidat.'
+            'InscriptionsUCLCandidatService.est_eligible_a_la_reinscription',
+            return_value=False,
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                proposition_id = self.message_bus.invoke(self.cmd(uuid=self.master_proposition.entity_id.uuid))
+
+                self.assertHasInstance(context.exception.exceptions, CandidatNonEligibleALaReinscriptionException)
+
+        with mock.patch(
+            'admission.ddd.admission.shared_kernel.domain.service.inscriptions_ucl_candidat.'
+            'InscriptionsUCLCandidatService.est_eligible_a_la_reinscription',
+            return_value=True,
+        ):
+            proposition_id = self.message_bus.invoke(self.cmd(uuid=self.master_proposition.entity_id.uuid))
+
+            self.assertEqual(proposition_id, self.master_proposition.entity_id)

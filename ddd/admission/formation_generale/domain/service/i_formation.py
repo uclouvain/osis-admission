@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,11 +27,14 @@ from abc import abstractmethod
 from typing import List, Optional
 
 from admission.ddd.admission.shared_kernel.domain.model.formation import Formation, FormationIdentity
-from admission.ddd.admission.shared_kernel.domain.service.i_formation_translator import IFormationTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_formation_translator import (
+    IBaseFormationTranslator,
+    IFormationTranslator,
+)
 from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 
 
-class IFormationGeneraleTranslator(IFormationTranslator):
+class IFormationGeneraleTranslator(IBaseFormationTranslator, IFormationTranslator):
     @classmethod
     @abstractmethod
     def get(cls, entity_id: FormationIdentity) -> Formation:
@@ -52,5 +55,6 @@ class IFormationGeneraleTranslator(IFormationTranslator):
         intitule: str,
         terme_de_recherche: Optional[str],
         campus: Optional[str],
+        statuts: Optional[List[str]],
     ) -> List['FormationDTO']:
         raise NotImplementedError

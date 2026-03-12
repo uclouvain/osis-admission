@@ -30,7 +30,7 @@ from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_evaluat
 )
 
 
-class InscriptionEvaluationsInMemoryTranslator(IInscriptionsEvaluationsTranslator):
+class InscriptionsEvaluationsInMemoryTranslator(IInscriptionsEvaluationsTranslator):
     def recuperer_date_fin_periode_inscription_etudiants_derniere_session(self, annee: int) -> datetime.date:
         return datetime.date(year=annee, month=7, day=15)
 

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,6 +25,9 @@
 # ##############################################################################
 from rest_framework import serializers
 
+from admission.ddd.admission.formation_generale.commands import (
+    SpecifierRaisonPlusieursDemandesMemeCycleMemeAnneeCommand,
+)
 from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription import (
     ICalendrierInscription,
 )
@@ -36,6 +39,8 @@ from base.utils.serializers import DTOSerializer
 __all__ = [
     'PropositionErrorsSerializer',
     'SubmitPropositionSerializer',
+    'SpecifierRaisonPlusieursDemandesMemeCycleMemeAnneeCommandSerializer',
+    'SubmitGeneralPropositionSerializer',
 ]
 
 
@@ -55,9 +60,30 @@ class PropositionErrorsSerializer(serializers.Serializer):
     pool_end_date = serializers.DateField(allow_null=True, required=False)
     access_conditions_url = serializers.CharField(allow_null=True, required=False)
     elements_confirmation = ElementConfirmationSerializer(many=True, allow_null=True, required=False)
+    display_several_applications_same_cycle_same_year_questions = serializers.BooleanField(
+        allow_null=True,
+        required=False,
+    )
 
 
 class SubmitPropositionSerializer(serializers.Serializer):
     annee = serializers.IntegerField()
     pool = serializers.ChoiceField(choices=[calendar.event_reference for calendar in ICalendrierInscription.all_pools])
     elements_confirmation = serializers.JSONField()
+
+
+class SubmitGeneralPropositionSerializer(SubmitPropositionSerializer):
+    raison_plusieurs_demandes_meme_cycle_meme_annee = serializers.CharField(allow_blank=True)
+    justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee = serializers.CharField(allow_blank=True)
+
+
+class SpecifierRaisonPlusieursDemandesMemeCycleMemeAnneeCommandSerializer(DTOSerializer):
+    """
+    Serializer containing the answers to the questions asked when the candidate has several applications for the same
+    cycle for the same year.
+    """
+
+    uuid_proposition = None
+
+    class Meta:
+        source = SpecifierRaisonPlusieursDemandesMemeCycleMemeAnneeCommand

@@ -23,33 +23,20 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
+from admission.ddd.admission.shared_kernel.domain.service.i_noma_translator import INomasTranslator
+from ddd.logic.shared_kernel.signaletique_etudiant.commands import RechercherSignaletiqueEtudiantQuery
+from ddd.logic.shared_kernel.signaletique_etudiant.dto.signaletique_etudiant import SignaletiqueEtudiantDTO
 
-from admission.ddd.admission.shared_kernel.domain.service.i_deliberation_translator import IDeliberationTranslator
-from ddd.logic.deliberation.cloture.dto.deliberation import DeliberationCycleDTO, DeliberationProgrammeAnnuelDTO
-
-
-class DeliberationInMemoryTranslator(IDeliberationTranslator):
+class NomasTranslator(INomasTranslator):
     @classmethod
-    def recuperer_deliberations_cycles(
+    def recuperer(
         cls,
-        nomas: list[str],
-        annee: int | None = None,
-        sigle_formation: str | None = None,
-    ) -> dict[tuple[str, str], DeliberationCycleDTO]:
-        return {}
+        matricule_candidat: str,
+    ) -> list[str]:
+        from infrastructure.messages_bus import message_bus_instance
 
-    @classmethod
-    def recuperer_deliberations_annuelles(
-        cls,
-        nomas: list[str],
-        annee: int,
-    ) -> dict[tuple[str, str], dict[int, DeliberationProgrammeAnnuelDTO | None]]:
-        return {}
+        students: set[SignaletiqueEtudiantDTO] = message_bus_instance.invoke(
+            RechercherSignaletiqueEtudiantQuery(matricule_fgs=matricule_candidat),
+        )
 
-    @classmethod
-    def recuperer_date_debut_periode_deliberation_deuxieme_session(
-        cls,
-        annee: int,
-    ) -> datetime.date:
-        return datetime.date(year=annee, month=4, day=15)
+        return [student.noma for student in students]

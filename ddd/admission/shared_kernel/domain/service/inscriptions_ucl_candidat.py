@@ -37,6 +37,7 @@ from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_evaluat
 from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
     IInscriptionsTranslatorService,
 )
+from admission.ddd.admission.shared_kernel.domain.service.i_noma_translator import INomasTranslator
 from admission.ddd.admission.shared_kernel.dtos.inscription_ucl_candidat import (
     InscriptionUCLCandidatDTO,
     PeriodeReinscriptionDTO,
@@ -230,3 +231,23 @@ class InscriptionsUCLCandidatService(interface.DomainService):
         )
         today_date = datetime.date.today()
         return periode_reinscription.date_debut <= today_date <= periode_reinscription.date_fin
+
+    @classmethod
+    def est_diplome(
+        cls,
+        matricule_candidat: str,
+        sigle_formation: str,
+        deliberation_translator: IDeliberationTranslator,
+        nomas_translator: INomasTranslator,
+    ) -> bool:
+        nomas = nomas_translator.recuperer(matricule_candidat=matricule_candidat)
+
+        if not nomas:
+            return False
+
+        deliberations_cycle = deliberation_translator.recuperer_deliberations_cycles(
+            nomas=nomas,
+            sigle_formation=sigle_formation,
+        )
+
+        return any(deliberation.est_diplome for deliberation in deliberations_cycle.values())

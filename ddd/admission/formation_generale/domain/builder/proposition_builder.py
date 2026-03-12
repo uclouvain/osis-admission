@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,7 +25,6 @@
 ##############################################################################
 from typing import Dict
 
-from admission.ddd.admission.shared_kernel.domain.model.formation import FormationIdentity
 from admission.ddd.admission.formation_generale.commands import (
     InitierPropositionCommand,
 )
@@ -38,6 +37,7 @@ from admission.ddd.admission.formation_generale.domain.model.proposition import 
 from admission.ddd.admission.formation_generale.repository.i_proposition import (
     IPropositionRepository,
 )
+from admission.ddd.admission.shared_kernel.domain.model.formation import FormationIdentity
 from ddd.logic.reference.domain.model.bourse import BourseIdentity
 from osis_common.ddd import interface
 
@@ -58,6 +58,7 @@ class PropositionBuilder(interface.RootEntityBuilder):
         proposition_repository: 'IPropositionRepository',
         formation_id: 'FormationIdentity',
         bourses_ids: Dict[str, BourseIdentity],
+        est_en_poursuite: bool,
     ) -> 'Proposition':
         return Proposition(
             entity_id=PropositionIdentityBuilder.build(),
@@ -71,4 +72,5 @@ class PropositionBuilder(interface.RootEntityBuilder):
             bourse_erasmus_mundus_id=bourses_ids.get(cmd.bourse_erasmus_mundus) if cmd.bourse_erasmus_mundus else None,
             reference=proposition_repository.recuperer_reference_suivante(),
             auteur_derniere_modification=cmd.matricule_candidat,
+            est_en_poursuite=est_en_poursuite,
         )
