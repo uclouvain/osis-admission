@@ -1581,6 +1581,8 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             financabilite_derogation_premiere_notification_par='',
             financabilite_derogation_derniere_notification_le=None,
             financabilite_derogation_derniere_notification_par='',
+            justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee='',
+            raison_plusieurs_demandes_meme_cycle_meme_annee='',
         )
         doctorate_proposition_dto = _PropositionFormationDoctoraleDTO(
             uuid='uuid-proposition',

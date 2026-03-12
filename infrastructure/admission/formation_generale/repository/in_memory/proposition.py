@@ -388,6 +388,14 @@ class PropositionInMemoryRepository(
             visa_etudes_d=proposition.visa_etudes_d,
             certificat_autorisation_signe=proposition.certificat_autorisation_signe,
             type=proposition.type_demande.name if proposition.type_demande else '',
+            raison_plusieurs_demandes_meme_cycle_meme_annee=(
+                proposition.raison_plusieurs_demandes_meme_cycle_meme_annee.name
+                if proposition.raison_plusieurs_demandes_meme_cycle_meme_annee
+                else ''
+            ),
+            justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee=(
+                proposition.justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee
+            ),
         )
 
     @classmethod

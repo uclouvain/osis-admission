@@ -42,11 +42,12 @@ class DeliberationTranslator(IDeliberationTranslator):
         cls,
         nomas: list[str],
         annee: int | None = None,
+        sigle_formation: str | None = None,
     ) -> dict[tuple[str, str], DeliberationCycleDTO]:
         from infrastructure.messages_bus import message_bus_instance
 
         cycles_deliberations: list[DeliberationCycleDTO] = message_bus_instance.invoke(
-            RechercherDeliberationCycleQuery(nomas=nomas, annee=annee)
+            RechercherDeliberationCycleQuery(nomas=nomas, annee=annee, sigle_formation=sigle_formation)
         )
 
         return {

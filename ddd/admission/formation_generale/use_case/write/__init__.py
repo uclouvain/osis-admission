@@ -133,4 +133,7 @@ from .specifier_paiement_plus_necessaire_service import (
 from .specifier_paiement_va_etre_ouvert_par_candidat_service import (
     specifier_paiement_va_etre_ouvert_par_candidat,
 )
+from .specifier_raison_plusieurs_demandes_meme_cycle_meme_annee_service import (
+    specifier_raison_plusieurs_demandes_meme_cycle_meme_annee,
+)
 from .supprimer_proposition_service import supprimer_proposition

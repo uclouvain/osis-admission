@@ -39,6 +39,7 @@ from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from admission.infrastructure.admission.shared_kernel.domain.service.formation_translator import BaseFormationTranslator
 from base.models.enums.active_status import ActiveStatusEnum
 from base.models.enums.education_group_types import TrainingType
 from ddd.logic.formation_catalogue.commands import RecupererFormationQuery, SearchFormationsCommand
@@ -49,7 +50,7 @@ from ddd.logic.shared_kernel.campus.commands import GetCampusQuery
 from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
 
 
-class FormationGeneraleTranslator(IFormationGeneraleTranslator):
+class FormationGeneraleTranslator(BaseFormationTranslator, IFormationGeneraleTranslator):
     @classmethod
     def _build_dto(cls, dto: 'TrainingDto') -> 'FormationDTO':
         from infrastructure.messages_bus import message_bus_instance
@@ -185,6 +186,7 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
         intitule: Optional[str],
         terme_de_recherche: Optional[str],
         campus: Optional[str],
+        statuts: Optional[List[str]],
     ) -> List['FormationDTO']:
         from infrastructure.messages_bus import message_bus_instance
 
@@ -198,7 +200,7 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
                 est_inscriptible=True,
                 uclouvain_est_institution_reference=True,
                 inscription_web=True,
-                statuts=[ActiveStatusEnum.ACTIVE.name, ActiveStatusEnum.RE_REGISTRATION.name],
+                statuts=statuts,
                 sigle=sigle,
                 intitule=intitule,
                 terme_de_recherche=terme_de_recherche,
@@ -222,16 +224,21 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
         )
 
     @classmethod
-    def verifier_existence(cls, sigle: str, annee: int) -> bool:
+    def verifier_existence(cls, sigle: str, annee: int, candidat_est_en_poursuite_directe: bool = None) -> bool:
         from infrastructure.messages_bus import message_bus_instance
 
-        dtos = message_bus_instance.invoke(
+        dtos: list[TrainingDto] = message_bus_instance.invoke(
             SearchFormationsCommand(
                 sigles_annees=[(sigle, annee)],
                 est_inscriptible=True,
                 uclouvain_est_institution_reference=True,
                 inscription_web=True,
-                statuts=[ActiveStatusEnum.ACTIVE.name, ActiveStatusEnum.RE_REGISTRATION.name],
+                statuts=[
+                    ActiveStatusEnum.ACTIVE.name,
+                    ActiveStatusEnum.RE_REGISTRATION.name,
+                ]
+                if candidat_est_en_poursuite_directe
+                else [ActiveStatusEnum.ACTIVE.name],
                 types=list(AnneeInscriptionFormationTranslator.GENERAL_EDUCATION_TYPES),
             )
         )

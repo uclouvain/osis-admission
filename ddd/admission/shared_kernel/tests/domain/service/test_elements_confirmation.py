@@ -38,6 +38,8 @@ from admission.ddd.admission.doctorat.preparation.domain.model.proposition impor
 )
 from admission.ddd.admission.formation_continue.commands import (
     RecupererElementsConfirmationQuery as RecupererElementsConfirmationContinueQuery,
+)
+from admission.ddd.admission.formation_continue.commands import (
     SoumettrePropositionCommand as SoumettrePropositionContinueCommand,
 )
 from admission.ddd.admission.formation_continue.domain.model.proposition import (
@@ -45,6 +47,8 @@ from admission.ddd.admission.formation_continue.domain.model.proposition import 
 )
 from admission.ddd.admission.formation_generale.commands import (
     RecupererElementsConfirmationQuery as RecupererElementsConfirmationGeneraleQuery,
+)
+from admission.ddd.admission.formation_generale.commands import (
     SoumettrePropositionCommand as SoumettrePropositionGeneraleCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import (
@@ -255,6 +259,28 @@ class ElementsConfirmationTestCase(TestCase):
             ]
             self.assertListEqual([e.nom for e in elements], expected)
 
+            # Etudiant en poursuite
+            with patch.object(
+                PropositionGeneraleRepository.entities[1],
+                'est_en_poursuite',
+                True,
+            ):
+                elements = message_bus_in_memory_instance.invoke(
+                    RecupererElementsConfirmationGeneraleQuery(uuid_proposition="uuid-BACHELIER-ECO1")
+                )
+                self.assertNotIn('frais_dossier', [e.nom for e in elements])
+
+            # Etudiant pas en poursuite
+            with patch.object(
+                PropositionGeneraleRepository.entities[1],
+                'est_en_poursuite',
+                False,
+            ):
+                elements = message_bus_in_memory_instance.invoke(
+                    RecupererElementsConfirmationGeneraleQuery(uuid_proposition="uuid-BACHELIER-ECO1")
+                )
+                self.assertIn('frais_dossier', [e.nom for e in elements])
+
     def test_recuperer_elements_confirmation_visa(self):
         candidat = ProfilCandidatInMemoryTranslator.profil_candidats[1]
         adresse_residence = next(
@@ -280,6 +306,28 @@ class ElementsConfirmationTestCase(TestCase):
                     'declaration_sur_lhonneur',
                 ]
                 self.assertListEqual([e.nom for e in elements], expected)
+
+                # Etudiant en réinscription
+                with patch(
+                    'admission.infrastructure.admission.shared_kernel.domain.service.in_memory.'
+                    'inscriptions_translator.InscriptionsInMemoryTranslator.est_inscrit_recemment',
+                    return_value=True,
+                ):
+                    elements = message_bus_in_memory_instance.invoke(
+                        RecupererElementsConfirmationGeneraleQuery(uuid_proposition="uuid-BACHELIER-ECO1")
+                    )
+                    self.assertNotIn('visa', [e.nom for e in elements])
+
+                # Etudiant pas en réinscription
+                with patch(
+                    'admission.infrastructure.admission.shared_kernel.domain.service.in_memory.'
+                    'inscriptions_translator.InscriptionsInMemoryTranslator.est_inscrit_recemment',
+                    return_value=False,
+                ):
+                    elements = message_bus_in_memory_instance.invoke(
+                        RecupererElementsConfirmationGeneraleQuery(uuid_proposition="uuid-BACHELIER-ECO1")
+                    )
+                    self.assertIn('visa', [e.nom for e in elements])
 
         # Nationalité non spécifiée
         with patch.multiple(candidat, pays_nationalite='', pays_nationalite_europeen=False):
@@ -341,6 +389,28 @@ class ElementsConfirmationTestCase(TestCase):
                 'declaration_sur_lhonneur',
             ]
             self.assertListEqual([e.nom for e in elements], expected)
+
+            # Etudiant en poursuite
+            with patch.object(
+                PropositionGeneraleRepository.entities[1],
+                'est_en_poursuite',
+                True,
+            ):
+                elements = message_bus_in_memory_instance.invoke(
+                    RecupererElementsConfirmationGeneraleQuery(uuid_proposition="uuid-BACHELIER-ECO1")
+                )
+                self.assertNotIn('documents_etudes_contingentees', [e.nom for e in elements])
+
+            # Etudiant pas en poursuite
+            with patch.object(
+                PropositionGeneraleRepository.entities[1],
+                'est_en_poursuite',
+                False,
+            ):
+                elements = message_bus_in_memory_instance.invoke(
+                    RecupererElementsConfirmationGeneraleQuery(uuid_proposition="uuid-BACHELIER-ECO1")
+                )
+                self.assertIn('documents_etudes_contingentees', [e.nom for e in elements])
 
     def test_recuperer_elements_confirmation_etudes_communication_ecole(self):
         with patch.object(
@@ -431,5 +501,7 @@ class ElementsConfirmationTestCase(TestCase):
                         'justificatifs': ElementsConfirmationInMemory.JUSTIFICATIFS,
                         'declaration_sur_lhonneur': ElementsConfirmationInMemory.DECLARATION_SUR_LHONNEUR,
                     },
+                    raison_plusieurs_demandes_meme_cycle_meme_annee='',
+                    justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee='',
                 )
             )

@@ -44,6 +44,7 @@ class RechercherFormationGeneraleQuery(interface.QueryRequest):
     type_formation: Optional[str] = ''
     campus: Optional[str] = ''
     annee: Optional[int] = None
+    statuts: List[str] = None
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -135,6 +136,15 @@ class SoumettrePropositionCommand(interface.CommandRequest):
     annee: int
     pool: str
     elements_confirmation: Dict[str, str]
+    raison_plusieurs_demandes_meme_cycle_meme_annee: str
+    justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierRaisonPlusieursDemandesMemeCycleMemeAnneeCommand(interface.CommandRequest):
+    uuid_proposition: str
+    raison_plusieurs_demandes_meme_cycle_meme_annee: str
+    justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee: str
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -773,3 +783,8 @@ class RetyperDocumentCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class RecupererPeriodeInscriptionSpecifiqueBachelierMedecineDentisterieQuery(interface.QueryRequest):
     annee: Optional[int]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererTypeDemandeQuery(interface.QueryRequest):
+    uuid_proposition: str

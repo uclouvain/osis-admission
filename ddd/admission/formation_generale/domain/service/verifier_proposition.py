@@ -37,12 +37,24 @@ from admission.ddd.admission.shared_kernel.domain.model.formation import Formati
 from admission.ddd.admission.shared_kernel.domain.model.question_specifique import (
     QuestionSpecifique,
 )
+from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import (
+    IAnneeInscriptionFormationTranslator,
+)
 from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription import (
     ICalendrierInscription,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_deliberation_translator import IDeliberationTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_diffusion_notes_translator import IDiffusionNotesTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_evaluations_translator import (
+    IInscriptionsEvaluationsTranslator,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
 )
 from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions import (
     IMaximumPropositionsAutorisees,
 )
+from admission.ddd.admission.shared_kernel.domain.service.i_noma_translator import INomasTranslator
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
@@ -80,10 +92,23 @@ class VerifierProposition(interface.DomainService):
         titres: 'Titres',
         formation: 'Formation',
         annee_formation: AcademicYear,
+        annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
+        inscriptions_translator: IInscriptionsTranslatorService,
+        deliberation_translator: IDeliberationTranslator,
+        diffusion_notes_translator: IDiffusionNotesTranslator,
+        inscriptions_evaluations_translator: IInscriptionsEvaluationsTranslator,
+        nomas_translator: INomasTranslator,
+        candidat_est_inscrit_recemment_ucl: bool,
         annee_soumise: int = None,
         pool_soumis: 'AcademicCalendarTypes' = None,
     ) -> None:
         profil_candidat_service = ProfilCandidat()
+        candidat_est_en_poursuite_directe = inscriptions_translator.est_en_poursuite_directe(
+            matricule_candidat=proposition_candidat.matricule_candidat,
+            sigle_formation=formation.entity_id.sigle,
+            annee_inscription_formation_translator=annee_inscription_formation_translator,
+        )
+
         execute_functions_and_aggregate_exceptions(
             partial(
                 profil_candidat_service.verifier_identification,
@@ -131,8 +156,14 @@ class VerifierProposition(interface.DomainService):
             ),
             partial(
                 profil_candidat_service.verifier_choix_formation_generale,
-                proposition_candidat,
-                formation,
+                proposition=proposition_candidat,
+                formation=formation,
+                annee_inscription_formation_translator=annee_inscription_formation_translator,
+                inscriptions_translator=inscriptions_translator,
+                deliberation_translator=deliberation_translator,
+                diffusion_notes_translator=diffusion_notes_translator,
+                inscriptions_evaluations_translator=inscriptions_evaluations_translator,
+                nomas_translator=nomas_translator,
             ),
             partial(
                 profil_candidat_service.verifier_informations_complementaires_formation_generale,
@@ -169,9 +200,16 @@ class VerifierProposition(interface.DomainService):
                 annee_soumise=annee_soumise,
                 pool_soumis=pool_soumis,
                 formation=formation,
+                candidat_est_en_poursuite_directe=candidat_est_en_poursuite_directe,
             ),
             partial(
                 maximum_propositions_service.verifier_nombre_propositions_envoyees_formation_generale,
+                proposition_candidat=proposition_candidat,
+                profil_candidat_translator=profil_candidat_translator,
+                annee_soumise=annee_soumise,
+            ),
+            partial(
+                maximum_propositions_service.verifier_une_seule_demande_envoyee_par_formation_generale_par_annee,
                 proposition_candidat=proposition_candidat,
                 annee_soumise=annee_soumise,
             ),
@@ -184,11 +222,21 @@ class VerifierProposition(interface.DomainService):
         titres: 'Titres',
         calendrier_inscription: 'ICalendrierInscription',
         profil_candidat_translator: 'IProfilCandidatTranslator',
+        candidat_est_inscrit_recemment_ucl: bool,
     ) -> 'TypeDemande':
-        # (Nationalité UE+5)
-        #   ET (tous les diplômes belges (y compris secondaires si déclaré dans le détail)) = inscription
         est_ue_plus_5 = calendrier_inscription.est_ue_plus_5(
             profil_candidat_translator.get_identification(proposition.matricule_candidat),
         )
-        diplomes_tous_belge = set(titres.get_valid_conditions()) <= set(DIPLOMES_ACCES_BELGE)
-        return TypeDemande.INSCRIPTION if est_ue_plus_5 and diplomes_tous_belge else TypeDemande.ADMISSION
+        if candidat_est_inscrit_recemment_ucl:
+            # Hors (UE+5) qui ne sont pas en poursuite = admission
+            # le reste = inscription
+            return (
+                TypeDemande.ADMISSION
+                if not est_ue_plus_5 and not proposition.est_en_poursuite
+                else TypeDemande.INSCRIPTION
+            )
+        else:
+            # (Nationalité UE+5)
+            #   ET (tous les diplômes belges (y compris secondaires si déclaré dans le détail)) = inscription
+            diplomes_tous_belge = set(titres.get_valid_conditions()) <= set(DIPLOMES_ACCES_BELGE)
+            return TypeDemande.INSCRIPTION if est_ue_plus_5 and diplomes_tous_belge else TypeDemande.ADMISSION

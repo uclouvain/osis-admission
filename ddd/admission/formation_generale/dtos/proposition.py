@@ -128,6 +128,9 @@ class PropositionDTO(interface.DTO):
 
     type: str
 
+    raison_plusieurs_demandes_meme_cycle_meme_annee: str
+    justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee: str
+
     @property
     def candidat_vip(self) -> bool:
         return any(

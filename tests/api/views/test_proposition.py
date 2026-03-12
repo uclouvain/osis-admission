@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -47,6 +47,7 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
+    RaisonPlusieursDemandesMemesCycleEtAnnee,
 )
 from admission.models import (
     ContinuingEducationAdmission,
@@ -135,6 +136,8 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
             status=ChoixStatutPropositionGenerale.EN_BROUILLON.name,
             training__management_entity=cls.commission.entity,
             training__credits=180,
+            several_admissions_same_cycle_same_year_reason=RaisonPlusieursDemandesMemesCycleEtAnnee.SUIVRE_EN_PARALLELE.name,
+            several_admissions_same_cycle_same_year_justification='My justification',
         )
         cls.teaching_campus = cls.admission.training.educationgroupversion_set.first().root_group.main_teaching_campus
         # Users
@@ -196,6 +199,14 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
         self.assertEqual(json_response['bourse_double_diplome'], double_degree_scholarship_json)
         self.assertEqual(json_response['bourse_internationale'], international_scholarship_json)
         self.assertEqual(json_response['bourse_erasmus_mundus'], erasmus_mundus_scholarship_json)
+        self.assertEqual(
+            json_response['raison_plusieurs_demandes_meme_cycle_meme_annee'],
+            RaisonPlusieursDemandesMemesCycleEtAnnee.SUIVRE_EN_PARALLELE.name,
+        )
+        self.assertEqual(
+            json_response['justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee'],
+            'My justification',
+        )
         self.assertEqual(json_response['erreurs'], [])
         self.assertActionLinks(
             links=json_response['links'],

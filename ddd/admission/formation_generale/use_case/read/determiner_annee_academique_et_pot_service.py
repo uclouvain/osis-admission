@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,14 +25,6 @@
 # ##############################################################################
 from typing import Union
 
-from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription import (
-    ICalendrierInscription,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
-    IProfilCandidatTranslator,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import ITitresAcces
-from admission.ddd.admission.shared_kernel.dtos.conditions import InfosDetermineesDTO
 from admission.ddd.admission.formation_generale.commands import (
     DeterminerAnneeAcademiqueEtPotQuery,
 )
@@ -45,6 +37,21 @@ from admission.ddd.admission.formation_generale.domain.service.i_formation impor
 from admission.ddd.admission.formation_generale.repository.i_proposition import (
     IPropositionRepository,
 )
+from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription import (
+    ICalendrierInscription,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_deliberation_translator import IDeliberationTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
+    IProfilCandidatTranslator,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import ITitresAcces
+from admission.ddd.admission.shared_kernel.domain.service.inscriptions_ucl_candidat import (
+    InscriptionsUCLCandidatService,
+)
+from admission.ddd.admission.shared_kernel.dtos.conditions import InfosDetermineesDTO
 
 
 def determiner_annee_academique_et_pot(
@@ -54,6 +61,8 @@ def determiner_annee_academique_et_pot(
     titres_acces: 'ITitresAcces',
     profil_candidat_translator: 'IProfilCandidatTranslator',
     calendrier_inscription: 'ICalendrierInscription',
+    inscriptions_translator: IInscriptionsTranslatorService,
+    deliberation_translator: IDeliberationTranslator,
 ) -> 'InfosDetermineesDTO':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -62,11 +71,21 @@ def determiner_annee_academique_et_pot(
     # THEN
     formation = formation_translator.get(proposition.formation_id)
     type_formation = formation.type
-    titres = titres_acces.recuperer_titres_access(
-        proposition.matricule_candidat,
-        type_formation,
-        proposition.equivalence_diplome,
+
+    inscriptions_ucl_candidat = InscriptionsUCLCandidatService.recuperer(
+        matricule_candidat=proposition.matricule_candidat,
+        inscriptions_translator=inscriptions_translator,
+        formation_translator=formation_translator,
+        deliberation_translator=deliberation_translator,
     )
+
+    titres = titres_acces.recuperer_titres_access(
+        matricule_candidat=proposition.matricule_candidat,
+        type_formation=type_formation,
+        equivalence_diplome=proposition.equivalence_diplome,
+        inscriptions_ucl_candidat=inscriptions_ucl_candidat,
+    )
+
     return calendrier_inscription.determiner_annee_academique_et_pot(
         formation_id=proposition.formation_id,
         proposition=proposition,
