@@ -23,19 +23,21 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from abc import abstractmethod
+from admission.ddd.admission.shared_kernel.commands import RecupererPeriodeReinscriptionQuery
+from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import (
+    IAnneeInscriptionFormationTranslator,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_ucl_candidat import (
+    IInscriptionsUCLCandidatService,
+)
+from admission.ddd.admission.shared_kernel.dtos.inscription_ucl_candidat import PeriodeReinscriptionDTO
 
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import FormationNonTrouveeException
-from osis_common.ddd import interface
 
-
-class IFormationTranslator(interface.DomainService):
-    @classmethod
-    @abstractmethod
-    def verifier_existence(cls, sigle: str, annee: int) -> bool:
-        raise NotImplementedError
-
-    @classmethod
-    def lever_exception_si_formation_inexistante(cls, sigle: str, annee: int):
-        if not cls.verifier_existence(sigle=sigle, annee=annee):
-            raise FormationNonTrouveeException
+def recuperer_periode_reinscription(
+    cmd: RecupererPeriodeReinscriptionQuery,
+    annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
+    inscriptions_ucl_candidat_service: IInscriptionsUCLCandidatService,
+) -> PeriodeReinscriptionDTO:
+    return inscriptions_ucl_candidat_service.recuperer_informations_periode_de_reinscription(
+        annee_inscription_formation_translator=annee_inscription_formation_translator,
+    )

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ from typing import Dict, Optional
 from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
 from admission.ddd.admission.shared_kernel.domain.enums import TypeFormation
 from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import (
+    CalendrierAcademique,
     IAnneeInscriptionFormationTranslator,
 )
 from base.models.academic_calendar import AcademicCalendar
@@ -119,23 +120,28 @@ class AnneeInscriptionFormationTranslator(IAnneeInscriptionFormationTranslator):
     )
 
     @classmethod
-    def recuperer(cls, type_calendrier_academique: AcademicCalendarTypes, annee: Optional[int] = None) -> Optional[int]:
-        if annee is not None:
-            return annee
+    def recuperer_calendrier_academique_courant(
+        cls,
+        type_calendrier_academique: AcademicCalendarTypes,
+    ) -> CalendrierAcademique | None:
         date_jour = datetime.date.today()
 
-        academic_calendar_year = (
+        academic_calendar = (
             AcademicCalendar.objects.filter(
                 start_date__lte=date_jour,
                 end_date__gte=date_jour,
                 reference=type_calendrier_academique.name,
             )
-            .values('data_year__year')
+            .values('start_date', 'end_date', 'data_year__year')
             .first()
         )
 
-        if academic_calendar_year:
-            return academic_calendar_year.get('data_year__year')
+        if academic_calendar:
+            return CalendrierAcademique(
+                annee=academic_calendar['data_year__year'],
+                date_debut=academic_calendar['start_date'],
+                date_fin=academic_calendar['end_date'],
+            )
 
     @classmethod
     def recuperer_annee_selon_type_formation(cls, type_formation: TrainingType) -> Optional[int]:
@@ -161,7 +167,9 @@ ADMISSION_CONTEXT_BY_ALL_OSIS_EDUCATION_TYPE: Dict[str, str] = {
     osis_type: (
         CONTEXT_DOCTORATE
         if osis_type in doctorate_types_as_set
-        else CONTEXT_CONTINUING if osis_type in continuing_education_types_as_set else CONTEXT_GENERAL
+        else CONTEXT_CONTINUING
+        if osis_type in continuing_education_types_as_set
+        else CONTEXT_GENERAL
     )
     for osis_type in AllTypes.get_names()
 }
