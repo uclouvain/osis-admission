@@ -78,6 +78,7 @@
         {% translate 'UCLouvain' %}
       </a>
     </li>
+    {% if admission.noma_candidat %}
     <li
         id="epc-item"
         role="presentation"
@@ -93,6 +94,7 @@
         <div class="badge">{% translate 'EPC' %}</div>
       </a>
     </li>
+    {% endif %}
   </ul>
 </div>
 <div id="document-tab-content" class="tab-content">
@@ -105,9 +107,11 @@
   <div role="tabpanel" class="tab-pane {% if next == 'uclouvain' %}active{% endif %}" id="uclouvain">
     {% include 'admission/document/uclouvain_documents.html' %}
   </div>
+  {% if admission.noma_candidat %}
   <div role="tabpanel" class="tab-pane {% if next == 'epc' %}active{% endif %}" id="epc">
     {% include 'admission/document/epc_documents.html' %}
   </div>
+  {% endif %}
 
   {% include 'admission/document/request_all_documents_modal.html' %}
 </div>

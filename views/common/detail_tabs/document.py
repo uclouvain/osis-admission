@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import logging
 from typing import Union
 
 from django.contrib import messages
@@ -83,6 +84,8 @@ __all__ = [
     'InProgressAnalysisFolderGenerationView',
     'RetypeDocumentView',
 ]
+
+logger = logging.getLogger(__name__)
 
 
 class UploadFreeInternalDocumentView(AdmissionFormMixin, HtmxPermissionRequiredMixin, HtmxMixin, FormView):
@@ -313,6 +316,8 @@ class DocumentEpcDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, H
     name = 'document-epc-detail'
 
     def get_document_metadata(self):
+        if not self.proposition.noma_candidat:
+            return None
         try:
             documents = get_student_files_from_epc(self.proposition.noma_candidat)
             for document in documents:
@@ -323,7 +328,10 @@ class DocumentEpcDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, H
                         'name': document.get('description_detaillee', document.get('description', document.get('nom'))),
                     }
         except Exception as e:
-            pass
+            logger.exception(
+                f"[Documents EPC] Erreur lors de la récupération des documents EPC pour le noma"
+                f" '{self.proposition.noma_candidat}'"
+            )
         return None
 
     def get_context_data(self, **kwargs):

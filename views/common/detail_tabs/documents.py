@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import datetime
+import logging
 from typing import Dict, List, Optional
 
 from django.conf import settings
@@ -79,6 +80,8 @@ __all__ = [
 ]
 
 __namespace__ = False
+
+logger = logging.getLogger(__name__)
 
 
 class CancelDocumentRequestView(
@@ -208,9 +211,15 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
         Return the list of documents stored in EPC for the current admission
         Return None if we are unable to get the documents list
         """
+        if not self.proposition.noma_candidat:
+            return []
         try:
             documents = get_student_files_from_epc(self.proposition.noma_candidat)
         except Exception as e:
+            logger.exception(
+                f"[Documents EPC] Erreur lors de la récupération des documents EPC pour le noma"
+                f" '{self.proposition.noma_candidat}'"
+            )
             return None
         return documents
 
