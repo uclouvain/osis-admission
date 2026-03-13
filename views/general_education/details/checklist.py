@@ -66,17 +66,7 @@ from admission.ddd.admission.formation_generale.commands import (
     EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand,
     EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand,
     EnvoyerRappelPaiementCommand,
-    ModifierAuthentificationEtudesSecondairesCommand,
-    ModifierAuthentificationExamenCommand,
-    ModifierAuthentificationExperienceAcademiqueCommand,
-    ModifierAuthentificationExperienceNonAcademiqueCommand,
-    ModifierAuthentificationExperienceParcoursAnterieurCommand,
     ModifierChecklistChoixFormationCommand,
-    ModifierStatutChecklistEtudesSecondairesCommand,
-    ModifierStatutChecklistExamenCommand,
-    ModifierStatutChecklistExperienceAcademiqueCommand,
-    ModifierStatutChecklistExperienceNonAcademiqueCommand,
-    ModifierStatutChecklistExperienceParcoursAnterieurCommand,
     ModifierStatutChecklistParcoursAnterieurCommand,
     NotifierCandidatDerogationFinancabiliteCommand,
     RecupererListePaiementsPropositionQuery,
@@ -129,25 +119,15 @@ from admission.ddd.admission.shared_kernel.commands import (
     ListerToutesDemandesQuery,
     RechercherParcoursAnterieurQuery,
     RecupererInformationsDestinataireQuery,
-    RecupererInformationsValidationEtudesSecondairesQuery,
-    RecupererInformationsValidationExamenQuery,
-    RecupererInformationsValidationExperienceAcademiqueQuery,
-    RecupererInformationsValidationExperienceNonAcademiqueQuery,
 )
 from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidat
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
-    ExperienceNonTrouveeException,
-    InformationsDestinatairePasTrouvee,
-)
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import InformationsDestinatairePasTrouvee
 from admission.ddd.admission.shared_kernel.dtos import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.shared_kernel.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.shared_kernel.dtos.resume import (
     ResumeEtEmplacementsDocumentsPropositionDTO,
     ResumePropositionDTO,
-)
-from admission.ddd.admission.shared_kernel.dtos.validation_experience_parcours_anterieur import (
-    ValidationExperienceParcoursAnterieurDTO,
 )
 from admission.ddd.admission.shared_kernel.enums import Onglets, TypeItemFormulaire
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
@@ -165,10 +145,9 @@ from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
 from admission.forms import disable_unavailable_forms
 from admission.forms.admission.checklist import (
+    AdmissionCommentForm,
     AssimilationForm,
     ChoixFormationForm,
-    CommentForm,
-    ExperienceStatusForm,
     FacDecisionApprovalForm,
     FacDecisionRefusalForm,
     FinancabiliteApprovalForm,
@@ -187,7 +166,6 @@ from admission.forms.admission.checklist import (
     SicDecisionFinalApprovalForm,
     SicDecisionFinalRefusalForm,
     SicDecisionRefusalForm,
-    SinglePastExperienceAuthenticationForm,
     StatusForm,
 )
 from admission.infrastructure.utils import CHAMPS_DOCUMENTS_EXPERIENCES_CURRICULUM
@@ -232,19 +210,31 @@ from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from base.utils.utils import format_academic_year
+from ddd.logic.shared_kernel.profil.commands import (
+    ModifierStatutEtudesSecondairesCommand,
+    ModifierStatutExamenCommand,
+    ModifierStatutExperienceAcademiqueCommand,
+    ModifierStatutExperienceNonAcademiqueCommand,
+    ModifierStatutExperienceParcoursAnterieurCommand,
+)
 from ddd.logic.shared_kernel.profil.commands import RecupererExperiencesParcoursInterneQuery
 from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import EtudesSecondairesDTO
 from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
+from ddd.logic.shared_kernel.profil.queries import RecupererExperiencesParcoursInterneQuery
 from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
+from osis_profile.forms.experience_authentication_statut import ExperienceAuthenticationStatusForm
+from osis_profile.forms.experience_validation_statut import ExperienceValidationStatusForm
 from osis_profile.models import EducationalExperience
 from osis_profile.models.enums.experience_validation import EtatAuthentificationParcours
 from osis_profile.models.enums.person import ChoixGenre
 from osis_profile.utils.curriculum import ElementCurriculumDTO, groupe_curriculum_par_annee_decroissante
+from osis_profile.views.authentication_status import ChangeExperienceAuthenticationStatus
+from osis_profile.views.mixins.status import EditStatusMixin
 from osis_role.templatetags.osis_role import has_perm
 from parcours_interne import etudiants_PCE_avant_2015
 
@@ -281,7 +271,6 @@ __all__ = [
     'FinancabiliteNotFinanceableView',
     'FinancabiliteNotConcernedView',
     'SinglePastExperienceChangeStatusView',
-    'SinglePastExperienceChangeAuthenticationView',
     'SicApprovalDecisionView',
     'SicApprovalEnrolmentDecisionView',
     'SicApprovalFinalDecisionView',
@@ -292,6 +281,7 @@ __all__ = [
     'SicDecisionDispensationView',
     'SicDecisionChangeStatusView',
     'SicDecisionPdfPreviewView',
+    'SinglePastExperienceChangeAuthenticationView',
 ]
 
 
@@ -1105,7 +1095,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
                 .first()
             )
             context['comment_forms'] = {
-                'decision_sic': CommentForm(
+                'decision_sic': AdmissionCommentForm(
                     comment=comment,
                     form_url=resolve_url(
                         f'{self.base_namespace}:save-comment',
@@ -1115,7 +1105,7 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
                     ),
                     prefix='decision_sic',
                 ),
-                'decision_sic__derogation': CommentForm(
+                'decision_sic__derogation': AdmissionCommentForm(
                     comment=comment_derogation,
                     form_url=resolve_url(
                         f'{self.base_namespace}:save-comment',
@@ -2210,7 +2200,7 @@ class PastExperiencesAccessTitleEquivalencyView(
 class ChangeExtraView(AdmissionFormMixin, FormView):
     urlpatterns = {'change-checklist-extra': 'change-checklist-extra/<str:tab>'}
     permission_required = 'admission.change_checklist'
-    template_name = 'admission/forms/default_form.html'
+    template_name = 'forms/default_form.html'
 
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
@@ -2464,7 +2454,7 @@ class FinancabiliteContextMixin(CheckListDefaultContextMixin):
             }
 
             context['comment_forms'] = {
-                'financabilite': CommentForm(
+                'financabilite': AdmissionCommentForm(
                     comment=comments.get('financabilite'),
                     form_url=resolve_url(
                         f'{self.base_namespace}:save-comment',
@@ -2474,7 +2464,7 @@ class FinancabiliteContextMixin(CheckListDefaultContextMixin):
                     ),
                     prefix='financabilite',
                 ),
-                'financabilite__derogation': CommentForm(
+                'financabilite__derogation': AdmissionCommentForm(
                     comment=comments.get('financabilite__derogation'),
                     form_url=resolve_url(
                         f'{self.base_namespace}:save-comment',
@@ -2839,62 +2829,16 @@ class SinglePastExperienceMixin(
     PastExperiencesMixin,
     AdmissionFormMixin,
     CheckListDefaultContextMixin,
-    HtmxPermissionRequiredMixin,
-    FormView,
+    EditStatusMixin,
 ):
     update_admission_author = True
-
-    @cached_property
-    def experience_uuid(self):
-        return str(self.kwargs['experience_uuid'])
-
-    def get_experience_validation_dto(self) -> ValidationExperienceParcoursAnterieurDTO:
-        retrieve_experience_cmd = {
-            TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name: RecupererInformationsValidationExperienceAcademiqueQuery,
-            TypeExperience.ACTIVITE_NON_ACADEMIQUE.name: RecupererInformationsValidationExperienceNonAcademiqueQuery,
-            TypeExperience.ETUDES_SECONDAIRES.name: RecupererInformationsValidationEtudesSecondairesQuery,
-            TypeExperience.EXAMEN.name: RecupererInformationsValidationExamenQuery,
-        }[self.kwargs['experience_type']]
-
-        try:
-            return message_bus_instance.invoke(retrieve_experience_cmd(uuid_experience=self.experience_uuid))
-        except ExperienceNonTrouveeException:
-            return ValidationExperienceParcoursAnterieurDTO(
-                uuid=self.experience_uuid,
-                type_experience=self.kwargs['experience_type'],
-            )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         experience_validation_dto = self.get_experience_validation_dto()
-        context['experience'] = experience_validation_dto
 
         tab_identifier = f'parcours_anterieur__{self.experience_uuid}'
-
-        context.setdefault('comment_forms', {})
-
-        authentication_comment_identifier = f'{tab_identifier}__authentication'
-
-        comment_permission = self.request.user.has_perm(
-            'admission.checklist_change_comment',
-            self.admission,
-        )
-
-        # The contents of the comment forms are preserved with htmx so we don't need to retrieve the data here
-        context['comment_forms'][tab_identifier] = CommentForm(
-            comment=None,
-            form_url='',
-            prefix=tab_identifier,
-            disabled=not comment_permission,
-        )
-
-        context['comment_forms'][authentication_comment_identifier] = CommentForm(
-            comment=None,
-            form_url='',
-            prefix=authentication_comment_identifier,
-            disabled=not comment_permission or not experience_validation_dto.authentification_en_cours,
-        )
 
         context['experience_authentication_history_entry'] = (
             HistoryEntry.objects.filter(
@@ -2917,22 +2861,15 @@ class SinglePastExperienceMixin(
 
         return context
 
-    def get_success_url(self):
-        return self.request.get_full_path()
-
-    def command(self, form):
-        raise NotImplementedError
-
-    def form_valid(self, form):
-        try:
-            self.command(form)
-        except ExperienceNonTrouveeException as exception:
-            self.message_on_failure = exception.message
-            return super().form_invalid(form)
-        except MultipleBusinessExceptions as exception:
-            self.message_on_failure = exception.exceptions.pop().message
-            return super().form_invalid(form)
-        return super().form_valid(form)
+    def get_authentication_url(self):
+        return reverse(
+            f'{self.base_namespace}:single-past-experience-change-authentication',
+            kwargs={
+                'experience_uuid': self.experience_uuid,
+                'experience_type': self.kwargs['experience_type'],
+                'uuid': self.admission_uuid,
+            },
+        )
 
 
 class SinglePastExperienceChangeStatusView(SinglePastExperienceMixin):
@@ -2945,24 +2882,24 @@ class SinglePastExperienceChangeStatusView(SinglePastExperienceMixin):
     permission_required = 'admission.checklist_change_past_experiences'
     template_name = 'admission/general_education/includes/checklist/previous_experience_single.html'
     htmx_template_name = 'admission/general_education/includes/checklist/previous_experience_single.html'
-    form_class = ExperienceStatusForm
+    form_class = ExperienceValidationStatusForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['authentication_form'] = SinglePastExperienceAuthenticationForm(context['experience'])
+        context['authentication_form'] = ExperienceAuthenticationStatusForm(context['experience'])
         return context
 
     def command(self, form):
-        update_status_experience_cmd: Type[ModifierStatutChecklistExperienceParcoursAnterieurCommand] = {
-            TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name: ModifierStatutChecklistExperienceAcademiqueCommand,
-            TypeExperience.ACTIVITE_NON_ACADEMIQUE.name: ModifierStatutChecklistExperienceNonAcademiqueCommand,
-            TypeExperience.ETUDES_SECONDAIRES.name: ModifierStatutChecklistEtudesSecondairesCommand,
-            TypeExperience.EXAMEN.name: ModifierStatutChecklistExamenCommand,
+        update_status_experience_cmd: Type[ModifierStatutExperienceParcoursAnterieurCommand] = {
+            TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name: ModifierStatutExperienceAcademiqueCommand,
+            TypeExperience.ACTIVITE_NON_ACADEMIQUE.name: ModifierStatutExperienceNonAcademiqueCommand,
+            TypeExperience.ETUDES_SECONDAIRES.name: ModifierStatutEtudesSecondairesCommand,
+            TypeExperience.EXAMEN.name: ModifierStatutExamenCommand,
         }[self.kwargs['experience_type']]
 
         message_bus_instance.invoke(
             update_status_experience_cmd(
-                uuid_proposition=self.admission_uuid,
+                # uuid_proposition=self.admission_uuid,
                 uuid_experience=self.experience_uuid,
                 gestionnaire=self.request.user.person.global_id,
                 statut=form.cleaned_data['status'],
@@ -2970,46 +2907,15 @@ class SinglePastExperienceChangeStatusView(SinglePastExperienceMixin):
         )
 
 
-class SinglePastExperienceChangeAuthenticationView(SinglePastExperienceMixin):
+class SinglePastExperienceChangeAuthenticationView(ChangeExperienceAuthenticationStatus, SinglePastExperienceMixin):
     name = 'single-past-experience-change-authentication'
     urlpatterns = {
         'single-past-experience-change-authentication': (
-            'single-past-experience-change-authentication/<str:experience_type>/<uuid:experience_uuid>'
+            'single-past-experience-change-authentication/<str:experience_type>/<str:experience_uuid>'
         )
     }
     permission_required = 'admission.checklist_change_past_experiences'
-    template_name = 'admission/general_education/includes/checklist/previous_experience_single_authentication_form.html'
-    htmx_template_name = (
-        'admission/general_education/includes/checklist/previous_experience_single_authentication_form.html'
-    )
-    form_class = SinglePastExperienceAuthenticationForm
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['experience_validation_data'] = self.get_experience_validation_dto()
-        return kwargs
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['authentication_form'] = context['form']
-        return context
-
-    def command(self, form):
-        update_cmd: Type[ModifierAuthentificationExperienceParcoursAnterieurCommand] = {
-            TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name: ModifierAuthentificationExperienceAcademiqueCommand,
-            TypeExperience.ACTIVITE_NON_ACADEMIQUE.name: ModifierAuthentificationExperienceNonAcademiqueCommand,
-            TypeExperience.ETUDES_SECONDAIRES.name: ModifierAuthentificationEtudesSecondairesCommand,
-            TypeExperience.EXAMEN.name: ModifierAuthentificationExamenCommand,
-        }[self.kwargs['experience_type']]
-
-        message_bus_instance.invoke(
-            update_cmd(
-                uuid_proposition=self.admission_uuid,
-                uuid_experience=self.experience_uuid,
-                gestionnaire=self.request.user.person.global_id,
-                etat_authentification=form.cleaned_data['state'],
-            )
-        )
+    without_context = False
 
 
 class ChecklistView(
@@ -3194,9 +3100,8 @@ class ChecklistView(
             comments_permissions = {
                 'financabilite__derogation': 'admission.checklist_change_fac_comment',
             }
-
             context['comment_forms'] = {
-                tab_name: CommentForm(
+                tab_name: AdmissionCommentForm(
                     comment=comments.get(tab_name, None),
                     form_url=resolve_url(
                         f'{self.base_namespace}:save-comment',
@@ -3258,6 +3163,7 @@ class ChecklistView(
 
             # Authentication forms (one by experience)
             context['authentication_forms'] = {}
+            context['authentication_urls'] = {}
 
             context['check_authentication_mail_to_checkers'] = get_email(
                 template_identifier=ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS,
@@ -3301,9 +3207,20 @@ class ChecklistView(
                 if current_experience.uuid:
                     context['authentication_forms'].setdefault(
                         experience_uuid,
-                        SinglePastExperienceAuthenticationForm(experience_validation_data=current_experience),
+                        ExperienceAuthenticationStatusForm(experience_validation_data=current_experience),
                     )
-                    context['comment_forms'][tab_identifier] = CommentForm(
+                    context['authentication_urls'].setdefault(
+                        experience_uuid,
+                        reverse(
+                            f'{self.base_namespace}:single-past-experience-change-authentication',
+                            kwargs={
+                                'experience_type': current_experience.type_experience,
+                                'experience_uuid': str(current_experience.uuid),
+                                'uuid': self.admission_uuid,
+                            },
+                        ),
+                    )
+                    context['comment_forms'][tab_identifier] = AdmissionCommentForm(
                         comment=comments.get(tab_identifier, None),
                         form_url=resolve_url(
                             f'{self.base_namespace}:save-comment',
@@ -3314,7 +3231,7 @@ class ChecklistView(
                         prefix=tab_identifier,
                     )
                     authentication_comment_identifier = f'{tab_identifier}__authentication'
-                    context['comment_forms'][authentication_comment_identifier] = CommentForm(
+                    context['comment_forms'][authentication_comment_identifier] = AdmissionCommentForm(
                         comment=comments.get(authentication_comment_identifier, None),
                         form_url=resolve_url(
                             f'{self.base_namespace}:save-comment',

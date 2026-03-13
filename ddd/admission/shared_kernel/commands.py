@@ -28,9 +28,7 @@ from typing import Dict, List, Optional
 
 import attr
 
-from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
-    ExperiencesCVRecuperees,
-)
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.shared_kernel.interface import SortedQueryRequest
 from osis_common.ddd import interface
 from osis_common.ddd.interface import QueryRequest
@@ -196,34 +194,3 @@ class RecupererInformationsDestinataireQuery(QueryRequest):
     annee: int
     sigle_formation: str
     est_premiere_annee: bool
-
-
-@attr.dataclass(frozen=True, slots=True)
-class RecupererInformationsValidationExperienceParcoursAnterieurQuery(interface.CommandRequest):
-    uuid_experience: str
-
-
-@attr.dataclass(frozen=True, slots=True)
-class RecupererInformationsValidationExperienceAcademiqueQuery(
-    RecupererInformationsValidationExperienceParcoursAnterieurQuery
-):
-    pass
-
-
-@attr.dataclass(frozen=True, slots=True)
-class RecupererInformationsValidationExperienceNonAcademiqueQuery(
-    RecupererInformationsValidationExperienceParcoursAnterieurQuery
-):
-    pass
-
-
-@attr.dataclass(frozen=True, slots=True)
-class RecupererInformationsValidationEtudesSecondairesQuery(
-    RecupererInformationsValidationExperienceParcoursAnterieurQuery
-):
-    pass
-
-
-@attr.dataclass(frozen=True, slots=True)
-class RecupererInformationsValidationExamenQuery(RecupererInformationsValidationExperienceParcoursAnterieurQuery):
-    pass

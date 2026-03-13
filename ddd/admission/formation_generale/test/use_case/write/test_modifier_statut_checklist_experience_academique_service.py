@@ -29,15 +29,8 @@ from django.test import SimpleTestCase
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     ExperiencesAcademiquesNonCompleteesException,
 )
-from admission.ddd.admission.formation_generale.commands import (
-    ModifierStatutChecklistExperienceAcademiqueCommand,
-)
-from admission.ddd.admission.formation_generale.domain.model.proposition import (
-    PropositionIdentity,
-)
-from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
-    PropositionNonTrouveeException,
-)
+from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
@@ -47,11 +40,10 @@ from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.m
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
 )
-from admission.infrastructure.message_bus_in_memory import (
-    message_bus_in_memory_instance,
-)
+from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.community import CommunityEnum
+from ddd.logic.shared_kernel.profil.commands import ModifierStatutExperienceAcademiqueCommand
 from osis_profile.models.enums.experience_validation import (
     ChoixStatutValidationExperience,
     EtatAuthentificationParcours,
@@ -79,7 +71,7 @@ class TestModifierStatutChecklistExperienceAcademique(SimpleTestCase):
 
     def test_should_modifier_vers_statut_checklist_validee(self):
         proposition_id = self.message_bus.invoke(
-            ModifierStatutChecklistExperienceAcademiqueCommand(
+            ModifierStatutExperienceAcademiqueCommand(
                 uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                 uuid_experience=self.experience_uuid,
                 statut=ChoixStatutValidationExperience.VALIDEE.name,
@@ -104,7 +96,7 @@ class TestModifierStatutChecklistExperienceAcademique(SimpleTestCase):
 
     def test_should_modifier_vers_statut_checklist_d_authentification(self):
         proposition_id = self.message_bus.invoke(
-            ModifierStatutChecklistExperienceAcademiqueCommand(
+            ModifierStatutExperienceAcademiqueCommand(
                 uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                 uuid_experience=self.experience_uuid,
                 statut=ChoixStatutValidationExperience.AUTHENTIFICATION.name,
@@ -131,7 +123,7 @@ class TestModifierStatutChecklistExperienceAcademique(SimpleTestCase):
 
     def test_should_modifier_vers_statut_checklist_pas_d_authentification(self):
         proposition_id = self.message_bus.invoke(
-            ModifierStatutChecklistExperienceAcademiqueCommand(
+            ModifierStatutExperienceAcademiqueCommand(
                 uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                 uuid_experience=self.experience_uuid,
                 statut=ChoixStatutValidationExperience.A_COMPLETER.name,
@@ -164,7 +156,7 @@ class TestModifierStatutChecklistExperienceAcademique(SimpleTestCase):
         ):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(
-                    ModifierStatutChecklistExperienceAcademiqueCommand(
+                    ModifierStatutExperienceAcademiqueCommand(
                         uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                         uuid_experience=self.experience_uuid,
                         statut=ChoixStatutValidationExperience.VALIDEE.name,
@@ -186,7 +178,7 @@ class TestModifierStatutChecklistExperienceAcademique(SimpleTestCase):
             grade_academique_formation='2',
         ):
             proposition_id = self.message_bus.invoke(
-                ModifierStatutChecklistExperienceAcademiqueCommand(
+                ModifierStatutExperienceAcademiqueCommand(
                     uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                     uuid_experience=self.experience_uuid,
                     statut=ChoixStatutValidationExperience.VALIDEE.name,
@@ -207,7 +199,7 @@ class TestModifierStatutChecklistExperienceAcademique(SimpleTestCase):
         ):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(
-                    ModifierStatutChecklistExperienceAcademiqueCommand(
+                    ModifierStatutExperienceAcademiqueCommand(
                         uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                         uuid_experience=self.experience_uuid,
                         statut=ChoixStatutValidationExperience.VALIDEE.name,
@@ -231,7 +223,7 @@ class TestModifierStatutChecklistExperienceAcademique(SimpleTestCase):
         ):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(
-                    ModifierStatutChecklistExperienceAcademiqueCommand(
+                    ModifierStatutExperienceAcademiqueCommand(
                         uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                         uuid_experience=self.experience_uuid,
                         statut=ChoixStatutValidationExperience.VALIDEE.name,
@@ -252,7 +244,7 @@ class TestModifierStatutChecklistExperienceAcademique(SimpleTestCase):
             credits_acquis_bloc_1=None,
         ):
             proposition_id = self.message_bus.invoke(
-                ModifierStatutChecklistExperienceAcademiqueCommand(
+                ModifierStatutExperienceAcademiqueCommand(
                     uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                     uuid_experience=self.experience_uuid,
                     statut=ChoixStatutValidationExperience.A_COMPLETER.name,
@@ -270,7 +262,7 @@ class TestModifierStatutChecklistExperienceAcademique(SimpleTestCase):
             credits_acquis_bloc_1=None,
         ):
             proposition_id = self.message_bus.invoke(
-                ModifierStatutChecklistExperienceAcademiqueCommand(
+                ModifierStatutExperienceAcademiqueCommand(
                     uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                     uuid_experience=self.experience_uuid,
                     statut=ChoixStatutValidationExperience.A_COMPLETER.name,
@@ -288,7 +280,7 @@ class TestModifierStatutChecklistExperienceAcademique(SimpleTestCase):
             credits_acquis_bloc_1=10,
         ):
             proposition_id = self.message_bus.invoke(
-                ModifierStatutChecklistExperienceAcademiqueCommand(
+                ModifierStatutExperienceAcademiqueCommand(
                     uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                     uuid_experience=self.experience_uuid,
                     statut=ChoixStatutValidationExperience.A_COMPLETER.name,
@@ -308,7 +300,7 @@ class TestModifierStatutChecklistExperienceAcademique(SimpleTestCase):
             credits_acquis_complements=10,
         ):
             proposition_id = self.message_bus.invoke(
-                ModifierStatutChecklistExperienceAcademiqueCommand(
+                ModifierStatutExperienceAcademiqueCommand(
                     uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                     uuid_experience=self.experience_uuid,
                     statut=ChoixStatutValidationExperience.A_COMPLETER.name,
@@ -328,7 +320,7 @@ class TestModifierStatutChecklistExperienceAcademique(SimpleTestCase):
             credits_acquis_complements=None,
         ):
             proposition_id = self.message_bus.invoke(
-                ModifierStatutChecklistExperienceAcademiqueCommand(
+                ModifierStatutExperienceAcademiqueCommand(
                     uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                     uuid_experience=self.experience_uuid,
                     statut=ChoixStatutValidationExperience.A_COMPLETER.name,
@@ -341,7 +333,7 @@ class TestModifierStatutChecklistExperienceAcademique(SimpleTestCase):
     def test_should_empecher_si_proposition_non_trouvee(self):
         with self.assertRaises(PropositionNonTrouveeException):
             self.message_bus.invoke(
-                ModifierStatutChecklistExperienceAcademiqueCommand(
+                ModifierStatutExperienceAcademiqueCommand(
                     uuid_proposition='INCONNUE',
                     uuid_experience=self.experience_uuid,
                     statut=ChoixStatutValidationExperience.A_COMPLETER.name,

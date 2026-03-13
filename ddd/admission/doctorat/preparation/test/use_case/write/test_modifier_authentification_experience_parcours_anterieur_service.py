@@ -26,27 +26,17 @@
 
 from django.test import SimpleTestCase
 
-from admission.ddd.admission.doctorat.preparation.commands import (
-    ModifierAuthentificationExperienceAcademiqueCommand,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
-    PropositionIdentity,
-)
-from admission.ddd.admission.doctorat.preparation.test.factory.person import (
-    PersonneConnueUclDTOFactory,
-)
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
-    ExperienceNonTrouveeException,
-)
+from admission.ddd.admission.doctorat.preparation.commands import ModifierAuthentificationExperienceAcademiqueCommand
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.doctorat.preparation.test.factory.person import PersonneConnueUclDTOFactory
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import AdmissionExperienceNonTrouveeException
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.modifier_checklist_experience_parcours_anterieur import (
     ValidationExperienceParcoursAnterieurInMemoryService,
 )
-from admission.infrastructure.message_bus_in_memory import (
-    message_bus_in_memory_instance,
-)
+from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
     PersonneConnueUclInMemoryTranslator,
@@ -96,7 +86,7 @@ class TestModifierAuthentificationExperienceParcoursAnterieur(SimpleTestCase):
         self.assertEqual(informations_validation.statut_authentification, EtatAuthentificationParcours.VRAI.name)
 
     def test_should_empecher_si_experience_non_trouvee(self):
-        with self.assertRaises(ExperienceNonTrouveeException):
+        with self.assertRaises(AdmissionExperienceNonTrouveeException):
             self.message_bus.invoke(
                 ModifierAuthentificationExperienceAcademiqueCommand(
                     uuid_proposition='uuid-SC3DP-confirmee',

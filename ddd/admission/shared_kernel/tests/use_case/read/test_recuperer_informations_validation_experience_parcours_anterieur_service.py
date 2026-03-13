@@ -27,20 +27,18 @@ import uuid
 
 from django.test import TestCase
 
-from admission.ddd.admission.shared_kernel.commands import (
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import AdmissionExperienceNonTrouveeException
+from admission.tests.factories.curriculum import EducationalExperienceFactory, ProfessionalExperienceFactory
+from base.models.person import Person
+from base.tests.factories.person import PersonFactory
+from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
+from ddd.logic.shared_kernel.profil.dtos.validation_experience import ValidationExperienceParcoursAnterieurDTO
+from ddd.logic.shared_kernel.profil.queries import (
     RecupererInformationsValidationEtudesSecondairesQuery,
     RecupererInformationsValidationExamenQuery,
     RecupererInformationsValidationExperienceAcademiqueQuery,
     RecupererInformationsValidationExperienceNonAcademiqueQuery,
 )
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import ExperienceNonTrouveeException
-from admission.ddd.admission.shared_kernel.dtos.validation_experience_parcours_anterieur import (
-    ValidationExperienceParcoursAnterieurDTO,
-)
-from admission.tests.factories.curriculum import EducationalExperienceFactory, ProfessionalExperienceFactory
-from base.models.person import Person
-from base.tests.factories.person import PersonFactory
-from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile.models import EducationalExperience, Exam, ProfessionalExperience
 from osis_profile.models.education import HighSchoolDiploma
@@ -58,7 +56,7 @@ class RecupererInformationsValidationExperienceParcoursAnterieurTestCase(TestCas
         cls.personne: Person = PersonFactory()
 
     def test_recuperer_informations_experience_academique(self):
-        with self.assertRaises(ExperienceNonTrouveeException):
+        with self.assertRaises(AdmissionExperienceNonTrouveeException):
             message_bus_instance.invoke(
                 RecupererInformationsValidationExperienceAcademiqueQuery(
                     uuid_experience=str(uuid.uuid4()),
@@ -83,7 +81,7 @@ class RecupererInformationsValidationExperienceParcoursAnterieurTestCase(TestCas
         self.assertEqual(experience_dto.statut_authentification, EtatAuthentificationParcours.VRAI.name)
 
     def test_recuperer_informations_experience_non_academique(self):
-        with self.assertRaises(ExperienceNonTrouveeException):
+        with self.assertRaises(AdmissionExperienceNonTrouveeException):
             message_bus_instance.invoke(
                 RecupererInformationsValidationExperienceNonAcademiqueQuery(
                     uuid_experience=str(uuid.uuid4()),
@@ -108,7 +106,7 @@ class RecupererInformationsValidationExperienceParcoursAnterieurTestCase(TestCas
         self.assertEqual(experience_dto.statut_authentification, EtatAuthentificationParcours.VRAI.name)
 
     def test_recuperer_informations_examen(self):
-        with self.assertRaises(ExperienceNonTrouveeException):
+        with self.assertRaises(AdmissionExperienceNonTrouveeException):
             message_bus_instance.invoke(
                 RecupererInformationsValidationExamenQuery(
                     uuid_experience=str(uuid.uuid4()),
@@ -133,7 +131,7 @@ class RecupererInformationsValidationExperienceParcoursAnterieurTestCase(TestCas
         self.assertEqual(experience_dto.statut_authentification, EtatAuthentificationParcours.VRAI.name)
 
     def test_recuperer_informations_etudes_secondaires(self):
-        with self.assertRaises(ExperienceNonTrouveeException):
+        with self.assertRaises(AdmissionExperienceNonTrouveeException):
             message_bus_instance.invoke(
                 RecupererInformationsValidationEtudesSecondairesQuery(
                     uuid_experience=str(uuid.uuid4()),

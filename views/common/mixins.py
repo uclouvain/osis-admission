@@ -23,17 +23,14 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import json
 import logging
 from typing import Dict, Optional, Union
 
-from django.contrib import messages
 from django.core.cache import cache
 from django.shortcuts import resolve_url
 from django.template.loader import render_to_string
 from django.utils.functional import cached_property
 from django.utils.safestring import mark_safe
-from django.utils.translation import gettext_lazy as _
 from django.views.generic.base import ContextMixin
 from osis_document_components.services import get_student_files_count_from_epc
 
@@ -82,8 +79,6 @@ from admission.models.base import AdmissionViewer, BaseAdmission
 from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
 from admission.utils import (
     access_title_country,
-    add_close_modal_into_htmx_response,
-    add_messages_into_htmx_response,
     get_cached_admission_perm_obj,
     get_cached_continuing_education_admission_perm_obj,
     get_cached_general_education_admission_perm_obj,
@@ -419,37 +414,13 @@ class LoadDossierViewMixin(AdmissionViewMixin):
 
 
 class AdmissionFormMixin(AdmissionViewMixin):
-    message_on_success = _('Your data have been saved.')
-    message_on_failure = _('Some errors have been encountered.')
     update_admission_author = False
-    default_htmx_trigger_form_extra = {}
-    close_modal_on_htmx_request = True
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.custom_headers = {}
-        self.htmx_refresh = False
-        self.htmx_trigger_form_extra = {**self.default_htmx_trigger_form_extra}
-
-    def htmx_trigger_form(self, is_valid: bool):
-        """Add a JS event to listen for when the form is submitted through HTMX."""
-        self.custom_headers = {
-            'HX-Trigger': {
-                "formValidation": {
-                    "is_valid": is_valid,
-                    "message": str(self.message_on_success if is_valid else self.message_on_failure),
-                    **self.htmx_trigger_form_extra,
-                }
-            }
-        }
 
     def update_current_admission_on_form_valid(self, form, admission):
         """Override this method to update the current admission on form valid."""
         pass
 
     def form_valid(self, form):
-        messages.success(self.request, str(self.message_on_success))
-
         # Update the last update author of the admission
         author = getattr(self.request.user, 'person')
         if self.update_admission_author and author:
@@ -459,17 +430,6 @@ class AdmissionFormMixin(AdmissionViewMixin):
             self.update_current_admission_on_form_valid(form, admission)
             admission.save()
 
-        if self.request.htmx:
-            self.htmx_trigger_form(is_valid=True)
-            response = self.render_to_response(self.get_context_data(form=form))
-            if self.htmx_refresh:
-                response.headers['HX-Refresh'] = 'true'
-            else:
-                add_messages_into_htmx_response(request=self.request, response=response)
-                if self.close_modal_on_htmx_request:
-                    add_close_modal_into_htmx_response(response=response)
-            return response
-
         return super().form_valid(form)
 
     def get_checklist_redirect_url(self):
@@ -477,24 +437,3 @@ class AdmissionFormMixin(AdmissionViewMixin):
         if 'next' in self.request.GET:
             url = resolve_url(f'admission:{self.current_context}:checklist', uuid=self.admission_uuid)
             return f"{url}#{self.request.GET['next']}"
-
-    def dispatch(self, request, *args, **kwargs):
-        response = super().dispatch(request, *args, **kwargs)
-        # Add custom headers
-        for header_key, header_value in self.custom_headers.items():
-            current_data_str = response.headers.get(header_key)
-            if current_data_str:
-                current_data = json.loads(current_data_str)
-                current_data.update(header_value)
-            else:
-                current_data = header_value
-            response.headers[header_key] = json.dumps(current_data)
-        return response
-
-    def form_invalid(self, form):
-        messages.error(self.request, str(self.message_on_failure))
-        response = super().form_invalid(form)
-        if self.request.htmx:
-            self.htmx_trigger_form(is_valid=False)
-            add_messages_into_htmx_response(request=self.request, response=response)
-        return response

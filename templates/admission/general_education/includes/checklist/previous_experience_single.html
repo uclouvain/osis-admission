@@ -45,7 +45,7 @@
 
     {% htmx_comment_form comment_forms|get_item_or_none:checklist_item_name %}
 
-    {% include "admission/general_education/includes/checklist/previous_experience_single_authentication_form.html" with experience=experience authentication_form=authentication_form experience_authentication_history_entry=experience_authentication_history_entry %}
+    {% include "osis_profile/forms/includes/authentication.html" with experience=experience authentication_form=authentication_form experience_authentication_history_entry=experience_authentication_history_entry url_authentification=url_authentification %}
   </div>
 
   {% if request.htmx %}
