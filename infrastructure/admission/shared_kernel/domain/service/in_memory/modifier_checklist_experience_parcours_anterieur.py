@@ -27,28 +27,20 @@ import itertools
 
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
     Proposition as PropositionDoctorale,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
     PropositionIdentity,
 )
-from admission.ddd.admission.formation_continue.domain.model.proposition import (
-    Proposition as PropositionContinue,
-)
-from admission.ddd.admission.formation_generale.domain.model.proposition import (
-    Proposition as PropositionGenerale,
-)
+from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition as PropositionContinue
+from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition as PropositionGenerale
 from admission.ddd.admission.shared_kernel.domain.service.i_modifier_checklist_experience_parcours_anterieur import (
     IValidationExperienceParcoursAnterieurService,
 )
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import ExperienceNonTrouveeException
-from admission.ddd.admission.shared_kernel.dtos.validation_experience_parcours_anterieur import (
-    ValidationExperienceParcoursAnterieurDTO,
-)
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import AdmissionExperienceNonTrouveeException
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
 )
 from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
+from ddd.logic.shared_kernel.profil.dtos.validation_experience import ValidationExperienceParcoursAnterieurDTO
 from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
 
 
@@ -62,7 +54,7 @@ class ValidationExperienceParcoursAnterieurInMemoryService(IValidationExperience
                 if experience.uuid == uuid_experience
             )
         except StopIteration:
-            raise ExperienceNonTrouveeException
+            raise AdmissionExperienceNonTrouveeException
 
     @classmethod
     def _recuperer_experience_non_academique(cls, uuid_experience: str):
@@ -73,7 +65,7 @@ class ValidationExperienceParcoursAnterieurInMemoryService(IValidationExperience
                 if experience.uuid == uuid_experience
             )
         except StopIteration:
-            raise ExperienceNonTrouveeException
+            raise AdmissionExperienceNonTrouveeException
 
     @classmethod
     def _recuperer_etudes_secondaires(cls, uuid_experience: str):
@@ -84,7 +76,7 @@ class ValidationExperienceParcoursAnterieurInMemoryService(IValidationExperience
                 if experience.uuid == uuid_experience
             )
         except StopIteration:
-            raise ExperienceNonTrouveeException
+            raise AdmissionExperienceNonTrouveeException
 
     @classmethod
     def recuperer_information_validation_experience_academique(

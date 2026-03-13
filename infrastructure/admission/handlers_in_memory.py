@@ -45,6 +45,12 @@ from admission.infrastructure.admission.shared_kernel.repository.in_memory.gesti
 from admission.infrastructure.admission.shared_kernel.repository.in_memory.titre_acces_selectionnable import (
     TitreAccesSelectionnableInMemoryRepository,
 )
+from ddd.logic.shared_kernel.profil.queries import (
+    RecupererInformationsValidationEtudesSecondairesQuery,
+    RecupererInformationsValidationExamenQuery,
+    RecupererInformationsValidationExperienceAcademiqueQuery,
+    RecupererInformationsValidationExperienceNonAcademiqueQuery,
+)
 from infrastructure.shared_kernel.profil.domain.service.in_memory.parcours_interne import (
     ExperienceParcoursInterneInMemoryTranslator,
 )

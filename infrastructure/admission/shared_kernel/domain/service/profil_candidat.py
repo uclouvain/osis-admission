@@ -51,42 +51,21 @@ from django.db.models.functions import Cast, Concat, ExtractMonth, ExtractYear
 from django.utils.translation import get_language
 
 from admission.ddd import LANGUES_OBLIGATOIRES_DOCTORAT, NB_MOIS_MIN_VAE
-from admission.ddd.admission.doctorat.preparation.dtos import (
-    ConditionsComptabiliteDTO,
-)
-from admission.ddd.admission.doctorat.preparation.dtos.connaissance_langue import (
-    ConnaissanceLangueDTO,
-)
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
-    CurriculumAdmissionDTO,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
-    IProfilCandidatTranslator,
-)
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
-    ExperienceNonTrouveeException,
-)
-from admission.ddd.admission.shared_kernel.dtos import (
-    AdressePersonnelleDTO,
-    CoordonneesDTO,
-    IdentificationDTO,
-)
-from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import (
-    EtudesSecondairesAdmissionDTO,
-)
+from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO
+from admission.ddd.admission.doctorat.preparation.dtos.connaissance_langue import ConnaissanceLangueDTO
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import AdmissionExperienceNonTrouveeException
+from admission.ddd.admission.shared_kernel.dtos import AdressePersonnelleDTO, CoordonneesDTO, IdentificationDTO
+from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.shared_kernel.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.shared_kernel.dtos.resume import ResumeCandidatDTO
-from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
-    ExperiencesCVRecuperees,
-)
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
 from admission.models import EPCInjection as AdmissionEPCInjection
-from admission.models.epc_injection import (
-    EPCInjectionStatus as AdmissionEPCInjectionStatus,
-)
-from admission.models.epc_injection import EPCInjectionType
+from admission.models.epc_injection import EPCInjectionStatus as AdmissionEPCInjectionStatus, EPCInjectionType
 from admission.models.functions import ArrayLength
 from base.models.enums.community import CommunityEnum
 from base.models.enums.person_address_type import PersonAddressType
@@ -108,19 +87,13 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceNonAcademiqueDTO,
 )
 from osis_profile import BE_ISO_CODE
-from osis_profile.models import (
-    EducationalExperience,
-    EducationalExperienceYear,
-    Exam,
-    ExamType,
-    ProfessionalExperience,
-)
+from osis_profile.models import EducationalExperience, EducationalExperienceYear, Exam, ExamType, ProfessionalExperience
 from osis_profile.models.education import HighSchoolDiploma, LanguageKnowledge
-from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection
 from osis_profile.models.epc_injection import (
+    EPCInjection as CurriculumEPCInjection,
     EPCInjectionStatus as CurriculumEPCInjectionStatus,
+    ExperienceType,
 )
-from osis_profile.models.epc_injection import ExperienceType
 from osis_profile.models.exam import EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
 
 
@@ -893,7 +866,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         )
 
         if not experiences:
-            raise ExperienceNonTrouveeException
+            raise AdmissionExperienceNonTrouveeException
 
         return experiences[0]
 
@@ -911,7 +884,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         )
 
         if not experiences:
-            raise ExperienceNonTrouveeException
+            raise AdmissionExperienceNonTrouveeException
 
         return experiences[0]
 

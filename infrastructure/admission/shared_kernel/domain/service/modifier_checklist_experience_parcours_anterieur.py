@@ -29,31 +29,18 @@ from django.db.models import Q
 
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
     Proposition as PropositionDoctorale,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
     PropositionIdentity,
 )
-from admission.ddd.admission.formation_continue.domain.model.proposition import (
-    Proposition as PropositionContinue,
-)
-from admission.ddd.admission.formation_generale.domain.model.proposition import (
-    Proposition as PropositionGenerale,
-)
+from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition as PropositionContinue
+from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition as PropositionGenerale
 from admission.ddd.admission.shared_kernel.domain.service.i_modifier_checklist_experience_parcours_anterieur import (
     IValidationExperienceParcoursAnterieurService,
 )
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import ExperienceNonTrouveeException
-from admission.ddd.admission.shared_kernel.dtos.validation_experience_parcours_anterieur import (
-    ValidationExperienceParcoursAnterieurDTO,
-)
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import AdmissionExperienceNonTrouveeException
 from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
-from osis_profile.models import (
-    EXAM_TYPE_PREMIER_CYCLE_LABEL_FR,
-    EducationalExperience,
-    Exam,
-    ProfessionalExperience,
-)
+from ddd.logic.shared_kernel.profil.dtos.validation_experience import ValidationExperienceParcoursAnterieurDTO
+from osis_profile.models import EXAM_TYPE_PREMIER_CYCLE_LABEL_FR, EducationalExperience, Exam, ProfessionalExperience
 from osis_profile.models.education import HighSchoolDiploma
 from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
 
@@ -72,7 +59,7 @@ class ValidationExperienceParcoursAnterieurService(IValidationExperienceParcours
         )
 
         if not experience:
-            raise ExperienceNonTrouveeException
+            raise AdmissionExperienceNonTrouveeException
 
         return ValidationExperienceParcoursAnterieurDTO(
             uuid=uuid_experience,
@@ -105,7 +92,7 @@ class ValidationExperienceParcoursAnterieurService(IValidationExperienceParcours
         )
 
         if not updates_number:
-            raise ExperienceNonTrouveeException
+            raise AdmissionExperienceNonTrouveeException
 
     @classmethod
     def modifier_authentification_experience_academique(cls, uuid_experience: str, etat_authentification: str):
@@ -114,7 +101,7 @@ class ValidationExperienceParcoursAnterieurService(IValidationExperienceParcours
         )
 
         if not updates_number:
-            raise ExperienceNonTrouveeException
+            raise AdmissionExperienceNonTrouveeException
 
     @staticmethod
     def _get_professional_experience_qs(experience_uuid: str):
@@ -129,7 +116,7 @@ class ValidationExperienceParcoursAnterieurService(IValidationExperienceParcours
         )
 
         if not experience:
-            raise ExperienceNonTrouveeException
+            raise AdmissionExperienceNonTrouveeException
 
         return ValidationExperienceParcoursAnterieurDTO(
             uuid=uuid_experience,
@@ -145,7 +132,7 @@ class ValidationExperienceParcoursAnterieurService(IValidationExperienceParcours
         )
 
         if not updates_number:
-            raise ExperienceNonTrouveeException
+            raise AdmissionExperienceNonTrouveeException
 
     @classmethod
     def modifier_authentification_experience_non_academique(cls, uuid_experience: str, etat_authentification: str):
@@ -154,7 +141,7 @@ class ValidationExperienceParcoursAnterieurService(IValidationExperienceParcours
         )
 
         if not updates_number:
-            raise ExperienceNonTrouveeException
+            raise AdmissionExperienceNonTrouveeException
 
     @staticmethod
     def _get_secondary_studies_qs(experience_uuid: str):
@@ -169,7 +156,7 @@ class ValidationExperienceParcoursAnterieurService(IValidationExperienceParcours
         )
 
         if not experience:
-            raise ExperienceNonTrouveeException
+            raise AdmissionExperienceNonTrouveeException
 
         return ValidationExperienceParcoursAnterieurDTO(
             uuid=uuid_experience,
@@ -183,7 +170,7 @@ class ValidationExperienceParcoursAnterieurService(IValidationExperienceParcours
         updates_number = cls._get_secondary_studies_qs(experience_uuid=uuid_experience).update(validation_status=statut)
 
         if not updates_number:
-            raise ExperienceNonTrouveeException
+            raise AdmissionExperienceNonTrouveeException
 
         Exam.objects.filter(
             type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR,
@@ -202,7 +189,7 @@ class ValidationExperienceParcoursAnterieurService(IValidationExperienceParcours
         )
 
         if not updates_number:
-            raise ExperienceNonTrouveeException
+            raise AdmissionExperienceNonTrouveeException
 
         Exam.objects.filter(
             type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR,
@@ -222,7 +209,7 @@ class ValidationExperienceParcoursAnterieurService(IValidationExperienceParcours
         )
 
         if not experience:
-            raise ExperienceNonTrouveeException
+            raise AdmissionExperienceNonTrouveeException
 
         return ValidationExperienceParcoursAnterieurDTO(
             uuid=uuid_experience,
@@ -255,7 +242,7 @@ class ValidationExperienceParcoursAnterieurService(IValidationExperienceParcours
         updates_number = cls._get_exam_qs(experience_uuid=uuid_experience).update(validation_status=statut)
 
         if not updates_number:
-            raise ExperienceNonTrouveeException
+            raise AdmissionExperienceNonTrouveeException
 
     @classmethod
     def modifier_authentification_examen(
@@ -268,7 +255,7 @@ class ValidationExperienceParcoursAnterieurService(IValidationExperienceParcours
         )
 
         if not updates_number:
-            raise ExperienceNonTrouveeException
+            raise AdmissionExperienceNonTrouveeException
 
     @classmethod
     @transaction.atomic
