@@ -24,34 +24,16 @@
 #
 # ##############################################################################
 
-from admission.ddd.admission.formation_generale.commands import (
-    ApprouverInscriptionParSicCommand,
-)
-from admission.ddd.admission.formation_generale.domain.model.proposition import (
-    PropositionIdentity,
-)
-from admission.ddd.admission.formation_generale.domain.service.i_historique import (
-    IHistorique,
-)
-from admission.ddd.admission.formation_generale.events import (
-    InscriptionApprouveeParSicEvent,
-)
-from admission.ddd.admission.formation_generale.repository.i_proposition import (
-    IPropositionRepository,
-)
-from admission.ddd.admission.shared_kernel.domain.service.resume_proposition import (
-    ResumeProposition,
-)
+from admission.ddd.admission.formation_generale.commands import ApprouverInscriptionParSicCommand
+from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
+from admission.ddd.admission.formation_generale.events import InscriptionApprouveeParSicEvent
+from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.shared_kernel.domain.service.resume_proposition import ResumeProposition
 from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire
-from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
-    ExperiencesCVRecuperees,
-)
-from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
-    AcademicYearIdentity,
-)
-from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
-    IExperienceParcoursInterneTranslator,
-)
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYearIdentity
+from ddd.logic.shared_kernel.profil.domain.service.i_parcours_interne import IExperienceParcoursInterneTranslator
 
 
 def approuver_inscription_par_sic(

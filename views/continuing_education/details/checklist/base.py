@@ -39,12 +39,8 @@ from osis_comment.models import CommentEntry
 from osis_mail_template.exceptions import EmptyMailTemplateContent
 from osis_mail_template.models import MailTemplate
 
-from admission.ddd.admission.formation_continue.commands import (
-    RecupererResumeEtEmplacementsDocumentsPropositionQuery,
-)
-from admission.ddd.admission.formation_continue.domain.model.enums import (
-    OngletsChecklist,
-)
+from admission.ddd.admission.formation_continue.commands import RecupererResumeEtEmplacementsDocumentsPropositionQuery
+from admission.ddd.admission.formation_continue.domain.model.enums import OngletsChecklist
 from admission.ddd.admission.shared_kernel.commands import (
     ListerToutesDemandesQuery,
     RecupererInformationsDestinataireQuery,
@@ -52,15 +48,13 @@ from admission.ddd.admission.shared_kernel.commands import (
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import InformationsDestinatairePasTrouvee
 from admission.ddd.admission.shared_kernel.dtos.destinataire import InformationsDestinataireDTO
 from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
-from admission.ddd.admission.shared_kernel.dtos.resume import (
-    ResumeEtEmplacementsDocumentsPropositionDTO,
-)
+from admission.ddd.admission.shared_kernel.dtos.resume import ResumeEtEmplacementsDocumentsPropositionDTO
 from admission.ddd.admission.shared_kernel.enums.statut import (
     STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER_OU_ANNULEE,
 )
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
 from admission.forms import disable_unavailable_forms
-from admission.forms.admission.checklist import CommentForm
+from admission.forms.admission.checklist import AdmissionCommentForm
 from admission.forms.admission.continuing_education.checklist import (
     CloseForm,
     DecisionCancelForm,
@@ -78,11 +72,7 @@ from admission.mail_templates import (
     ADMISSION_EMAIL_DECISION_IUFC_COMMENT_FOR_FAC,
     ADMISSION_EMAIL_DECISION_ON_HOLD,
 )
-from admission.utils import (
-    get_backoffice_admission_url,
-    get_portal_admission_url,
-    get_salutation_prefix,
-)
+from admission.utils import get_backoffice_admission_url, get_portal_admission_url, get_salutation_prefix
 from admission.views.common.detail_tabs.checklist import ChecklistTabIcon, PropositionFromResumeMixin
 from admission.views.common.mixins import LoadDossierViewMixin
 from infrastructure.messages_bus import message_bus_instance
@@ -381,7 +371,7 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
         }
 
         context['comment_forms'] = {
-            tab_name: CommentForm(
+            tab_name: AdmissionCommentForm(
                 comment=comments.get(tab_name, None),
                 form_url=resolve_url(
                     f'{self.base_namespace}:save-comment',

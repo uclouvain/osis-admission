@@ -24,46 +24,20 @@
 #
 # ##############################################################################
 
-from admission.ddd.admission.formation_generale.commands import (
-    ApprouverAdmissionParSicCommand,
-)
-from admission.ddd.admission.formation_generale.domain.model.proposition import (
-    PropositionIdentity,
-)
-from admission.ddd.admission.formation_generale.domain.service.emplacement_document import (
-    EmplacementDocumentService,
-)
-from admission.ddd.admission.formation_generale.domain.service.i_historique import (
-    IHistorique,
-)
-from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation import (
-    IPDFGeneration,
-)
-from admission.ddd.admission.formation_generale.events import (
-    AdmissionApprouveeParSicEvent,
-)
-from admission.ddd.admission.formation_generale.repository.i_proposition import (
-    IPropositionRepository,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import (
-    IMatriculeEtudiantService,
-)
-from admission.ddd.admission.shared_kernel.domain.service.resume_proposition import (
-    ResumeProposition,
-)
+from admission.ddd.admission.formation_generale.commands import ApprouverAdmissionParSicCommand
+from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.formation_generale.domain.service.emplacement_document import EmplacementDocumentService
+from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
+from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation import IPDFGeneration
+from admission.ddd.admission.formation_generale.events import AdmissionApprouveeParSicEvent
+from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import IMatriculeEtudiantService
+from admission.ddd.admission.shared_kernel.domain.service.resume_proposition import ResumeProposition
 from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire
-from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
-    ExperiencesCVRecuperees,
-)
-from admission.ddd.admission.shared_kernel.repository.i_emplacement_document import (
-    IEmplacementDocumentRepository,
-)
-from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
-    AcademicYearIdentity,
-)
-from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
-    IExperienceParcoursInterneTranslator,
-)
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
+from admission.ddd.admission.shared_kernel.repository.i_emplacement_document import IEmplacementDocumentRepository
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYearIdentity
+from ddd.logic.shared_kernel.profil.domain.service.i_parcours_interne import IExperienceParcoursInterneTranslator
 
 
 def approuver_admission_par_sic(

@@ -25,20 +25,12 @@
 # ##############################################################################
 from abc import abstractmethod
 
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
-    Proposition as PropositionDoctorale,
-)
-from admission.ddd.admission.formation_continue.domain.model.proposition import (
-    Proposition as PropositionContinue,
-)
-from admission.ddd.admission.formation_generale.domain.model.proposition import (
-    Proposition as PropositionGenerale,
-)
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition as PropositionDoctorale
+from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition as PropositionContinue
+from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition as PropositionGenerale
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidat
-from admission.ddd.admission.shared_kernel.dtos.validation_experience_parcours_anterieur import (
-    ValidationExperienceParcoursAnterieurDTO,
-)
+from ddd.logic.shared_kernel.profil.dtos.validation_experience import ValidationExperienceParcoursAnterieurDTO
 from osis_common.ddd import interface
 from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
 

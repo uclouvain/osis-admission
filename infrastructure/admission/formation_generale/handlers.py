@@ -133,6 +133,15 @@ from admission.infrastructure.admission.shared_kernel.repository.email_destinata
 from admission.infrastructure.admission.shared_kernel.repository.titre_acces_selectionnable import (
     TitreAccesSelectionnableRepository,
 )
+from ddd.logic.shared_kernel.profil.commands import (
+    ModifierAuthentificationEtudesSecondairesCommand,
+    ModifierAuthentificationExamenCommand,
+    ModifierAuthentificationExperienceAcademiqueCommand,
+    ModifierAuthentificationExperienceNonAcademiqueCommand,
+    ModifierStatutEtudesSecondairesCommand,
+    ModifierStatutExamenCommand,
+    ModifierStatutExperienceAcademiqueCommand,
+)
 from infrastructure.reference.domain.service.bourse import BourseTranslator
 from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
 from infrastructure.shared_kernel.campus.repository.uclouvain_campus import UclouvainCampusRepository
@@ -590,7 +599,7 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=PropositionRepository(),
     ),
-    ModifierStatutChecklistExperienceAcademiqueCommand: (
+    ModifierStatutExperienceAcademiqueCommand: (
         lambda msg_bus, cmd: modifier_statut_checklist_experience_academique(
             cmd,
             proposition_repository=PropositionRepository(),
@@ -599,19 +608,13 @@ COMMAND_HANDLERS = {
             validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
         )
     ),
-    ModifierStatutChecklistExperienceNonAcademiqueCommand: (
-        lambda msg_bus, cmd: modifier_statut_checklist_experience_non_academique(
-            cmd,
-            validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
-        )
-    ),
-    ModifierStatutChecklistEtudesSecondairesCommand: (
+    ModifierStatutEtudesSecondairesCommand: (
         lambda msg_bus, cmd: modifier_statut_checklist_etudes_secondaires(
             cmd,
             validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
         )
     ),
-    ModifierStatutChecklistExamenCommand: (
+    ModifierStatutExamenCommand: (
         lambda msg_bus, cmd: modifier_statut_checklist_examen(
             cmd,
             proposition_repository=PropositionRepository(),
@@ -634,14 +637,6 @@ COMMAND_HANDLERS = {
     ),
     ModifierAuthentificationExperienceAcademiqueCommand: (
         lambda msg_bus, cmd: modifier_authentification_experience_academique(
-            cmd,
-            notification=Notification(),
-            historique=HistoriqueFormationGenerale(),
-            validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
-        )
-    ),
-    ModifierAuthentificationExperienceNonAcademiqueCommand: (
-        lambda msg_bus, cmd: modifier_authentification_experience_non_academique(
             cmd,
             notification=Notification(),
             historique=HistoriqueFormationGenerale(),

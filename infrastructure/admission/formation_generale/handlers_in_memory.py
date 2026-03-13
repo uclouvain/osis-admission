@@ -158,6 +158,16 @@ from admission.infrastructure.admission.shared_kernel.repository.in_memory.empla
 from admission.infrastructure.admission.shared_kernel.repository.in_memory.titre_acces_selectionnable import (
     TitreAccesSelectionnableInMemoryRepositoryFactory,
 )
+from ddd.logic.shared_kernel.profil.commands import (
+    ModifierAuthentificationEtudesSecondairesCommand,
+    ModifierAuthentificationExamenCommand,
+    ModifierAuthentificationExperienceAcademiqueCommand,
+    ModifierAuthentificationExperienceNonAcademiqueCommand,
+    ModifierStatutEtudesSecondairesCommand,
+    ModifierStatutExamenCommand,
+    ModifierStatutExperienceAcademiqueCommand,
+    ModifierStatutExperienceNonAcademiqueCommand,
+)
 from infrastructure.reference.domain.service.in_memory.bourse import BourseInMemoryTranslator
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 from infrastructure.shared_kernel.campus.repository.in_memory.campus import UclouvainCampusInMemoryRepository
@@ -641,7 +651,7 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=_proposition_repository,
     ),
-    ModifierStatutChecklistExperienceAcademiqueCommand: (
+    ModifierStatutExperienceAcademiqueCommand: (
         lambda msg_bus, cmd: modifier_statut_checklist_experience_academique(
             cmd,
             proposition_repository=_proposition_repository,
@@ -650,19 +660,19 @@ COMMAND_HANDLERS = {
             validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur_service,
         )
     ),
-    ModifierStatutChecklistExperienceNonAcademiqueCommand: (
+    ModifierStatutExperienceNonAcademiqueCommand: (
         lambda msg_bus, cmd: modifier_statut_checklist_experience_non_academique(
             cmd,
             validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur_service,
         )
     ),
-    ModifierStatutChecklistEtudesSecondairesCommand: (
+    ModifierStatutEtudesSecondairesCommand: (
         lambda msg_bus, cmd: modifier_statut_checklist_etudes_secondaires(
             cmd,
             validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur_service,
         )
     ),
-    ModifierStatutChecklistExamenCommand: (
+    ModifierStatutExamenCommand: (
         lambda msg_bus, cmd: modifier_statut_checklist_examen(
             cmd,
             proposition_repository=_proposition_repository,
