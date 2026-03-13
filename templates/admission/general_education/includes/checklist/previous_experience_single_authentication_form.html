@@ -25,7 +25,7 @@
 {% endcomment %}
 
 <div
-  {% if not experience.authentification_en_cours and experience.statut_authentification == 'NON_CONCERNE' %}
+  {% if not experience.authentification_en_cours and experience.statut_authentification == 'NON_CONCERNE' or experience.authentication_status == 'NON_CONCERNE' %}
     class="hidden"
   {% endif %}
 >
