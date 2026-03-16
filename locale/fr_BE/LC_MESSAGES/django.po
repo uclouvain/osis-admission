@@ -2620,6 +2620,9 @@ msgstr "EN"
 msgid "ENROLMENT AUTHORISATION<br>for the %(academic_year)s academic year"
 msgstr "AUTORISATION D’INSCRIPTION<br>à l’année académique %(academic_year)s"
 
+msgid "EPC"
+msgstr "EPC"
+
 msgid "EPC injection"
 msgstr "Injection EPC"
 
@@ -7655,6 +7658,9 @@ msgstr "Le type de l'élément du formulaire d'admission est inconnu (%(type)s).
 msgid "The university tuition fee is EURO %(montant)s."
 msgstr "Les droits d'inscription à l'Université s'élèvent à %(montant)s EUR."
 
+msgid "There are no EPC documents for this student."
+msgstr "Il n'y a pas de documents EPC pour cet étudiant."
+
 msgid "There can be no more CA members in the supervision group."
 msgstr ""
 "Il ne peut y avoir davantage de membres du comité d'accompagnement dans le "
@@ -7677,6 +7683,9 @@ msgstr ""
 
 msgid "There is no required exam for this training."
 msgstr "Il n'y a pas d'examen requis pour cette formation."
+
+msgid "There was an error while getting the EPC documents list."
+msgstr "Erreur lors de la récupération des documents EPC."
 
 msgid "Thesis field"
 msgstr "Domaine de la thèse"
@@ -8545,8 +8554,8 @@ msgid ""
 "href=\"%(edit_experience_url)s\">edit form</a>."
 msgstr ""
 "Vous pouvez le faire automatiquement en cliquant <button type=\"submit\" "
-"class=\"btn-link p-0 no-border\">ici</button> ou manuellement via le <a href=\"%(edit_experience_url)s\">formulaire "
-"d'édition</a>."
+"class=\"btn-link p-0 no-border\">ici</button> ou manuellement via le <a "
+"href=\"%(edit_experience_url)s\">formulaire d'édition</a>."
 
 msgid ""
 "You can do it automatically by clicking <button type=\"submit\" class=\"btn-"

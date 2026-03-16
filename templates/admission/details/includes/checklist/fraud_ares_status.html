@@ -24,23 +24,25 @@
 * see http://www.gnu.org/licenses/.
 {% endcomment %}
 
-{% if is_fraudster_from_ares_error %}
-  <div class="alert alert-warning">
-    {% blocktranslate %}Unable to get fraud status from the ARES at the moment{% endblocktranslate %}
-  </div>
-{% elif is_fraudster_from_ares is True %}
-  <div class="alert alert-danger">
-    {% blocktranslate %}<strong>Warning</strong> the candidate is reported as <strong>fraudster</strong> by the ARES{% endblocktranslate %}
-  </div>
-{% elif is_fraudster_from_ares is False %}
-{% else %}
-  <div hx-post="{% url view.base_namespace|add:':fraudster-check' uuid=view.kwargs.uuid %}"
-     hx-trigger="fraudAresResult"
-     hx-swap="outerHTML"
-     id="ares-fraudster-result-{{ container_id }}"
-  >
-    <div class="alert alert-info">
-      <i class="fas fa-spinner fa-spin-pulse"></i> {% blocktranslate %}Requesting fraud status from the ARES{% endblocktranslate %}
+<div id="ares-fraudster-{{ container_id }}" hx-preserve>
+  {% if is_fraudster_from_ares_error %}
+    <div class="alert alert-warning">
+      {% blocktranslate %}Unable to get fraud status from the ARES at the moment{% endblocktranslate %}
     </div>
-  </div>
-{% endif %}
+  {% elif is_fraudster_from_ares is True %}
+    <div class="alert alert-danger">
+      {% blocktranslate %}<strong>Warning</strong> the candidate is reported as <strong>fraudster</strong> by the ARES{% endblocktranslate %}
+    </div>
+  {% elif is_fraudster_from_ares is False %}
+  {% else %}
+    <div hx-post="{% url view.base_namespace|add:':fraudster-check' uuid=view.kwargs.uuid %}"
+       hx-trigger="fraudAresResult"
+       hx-swap="outerHTML"
+       id="ares-fraudster-result-{{ container_id }}"
+    >
+      <div class="alert alert-info">
+        <i class="fas fa-spinner fa-spin-pulse"></i> {% blocktranslate %}Requesting fraud status from the ARES{% endblocktranslate %}
+      </div>
+    </div>
+  {% endif %}
+</div>

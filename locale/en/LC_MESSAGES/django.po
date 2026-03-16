@@ -2415,6 +2415,9 @@ msgstr ""
 msgid "ENROLMENT AUTHORISATION<br>for the %(academic_year)s academic year"
 msgstr ""
 
+msgid "EPC"
+msgstr ""
+
 msgid "EPC injection"
 msgstr ""
 
@@ -6882,6 +6885,9 @@ msgstr ""
 msgid "The university tuition fee is EURO %(montant)s."
 msgstr "The university tuition fee is €%(montant)s."
 
+msgid "There are no EPC documents for this student."
+msgstr ""
+
 msgid "There can be no more CA members in the supervision group."
 msgstr ""
 "There can be no more supervision committee members in the supervision group."
@@ -6897,6 +6903,9 @@ msgid ""
 msgstr ""
 
 msgid "There is no required exam for this training."
+msgstr ""
+
+msgid "There was an error while getting the EPC documents list."
 msgstr ""
 
 msgid "Thesis field"
