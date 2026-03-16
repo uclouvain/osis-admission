@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -26,30 +26,14 @@
 {% endcomment %}
 
 <div id="document-details" class="element-with-spinner">
-  {% if several_files %}
-    {% blocktranslate trimmed asvar display_problem_message %}
-      There has been a problem when merging the documents, this document contains several files and only the first one
-      is displayed in the viewer. You can view the other files either in the candidate's replicated tabs or by
-      switching to edit mode.
-    {% endblocktranslate %}
-    <div class="fit-content" style="margin-bottom: 5px;">
-      <span
-        tabindex="0"
-        class="popover-buttons fa-regular fa-eye-slash fit-content"
-        data-content="<p>{{ display_problem_message }}</p>"
-        data-container="body"
-        role="button"
-      ></span> {% translate 'Display problem' %}
-    </div>
-  {% endif %}
-  {% if not document_token %}
+  {% if not document_metadata %}
     <p id="empty-document-details">
       {% translate 'To visualize and edit a document, please select it in the list opposite.' %}
       <i id="empty-document-icon" class="fa-solid fa-file-import"></i>
     </p>
   {% else %}
     <div id="document-editor-container">
-      {% document_component document_token document_metadata False %}
+      {% document_epc_component document_metadata %}
     </div>
   {% endif %}
 
