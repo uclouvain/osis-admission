@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -66,6 +66,7 @@ from base.models.enums.community import CommunityEnum
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.enums.got_diploma import GotDiploma
 from base.models.enums.person_address_type import PersonAddressType
+from base.models.enums.personal_data import ChoixStatutValidationDonneesPersonnelles
 from base.models.enums.teaching_type import TeachingTypeEnum
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     DiplomeBelgeEtudesSecondairesDTO,
@@ -86,6 +87,10 @@ from osis_profile.models.enums.curriculum import (
     Grade,
     Result,
     TranscriptType,
+)
+from osis_profile.models.enums.experience_validation import (
+    ChoixStatutValidationExperience,
+    EtatAuthentificationParcours,
 )
 from reference.models.enums.cycle import Cycle
 
@@ -157,6 +162,8 @@ class ConnaissanceLangue:
 class DiplomeEtudeSecondaire:
     personne: str
     annee: int
+    statut_validation: str = ChoixStatutValidationExperience.EN_BROUILLON.name
+    statut_authentification: str = EtatAuthentificationParcours.NON_CONCERNE.name
 
 
 @dataclass
@@ -210,6 +217,8 @@ class ExperienceAcademique:
     avec_complements = None
     credits_inscrits_complements = None
     credits_acquis_complements = None
+    statut_validation: str = ChoixStatutValidationExperience.EN_BROUILLON.name
+    statut_authentification: str = EtatAuthentificationParcours.NON_CONCERNE.name
 
 
 @dataclass
@@ -225,6 +234,8 @@ class ExperienceNonAcademique:
     secteur: str
     autre_activite: str
     identifiant_externe: Optional[str] = None
+    statut_validation: str = ChoixStatutValidationExperience.EN_BROUILLON.name
+    statut_authentification: str = EtatAuthentificationParcours.NON_CONCERNE.name
 
 
 class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
@@ -308,6 +319,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 nom_langue_contact='Français',
                 date_expiration_passeport=datetime.date(2020, 1, 1),
                 date_expiration_carte_identite=datetime.date(2020, 1, 1),
+                statut_validation_donnees_personnelles=ChoixStatutValidationDonneesPersonnelles.VALIDEES.name,
             ),
             _IdentificationDTO(
                 matricule="0000000001",
@@ -339,6 +351,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 nom_langue_contact='Français',
                 date_expiration_passeport=datetime.date(2020, 1, 1),
                 date_expiration_carte_identite=datetime.date(2020, 1, 1),
+                statut_validation_donnees_personnelles=ChoixStatutValidationDonneesPersonnelles.VALIDEES.name,
             ),
             _IdentificationDTO(
                 matricule="0000000002",
@@ -370,6 +383,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 nom_langue_contact='Français',
                 date_expiration_passeport=datetime.date(2020, 1, 1),
                 date_expiration_carte_identite=datetime.date(2020, 1, 1),
+                statut_validation_donnees_personnelles=ChoixStatutValidationDonneesPersonnelles.VALIDEES.name,
             ),
             _IdentificationDTO(
                 matricule="0000000003",
@@ -401,6 +415,39 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 nom_pays_naissance='Belgique',
                 date_expiration_passeport=datetime.date(2020, 1, 1),
                 date_expiration_carte_identite=datetime.date(2020, 1, 1),
+                statut_validation_donnees_personnelles=ChoixStatutValidationDonneesPersonnelles.VALIDEES.name,
+            ),
+            _IdentificationDTO(
+                matricule="candidat_checklist",
+                nom='Foreign',
+                prenom='Individual',
+                date_naissance=datetime.date(1990, 1, 1),
+                annee_naissance=None,
+                lieu_naissance='Louvain-la-Neuve',
+                pays_nationalite_europeen=True,
+                pays_nationalite='AR',
+                langue_contact='en',
+                sexe='M',
+                genre='H',
+                photo_identite=['uuid11'],
+                carte_identite=['uuid12'],
+                passeport=['uuid13'],
+                numero_registre_national_belge='',
+                numero_carte_identite='',
+                numero_passeport='1003',
+                annee_derniere_inscription_ucl=None,
+                noma_derniere_inscription_ucl='',
+                email='john.doe@ucl.be',
+                pays_naissance='BE',
+                etat_civil=CivilState.MARRIED.name,
+                pays_residence="BE",
+                nom_langue_contact='Anglais',
+                autres_prenoms='',
+                nom_pays_nationalite='Argentine',
+                nom_pays_naissance='Belgique',
+                date_expiration_passeport=datetime.date(2020, 1, 1),
+                date_expiration_carte_identite=datetime.date(2020, 1, 1),
+                statut_validation_donnees_personnelles=ChoixStatutValidationDonneesPersonnelles.VALIDEES.name,
             ),
         ]
         cls.adresses_candidats = [
@@ -984,6 +1031,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 nom_pays_naissance=candidate.nom_pays_naissance,
                 date_expiration_passeport=candidate.date_expiration_passeport,
                 date_expiration_carte_identite=candidate.date_expiration_carte_identite,
+                statut_validation_donnees_personnelles=candidate.statut_validation_donnees_personnelles,
             )
         except StopIteration:  # pragma: no cover
             raise CandidatNonTrouveException
@@ -1084,7 +1132,13 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
 
             experiences_dtos = []
             for experience in cls.experiences_academiques:
-                if experience.personne == matricule:
+                if experience.personne == matricule and (
+                    experiences_cv_recuperees == ExperiencesCVRecuperees.TOUTES
+                    or experiences_cv_recuperees == ExperiencesCVRecuperees.SEULEMENT_VALORISEES
+                    and experience.uuid in cls.valorisations
+                    or experiences_cv_recuperees == ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION
+                    and uuid_proposition in cls.valorisations.get(experience.uuid, [])
+                ):
                     experiences_dtos.append(
                         ExperienceAcademiqueDTO(
                             uuid=experience.uuid,
@@ -1135,6 +1189,8 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                             credits_inscrits_complements=experience.credits_inscrits_complements,
                             credits_acquis_complements=experience.credits_acquis_complements,
                             grade_academique_formation=experience.grade_academique_formation,
+                            statut_validation=experience.statut_validation,
+                            statut_authentification=experience.statut_authentification,
                         ),
                     )
 
@@ -1150,9 +1206,18 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                     secteur=experience.secteur,
                     autre_activite=experience.autre_activite,
                     valorisee_par_admissions=[],
+                    statut_validation=experience.statut_validation,
+                    statut_authentification=experience.statut_authentification,
                 )
                 for experience in cls.experiences_non_academiques
                 if experience.personne == matricule
+                and (
+                    experiences_cv_recuperees == ExperiencesCVRecuperees.TOUTES
+                    or experiences_cv_recuperees == ExperiencesCVRecuperees.SEULEMENT_VALORISEES
+                    and experience.uuid in cls.valorisations
+                    or experiences_cv_recuperees == ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION
+                    and uuid_proposition in cls.valorisations.get(experience.uuid, [])
+                )
             ]
 
             etudes_secondaires = cls.etudes_secondaires.get(matricule)
@@ -1306,11 +1371,3 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
     @classmethod
     def get_merge_proposal(cls, matricule: str) -> Optional['MergeProposalDTO']:
         return None
-
-    @classmethod
-    def get_uuids_experiences_curriculum_valorisees_par_admission(cls, uuid_proposition: str) -> set[str]:
-        return set(
-            uuid_experience
-            for uuid_experience, uuids_propositions in cls.valorisations.items()
-            if uuid_proposition in uuids_propositions
-        )

@@ -60,6 +60,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervi
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
     Proposition,
+    PropositionIdentity,
 )
 from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import (
     INotification,
@@ -666,13 +667,13 @@ class Notification(INotification):
     @classmethod
     def demande_verification_titre_acces(
         cls,
-        proposition: Proposition,
+        proposition_id: PropositionIdentity,
         gestionnaire: PersonneConnueUclDTO,
     ) -> EmailMessage:
         admission: BaseAdmission = (
             BaseAdmission.objects.with_training_management_and_reference()
-            .select_related('candidate__country_of_citizenship', 'training')
-            .get(uuid=proposition.entity_id.uuid)
+            .select_related('candidate__country_of_citizenship', 'training__academic_year')
+            .get(uuid=proposition_id.uuid)
         )
 
         # Notifier le vérificateur par mail
@@ -691,7 +692,7 @@ class Notification(INotification):
                     settings.LANGUAGE_CODE_EN: admission.training.title_english,
                 }[current_language],
                 'training_acronym': admission.training.acronym,
-                'training_year': format_academic_year(proposition.annee_calculee),
+                'training_year': format_academic_year(admission.training.academic_year.year),
                 'admission_link_front': get_portal_admission_url('doctorate', str(admission.uuid)),
                 'admission_link_back': get_backoffice_admission_url('doctorate', str(admission.uuid)),
                 'sender_name': f'{gestionnaire.prenom} {gestionnaire.nom}',
@@ -713,13 +714,13 @@ class Notification(INotification):
     @classmethod
     def informer_candidat_verification_parcours_en_cours(
         cls,
-        proposition: Proposition,
+        proposition_id: PropositionIdentity,
         gestionnaire: PersonneConnueUclDTO,
     ) -> EmailMessage:
         admission: BaseAdmission = (
             BaseAdmission.objects.with_training_management_and_reference()
-            .select_related('candidate', 'training')
-            .get(uuid=proposition.entity_id.uuid)
+            .select_related('candidate', 'training__academic_year')
+            .get(uuid=proposition_id.uuid)
         )
 
         # Notifier le candidat par mail
@@ -734,7 +735,7 @@ class Notification(INotification):
                 }[admission.candidate.language],
                 'training_acronym': admission.training.acronym,
                 'training_campus': admission.teaching_campus,
-                'training_year': format_academic_year(proposition.annee_calculee),
+                'training_year': format_academic_year(admission.training.academic_year.year),
                 'admission_link_front': get_portal_admission_url('doctorate', str(admission.uuid)),
                 'admission_link_back': get_backoffice_admission_url('doctorate', str(admission.uuid)),
                 'sender_name': f'{gestionnaire.prenom} {gestionnaire.nom}',

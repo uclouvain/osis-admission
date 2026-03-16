@@ -46,7 +46,13 @@ from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscripti
 from admission.ddd.admission.shared_kernel.domain.service.i_elements_confirmation import IElementsConfirmation
 from admission.ddd.admission.shared_kernel.domain.service.i_historique import IHistorique
 from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
+from admission.ddd.admission.shared_kernel.domain.service.i_modifier_checklist_experience_parcours_anterieur import (
+    IValidationExperienceParcoursAnterieurService,
+)
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_raccrocher_experiences_curriculum import (
+    IRaccrocherExperiencesCurriculum,
+)
 from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import ITitresAcces
 from admission.ddd.admission.shared_kernel.domain.service.profil_soumis_candidat import ProfilSoumisCandidatTranslator
 from admission.ddd.admission.shared_kernel.enums.question_specifique import Onglets
@@ -74,6 +80,8 @@ def soumettre_proposition(
     inscription_tardive_service: 'IInscriptionTardive',
     paiement_frais_dossier_service: 'IPaiementFraisDossier',
     historique: 'IHistorique',
+    raccrocher_experiences_curriculum: 'IRaccrocherExperiencesCurriculum',
+    validation_experience_parcours_anterieur_service: 'IValidationExperienceParcoursAnterieurService',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -180,10 +188,13 @@ def soumettre_proposition(
         formation=formation,
         profil_candidat_translator=profil_candidat_translator,
         questions_specifiques_translator=questions_specifiques_translator,
-        annee_courante=annee_courante,
     )
     proposition_repository.save(proposition)
 
+    raccrocher_experiences_curriculum.raccrocher(proposition=proposition)
+    validation_experience_parcours_anterieur_service.passer_experiences_en_brouillon_en_a_traiter(
+        proposition=proposition
+    )
     notification.confirmer_soumission(proposition)
     historique.historiser_soumission(proposition)
 

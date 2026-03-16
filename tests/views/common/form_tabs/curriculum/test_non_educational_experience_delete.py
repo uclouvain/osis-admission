@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -34,33 +34,38 @@ from django.test import TestCase
 from rest_framework import status
 
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
-from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
-from admission.models import EPCInjection as AdmissionEPCInjection, DoctorateAdmission, ContinuingEducationAdmission
-from admission.models.valuated_epxeriences import AdmissionProfessionalValuatedExperiences
-from admission.models.epc_injection import EPCInjectionType, EPCInjectionStatus as AdmissionEPCInjectionStatus
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
+from admission.models import ContinuingEducationAdmission, DoctorateAdmission
+from admission.models import EPCInjection as AdmissionEPCInjection
+from admission.models.epc_injection import EPCInjectionStatus as AdmissionEPCInjectionStatus
+from admission.models.epc_injection import EPCInjectionType
 from admission.models.general_education import GeneralEducationAdmission
+from admission.models.valuated_epxeriences import AdmissionProfessionalValuatedExperiences
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from admission.tests.factories.curriculum import (
-    ProfessionalExperienceFactory,
     AdmissionProfessionalValuatedExperiencesFactory,
+    ProfessionalExperienceFactory,
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
-from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
+from admission.tests.factories.roles import ProgramManagerRoleFactory, SicManagementRoleFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from osis_profile.models import ProfessionalExperience
-from osis_profile.models.enums.curriculum import ActivityType, ActivitySector
+from osis_profile.models.enums.curriculum import ActivitySector, ActivityType
 from osis_profile.models.epc_injection import (
     EPCInjection as CurriculumEPCInjection,
-    ExperienceType,
+)
+from osis_profile.models.epc_injection import (
     EPCInjectionStatus as CurriculumEPCInjectionStatus,
+)
+from osis_profile.models.epc_injection import (
+    ExperienceType,
 )
 from reference.tests.factories.country import CountryFactory
 
@@ -79,7 +84,6 @@ class CurriculumNonEducationalExperienceDeleteViewTestCase(TestCase):
             training__academic_year=cls.academic_years[0],
             candidate__language=settings.LANGUAGE_CODE_EN,
             candidate__country_of_citizenship=CountryFactory(european_union=False),
-            candidate__graduated_from_high_school_year=None,
             candidate__last_registration_year=None,
             candidate__id_photo=[],
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
@@ -178,7 +182,7 @@ class CurriculumNonEducationalExperienceDeleteViewTestCase(TestCase):
         # The experience has been injected from another admission
         other_admission = GeneralEducationAdmissionFactory(candidate=self.general_admission.candidate)
 
-        other_admission_injection = AdmissionEPCInjection.objects.create(
+        AdmissionEPCInjection.objects.create(
             admission=other_admission,
             type=EPCInjectionType.DEMANDE.name,
             status=AdmissionEPCInjectionStatus.OK.name,
@@ -199,7 +203,7 @@ class CurriculumNonEducationalExperienceDeleteViewTestCase(TestCase):
         other_valuation.delete()
 
         # The current admission has been injected
-        admission_injection = AdmissionEPCInjection.objects.create(
+        AdmissionEPCInjection.objects.create(
             admission=self.general_admission,
             type=EPCInjectionType.DEMANDE.name,
             status=AdmissionEPCInjectionStatus.OK.name,
@@ -239,12 +243,6 @@ class CurriculumNonEducationalExperienceDeleteViewTestCase(TestCase):
             professionalexperience_id=self.experience.uuid,
         )
 
-        self.general_admission.checklist['current']['parcours_anterieur']['enfants'] = [
-            Checklist.initialiser_checklist_experience(experience_uuid=self.experience.uuid).to_dict()
-        ]
-
-        self.general_admission.save()
-
         response = self.client.post(self.delete_url)
 
         self.assertFalse(ProfessionalExperience.objects.filter(uuid=self.experience.uuid).exists())
@@ -257,10 +255,6 @@ class CurriculumNonEducationalExperienceDeleteViewTestCase(TestCase):
 
         self.general_admission.refresh_from_db()
 
-        self.assertEqual(
-            self.general_admission.checklist['current']['parcours_anterieur']['enfants'],
-            [],
-        )
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
         self.assertNotIn(

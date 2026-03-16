@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,19 +29,20 @@ from django.test import TestCase
 
 from admission.infrastructure.admission.shared_kernel.domain.service.titres_acces import TitresAcces
 from admission.tests.factories.curriculum import (
-    ProfessionalExperienceFactory,
     EducationalExperienceFactory,
     EducationalExperienceYearFactory,
+    ProfessionalExperienceFactory,
 )
 from admission.tests.factories.secondary_studies import (
-    HighSchoolDiplomaAlternativeFactory,
     BelgianHighSchoolDiplomaFactory,
     ForeignHighSchoolDiplomaFactory,
+    HighSchoolDiplomaAlternativeFactory,
 )
 from base.models.enums.got_diploma import GotDiploma
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.person import PersonFactory
 from osis_profile.models.enums.curriculum import ActivitySector, ActivityType, Result
+from osis_profile.tests.factories.high_school_diploma import HighSchoolDiplomaFactory
 from reference.models.enums.cycle import Cycle
 from reference.tests.factories.diploma_title import DiplomaTitleFactory
 
@@ -64,32 +65,32 @@ class TitresAccesTestCase(TestCase):
 
     def test_diplomation_secondaire_belge(self):
         with self.subTest('diplome_belge'):
-            person_avec_diplome_belge = PersonFactory(
-                graduated_from_high_school=GotDiploma.YES.name,
-            )
+            person_avec_diplome_belge = HighSchoolDiplomaFactory(
+                got_diploma=GotDiploma.YES.name,
+            ).person
             BelgianHighSchoolDiplomaFactory(person=person_avec_diplome_belge)
             result = TitresAcces.conditions_remplies(person_avec_diplome_belge.global_id, [])
             self.assertTrue(result.diplomation_secondaire_belge)
 
         with self.subTest('sans_diplome'):
-            person_sans_diplome = PersonFactory(
-                graduated_from_high_school=GotDiploma.THIS_YEAR.name,
-            )
+            person_sans_diplome = HighSchoolDiplomaFactory(
+                got_diploma=GotDiploma.THIS_YEAR.name,
+            ).person
             result = TitresAcces.conditions_remplies(person_sans_diplome.global_id, [])
             self.assertTrue(result.diplomation_secondaire_belge)
 
     def test_diplomation_secondaire_etranger(self):
-        person = PersonFactory(
-            graduated_from_high_school=GotDiploma.YES.name,
-        )
+        person = HighSchoolDiplomaFactory(
+            got_diploma=GotDiploma.YES.name,
+        ).person
         ForeignHighSchoolDiplomaFactory(person=person)
         result = TitresAcces.conditions_remplies(person.global_id, [])
         self.assertTrue(result.diplomation_secondaire_etranger)
 
     def test_alternative_etudes_secondaires(self):
-        person = PersonFactory(
-            graduated_from_high_school=GotDiploma.NO.name,
-        )
+        person = HighSchoolDiplomaFactory(
+            got_diploma=GotDiploma.NO.name,
+        ).person
         HighSchoolDiplomaAlternativeFactory(person=person)
         result = TitresAcces.conditions_remplies(person.global_id, [])
         self.assertTrue(result.alternative_etudes_secondaires)

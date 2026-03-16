@@ -24,10 +24,12 @@
 #
 # ##############################################################################
 import datetime
+import itertools
 from typing import Dict, List, Set
 
 import attr
 from django.conf import settings
+from django.db.models import Q
 from django.shortcuts import resolve_url
 from django.template.defaultfilters import truncatechars
 from django.utils.functional import cached_property
@@ -45,14 +47,10 @@ from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
 from admission.ddd.admission.shared_kernel.commands import (
     RechercherParcoursAnterieurQuery,
 )
-from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
-    EtatAuthentificationParcours,
-)
 from admission.ddd.admission.shared_kernel.dtos.question_specifique import (
     QuestionSpecifiqueDTO,
 )
 from admission.ddd.admission.shared_kernel.dtos.resume import (
-    ResumeCandidatDTO,
     ResumePropositionDTO,
 )
 from admission.ddd.admission.shared_kernel.enums import Onglets, TypeItemFormulaire
@@ -62,14 +60,12 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     DocumentsProjetRecherche,
     OngletsDemande,
 )
-from admission.ddd.admission.shared_kernel.utils import initialiser_checklist_experience
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
 from admission.forms import disable_unavailable_forms
 from admission.forms.admission.checklist import (
     AssimilationForm,
     CommentForm,
     SinglePastExperienceAuthenticationForm,
-    can_edit_experience_authentication,
 )
 from admission.mail_templates import (
     ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CANDIDATE_DOCTORATE,
@@ -109,11 +105,16 @@ from admission.views.doctorate.details.checklist.projet_recherche import (
     ProjetRechercheContextMixin,
 )
 from admission.views.doctorate.details.checklist.sic_decision import SicDecisionMixin
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
+    ExperienceAcademiqueDTO,
+    ExperienceNonAcademiqueDTO,
+)
 from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
     ExperienceParcoursInterneDTO,
 )
 from infrastructure.messages_bus import message_bus_instance
-from osis_profile.utils.curriculum import groupe_curriculum_par_annee_decroissante
+from osis_profile.models.enums.experience_validation import EtatAuthentificationParcours
+from osis_profile.utils.curriculum import ElementCurriculumDTO, groupe_curriculum_par_annee_decroissante
 from parcours_interne import etudiants_PCE_avant_2015
 
 __namespace__ = False
@@ -240,26 +241,44 @@ class ChecklistView(
 
             context['resume_proposition'] = command_result.resume
 
+            experiences = self._get_experiences(command_result.resume)
+            experiences_by_uuid = self._get_experiences_by_uuid(experiences)
+            context['experiences'] = experiences
+            context['experiences_by_uuid'] = experiences_by_uuid
+
             context['specific_questions_by_tab'] = get_dynamic_questions_by_tab(
                 command_result.resume.questions_specifiques_dtos
             )
 
             # Initialize forms
-            tab_names = list(self.extra_context['checklist_tabs'].keys())
+            profile_tabs = [
+                OngletsChecklist.donnees_personnelles.name,
+            ]
+            admission_tabs = list(tab for tab in self.extra_context['checklist_tabs'] if tab not in profile_tabs)
 
             comments = {
                 ('__'.join(c.tags)): c
                 for c in CommentEntry.objects.filter(
-                    object_uuid=self.admission_uuid,
-                    tags__overlap=tab_names,
+                    Q(
+                        object_uuid=self.admission_uuid,
+                        tags__overlap=admission_tabs,
+                    )
+                    | Q(
+                        object_uuid=self.admission.candidate.uuid,
+                        tags__overlap=profile_tabs,
+                    )
+                    | Q(
+                        object_uuid__in=experiences_by_uuid.keys(),
+                        tags__0=OngletsChecklist.parcours_anterieur.name,
+                    ),
                 ).select_related('author')
             }
 
             for tab in TABS_WITH_SIC_AND_FAC_COMMENTS:
-                tab_names.remove(tab)
-                tab_names += [f'{tab}__{COMMENT_TAG_SIC_FOR_CDD}', f'{tab}__{COMMENT_TAG_CDD_FOR_SIC}']
-            tab_names.append('decision_sic__derogation')
-            tab_names.append('financabilite__derogation')
+                admission_tabs.remove(tab)
+                admission_tabs += [f'{tab}__{COMMENT_TAG_SIC_FOR_CDD}', f'{tab}__{COMMENT_TAG_CDD_FOR_SIC}']
+            admission_tabs.append('decision_sic__derogation')
+            admission_tabs.append('financabilite__derogation')
 
             comments_permissions = {
                 'financabilite__derogation': 'admission.checklist_change_fac_comment',
@@ -269,11 +288,16 @@ class ChecklistView(
             context['comment_forms'] = {
                 tab_name: CommentForm(
                     comment=comments.get(tab_name, None),
-                    form_url=resolve_url(f'{self.base_namespace}:save-comment', uuid=self.admission_uuid, tab=tab_name),
+                    form_url=resolve_url(
+                        f'{self.base_namespace}:save-comment',
+                        uuid=self.admission_uuid,
+                        object_uuid=self.admission.candidate.uuid if tab_name in profile_tabs else self.admission_uuid,
+                        tab=tab_name,
+                    ),
                     prefix=tab_name,
                     permission=comments_permissions.get(tab_name, None),
                 )
-                for tab_name in tab_names
+                for tab_name in itertools.chain(admission_tabs, profile_tabs)
             }
             context['assimilation_form'] = AssimilationForm(
                 initial=self.admission.checklist.get('current', {}).get('assimilation', {}).get('extra'),
@@ -311,11 +335,6 @@ class ChecklistView(
                 self._merge_with_known_curriculum(merge_curex, command_result.resume)
                 context['curex_a_fusionner'] = merge_curex
 
-            experiences = self._get_experiences(command_result.resume)
-            experiences_by_uuid = self._get_experiences_by_uuid(command_result.resume)
-            context['experiences'] = experiences
-            context['experiences_by_uuid'] = experiences_by_uuid
-
             # Access titles
             context['access_title_url'] = self.access_title_url
             context['access_titles'] = self.selectable_access_titles
@@ -337,13 +356,6 @@ class ChecklistView(
 
             # Authentication forms (one by experience)
             context['authentication_forms'] = {}
-
-            children = (
-                context['original_admission']
-                .checklist.get('current', {})
-                .get('parcours_anterieur', {})
-                .get('enfants', [])
-            )
 
             extra_tokens = {
                 'sender_name': self.current_user_name,
@@ -377,33 +389,23 @@ class ChecklistView(
                     context['all_experience_authentication_history_entries'].setdefault(experience_id, entry)
 
             # Past experiences
-            children_by_identifier = {
-                child['extra']['identifiant']: child for child in children if child.get('extra', {}).get('identifiant')
-            }
             last_valuated_admission_by_experience_uuid = {}
             not_valuated_by_current_admission_experiences_uuids = set()
 
             for experience_uuid, current_experience in experiences_by_uuid.items():
                 tab_identifier = f'parcours_anterieur__{experience_uuid}'
 
-                if experience_uuid in children_by_identifier:
-                    experience_checklist_info = children_by_identifier.get(experience_uuid, {})
-                else:
-                    experience_checklist_info = initialiser_checklist_experience(experience_uuid).to_dict()
-                    children.append(experience_checklist_info)
-
-                experience_authentication_state = experience_checklist_info['extra'].get('etat_authentification') or ''
                 context['checklist_additional_icons'][tab_identifier].append(
                     ChecklistTabIcon(
                         identifier='authentication_state',
-                        icon=authentication_css_class(authentication_status=experience_authentication_state),
-                        title=EtatAuthentificationParcours.get_value(experience_authentication_state),
-                        displayed=bool(experience_authentication_state),
+                        icon=authentication_css_class(authentication_status=current_experience.statut_authentification),
+                        title=EtatAuthentificationParcours.get_value(current_experience.statut_authentification),
+                        displayed=bool(current_experience.statut_authentification),
                     )
                 )
                 context['authentication_forms'].setdefault(
                     experience_uuid,
-                    SinglePastExperienceAuthenticationForm(experience_checklist_info),
+                    SinglePastExperienceAuthenticationForm(current_experience),
                 )
                 context['bg_classes'][tab_identifier] = bg_class_by_checklist_experience(current_experience)
                 context['checklist_tabs'][tab_identifier] = truncatechars(current_experience.titre_formate, 50)
@@ -412,6 +414,7 @@ class ChecklistView(
                     form_url=resolve_url(
                         f'{self.base_namespace}:save-comment',
                         uuid=self.admission_uuid,
+                        object_uuid=experience_uuid,
                         tab=tab_identifier,
                     ),
                     prefix=tab_identifier,
@@ -422,11 +425,11 @@ class ChecklistView(
                     form_url=resolve_url(
                         f'{self.base_namespace}:save-comment',
                         uuid=self.admission_uuid,
+                        object_uuid=experience_uuid,
                         tab=authentication_comment_identifier,
                     ),
                     prefix=authentication_comment_identifier,
-                    disabled=not can_edit_experience_authentication(experience_checklist_info),
-                    label=_('Comment about the authentication'),
+                    disabled=not current_experience.authentification_en_cours,
                 )
 
                 # Get the last valuated admission for this experience
@@ -444,23 +447,6 @@ class ChecklistView(
                     )
 
             context['last_valuated_admission_by_experience_uuid'] = last_valuated_admission_by_experience_uuid
-
-            # Remove the experiences that we had in the checklist that have been removed
-            children[:] = [child for child in children if child['extra']['identifiant'] in experiences_by_uuid]
-
-            # Order the experiences in chronological order
-            ordered_experiences = {}
-            if children:
-                order = 0
-
-                for annee, experience_list in experiences.items():
-                    for experience in experience_list:
-                        experience_uuid = str(experience.uuid)
-                        if experience_uuid not in ordered_experiences:
-                            ordered_experiences[experience_uuid] = order
-                            order += 1
-
-                children.sort(key=lambda x: ordered_experiences.get(x['extra']['identifiant'], 0))
 
             prefixed_past_experiences_documents = []
             read_only_documents = []
@@ -599,12 +585,17 @@ class ChecklistView(
             'inscription_supplementaire': 1,
         }
 
-    def _get_experiences_by_uuid(self, resume: ResumeCandidatDTO):
-        experiences = {}
-        for experience_academique in resume.curriculum.experiences_academiques:
-            experiences[str(experience_academique.uuid)] = experience_academique
-        for experience_non_academique in resume.curriculum.experiences_non_academiques:
-            experiences[str(experience_non_academique.uuid)] = experience_non_academique
+    def _get_experiences_by_uuid(self, experiences_by_year: dict[int, list[ElementCurriculumDTO]]):
+        # Get the experiences by uuid in chronological order
+        experiences: dict[str, ExperienceAcademiqueDTO | ExperienceNonAcademiqueDTO] = {}
+        for year_experiences in experiences_by_year.values():
+            for experience in year_experiences:
+                if isinstance(experience, (ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO)):
+                    experience_uuid_as_str = str(experience.uuid)
+
+                    if experience_uuid_as_str not in experiences:
+                        experiences[experience_uuid_as_str] = experience
+
         return experiences
 
 

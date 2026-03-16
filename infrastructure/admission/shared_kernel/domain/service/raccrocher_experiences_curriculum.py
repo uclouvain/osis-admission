@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -33,9 +33,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
     Proposition as PropositionDoctorale,
 )
-from admission.ddd.admission.shared_kernel.domain.service.i_raccrocher_experiences_curriculum import (
-    IRaccrocherExperiencesCurriculum,
-)
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
 )
@@ -48,11 +45,16 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.ddd.admission.formation_generale.domain.model.proposition import (
     Proposition as PropositionGenerale,
 )
+from admission.ddd.admission.shared_kernel.domain.service.i_raccrocher_experiences_curriculum import (
+    IRaccrocherExperiencesCurriculum,
+)
 from admission.models.base import (
     BaseAdmission,
 )
-from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences, \
-    AdmissionProfessionalValuatedExperiences
+from admission.models.valuated_epxeriences import (
+    AdmissionEducationalValuatedExperiences,
+    AdmissionProfessionalValuatedExperiences,
+)
 from osis_profile.models import EducationalExperience, ProfessionalExperience
 
 
@@ -67,6 +69,7 @@ class RaccrocherExperiencesCurriculum(IRaccrocherExperiencesCurriculum):
             ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE,
             ChoixStatutPropositionContinue.CONFIRMEE,
             ChoixStatutPropositionGenerale.CONFIRMEE,
+            ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE,
         }:
             return
 

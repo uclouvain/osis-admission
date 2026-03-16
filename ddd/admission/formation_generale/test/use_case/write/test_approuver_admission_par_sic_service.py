@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -30,17 +30,6 @@ import factory
 import freezegun
 from django.test import TestCase
 
-from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import (
-    EmplacementDocumentIdentity,
-)
-from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import EnQuarantaineException
-from admission.ddd.admission.shared_kernel.dtos.merge_proposal import MergeProposalDTO
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
-    OngletsDemande,
-    StatutEmplacementDocument,
-    StatutReclamationEmplacementDocument,
-)
 from admission.ddd.admission.formation_generale.commands import (
     ApprouverAdmissionParSicCommand,
 )
@@ -58,12 +47,23 @@ from admission.ddd.admission.formation_generale.test.factory.proposition import 
     PropositionFactory,
     _PropositionIdentityFactory,
 )
-from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationIdentityFactory
-from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
-    ProfilCandidatInMemoryTranslator,
+from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import (
+    EmplacementDocumentIdentity,
 )
+from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import EnQuarantaineException
+from admission.ddd.admission.shared_kernel.dtos.merge_proposal import MergeProposalDTO
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    OngletsDemande,
+    StatutEmplacementDocument,
+    StatutReclamationEmplacementDocument,
+)
+from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationIdentityFactory
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
+    ProfilCandidatInMemoryTranslator,
 )
 from admission.infrastructure.admission.shared_kernel.repository.in_memory.emplacement_document import (
     emplacement_document_in_memory_repository,
@@ -72,6 +72,7 @@ from admission.infrastructure.message_bus_in_memory import (
     message_bus_in_memory_instance,
 )
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from base.models.enums.personal_data import ChoixStatutValidationDonneesPersonnelles
 from base.models.person_merge_proposal import PersonMergeStatus
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
     AcademicYear,
@@ -226,9 +227,15 @@ class TestApprouverAdmissionParSic(TestCase):
             self.assertIsInstance(context.exception.exceptions.pop(), ParcoursAnterieurNonSuffisantException)
 
     def test_should_lever_exception_si_donnees_personnelles_non_validees(self):
-        self.proposition.checklist_actuelle.donnees_personnelles.statut = ChoixStatutChecklist.INITIAL_CANDIDAT
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
+        index = next(
+            i for i, c in enumerate(ProfilCandidatInMemoryTranslator.profil_candidats) if c.matricule == '0000000001'
+        )
+        with patch.multiple(
+            ProfilCandidatInMemoryTranslator.profil_candidats[index],
+            statut_validation_donnees_personnelles=ChoixStatutValidationDonneesPersonnelles.A_COMPLETER.name,
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.command(**self.parametres_commande_par_defaut))
         self.assertIsInstance(
             context.exception.exceptions.pop(),
             EtatChecklistDonneesPersonnellesNonValidePourApprouverDemande,
