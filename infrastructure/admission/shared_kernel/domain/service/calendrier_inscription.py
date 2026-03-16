@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ from datetime import date
 from typing import List, Optional, Tuple
 
 from django.db.models import Q
+from django.utils import timezone
 
 from admission.ddd.admission.shared_kernel.domain.model.periode import Periode
 from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription import (
@@ -51,10 +52,13 @@ class CalendrierInscription(ICalendrierInscription):
 
     @classmethod
     def get_pool_ouverts(cls) -> List[Tuple[str, int]]:
-        today = date.today()
+        today = timezone.now().date()
+        now = timezone.now().time()
         return AcademicCalendar.objects.filter(
-            start_date__lte=today,
-            end_date__gte=today,
+            Q(start_time__isnull=True, start_date__lte=today)
+            | (Q(start_time__isnull=False) & (Q(start_date__lt=today) | Q(start_date=today, start_time__lt=now))),
+            Q(end_time__isnull=True, end_date__gte=today)
+            | (Q(end_time__isnull=False) & (Q(end_date__gt=today) | Q(end_date=today, end_time__gte=now))),
         ).values_list('reference', 'data_year__year')
 
     @classmethod

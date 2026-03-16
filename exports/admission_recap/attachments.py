@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -501,6 +501,7 @@ def get_specific_questions_attachments(
     specific_questions: List[QuestionSpecifiqueDTO],
     eligible_for_reorientation: bool,
     eligible_for_modification: bool,
+    est_formation_contingente: bool,
 ) -> List[Attachment]:
     """Returns the specific questions attachments."""
     attachments = []
@@ -552,6 +553,70 @@ def get_specific_questions_attachments(
                 candidate_language=context.identification.langue_contact,
             )
         )
+    if est_formation_contingente:
+        if context.proposition.est_non_resident_au_sens_decret:
+            attachments.append(
+                Attachment(
+                    identifier='DOSSIER_NON_RESIDENT',
+                    label=DocumentsQuestionsSpecifiques['DOSSIER_NON_RESIDENT'],
+                    uuids=context.proposition.dossier_non_resident,
+                    required=True,
+                    candidate_language=context.identification.langue_contact,
+                )
+            )
+
+            if context.proposition.non_resident_admission_en_seconde_annee:
+                attachments.append(
+                    Attachment(
+                        identifier='FORMULAIRE_DE_DEMANDE_NON_RESIDENT_ADMISSION_EN_SECONDE_ANNEE',
+                        label=DocumentsQuestionsSpecifiques[
+                            'FORMULAIRE_DE_DEMANDE_NON_RESIDENT_ADMISSION_EN_SECONDE_ANNEE'
+                        ],
+                        uuids=context.proposition.formulaire_de_demande_non_resident_admission_en_seconde_annee,
+                        required=True,
+                        candidate_language=context.identification.langue_contact,
+                    )
+                )
+
+            attachments.append(
+                Attachment(
+                    identifier='ACCUSE_DE_RECEPTION_FORMATION_CONTINGENTE',
+                    label=DocumentsQuestionsSpecifiques['ACCUSE_DE_RECEPTION_FORMATION_CONTINGENTE'],
+                    uuids=context.proposition.accuse_de_reception_contingente,
+                    required=True,
+                    candidate_language=context.identification.langue_contact,
+                )
+            )
+            attachments.append(
+                Attachment(
+                    identifier='ACCEPTATION_FORMATION_CONTINGENTE',
+                    label=DocumentsQuestionsSpecifiques['ACCEPTATION_FORMATION_CONTINGENTE'],
+                    uuids=context.proposition.acceptation_contingente,
+                    required=True,
+                    candidate_language=context.identification.langue_contact,
+                )
+            )
+
+        else:
+            attachments.append(
+                Attachment(
+                    identifier='CERTIFICAT_DE_RESIDENCE',
+                    label=DocumentsQuestionsSpecifiques['CERTIFICAT_DE_RESIDENCE'],
+                    uuids=context.proposition.certificat_de_residence,
+                    required=True,
+                    candidate_language=context.identification.langue_contact,
+                )
+            )
+            attachments.append(
+                Attachment(
+                    identifier='DOSSIER_RESIDENT',
+                    label=DocumentsQuestionsSpecifiques['DOSSIER_RESIDENT'],
+                    uuids=context.proposition.dossier_resident,
+                    required=True,
+                    candidate_language=context.identification.langue_contact,
+                )
+            )
+
     attachments.extend(get_dynamic_questions_attachments(specific_questions))
     attachments.append(
         Attachment(

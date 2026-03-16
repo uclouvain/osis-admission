@@ -37,8 +37,13 @@ from admission.ddd.admission.formation_generale.dtos.condition_approbation impor
     ConditionComplementaireApprobationDTO,
 )
 from admission.ddd.admission.formation_generale.dtos.motif_refus import MotifRefusDTO
-from admission.ddd.admission.shared_kernel.dtos.formation import BaseFormationDTO, FormationDTO
-from admission.ddd.admission.shared_kernel.dtos.poste_diplomatique import PosteDiplomatiqueDTO
+from admission.ddd.admission.shared_kernel.dtos.formation import (
+    BaseFormationDTO,
+    FormationDTO,
+)
+from admission.ddd.admission.shared_kernel.dtos.poste_diplomatique import (
+    PosteDiplomatiqueDTO,
+)
 from admission.ddd.admission.shared_kernel.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from ddd.logic.learning_unit.dtos import LearningUnitSearchDTO, PartimSearchDTO
@@ -47,7 +52,7 @@ from osis_common.ddd import interface
 from osis_profile import PLUS_5_ISO_CODES
 
 
-@attr.dataclass(frozen=True, slots=True)
+@attr.dataclass(slots=True)
 class PropositionDTO(interface.DTO):
     uuid: str
     formation: FormationDTO
@@ -88,6 +93,16 @@ class PropositionDTO(interface.DTO):
     attestation_inscription_reguliere_pour_modification_inscription: List[str]
 
     est_non_resident_au_sens_decret: Optional[bool]
+    accuse_de_reception_contingente: List[str]
+    acceptation_contingente: List[str]
+    numero_dossier_ares: str
+    certificat_de_residence: List[str]
+    dossier_resident: List[str]
+    numero_de_tirage_contingente: Optional[int]
+    dossier_non_resident: List[str]
+    non_resident_admission_en_seconde_annee: Optional[bool]
+    formulaire_de_demande_non_resident_admission_en_seconde_annee: List[str]
+    non_resident_notifie_a: Optional[datetime.datetime]
 
     poste_diplomatique: Optional[PosteDiplomatiqueDTO]
 

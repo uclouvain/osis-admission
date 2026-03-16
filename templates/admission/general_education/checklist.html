@@ -399,6 +399,10 @@
               {% endpanel %}
             {% endif %}
             {% multiple_field_data specific_questions_by_tab|get_item:'INFORMATIONS_ADDITIONNELLES' title=_('Specific questions') %}
+
+            {% include 'admission/general_education/includes/checklist/specificites_formation_contingente.html' %}
+            {% include 'admission/general_education/includes/checklist/specificites_formation_contingente_notification_modal.html' %}
+
           </div>
 
         </div>

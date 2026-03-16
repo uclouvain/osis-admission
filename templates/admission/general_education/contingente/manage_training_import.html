@@ -1,0 +1,68 @@
+{% load bootstrap3 i18n %}
+
+{% comment "License" %}
+  * OSIS stands for Open Student Information System. It's an application
+  * designed to manage the core business of higher education institutions,
+  * such as universities, faculties, institutes and professional schools.
+  * The core business involves the administration of students, teachers,
+  * courses, programs and so on.
+  *
+  * Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
+  *
+  * This program is free software: you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+  * the Free Software Foundation, either version 3 of the License, or
+  * (at your option) any later version.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  *
+  * A copy of this license - GNU General Public License - is available
+  * at the root of the source code of this program.  If not,
+  * see http://www.gnu.org/licenses/.
+{% endcomment %}
+
+<dd>
+  <dt>{% translate "Excel import completed by the court bailiff" %}</dt>
+  <dl>
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#contingente-import-modal">{% translate "Import" %}</button>
+    {% if contingente_training.last_import_at %}
+      <p>{% blocktranslate with date=contingente_training.last_import_at|date:"SHORT_DATETIME_FORMAT" author=contingente_training.last_import_by trimmed %}
+      	Last import done the {{ date }} by {{ author }}.
+      {% endblocktranslate %}</p>
+    {% endif %}
+    {% if contingente_training_import_form.errors %}
+      {% bootstrap_form_errors form error_types='all' %}
+    {% endif %}
+  </dl>
+</dd>
+
+<div id="contingente-import-modal" class="modal fade" role="dialog" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">{% translate "Import" %}</h4>
+      </div>
+      <div class="modal-body">
+        {% if contingente_training.last_import_at %}
+          <div class="alert alert-danger">
+            {% blocktranslate with training=training academic_year=academic_year trimmed %}
+              An import was already realized for {{ training }} for the year {{ academic_year }}, a new import will overwrite the data already present. Do you confirm the overwriting of the data ?
+            {% endblocktranslate %}
+          </div>
+        {% endif %}
+        {% csrf_token %}
+        {{ contingente_training_import_form.import_file }}
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">{% trans 'Submit'%} </button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">{% trans 'Close'%} </button>
+      </div>
+    </div>
+  </div>
+</div>

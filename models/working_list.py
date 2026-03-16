@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
 )
 from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
+from admission.ddd.admission.shared_kernel.enums.liste import ContingenteFiltre
 from admission.ddd.admission.shared_kernel.enums.statut import (
     CHOIX_STATUT_TOUTE_PROPOSITION,
 )
@@ -78,6 +79,10 @@ UNCHANGED_KEY = 'INCHANGE'
 UNCHANGED_VALUE = _('INCHANGE')
 
 
+def get_admission_contingentes_default():
+    return [ContingenteFiltre.NON_CONTINGENTE.name, ContingenteFiltre.CONTINGENTE_RESIDENT.name]
+
+
 class WorkingList(CommonWorkingList):
     quarantine = models.BooleanField(null=True)
 
@@ -108,6 +113,16 @@ class WorkingList(CommonWorkingList):
         verbose_name=_('Admission education types'),
         base_field=models.CharField(
             choices=AnneeInscriptionFormationTranslator.EDUCATION_TYPES_CHOICES,
+            max_length=64,
+        ),
+        blank=True,
+    )
+
+    admission_contingentes = ArrayField(
+        default=get_admission_contingentes_default,
+        verbose_name=_('Admission limited enrolment'),
+        base_field=models.CharField(
+            choices=ContingenteFiltre.choices(),
             max_length=64,
         ),
         blank=True,

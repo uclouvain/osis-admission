@@ -35,6 +35,7 @@ from rules import predicate
 from waffle import switch_is_active
 
 from admission.auth.scope import Scope
+from admission.calendar.admission_calendar import SIGLES_WITH_QUOTA
 from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
 from admission.models import DoctorateAdmission, GeneralEducationAdmission
 from admission.models.base import BaseAdmission
@@ -45,7 +46,7 @@ from osis_role.errors import predicate_failed_msg
 @predicate(bind=True)
 @predicate_failed_msg(message=_("You must be the request author to access this admission"))
 def is_admission_request_author(self, user: User, obj: BaseAdmission):
-    return obj.candidate == user.person
+    return obj is not None and obj.candidate == user.person
 
 
 @predicate(bind=True)
@@ -153,11 +154,18 @@ def is_scoped_entity_manager(self, user: User, obj: BaseAdmission):
     """
     Check that the user is a manager of the admission training management entity with the correct scope.
     """
-    scope = {
-        CONTEXT_GENERAL: Scope.GENERAL,
-        CONTEXT_DOCTORATE: Scope.DOCTORAT,
-        CONTEXT_CONTINUING: Scope.IUFC,
-    }[obj.admission_context]
+    if (
+        obj.admission_context == CONTEXT_GENERAL
+        and obj.training.acronym in SIGLES_WITH_QUOTA
+        and obj.generaleducationadmission.is_non_resident
+    ):
+        scope = Scope.CONTINGENTE_NON_RESIDENT
+    else:
+        scope = {
+            CONTEXT_GENERAL: Scope.GENERAL,
+            CONTEXT_DOCTORATE: Scope.DOCTORAT,
+            CONTEXT_CONTINUING: Scope.IUFC,
+        }[obj.admission_context]
 
     cache_key = _build_queryset_cache_key_from_role_qs(self.context['role_qs'], f'entities_ids_by_scope_{scope.name}')
 

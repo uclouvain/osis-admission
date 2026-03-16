@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -381,4 +381,57 @@ class InformationsEquivalenceNonSpecifieesChecklistException(BusinessException):
 
     def __init__(self, **kwargs):
         message = _('The "Sufficient" status requires the equivalence information to be specified.')
+        super().__init__(message, **kwargs)
+
+
+class UneSeuleFormationContingentePossible(BusinessException):
+    status_code = "FORMATION-GENERALE-42"
+
+    def __init__(self, **kwargs):
+        message = _(
+            'Non-resident applicants may submit only one application among the limited enrollment courses. '
+            'Any duplicate application will result in all applications being rejected.'
+        )
+        super().__init__(message, **kwargs)
+
+
+class PropositionNonEnCoursException(BusinessException):
+    status_code = "FORMATION-GENERALE-43"
+
+    def __init__(self, **kwargs):
+        message = _('The proposition is not in progress.')
+        super().__init__(message, **kwargs)
+
+
+class RefusDossierIncompletSansDocumentException(BusinessException):
+    status_code = "FORMATION-GENERALE-44"
+
+    def __init__(self, **kwargs):
+        message = _('There need to be at least one document with the request status to "Immediately".')
+        super().__init__(message, **kwargs)
+
+
+class RefusNonFinancableSansRegleException(BusinessException):
+    status_code = "FORMATION-GENERALE-45"
+
+    def __init__(self, **kwargs):
+        message = _('A non-financability rule must be selected.')
+        super().__init__(message, **kwargs)
+
+
+class RefusDocumentsManquantsSansDocumentsDemandesException(BusinessException):
+    status_code = "FORMATION-GENERALE-46"
+
+    def __init__(self, **kwargs):
+        message = _('No documents are requested.')
+        super().__init__(message, **kwargs)
+
+
+class AdmissionContingenteNotificationStatusDecisionSicInvalideException(BusinessException):
+    status_code = "FORMATION-GENERALE-47"
+
+    def __init__(self, **kwargs):
+        message = _(
+            'To send the acceptance notification, the SIC decision must be in one of the following status: To be processed, Manager follow-up, Dispensation needed or Approval to validate'
+        )
         super().__init__(message, **kwargs)

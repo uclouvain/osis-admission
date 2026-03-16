@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -39,10 +39,10 @@
 
 {% block content %}
   <h1>{% translate 'Initialization of the predefined specific questions for an academic year' %}</h1>
-  <form method="post" action="">
+  `<form method="post" action="">
     {% csrf_token %}
     {% bootstrap_form form %}
     <input type="submit" value="{% translate 'Launch' %}">
     <a href="{% url 'admin:admission_admissionformitem_changelist' %}" class="button cancel-link">{% translate "Cancel" %}</a>
-  </form>
+  </form>`
 {% endblock %}

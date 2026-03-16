@@ -40,26 +40,62 @@ from osis_mail_template.utils import transform_html_to_text
 from osis_notification.contrib.handlers import EmailNotificationHandler
 from osis_notification.contrib.notification import EmailNotification
 
+from admission.calendar.admission_calendar import SIGLES_WITH_QUOTA
 from admission.ddd import MAIL_INSCRIPTION_DEFAUT, MAIL_VERIFICATEUR_CURSUS
+from admission.ddd.admission.formation_generale.domain.model.contingente import (
+    PropositionContingenteResume,
+)
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
     ChoixStatutPropositionGenerale,
 )
-from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
-from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    Proposition, PropositionIdentity,
+)
+from admission.ddd.admission.formation_generale.domain.service.i_notification import (
+    INotification,
+)
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
-from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import EmplacementDocument
-from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import IMatriculeEtudiantService
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import InformationsDestinatairePasTrouvee
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import StatutEmplacementDocument
+from admission.ddd.admission.formation_generale.dtos.contingente import (
+    AdmissionContingenteNonResidenteNotificationDTO,
+)
+from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import (
+    EmplacementDocument,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import (
+    IMatriculeEtudiantService,
+)
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
+    InformationsDestinatairePasTrouvee,
+)
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
+    EmplacementDocumentDTO,
+)
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
+    StatutEmplacementDocument,
+)
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.shared_kernel.repository.i_email_destinataire import (
     IEmailDestinataireRepository,
 )
-from admission.infrastructure.admission.formation_generale.domain.service.formation import FormationGeneraleTranslator
+from admission.infrastructure.admission.formation_generale.domain.service.formation import (
+    FormationGeneraleTranslator,
+)
+from admission.infrastructure.admission.formation_generale.domain.service.pdf_generation import (
+    PDFGeneration,
+)
+from admission.infrastructure.admission.formation_generale.repository.proposition import (
+    PropositionRepository,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import (
+    ProfilCandidatTranslator,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.unites_enseignement_translator import (
+    UnitesEnseignementTranslator,
+)
 from admission.infrastructure.utils import get_requested_documents_html_lists
 from admission.mail_templates import (
+    ADMISSION_EMAIL_CONTINGENTE_CONFIRMATION,
     ADMISSION_EMAIL_REQUEST_APPLICATION_FEES_GENERAL,
     ADMISSION_EMAIL_SEND_TO_FAC_AT_FAC_DECISION_GENERAL,
     ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_GENERAL,
@@ -72,7 +108,9 @@ from admission.mail_templates.checklist import (
     EMAIL_TEMPLATE_ENROLLMENT_AUTHORIZATION_DOCUMENT_URL_TOKEN,
     EMAIL_TEMPLATE_VISA_APPLICATION_DOCUMENT_URL_TOKEN,
 )
-from admission.mail_templates.submission import ADMISSION_EMAIL_CONFIRM_SUBMISSION_GENERAL
+from admission.mail_templates.submission import (
+    ADMISSION_EMAIL_CONFIRM_SUBMISSION_GENERAL,
+)
 from admission.models import AdmissionTask, GeneralEducationAdmission
 from admission.models.base import BaseAdmission
 from admission.utils import (
@@ -83,7 +121,9 @@ from admission.utils import (
 )
 from base.models.person import Person
 from base.utils.utils import format_academic_year
-from ddd.logic.gestion_des_comptes.domain.validator.exceptions import MatriculeEtudiantIntrouvableException
+from ddd.logic.gestion_des_comptes.domain.validator.exceptions import (
+    MatriculeEtudiantIntrouvableException,
+)
 
 ONE_YEAR_SECONDS = 366 * 24 * 60 * 60
 MOIS_DEBUT_TRAITEMENT_INSCRIPTION = 7
@@ -115,14 +155,39 @@ class Notification(INotification):
         }
 
     @classmethod
+    def _confirmer_soumission_contingente(cls, proposition: Proposition, admission: GeneralEducationAdmission):
+        PDFGeneration.generer_accuse_de_reception_contingente(
+            PropositionRepository(), ProfilCandidatTranslator(), UnitesEnseignementTranslator(), proposition
+        )
+        admission.quota_admission_receipt = proposition.accuse_de_reception_contingente
+        admission.save(update_fields=['quota_admission_receipt'])
+
+        common_tokens = cls.get_common_tokens(proposition, admission.candidate)
+        common_tokens['ares_application_number'] = proposition.numero_dossier_ares
+        common_tokens['receipt_document_link'] = get_file_url(
+            get_remote_token(
+                admission.quota_admission_receipt[0],
+                custom_ttl=ONE_YEAR_SECONDS,
+                wanted_post_process=PostProcessingWanted.ORIGINAL.name,
+            )
+        )
+        email_message = generate_email(
+            ADMISSION_EMAIL_CONTINGENTE_CONFIRMATION,
+            settings.LANGUAGE_CODE_FR,
+            common_tokens,
+            recipients=[admission.candidate.private_email],
+        )
+        EmailNotificationHandler.create(email_message, person=admission.candidate)
+
+    @classmethod
     def confirmer_soumission(cls, proposition: Proposition) -> None:
         # The candidate will be notified only when the proposition is confirmed
         if proposition.statut != ChoixStatutPropositionGenerale.CONFIRMEE:
             return
 
         admission = (
-            BaseAdmission.objects.with_training_management_and_reference()
-            .select_related('candidate')
+            GeneralEducationAdmission.objects.with_training_management_and_reference()
+            .select_related('candidate', 'training')
             .get(uuid=proposition.entity_id.uuid)
         )
 
@@ -149,6 +214,11 @@ class Notification(INotification):
             admission=admission,
             type=AdmissionTask.TaskType.GENERAL_MERGE.name,
         )
+
+        # There is a special mail for training with quota
+        if admission.is_non_resident and admission.training.acronym in SIGLES_WITH_QUOTA:
+            cls._confirmer_soumission_contingente(proposition, admission)
+            return
 
         # Notifier le candidat via mail
         with translation.override(admission.candidate.language):
@@ -322,9 +392,11 @@ class Notification(INotification):
             'candidate_first_name': proposition.prenom_candidat,
             'candidate_last_name': proposition.nom_candidat,
             'salutation': get_salutation_prefix(person=admission.candidate),
-            'training_title': admission.training.title
-            if admission.candidate.language == settings.LANGUAGE_CODE_FR
-            else admission.training.title_english,
+            'training_title': (
+                admission.training.title
+                if admission.candidate.language == settings.LANGUAGE_CODE_FR
+                else admission.training.title_english
+            ),
             'training_acronym': proposition.formation.sigle,
             'training_campus': proposition.formation.campus,
             'requested_submitted_documents': html_list_by_status[StatutEmplacementDocument.COMPLETE_APRES_RECLAMATION],
@@ -337,9 +409,11 @@ class Notification(INotification):
         }
 
         email_message = generate_email(
-            ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_GENERAL
-            if html_list_by_status[StatutEmplacementDocument.A_RECLAMER]
-            else ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_GENERAL,
+            (
+                ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_AND_NOT_SUBMITTED_GENERAL
+                if html_list_by_status[StatutEmplacementDocument.A_RECLAMER]
+                else ADMISSION_EMAIL_SUBMISSION_CONFIRM_WITH_SUBMITTED_GENERAL
+            ),
             admission.candidate.language,
             tokens,
             recipients=[admission.candidate.private_email],
@@ -562,6 +636,27 @@ class Notification(INotification):
     def notifier_candidat_derogation_financabilite(
         cls,
         proposition: Proposition,
+        objet_message: str,
+        corps_message: str,
+    ) -> EmailMessage:
+        candidate = Person.objects.get(global_id=proposition.matricule_candidat)
+
+        email_notification = EmailNotification(
+            recipient=candidate.private_email,
+            subject=objet_message,
+            html_content=corps_message,
+            plain_text_content=transform_html_to_text(corps_message),
+        )
+
+        candidate_email_message = EmailNotificationHandler.build(email_notification)
+        EmailNotificationHandler.create(candidate_email_message, person=candidate)
+
+        return candidate_email_message
+
+    @classmethod
+    def notifier_candidat_contingente_acceptation(
+        cls,
+        proposition: PropositionContingenteResume,
         objet_message: str,
         corps_message: str,
     ) -> EmailMessage:

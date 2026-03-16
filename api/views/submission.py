@@ -215,6 +215,8 @@ class SubmitGeneralEducationPropositionView(
             )
             data['pool_start_date'] = period.start_date
             data['pool_end_date'] = period.end_date
+            data['pool_start_time'] = period.start_time
+            data['pool_end_time'] = period.end_time
 
         self.add_access_conditions_url(data)
         if not data['errors']:
