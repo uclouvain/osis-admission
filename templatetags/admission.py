@@ -429,6 +429,35 @@ def document_component(document_write_token, document_metadata, can_edit=True):
     }
 
 
+@register.inclusion_tag('admission/dummy.html')
+def document_epc_component(document_metadata):
+    """Display the right editor component depending on the file type."""
+    if document_metadata:
+        if document_metadata.get('mimetype') == PDF_MIME_TYPE:
+            return {
+                'template': 'osis_document_components/editor.html',
+                'attrs': {
+                    'pagination': True,
+                    'zoom': True,
+                    'rotation': True,
+                    'comment': False,
+                    'highlight': False,
+                    'save': False,
+                    'get-file-url': document_metadata.get('url'),
+                },
+            }
+        elif document_metadata.get('mimetype') in IMAGE_MIME_TYPES:
+            return {
+                'template': 'admission/image.html',
+                'url': document_metadata.get('url'),
+                'alt': document_metadata.get('name'),
+            }
+    return {
+        'template': 'admission/no_document.html',
+        'message': _('No document'),
+    }
+
+
 @register.filter
 def phone_spaced(phone, with_optional_zero=False):
     if not phone:
