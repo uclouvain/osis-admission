@@ -5094,6 +5094,13 @@ msgid "Please note that the first term begins on %(date)s."
 msgstr ""
 
 msgid ""
+"Please note that these amounts are currently the subject of a draft decree "
+"under which the Wallonia-Brussels Federation is considering increasing them "
+"(see: <a href=\"https://www.uclouvain.be/en/enrolment/registration-fee-"
+"amount\" target=\"_blank\">The amount of tuition fees</a>)."
+msgstr ""
+
+msgid ""
 "Please note that this document will be removed from the list of the missing "
 "documents."
 msgstr ""
@@ -6985,11 +6992,6 @@ msgid "This activity will be refused"
 msgstr ""
 
 msgid "This activity will be restored"
-msgstr ""
-
-msgid ""
-"This amount is subject to change pending the adoption and publication of the "
-"decree setting it."
 msgstr ""
 
 msgid ""

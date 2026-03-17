@@ -17,7 +17,7 @@ def _set_tuition_fees_amount(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0287_merge_20260304_1039'),
+        ('admission', '0285_alter_doctorateadmission_financability_computed_rule_situation_and_more'),
     ]
 
     operations = [
