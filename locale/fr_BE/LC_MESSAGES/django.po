@@ -2090,7 +2090,7 @@ msgid "DISPENSE_VCRC"
 msgstr "Dispense VCRC"
 
 msgid "DROITS_MAJORES"
-msgstr "Droits majorés"
+msgstr "5369 € - Droits majorés"
 
 msgid "DROITS_MAJORES_DEMANDES"
 msgstr "Droits majorés demandés"
