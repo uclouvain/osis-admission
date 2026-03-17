@@ -468,6 +468,7 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
                 ),
             )).values(
             'uuid',
+            'determined_academic_year__year',
             'training_acronym',
             'training_full_title',
             'formatted_reference',
@@ -488,8 +489,7 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
         rows_by_year = defaultdict(list)
         for row in qs:
             row = dict(row)
-            submitted_at = row.get('submitted_at')
-            year = submitted_at.year if submitted_at else None
+            year = row['determined_academic_year__year']
             admission_type = row.get('admission_type', '')
             status_val = row.get('status', '')
             enum_cls = _status_enums.get(admission_type)
