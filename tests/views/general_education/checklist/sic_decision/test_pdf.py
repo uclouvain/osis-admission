@@ -32,16 +32,16 @@ from django.test import TestCase
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
     ENTITY_CDE,
 )
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
+    DispenseOuDroitsMajores,
+    DroitsInscriptionMontant,
+)
 from admission.ddd.admission.shared_kernel.domain.enums import TypeFormation
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     DocumentsCurriculum,
     DocumentsIdentification,
     StatutReclamationEmplacementDocument,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
-    DispenseOuDroitsMajores,
-    DroitsInscriptionMontant,
 )
 from admission.models import GeneralEducationAdmission
 from admission.tests.factories.curriculum import (
@@ -102,7 +102,7 @@ class SicDecisionPdfPreviewViewTestCase(SicPatchMixin, TestCase):
             annual_program_contact_person_name='foo',
             annual_program_contact_person_email='bar@example.org',
             with_additional_approval_conditions=False,
-            tuition_fees_amount=DroitsInscriptionMontant.INSCRIPTION_REGULIERE.name,
+            tuition_fees_amount=DroitsInscriptionMontant.INSCRIPTION_REGULIERE_835.name,
             tuition_fees_dispensation=DispenseOuDroitsMajores.NON_CONCERNE.name,
             must_report_to_sic=False,
             communication_to_the_candidate='',

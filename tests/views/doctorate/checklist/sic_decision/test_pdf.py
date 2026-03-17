@@ -100,7 +100,7 @@ class SicDecisionPdfPreviewViewTestCase(SicPatchMixin, TestCase):
             with_prerequisite_courses=False,
             annual_program_contact_person_name='foo',
             annual_program_contact_person_email='bar@example.org',
-            tuition_fees_amount=DroitsInscriptionMontant.INSCRIPTION_REGULIERE.name,
+            tuition_fees_amount=DroitsInscriptionMontant.INSCRIPTION_REGULIERE_835.name,
             tuition_fees_dispensation=DispenseOuDroitsMajores.NON_CONCERNE.name,
             must_report_to_sic=False,
             communication_to_the_candidate='',
