@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,37 +29,20 @@ from typing import Dict, List, Optional
 from django.conf import settings
 from django.utils.translation import get_language
 
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
-    DoctoratFormation,
-)
-from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import (
-    IDoctoratTranslator,
-)
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
-    DoctoratNonTrouveException,
-)
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import DoctoratFormation
+from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import DoctoratNonTrouveException
 from admission.ddd.admission.doctorat.preparation.dtos import DoctoratFormationDTO
-from admission.ddd.admission.shared_kernel.domain.model.formation import (
-    FormationIdentity,
-)
+from admission.ddd.admission.shared_kernel.domain.model.formation import FormationIdentity
 from admission.ddd.admission.shared_kernel.dtos.campus import CampusDTO
 from base.models.enums.active_status import ActiveStatusEnum
 from base.models.enums.education_group_types import TrainingType
-from ddd.logic.formation_catalogue.commands import (
-    RecupererFormationQuery,
-    SearchFormationsCommand,
-)
-from ddd.logic.formation_catalogue.domain.validators.exceptions import (
-    TrainingNotFoundException,
-)
+from ddd.logic.formation_catalogue.commands import RecupererFormationQuery, SearchFormationsCommand
+from ddd.logic.formation_catalogue.domain.validators.exceptions import TrainingNotFoundException
 from ddd.logic.formation_catalogue.dtos.training import TrainingDto
-from ddd.logic.learning_unit.domain.model.responsible_entity import (
-    UCLEntityIdentity,  # FIXME reuse from shared_kernel
-)
+from ddd.logic.learning_unit.domain.model.responsible_entity import UCLEntityIdentity  # FIXME reuse from shared_kernel
 from ddd.logic.shared_kernel.academic_year.commands import SearchAcademicYearCommand
-from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
-    AcademicYear,
-)
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear
 from ddd.logic.shared_kernel.campus.commands import SearchUclouvainCampusesQuery
 from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
 
@@ -203,7 +186,7 @@ class DoctoratTranslator(IDoctoratTranslator):
                 est_inscriptible=True,
                 uclouvain_est_institution_reference=True,
                 inscription_web=True,
-                statut=ActiveStatusEnum.ACTIVE.name,
+                statuts=[ActiveStatusEnum.ACTIVE.name],
             )
         )
 
@@ -249,7 +232,7 @@ class DoctoratTranslator(IDoctoratTranslator):
                 est_inscriptible=True,
                 uclouvain_est_institution_reference=True,
                 inscription_web=True,
-                statut=ActiveStatusEnum.ACTIVE.name,
+                statuts=[ActiveStatusEnum.ACTIVE.name],
             )
         )
         return bool(dtos)
