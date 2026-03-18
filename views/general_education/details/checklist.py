@@ -31,7 +31,7 @@ from typing import Dict, List, Optional, Set, Type, Union
 import attr
 from django.conf import settings
 from django.db.models import Q, QuerySet, ExpressionWrapper, BooleanField, Case, When, F, Value, CharField, Subquery, \
-    OuterRef
+    OuterRef, IntegerField
 from django.db.models.functions import Concat
 from django.forms import Form
 from django.forms.formsets import formset_factory
@@ -56,14 +56,16 @@ from osis_mail_template.models import MailTemplate
 
 from admission.constants import COMMENT_TAG_FAC, COMMENT_TAG_SIC
 from admission.ddd import MAIL_VERIFICATEUR_CURSUS, MONTANT_FRAIS_DOSSIER
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale, \
+    STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AnneesCurriculumNonSpecifieesException,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     message_candidat_avec_pae_avant_2015,
 )
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue, \
+    STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE
 from admission.ddd.admission.formation_generale.commands import (
     ApprouverAdmissionParSicCommand,
     ApprouverInscriptionParSicCommand,
@@ -120,7 +122,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     DerogationFinancement,
     OngletsChecklist,
     PoursuiteDeCycle,
-    TypeDeRefus, STATUTS_PROPOSITION_GENERALE_NON_SOUMISE_OU_FRAIS_DOSSIER_EN_ATTENTE,
+    TypeDeRefus, STATUTS_PROPOSITION_GENERALE_NON_SOUMISE,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
@@ -246,6 +248,7 @@ from admission.views.common.mixins import (
 )
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
+from base.models.enums.academic_type import AcademicTypes
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
@@ -397,16 +400,17 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
         ]
 
     @cached_property
-    def dossiers_admission_par_annee(self) -> defaultdict[int, list]:
+    def dossiers_admission_annee(self) -> defaultdict[int, list]:
         qs = (
             BaseAdmission.objects
             .filter(
                 candidate=self.admission.candidate,
+                determined_academic_year=self.admission.determined_academic_year,
             )
             .exclude(
-                Q(generaleducationadmission__status__in=STATUTS_PROPOSITION_GENERALE_NON_SOUMISE_OU_FRAIS_DOSSIER_EN_ATTENTE)
-                | Q(continuingeducationadmission__status__in=STATUTS_PROPOSITION_GENERALE_NON_SOUMISE_OU_FRAIS_DOSSIER_EN_ATTENTE)
-                | Q(doctorateadmission__status__in=STATUTS_PROPOSITION_GENERALE_NON_SOUMISE_OU_FRAIS_DOSSIER_EN_ATTENTE)
+                Q(generaleducationadmission__status__in=STATUTS_PROPOSITION_GENERALE_NON_SOUMISE)
+                | Q(continuingeducationadmission__status__in=STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE)
+                | Q(doctorateadmission__status__in=STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE)
             )
             .annotate_training_management_entity()
             .annotate_training_management_faculty()
@@ -466,6 +470,21 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
                         admission_uuid=OuterRef('uuid'),
                     ).values('date_inscription')[:1]
                 ),
+                currently_viewed_admission_sort_order=Case(
+                    When(uuid=self.admission.uuid, then=Value(0)),
+                    default=Value(1),
+                    output_field=IntegerField(),
+                ),
+                academic_type_order=Case(
+                    When(
+                        training__academic_type__in=[
+                            AcademicTypes.ACADEMIC.name,
+                            AcademicTypes.NON_ACADEMIC_CREF.name
+                        ], then=Value(0)
+                    ),
+                    default=Value(1),
+                    output_field=IntegerField(),
+                )
             )).values(
             'uuid',
             'determined_academic_year__year',
@@ -478,7 +497,9 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
             'admission_type',
             'epc_inscription_status',
             'epc_inscription_date',
-        ).order_by('submitted_at', 'training__acronym')
+            'currently_viewed_admission_sort_order',
+            'academic_type_order',
+        ).order_by('currently_viewed_admission_sort_order', 'academic_type_order', 'submitted_at', 'training__acronym')
 
         _status_enums = {
             'generale': ChoixStatutPropositionGenerale,
@@ -701,7 +722,7 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
             == ChoixStatutChecklist.GEST_REUSSITE.name
         )
         context['bg_classes'] = {}
-        context['dossiers_admission_par_annee'] = self.dossiers_admission_par_annee
+        context['dossiers_admission_annee'] = self.dossiers_admission_annee
         context.update(**{
             'statuts_epc_autorises': self._get_statuts_epc_autorises(),
             'statuts_epc_refuses': self._get_statuts_epc_refuses(),

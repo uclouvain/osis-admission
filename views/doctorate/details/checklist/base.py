@@ -25,11 +25,14 @@
 # ##############################################################################
 import datetime
 import itertools
+from collections import defaultdict
 from typing import Dict, List, Set
 
 import attr
 from django.conf import settings
-from django.db.models import Q
+from django.db.models import Q, ExpressionWrapper, BooleanField, Case, When, F, Value, CharField, Subquery, OuterRef, \
+    IntegerField
+from django.db.models.functions import Concat
 from django.shortcuts import resolve_url
 from django.template.defaultfilters import truncatechars
 from django.utils.functional import cached_property
@@ -38,12 +41,18 @@ from django.views.generic import FormView, TemplateView
 from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
 
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE, \
+    ChoixStatutPropositionDoctorale
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     OngletsChecklist,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     message_candidat_avec_pae_avant_2015,
 )
+from admission.ddd.admission.formation_continue.domain.model.enums import STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE, \
+    ChoixStatutPropositionContinue
+from admission.ddd.admission.formation_generale.domain.model.enums import STATUTS_PROPOSITION_GENERALE_NON_SOUMISE, \
+    PoursuiteDeCycle, ChoixStatutPropositionGenerale
 from admission.ddd.admission.shared_kernel.commands import (
     RechercherParcoursAnterieurQuery,
 )
@@ -71,6 +80,7 @@ from admission.mail_templates import (
     ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CANDIDATE_DOCTORATE,
     ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS_DOCTORATE,
 )
+from admission.models.base import BaseAdmission
 from admission.models.epc_injection import (
     EPCInjection,
     EPCInjectionStatus,
@@ -105,6 +115,8 @@ from admission.views.doctorate.details.checklist.projet_recherche import (
     ProjetRechercheContextMixin,
 )
 from admission.views.doctorate.details.checklist.sic_decision import SicDecisionMixin
+from base.models.enums.academic_type import AcademicTypes
+from base.models.enums.education_group_types import TrainingType
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
@@ -112,6 +124,8 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
 from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
     ExperienceParcoursInterneDTO,
 )
+from epc.models.enums.etat_inscription import EtatInscriptionFormation
+from epc.models.inscription_programme_annuel import InscriptionProgrammeAnnuel
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile.models.enums.experience_validation import EtatAuthentificationParcours
 from osis_profile.utils.curriculum import ElementCurriculumDTO, groupe_curriculum_par_annee_decroissante
@@ -231,6 +245,221 @@ class ChecklistView(
             ],
             type=EPCInjectionType.SIGNALETIQUE.name,
         ).first()
+
+
+    @cached_property
+    def dossiers_admission_annee(self) -> defaultdict[int, list]:
+        qs = (
+            BaseAdmission.objects
+            .filter(
+                candidate=self.admission.candidate,
+                determined_academic_year=self.admission.determined_academic_year,
+            )
+            .exclude(
+                Q(generaleducationadmission__status__in=STATUTS_PROPOSITION_GENERALE_NON_SOUMISE)
+                | Q(continuingeducationadmission__status__in=STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE)
+                | Q(doctorateadmission__status__in=STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE)
+            )
+            .annotate_training_management_entity()
+            .annotate_training_management_faculty()
+            .annotate_with_reference()
+            .annotate(
+                est_premiere_annee_bachelier=ExpressionWrapper(
+                    Q(training__education_group_type__name=TrainingType.BACHELOR.name)
+                    & ~Q(generaleducationadmission__cycle_pursuit=PoursuiteDeCycle.YES.name),
+                    output_field=BooleanField(),
+                ),
+            )
+            .annotate(
+                training_acronym=Case(
+                    When(
+                        est_premiere_annee_bachelier=True,
+                        then=Concat(
+                            F("training__acronym"),
+                            Value("-1"),
+                        ),
+                    ),
+                    default=F("training__acronym"),
+                    output_field=CharField(),
+                ),
+                training_full_title=F('training__title'),
+                status=Case(
+                    When(
+                        generaleducationadmission__isnull=False,
+                        then=F('generaleducationadmission__status'),
+                    ),
+                    When(
+                        doctorateadmission__isnull=False,
+                        then=F('doctorateadmission__status'),
+                    ),
+                    When(
+                        continuingeducationadmission__isnull=False,
+                        then=F('continuingeducationadmission__status'),
+                    ),
+                    default=Value(''),
+                    output_field=CharField(),
+                ),
+                # pas sûr pour ceci (raccourci trop simple pour déterminer la dernière modification de l'état)
+                status_date=F('modified_at'),
+                admission_type=Case(
+                    When(generaleducationadmission__isnull=False, then=Value('generale')),
+                    When(doctorateadmission__isnull=False, then=Value('doctorat')),
+                    When(continuingeducationadmission__isnull=False, then=Value('continue')),
+                    default=Value(''),
+                    output_field=CharField(),
+                ),
+                epc_inscription_status=Subquery(
+                    InscriptionProgrammeAnnuel.objects.filter(
+                        admission_uuid=OuterRef('uuid'),
+                    ).values('etat_inscription')[:1]
+                ),
+                epc_inscription_date=Subquery(
+                    InscriptionProgrammeAnnuel.objects.filter(
+                        admission_uuid=OuterRef('uuid'),
+                    ).values('date_inscription')[:1]
+                ),
+                currently_viewed_admission_sort_order=Case(
+                    When(uuid=self.admission.uuid, then=Value(0)),
+                    default=Value(1),
+                    output_field=IntegerField(),
+                ),
+                academic_type_order=Case(
+                    When(
+                        training__academic_type__in=[
+                            AcademicTypes.ACADEMIC.name,
+                            AcademicTypes.NON_ACADEMIC_CREF.name
+                        ], then=Value(0)
+                    ),
+                    default=Value(1),
+                    output_field=IntegerField(),
+                )
+            )).values(
+            'uuid',
+            'determined_academic_year__year',
+            'training_acronym',
+            'training_full_title',
+            'formatted_reference',
+            'submitted_at',
+            'status',
+            'status_date',
+            'admission_type',
+            'epc_inscription_status',
+            'epc_inscription_date',
+            'currently_viewed_admission_sort_order',
+            'academic_type_order',
+        ).order_by('currently_viewed_admission_sort_order', 'academic_type_order', 'submitted_at', 'training__acronym')
+
+        _status_enums = {
+            'generale': ChoixStatutPropositionGenerale,
+            'doctorat': ChoixStatutPropositionDoctorale,
+            'continue': ChoixStatutPropositionContinue,
+        }
+
+        rows_by_year = defaultdict(list)
+        for row in qs:
+            row = dict(row)
+            year = row['determined_academic_year__year']
+            admission_type = row.get('admission_type', '')
+            status_val = row.get('status', '')
+            enum_cls = _status_enums.get(admission_type)
+            if enum_cls and status_val:
+                try:
+                    row['status_display'] = enum_cls.get_value(status_val)
+                except Exception:
+                    row['status_display'] = status_val
+            else:
+                row['status_display'] = status_val
+
+            epc_status = row.get('epc_inscription_status', '')
+            if epc_status:
+                try:
+                    row['epc_status_display'] = EtatInscriptionFormation.get_value(epc_status)
+                except Exception:
+                    row['epc_status_display'] = epc_status
+            else:
+                row['epc_status_display'] = ''
+
+            rows_by_year[year].append(row)
+        return dict(rows_by_year)
+
+    def _get_statuts_epc_autorises(self) -> list[str]:
+        return [
+            EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+            EtatInscriptionFormation.PROVISOIRE.name
+        ]
+
+    def _get_statuts_epc_refuses(self) -> list[str]:
+        return [
+            EtatInscriptionFormation.CESSATION.name,
+            EtatInscriptionFormation.EXCLUSION.name,
+            EtatInscriptionFormation.DECES.name,
+            # ajouter CESSATION FORCEE
+            EtatInscriptionFormation.REFUS.name
+        ]
+
+    def _get_statuts_epc_en_cours(self) -> list[str]:
+        return [
+            EtatInscriptionFormation.EN_DEMANDE.name,
+            EtatInscriptionFormation.DEMANDE_INCOMPLETE.name,
+            # verifier si correspond à demande en ligne
+            EtatInscriptionFormation.DEMANDE_INSCRIPTION.name,
+            EtatInscriptionFormation.REINSCRIPTION_WEB.name
+        ]
+
+    def _get_statuts_epc_erreur(self) -> list[str]:
+        return [
+            EtatInscriptionFormation.ERREUR.name,
+            EtatInscriptionFormation.ANNULATION_IP.name,
+            EtatInscriptionFormation.ANNULATION_ETD.name,
+            # specifier tout autre relicat EPC
+        ]
+
+    def _get_statuts_osis_autorises(self) -> list[str]:
+        return [
+            ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name,
+            ChoixStatutPropositionContinue.INSCRIPTION_AUTORISEE.name,
+            ChoixStatutPropositionDoctorale.INSCRIPTION_AUTORISEE.name,
+        ]
+
+    def _get_statuts_osis_refuses(self) -> list[str]:
+        return [
+            ChoixStatutPropositionGenerale.INSCRIPTION_REFUSEE.name,
+            ChoixStatutPropositionContinue.INSCRIPTION_REFUSEE.name,
+            ChoixStatutPropositionDoctorale.INSCRIPTION_REFUSEE.name,
+        ]
+
+    def _get_statuts_osis_en_cours(self) -> list[str]:
+        return [
+            ChoixStatutPropositionGenerale.CONFIRMEE.name,
+            ChoixStatutPropositionContinue.CONFIRMEE.name,
+            ChoixStatutPropositionDoctorale.CONFIRMEE.name,
+            ChoixStatutPropositionGenerale.A_COMPLETER_POUR_SIC.name,
+            ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_SIC.name,
+            ChoixStatutPropositionGenerale.A_COMPLETER_POUR_FAC.name,
+            ChoixStatutPropositionContinue.A_COMPLETER_POUR_FAC.name,
+            ChoixStatutPropositionDoctorale.A_COMPLETER_POUR_FAC.name,
+            ChoixStatutPropositionGenerale.COMPLETEE_POUR_FAC.name,
+            ChoixStatutPropositionContinue.COMPLETEE_POUR_FAC.name,
+            ChoixStatutPropositionDoctorale.COMPLETEE_POUR_FAC.name,
+            ChoixStatutPropositionGenerale.COMPLETEE_POUR_SIC.name,
+            ChoixStatutPropositionDoctorale.COMPLETEE_POUR_SIC.name,
+            ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name,
+            ChoixStatutPropositionDoctorale.TRAITEMENT_FAC.name,
+            ChoixStatutPropositionGenerale.RETOUR_DE_FAC.name,
+            ChoixStatutPropositionDoctorale.RETOUR_DE_FAC.name,
+            ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION.name,
+            ChoixStatutPropositionDoctorale.ATTENTE_VALIDATION_DIRECTION.name,
+            # vérifier Mise en attente et CA à compléter
+        ]
+
+    def _get_statuts_osis_erreur(self) -> list[str]:
+        return [
+            ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name,
+            ChoixStatutPropositionGenerale.CLOTUREE.name,
+            ChoixStatutPropositionContinue.CLOTUREE.name,
+            ChoixStatutPropositionDoctorale.CLOTUREE.name,
+        ]
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -543,6 +772,19 @@ class ChecklistView(
             )
             if self.proposition_fusion:
                 context['proposition_fusion'] = self.proposition_fusion
+
+
+        context['dossiers_admission_annee'] = self.dossiers_admission_annee
+        context.update(**{
+            'statuts_epc_autorises': self._get_statuts_epc_autorises(),
+            'statuts_epc_refuses': self._get_statuts_epc_refuses(),
+            'statuts_epc_en_cours': self._get_statuts_epc_en_cours(),
+            'statuts_epc_erreur': self._get_statuts_epc_erreur(),
+            'statuts_osis_autorises': self._get_statuts_osis_autorises(),
+            'statuts_osis_refuses': self._get_statuts_osis_refuses(),
+            'statuts_osis_en_cours': self._get_statuts_osis_en_cours(),
+            'statuts_osis_erreur': self._get_statuts_osis_erreur(),
+        })
 
         context['injection_signaletique'] = self.injection_signaletique
         return context
