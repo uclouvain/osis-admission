@@ -277,7 +277,9 @@
         The university tuition fee is EURO {{ montant }}.
       {% endblocktrans %}
       {% if montant > 0 %}
-        {% translate 'This amount is subject to change pending the adoption and publication of the decree setting it.' %}
+          {% blocktrans trimmed %}
+            Please note that these amounts are currently the subject of a draft decree under which the Wallonia-Brussels Federation is considering increasing them (see: <a href="https://www.uclouvain.be/en/enrolment/registration-fee-amount" target="_blank">The amount of tuition fees</a>).
+        {% endblocktrans %}
       {% endif %}
       {% if not est_doctorat and montant >= 50 %}
         {% blocktrans with start_year=proposition.formation.annee end_year=proposition.formation.annee|add:1 trimmed %}

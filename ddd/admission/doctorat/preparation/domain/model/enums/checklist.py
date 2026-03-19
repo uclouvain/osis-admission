@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,8 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.utils.translation import gettext_lazy as _
-from django.utils.translation import pgettext_lazy
+from django.utils.translation import gettext_lazy as _, pgettext_lazy
 
 from base.models.utils.utils import ChoiceEnum
 
@@ -63,7 +62,9 @@ class BesoinDeDerogation(ChoiceEnum):
 
 class DroitsInscriptionMontant(ChoiceEnum):
     INSCRIPTION_AU_ROLE = _("INSCRIPTION_AU_ROLE")
-    INSCRIPTION_REGULIERE = _("INSCRIPTION_REGULIERE")
+    INSCRIPTION_REGULIERE_1194 = _("INSCRIPTION_REGULIERE_1194")
+    INSCRIPTION_REGULIERE_835 = _("INSCRIPTION_REGULIERE_835")
+    DROITS_MAJORES = _("DROITS_MAJORES")
     NOUVEAUX_DROITS_MAJORES = _("NOUVEAUX_DROITS_MAJORES")
     ANCIENS_DROITS_MAJORES_2505 = _("ANCIENS_DROITS_MAJORES_2505")
     ANCIENS_DROITS_MAJORES_4175 = _("ANCIENS_DROITS_MAJORES_4175")
@@ -71,6 +72,7 @@ class DroitsInscriptionMontant(ChoiceEnum):
     MASTER_DE_SPECIALISATION_SANTE = _("MASTER_DE_SPECIALISATION_SANTE")
     CERTIFICAT_60_CREDITS = _("CERTIFICAT_60_CREDITS")
     PAS_DE_DROITS_D_INSCRIPTION = _("PAS_DE_DROITS_D_INSCRIPTION")
+    CO_DIPLOMATION_1260 = _("CO_DIPLOMATION_1260")
     CO_DIPLOMATION_901 = _("CO_DIPLOMATION_901")
     CO_DIPLOMATION_132 = _("CO_DIPLOMATION_132")
     AUTRE = _("AUTRE")
@@ -78,7 +80,9 @@ class DroitsInscriptionMontant(ChoiceEnum):
 
 DROITS_INSCRIPTION_MONTANT_VALEURS = {
     DroitsInscriptionMontant.INSCRIPTION_AU_ROLE.name: 66,
-    DroitsInscriptionMontant.INSCRIPTION_REGULIERE.name: 835,
+    DroitsInscriptionMontant.INSCRIPTION_REGULIERE_1194.name: 1194,
+    DroitsInscriptionMontant.INSCRIPTION_REGULIERE_835.name: 835,
+    DroitsInscriptionMontant.DROITS_MAJORES.name: 5369,
     DroitsInscriptionMontant.NOUVEAUX_DROITS_MAJORES.name: 5010,
     DroitsInscriptionMontant.ANCIENS_DROITS_MAJORES_2505.name: 2505,
     DroitsInscriptionMontant.ANCIENS_DROITS_MAJORES_4175.name: 4175,
@@ -86,6 +90,7 @@ DROITS_INSCRIPTION_MONTANT_VALEURS = {
     DroitsInscriptionMontant.MASTER_DE_SPECIALISATION_SANTE.name: 485,
     DroitsInscriptionMontant.CERTIFICAT_60_CREDITS.name: 1065,
     DroitsInscriptionMontant.PAS_DE_DROITS_D_INSCRIPTION.name: 0,
+    DroitsInscriptionMontant.CO_DIPLOMATION_1260.name: 1260,
     DroitsInscriptionMontant.CO_DIPLOMATION_901.name: 901,
     DroitsInscriptionMontant.CO_DIPLOMATION_132.name: 132,
 }
