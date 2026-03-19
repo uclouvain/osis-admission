@@ -25,6 +25,7 @@
 # ##############################################################################
 
 import datetime
+import logging
 import re
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Union
@@ -44,7 +45,14 @@ from osis_history.models import HistoryEntry
 from rules.templatetags import rules
 
 from admission.auth.constants import READ_ACTIONS_BY_TAB, UPDATE_ACTIONS_BY_TAB
-from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL, ORDERED_CAMPUSES_UUIDS
+from admission.constants import (
+    CONTEXT_CONTINUING,
+    CONTEXT_DOCTORATE,
+    CONTEXT_GENERAL,
+    IMAGE_EXTENSIONS,
+    ORDERED_CAMPUSES_UUIDS,
+    PDF_EXTENSION,
+)
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
     INDEX_ONGLETS_CHECKLIST as INDEX_ONGLETS_CHECKLIST_DOCTORALE,
@@ -127,6 +135,7 @@ WOLUWE = 'Bruxelles Woluwe'
 SAINT_LOUIS = 'Bruxelles Saint-Louis'
 SAINT_GILLES = 'Bruxelles Saint-Gilles'
 
+logger = logging.getLogger(__name__)
 register = template.Library()
 
 
@@ -433,7 +442,8 @@ def document_component(document_write_token, document_metadata, can_edit=True):
 def document_epc_component(document_metadata):
     """Display the right editor component depending on the file type."""
     if document_metadata:
-        if document_metadata.get('mimetype') == PDF_MIME_TYPE:
+        file_extension = document_metadata.get('name', '').rsplit('.')[-1]
+        if file_extension == PDF_EXTENSION:
             return {
                 'template': 'osis_document_components/editor.html',
                 'attrs': {
@@ -446,12 +456,16 @@ def document_epc_component(document_metadata):
                     'get-file-url': document_metadata.get('url'),
                 },
             }
-        elif document_metadata.get('mimetype') in IMAGE_MIME_TYPES:
+        elif file_extension in IMAGE_EXTENSIONS:
             return {
                 'template': 'admission/image.html',
                 'url': document_metadata.get('url'),
-                'alt': document_metadata.get('name'),
+                'alt': document_metadata.get('description_detaillee'),
             }
+        else:
+            logger.debug(
+                f'[document_epc_component] unsupported file extension ' f'"{file_extension}" "{document_metadata}"'
+            )
     return {
         'template': 'admission/no_document.html',
         'message': _('No document'),
