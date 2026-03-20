@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,33 +25,19 @@
 # ##############################################################################
 from typing import Dict, List, Optional
 
-from django.utils.translation import gettext as _
-from django.utils.translation import override
+from django.utils.translation import gettext as _, override
 
 from admission.calendar.admission_calendar import (
     AdmissionPoolExternalEnrollmentChangeCalendar,
     AdmissionPoolExternalReorientationCalendar,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    STATUTS_PROPOSITION_GENERALE_NON_SOUMISE,
-)
-from admission.ddd.admission.shared_kernel.domain.model.formation import (
-    est_formation_medecine_ou_dentisterie,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_elements_confirmation import (
-    IElementsConfirmation,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
-    IProfilCandidatTranslator,
-)
-from admission.ddd.admission.shared_kernel.dtos.question_specifique import (
-    QuestionSpecifiqueDTO,
-)
+from admission.ddd.admission.formation_generale.domain.model.enums import STATUTS_PROPOSITION_GENERALE_NON_SOUMISE
+from admission.ddd.admission.shared_kernel.domain.model.formation import est_formation_medecine_ou_dentisterie
+from admission.ddd.admission.shared_kernel.domain.service.i_elements_confirmation import IElementsConfirmation
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
-from admission.ddd.admission.shared_kernel.enums import (
-    CHOIX_AFFILIATION_SPORT_SELON_SITE,
-    Onglets,
-)
+from admission.ddd.admission.shared_kernel.enums import CHOIX_AFFILIATION_SPORT_SELON_SITE, Onglets
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     IdentifiantBaseEmplacementDocument,
     OngletsDemande,
@@ -75,25 +61,14 @@ from admission.exports.admission_recap.attachments import (
     get_supervision_group_attachments,
     get_training_choice_attachments,
 )
-from admission.exports.admission_recap.constants import (
-    FORMATTED_RELATIONSHIPS,
-    TRAINING_TYPES_WITH_EQUIVALENCE,
-)
-from admission.infrastructure.admission.shared_kernel.domain.service.calendrier_inscription import (
-    CalendrierInscription,
-)
+from admission.exports.admission_recap.constants import FORMATTED_RELATIONSHIPS, TRAINING_TYPES_WITH_EQUIVALENCE
+from admission.infrastructure.admission.shared_kernel.domain.service.calendrier_inscription import CalendrierInscription
 from admission.utils import WeasyprintStylesheets
 from base.models.enums.education_group_types import TrainingType
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
-    ExperienceAcademiqueDTO,
-    ExperienceNonAcademiqueDTO,
-)
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
 from osis_profile import BE_ISO_CODE, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
-from osis_profile.models.enums.curriculum import CURRICULUM_ACTIVITY_LABEL
+from osis_profile.models.enums.curriculum import CURRICULUM_ACTIVITY_LABEL, SYSTEMES_EVALUATION_AVEC_CREDITS
 from osis_profile.models.exam import ExamType
-from osis_profile.views.edit_experience_academique import (
-    SYSTEMES_EVALUATION_AVEC_CREDITS,
-)
 
 
 class Section:

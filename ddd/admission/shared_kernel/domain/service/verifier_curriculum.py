@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -28,10 +28,11 @@ from typing import Dict, List
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO
 from osis_common.ddd import interface
 from osis_profile import BE_ISO_CODE, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
-from osis_profile.models.enums.curriculum import Result, TranscriptType
-from osis_profile.views.edit_experience_academique import (
+from osis_profile.models.enums.curriculum import (
     PREMIERE_ANNEE_AVEC_CREDITS_ECTS_BE,
     SYSTEMES_EVALUATION_AVEC_CREDITS,
+    Result,
+    TranscriptType,
 )
 
 
