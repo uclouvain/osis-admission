@@ -28,8 +28,8 @@ from typing import Dict, Optional
 
 from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
 from admission.ddd.admission.shared_kernel.domain.enums import TypeFormation
+from admission.ddd.admission.shared_kernel.domain.model.calendrier_academique import CalendrierAcademique
 from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import (
-    CalendrierAcademique,
     IAnneeInscriptionFormationTranslator,
 )
 from base.models.academic_calendar import AcademicCalendar

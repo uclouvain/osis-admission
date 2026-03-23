@@ -26,8 +26,8 @@
 import datetime
 from datetime import date, timedelta
 
+from admission.ddd.admission.shared_kernel.domain.model.calendrier_academique import CalendrierAcademique
 from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import (
-    CalendrierAcademique,
     Date,
     IAnneeInscriptionFormationTranslator,
 )

@@ -27,8 +27,9 @@ from admission.ddd.admission.shared_kernel.commands import RecupererPeriodeReins
 from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import (
     IAnneeInscriptionFormationTranslator,
 )
-from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_ucl_candidat import (
-    IInscriptionsUCLCandidatService,
+from admission.ddd.admission.shared_kernel.domain.service.i_deliberation_translator import IDeliberationTranslator
+from admission.ddd.admission.shared_kernel.domain.service.inscriptions_ucl_candidat import (
+    InscriptionsUCLCandidatService,
 )
 from admission.ddd.admission.shared_kernel.dtos.inscription_ucl_candidat import PeriodeReinscriptionDTO
 
@@ -36,8 +37,9 @@ from admission.ddd.admission.shared_kernel.dtos.inscription_ucl_candidat import 
 def recuperer_periode_reinscription(
     cmd: RecupererPeriodeReinscriptionQuery,
     annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
-    inscriptions_ucl_candidat_service: IInscriptionsUCLCandidatService,
+    deliberation_translator: IDeliberationTranslator,
 ) -> PeriodeReinscriptionDTO:
-    return inscriptions_ucl_candidat_service.recuperer_informations_periode_de_reinscription(
+    return InscriptionsUCLCandidatService.recuperer_informations_periode_de_reinscription(
         annee_inscription_formation_translator=annee_inscription_formation_translator,
+        deliberation_translator=deliberation_translator,
     )

@@ -25,16 +25,26 @@
 # ##############################################################################
 
 from admission.ddd.admission.shared_kernel.commands import RecupererInscriptionsCandidatQuery
-from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_ucl_candidat import (
-    IInscriptionsUCLCandidatService,
+from admission.ddd.admission.shared_kernel.domain.service.i_deliberation_translator import IDeliberationTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_formation_translator import IBaseFormationTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
+)
+from admission.ddd.admission.shared_kernel.domain.service.inscriptions_ucl_candidat import (
+    InscriptionsUCLCandidatService,
 )
 
 
 def recuperer_inscriptions_candidat(
-    cmd: 'RecupererInscriptionsCandidatQuery',
-    inscriptions_ucl_candidat_service: 'IInscriptionsUCLCandidatService',
+    cmd: RecupererInscriptionsCandidatQuery,
+    inscriptions_translator: IInscriptionsTranslatorService,
+    formation_translator: IBaseFormationTranslator,
+    deliberation_translator: IDeliberationTranslator,
 ):
-    return inscriptions_ucl_candidat_service.recuperer(
+    return InscriptionsUCLCandidatService.recuperer(
         matricule_candidat=cmd.matricule_candidat,
         annees=cmd.annees,
+        inscriptions_translator=inscriptions_translator,
+        formation_translator=formation_translator,
+        deliberation_translator=deliberation_translator,
     )

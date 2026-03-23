@@ -26,7 +26,18 @@
 from abc import abstractmethod
 
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import FormationNonTrouveeException
+from admission.ddd.admission.shared_kernel.dtos.formation import FormationInscriteDTO
 from osis_common.ddd import interface
+
+
+class IBaseFormationTranslator(interface.DomainService):
+    @classmethod
+    @abstractmethod
+    def recuperer_informations_formations_inscrites(
+        cls,
+        sigles_annees: list[tuple[str, int]],
+    ) -> dict[tuple[str, int], FormationInscriteDTO]:
+        raise NotImplementedError
 
 
 class IFormationTranslator(interface.DomainService):

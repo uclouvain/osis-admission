@@ -23,36 +23,50 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.shared_kernel.commands import CandidatEstDelibereQuery
+
 from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import (
     IAnneeInscriptionFormationTranslator,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_deliberation_translator import IDeliberationTranslator
-from admission.ddd.admission.shared_kernel.domain.service.i_diffusion_notes_translator import IDiffusionNotesTranslator
-from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_evaluations_translator import (
-    IInscriptionsEvaluationsTranslator,
 )
 from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
     IInscriptionsTranslatorService,
 )
-from admission.ddd.admission.shared_kernel.domain.service.inscriptions_ucl_candidat import (
-    InscriptionsUCLCandidatService,
-)
+from admission.ddd.admission.shared_kernel.dtos.inscription import InscriptionDTO
 
 
-def candidat_est_delibere(
-    cmd: CandidatEstDelibereQuery,
-    annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
-    inscriptions_translator: IInscriptionsTranslatorService,
-    deliberation_translator: IDeliberationTranslator,
-    diffusion_notes_translator: IDiffusionNotesTranslator,
-    inscriptions_evaluations_translator: IInscriptionsEvaluationsTranslator,
-):
-    return InscriptionsUCLCandidatService.est_delibere(
-        matricule_candidat=cmd.matricule_candidat,
-        annee_inscription_formation_translator=annee_inscription_formation_translator,
-        inscriptions_translator=inscriptions_translator,
-        deliberation_translator=deliberation_translator,
-        diffusion_notes_translator=diffusion_notes_translator,
-        inscriptions_evaluations_translator=inscriptions_evaluations_translator,
-    )
+class InscriptionsInMemoryTranslator(IInscriptionsTranslatorService):
+    @classmethod
+    def recuperer(
+        cls,
+        matricule_candidat: str,
+        annees: list[int] | None = None,
+    ) -> list[InscriptionDTO]:
+        return []
+
+    @classmethod
+    def recuperer_inscriptions_deliberables(cls, matricule_candidat: str, annee: int) -> list[InscriptionDTO]:
+        return []
+
+    @classmethod
+    def est_inscrit_recemment(
+        cls,
+        matricule_candidat: str,
+        annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
+    ) -> bool:
+        return False
+
+    @classmethod
+    def est_en_poursuite(
+        cls,
+        matricule_candidat: str,
+        sigle_formation: str,
+    ) -> bool:
+        return False
+
+    @classmethod
+    def est_en_poursuite_directe(
+        cls,
+        matricule_candidat: str,
+        sigle_formation: str,
+        annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
+    ) -> bool:
+        return False

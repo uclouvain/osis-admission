@@ -23,23 +23,36 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.shared_kernel.commands import (
-    CandidatEstInscritRecemmentUCLQuery,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import (
-    IAnneeInscriptionFormationTranslator,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
-    IInscriptionsTranslatorService,
-)
+import datetime
+from abc import abstractmethod
+
+from ddd.logic.deliberation.cloture.dto.deliberation import DeliberationCycleDTO, DeliberationProgrammeAnnuelDTO
+from osis_common.ddd import interface
 
 
-def candidat_est_inscrit_recemment_ucl(
-    cmd: CandidatEstInscritRecemmentUCLQuery,
-    annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
-    inscriptions_translator: IInscriptionsTranslatorService,
-):
-    return inscriptions_translator.est_inscrit_recemment(
-        matricule_candidat=cmd.matricule_candidat,
-        annee_inscription_formation_translator=annee_inscription_formation_translator,
-    )
+class IDeliberationTranslator(interface.DomainService):
+    @classmethod
+    @abstractmethod
+    def recuperer_deliberations_cycles(
+        cls,
+        nomas: list[str],
+        annee: int | None = None,
+    ) -> dict[tuple[str, str], DeliberationCycleDTO]:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def recuperer_deliberations_annuelles(
+        cls,
+        nomas: list[str],
+        annee: int,
+    ) -> dict[tuple[str, str], dict[int, DeliberationProgrammeAnnuelDTO | None]]:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def recuperer_date_debut_periode_deliberation_deuxieme_session(
+        cls,
+        annee: int,
+    ) -> datetime.date:
+        raise NotImplementedError

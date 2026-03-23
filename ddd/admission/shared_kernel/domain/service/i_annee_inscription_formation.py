@@ -24,26 +24,18 @@
 #
 ##############################################################################
 import abc
-import datetime
 from dataclasses import dataclass
 from typing import Optional
 
+from admission.ddd.admission.shared_kernel.domain.model.calendrier_academique import CalendrierAcademique
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from osis_common.ddd import interface
-from osis_common.ddd.interface import ValueObject
 
 
 @dataclass
 class Date:
     jour: int
     mois: int
-    annee: int
-
-
-@dataclass(slots=True)
-class CalendrierAcademique(ValueObject):
-    date_debut: datetime.date
-    date_fin: datetime.date
     annee: int
 
 

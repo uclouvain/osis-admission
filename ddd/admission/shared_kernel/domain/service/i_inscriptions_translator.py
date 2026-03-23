@@ -23,41 +23,37 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
 from abc import abstractmethod
 
 from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import (
     IAnneeInscriptionFormationTranslator,
 )
-from admission.ddd.admission.shared_kernel.dtos.inscription_ucl_candidat import (
-    InscriptionUCLCandidatDTO,
-    PeriodeReinscriptionDTO,
-)
+from admission.ddd.admission.shared_kernel.dtos.inscription import InscriptionDTO
 from osis_common.ddd import interface
 
 
-class IInscriptionsUCLCandidatService(interface.DomainService):
+class IInscriptionsTranslatorService(interface.DomainService):
     @classmethod
     @abstractmethod
     def recuperer(
         cls,
         matricule_candidat: str,
         annees: list[int] | None = None,
-    ) -> list[InscriptionUCLCandidatDTO]:
+    ) -> list[InscriptionDTO]:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def recuperer_inscriptions_deliberables(
+        cls,
+        matricule_candidat: str,
+        annee: int,
+    ) -> list[InscriptionDTO]:
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
     def est_inscrit_recemment(
-        cls,
-        matricule_candidat: str,
-        annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
-    ) -> bool:
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def est_delibere(
         cls,
         matricule_candidat: str,
         annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
@@ -82,22 +78,3 @@ class IInscriptionsUCLCandidatService(interface.DomainService):
         annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
     ) -> bool:
         raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def recuperer_informations_periode_de_reinscription(
-        cls,
-        annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
-    ) -> PeriodeReinscriptionDTO:
-        raise NotImplementedError
-
-    @classmethod
-    def periode_de_reinscription_en_cours(
-        cls,
-        annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
-    ) -> bool:
-        periode_reinscription = cls.recuperer_informations_periode_de_reinscription(
-            annee_inscription_formation_translator=annee_inscription_formation_translator,
-        )
-        today_date = datetime.date.today()
-        return periode_reinscription.date_debut <= today_date <= periode_reinscription.date_fin

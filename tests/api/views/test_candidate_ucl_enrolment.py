@@ -34,7 +34,7 @@ from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from base.models.enums.academic_type import AcademicTypes
 from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_calendar import (
-    DeliberationAcademicCalendarFactory,
+    BasculementDeliberationAcademicCalendarFactory,
     DiffusionDesNotesAcademicCalendarFactory,
     InscriptionEvaluationAcademicCalendarFactory,
 )
@@ -42,6 +42,7 @@ from base.tests.factories.offer_year_calendar import OfferYearCalendarFactory
 from base.tests.factories.session_exam_calendar import SessionExamCalendarFactory
 from base.tests.factories.student import StudentFactory
 from ddd.logic.deliberation.propositions.domain.model._decision import Decision
+from ddd.logic.inscription_aux_evaluations.shared_kernel.domain.model._type_inscription import TypeInscription
 from deliberation.models.deliberation_actee import DeliberationActee
 from deliberation.tests.factories.deliberation_actee import DeliberationActeeFactory
 from epc.models.enums.decision_resultat_cycle import DecisionResultatCycle
@@ -49,6 +50,7 @@ from epc.models.enums.etat_inscription import EtatInscriptionFormation
 from epc.models.enums.statut_inscription_programme_annuel import StatutInscriptionProgrammAnnuel
 from epc.models.inscription_programme_annuel import InscriptionProgrammeAnnuel
 from epc.tests.factories.inscription_programme_annuel import InscriptionProgrammeAnnuelFactory
+from inscription_evaluation.models.formulaire_inscription import FormulaireInscription
 from inscription_evaluation.tests.factories.formulaire_inscription import FormulaireInscriptionFactory
 
 
@@ -204,7 +206,7 @@ class CandidateReEnrolmentPeriodViewTestCase(APITestCase):
         deliberation_sessions = {
             (year, session): SessionExamCalendarFactory(
                 number_session=session,
-                academic_calendar=DeliberationAcademicCalendarFactory(
+                academic_calendar=BasculementDeliberationAcademicCalendarFactory(
                     data_year__year=year,
                 ),
             )
@@ -400,18 +402,39 @@ class CandidateDeliberationViewTestCase(APITestCase):
         self.client.force_authenticate(user=self.candidate.user)
 
         # The student is not enrolled to the last exam session > deliberated
+        # > (no form)
         acted_deliberation = self._build_acted_deliberation()
 
         self._test_is_deliberated(True)
 
-        # The student is enrolled to the last exam session
-        # > but the result is not announced (no result and no published mark)
-        FormulaireInscriptionFactory(
+        # > (a form but without enrolment)
+        form = FormulaireInscriptionFactory(
             noma=self.student.registration_id,
             session=3,
             sigle_formation=self.enrolment.programme.offer.acronym,
             annee=2024,
         )
+
+        self._test_is_deliberated(True)
+
+        # The student is enrolled to the last exam session
+        # > but the result is not announced (no result and no published mark)
+        form.delete()
+        forms = [
+            FormulaireInscriptionFactory.avec_inscriptions(
+                codes_ue={('LDROI1001', TypeInscription.PREMIERE_INSCRIPTION)},
+                noma=self.student.registration_id,
+                session=session,
+                sigle_formation=self.enrolment.programme.offer.acronym,
+                annee=2024,
+            )
+            for session in (1, 2, 3)
+        ]
+
+        for form in forms:
+            form.formulaire['codes_ue_inscriptibles'] = {}
+
+        FormulaireInscription.objects.bulk_update(objs=forms, fields=['formulaire'])
 
         self._test_is_deliberated(False)
 
@@ -457,7 +480,7 @@ class CandidateDeliberationViewTestCase(APITestCase):
 
         # > but the result is not announced (no result but published mark)
         with freezegun.freeze_time('2025-07-20'):
-            third_session_annual_result['decision'] = ''
+            third_session_annual_result['decision'] = Decision.PAS_DE_DECISION.name
             acted_deliberation.save()
 
             self._test_is_deliberated(False)
