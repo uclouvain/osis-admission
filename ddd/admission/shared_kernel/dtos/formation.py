@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@ from admission.ddd.admission.shared_kernel.domain.model.formation import (
     est_formation_medecine_ou_dentisterie,
 )
 from admission.ddd.admission.shared_kernel.dtos.campus import CampusDTO
+from base.models.enums.active_status import ActiveStatusEnum
 from osis_common.ddd import interface
 
 
@@ -52,6 +53,7 @@ class FormationDTO(interface.DTO):
     sigle_entite_gestion: str
     credits: Optional[int]
     grade_academique: str
+    active: str
 
     def __str__(self):
         return f'{self.sigle} - {self.intitule or self.intitule_fr} ({self.campus})'
@@ -67,6 +69,10 @@ class FormationDTO(interface.DTO):
     @property
     def est_formation_avec_bourse(self) -> bool:
         return self.type in FORMATIONS_AVEC_BOURSES
+
+    @property
+    def est_active_uniquement_pour_reinscription(self) -> bool:
+        return self.active == ActiveStatusEnum.RE_REGISTRATION.name
 
 
 @attr.dataclass(frozen=True, slots=True)
