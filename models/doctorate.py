@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -53,10 +53,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
     DroitsInscriptionMontant,
     MobiliteNombreDeMois,
 )
-from admission.ddd.admission.doctorat.validation.domain.model.enums import (
-    ChoixStatutCDD,
-    ChoixStatutSIC,
-)
+from admission.ddd.admission.doctorat.validation.domain.model.enums import ChoixStatutCDD, ChoixStatutSIC
 from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import (
     EtatEquivalenceTitreAcces,
     StatutEquivalenceTitreAcces,
@@ -67,16 +64,13 @@ from base.models.academic_year import AcademicYear
 from base.models.entity_version import EntityVersion
 from base.models.enums.entity_type import SECTOR
 from base.utils.cte import CTESubquery
-from ddd.logic.financabilite.commands import DeterminerSiCandidatEstFinancableQuery
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
+from ddd.logic.financabilite.queries import DeterminerSiCandidatEstFinancableQuery
 from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd.interface import BusinessException
-from .base import (
-    BaseAdmission,
-    BaseAdmissionQuerySet,
-    admission_directory_path,
-)
+
+from .base import BaseAdmission, BaseAdmissionQuerySet, admission_directory_path
 from .checklist import DoctorateRefusalReason
 from .mixins import DocumentCopyModelMixin
 from .specific_question import SpecificQuestionAnswer
@@ -642,9 +636,7 @@ class DoctorateAdmission(DocumentCopyModelMixin, BaseAdmission):
     )
 
     def update_financability_computed_rule(self, author: 'Person'):
-        from admission.ddd.admission.doctorat.preparation.commands import (
-            SpecifierFinancabiliteResultatCalculCommand,
-        )
+        from admission.ddd.admission.doctorat.preparation.commands import SpecifierFinancabiliteResultatCalculCommand
         from infrastructure.messages_bus import message_bus_instance
 
         financabilite = message_bus_instance.invoke(
