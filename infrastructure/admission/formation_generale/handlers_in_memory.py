@@ -130,11 +130,17 @@ from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.m
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.maximum_propositions import (
     MaximumPropositionsAutoriseesInMemory,
 )
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.modifier_checklist_experience_parcours_anterieur import (
+    ValidationExperienceParcoursAnterieurInMemoryService,
+)
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.poste_diplomatique import (
     PosteDiplomatiqueInMemoryFactory,
 )
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.raccrocher_experiences_curriculum import (
+    RaccrocherExperiencesCurriculumInMemory,
 )
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.recuperer_documents_proposition import (
     EmplacementsDocumentsPropositionInMemoryTranslator,
@@ -193,6 +199,8 @@ _taches_techniques = TachesTechniquesInMemory()
 _matricule_etudiant_service = MatriculeEtudiantInMemoryService()
 _compteur_noma = CompteurAnnuelPourNomaInMemoryRepository()
 _experience_parcours_interne_translator = ExperienceParcoursInterneInMemoryTranslator()
+_validation_experience_parcours_anterieur_service = ValidationExperienceParcoursAnterieurInMemoryService()
+_raccrocher_experiences_curriculum = RaccrocherExperiencesCurriculumInMemory()
 
 
 COMMAND_HANDLERS = {
@@ -261,6 +269,8 @@ COMMAND_HANDLERS = {
         inscription_tardive_service=InscriptionTardiveInMemory(),
         paiement_frais_dossier_service=_paiement_frais_dossier,
         historique=_historique_global,
+        raccrocher_experiences_curriculum=_raccrocher_experiences_curriculum,
+        validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur_service,
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,
@@ -581,6 +591,7 @@ COMMAND_HANDLERS = {
         experience_parcours_interne_translator=_experience_parcours_interne_translator,
         profil_candidat_translator=_profil_candidat_translator,
         formation_translator=_formation_generale_translator,
+        academic_year_repository=_academic_year_repository,
     ),
     SpecifierConditionAccesPropositionCommand: lambda msg_bus, cmd: specifier_condition_acces_proposition(
         cmd,
@@ -630,12 +641,33 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=_proposition_repository,
     ),
-    ModifierStatutChecklistExperienceParcoursAnterieurCommand: (
-        lambda msg_bus, cmd: modifier_statut_checklist_experience_parcours_anterieur(
+    ModifierStatutChecklistExperienceAcademiqueCommand: (
+        lambda msg_bus, cmd: modifier_statut_checklist_experience_academique(
             cmd,
             proposition_repository=_proposition_repository,
             profil_candidat_translator=_profil_candidat_translator,
             formation_translator=_formation_generale_translator,
+            validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur_service,
+        )
+    ),
+    ModifierStatutChecklistExperienceNonAcademiqueCommand: (
+        lambda msg_bus, cmd: modifier_statut_checklist_experience_non_academique(
+            cmd,
+            validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur_service,
+        )
+    ),
+    ModifierStatutChecklistEtudesSecondairesCommand: (
+        lambda msg_bus, cmd: modifier_statut_checklist_etudes_secondaires(
+            cmd,
+            validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur_service,
+        )
+    ),
+    ModifierStatutChecklistExamenCommand: (
+        lambda msg_bus, cmd: modifier_statut_checklist_examen(
+            cmd,
+            proposition_repository=_proposition_repository,
+            profil_candidat_translator=_profil_candidat_translator,
+            validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur_service,
         )
     ),
     SpecifierInformationsAcceptationPropositionParSicCommand: (
@@ -651,12 +683,36 @@ COMMAND_HANDLERS = {
             personne_connue_translator=_personne_connue_ucl_translator,
         )
     ),
-    ModifierAuthentificationExperienceParcoursAnterieurCommand: (
-        lambda msg_bus, cmd: modifier_authentification_experience_parcours_anterieur(
+    ModifierAuthentificationExperienceAcademiqueCommand: (
+        lambda msg_bus, cmd: modifier_authentification_experience_academique(
             cmd,
-            proposition_repository=_proposition_repository,
             notification=_notification,
             historique=_historique_formation_generale,
+            validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur_service,
+        )
+    ),
+    ModifierAuthentificationExperienceNonAcademiqueCommand: (
+        lambda msg_bus, cmd: modifier_authentification_experience_non_academique(
+            cmd,
+            notification=_notification,
+            historique=_historique_formation_generale,
+            validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur_service,
+        )
+    ),
+    ModifierAuthentificationEtudesSecondairesCommand: (
+        lambda msg_bus, cmd: modifier_authentification_etudes_secondaires(
+            cmd,
+            notification=_notification,
+            historique=_historique_formation_generale,
+            validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur_service,
+        )
+    ),
+    ModifierAuthentificationExamenCommand: (
+        lambda msg_bus, cmd: modifier_authentification_examen(
+            cmd,
+            notification=_notification,
+            historique=_historique_formation_generale,
+            validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur_service,
         )
     ),
     SpecifierMotifsRefusPropositionParSicCommand: (

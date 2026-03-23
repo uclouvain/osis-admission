@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -105,7 +105,8 @@ class VerifierProposition(interface.DomainService):
                 profil_candidat_service.verifier_examens,
                 uuid_proposition=proposition_candidat.entity_id.uuid,
                 matricule=proposition_candidat.matricule_candidat,
-                formation=formation,
+                sigle_formation=formation.entity_id.sigle,
+                annee_formation=formation.entity_id.annee,
                 profil_candidat_translator=profil_candidat_translator,
             ),
             partial(

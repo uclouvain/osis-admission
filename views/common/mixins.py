@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import json
+import logging
 from typing import Dict, Optional, Union
 
 from django.contrib import messages
@@ -34,6 +35,7 @@ from django.utils.functional import cached_property
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from django.views.generic.base import ContextMixin
+from osis_document_components.services import get_student_files_count_from_epc
 
 from admission.constants import (
     COMMENT_TAG_FAC,
@@ -46,52 +48,36 @@ from admission.constants import (
 from admission.ddd.admission.doctorat.preparation.commands import (
     GetCotutelleCommand,
     RecupererAdmissionDoctoratQuery,
-)
-from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererPropositionGestionnaireQuery as RecupererPropositionDoctoraleGestionnaireQuery,
-)
-from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionDoctoraleQuery,
 )
-from admission.ddd.admission.doctorat.preparation.dtos import (
-    PropositionDTO,
+from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_DOCTORALE_PAR_STATUT,
 )
+from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO
 from admission.ddd.admission.doctorat.validation.commands import RecupererDemandeQuery
 from admission.ddd.admission.formation_continue.commands import (
     RecupererPropositionQuery,
-)
-from admission.ddd.admission.formation_continue.commands import (
     RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionContinueQuery,
 )
-from admission.ddd.admission.formation_continue.dtos.proposition import (
-    PropositionDTO as PropositionContinueDTO,
+from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_CONTINUE_PAR_STATUT,
 )
+from admission.ddd.admission.formation_continue.dtos.proposition import PropositionDTO as PropositionContinueDTO
 from admission.ddd.admission.formation_generale.commands import (
     RecupererPropositionGestionnaireQuery,
+    RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionGeneraleQuery,
     RecupererTitresAccesSelectionnablesPropositionQuery,
 )
-from admission.ddd.admission.formation_generale.commands import (
-    RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionGeneraleQuery,
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_GENERALE_PAR_STATUT,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
-)
-from admission.ddd.admission.formation_generale.dtos.proposition import (
-    PropositionGestionnaireDTO,
-)
-from admission.ddd.admission.shared_kernel.domain.model.enums.type_gestionnaire import (
-    TypeGestionnaire,
-)
-from admission.ddd.admission.shared_kernel.dtos.titre_acces_selectionnable import (
-    TitreAccesSelectionnableDTO,
-)
+from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
+from admission.ddd.admission.shared_kernel.domain.model.enums.type_gestionnaire import TypeGestionnaire
+from admission.ddd.admission.shared_kernel.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
 from admission.ddd.admission.shared_kernel.enums import Onglets
-from admission.models import (
-    ContinuingEducationAdmission,
-    DoctorateAdmission,
-    EPCInjection,
-    GeneralEducationAdmission,
-)
+from admission.models import ContinuingEducationAdmission, DoctorateAdmission, EPCInjection, GeneralEducationAdmission
 from admission.models.base import AdmissionViewer, BaseAdmission
 from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
 from admission.utils import (
@@ -107,9 +93,12 @@ from admission.utils import (
 from admission.views.list import BaseAdmissionList
 from base.models.person_merge_proposal import PersonMergeStatus
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
+from ddd.logic.gestion_des_comptes.dto.periode_soumission_ticket import PeriodeSoumissionTicketDigitDTO
 from ddd.logic.gestion_des_comptes.queries import GetPeriodeActiveSoumissionTicketQuery, GetPropositionFusionQuery
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.contrib.views import PermissionRequiredMixin
+
+logger = logging.getLogger(__name__)
 
 
 class AdmissionViewMixin(PermissionRequiredMixin, ContextMixin):
@@ -192,6 +181,14 @@ class AdmissionViewMixin(PermissionRequiredMixin, ContextMixin):
     def current_user_name(self):
         return f'{self.request.user.person.first_name} {self.request.user.person.last_name}'
 
+    @cached_property
+    def checklist_tabs_organization(self):
+        return {
+            CONTEXT_DOCTORATE: ORGANISATION_ONGLETS_CHECKLIST_DOCTORALE_PAR_STATUT,
+            CONTEXT_CONTINUING: ORGANISATION_ONGLETS_CHECKLIST_CONTINUE_PAR_STATUT,
+            CONTEXT_GENERAL: ORGANISATION_ONGLETS_CHECKLIST_GENERALE_PAR_STATUT,
+        }[self.current_context]
+
 
 class LoadDossierViewMixin(AdmissionViewMixin):
     specific_questions_tab: Optional[Onglets] = None
@@ -264,7 +261,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         if self.admission.status != ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name:
             return False, "Le dossier doit être en 'Inscription autorisée'"
         periodes_actives: list[PeriodeSoumissionTicketDigitDTO] = message_bus_instance.invoke(
-            GetPeriodeActiveSoumissionTicketQuery()
+            GetPeriodeActiveSoumissionTicketQuery(),
         )
         annees_ouvertes = [p.annee for p in periodes_actives]
         if annees_ouvertes and self.admission.determined_academic_year.year not in annees_ouvertes:
@@ -354,6 +351,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         context['demande_est_en_quarantaine'] = self.demande_est_en_quarantaine
         context['outil_de_comparaison_et_fusion_url'] = self.get_outil_de_comparaison_et_fusion_url()
         context['double_check_decision_url'] = self.get_double_check_decision_url()
+        context['checklist_tabs_organization'] = self.checklist_tabs_organization
         return context
 
     def get_outil_de_comparaison_et_fusion_url(self) -> str:
@@ -404,6 +402,18 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         # Add icon when folder in quarantine
         if self.demande_est_en_quarantaine:
             tab_label_suffixes['person'] = mark_safe('<span class="fa fa-fas fa-warning text-warning"></span>')
+
+        # Add EPC badge if there are EPC documents
+        try:
+            if self.proposition.noma_candidat:
+                documents_count = get_student_files_count_from_epc(self.proposition.noma_candidat).get('count', 0)
+                if documents_count > 0:
+                    tab_label_suffixes['documents'] = mark_safe('<div class="badge">EPC</div>')
+        except Exception as e:
+            logger.exception(
+                f"[Documents EPC] Erreur lors de la récupération du nombre de documents EPC pour le noma"
+                f" '{self.proposition.noma_candidat}'"
+            )
 
         return tab_label_suffixes
 

@@ -173,10 +173,11 @@ msgstr ""
 "l’adresse <a href=\"mailto:{mail}\">{mail}</a> :</p>"
 
 msgid ""
-"<strong>Warning</strong> the candidate is reported as a <strong>fraudster</"
-"strong>"
+"<strong>Warning</strong> the candidate is reported as <strong>fraudster</"
+"strong> by the ARES"
 msgstr ""
-"<strong>Attention</strong> le candidat est signalé <strong>fraudeur</strong>"
+"<strong>Attention</strong> le candidat est signalé <strong>fraudeur</strong> "
+"par l'ARES"
 
 #, python-format
 msgid ""
@@ -1594,10 +1595,6 @@ msgstr "Réclamation annulée le"
 msgid "Cleaned"
 msgstr "Toiletté"
 
-msgctxt "plural"
-msgid "Cleaned"
-msgstr "Toilettées"
-
 msgid "Clear the reason"
 msgstr "Effacer le motif"
 
@@ -2629,6 +2626,9 @@ msgstr "EN"
 msgid "ENROLMENT AUTHORISATION<br>for the %(academic_year)s academic year"
 msgstr "AUTORISATION D’INSCRIPTION<br>à l’année académique %(academic_year)s"
 
+msgid "EPC"
+msgstr "EPC"
+
 msgid "EPC injection"
 msgstr "Injection EPC"
 
@@ -3117,9 +3117,6 @@ msgstr "Refus de dérogation facultaire"
 msgid "Faculty process"
 msgstr "Traitement facultaire"
 
-msgid "False"
-msgstr "Faux"
-
 msgid "Feedback from Fac"
 msgstr "Retour de FAC"
 
@@ -3330,6 +3327,13 @@ msgstr ""
 "Par exemple, un contrat, une lettre d'un•e promoteur•trice ou tout autre "
 "document indiquant que la bourse vous est octroyée aux dates indiquées."
 
+msgid ""
+"For some reason, the experience isn't yet initialized. However, this is "
+"required to edit its status, its comments, etc."
+msgstr ""
+"Pour une raison particulière, l'expérience n'a pas encore été initialisée. "
+"Or, ceci est requis pour éditer son statut, ses commentaires, etc."
+
 msgid "For the CDD Chair:"
 msgstr "Pour le·la président·e de CDD :"
 
@@ -3386,9 +3390,6 @@ msgstr "Ancien·ne étudiant·e UCLouvain"
 
 msgid "Fraudster"
 msgstr "Fraudeur"
-
-msgid "Fraudster (ARES)"
-msgstr "Fraudeur (ARES)"
 
 msgid "Fraudster status from ARES"
 msgstr "Statut fraudeur d'après l'ARES"
@@ -4245,9 +4246,6 @@ msgstr "Institution"
 
 msgid "Institution Federation Wallonie-Bruxelles"
 msgstr "Institution de la Federation Wallonie-Bruxelles"
-
-msgid "Institution contacted"
-msgstr "Établissement contacté"
 
 msgid "Institution in which the PhD thesis has been realised / started"
 msgstr "Institution où la thèse de doctorat a été réalisée/entamée"
@@ -5181,9 +5179,6 @@ msgstr "Non finançable - %(rule)s (Établi par %(established_by)s)"
 
 msgid "Not free"
 msgstr "Non libre"
-
-msgid "Not fundable"
-msgstr "Non-finançable"
 
 msgctxt "dashboard-indicator admission"
 msgid "Not in order of registration"
@@ -6244,6 +6239,9 @@ msgstr "Liste des documents réclamés"
 msgid "Requested on"
 msgstr "Réclamé le"
 
+msgid "Requesting fraud status from the ARES"
+msgstr "Demande du statut fraudeur depuis l'ARES"
+
 #, python-format
 msgid "Require changes for \"%(object)s\""
 msgstr "Demander des changements pour \"%(object)s\""
@@ -6526,6 +6524,13 @@ msgstr "Envoyer en faculté"
 
 msgid "Sender"
 msgstr "Expéditeur"
+
+msgid ""
+"Sending the authorization is impossible while the personal data are in the "
+"\"Fraudster\" status."
+msgstr ""
+"L’envoi de l’autorisation est impossible lorsque les données personnelles "
+"sont à l'état \"Fraudeur\"."
 
 msgid "Sent to EPC"
 msgstr "Envoyée à EPC"
@@ -7300,6 +7305,9 @@ msgstr ""
 msgid "The element has not been found."
 msgstr "L'élément n'a pas été trouvé"
 
+msgid "The experience has been initialized"
+msgstr "L'expérience a été initialisée."
+
 msgid "The experience has been valuated."
 msgstr "L'expérience a été valorisée."
 
@@ -7670,6 +7678,9 @@ msgstr "Le type de l'élément du formulaire d'admission est inconnu (%(type)s).
 msgid "The university tuition fee is EURO %(montant)s."
 msgstr "Les droits d'inscription à l'Université s'élèvent à %(montant)s EUR."
 
+msgid "There are no EPC documents for this student."
+msgstr "Il n'y a pas de documents EPC pour cet étudiant."
+
 msgid "There can be no more CA members in the supervision group."
 msgstr ""
 "Il ne peut y avoir davantage de membres du comité d'accompagnement dans le "
@@ -7692,6 +7703,9 @@ msgstr ""
 
 msgid "There is no required exam for this training."
 msgstr "Il n'y a pas d'examen requis pour cette formation."
+
+msgid "There was an error while getting the EPC documents list."
+msgstr "Erreur lors de la récupération des documents EPC."
 
 msgid "Thesis field"
 msgstr "Domaine de la thèse"
@@ -7833,11 +7847,6 @@ msgstr ""
 "Cette autorisation d'inscription vous permet d'introduire une demande de "
 "logement auprès du service LOGE : <a href=\"https://www.uclouvain.be/fr/"
 "logement\">www.uclouvain.be/fr/logement</a>."
-
-msgid "This experience can't be validated if mandatory information is missing."
-msgstr ""
-"Cette expérience ne peut pas être validée tant que des informations "
-"obligatoires en sont manquantes."
 
 msgid "This experience cannot be updated as it has already been valuated."
 msgstr ""
@@ -8038,9 +8047,6 @@ msgstr "Transmettre en SIC"
 msgid "Trigger the payment hook"
 msgstr "Déclencher le webhook de paiement"
 
-msgid "True"
-msgstr "Vrai"
-
 msgid "Tuition fees amount"
 msgstr "Montant des droits d'inscription"
 
@@ -8102,6 +8108,9 @@ msgstr "UE"
 msgid "UUID"
 msgstr "UUID"
 
+msgid "Unable to get fraud status from the ARES at the moment"
+msgstr "Impossible de récupérer l'état fraudeur depuis l'ARES"
+
 msgid "Unavailable"
 msgstr "Non disponible"
 
@@ -8117,6 +8126,9 @@ msgstr "Inconnu·e"
 
 msgid "Unknown PDF type."
 msgstr "Type de PDF inconnu."
+
+msgid "Unknown author"
+msgstr "Auteur inconnu"
 
 msgid "Unknown citizenship"
 msgstr "Nationalité inconnue"
@@ -8182,10 +8194,6 @@ msgstr "Validée"
 msgctxt "decision-checklist"
 msgid "Validated"
 msgstr "Validée"
-
-msgctxt "plural"
-msgid "Validated"
-msgstr "Validées"
 
 msgid "Valuated diplomas or experiences:"
 msgstr "Diplômes ou expériences valorisées :"
@@ -8551,6 +8559,31 @@ msgid ""
 msgstr ""
 "Vous avez la possibilité d'ajouter tout document que vous jugez pertinent "
 "pour votre dossier (justificatifs, preuve de niveau de langue, ...)."
+
+#, python-format
+msgid ""
+"You can do it automatically by clicking <button type=\"submit\" class=\"btn-"
+"link p-0 no-border\">here</button> or manually through the <a "
+"href=\"%(edit_experience_url)s\">edit form</a>."
+msgstr ""
+"Vous pouvez le faire automatiquement en cliquant <button type=\"submit\" "
+"class=\"btn-link p-0 no-border\">ici</button> ou manuellement via le <a "
+"href=\"%(edit_experience_url)s\">formulaire d'édition</a>."
+
+msgid ""
+"You can do it automatically by clicking <button type=\"submit\" class=\"btn-"
+"link p-0 no-border\">here</button>."
+msgstr ""
+"Vous pouvez le faire automatiquement en cliquant <button type=\"submit\" "
+"class=\"btn-link p-0 no-border\">ici</button>."
+
+#, python-format
+msgid ""
+"You can do it manually through the <a href=\"%(edit_experience_url)s\">edit "
+"form</a>."
+msgstr ""
+"Vous pouvez le faire manuellement via le <a "
+"href=\"%(edit_experience_url)s\">formulaire d'édition</a>."
 
 msgid ""
 "You can find more information on the French Community webpage <a "
@@ -8950,6 +8983,9 @@ msgstr "année académique"
 
 msgid "actions"
 msgstr "actions"
+
+msgid "an unknown author"
+msgstr "un auteur inconnu"
 
 msgid "approval"
 msgstr "accord"

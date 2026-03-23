@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -50,6 +50,7 @@ from epc.tests.factories.inscription_programme_annuel import (
 from epc.tests.factories.inscription_programme_cycle import (
     InscriptionProgrammeCycleFactory,
 )
+from osis_profile.tests.factories.high_school_diploma import HighSchoolDiplomaFactory
 
 
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
@@ -174,9 +175,11 @@ class GetMissingCurriculumPeriodsTestCase(TestCase):
         )
 
     def test_with_secondary_studies(self):
-        self.admission.candidate.graduated_from_high_school = GotDiploma.YES.name
-        self.admission.candidate.graduated_from_high_school_year = self.academic_years[2012]
-        self.admission.candidate.save()
+        HighSchoolDiplomaFactory(
+            person=self.admission.candidate,
+            got_diploma=GotDiploma.YES.name,
+            academic_graduation_year=self.academic_years[2012],
+        )
 
         result = get_missing_curriculum_periods(proposition_uuid=self.admission.uuid)
 
@@ -210,7 +213,7 @@ class GetMissingCurriculumPeriodsTestCase(TestCase):
         )
 
         # Valuation of the non-academic experience
-        valuation = AdmissionProfessionalValuatedExperiencesFactory(
+        AdmissionProfessionalValuatedExperiencesFactory(
             baseadmission=self.admission,
             professionalexperience=non_academic_experience,
         )
@@ -232,7 +235,7 @@ class GetMissingCurriculumPeriodsTestCase(TestCase):
             person=self.admission.candidate,
         )
 
-        academic_experience_years = [
+        [
             EducationalExperienceYearFactory(
                 educational_experience=academic_experience,
                 academic_year=self.academic_years[year],
@@ -255,7 +258,7 @@ class GetMissingCurriculumPeriodsTestCase(TestCase):
         )
 
         # Valuation of the academic experience
-        valuation = AdmissionEducationalValuatedExperiencesFactory(
+        AdmissionEducationalValuatedExperiencesFactory(
             baseadmission=self.admission,
             educationalexperience=academic_experience,
         )
@@ -292,21 +295,21 @@ class GetMissingCurriculumPeriodsTestCase(TestCase):
             decision=DecisionResultatCycle.DISTINCTION.name,
             sigle_formation="SF1",
         )
-        pce_a_pae_a = InscriptionProgrammeAnnuelFactory(
+        InscriptionProgrammeAnnuelFactory(
             programme_cycle=pce_a,
             etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
             programme__offer__academic_year=self.academic_years[2010],
             programme__root_group__academic_year=self.academic_years[2010],
             type_duree=TypeDuree.NORMAL.name,
         )
-        pce_a_pae_b = InscriptionProgrammeAnnuelFactory(
+        InscriptionProgrammeAnnuelFactory(
             programme_cycle=pce_a,
             etat_inscription=EtatInscriptionFormation.ERREUR.name,
             programme__offer__academic_year=self.academic_years[2012],
             programme__root_group__academic_year=self.academic_years[2012],
             type_duree=TypeDuree.NORMAL.name,
         )
-        pce_a_pae_c = InscriptionProgrammeAnnuelFactory(
+        InscriptionProgrammeAnnuelFactory(
             programme_cycle=pce_a,
             etat_inscription=EtatInscriptionFormation.FIN_DE_CYCLE.name,
             programme__offer__academic_year=self.academic_years[2013],
@@ -318,7 +321,7 @@ class GetMissingCurriculumPeriodsTestCase(TestCase):
             decision=DecisionResultatCycle.DISTINCTION.name,
             sigle_formation="SF2",
         )
-        pce_b_pae_a = InscriptionProgrammeAnnuelFactory(
+        InscriptionProgrammeAnnuelFactory(
             programme_cycle=pce_b,
             etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
             programme__offer__academic_year=self.academic_years[2014],

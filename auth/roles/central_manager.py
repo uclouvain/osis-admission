@@ -245,5 +245,7 @@ class CentralManager(EntityRoleModel):
             'reference.view_scholarship': rules.always_allow,
             'reference.view_reference_choice': rules.always_allow,
             'base.view_organization': rules.always_allow,
+            # Administration facultaire (OSIS-Portal)
+            'faculty_administration.can_access_attestation_etudiants': rules.always_allow,
         }
         return RuleSet(ruleset)

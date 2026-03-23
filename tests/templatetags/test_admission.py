@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -53,9 +53,6 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
 from admission.ddd.admission.shared_kernel.domain.enums import TypeFormation
-from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
-    EtatAuthentificationParcours,
-)
 from admission.ddd.admission.shared_kernel.enums import Onglets, TypeItemFormulaire
 from admission.ddd.admission.shared_kernel.tests.factory.profil import (
     AnneeExperienceAcademiqueDTOFactory,
@@ -120,6 +117,7 @@ from osis_profile.models.enums.curriculum import (
     CURRICULUM_ACTIVITY_LABEL,
     EvaluationSystem,
 )
+from osis_profile.models.enums.experience_validation import EtatAuthentificationParcours
 from osis_profile.tests.factories.curriculum import ExperienceParcoursInterneDTOFactory
 from reference.tests.factories.university import UniversityFactory
 
@@ -394,7 +392,6 @@ class DisplayTagTestCase(TestCase):
         )
         self.assertEqual(component, {'template': 'admission/image.html', 'url': 'url', 'alt': 'name'})
 
-
     def test_experience_details_template_with_an_educational_experience(self):
         general_admission = GeneralEducationAdmissionFactory()
         proposition_uuid = general_admission.uuid
@@ -505,7 +502,6 @@ class DisplayTagTestCase(TestCase):
             '/osis_profile/{noma}/parcours_externe/edit/experience_academique/{annee_experience_uuid}'.format(
                 noma='0123456',
                 annee_experience_uuid=kwargs['experience'].annees[0].uuid,
-                experience_uuid=kwargs['experience'].uuid,
             ),
         )
         self.assertEqual(template_params['edit_link_button'], '')
@@ -521,7 +517,6 @@ class DisplayTagTestCase(TestCase):
             '/osis_profile/{noma}/parcours_externe/edit/experience_academique/{annee_experience_uuid}'.format(
                 noma='0123456',
                 annee_experience_uuid=kwargs['experience'].annees[0].uuid,
-                experience_uuid=kwargs['experience'].uuid,
             ),
         )
         self.assertEqual(template_params['edit_link_button'], '')
@@ -786,7 +781,7 @@ class DisplayTagTestCase(TestCase):
             'parcours_tab_id': 'tabID',
         }
 
-        next_url_suffix = f'?next=mypath&next_hash_url=tabID'
+        next_url_suffix = '?next=mypath&next_hash_url=tabID'
 
         context = checklist_experience_action_links_context(**kwargs)
 
@@ -871,7 +866,7 @@ class DisplayTagTestCase(TestCase):
             'parcours_tab_id': 'tabID',
         }
 
-        next_url_suffix = f'?next=mypath&next_hash_url=tabID'
+        next_url_suffix = '?next=mypath&next_hash_url=tabID'
 
         context = checklist_experience_action_links_context(**kwargs)
 
@@ -953,7 +948,7 @@ class DisplayTagTestCase(TestCase):
             'parcours_tab_id': 'tabID',
         }
 
-        next_url_suffix = f'?next=mypath&next_hash_url=tabID'
+        next_url_suffix = '?next=mypath&next_hash_url=tabID'
 
         context = checklist_experience_action_links_context(**kwargs)
 
@@ -974,7 +969,7 @@ class DisplayTagTestCase(TestCase):
         self.assertEqual(context['edit_link_button_in_new_tab'], True)
         self.assertEqual(
             context['curex_url'],
-            f'/osis_profile/0123456/parcours_externe/edit/etudes_secondaires',
+            '/osis_profile/0123456/parcours_externe/edit/etudes_secondaires',
         )
 
     def test_checklist_experience_action_links_context_with_an_internal_experience(self):
@@ -1289,17 +1284,17 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
     def test_candidate_language(self):
         self.assertEqual(
             candidate_language(''),
-            f' <strong>(langue de contact </strong><span class="label label-admission-primary"></span>)',
+            ' <strong>(langue de contact </strong><span class="label label-admission-primary"></span>)',
         )
 
         self.assertEqual(
             candidate_language(settings.LANGUAGE_CODE_FR),
-            f' <strong>(langue de contact </strong><span class="label label-admission-primary">FR</span>)',
+            ' <strong>(langue de contact </strong><span class="label label-admission-primary">FR</span>)',
         )
 
         self.assertEqual(
             candidate_language(settings.LANGUAGE_CODE_EN),
-            f' <strong>(langue de contact </strong><span class="label label-admission-primary">EN</span>)',
+            ' <strong>(langue de contact </strong><span class="label label-admission-primary">EN</span>)',
         )
 
     def test_format_ways_to_find_out_about_the_course(self):
@@ -1327,7 +1322,7 @@ class SimpleAdmissionTemplateTagsTestCase(TestCase):
                     autre_moyen_decouverte_formation='Other way',
                 )
             ),
-            f'\t<li>{ChoixMoyensDecouverteFormation.SITE_FORMATION_CONTINUE.value}</li>\n' f'\t<li>Other way</li>',
+            f'\t<li>{ChoixMoyensDecouverteFormation.SITE_FORMATION_CONTINUE.value}</li>\n\t<li>Other way</li>',
         )
 
         self.assertEqual(
@@ -1439,7 +1434,7 @@ class AdmissionTagsTestCase(TestCase):
                 name='UCL',
             ),
         )
-        entity_version_address = EntityVersionAddressFactory(
+        EntityVersionAddressFactory(
             entity_version=entity.entityversion_set.first(),
             city='Louvain-la-Neuve',
             street='Avenue de l\'Université',

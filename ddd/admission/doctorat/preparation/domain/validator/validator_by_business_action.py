@@ -735,6 +735,8 @@ class ApprouverAdmissionParSicValidatorList(TwoStepsMultipleBusinessExceptionLis
     checklist: StatutsChecklistDoctorale
     documents_dto: List[EmplacementDocumentDTO]
 
+    statut_validation_donnees_personnelles: str
+
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
@@ -744,7 +746,7 @@ class ApprouverAdmissionParSicValidatorList(TwoStepsMultipleBusinessExceptionLis
                 statut=self.statut,
             ),
             ShouldDonneesPersonnellesEtreDansEtatCorrectPourApprouverDemande(
-                checklist_actuelle=self.checklist,
+                statut_validation_donnees_personnelles=self.statut_validation_donnees_personnelles,
             ),
             ShouldDecisionCddEtreDansEtatCorrectPourApprouverDemande(
                 checklist_actuelle=self.checklist,
@@ -770,6 +772,8 @@ class ApprouverInscriptionParSicValidatorList(TwoStepsMultipleBusinessExceptionL
 
     documents_dto: List[EmplacementDocumentDTO]
 
+    statut_validation_donnees_personnelles: str
+
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
@@ -779,7 +783,7 @@ class ApprouverInscriptionParSicValidatorList(TwoStepsMultipleBusinessExceptionL
                 statut=self.statut,
             ),
             ShouldDonneesPersonnellesEtreDansEtatCorrectPourApprouverDemande(
-                checklist_actuelle=self.checklist,
+                statut_validation_donnees_personnelles=self.statut_validation_donnees_personnelles,
             ),
             ShouldDecisionCddEtreDansEtatCorrectPourApprouverDemande(
                 checklist_actuelle=self.checklist,
@@ -809,8 +813,8 @@ class ModifierStatutChecklistParcoursAnterieurValidatorList(TwoStepsMultipleBusi
     condition_acces: Optional[ConditionAcces]
     millesime_condition_acces: Optional[int]
 
-    uuids_experiences_valorisees: set[str]
-    checklist: StatutsChecklistDoctorale
+    experiences_academiques: list[ExperienceAcademiqueDTO]
+    experiences_non_academiques: list[ExperienceNonAcademiqueDTO]
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -827,8 +831,8 @@ class ModifierStatutChecklistParcoursAnterieurValidatorList(TwoStepsMultipleBusi
                 millesime_condition_acces=self.millesime_condition_acces,
             ),
             ShouldStatutsChecklistExperiencesEtreValidees(
-                uuids_experiences_valorisees=self.uuids_experiences_valorisees,
-                checklist=self.checklist,
+                experiences_academiques=self.experiences_academiques,
+                experiences_non_academiques=self.experiences_non_academiques,
                 statut=self.statut,
             ),
         ]
