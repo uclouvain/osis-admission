@@ -442,7 +442,7 @@ def document_component(document_write_token, document_metadata, can_edit=True):
 def document_epc_component(document_metadata):
     """Display the right editor component depending on the file type."""
     if document_metadata:
-        file_extension = document_metadata.get('name', '').rsplit('.')[-1]
+        file_extension = document_metadata.get('name', '').rsplit('.')[-1].lower()
         if file_extension == PDF_EXTENSION:
             return {
                 'template': 'osis_document_components/editor.html',
@@ -463,7 +463,7 @@ def document_epc_component(document_metadata):
                 'alt': document_metadata.get('description_detaillee'),
             }
         else:
-            logger.debug(
+            logger.warning(
                 f'[document_epc_component] unsupported file extension ' f'"{file_extension}" "{document_metadata}"'
             )
     return {
