@@ -48,6 +48,7 @@ from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from admission.models import ContinuingEducationAdmission
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from base.models.enums.active_status import ActiveStatusEnum
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.campus import CampusFactory
 from base.tests.factories.entity import EntityFactory
