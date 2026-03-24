@@ -51,6 +51,7 @@ from admission.tests.factories.general_education import (
     GeneralEducationAdmissionFactory,
     GeneralEducationTrainingFactory,
 )
+from base.models.enums.active_status import ActiveStatusEnum
 from base.models.enums.organization_type import MAIN
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
