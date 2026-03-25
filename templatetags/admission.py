@@ -441,10 +441,8 @@ def document_component(document_write_token, document_metadata, can_edit=True):
 @register.inclusion_tag('admission/dummy.html')
 def document_epc_component(document_metadata):
     """Display the right editor component depending on the file type."""
-    logger.error(f'[document_epc_component] LOG TEMPORAIRE A SUPPRIMER "{document_metadata=}"')
-
     if document_metadata:
-        file_extension = document_metadata.get('name', '').rsplit('.')[-1].lower()
+        file_extension = document_metadata.get('filename', '').rsplit('.')[-1].lower()
         if file_extension == PDF_EXTENSION:
             return {
                 'template': 'osis_document_components/editor.html',
@@ -462,7 +460,7 @@ def document_epc_component(document_metadata):
             return {
                 'template': 'admission/image.html',
                 'url': document_metadata.get('url'),
-                'alt': document_metadata.get('description_detaillee'),
+                'alt': document_metadata.get('name'),
             }
         else:
             logger.warning(
