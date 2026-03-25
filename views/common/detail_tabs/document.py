@@ -330,6 +330,7 @@ class DocumentEpcDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, H
                     'mimetype': metadata.get('type_contenu'),
                     'url': metadata.get('url'),
                     'name': name,
+                    'filename': metadata.get('name'),
                 }
         except Exception as e:
             logger.exception(f"[Documents EPC] Erreur lors de la récupération du document EPC {self.kwargs['token']}")
