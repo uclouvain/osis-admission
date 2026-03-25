@@ -95,9 +95,6 @@ from admission.ddd.admission.shared_kernel.dtos.question_specifique import (
     QuestionSpecifiqueDTO,
 )
 from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
-from admission.ddd.admission.shared_kernel.dtos.titre_acces_selectionnable import (
-    TitreAccesSelectionnableDTO,
-)
 from admission.ddd.admission.shared_kernel.enums import Onglets, TypeItemFormulaire
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     StatutReclamationEmplacementDocument,
@@ -128,6 +125,9 @@ from admission.utils import get_access_conditions_url, get_experience_urls
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.enums.civil_state import CivilState
 from base.models.person import Person
+from ddd.logic.dossier_etudiant.read_view.dto.dossier_etudiant import DossierEtudiantLigneHistoriqueDTO
+from ddd.logic.dossier_etudiant.shared_kernel.dto.dossier_etudiant_lignes_annualisees import \
+    DossierEtudiantLignesAnnualiseesDTO
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
 from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
@@ -136,9 +136,6 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
     MessageCurriculumDTO,
-)
-from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
-    ExperienceParcoursInterneDTO,
 )
 from osis_profile.constants import IMAGE_MIME_TYPES
 from osis_profile.models.enums.experience_validation import EtatAuthentificationParcours
@@ -1080,7 +1077,7 @@ def checklist_experience_action_links_context(
         ExperienceAcademiqueDTO,
         ExperienceNonAcademiqueDTO,
         EtudesSecondairesAdmissionDTO,
-        ExperienceParcoursInterneDTO,
+        DossierEtudiantLignesAnnualiseesDTO,
         ExamenDTO,
     ],
     current_year,
@@ -1092,22 +1089,23 @@ def checklist_experience_action_links_context(
 
     result_context = {
         'prefix': prefix,
-        'experience_uuid': str(experience.uuid),
+        'experience_uuid': '',
         'edit_link_button_in_new_tab': getattr(experience, 'epc_experience', False),
         'update_url': '',
         'delete_url': '',
         'duplicate_url': '',
     }
 
-    if isinstance(experience, (ExperienceParcoursInterneDTO, MessageCurriculumDTO)):
+    if isinstance(experience, (DossierEtudiantLignesAnnualiseesDTO, DossierEtudiantLigneHistoriqueDTO, MessageCurriculumDTO)):
         return result_context
 
-    elif (
+    if (
         experience.__class__ in [EtudesSecondairesAdmissionDTO, ExamenDTO]
         or experience.valorisee_par_admissions
         and proposition_uuid in experience.valorisee_par_admissions
         and experience.derniere_annee == current_year
     ):
+        result_context['experience_uuid'] = str(experience.uuid)
         experience_urls = get_experience_urls(
             user=context['request'].user,
             admission=context['view'].admission,

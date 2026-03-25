@@ -254,18 +254,14 @@ from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from base.utils.utils import format_academic_year
-from ddd.logic.shared_kernel.profil.commands import (
-    RecupererExperiencesParcoursInterneQuery,
-)
+from ddd.logic.dossier_etudiant.read_view.dto.dossier_etudiant import DossierEtudiantDTO
+from ddd.logic.dossier_etudiant.read_view.queries import SearchDossierEtudiantQuery
 from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import EtudesSecondairesDTO
 from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
-)
-from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
-    ExperienceParcoursInterneDTO,
 )
 from epc.models.enums.condition_acces import ConditionAcces
 from epc.models.enums.etat_inscription import EtatInscriptionFormation
@@ -723,6 +719,8 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
         )
         context['bg_classes'] = {}
         context['dossiers_admission_annee'] = self.dossiers_admission_annee
+        context['annee_dossier_courant'] = self.admission.determined_academic_year.year
+        context['noma'] = self.proposition.noma_candidat
         context.update(**{
             'statuts_epc_autorises': self._get_statuts_epc_autorises(),
             'statuts_epc_refuses': self._get_statuts_epc_refuses(),
@@ -2171,15 +2169,14 @@ class SicDecisionPdfPreviewView(LoadDossierViewMixin, RedirectView):
 
 
 def get_internal_experiences(
-    matricule_candidat: str,
-    with_credits: bool = True,
-) -> List[ExperienceParcoursInterneDTO]:
-    return message_bus_instance.invoke(
-        RecupererExperiencesParcoursInterneQuery(
-            matricule=matricule_candidat,
-            avec_credits=with_credits,
+    noma_candidat: str,
+) -> List[DossierEtudiantDTO]:
+    internal_experience: List[DossierEtudiantDTO] = message_bus_instance.invoke(
+        SearchDossierEtudiantQuery(
+            nomas=[noma_candidat],
         )
     )
+    return internal_experience
 
 
 class ApplicationFeesView(
@@ -3281,8 +3278,8 @@ class ChecklistView(
     permission_required = 'admission.view_checklist'
 
     @cached_property
-    def internal_experiences(self) -> List[ExperienceParcoursInterneDTO]:
-        return get_internal_experiences(matricule_candidat=self.proposition.matricule_candidat)
+    def internal_experiences(self) -> List[DossierEtudiantDTO]:
+        return get_internal_experiences(noma_candidat=self.proposition.noma_candidat)
 
     @classmethod
     def checklist_documents_by_tab(cls, specific_questions: List[QuestionSpecifiqueDTO]) -> Dict[str, Set[str]]:
@@ -3727,7 +3724,7 @@ class ChecklistView(
             experiences_professionnelles=resume.curriculum.experiences_non_academiques,
             etudes_secondaires=resume.etudes_secondaires,
             examens=[resume.examen_formation],
-            experiences_parcours_interne=self.internal_experiences,
+            dossiers_etudiant=self.internal_experiences,
             additional_messages=self.curriculum_additional_messages(),
         )
 
