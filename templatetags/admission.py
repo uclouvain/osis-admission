@@ -441,6 +441,8 @@ def document_component(document_write_token, document_metadata, can_edit=True):
 @register.inclusion_tag('admission/dummy.html')
 def document_epc_component(document_metadata):
     """Display the right editor component depending on the file type."""
+    logger.warning(f'[document_epc_component] LOG TEMPORAIRE A SUPPRIMER "{document_metadata=}"')
+
     if document_metadata:
         file_extension = document_metadata.get('name', '').rsplit('.')[-1].lower()
         if file_extension == PDF_EXTENSION:
