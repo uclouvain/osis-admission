@@ -1140,6 +1140,9 @@ msgstr "Chemistry"
 msgid "CIRE, unlimited stay or foreigner`s card"
 msgstr ""
 
+msgid "CO_DIPLOMATION_1260"
+msgstr "1260 € - Joint degree"
+
 msgid "CO_DIPLOMATION_132"
 msgstr "132 € - Joint degree"
 
@@ -1902,6 +1905,9 @@ msgstr ""
 msgid "DISPENSE_VCRC"
 msgstr ""
 
+msgid "DROITS_MAJORES"
+msgstr ""
+
 msgid "DROITS_MAJORES_DEMANDES"
 msgstr ""
 
@@ -2413,6 +2419,9 @@ msgstr ""
 
 #, python-format
 msgid "ENROLMENT AUTHORISATION<br>for the %(academic_year)s academic year"
+msgstr ""
+
+msgid "EPC"
 msgstr ""
 
 msgid "EPC injection"
@@ -3535,7 +3544,10 @@ msgstr "Enrollment"
 msgid "INSCRIPTION_AU_ROLE"
 msgstr ""
 
-msgid "INSCRIPTION_REGULIERE"
+msgid "INSCRIPTION_REGULIERE_1194"
+msgstr ""
+
+msgid "INSCRIPTION_REGULIERE_835"
 msgstr ""
 
 msgid "INVALID"
@@ -5074,6 +5086,13 @@ msgid "Please note that the first term begins on %(date)s."
 msgstr ""
 
 msgid ""
+"Please note that these amounts are currently the subject of a draft decree "
+"under which the Wallonia-Brussels Federation is considering increasing them "
+"(see: <a href=\"https://www.uclouvain.be/en/enrolment/registration-fee-"
+"amount\" target=\"_blank\">The amount of tuition fees</a>)."
+msgstr ""
+
+msgid ""
 "Please note that this document will be removed from the list of the missing "
 "documents."
 msgstr ""
@@ -5842,6 +5861,9 @@ msgid "Secretary"
 msgstr ""
 
 msgid "Sector"
+msgstr ""
+
+msgid "Select a document to display it"
 msgstr ""
 
 #, python-format
@@ -6882,6 +6904,9 @@ msgstr ""
 msgid "The university tuition fee is EURO %(montant)s."
 msgstr "The university tuition fee is €%(montant)s."
 
+msgid "There are no EPC documents for this student."
+msgstr ""
+
 msgid "There can be no more CA members in the supervision group."
 msgstr ""
 "There can be no more supervision committee members in the supervision group."
@@ -6897,6 +6922,9 @@ msgid ""
 msgstr ""
 
 msgid "There is no required exam for this training."
+msgstr ""
+
+msgid "There was an error while getting the EPC documents list."
 msgstr ""
 
 msgid "Thesis field"
@@ -6976,11 +7004,6 @@ msgid "This activity will be refused"
 msgstr ""
 
 msgid "This activity will be restored"
-msgstr ""
-
-msgid ""
-"This amount is subject to change pending the adoption and publication of the "
-"decree setting it."
 msgstr ""
 
 msgid ""

@@ -7,7 +7,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -64,16 +64,36 @@
   {{ form.media }}
   <script>
       window.admission.trainingChoiceForm = function() {
-      $('#id_formation').on('select2:select select2:clear', function (event) {
-          if(event.params.data.type === 'BACHELOR') {
-              $('#bachelor-cycle-continuation-container').removeClass('hidden');
-          } else {
-              $('#bachelor-cycle-continuation-container').addClass('hidden');
-          }
-      });
+        $('#id_formation').on('select2:select select2:clear', function (event) {
+            if(event.params.data.type === 'BACHELOR') {
+                $('#bachelor-cycle-continuation-container').removeClass('hidden');
+            } else {
+                $('#bachelor-cycle-continuation-container').addClass('hidden');
+            }
+        });
       };
+
+      $(document).on("dal-element-initialized", function (e) {
+        if (e.detail.element.id === "id_formation") {
+          $('#id_formation').data('select2').options.options['templateResult'] = function(state) {
+            if (!!state.est_active_uniquement_pour_reinscription) {
+              return $('<div class="formation-option-reinscription">'+ state.text +'</div>');
+            } else {
+              return $('<span>'+ state.text +'</span>');
+            }
+          };
+        }
+      });
+
       {% if not request.htmx %}
         window.admission.trainingChoiceForm();
       {% endif %}
   </script>
+  <style>
+    li:not([aria-selected="true"], .select2-results__option--highlighted) > .formation-option-reinscription {
+      background-color: #e5ac70;
+      margin: -6px;
+      padding: 6px;
+    }
+  </style>
 </div>

@@ -166,7 +166,8 @@ class ProgramManager(EducationGroupRoleModel):
             'admission.edit_external_supervision_member': is_part_of_education_group
             & doctorate.is_submitted
             & ~is_sent_to_epc,
-            'admission.approve_proposition_by_pdf': is_part_of_education_group & doctorate.is_submitted,
+            'admission.approve_proposition_by_pdf': is_part_of_education_group
+            & (doctorate.is_submitted | doctorate.signing_in_progress),
             'admission.resend_invitation': is_part_of_education_group & doctorate.signing_in_progress,
             'admission.request_signatures': is_part_of_education_group & doctorate.is_submitted,
             'admission.view_historyentry': is_part_of_education_group,

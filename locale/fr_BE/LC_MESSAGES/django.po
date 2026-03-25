@@ -1248,6 +1248,9 @@ msgstr "Chimie"
 msgid "CIRE, unlimited stay or foreigner`s card"
 msgstr "Carte CIRE, séjour illimité ou d'étranger"
 
+msgid "CO_DIPLOMATION_1260"
+msgstr "1260 € - Codiplômation"
+
 msgid "CO_DIPLOMATION_132"
 msgstr "132 € - Codiplômation"
 
@@ -2083,6 +2086,9 @@ msgstr "Dispense UNIV"
 msgid "DISPENSE_VCRC"
 msgstr "Dispense VCRC"
 
+msgid "DROITS_MAJORES"
+msgstr "5369 € - Droits majorés"
+
 msgid "DROITS_MAJORES_DEMANDES"
 msgstr "Droits majorés demandés"
 
@@ -2619,6 +2625,9 @@ msgstr "EN"
 #, python-format
 msgid "ENROLMENT AUTHORISATION<br>for the %(academic_year)s academic year"
 msgstr "AUTORISATION D’INSCRIPTION<br>à l’année académique %(academic_year)s"
+
+msgid "EPC"
+msgstr "EPC"
 
 msgid "EPC injection"
 msgstr "Injection EPC"
@@ -3931,7 +3940,10 @@ msgstr "Inscription"
 msgid "INSCRIPTION_AU_ROLE"
 msgstr "66 € - Inscription au rôle (pré-admission doctorat, ...)"
 
-msgid "INSCRIPTION_REGULIERE"
+msgid "INSCRIPTION_REGULIERE_1194"
+msgstr "1194 € - Inscription régulière"
+
+msgid "INSCRIPTION_REGULIERE_835"
 msgstr "835 € - Inscription régulière"
 
 msgid "INVALID"
@@ -5635,6 +5647,17 @@ msgid "Please note that the first term begins on %(date)s."
 msgstr "Nous vous signalons que le 1er quadrimestre débute le %(date)s."
 
 msgid ""
+"Please note that these amounts are currently the subject of a draft decree "
+"under which the Wallonia-Brussels Federation is considering increasing them "
+"(see: <a href=\"https://www.uclouvain.be/en/enrolment/registration-fee-"
+"amount\" target=\"_blank\">The amount of tuition fees</a>)."
+msgstr ""
+"Sachez que ces montants font actuellement l’objet d’un projet de décret aux "
+"termes duquel la Fédération Wallonie-Bruxelles envisage de les majorer "
+"(voir: <a href=\"https://www.uclouvain.be/fr/inscriptions/montant-droits-"
+"inscription\" target=\"_blank\">Le montant des droits d'inscription</a>)."
+
+msgid ""
 "Please note that this document will be removed from the list of the missing "
 "documents."
 msgstr ""
@@ -6448,6 +6471,9 @@ msgstr "Secrétaire"
 
 msgid "Sector"
 msgstr "Secteur"
+
+msgid "Select a document to display it"
+msgstr "Sélectionner un document pour l'afficher"
 
 #, python-format
 msgid "Select valid choices. %(value)s is not one of the available choices."
@@ -7655,6 +7681,9 @@ msgstr "Le type de l'élément du formulaire d'admission est inconnu (%(type)s).
 msgid "The university tuition fee is EURO %(montant)s."
 msgstr "Les droits d'inscription à l'Université s'élèvent à %(montant)s EUR."
 
+msgid "There are no EPC documents for this student."
+msgstr "Il n'y a pas de documents EPC pour cet étudiant."
+
 msgid "There can be no more CA members in the supervision group."
 msgstr ""
 "Il ne peut y avoir davantage de membres du comité d'accompagnement dans le "
@@ -7677,6 +7706,9 @@ msgstr ""
 
 msgid "There is no required exam for this training."
 msgstr "Il n'y a pas d'examen requis pour cette formation."
+
+msgid "There was an error while getting the EPC documents list."
+msgstr "Erreur lors de la récupération des documents EPC."
 
 msgid "Thesis field"
 msgstr "Domaine de la thèse"
@@ -7771,13 +7803,6 @@ msgstr "Cette activité sera refusée"
 
 msgid "This activity will be restored"
 msgstr "Cette activité sera remise au statut soumise"
-
-msgid ""
-"This amount is subject to change pending the adoption and publication of the "
-"decree setting it."
-msgstr ""
-"Ce montant est susceptible d'être adapté sous réserve de l'adoption et de la "
-"publication du décret fixant celui-ci."
 
 msgid ""
 "This course is closed. The candidate can express its interest by ticking the "
@@ -8545,8 +8570,8 @@ msgid ""
 "href=\"%(edit_experience_url)s\">edit form</a>."
 msgstr ""
 "Vous pouvez le faire automatiquement en cliquant <button type=\"submit\" "
-"class=\"btn-link p-0 no-border\">ici</button> ou manuellement via le <a href=\"%(edit_experience_url)s\">formulaire "
-"d'édition</a>."
+"class=\"btn-link p-0 no-border\">ici</button> ou manuellement via le <a "
+"href=\"%(edit_experience_url)s\">formulaire d'édition</a>."
 
 msgid ""
 "You can do it automatically by clicking <button type=\"submit\" class=\"btn-"

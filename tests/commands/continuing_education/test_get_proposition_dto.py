@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -33,27 +33,22 @@ from django.test import TestCase, override_settings
 from django.utils.translation import override
 from osis_history.models import HistoryEntry
 
-from admission.ddd.admission.formation_continue.commands import (
-    RecupererPropositionQuery,
-)
+from admission.ddd.admission.formation_continue.commands import RecupererPropositionQuery
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixEdition,
     ChoixMoyensDecouverteFormation,
     ChoixStatutPropositionContinue,
     ChoixTypeAdresseFacturation,
 )
-from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
-    PropositionNonTrouveeException,
-)
+from admission.ddd.admission.formation_continue.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.formation_continue.dtos import PropositionDTO
 from admission.ddd.admission.shared_kernel.dtos import AdressePersonnelleDTO
 from admission.ddd.admission.shared_kernel.dtos.campus import CampusDTO
 from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from admission.models import ContinuingEducationAdmission
-from admission.tests.factories.continuing_education import (
-    ContinuingEducationAdmissionFactory,
-)
+from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from base.models.enums.active_status import ActiveStatusEnum
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.campus import CampusFactory
 from base.tests.factories.entity import EntityFactory
@@ -224,6 +219,7 @@ class GetPropositionDTOTestCase(TestCase):
                 sigle_entite_gestion='SCH',
                 credits=180,
                 grade_academique='10',
+                active=ActiveStatusEnum.ACTIVE.name,
             ),
         )
         self.assertEqual(result.reference, f'L-SCH22-{self.admission}')

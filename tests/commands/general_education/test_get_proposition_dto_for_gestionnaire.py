@@ -32,24 +32,12 @@ from django.test import TestCase, override_settings
 from django.utils.translation import pgettext
 from osis_history.models import HistoryEntry
 
-from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
-    PropositionNonTrouveeException,
-)
-from admission.ddd.admission.formation_generale.commands import (
-    RecupererPropositionGestionnaireQuery,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
-)
-from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
-    PropositionNonTrouveeException,
-)
-from admission.ddd.admission.formation_generale.dtos.condition_approbation import (
-    ConditionComplementaireApprobationDTO,
-)
-from admission.ddd.admission.formation_generale.dtos.proposition import (
-    PropositionGestionnaireDTO,
-)
+from admission.ddd.admission.formation_continue.domain.validator.exceptions import PropositionNonTrouveeException
+from admission.ddd.admission.formation_generale.commands import RecupererPropositionGestionnaireQuery
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
+from admission.ddd.admission.formation_generale.dtos.condition_approbation import ConditionComplementaireApprobationDTO
+from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
 from admission.ddd.admission.shared_kernel.dtos.campus import CampusDTO
 from admission.ddd.admission.shared_kernel.dtos.formation import BaseFormationDTO, FormationDTO
 from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation
@@ -63,6 +51,7 @@ from admission.tests.factories.general_education import (
     GeneralEducationAdmissionFactory,
     GeneralEducationTrainingFactory,
 )
+from base.models.enums.active_status import ActiveStatusEnum
 from base.models.enums.organization_type import MAIN
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -159,6 +148,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
                 sigle_entite_gestion='SCH',
                 credits=180,
                 grade_academique='5',
+                active=ActiveStatusEnum.ACTIVE.name,
             ),
         )
         self.assertEqual(result.reference, f'M-SCH22-{self.admission}')

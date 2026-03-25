@@ -169,7 +169,13 @@
                   id="{{ tab }}-documents-select"
                   class="form-control documents-select"
                   name="identifier"
+                  {% if not documents %}disabled{% endif %}
               >
+                {% if documents %}
+                  <option value="" disabled>{% translate "Select a document to display it" %}</option>
+                {% else %}
+                  <option value="" disabled>{% translate "No document" %}</option>
+                {% endif %}
                 {% for document in documents %}
                   <option
                       value="{{ document.identifiant }}"
@@ -251,7 +257,6 @@
           const defaultDocumentSelect2Options = {
               templateResult: formatResultDocumentOption,
               templateSelection: formatSelectedDocumentOption,
-              placeholder: '{% translate "No document" %}',
           };
 
           $('.documents-select').select2(defaultDocumentSelect2Options);
@@ -264,7 +269,7 @@
               const nextOptionButton = jQuerySelect.siblings('.next-option-button');
               const documentSelectElement = jQuerySelect[0];
 
-              prevOptionButton.prop('disabled', documentSelectElement.selectedIndex <= 0);
+              prevOptionButton.prop('disabled', documentSelectElement.selectedIndex <= 1);
               nextOptionButton.prop('disabled', documentSelectElement.selectedIndex >= documentSelectElement.length - 1);
           }
 
