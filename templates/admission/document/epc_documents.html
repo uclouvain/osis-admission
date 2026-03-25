@@ -35,7 +35,8 @@
       >
         <thead>
           <tr>
-            <th>{% translate 'Document' %}</th>
+            <th>{% translate 'Type' %}</th>
+            <th>{% translate 'Comment' %}</th>
             <th>{% translate 'Year' %}</th>
           </tr>
         </thead>
@@ -47,6 +48,9 @@
                   hx-swap="outerHTML"
                   data-document-id="{{ document.token }}"
               >
+                <td class="auto-width">
+                  {{ document.description }}
+                </td>
                 <td class="auto-width">
                   {{ document.description_detaillee }}
                 </td>
