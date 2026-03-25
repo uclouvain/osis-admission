@@ -38,43 +38,26 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
 
 from admission.admission_utils.copy_documents import copy_documents
-from admission.forms.admission.curriculum import (
-    CurriculumAcademicExperienceAdmissionForm,
-)
+from admission.forms.admission.curriculum import CurriculumAcademicExperienceAdmissionForm
 from admission.models import EPCInjection as AdmissionEPCInjection
-from admission.models.base import (
-    BaseAdmission,
-)
+from admission.models.base import BaseAdmission
 from admission.models.checklist import FreeAdditionalApprovalCondition
-from admission.models.epc_injection import (
-    EPCInjectionStatus as AdmissionEPCInjectionStatus,
-)
-from admission.models.epc_injection import EPCInjectionType
+from admission.models.epc_injection import EPCInjectionStatus as AdmissionEPCInjectionStatus, EPCInjectionType
 from admission.models.valuated_epxeriences import (
     AdmissionEducationalValuatedExperiences,
     AdmissionProfessionalValuatedExperiences,
 )
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
-from osis_profile.models import (
-    EducationalExperience,
-    EducationalExperienceYear,
-    ProfessionalExperience,
-)
-from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection
+from osis_profile.models import EducationalExperience, EducationalExperienceYear, ProfessionalExperience
 from osis_profile.models.epc_injection import (
+    EPCInjection as CurriculumEPCInjection,
     EPCInjectionStatus as CurriculumEPCInjectionStatus,
 )
-from osis_profile.views.delete_experience_academique import (
-    DeleteExperienceAcademiqueView,
-)
-from osis_profile.views.delete_experience_non_academique import (
-    DeleteExperienceNonAcademiqueView,
-)
+from osis_profile.views.delete_experience_academique import DeleteExperienceAcademiqueView
+from osis_profile.views.delete_experience_non_academique import DeleteExperienceNonAcademiqueView
 from osis_profile.views.edit_experience_academique import EditExperienceAcademiqueView
-from osis_profile.views.edit_experience_non_academique import (
-    EditExperienceNonAcademiqueView,
-)
-from osis_profile.views.mixins.parcours_externe import DeleteEducationalExperienceMixin
+from osis_profile.views.edit_experience_non_academique import EditExperienceNonAcademiqueView
+from osis_profile.views.mixins.parcours_externe import DeleteExperienceMixin
 
 __all__ = [
     'CurriculumEducationalExperienceFormView',
@@ -277,7 +260,7 @@ class CurriculumNonEducationalExperienceFormView(
         return context_data
 
 
-class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteEducationalExperienceMixin):
+class CurriculumBaseDeleteView(LoadDossierViewMixin, DeleteExperienceMixin):
     permission_required = 'admission.delete_admission_curriculum'
     template_name = 'admission/empty_template.html'
 
@@ -451,7 +434,9 @@ class CurriculumBaseExperienceDuplicateView(AdmissionFormMixin, LoadDossierViewM
             Union[AdmissionProfessionalValuatedExperiences, AdmissionEducationalValuatedExperiences]
         ] = self.valuated_experience_model.objects.filter(
             **{self.valuated_experience_field_id_name: self.experience_id}
-        ).select_related('baseadmission')
+        ).select_related(
+            'baseadmission'
+        )
 
         # Initialize the new experience
         duplicated_experience.pk = None
