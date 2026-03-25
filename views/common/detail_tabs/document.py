@@ -316,23 +316,21 @@ class DocumentEpcDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, H
     name = 'document-epc-detail'
 
     def get_document_metadata(self):
-        logger.error(f'[DocumentEpcDetailView] LOG TEMPORAIRE A SUPPRIMER {self.kwargs["token"]=}')
         if not self.proposition.noma_candidat:
             return None
         try:
             metadata = get_external_file_remote_metadata(self.kwargs['token'])
-            logger.error(f'[DocumentEpcDetailView] LOG TEMPORAIRE A SUPPRIMER {metadata=}')
             if metadata:
                 name = metadata.get('description_detaillee')
                 if not name:
                     name = metadata.get('description')
                 if not name:
                     name = metadata.get('nom')
-                logger.error(f'[DocumentEpcDetailView] LOG TEMPORAIRE A SUPPRIMER {name=}')
                 return {
                     'mimetype': metadata.get('type_contenu'),
                     'url': metadata.get('url'),
                     'name': name,
+                    'filename': metadata.get('name'),
                 }
         except Exception as e:
             logger.exception(f"[Documents EPC] Erreur lors de la récupération du document EPC {self.kwargs['token']}")
