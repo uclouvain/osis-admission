@@ -88,6 +88,7 @@ from infrastructure.shared_kernel.profil.domain.service.in_memory.parcours_inter
     ExperienceParcoursInterneInMemoryTranslator,
 )
 
+from ...shared_kernel.domain.service.in_memory.inscriptions_translator import InscriptionsInMemoryTranslator
 from ...shared_kernel.domain.service.in_memory.modifier_checklist_experience_parcours_anterieur import (
     ValidationExperienceParcoursAnterieurInMemoryService,
 )
@@ -143,6 +144,8 @@ _experience_parcours_interne_translator = ExperienceParcoursInterneInMemoryTrans
 _matricule_etudiant_service = MatriculeEtudiantService()
 _raccrocher_experiences_curriculum = RaccrocherExperiencesCurriculumInMemory()
 _validation_experience_parcours_anterieur_service = ValidationExperienceParcoursAnterieurInMemoryService()
+_annee_inscription_formation_translator = AnneeInscriptionFormationInMemoryTranslator()
+_inscriptions_translator = InscriptionsInMemoryTranslator()
 
 
 COMMAND_HANDLERS = {
@@ -163,7 +166,7 @@ COMMAND_HANDLERS = {
     RechercherDoctoratQuery: lambda msg_bus, cmd: rechercher_doctorats(
         cmd,
         doctorat_translator=_doctorat_translator,
-        annee_inscription_formation_translator=AnneeInscriptionFormationInMemoryTranslator(),
+        annee_inscription_formation_translator=_annee_inscription_formation_translator,
     ),
     IdentifierPromoteurCommand: lambda msg_bus, cmd: identifier_promoteur(
         cmd,
@@ -197,6 +200,8 @@ COMMAND_HANDLERS = {
         academic_year_repository=_academic_year_repository,
         profil_candidat_translator=_profil_candidat_translator,
         raccrocher_experiences_curriculum=_raccrocher_experiences_curriculum,
+        annee_inscription_formation_translator=_annee_inscription_formation_translator,
+        inscriptions_translator=_inscriptions_translator,
     ),
     RenvoyerInvitationSignatureCommand: lambda msg_bus, cmd: renvoyer_invitation_signature(
         cmd,
@@ -223,6 +228,8 @@ COMMAND_HANDLERS = {
         questions_specifiques_translator=_question_specific_translator,
         academic_year_repository=_academic_year_repository,
         profil_candidat_translator=_profil_candidat_translator,
+        annee_inscription_formation_translator=_annee_inscription_formation_translator,
+        inscriptions_translator=_inscriptions_translator,
     ),
     SupprimerPromoteurCommand: lambda msg_bus, cmd: supprimer_promoteur(
         cmd,

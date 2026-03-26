@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -47,6 +47,12 @@ from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervi
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
     IPropositionRepository,
 )
+from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import (
+    IAnneeInscriptionFormationTranslator,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
+)
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
@@ -70,6 +76,8 @@ def verifier_projet(
     questions_specifiques_translator: 'IQuestionSpecifiqueTranslator',
     academic_year_repository: 'IAcademicYearRepository',
     profil_candidat_translator: 'IProfilCandidatTranslator',
+    annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
+    inscriptions_translator: IInscriptionsTranslatorService,
 ) -> 'PropositionIdentity':
     # GIVEN
     entity_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -92,6 +100,10 @@ def verifier_projet(
             year=proposition_candidat.annee_calculee or proposition_candidat.formation_id.annee
         )
     )
+    candidat_est_inscrit_recemment_ucl = inscriptions_translator.est_inscrit_recemment(
+        matricule_candidat=proposition_candidat.matricule_candidat,
+        annee_inscription_formation_translator=annee_inscription_formation_translator,
+    )
 
     # WHEN
     VerifierPropositionProjetDoctoral.verifier(
@@ -102,6 +114,7 @@ def verifier_projet(
         profil_candidat_translator=profil_candidat_translator,
         annee_courante=annee_courante,
         annee_formation=annee_formation,
+        candidat_est_inscrit_recemment_ucl=candidat_est_inscrit_recemment_ucl,
     )
 
     # THEN

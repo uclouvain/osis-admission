@@ -50,3 +50,9 @@ class CandidateReEnrolmentEligibilitySerializer(serializers.Serializer):
     """Data related to the candidate re-enrolment eligibility."""
 
     est_eligible_a_la_reinscription = serializers.BooleanField()
+
+
+class CandidateEnrolmentInformationSerializer(serializers.Serializer):
+    """Data related to the candidate re-enrolment information."""
+
+    est_inscrit_recemment = serializers.BooleanField()

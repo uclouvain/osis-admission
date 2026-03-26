@@ -82,6 +82,7 @@ from admission.infrastructure.admission.shared_kernel.domain.service.emplacement
 from admission.infrastructure.admission.shared_kernel.domain.service.historique import (
     Historique as HistoriqueGlobal,
 )
+from admission.infrastructure.admission.shared_kernel.domain.service.inscriptions import InscriptionsTranslatorService
 from admission.infrastructure.admission.shared_kernel.domain.service.maximum_propositions import (
     MaximumPropositionsAutorisees,
 )
@@ -149,6 +150,8 @@ COMMAND_HANDLERS = {
         calendrier_inscription=CalendrierInscription(),
         maximum_propositions_service=MaximumPropositionsAutorisees(),
         questions_specifiques_translator=QuestionSpecifiqueTranslator(),
+        annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
+        inscriptions_translator=InscriptionsTranslatorService(),
     ),
     SoumettrePropositionCommand: lambda msg_bus, cmd: soumettre_proposition(
         msg_bus,
@@ -166,6 +169,8 @@ COMMAND_HANDLERS = {
         raccrocher_experiences_curriculum=RaccrocherExperiencesCurriculum(),
         email_destinataire_repository=EmailDestinataireRepository(),
         validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
+        annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
+        inscriptions_translator=InscriptionsTranslatorService(),
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,

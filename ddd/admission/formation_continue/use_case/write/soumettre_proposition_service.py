@@ -38,9 +38,15 @@ from admission.ddd.admission.formation_continue.domain.service.verifier_proposit
 from admission.ddd.admission.formation_continue.events import PropositionFormationContinueSoumiseEvent
 from admission.ddd.admission.formation_continue.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.shared_kernel.domain.builder.formation_identity import FormationIdentityBuilder
+from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import (
+    IAnneeInscriptionFormationTranslator,
+)
 from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.ddd.admission.shared_kernel.domain.service.i_elements_confirmation import IElementsConfirmation
 from admission.ddd.admission.shared_kernel.domain.service.i_historique import IHistorique
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
+)
 from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
 from admission.ddd.admission.shared_kernel.domain.service.i_modifier_checklist_experience_parcours_anterieur import (
     IValidationExperienceParcoursAnterieurService,
@@ -72,6 +78,8 @@ def soumettre_proposition(
     raccrocher_experiences_curriculum: 'IRaccrocherExperiencesCurriculum',
     email_destinataire_repository: 'IEmailDestinataireRepository',
     validation_experience_parcours_anterieur_service: 'IValidationExperienceParcoursAnterieurService',
+    annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
+    inscriptions_translator: IInscriptionsTranslatorService,
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -81,6 +89,10 @@ def soumettre_proposition(
         onglets=Onglets.get_names(),
     )
     formation_id = FormationIdentityBuilder.build(sigle=proposition.formation_id.sigle, annee=cmd.annee)
+    candidat_est_inscrit_recemment_ucl = inscriptions_translator.est_inscrit_recemment(
+        matricule_candidat=proposition.matricule_candidat,
+        annee_inscription_formation_translator=annee_inscription_formation_translator,
+    )
 
     # WHEN
     VerifierProposition().verifier(
@@ -93,6 +105,7 @@ def soumettre_proposition(
         pool_soumis=AcademicCalendarTypes[cmd.pool],
         maximum_propositions_service=maximum_propositions_service,
         questions_specifiques=questions_specifiques,
+        candidat_est_inscrit_recemment_ucl=candidat_est_inscrit_recemment_ucl,
     )
     element_confirmation.valider(
         soumis=cmd.elements_confirmation,
