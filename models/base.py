@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -84,6 +84,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_NON_SOUMISE,
     STATUTS_PROPOSITION_GENERALE_NON_SOUMISE_OU_FRAIS_DOSSIER_EN_ATTENTE,
 )
+from admission.ddd.admission.shared_kernel.commands import CandidatEstInscritRecemmentUCLQuery
 from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.shared_kernel.repository.i_proposition import (
@@ -694,6 +695,14 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         return any(
             injection.status == EPCInjectionStatus.OK.name
             for injection in self.epc_injection.filter(type=EPCInjectionType.DEMANDE.name)
+        )
+
+    @cached_property
+    def candidate_is_recent_student(self):
+        from infrastructure.messages_bus import message_bus_instance
+
+        return message_bus_instance.invoke(
+            CandidatEstInscritRecemmentUCLQuery(matricule_candidat=self.candidate.global_id)
         )
 
     @cached_property

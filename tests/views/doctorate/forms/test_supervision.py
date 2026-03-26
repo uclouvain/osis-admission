@@ -46,6 +46,7 @@ from admission.forms.admission.doctorate.supervision import (
 from admission.models import SupervisionActor
 from admission.models.enums.actor_type import ActorType
 from admission.tests.factories import DoctorateAdmissionFactory
+from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.curriculum import (
     AdmissionEducationalValuatedExperiencesFactory,
     AdmissionProfessionalValuatedExperiencesFactory,
@@ -66,7 +67,7 @@ from admission.tests.factories.supervision import (
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
-from base.tests.factories.person import ExternalPersonFactory, InternalPersonFactory, EmployeeInternalPersonFactory
+from base.tests.factories.person import EmployeeInternalPersonFactory, ExternalPersonFactory, InternalPersonFactory
 from base.tests.factories.tutor import TutorFactory
 from reference.tests.factories.country import CountryFactory
 
@@ -110,6 +111,8 @@ class SupervisionTestCase(TestCase):
         TutorFactory(person=cls.person)
 
         cls.external_person = ExternalPersonFactory()
+
+        AdmissionAcademicCalendarFactory.produce_all_required()
 
         # Urls
         cls.update_url = reverse('admission:doctorate:update:supervision', args=[cls.admission.uuid])

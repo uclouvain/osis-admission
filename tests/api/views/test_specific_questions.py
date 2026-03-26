@@ -1148,7 +1148,7 @@ class ContinuingEducationSpecificQuestionUpdateApiTestCase(APITestCase):
         # Data
         cls.admission = ContinuingEducationAdmissionFactory(training__academic_year__year=2020)
         CountryFactory(iso_code=BE_ISO_CODE)
-        AdmissionAcademicCalendarFactory.produce_all_required()
+        AdmissionAcademicCalendarFactory.produce_all_required(quantity=6)
 
         cls.message_instantiation = AdmissionFormItemInstantiationFactory(
             form_item=TextAdmissionFormItemFactory(
@@ -1189,7 +1189,6 @@ class ContinuingEducationSpecificQuestionUpdateApiTestCase(APITestCase):
             'adresse_facturation_destinataire': 'John Doe',
             'adresse_facturation_boite_postale': 'B1',
         }
-        AdmissionAcademicCalendarFactory.produce_all_required()
 
         # Users
         cls.candidate = cls.admission.candidate

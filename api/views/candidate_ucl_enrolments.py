@@ -32,8 +32,10 @@ from admission.api.serializers import (
     CandidateReEnrolmentPeriodDTOSerializer,
     CandidateUCLEnrolmentDTOSerializer,
 )
+from admission.api.serializers.candidate_ucl_enrolments import CandidateEnrolmentInformationSerializer
 from admission.ddd.admission.shared_kernel.commands import (
     CandidatEstEligibleALaReinscriptionQuery,
+    CandidatEstInscritRecemmentUCLQuery,
     RecupererInscriptionsCandidatQuery,
     RecupererPeriodeReinscriptionQuery,
 )
@@ -44,6 +46,7 @@ __all__ = [
     'CandidateUCLEnrolmentsView',
     'CandidateReEnrolmentPeriodView',
     'CandidateReEnrolmentEligibilityView',
+    'CandidateEnrolmentInformationView',
 ]
 
 
@@ -86,6 +89,21 @@ class CandidateReEnrolmentEligibilityView(APIPermissionRequiredMixin, RetrieveAP
         return {
             'est_eligible_a_la_reinscription': message_bus_instance.invoke(
                 CandidatEstEligibleALaReinscriptionQuery(
+                    matricule_candidat=self.request.user.person.global_id,
+                )
+            )
+        }
+
+
+class CandidateEnrolmentInformationView(APIPermissionRequiredMixin, RetrieveAPIView):
+    name = "candidate_enrolment_information"
+    permission_classes = [IsListingOrHasNotAlreadyCreatedPermission]
+    serializer_class = CandidateEnrolmentInformationSerializer
+
+    def get_object(self):
+        return {
+            'est_inscrit_recemment': message_bus_instance.invoke(
+                CandidatEstInscritRecemmentUCLQuery(
                     matricule_candidat=self.request.user.person.global_id,
                 )
             )

@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Admission API
-  version: 1.1.18.dev1754
+  version: 1.1.18.dev1735
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -1131,6 +1131,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CandidateReEnrolmentEligibility'
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/Accept-Language'
+      - $ref: '#/components/parameters/X-User-FirstName'
+      - $ref: '#/components/parameters/X-User-LastName'
+      - $ref: '#/components/parameters/X-User-Email'
+      - $ref: '#/components/parameters/X-User-GlobalID'
+  /propositions/candidate-ucl-enrolment-information:
+    get:
+      operationId: propositions_candidate_ucl_enrolment_information_retrieve
+      tags:
+      - propositions
+      security:
+      - tokenAuth: []
+      - Token: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CandidateEnrolmentInformation'
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -6199,6 +6226,14 @@ components:
       required:
       - nom
       - uuid
+    CandidateEnrolmentInformation:
+      type: object
+      description: Data related to the candidate re-enrolment information.
+      properties:
+        est_inscrit_recemment:
+          type: boolean
+      required:
+      - est_inscrit_recemment
     CandidateReEnrolmentEligibility:
       type: object
       description: Data related to the candidate re-enrolment eligibility.
