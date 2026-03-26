@@ -7194,8 +7194,14 @@ msgstr ""
 "Le ou la candidat·e a déjà postulé pour cette formation cette année "
 "académique."
 
+msgid "The candidate is a UCL student."
+msgstr "Le candidat est un étudiant UCL."
+
 msgid "The candidate is doing a mobility"
 msgstr "Le candidat effectue une mobilité"
+
+msgid "The candidate is not a UCL student."
+msgstr "Le candidat n'est pas un étudiant UCL"
 
 msgid "The candidate must provide a student visa"
 msgstr "Le candidat doit fournir un visa d'études"

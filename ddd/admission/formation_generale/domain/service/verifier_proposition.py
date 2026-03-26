@@ -121,6 +121,7 @@ class VerifierProposition(interface.DomainService):
                 profil_candidat_service.verifier_identification,
                 matricule=proposition_candidat.matricule_candidat,
                 profil_candidat_translator=profil_candidat_translator,
+                candidat_est_inscrit_recemment_ucl=candidat_est_inscrit_recemment_ucl,
             ),
             partial(
                 profil_candidat_service.verifier_coordonnees,

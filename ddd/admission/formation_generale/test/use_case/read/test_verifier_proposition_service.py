@@ -38,6 +38,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     CarteBancaireRemboursementAutreFormatNonCompleteException,
     CarteBancaireRemboursementIbanNonCompleteException,
     ExperiencesAcademiquesNonCompleteesException,
+    IdentificationNonCompleteeException,
     ReductionDesDroitsInscriptionNonCompleteeException,
     TypeCompteBancaireRemboursementNonCompleteException,
 )
@@ -2160,3 +2161,22 @@ class TestVerifierPropositionService(TestCase):
             proposition_id = self.message_bus.invoke(self.cmd(uuid=self.master_proposition.entity_id.uuid))
 
             self.assertEqual(proposition_id, self.master_proposition.entity_id)
+
+    def test_should_pas_verifier_identification_si_etudiant_ucl(self):
+        with mock.patch.multiple(self.candidat, pays_naissance=''):
+            with mock.patch(
+                'admission.infrastructure.admission.shared_kernel.domain.service.in_memory.inscriptions_translator.'
+                'InscriptionsInMemoryTranslator.est_inscrit_recemment',
+                return_value=True,
+            ):
+                result = self.message_bus.invoke(self.cmd(uuid=self.master_proposition.entity_id.uuid))
+                self.assertEqual(result, self.master_proposition.entity_id)
+
+            with mock.patch(
+                'admission.infrastructure.admission.shared_kernel.domain.service.in_memory.inscriptions_translator.'
+                'InscriptionsInMemoryTranslator.est_inscrit_recemment',
+                return_value=False,
+            ):
+                with self.assertRaises(MultipleBusinessExceptions) as context:
+                    self.message_bus.invoke(self.cmd(uuid=self.master_proposition.entity_id.uuid))
+                self.assertHasInstance(context.exception.exceptions, IdentificationNonCompleteeException)

@@ -88,7 +88,15 @@ from reference.models.enums.cycle import Cycle
 
 class ProfilCandidat(interface.DomainService):
     @classmethod
-    def verifier_identification(cls, matricule: str, profil_candidat_translator: 'IProfilCandidatTranslator') -> None:
+    def verifier_identification(
+        cls,
+        matricule: str,
+        profil_candidat_translator: 'IProfilCandidatTranslator',
+        candidat_est_inscrit_recemment_ucl: bool,
+    ) -> None:
+        if candidat_est_inscrit_recemment_ucl:
+            return
+
         identification = profil_candidat_translator.get_identification(matricule)
         IdentificationValidatorList(
             identite_signaletique=CandidatSignaletique(

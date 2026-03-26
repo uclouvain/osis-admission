@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -28,35 +28,39 @@ from unittest import mock
 import freezegun
 from django.test import TestCase
 
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
-    NombrePropositionsSoumisesDepasseException,
-    QuestionsSpecifiquesCurriculumNonCompleteesException,
-    QuestionsSpecifiquesEtudesSecondairesNonCompleteesException,
-    QuestionsSpecifiquesInformationsComplementairesNonCompleteesException,
-    QuestionsSpecifiquesChoixFormationNonCompleteesException,
-)
-from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import IdentificationNonCompleteeException
 from admission.ddd.admission.formation_continue.commands import VerifierPropositionQuery
 from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutPropositionContinue,
     ChoixMoyensDecouverteFormation,
+    ChoixStatutPropositionContinue,
 )
 from admission.ddd.admission.formation_continue.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
-    ExperiencesCurriculumNonRenseigneesException,
-    InformationsComplementairesNonRenseigneesException,
     ChoixDeFormationNonRenseigneException,
+    ExperiencesCurriculumNonRenseigneesException,
     FormationEstFermeeException,
+    InformationsComplementairesNonRenseigneesException,
 )
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     EtudesSecondairesNonCompleteesException,
 )
-from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import ProfilCandidatInMemoryTranslator
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
+    NombrePropositionsSoumisesDepasseException,
+    QuestionsSpecifiquesChoixFormationNonCompleteesException,
+    QuestionsSpecifiquesCurriculumNonCompleteesException,
+    QuestionsSpecifiquesEtudesSecondairesNonCompleteesException,
+    QuestionsSpecifiquesInformationsComplementairesNonCompleteesException,
+)
+from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
+from admission.ddd.admission.shared_kernel.tests.mixins import AdmissionTestMixin
 from admission.infrastructure.admission.formation_continue.domain.service.in_memory.formation import (
     FormationContinueInMemoryTranslator,
 )
 from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
+    ProfilCandidatInMemoryTranslator,
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
@@ -64,11 +68,7 @@ from base.models.enums.got_diploma import GotDiploma
 
 
 @freezegun.freeze_time('2023-01-01')
-class TestVerifierPropositionService(TestCase):
-    def assertHasInstance(self, container, cls, msg=None):
-        if not any(isinstance(obj, cls) for obj in container):
-            self.fail(msg or f"No instance of '{cls}' has been found")
-
+class TestVerifierPropositionService(AdmissionTestMixin, TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -82,6 +82,7 @@ class TestVerifierPropositionService(TestCase):
         self.candidat_translator = ProfilCandidatInMemoryTranslator()
         self.etudes_secondaires = self.candidat_translator.etudes_secondaires
         self.verifier_commande = VerifierPropositionQuery(uuid_proposition=self.complete_proposition.entity_id.uuid)
+        self.candidat = self.candidat_translator.profil_candidats[1]
 
     def test_should_verifier_etre_ok_si_complet(self):
         proposition_id = self.message_bus.invoke(self.verifier_commande)
@@ -301,3 +302,22 @@ class TestVerifierPropositionService(TestCase):
             self.message_bus.invoke(VerifierPropositionQuery(uuid_proposition='uuid-USCC32'))
 
         self.assertHasInstance(context.exception.exceptions, FormationEstFermeeException)
+
+    def test_should_pas_verifier_identification_si_etudiant_ucl(self):
+        with mock.patch.multiple(self.candidat, pays_naissance=''):
+            with mock.patch(
+                'admission.infrastructure.admission.shared_kernel.domain.service.in_memory.inscriptions_translator.'
+                'InscriptionsInMemoryTranslator.est_inscrit_recemment',
+                return_value=True,
+            ):
+                result = self.message_bus.invoke(self.verifier_commande)
+                self.assertEqual(result, self.complete_proposition.entity_id)
+
+            with mock.patch(
+                'admission.infrastructure.admission.shared_kernel.domain.service.in_memory.inscriptions_translator.'
+                'InscriptionsInMemoryTranslator.est_inscrit_recemment',
+                return_value=False,
+            ):
+                with self.assertRaises(MultipleBusinessExceptions) as context:
+                    self.message_bus.invoke(self.verifier_commande)
+                self.assertHasInstance(context.exception.exceptions, IdentificationNonCompleteeException)

@@ -76,6 +76,7 @@ from infrastructure.shared_kernel.campus.repository.uclouvain_campus import Uclo
 from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
 from infrastructure.shared_kernel.profil.domain.service.parcours_interne import ExperienceParcoursInterneTranslator
 
+from ...shared_kernel.domain.service.inscriptions import InscriptionsTranslatorService
 from ...shared_kernel.domain.service.matricule_etudiant import MatriculeEtudiantService
 from ...shared_kernel.domain.service.modifier_checklist_experience_parcours_anterieur import (
     ValidationExperienceParcoursAnterieurService,
@@ -147,6 +148,8 @@ COMMAND_HANDLERS = {
         academic_year_repository=AcademicYearRepository(),
         profil_candidat_translator=ProfilCandidatTranslator(),
         raccrocher_experiences_curriculum=RaccrocherExperiencesCurriculum(),
+        annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
+        inscriptions_translator=InscriptionsTranslatorService(),
     ),
     RenvoyerInvitationSignatureCommand: lambda msg_bus, cmd: renvoyer_invitation_signature(
         cmd,
@@ -173,6 +176,8 @@ COMMAND_HANDLERS = {
         questions_specifiques_translator=QuestionSpecifiqueTranslator(),
         academic_year_repository=AcademicYearRepository(),
         profil_candidat_translator=ProfilCandidatTranslator(),
+        annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
+        inscriptions_translator=InscriptionsTranslatorService(),
     ),
     SupprimerPromoteurCommand: lambda msg_bus, cmd: supprimer_promoteur(
         cmd,
