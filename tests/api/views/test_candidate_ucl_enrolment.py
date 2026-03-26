@@ -484,3 +484,53 @@ class CandidateReEnrolmentEligibilityViewTestCase(APITestCase):
             acted_deliberation.save()
 
             self._test_is_eligible(False)
+
+
+@freezegun.freeze_time('2025-01-01')
+class CandidateEnrolmentInformationViewTestCase(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.url = resolve_url('admission_api_v1:candidate_enrolment_information')
+        cls.student = StudentFactory()
+        cls.candidate = cls.student.person
+        AdmissionAcademicCalendarFactory.produce_all_required()
+
+    def test_user_not_logged_assert_not_authorized(self):
+        self.client.force_authenticate(user=None)
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_assert_methods_not_allowed(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        for method in ['delete', 'post', 'patch', 'put']:
+            response = getattr(self.client, method)(self.url)
+            self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_with_a_recent_enrolment(self):
+        self.client.force_authenticate(user=self.candidate.user)
+        self.enrolment: InscriptionProgrammeAnnuel = InscriptionProgrammeAnnuelFactory(
+            etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+            statut=StatutInscriptionProgrammAnnuel.ETUDIANT_UCL.name,
+            programme_cycle__etudiant=self.student,
+            programme__root_group__acronym='MDS1',
+            programme__root_group__academic_year__year=2024,
+            programme__root_group__education_group_type__name=TrainingType.MASTER_M1.name,
+            programme__offer__academic_type=AcademicTypes.ACADEMIC.name,
+        )
+
+        response = self.client.get(self.url)
+
+        enrolment_information = response.json()
+
+        self.assertTrue(enrolment_information['est_inscrit_recemment'])
+
+    def test_with_no_enrolment(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        response = self.client.get(self.url)
+
+        enrolment_information = response.json()
+
+        self.assertFalse(enrolment_information['est_inscrit_recemment'])

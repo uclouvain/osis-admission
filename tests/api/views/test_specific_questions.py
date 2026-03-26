@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -1146,8 +1146,8 @@ class ContinuingEducationSpecificQuestionUpdateApiTestCase(APITestCase):
     def setUpTestData(cls):
         # Data
         cls.admission = ContinuingEducationAdmissionFactory(training__academic_year__year=2020)
-        be_country = CountryFactory(iso_code=BE_ISO_CODE)
-        AdmissionAcademicCalendarFactory.produce_all_required()
+        CountryFactory(iso_code=BE_ISO_CODE)
+        AdmissionAcademicCalendarFactory.produce_all_required(quantity=6)
 
         cls.message_instantiation = AdmissionFormItemInstantiationFactory(
             form_item=TextAdmissionFormItemFactory(
@@ -1188,7 +1188,6 @@ class ContinuingEducationSpecificQuestionUpdateApiTestCase(APITestCase):
             'adresse_facturation_destinataire': 'John Doe',
             'adresse_facturation_boite_postale': 'B1',
         }
-        AdmissionAcademicCalendarFactory.produce_all_required()
 
         # Users
         cls.candidate = cls.admission.candidate

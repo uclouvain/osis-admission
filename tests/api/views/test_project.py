@@ -567,6 +567,7 @@ class DoctorateAdmissionVerifyProjectTestCase(APITestCase):
         cls.no_role_user = PersonFactory().user
         cls.url = resolve_url("verify-project", uuid=cls.admission.uuid)
         cls.pre_admission_url = resolve_url("verify-project", uuid=cls.pre_admission.uuid)
+        AdmissionAcademicCalendarFactory.produce_all_required()
 
     @mock.patch(
         'admission.infrastructure.admission.doctorat.preparation.domain.service.promoteur.PromoteurTranslator.est_externe',

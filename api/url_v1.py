@@ -95,6 +95,7 @@ urlpatterns = [
     path('propositions/re-enrolment-period', views.CandidateReEnrolmentPeriodView),
     path('propositions/ucl-enrolments', views.CandidateUCLEnrolmentsView),
     path('propositions/candidate-re-enrolment-eligibity', views.CandidateReEnrolmentEligibilityView),
+    path('propositions/candidate-ucl-enrolment-information', views.CandidateEnrolmentInformationView),
     path('identification', views.IdentificationDTOView, views.IdentificationDTOView),
     # > Doctorate education
     path('supervised_propositions', views.SupervisedPropositionListView),
