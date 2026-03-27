@@ -66,7 +66,14 @@ from admission.ddd.admission.formation_generale.commands import (
     EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand,
     EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand,
     EnvoyerRappelPaiementCommand,
+    ModifierAuthentificationEtudesSecondairesCommand,
+    ModifierAuthentificationExamenCommand,
+    ModifierAuthentificationExperienceAcademiqueCommand,
+    ModifierAuthentificationExperienceNonAcademiqueCommand,
+    ModifierAuthentificationExperienceParcoursAnterieurCommand,
     ModifierChecklistChoixFormationCommand,
+    ModifierChecklistStatutExamenCommand,
+    ModifierChecklistStatutExperienceAcademiqueCommand,
     ModifierStatutChecklistParcoursAnterieurCommand,
     NotifierCandidatDerogationFinancabiliteCommand,
     RecupererListePaiementsPropositionQuery,
@@ -189,7 +196,6 @@ from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
 from admission.models.online_payment import PaymentMethod, PaymentStatus
 from admission.templatetags.admission import authentication_css_class, bg_class_by_checklist_experience
 from admission.utils import (
-    add_close_modal_into_htmx_response,
     get_access_titles_names,
     get_backoffice_admission_url,
     get_missing_curriculum_periods,
@@ -209,11 +215,9 @@ from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
 from base.utils.htmx import HtmxPermissionRequiredMixin
-from base.utils.utils import format_academic_year
+from base.utils.utils import add_close_modal_into_htmx_response, format_academic_year
 from ddd.logic.shared_kernel.profil.commands import (
     ModifierStatutEtudesSecondairesCommand,
-    ModifierStatutExamenCommand,
-    ModifierStatutExperienceAcademiqueCommand,
     ModifierStatutExperienceNonAcademiqueCommand,
     ModifierStatutExperienceParcoursAnterieurCommand,
 )
@@ -227,13 +231,13 @@ from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
 from osis_profile.forms.experience_authentication_statut import ExperienceAuthenticationStatusForm
-from osis_profile.forms.experience_validation_statut import ExperienceValidationStatusForm
 from osis_profile.models import EducationalExperience
 from osis_profile.models.enums.experience_validation import EtatAuthentificationParcours
 from osis_profile.models.enums.person import ChoixGenre
 from osis_profile.utils.curriculum import ElementCurriculumDTO, groupe_curriculum_par_annee_decroissante
 from osis_profile.views.authentication_status import ChangeExperienceAuthenticationStatus
 from osis_profile.views.mixins.status import EditStatusMixin
+from osis_profile.views.validation_status import ChangeExperienceValidationStatus
 from osis_role.templatetags.osis_role import has_perm
 from parcours_interne import etudiants_PCE_avant_2015
 
@@ -283,9 +287,7 @@ __all__ = [
     'SinglePastExperienceChangeAuthenticationView',
 ]
 
-
 __namespace__ = False
-
 
 TABS_WITH_SIC_AND_FAC_COMMENTS = {'decision_facultaire'}
 ENTITY_SIC = 'SIC'
@@ -2870,8 +2872,18 @@ class SinglePastExperienceMixin(
             },
         )
 
+    def get_validation_url(self):
+        return reverse(
+            f'{self.base_namespace}:single-past-experience-change-status',
+            kwargs={
+                'experience_uuid': self.experience_uuid,
+                'experience_type': self.kwargs['experience_type'],
+                'uuid': self.admission_uuid,
+            },
+        )
 
-class SinglePastExperienceChangeStatusView(SinglePastExperienceMixin):
+
+class SinglePastExperienceChangeStatusView(ChangeExperienceValidationStatus, SinglePastExperienceMixin):
     name = 'single-past-experience-change-status'
     urlpatterns = {
         'single-past-experience-change-status': (
@@ -2881,29 +2893,27 @@ class SinglePastExperienceChangeStatusView(SinglePastExperienceMixin):
     permission_required = 'admission.checklist_change_past_experiences'
     template_name = 'admission/general_education/includes/checklist/previous_experience_single.html'
     htmx_template_name = 'admission/general_education/includes/checklist/previous_experience_single.html'
-    form_class = ExperienceValidationStatusForm
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['authentication_form'] = ExperienceAuthenticationStatusForm(context['experience'])
-        return context
+    without_context = False
 
     def command(self, form):
         update_status_experience_cmd: Type[ModifierStatutExperienceParcoursAnterieurCommand] = {
-            TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name: ModifierStatutExperienceAcademiqueCommand,
+            TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name: ModifierChecklistStatutExperienceAcademiqueCommand,
             TypeExperience.ACTIVITE_NON_ACADEMIQUE.name: ModifierStatutExperienceNonAcademiqueCommand,
             TypeExperience.ETUDES_SECONDAIRES.name: ModifierStatutEtudesSecondairesCommand,
-            TypeExperience.EXAMEN.name: ModifierStatutExamenCommand,
+            TypeExperience.EXAMEN.name: ModifierChecklistStatutExamenCommand,
         }[self.kwargs['experience_type']]
 
-        message_bus_instance.invoke(
-            update_status_experience_cmd(
-                # uuid_proposition=self.admission_uuid,
-                uuid_experience=self.experience_uuid,
-                gestionnaire=self.request.user.person.global_id,
-                statut=form.cleaned_data['status'],
-            )
-        )
+        cmd_parameters = {
+            'uuid_experience': self.experience_uuid,
+            'gestionnaire': self.request.user.person.global_id,
+            'statut': form.cleaned_data['status'],
+        }
+        if update_status_experience_cmd in [
+            ModifierChecklistStatutExperienceAcademiqueCommand,
+            ModifierChecklistStatutExamenCommand,
+        ]:
+            cmd_parameters['uuid_proposition'] = self.admission_uuid
+        message_bus_instance.invoke(update_status_experience_cmd(**cmd_parameters))
 
 
 class SinglePastExperienceChangeAuthenticationView(ChangeExperienceAuthenticationStatus, SinglePastExperienceMixin):
@@ -2915,6 +2925,23 @@ class SinglePastExperienceChangeAuthenticationView(ChangeExperienceAuthenticatio
     }
     permission_required = 'admission.checklist_change_past_experiences'
     without_context = False
+
+    def command(self, form):
+        update_cmd: Type[ModifierAuthentificationExperienceParcoursAnterieurCommand] = {
+            TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name: ModifierAuthentificationExperienceAcademiqueCommand,
+            TypeExperience.ACTIVITE_NON_ACADEMIQUE.name: ModifierAuthentificationExperienceNonAcademiqueCommand,
+            TypeExperience.ETUDES_SECONDAIRES.name: ModifierAuthentificationEtudesSecondairesCommand,
+            TypeExperience.EXAMEN.name: ModifierAuthentificationExamenCommand,
+        }[self.kwargs['experience_type']]
+
+        message_bus_instance.invoke(
+            update_cmd(
+                uuid_proposition=self.admission_uuid,
+                uuid_experience=self.experience_uuid,
+                gestionnaire=self.request.user.person.global_id,
+                etat_authentification=form.cleaned_data['state'],
+            )
+        )
 
 
 class ChecklistView(
@@ -3163,6 +3190,7 @@ class ChecklistView(
             # Authentication forms (one by experience)
             context['authentication_forms'] = {}
             context['authentication_urls'] = {}
+            context['validation_urls'] = {}
 
             context['check_authentication_mail_to_checkers'] = get_email(
                 template_identifier=ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS,
@@ -3212,6 +3240,17 @@ class ChecklistView(
                         experience_uuid,
                         reverse(
                             f'{self.base_namespace}:single-past-experience-change-authentication',
+                            kwargs={
+                                'experience_type': current_experience.type_experience,
+                                'experience_uuid': str(current_experience.uuid),
+                                'uuid': self.admission_uuid,
+                            },
+                        ),
+                    )
+                    context['validation_urls'].setdefault(
+                        experience_uuid,
+                        reverse(
+                            f'{self.base_namespace}:single-past-experience-change-status',
                             kwargs={
                                 'experience_type': current_experience.type_experience,
                                 'experience_uuid': str(current_experience.uuid),

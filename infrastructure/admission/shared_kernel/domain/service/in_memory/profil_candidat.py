@@ -1091,10 +1091,11 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
     @classmethod
     def get_examen(
         cls,
-        uuid_proposition: str,
-        matricule: str,
-        formation_sigle: str,
-        formation_annee: int,
+        uuid_experience: str = None,
+        matricule: str = None,
+        formation_sigle: str = None,
+        formation_annee: int = None,
+        uuid_proposition: str = None,
     ) -> 'ExamenDTO':
         return ExamenDTO(
             uuid='',
@@ -1324,9 +1325,9 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
     @classmethod
     def get_experience_academique(
         cls,
-        matricule: str,
-        uuid_proposition: str,
         uuid_experience: str,
+        matricule: str = None,
+        uuid_proposition: str = None,
     ) -> 'ExperienceAcademiqueDTO':
         curriculum = cls.get_curriculum(matricule, datetime.date.today().year, uuid_proposition)
 

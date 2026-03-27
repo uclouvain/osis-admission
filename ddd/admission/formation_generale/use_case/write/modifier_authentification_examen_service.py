@@ -23,27 +23,42 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import (
+from admission.ddd.admission.formation_generale.commands import ModifierAuthentificationExamenCommand
+from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
-from admission.ddd.admission.doctorat.preparation.commands import ModifierStatutChecklistExperienceNonAcademiqueCommand
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
-    PropositionIdentity,
-)
+from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
+from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
 from admission.ddd.admission.shared_kernel.domain.service.i_modifier_checklist_experience_parcours_anterieur import (
     IValidationExperienceParcoursAnterieurService,
 )
 
 
-def modifier_statut_checklist_experience_non_academique(
-    cmd: 'ModifierStatutChecklistExperienceNonAcademiqueCommand',
+def modifier_authentification_examen(
+    cmd: 'ModifierAuthentificationExamenCommand',
+    notification: 'INotification',
+    historique: 'IHistorique',
     validation_experience_parcours_anterieur_service: 'IValidationExperienceParcoursAnterieurService',
 ) -> 'PropositionIdentity':
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
 
-    validation_experience_parcours_anterieur_service.modifier_statut_experience_non_academique(
+    validation_experience_parcours_anterieur_service.modifier_authentification_examen(
         uuid_experience=cmd.uuid_experience,
-        statut=cmd.statut,
+        etat_authentification=cmd.etat_authentification,
+    )
+
+    message = notification.modifier_authentification_experience_parcours(
+        proposition_id=proposition_id,
+        etat_authentification=cmd.etat_authentification,
+    )
+
+    historique.historiser_modification_authentification_experience_parcours(
+        proposition_id=proposition_id,
+        gestionnaire=cmd.gestionnaire,
+        etat_authentification=cmd.etat_authentification,
+        message=message,
+        uuid_experience=cmd.uuid_experience,
     )
 
     return proposition_id

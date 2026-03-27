@@ -33,13 +33,13 @@ from admission.ddd.admission.shared_kernel.domain.validator.exceptions import Ad
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.modifier_checklist_experience_parcours_anterieur import (
-    ValidationExperienceParcoursAnterieurInMemoryService,
-)
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
     PersonneConnueUclInMemoryTranslator,
+)
+from infrastructure.shared_kernel.profil.domain.service.in_memory.modifier_statut_experience_parcours_anterieur import (
+    ValidationExperienceParcoursAnterieurInMemoryService,
 )
 from osis_profile.models.enums.experience_validation import (
     ChoixStatutValidationExperience,

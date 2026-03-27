@@ -610,6 +610,36 @@ class ModifierChecklistStatutExamenCommand(ModifierStatutExamenCommand):
 
 
 @attr.dataclass(frozen=True, slots=True)
+class ModifierAuthentificationExperienceParcoursAnterieurCommand(interface.CommandRequest):
+    uuid_proposition: str
+    uuid_experience: str
+    gestionnaire: str
+    etat_authentification: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierAuthentificationExperienceNonAcademiqueCommand(
+    ModifierAuthentificationExperienceParcoursAnterieurCommand
+):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierAuthentificationEtudesSecondairesCommand(ModifierAuthentificationExperienceParcoursAnterieurCommand):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierAuthentificationExamenCommand(ModifierAuthentificationExperienceParcoursAnterieurCommand):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierAuthentificationExperienceAcademiqueCommand(ModifierAuthentificationExperienceParcoursAnterieurCommand):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
 class SpecifierBesoinDeDerogationSicCommand(interface.CommandRequest):
     uuid_proposition: str
     besoin_de_derogation: str

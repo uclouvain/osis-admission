@@ -9170,13 +9170,3 @@ msgstr "{items} types sur {total}"
 #, python-brace-format
 msgid "{obj.dates_formatees} : {obj.fonction} at {obj.employeur}"
 msgstr "{obj.dates_formatees} : {obj.fonction} à {obj.employeur}"
-
-#, python-brace-format
-#~ msgid " (last update by {author} on {date} at {time}):"
-#~ msgstr " (dernière modification par {author} le {date} à {time}) :"
-
-#~ msgid "an unknown author"
-#~ msgstr "un auteur inconnu"
-
-#~ msgid "Past experiences authentication"
-#~ msgstr "Authentification parcours"
