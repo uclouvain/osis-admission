@@ -738,6 +738,8 @@ class FormationGeneraleInformationsComplementairesValidatorList(TwoStepsMultiple
 
     poste_diplomatique: Optional[PosteDiplomatiqueIdentity]
 
+    candidat_est_inscrit_recemment_ucl: bool
+
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
@@ -748,6 +750,7 @@ class FormationGeneraleInformationsComplementairesValidatorList(TwoStepsMultiple
                 pays_nationalite_europeen=self.pays_nationalite_europeen,
                 pays_residence=self.pays_residence,
                 poste_diplomatique=self.poste_diplomatique,
+                candidat_est_inscrit_recemment_ucl=self.candidat_est_inscrit_recemment_ucl,
             ),
         ]
 

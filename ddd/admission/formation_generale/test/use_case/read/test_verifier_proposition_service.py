@@ -1906,6 +1906,30 @@ class TestVerifierPropositionService(TestCase):
             self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
         self.assertHasInstance(context.exception.exceptions, InformationsVisaNonCompleteesException)
 
+    def test_should_verification_etre_ok_si_visa_non_renseigne_candidat_uclouvain_etranger(self):
+        mock.patch.multiple(self.candidat, pays_nationalite='CA', pays_nationalite_europeen=False).start()
+        mock.patch.multiple(self.adresse_residentielle, pays='FR').start()
+        mock.patch.multiple(self.master_proposition, poste_diplomatique=None).start()
+
+        mock.patch(
+            'admission.infrastructure.admission.shared_kernel.domain.service.in_memory.inscriptions_translator.'
+            'InscriptionsInMemoryTranslator.est_inscrit_recemment',
+            return_value=False,
+        ).start()
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+        self.assertHasInstance(context.exception.exceptions, InformationsVisaNonCompleteesException)
+
+        mock.patch(
+            'admission.infrastructure.admission.shared_kernel.domain.service.in_memory.inscriptions_translator.'
+            'InscriptionsInMemoryTranslator.est_inscrit_recemment',
+            return_value=True,
+        ).start()
+
+        resultat = self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+        self.assertEqual(resultat, self.master_proposition.entity_id)
+
     def test_should_verification_etre_ok_si_visa_non_renseigne_et_non_necessaire(self):
         # Visa non renseigné
         mock.patch.multiple(self.master_proposition, poste_diplomatique=None).start()

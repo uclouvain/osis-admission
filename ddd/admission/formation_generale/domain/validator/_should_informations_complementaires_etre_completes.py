@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,12 +27,12 @@ from typing import Optional
 
 import attr
 
-from admission.ddd.admission.shared_kernel.domain.model.poste_diplomatique import PosteDiplomatiqueIdentity
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     InformationsVisaNonCompleteesException,
 )
+from admission.ddd.admission.shared_kernel.domain.model.poste_diplomatique import PosteDiplomatiqueIdentity
 from base.ddd.utils.business_validator import BusinessValidator
-from osis_profile import PLUS_5_ISO_CODES, BE_ISO_CODE
+from osis_profile import BE_ISO_CODE, PLUS_5_ISO_CODES
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -43,6 +43,8 @@ class ShouldVisaEtreComplete(BusinessValidator):
 
     poste_diplomatique: Optional[PosteDiplomatiqueIdentity]
 
+    candidat_est_inscrit_recemment_ucl: bool
+
     def validate(self, *args, **kwargs):
         if (
             self.pays_nationalite
@@ -51,5 +53,6 @@ class ShouldVisaEtreComplete(BusinessValidator):
             and self.pays_nationalite not in PLUS_5_ISO_CODES
             and self.pays_residence != BE_ISO_CODE
             and not self.poste_diplomatique
+            and not self.candidat_est_inscrit_recemment_ucl
         ):
             raise InformationsVisaNonCompleteesException

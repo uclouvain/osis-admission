@@ -545,6 +545,7 @@ class ProfilCandidat(interface.DomainService):
         cls,
         proposition,
         profil_candidat_translator: 'IProfilCandidatTranslator',
+        candidat_est_inscrit_recemment_ucl: bool,
     ):
         identification = profil_candidat_translator.get_identification(proposition.matricule_candidat)
         FormationGeneraleInformationsComplementairesValidatorList(
@@ -552,6 +553,7 @@ class ProfilCandidat(interface.DomainService):
             pays_nationalite=identification.pays_nationalite,
             pays_nationalite_europeen=identification.pays_nationalite_europeen,
             pays_residence=identification.pays_residence,
+            candidat_est_inscrit_recemment_ucl=candidat_est_inscrit_recemment_ucl,
         ).validate()
 
     @classmethod
