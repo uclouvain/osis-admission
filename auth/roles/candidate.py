@@ -36,6 +36,7 @@ _CANDIDATE_RULESET = {
     # Doctorate
     # A candidate can view as long as it's the author
     'api_view_doctorateadmission': common.is_admission_request_author,
+    'api_view_admission_candidate_enrolment_information': common.is_admission_request_author,
     'api_download_doctorateadmission_pdf_recap': common.is_admission_request_author,
     # A candidate can view as long as he's the author and the proposition is not confirmed
     'api_view_admission_person': common.is_admission_request_author & doctorate.unconfirmed_proposition,
@@ -103,6 +104,7 @@ _CANDIDATE_RULESET = {
     # General admission
     # A candidate can view as long as he's the author
     'view_generaleducationadmission': common.is_admission_request_author,
+    'view_generaleducationadmission_candidate_enrolment_information': common.is_admission_request_author,
     'view_generaleducationadmission_person': common.is_admission_request_author & general.in_progress,
     'view_generaleducationadmission_training_choice': common.is_admission_request_author & general.in_progress,
     'view_generaleducationadmission_coordinates': common.is_admission_request_author & general.in_progress,
@@ -140,6 +142,7 @@ _CANDIDATE_RULESET = {
     # Continuing admission
     # A candidate can view as long as he's the author
     'view_continuingeducationadmission': common.is_admission_request_author,
+    'view_continuingeducationadmission_candidate_enrolment_information': common.is_admission_request_author,
     'view_continuingeducationadmission_person': common.is_admission_request_author & continuing.in_progress,
     'view_continuingeducationadmission_training_choice': common.is_admission_request_author & continuing.in_progress,
     'view_continuingeducationadmission_coordinates': common.is_admission_request_author & continuing.in_progress,

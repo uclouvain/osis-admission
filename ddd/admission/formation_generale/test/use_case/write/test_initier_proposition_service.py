@@ -38,15 +38,22 @@ from admission.ddd.admission.formation_generale.commands import (
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
+    CandidatDejaDiplomeFormationException,
+    CandidatNonEligibleALaReinscriptionException,
+)
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
+    DemandeEnBrouillonDejaExistantePourCetteFormationException,
     FormationNonTrouveeException,
 )
+from admission.ddd.admission.shared_kernel.tests.mixins import AdmissionTestMixin
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
 from admission.infrastructure.message_bus_in_memory import (
     message_bus_in_memory_instance,
 )
+from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from ddd.logic.reference.domain.validator.exceptions import BourseNonTrouveeException
 from infrastructure.reference.domain.service.in_memory.bourse import (
     BourseInMemoryTranslator,
@@ -54,7 +61,7 @@ from infrastructure.reference.domain.service.in_memory.bourse import (
 from reference.models.enums.scholarship_type import ScholarshipType
 
 
-class TestInitierPropositionService(SimpleTestCase):
+class TestInitierPropositionService(AdmissionTestMixin, SimpleTestCase):
     @classmethod
     def _get_une_bourse_par_type(cls, type_bourse: ScholarshipType):
         return next(
@@ -107,6 +114,35 @@ class TestInitierPropositionService(SimpleTestCase):
             proposition = self.proposition_repository.get(proposition_id)
             self.assertEqual(proposition.entity_id, proposition_id)
             self.assertEqual(proposition.est_en_poursuite, True)
+
+    def test_should_empecher_si_deja_diplome_formation(self):
+        with mock.patch(
+            'admission.ddd.admission.shared_kernel.domain.service.inscriptions_ucl_candidat.'
+            'InscriptionsUCLCandidatService.est_diplome',
+            return_value=True,
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd)
+            self.assertHasInstance(context.exception.exceptions, CandidatDejaDiplomeFormationException)
+
+    def test_should_empecher_si_non_eligible_a_la_reinscription(self):
+        with mock.patch(
+            'admission.ddd.admission.shared_kernel.domain.service.inscriptions_ucl_candidat.'
+            'InscriptionsUCLCandidatService.est_eligible_a_la_reinscription',
+            return_value=False,
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd)
+            self.assertHasInstance(context.exception.exceptions, CandidatNonEligibleALaReinscriptionException)
+
+    def test_should_empecher_si_brouillon_pour_cette_formation_deja_existante(self):
+        with mock.patch(
+            'admission.infrastructure.admission.shared_kernel.domain.service.in_memory.maximum_propositions.'
+            'MaximumPropositionsAutoriseesInMemory.verifier_une_seule_demande_non_soumise_par_formation_generale',
+            side_effect=DemandeEnBrouillonDejaExistantePourCetteFormationException('', ''),
+        ):
+            with self.assertRaises(DemandeEnBrouillonDejaExistantePourCetteFormationException):
+                self.message_bus.invoke(self.cmd)
 
     def test_should_empecher_si_pas_formation_generale(self):
         not_doctorat = 'DROI1BA'

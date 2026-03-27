@@ -113,3 +113,12 @@ class MaximumPropositionsAutoriseesInMemory(IMaximumPropositionsAutorisees):
         annee_soumise: int = None,
     ):
         pass
+
+    @classmethod
+    def verifier_une_seule_demande_non_soumise_par_formation_generale(
+        cls,
+        matricule_candidat: str,
+        sigle_formation: str,
+        uuid_proposition: str = '',
+    ):
+        pass

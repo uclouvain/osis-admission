@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("admission", "0289_alter_doctorateadmission_financability_computed_rule_situation_and_more"),
+        ("admission", "0290_generaleducationadmission_bama_15_proof_and_more"),
     ]
 
     operations = [
