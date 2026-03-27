@@ -1071,10 +1071,11 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
     def test_has_other_admission_same_cycle_same_year(self):
         admission = GeneralEducationAdmissionFactory(
             training__acronym='TRAINING-1',
-            training__education_group_type__cycle=1,
             determined_academic_year__year=2020,
             training__academic_year__year=2020,
         )
+        admission.training.education_group_type.cycle = 1
+        admission.training.education_group_type.save(update_fields=['cycle'])
 
         # Temporary display a detailed error message because the test seems to fail in some cases
         _get_error_message = lambda a1, a2: '{}-{},{}-{},{}-{}-{}'.format(
@@ -1094,10 +1095,11 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         other_admission = GeneralEducationAdmissionFactory(
             candidate=admission.candidate,
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
-            training__education_group_type__cycle=1,
             training__acronym='TRAINING-2',
             determined_academic_year=admission.determined_academic_year,
         )
+        other_admission.training.education_group_type.cycle = 1
+        other_admission.training.education_group_type.save(update_fields=['cycle'])
 
         # Other admission with the same cycle same year
         result = SubmitGeneralEducationPropositionView._has_other_admission_same_cycle_same_year(admission)
