@@ -547,6 +547,7 @@ class ProfilCandidat(interface.DomainService):
         profil_candidat_translator: 'IProfilCandidatTranslator',
         experiences_academiques: list[ExperienceAcademiqueDTO],
         formation: Formation,
+        candidat_est_inscrit_recemment_ucl: bool,
     ):
         identification = profil_candidat_translator.get_identification(proposition.matricule_candidat)
         est_potentiellement_concerne_par_le_bama_15 = cls.est_potentiellement_concerne_par_le_bama_15(
@@ -566,6 +567,7 @@ class ProfilCandidat(interface.DomainService):
             est_potentiellement_concerne_par_le_bama_15=est_potentiellement_concerne_par_le_bama_15,
             est_concerne_par_le_bama_15=proposition.est_concerne_par_le_bama_15,
             preuve_bama_15=proposition.preuve_bama_15,
+            candidat_est_inscrit_recemment_ucl=candidat_est_inscrit_recemment_ucl,
         ).validate()
 
     @classmethod

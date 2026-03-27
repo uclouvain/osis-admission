@@ -45,6 +45,8 @@ class ShouldVisaEtreComplete(BusinessValidator):
 
     poste_diplomatique: Optional[PosteDiplomatiqueIdentity]
 
+    candidat_est_inscrit_recemment_ucl: bool
+
     def validate(self, *args, **kwargs):
         if (
             self.pays_nationalite
@@ -53,6 +55,7 @@ class ShouldVisaEtreComplete(BusinessValidator):
             and self.pays_nationalite not in PLUS_5_ISO_CODES
             and self.pays_residence != BE_ISO_CODE
             and not self.poste_diplomatique
+            and not self.candidat_est_inscrit_recemment_ucl
         ):
             raise InformationsVisaNonCompleteesException
 

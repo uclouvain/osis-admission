@@ -743,6 +743,7 @@ class FormationGeneraleInformationsComplementairesValidatorList(TwoStepsMultiple
     est_potentiellement_concerne_par_le_bama_15: bool
     est_concerne_par_le_bama_15: bool | None
     preuve_bama_15: list[str]
+    candidat_est_inscrit_recemment_ucl: bool
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -754,6 +755,7 @@ class FormationGeneraleInformationsComplementairesValidatorList(TwoStepsMultiple
                 pays_nationalite_europeen=self.pays_nationalite_europeen,
                 pays_residence=self.pays_residence,
                 poste_diplomatique=self.poste_diplomatique,
+                candidat_est_inscrit_recemment_ucl=self.candidat_est_inscrit_recemment_ucl,
             ),
             ShouldInformationsBama15EtreCompletees(
                 experiences_academiques=self.experiences_academiques,
