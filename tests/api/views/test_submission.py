@@ -1070,6 +1070,7 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
 
     def test_has_other_admission_same_cycle_same_year(self):
         admission = GeneralEducationAdmissionFactory(
+            training__acronym='TRAINING-1',
             training__education_group_type__cycle=1,
             determined_academic_year__year=2020,
             training__academic_year__year=2020,
@@ -1094,6 +1095,7 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
             candidate=admission.candidate,
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
             training__education_group_type__cycle=1,
+            training__acronym='TRAINING-2',
             determined_academic_year=admission.determined_academic_year,
         )
 
