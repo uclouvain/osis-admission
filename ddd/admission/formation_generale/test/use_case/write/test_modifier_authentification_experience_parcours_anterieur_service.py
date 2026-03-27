@@ -26,17 +26,17 @@
 
 from django.test import SimpleTestCase
 
+from admission.ddd.admission.formation_generale.commands import ModifierAuthentificationExperienceAcademiqueCommand
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import AdmissionExperienceNonTrouveeException
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.modifier_checklist_experience_parcours_anterieur import (
+from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
+from infrastructure.shared_kernel.profil.domain.service.in_memory.modifier_statut_experience_parcours_anterieur import (
     ValidationExperienceParcoursAnterieurInMemoryService,
 )
-from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
-from ddd.logic.shared_kernel.profil.commands import ModifierAuthentificationExperienceAcademiqueCommand
-from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
 from osis_profile.models.enums.experience_validation import (
     ChoixStatutValidationExperience,
     EtatAuthentificationParcours,

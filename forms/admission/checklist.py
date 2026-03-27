@@ -73,7 +73,6 @@ from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.forms import (
     EMPTY_CHOICE_AS_LIST,
     AdmissionHTMLCharField,
-    AutoGrowTextareaWidget,
     FilterFieldWidget,
     get_academic_year_choices,
     get_initial_choices_for_additional_approval_conditions,
@@ -95,6 +94,7 @@ from base.forms.utils.autocomplete import Select2MultipleWithTagWhenNoResultWidg
 from base.forms.utils.choice_field import BLANK_CHOICE
 from base.forms.utils.datefield import CustomDateInput
 from base.forms.utils.file_field import MaxOneFileUploadField
+from base.forms.widgets import AutoGrowTextareaWidget
 from base.models.academic_year import AcademicYear
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.education_group_types import TrainingType

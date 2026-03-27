@@ -330,7 +330,9 @@
                   {% experience_details_template resume_proposition=resume_proposition experience=experience with_edit_link_button=False specific_questions=specific_questions_by_tab %}
                 </div>
               {% else %}
-                {% include 'admission/general_education/includes/checklist/previous_experience_single.html' with type_experience=experience.type_experience experience=experience authentication_form=authentication_forms|get_item_or_none:experience_uuid experience_authentication_history_entry=all_experience_authentication_history_entries|get_item_or_none:experience_uuid %}
+                {% with experience_uuid=experience.uuid|stringformat:'s' authentication_url=authentication_urls|get_item:experience_uuid validation_url=validation_urls|get_item:experience_uuid %}
+                    {% include 'admission/general_education/includes/checklist/previous_experience_single.html' with type_experience=experience.type_experience experience=experience authentication_form=authentication_forms|get_item_or_none:experience_uuid experience_authentication_history_entry=all_experience_authentication_history_entries|get_item_or_none:experience_uuid url_authentification=authentication_url url_validation=validation_url %}
+                {% endwith %}
                 <div>
                   {% experience_details_template resume_proposition=resume_proposition experience=experience with_edit_link_button=True specific_questions=specific_questions_by_tab %}
                 </div>

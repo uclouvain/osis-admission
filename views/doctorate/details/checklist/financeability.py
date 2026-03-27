@@ -56,7 +56,6 @@ from admission.forms.admission.checklist import (
 )
 from admission.mail_templates import ADMISSION_EMAIL_FINANCABILITY_DISPENSATION_NOTIFICATION_DOCTORATE
 from admission.utils import (
-    add_close_modal_into_htmx_response,
     get_backoffice_admission_url,
     get_portal_admission_url,
     get_salutation_prefix,
@@ -67,7 +66,7 @@ from admission.views.common.mixins import AdmissionFormMixin
 from admission.views.doctorate.details.checklist.mixins import CheckListDefaultContextMixin
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.utils.htmx import HtmxPermissionRequiredMixin
-from base.utils.utils import format_academic_year
+from base.utils.utils import add_close_modal_into_htmx_response, format_academic_year
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile.models.enums.person import ChoixGenre
 

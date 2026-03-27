@@ -38,8 +38,6 @@ from admission.ddd.admission.shared_kernel.domain.service.i_modifier_checklist_e
 )
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import AdmissionExperienceNonTrouveeException
-from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
-from ddd.logic.shared_kernel.profil.dtos.validation_experience import ValidationExperienceParcoursAnterieurDTO
 from osis_profile.models import EXAM_TYPE_PREMIER_CYCLE_LABEL_FR, EducationalExperience, Exam, ProfessionalExperience
 from osis_profile.models.education import HighSchoolDiploma
 from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
@@ -51,32 +49,14 @@ class ValidationExperienceParcoursAnterieurService(IValidationExperienceParcours
         return EducationalExperience.objects.filter(uuid=experience_uuid)
 
     @classmethod
-    def recuperer_information_validation_experience_academique(cls, uuid_experience: str):
-        experience = (
-            cls._get_educational_experience_qs(experience_uuid=uuid_experience)
-            .values('validation_status', 'authentication_status')
-            .first()
-        )
-
-        if not experience:
-            raise AdmissionExperienceNonTrouveeException
-
-        return ValidationExperienceParcoursAnterieurDTO(
-            uuid=uuid_experience,
-            type_experience=TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name,
-            statut_validation=experience['validation_status'],
-            statut_authentification=experience['authentication_status'],
-        )
-
-    @classmethod
     def modifier_statut_experience_academique(
         cls,
-        proposition_id: PropositionIdentity,
-        matricule_candidat: str,
         uuid_experience: str,
         statut: str,
         profil_candidat_translator: IProfilCandidatTranslator,
-        grade_academique_formation_proposition: str,
+        proposition_id: PropositionIdentity = None,
+        matricule_candidat: str = None,
+        grade_academique_formation_proposition: str = None,
     ):
         super().modifier_statut_experience_academique(
             proposition_id=proposition_id,
@@ -108,33 +88,6 @@ class ValidationExperienceParcoursAnterieurService(IValidationExperienceParcours
         return ProfessionalExperience.objects.filter(uuid=experience_uuid)
 
     @classmethod
-    def recuperer_information_validation_experience_non_academique(cls, uuid_experience: str):
-        experience = (
-            cls._get_professional_experience_qs(experience_uuid=uuid_experience)
-            .values('validation_status', 'authentication_status')
-            .first()
-        )
-
-        if not experience:
-            raise AdmissionExperienceNonTrouveeException
-
-        return ValidationExperienceParcoursAnterieurDTO(
-            uuid=uuid_experience,
-            type_experience=TypeExperience.ACTIVITE_NON_ACADEMIQUE.name,
-            statut_validation=experience['validation_status'],
-            statut_authentification=experience['authentication_status'],
-        )
-
-    @classmethod
-    def modifier_statut_experience_non_academique(cls, uuid_experience: str, statut: str):
-        updates_number = cls._get_professional_experience_qs(experience_uuid=uuid_experience).update(
-            validation_status=statut
-        )
-
-        if not updates_number:
-            raise AdmissionExperienceNonTrouveeException
-
-    @classmethod
     def modifier_authentification_experience_non_academique(cls, uuid_experience: str, etat_authentification: str):
         updates_number = cls._get_professional_experience_qs(experience_uuid=uuid_experience).update(
             authentication_status=etat_authentification
@@ -146,36 +99,6 @@ class ValidationExperienceParcoursAnterieurService(IValidationExperienceParcours
     @staticmethod
     def _get_secondary_studies_qs(experience_uuid: str):
         return HighSchoolDiploma.objects.filter(uuid=experience_uuid)
-
-    @classmethod
-    def recuperer_information_validation_etudes_secondaires(cls, uuid_experience: str):
-        experience = (
-            cls._get_secondary_studies_qs(experience_uuid=uuid_experience)
-            .values('validation_status', 'authentication_status')
-            .first()
-        )
-
-        if not experience:
-            raise AdmissionExperienceNonTrouveeException
-
-        return ValidationExperienceParcoursAnterieurDTO(
-            uuid=uuid_experience,
-            type_experience=TypeExperience.ETUDES_SECONDAIRES.name,
-            statut_validation=experience['validation_status'],
-            statut_authentification=experience['authentication_status'],
-        )
-
-    @classmethod
-    def modifier_statut_etudes_secondaires(cls, uuid_experience: str, statut: str):
-        updates_number = cls._get_secondary_studies_qs(experience_uuid=uuid_experience).update(validation_status=statut)
-
-        if not updates_number:
-            raise AdmissionExperienceNonTrouveeException
-
-        Exam.objects.filter(
-            type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR,
-            person__highschooldiploma__uuid=uuid_experience,
-        ).update(validation_status=statut)
 
     @classmethod
     @transaction.atomic
@@ -199,24 +122,6 @@ class ValidationExperienceParcoursAnterieurService(IValidationExperienceParcours
     @staticmethod
     def _get_exam_qs(experience_uuid: str):
         return Exam.objects.filter(uuid=experience_uuid)
-
-    @classmethod
-    def recuperer_information_validation_examen(cls, uuid_experience: str):
-        experience = (
-            cls._get_exam_qs(experience_uuid=uuid_experience)
-            .values('validation_status', 'authentication_status')
-            .first()
-        )
-
-        if not experience:
-            raise AdmissionExperienceNonTrouveeException
-
-        return ValidationExperienceParcoursAnterieurDTO(
-            uuid=uuid_experience,
-            type_experience=TypeExperience.EXAMEN.name,
-            statut_validation=experience['validation_status'],
-            statut_authentification=experience['authentication_status'],
-        )
 
     @classmethod
     def modifier_statut_examen(

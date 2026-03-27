@@ -40,8 +40,26 @@ from admission.ddd.admission.formation_generale.use_case.write.approuver_admissi
 from admission.ddd.admission.formation_generale.use_case.write.approuver_inscription_par_sic_service import (
     approuver_inscription_par_sic,
 )
+from admission.ddd.admission.formation_generale.use_case.write.modifier_authentification_etudes_secondaires_service import (  # noqa
+    modifier_authentification_etudes_secondaires,
+)
+from admission.ddd.admission.formation_generale.use_case.write.modifier_authentification_examen_service import (
+    modifier_authentification_examen,
+)
+from admission.ddd.admission.formation_generale.use_case.write.modifier_authentification_experience_academique_service import (  # noqa
+    modifier_authentification_experience_academique,
+)
+from admission.ddd.admission.formation_generale.use_case.write.modifier_authentification_experience_non_academique_service import (  # noqa
+    modifier_authentification_experience_non_academique,
+)
 from admission.ddd.admission.formation_generale.use_case.write.modifier_checklist_choix_formation_service import (
     modifier_checklist_choix_formation,
+)
+from admission.ddd.admission.formation_generale.use_case.write.modifier_statut_checklist_examen_service import (
+    modifier_statut_checklist_examen,
+)
+from admission.ddd.admission.formation_generale.use_case.write.modifier_statut_checklist_experience_academique_service import (  # noqa
+    modifier_statut_checklist_experience_academique,
 )
 from admission.ddd.admission.formation_generale.use_case.write.refuser_admission_par_sic_service import (
     refuser_admission_par_sic,
@@ -161,12 +179,7 @@ from admission.infrastructure.admission.shared_kernel.repository.in_memory.titre
 from ddd.logic.shared_kernel.profil.commands import (
     ModifierAuthentificationEtudesSecondairesCommand,
     ModifierAuthentificationExamenCommand,
-    ModifierAuthentificationExperienceAcademiqueCommand,
-    ModifierAuthentificationExperienceNonAcademiqueCommand,
-    ModifierStatutEtudesSecondairesCommand,
     ModifierStatutExamenCommand,
-    ModifierStatutExperienceAcademiqueCommand,
-    ModifierStatutExperienceNonAcademiqueCommand,
 )
 from infrastructure.reference.domain.service.in_memory.bourse import BourseInMemoryTranslator
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
@@ -651,7 +664,7 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=_proposition_repository,
     ),
-    ModifierStatutExperienceAcademiqueCommand: (
+    ModifierChecklistStatutExperienceAcademiqueCommand: (
         lambda msg_bus, cmd: modifier_statut_checklist_experience_academique(
             cmd,
             proposition_repository=_proposition_repository,
@@ -660,15 +673,11 @@ COMMAND_HANDLERS = {
             validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur_service,
         )
     ),
-    ModifierStatutExperienceNonAcademiqueCommand: (
-        lambda msg_bus, cmd: modifier_statut_checklist_experience_non_academique(
+    ModifierChecklistStatutExamenCommand: (
+        lambda msg_bus, cmd: modifier_statut_checklist_examen(
             cmd,
-            validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur_service,
-        )
-    ),
-    ModifierStatutEtudesSecondairesCommand: (
-        lambda msg_bus, cmd: modifier_statut_checklist_etudes_secondaires(
-            cmd,
+            proposition_repository=_proposition_repository,
+            profil_candidat_translator=_profil_candidat_translator,
             validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur_service,
         )
     ),
@@ -701,14 +710,6 @@ COMMAND_HANDLERS = {
             validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur_service,
         )
     ),
-    ModifierAuthentificationExperienceNonAcademiqueCommand: (
-        lambda msg_bus, cmd: modifier_authentification_experience_non_academique(
-            cmd,
-            notification=_notification,
-            historique=_historique_formation_generale,
-            validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur_service,
-        )
-    ),
     ModifierAuthentificationEtudesSecondairesCommand: (
         lambda msg_bus, cmd: modifier_authentification_etudes_secondaires(
             cmd,
@@ -719,6 +720,14 @@ COMMAND_HANDLERS = {
     ),
     ModifierAuthentificationExamenCommand: (
         lambda msg_bus, cmd: modifier_authentification_examen(
+            cmd,
+            notification=_notification,
+            historique=_historique_formation_generale,
+            validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur_service,
+        )
+    ),
+    ModifierAuthentificationExperienceNonAcademiqueCommand: (
+        lambda msg_bus, cmd: modifier_authentification_experience_non_academique(
             cmd,
             notification=_notification,
             historique=_historique_formation_generale,

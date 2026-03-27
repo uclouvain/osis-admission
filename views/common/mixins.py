@@ -91,6 +91,7 @@ from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.gestion_des_comptes.dto.periode_soumission_ticket import PeriodeSoumissionTicketDigitDTO
 from ddd.logic.gestion_des_comptes.queries import GetPeriodeActiveSoumissionTicketQuery, GetPropositionFusionQuery
 from infrastructure.messages_bus import message_bus_instance
+from osis_profile.views.mixins.form import FormMixin
 from osis_role.contrib.views import PermissionRequiredMixin
 
 logger = logging.getLogger(__name__)
@@ -413,7 +414,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         return tab_label_suffixes
 
 
-class AdmissionFormMixin(AdmissionViewMixin):
+class AdmissionFormMixin(FormMixin, AdmissionViewMixin):
     update_admission_author = False
 
     def update_current_admission_on_form_valid(self, form, admission):
