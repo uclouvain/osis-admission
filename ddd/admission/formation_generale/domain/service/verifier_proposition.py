@@ -179,6 +179,7 @@ class VerifierProposition(interface.DomainService):
                 profil_candidat_translator=profil_candidat_translator,
                 experiences_academiques=curriculum.experiences_academiques,
                 formation=formation,
+                candidat_est_inscrit_recemment_ucl=candidat_est_inscrit_recemment_ucl,
             ),
             partial(
                 VerifierQuestionsSpecifiques.verifier_onglet_etudes_secondaires,
