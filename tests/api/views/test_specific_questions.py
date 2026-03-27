@@ -936,6 +936,40 @@ class GeneralEducationSpecificQuestionListApiTestCase(APITestCase):
             ],
         )
 
+    def test_retrieve_items_related_to_an_education_group(self):
+        # Education group of a general admission
+        # > without pursuit
+        admission = GeneralEducationAdmissionFactory(
+            candidate=self.candidate,
+            training__academic_year=self.admission.training.academic_year,
+            determined_academic_year=self.admission.determined_academic_year,
+            is_in_pursuit=False,
+        )
+
+        url = resolve_url(
+            "admission_api_v1:general-specific-questions",
+            uuid=admission.uuid,
+            tab=Onglets.CHOIX_FORMATION.name,
+        )
+
+        self.message_instantiation.education_group = admission.training.education_group
+        self.message_instantiation.display_according_education = CritereItemFormulaireFormation.UNE_FORMATION.name
+        self.message_instantiation.save()
+
+        self.client.force_authenticate(user=self.candidate.user)
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 1)
+
+        # > with pursuit
+        admission.is_in_pursuit = True
+        admission.save(update_fields=['is_in_pursuit'])
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 0)
+
 
 class ContinuingEducationSpecificQuestionListApiTestCase(APITestCase):
     @classmethod
