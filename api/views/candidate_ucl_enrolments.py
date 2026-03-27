@@ -23,16 +23,23 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from functools import partial
+
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.response import Response
 
-from admission.api.permissions import IsListingOrHasNotAlreadyCreatedPermission
+from admission.api.permissions import IsListingOrHasNotAlreadyCreatedPermission, IsSelfPersonTabOrTabPermission
 from admission.api.serializers import (
     CandidateReEnrolmentEligibilitySerializer,
     CandidateReEnrolmentPeriodDTOSerializer,
     CandidateUCLEnrolmentDTOSerializer,
 )
 from admission.api.serializers.candidate_ucl_enrolments import CandidateEnrolmentInformationSerializer
+from admission.api.views.mixins import (
+    ContinuingEducationPersonRelatedMixin,
+    GeneralEducationPersonRelatedMixin,
+    PersonRelatedMixin,
+)
 from admission.ddd.admission.shared_kernel.commands import (
     CandidatEstEligibleALaReinscriptionQuery,
     CandidatEstInscritRecemmentUCLQuery,
@@ -47,6 +54,8 @@ __all__ = [
     'CandidateReEnrolmentPeriodView',
     'CandidateReEnrolmentEligibilityView',
     'CandidateEnrolmentInformationView',
+    'GeneralCandidateEnrolmentInformationView',
+    'ContinuingCandidateEnrolmentInformationView',
 ]
 
 
@@ -95,16 +104,35 @@ class CandidateReEnrolmentEligibilityView(APIPermissionRequiredMixin, RetrieveAP
         }
 
 
-class CandidateEnrolmentInformationView(APIPermissionRequiredMixin, RetrieveAPIView):
+class CandidateEnrolmentInformationView(PersonRelatedMixin, APIPermissionRequiredMixin, RetrieveAPIView):
     name = "candidate_enrolment_information"
-    permission_classes = [IsListingOrHasNotAlreadyCreatedPermission]
+    permission_classes = [
+        partial(IsSelfPersonTabOrTabPermission, permission_suffix='candidate_enrolment_information'),
+    ]
     serializer_class = CandidateEnrolmentInformationSerializer
 
     def get_object(self):
         return {
             'est_inscrit_recemment': message_bus_instance.invoke(
                 CandidatEstInscritRecemmentUCLQuery(
-                    matricule_candidat=self.request.user.person.global_id,
+                    matricule_candidat=self.candidate.global_id,
                 )
             )
         }
+
+
+class GeneralCandidateEnrolmentInformationView(GeneralEducationPersonRelatedMixin, CandidateEnrolmentInformationView):
+    name = 'general_candidate_enrolment_information'
+    permission_mapping = {
+        'GET': 'admission.view_generaleducationadmission_candidate_enrolment_information',
+    }
+
+
+class ContinuingCandidateEnrolmentInformationView(
+    ContinuingEducationPersonRelatedMixin,
+    CandidateEnrolmentInformationView,
+):
+    name = 'continuing_candidate_enrolment_information'
+    permission_mapping = {
+        'GET': 'admission.view_continuingeducationadmission_candidate_enrolment_information',
+    }

@@ -29,6 +29,7 @@ from django.test import TestCase
 
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
+    DemandeEnBrouillonDejaExistantePourCetteFormationException,
     DemandePourCetteFormationDejaEnvoyeeException,
 )
 from admission.infrastructure.admission.shared_kernel.domain.service.maximum_propositions import (
@@ -199,3 +200,129 @@ class MaxAuthorizedApplicationTestCase(TestCase):
             )
         except DemandePourCetteFormationDejaEnvoyeeException:
             self.fail('No exception must be raise.')
+
+
+class MaxNonSubmittedApplicationTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+
+        cls.academic_years = {year: AcademicYearFactory(year=year) for year in [2023, 2024, 2025]}
+        cls.admission = GeneralEducationAdmissionFactory(
+            training__acronym='ABCD1',
+            status=ChoixStatutPropositionGenerale.EN_BROUILLON.name,
+        )
+
+    def test_with_a_single_admission(self):
+        # Same training but with the current admission => no exception
+        try:
+            MaximumPropositionsAutorisees.verifier_une_seule_demande_non_soumise_par_formation_generale(
+                matricule_candidat=self.admission.candidate.global_id,
+                sigle_formation='ABCD1',
+                uuid_proposition=self.admission.uuid,
+            )
+        except DemandeEnBrouillonDejaExistantePourCetteFormationException:
+            self.fail('No exception must be raise.')
+
+        # Same training but with no admission => exception
+        with self.assertRaises(DemandeEnBrouillonDejaExistantePourCetteFormationException):
+            MaximumPropositionsAutorisees.verifier_une_seule_demande_non_soumise_par_formation_generale(
+                matricule_candidat=self.admission.candidate.global_id,
+                sigle_formation='ABCD1',
+            )
+
+    def test_with_another_admission_with_specific_training(self):
+        other_admission = GeneralEducationAdmissionFactory(
+            candidate=self.admission.candidate,
+            training__acronym='ABCD2',
+            training__academic_year=self.admission.training.academic_year,
+            status=ChoixStatutPropositionGenerale.EN_BROUILLON.name,
+        )
+
+        # Other training => no exception
+        try:
+            MaximumPropositionsAutorisees.verifier_une_seule_demande_non_soumise_par_formation_generale(
+                matricule_candidat=self.admission.candidate.global_id,
+                sigle_formation='ABCD1',
+                uuid_proposition=self.admission.uuid,
+            )
+        except DemandeEnBrouillonDejaExistantePourCetteFormationException:
+            self.fail('No exception must be raise.')
+
+        # Same training => exception
+        other_admission.training = self.admission.training
+        other_admission.save()
+
+        with self.assertRaises(DemandeEnBrouillonDejaExistantePourCetteFormationException):
+            MaximumPropositionsAutorisees.verifier_une_seule_demande_non_soumise_par_formation_generale(
+                matricule_candidat=self.admission.candidate.global_id,
+                sigle_formation='ABCD1',
+                uuid_proposition=self.admission.uuid,
+            )
+
+    def test_depends_on_admission_status(self):
+        other_admission = GeneralEducationAdmissionFactory(
+            candidate=self.admission.candidate,
+            training=self.admission.training,
+        )
+
+        invalid_statuses = [
+            ChoixStatutPropositionGenerale.EN_BROUILLON.name,
+            ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name,
+        ]
+
+        # Not submitted status => exception
+        for status in invalid_statuses:
+            other_admission.status = status
+            other_admission.save()
+
+            other_admission.status = status
+            other_admission.save()
+
+            with self.assertRaises(DemandeEnBrouillonDejaExistantePourCetteFormationException):
+                MaximumPropositionsAutorisees.verifier_une_seule_demande_non_soumise_par_formation_generale(
+                    matricule_candidat=self.admission.candidate.global_id,
+                    sigle_formation='ABCD1',
+                    uuid_proposition=self.admission.uuid,
+                )
+
+        # Submitted status => no exception
+        for status in ChoixStatutPropositionGenerale.get_names_except(*invalid_statuses):
+            other_admission.status = status
+            other_admission.save()
+
+            try:
+                MaximumPropositionsAutorisees.verifier_une_seule_demande_non_soumise_par_formation_generale(
+                    matricule_candidat=self.admission.candidate.global_id,
+                    sigle_formation='ABCD1',
+                    uuid_proposition=self.admission.uuid,
+                )
+            except DemandeEnBrouillonDejaExistantePourCetteFormationException:
+                self.fail('No exception must be raise.')
+
+    def test_with_an_admission_for_the_same_training_but_for_another_candidate(self):
+        other_admission = GeneralEducationAdmissionFactory(
+            training=self.admission.training,
+            status=ChoixStatutPropositionGenerale.EN_BROUILLON.name,
+        )
+
+        # Other candidate => no exception
+        try:
+            MaximumPropositionsAutorisees.verifier_une_seule_demande_non_soumise_par_formation_generale(
+                matricule_candidat=self.admission.candidate.global_id,
+                sigle_formation='ABCD1',
+                uuid_proposition=self.admission.uuid,
+            )
+        except DemandeEnBrouillonDejaExistantePourCetteFormationException:
+            self.fail('No exception must be raise.')
+
+        # Same candidate => exception
+        other_admission.candidate = self.admission.candidate
+        other_admission.save()
+
+        with self.assertRaises(DemandeEnBrouillonDejaExistantePourCetteFormationException):
+            MaximumPropositionsAutorisees.verifier_une_seule_demande_non_soumise_par_formation_generale(
+                matricule_candidat=self.admission.candidate.global_id,
+                sigle_formation='ABCD1',
+                uuid_proposition=self.admission.uuid,
+            )

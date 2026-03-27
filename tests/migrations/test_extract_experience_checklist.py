@@ -939,7 +939,7 @@ class ExtractExperienceAuthenticationStatusTestCase(TestCase):
                                     'identifiant': 'ETUDES_SECONDAIRES',
                                     'etat_authentification': (
                                         EtatAuthentificationParcours.AUTHENTIFICATION_DEMANDEE.name
-                                    )
+                                    ),
                                 },
                             },
                         ]

@@ -44,13 +44,20 @@ from admission.ddd.admission.shared_kernel.domain.builder.formation_identity imp
 from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import (
     IAnneeInscriptionFormationTranslator,
 )
+from admission.ddd.admission.shared_kernel.domain.service.i_deliberation_translator import IDeliberationTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_diffusion_notes_translator import IDiffusionNotesTranslator
 from admission.ddd.admission.shared_kernel.domain.service.i_historique import IHistorique
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_evaluations_translator import (
+    IInscriptionsEvaluationsTranslator,
+)
 from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
     IInscriptionsTranslatorService,
 )
 from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions import (
     IMaximumPropositionsAutorisees,
 )
+from admission.ddd.admission.shared_kernel.domain.service.i_noma_translator import INomasTranslator
+from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidat
 from ddd.logic.reference.domain.service.i_bourse import IBourseTranslator
 
 
@@ -63,6 +70,10 @@ def initier_proposition(
     historique: 'IHistorique',
     inscriptions_translator: IInscriptionsTranslatorService,
     annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
+    deliberation_translator: IDeliberationTranslator,
+    diffusion_notes_translator: IDiffusionNotesTranslator,
+    inscriptions_evaluations_translator: IInscriptionsEvaluationsTranslator,
+    nomas_translator: INomasTranslator,
 ) -> 'PropositionIdentity':
     # GIVEN
     formation_id = FormationIdentityBuilder.build(sigle=cmd.sigle_formation, annee=cmd.annee_formation)
@@ -78,6 +89,10 @@ def initier_proposition(
         annee=cmd.annee_formation,
         candidat_est_en_poursuite_directe=candidat_est_en_poursuite_directe,
     )
+    maximum_propositions_service.verifier_une_seule_demande_non_soumise_par_formation_generale(
+        matricule_candidat=cmd.matricule_candidat,
+        sigle_formation=cmd.sigle_formation,
+    )
     maximum_propositions_service.verifier_nombre_propositions_en_cours(cmd.matricule_candidat)
     bourses_ids = bourse_translator.search(
         [
@@ -86,6 +101,8 @@ def initier_proposition(
             if scholarship
         ]
     )
+
+    formation = formation_translator.get(entity_id=formation_id)
 
     est_en_poursuite = inscriptions_translator.est_en_poursuite(
         matricule_candidat=cmd.matricule_candidat,
@@ -99,6 +116,17 @@ def initier_proposition(
         formation_id=formation_id,
         bourses_ids=bourses_ids,
         est_en_poursuite=est_en_poursuite,
+    )
+
+    ProfilCandidat.verifier_choix_formation_generale(
+        proposition=proposition,
+        formation=formation,
+        annee_inscription_formation_translator=annee_inscription_formation_translator,
+        inscriptions_translator=inscriptions_translator,
+        deliberation_translator=deliberation_translator,
+        diffusion_notes_translator=diffusion_notes_translator,
+        inscriptions_evaluations_translator=inscriptions_evaluations_translator,
+        nomas_translator=nomas_translator,
     )
 
     # THEN
