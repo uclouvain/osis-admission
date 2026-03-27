@@ -112,6 +112,10 @@ urlpatterns = [
     path('propositions/doctorate/pre-admission-list', views.DoctoratePreAdmissionList),
     path('propositions/doctorate/<uuid:uuid>', views.DoctoratePropositionView),
     _path('propositions/doctorate/<uuid:uuid>/', include(doctorate_view_set_router.urls)),
+    path(
+        'propositions/doctorate/<uuid:uuid>/candidate-ucl-enrolment-information',
+        views.CandidateEnrolmentInformationView,
+    ),
     path('propositions/doctorate/<uuid:uuid>/person', views.PersonViewSet),
     path('propositions/doctorate/<uuid:uuid>/person_last_enrolment', views.DoctoratePersonLastEnrolmentViewSet),
     path('propositions/doctorate/<uuid:uuid>/coordonnees', views.CoordonneesViewSet),
@@ -148,6 +152,10 @@ urlpatterns = [
     # > General education
     path('propositions/general-education', views.GeneralTrainingChoiceAPIView),
     path('propositions/general-education/<uuid:uuid>', views.GeneralPropositionView),
+    path(
+        'propositions/general-education/<uuid:uuid>/candidate-ucl-enrolment-information',
+        views.GeneralCandidateEnrolmentInformationView,
+    ),
     path('propositions/general-education/<uuid:uuid>/training-choice', views.GeneralUpdateTrainingChoiceAPIView),
     path('propositions/general-education/<uuid:uuid>/person', views.GeneralPersonView),
     path('propositions/general-education/<uuid:uuid>/person_last_enrolment', views.GeneralPersonLastEnrolmentViewSet),
@@ -177,6 +185,10 @@ urlpatterns = [
     # > Continuing education
     path('propositions/continuing-education', views.ContinuingTrainingChoiceAPIView),
     path('propositions/continuing-education/<uuid:uuid>', views.ContinuingPropositionView),
+    path(
+        'propositions/continuing-education/<uuid:uuid>/candidate-ucl-enrolment-information',
+        views.ContinuingCandidateEnrolmentInformationView,
+    ),
     path('propositions/continuing-education/<uuid:uuid>/training-choice', views.ContinuingUpdateTrainingChoiceAPIView),
     path('propositions/continuing-education/<uuid:uuid>/person', views.ContinuingPersonView),
     path(

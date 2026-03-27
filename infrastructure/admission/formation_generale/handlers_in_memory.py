@@ -237,6 +237,10 @@ COMMAND_HANDLERS = {
         historique=_historique_global,
         annee_inscription_formation_translator=_annee_inscription_formation_translator,
         inscriptions_translator=_inscriptions_translator,
+        deliberation_translator=_deliberation_translator,
+        diffusion_notes_translator=_diffusion_notes_translator,
+        inscriptions_evaluations_translator=_inscriptions_evaluations_translator,
+        nomas_translator=_nomas_translator,
     ),
     ListerPropositionsCandidatQuery: lambda msg_bus, cmd: lister_propositions_candidat(
         cmd,
@@ -252,6 +256,12 @@ COMMAND_HANDLERS = {
         formation_translator=_formation_generale_translator,
         bourse_translator=_bourse_translator,
         inscriptions_translator=_inscriptions_translator,
+        maximum_propositions_service=_maximum_propositions_autorisees,
+        annee_inscription_formation_translator=_annee_inscription_formation_translator,
+        deliberation_translator=_deliberation_translator,
+        diffusion_notes_translator=_diffusion_notes_translator,
+        inscriptions_evaluations_translator=_inscriptions_evaluations_translator,
+        nomas_translator=_nomas_translator,
     ),
     ModifierChecklistChoixFormationCommand: lambda msg_bus, cmd: modifier_checklist_choix_formation(
         msg_bus,

@@ -49,6 +49,7 @@ from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions
     IMaximumPropositionsAutorisees,
 )
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
+    DemandeEnBrouillonDejaExistantePourCetteFormationException,
     DemandePourCetteFormationDejaEnvoyeeException,
 )
 from admission.models import (
@@ -151,3 +152,30 @@ class MaximumPropositionsAutorisees(IMaximumPropositionsAutorisees):
 
         if has_similar_application:
             raise DemandePourCetteFormationDejaEnvoyeeException(training_year=target_year)
+
+    @classmethod
+    def verifier_une_seule_demande_non_soumise_par_formation_generale(
+        cls,
+        matricule_candidat: str,
+        sigle_formation: str,
+        uuid_proposition: str = '',
+    ):
+        qs = GeneralEducationAdmission.objects.filter(
+            candidate__global_id=matricule_candidat,
+            training__acronym=sigle_formation,
+            status__in=[
+                ChoixStatutPropositionGenerale.EN_BROUILLON.name,
+                ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name,
+            ],
+        )
+
+        if uuid_proposition:
+            qs = qs.exclude(uuid=uuid_proposition)
+
+        similar_application_uuid = qs.values_list('uuid', flat=True).first()
+
+        if similar_application_uuid:
+            raise DemandeEnBrouillonDejaExistantePourCetteFormationException(
+                admission_context='general-education',
+                admission_uuid=str(similar_application_uuid),
+            )

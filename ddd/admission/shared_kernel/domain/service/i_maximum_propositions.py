@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+from abc import abstractmethod
 from typing import Optional
 
 from django.utils.translation import ngettext
@@ -161,9 +162,20 @@ class IMaximumPropositionsAutorisees(interface.DomainService):
             raise MaximumPropositionsDoctoralesAtteintException(MAXIMUM_PROPOSITIONS_EN_COURS_FORMATION_DOCTORALE)
 
     @classmethod
+    @abstractmethod
     def verifier_une_seule_demande_envoyee_par_formation_generale_par_annee(
         cls,
         proposition_candidat: PropositionGenerale,
         annee_soumise: int = None,
+    ):
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def verifier_une_seule_demande_non_soumise_par_formation_generale(
+        cls,
+        matricule_candidat: str,
+        sigle_formation: str,
+        uuid_proposition: str = '',
     ):
         raise NotImplementedError

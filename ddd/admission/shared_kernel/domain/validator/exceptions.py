@@ -277,3 +277,19 @@ class DemandePourCetteFormationDejaEnvoyeeException(BusinessException):
             "the year %(training_year)s."
         ) % {'training_year': format_academic_year(training_year, short=True)}
         super().__init__(message, **kwargs)
+
+
+class DemandeEnBrouillonDejaExistantePourCetteFormationException(BusinessException):
+    status_code = "ADMISSION-27"
+
+    def __init__(self, admission_context: str, admission_uuid: str, **kwargs):
+        from admission.utils import get_portal_admission_url
+
+        portal_admission_url = get_portal_admission_url(context=admission_context, admission_uuid=admission_uuid)
+
+        message = _(
+            'You have already created another request for this training, please '
+            '<a href="%(url)s">continue with that one.</a>'
+        ) % {'url': portal_admission_url}
+
+        super().__init__(message, **kwargs)

@@ -1066,7 +1066,7 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
 
         errors_codes = [error['status_code'] for error in json_response['errors']]
         self.assertNotIn('ADMISSION-7', errors_codes)
-        self.assertIn('FORMATION-GENERALE-43', errors_codes)  # Already graduated
+        self.assertIn('FORMATION-GENERALE-44', errors_codes)  # Already graduated
 
     def test_has_other_admission_same_cycle_same_year(self):
         admission = GeneralEducationAdmissionFactory(
@@ -1078,15 +1078,16 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         admission.training.education_group_type.save(update_fields=['cycle'])
 
         # Temporary display a detailed error message because the test seems to fail in some cases
-        _get_error_message = lambda a1, a2: '{}-{},{}-{},{}-{}-{}'.format(
-            a1.training.education_group_type.cycle,
-            a2.training.education_group_type.cycle,
-            a1.determined_academic_year,
-            a2.determined_academic_year,
-            a1.candidate,
-            a2.candidate,
-            a2.status,
-        )
+        def _get_error_message(a1, a2):
+            return '{}-{},{}-{},{}-{}-{}'.format(
+                a1.training.education_group_type.cycle,
+                a2.training.education_group_type.cycle,
+                a1.determined_academic_year,
+                a2.determined_academic_year,
+                a1.candidate,
+                a2.candidate,
+                a2.status,
+            )
 
         # No other admission
         result = SubmitGeneralEducationPropositionView._has_other_admission_same_cycle_same_year(admission)

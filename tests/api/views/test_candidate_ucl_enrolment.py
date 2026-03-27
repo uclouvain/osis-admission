@@ -506,7 +506,7 @@ class CandidateEnrolmentInformationViewTestCase(APITestCase):
 
         for method in ['delete', 'post', 'patch', 'put']:
             response = getattr(self.client, method)(self.url)
-            self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_with_a_recent_enrolment(self):
         self.client.force_authenticate(user=self.candidate.user)

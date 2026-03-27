@@ -27,6 +27,7 @@ from admission.ddd.admission.shared_kernel.domain.service.i_noma_translator impo
 from ddd.logic.shared_kernel.signaletique_etudiant.commands import RechercherSignaletiqueEtudiantQuery
 from ddd.logic.shared_kernel.signaletique_etudiant.dto.signaletique_etudiant import SignaletiqueEtudiantDTO
 
+
 class NomasTranslator(INomasTranslator):
     @classmethod
     def recuperer(
