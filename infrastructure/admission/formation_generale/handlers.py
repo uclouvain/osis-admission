@@ -39,6 +39,24 @@ from admission.ddd.admission.formation_generale.use_case.write.approuver_admissi
 from admission.ddd.admission.formation_generale.use_case.write.approuver_inscription_par_sic_service import (
     approuver_inscription_par_sic,
 )
+from admission.ddd.admission.formation_generale.use_case.write.modifier_authentification_etudes_secondaires_service import (  # noqa
+    modifier_authentification_etudes_secondaires,
+)
+from admission.ddd.admission.formation_generale.use_case.write.modifier_authentification_examen_service import (
+    modifier_authentification_examen,
+)
+from admission.ddd.admission.formation_generale.use_case.write.modifier_authentification_experience_academique_service import (  # noqa
+    modifier_authentification_experience_academique,
+)
+from admission.ddd.admission.formation_generale.use_case.write.modifier_authentification_experience_non_academique_service import (  # noqa
+    modifier_authentification_experience_non_academique,
+)
+from admission.ddd.admission.formation_generale.use_case.write.modifier_statut_checklist_examen_service import (
+    modifier_statut_checklist_examen,
+)
+from admission.ddd.admission.formation_generale.use_case.write.modifier_statut_checklist_experience_academique_service import (  # noqa
+    modifier_statut_checklist_experience_academique,
+)
 from admission.ddd.admission.formation_generale.use_case.write.refuser_admission_par_sic_service import (
     refuser_admission_par_sic,
 )
@@ -132,15 +150,6 @@ from admission.infrastructure.admission.shared_kernel.domain.service.unites_ense
 from admission.infrastructure.admission.shared_kernel.repository.email_destinataire import EmailDestinataireRepository
 from admission.infrastructure.admission.shared_kernel.repository.titre_acces_selectionnable import (
     TitreAccesSelectionnableRepository,
-)
-from ddd.logic.shared_kernel.profil.commands import (
-    ModifierAuthentificationEtudesSecondairesCommand,
-    ModifierAuthentificationExamenCommand,
-    ModifierAuthentificationExperienceAcademiqueCommand,
-    ModifierAuthentificationExperienceNonAcademiqueCommand,
-    ModifierStatutEtudesSecondairesCommand,
-    ModifierStatutExamenCommand,
-    ModifierStatutExperienceAcademiqueCommand,
 )
 from infrastructure.reference.domain.service.bourse import BourseTranslator
 from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
@@ -599,7 +608,7 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=PropositionRepository(),
     ),
-    ModifierStatutExperienceAcademiqueCommand: (
+    ModifierChecklistStatutExperienceAcademiqueCommand: (
         lambda msg_bus, cmd: modifier_statut_checklist_experience_academique(
             cmd,
             proposition_repository=PropositionRepository(),
@@ -608,13 +617,7 @@ COMMAND_HANDLERS = {
             validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
         )
     ),
-    ModifierStatutEtudesSecondairesCommand: (
-        lambda msg_bus, cmd: modifier_statut_checklist_etudes_secondaires(
-            cmd,
-            validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
-        )
-    ),
-    ModifierStatutExamenCommand: (
+    ModifierChecklistStatutExamenCommand: (
         lambda msg_bus, cmd: modifier_statut_checklist_examen(
             cmd,
             proposition_repository=PropositionRepository(),
@@ -633,6 +636,14 @@ COMMAND_HANDLERS = {
             emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
+        )
+    ),
+    ModifierAuthentificationExperienceNonAcademiqueCommand: (
+        lambda msg_bus, cmd: modifier_authentification_experience_non_academique(
+            cmd,
+            notification=Notification(),
+            historique=HistoriqueFormationGenerale(),
+            validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
         )
     ),
     ModifierAuthentificationExperienceAcademiqueCommand: (

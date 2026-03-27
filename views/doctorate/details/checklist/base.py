@@ -318,6 +318,7 @@ class ChecklistView(
             # Authentication forms (one by experience)
             context['authentication_forms'] = {}
             context['authentication_urls'] = {}
+            context['validation_urls'] = {}
 
             extra_tokens = {
                 'sender_name': self.current_user_name,
@@ -373,6 +374,17 @@ class ChecklistView(
                     experience_uuid,
                     reverse(
                         f'{self.base_namespace}:single-past-experience-change-authentication',
+                        kwargs={
+                            'experience_type': current_experience.type_experience,
+                            'experience_uuid': str(current_experience.uuid),
+                            'uuid': self.admission_uuid,
+                        },
+                    ),
+                )
+                context['validation_urls'].setdefault(
+                    experience_uuid,
+                    reverse(
+                        f'{self.base_namespace}:single-past-experience-change-status',
                         kwargs={
                             'experience_type': current_experience.type_experience,
                             'experience_uuid': str(current_experience.uuid),

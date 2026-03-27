@@ -711,30 +711,33 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
     @classmethod
     def get_examen(
         cls,
-        uuid_proposition: str,
-        matricule: str,
-        formation_sigle: str,
-        formation_annee: int,
+        uuid_experience: str = None,
+        matricule: str = None,
+        formation_sigle: str = None,
+        formation_annee: int = None,
+        uuid_proposition: str = None,
     ) -> 'ExamenDTO':
         exam_type = ExamType.objects.filter(
             education_group_years__acronym=formation_sigle,
             education_group_years__academic_year__year=formation_annee,
         ).first()
-        if exam_type is None:
+        if formation_annee and formation_sigle and exam_type is None:
             return ExamenDTO(uuid='', requis=False, titre='', attestation=[], annee=None)
         exam = (
-            Exam.objects.filter(
-                admissions__admission__uuid=uuid_proposition,
+            (
+                Exam.objects.filter(admissions__admission__uuid=uuid_proposition)
+                .annotate(**cls.get_examen_annotations())
+                .first()
             )
-            .annotate(**cls.get_examen_annotations())
-            .first()
+            if uuid_proposition
+            else (Exam.objects.filter(uuid=uuid_experience).annotate(**cls.get_examen_annotations()).first())
         )
         if exam is None:
             return ExamenDTO(uuid='', requis=True, titre=exam_type.title, attestation=[], annee=None)
         return ExamenDTO(
             uuid=str(exam.uuid),
             requis=True,
-            titre=exam_type.title,
+            titre=exam_type.title if exam_type else exam.type.title,
             attestation=exam.certificate,
             annee=exam.year.year if exam.year else None,
             identifiant_externe=exam.external_id,
@@ -854,9 +857,9 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
     @classmethod
     def get_experience_academique(
         cls,
-        matricule: str,
-        uuid_proposition: str,
         uuid_experience: str,
+        matricule: str = None,
+        uuid_proposition: str = None,
     ) -> 'ExperienceAcademiqueDTO':
         experiences = cls._get_academic_experiences_dtos(
             matricule,

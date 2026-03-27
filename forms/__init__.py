@@ -29,8 +29,7 @@ from typing import Dict, Iterable, List, Mapping, Optional, Union
 from django import forms
 from django.conf import settings
 from django.utils.safestring import mark_safe
-from django.utils.translation import get_language, pgettext_lazy
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import get_language, gettext_lazy as _, pgettext_lazy
 
 from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from base.forms.utils import EMPTY_CHOICE
@@ -282,25 +281,6 @@ class AdmissionHTMLCharField(forms.CharField):
             return html.unescape(cleaned_value)
 
         return cleaned_value
-
-
-class AutoGrowTextareaWidget(forms.Textarea):
-    """A textarea widget whose minimum height is automatically adjusted to fit its content."""
-
-    template_name = "admission/widgets/autogrow_textarea.html"
-
-    def __init__(self, attrs=None):
-        if not attrs:
-            attrs = {}
-
-        attrs['onInput'] = 'this.parentNode.dataset.value = this.value'
-
-        super().__init__(attrs)
-
-    class Media:
-        css = {
-            'all': ('admission/autogrow_textarea.css',),
-        }
 
 
 class SelectWithDisabledOptions(forms.Select):
