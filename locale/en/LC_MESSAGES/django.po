@@ -328,6 +328,12 @@ msgstr ""
 msgid "Access title"
 msgstr ""
 
+#, python-format
+msgid ""
+"According to our analysis, you have a maximum of 15 remaining credits from "
+"your bachelor's degree to complete in %(year)s. Do you confirm this analysis?"
+msgstr ""
+
 msgid "Account holder first name"
 msgstr ""
 
@@ -2387,6 +2393,9 @@ msgstr ""
 msgid "Dr"
 msgstr ""
 
+msgid "Dual bachelor-master registration (BAMA15)"
+msgstr ""
+
 msgid "Dual degree scholarship"
 msgstr ""
 
@@ -3872,6 +3881,9 @@ msgstr ""
 msgid "Is belgian bachelor"
 msgstr ""
 
+msgid "Is concerned by BAMA15"
+msgstr ""
+
 msgid "Is it a Wallonia-Brussels Federation institution?"
 msgstr ""
 
@@ -4228,6 +4240,11 @@ msgid "Management of the enrolment applications"
 msgstr ""
 
 msgid "Manager follow-up"
+msgstr ""
+
+msgid ""
+"Mandatory fields are missing in the 'Additional information > Dual bachelor-"
+"master registration (BAMA15)' tab."
 msgstr ""
 
 msgid ""
@@ -5263,6 +5280,13 @@ msgid "Proof of equivalency request"
 msgstr ""
 
 msgid "Proof of passing the exam"
+msgstr ""
+
+msgid "Proof of re-enrolment for the bachelor's degree (BAMA15)"
+msgstr ""
+
+#, python-format
+msgid "Proof of re-enrolment for your %(year)s bachelor's degree"
 msgstr ""
 
 msgid "Proof of receipt of unemployment benefit, pension or compensation"
@@ -6922,9 +6946,6 @@ msgid ""
 msgstr ""
 
 msgid "There is no required exam for this training."
-msgstr ""
-
-msgid "There was an error while getting the EPC documents list."
 msgstr ""
 
 msgid "Thesis field"

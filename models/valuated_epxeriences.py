@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from admission.models.base import BaseAdmission
+from osis_profile.models import EducationalExperience
 
 
 class AdmissionEducationalValuatedExperiences(models.Model):
@@ -37,7 +38,7 @@ class AdmissionEducationalValuatedExperiences(models.Model):
     )
 
     educationalexperience = models.ForeignKey(
-        'osis_profile.EducationalExperience',
+        EducationalExperience,
         on_delete=models.CASCADE,
         to_field='uuid',
         related_name='educational_valuated_experiences',

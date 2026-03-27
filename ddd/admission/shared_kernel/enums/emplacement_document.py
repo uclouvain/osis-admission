@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -220,6 +220,7 @@ DocumentsQuestionsSpecifiques = {
         'You can add any document you feel is relevant to your application '
         '(supporting documents, proof of language level, etc.).'
     ),
+    'PREUVE_BAMA_15': _("Proof of re-enrolment for your %(year)s bachelor's degree"),
 }
 
 

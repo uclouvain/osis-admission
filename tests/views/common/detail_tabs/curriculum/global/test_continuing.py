@@ -258,7 +258,7 @@ class CurriculumGlobalDetailsViewForContinuingTestCase(TestCase):
         self.assertEqual(experience.systeme_evaluation, educational_experience.evaluation_type)
         self.assertEqual(experience.nom_formation, 'My custom program name')
         self.assertEqual(experience.nom_formation_equivalente_communaute_fr, '')
-        self.assertEqual(experience.est_autre_formation, True)
+        self.assertEqual(experience.formation_non_selectionnee_dans_liste_de_reference, True)
         self.assertEqual(experience.cycle_formation, '')
         self.assertEqual(experience.type_enseignement, educational_experience.study_system)
         self.assertEqual(experience.injectee, False)
@@ -330,7 +330,7 @@ class CurriculumGlobalDetailsViewForContinuingTestCase(TestCase):
         self.assertEqual(experience.nom_formation, self.diploma.title)
         self.assertEqual(experience.nom_formation_equivalente_communaute_fr, self.other_diploma.title)
         self.assertEqual(experience.cycle_formation, self.other_diploma.cycle)
-        self.assertEqual(experience.est_autre_formation, False)
+        self.assertEqual(experience.formation_non_selectionnee_dans_liste_de_reference, False)
 
         self.assertEqual(len(experience.annees), 1)
 

@@ -7,7 +7,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2025 Université catholique de Louvain
+  * Copyright (C) 2015-2026 Université catholique de Louvain
   (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
@@ -75,7 +75,7 @@
   </div>
   {% if checklist_display %}
     <div class="row">
-      {% if is_foreign_experience or is_belgian_experience and experience.est_autre_formation %}
+      {% if is_foreign_experience or is_belgian_experience and experience.formation_non_selectionnee_dans_liste_de_reference %}
         <div class="col-md-6">
           {% field_data _('FWB equivalent course') experience.nom_formation_equivalente_communaute_fr %}
         </div>
