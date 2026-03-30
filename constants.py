@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -32,6 +32,8 @@ from osis_profile.constants import IMAGE_MIME_TYPES
 DEFAULT_PAGINATOR_SIZE = 500
 SUPPORTED_MIME_TYPES = {PDF_MIME_TYPE} | IMAGE_MIME_TYPES
 DEFAULT_MIME_TYPES = [PDF_MIME_TYPE]
+PDF_EXTENSION = 'pdf'
+IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg']
 UUID_REGEX = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
 ORDERED_CAMPUSES_UUIDS = {
     'LOUVAIN_LA_NEUVE_UUID': uuid.UUID('6f207107-bcf0-4b38-a622-9e78a3540c99'),

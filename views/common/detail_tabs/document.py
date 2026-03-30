@@ -32,7 +32,7 @@ from django.utils.functional import cached_property
 from django.utils.translation import get_language, gettext as _
 from django.views.generic import FormView, RedirectView, TemplateView
 from osis_document_components.enums import PostProcessingWanted
-from osis_document_components.services import get_student_files_from_epc
+from osis_document_components.services import get_external_file_remote_metadata, get_student_files_from_epc
 from osis_document_components.utils import get_file_url
 from rest_framework.status import HTTP_204_NO_CONTENT
 
@@ -319,19 +319,21 @@ class DocumentEpcDetailView(LoadDossierViewMixin, HtmxPermissionRequiredMixin, H
         if not self.proposition.noma_candidat:
             return None
         try:
-            documents = get_student_files_from_epc(self.proposition.noma_candidat)
-            for document in documents:
-                if document.get('token') == self.kwargs['token']:
-                    return {
-                        'mimetype': document.get('type_contenu'),
-                        'url': get_file_url(self.kwargs['token']),
-                        'name': document.get('description_detaillee', document.get('description', document.get('nom'))),
-                    }
+            metadata = get_external_file_remote_metadata(self.kwargs['token'])
+            if metadata:
+                name = metadata.get('description_detaillee')
+                if not name:
+                    name = metadata.get('description')
+                if not name:
+                    name = metadata.get('nom')
+                return {
+                    'mimetype': metadata.get('type_contenu'),
+                    'url': metadata.get('url'),
+                    'name': name,
+                    'filename': metadata.get('name'),
+                }
         except Exception as e:
-            logger.exception(
-                f"[Documents EPC] Erreur lors de la récupération des documents EPC pour le noma"
-                f" '{self.proposition.noma_candidat}'"
-            )
+            logger.exception(f"[Documents EPC] Erreur lors de la récupération du document EPC {self.kwargs['token']}")
         return None
 
     def get_context_data(self, **kwargs):

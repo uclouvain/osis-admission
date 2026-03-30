@@ -525,12 +525,12 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                     'nom_formation_equivalente_communaute_fr': '',
                     'cycle_formation': '',
                     'grade_academique_formation': '',
-                    'est_autre_formation': None,
+                    'formation_non_selectionnee_dans_liste_de_reference': None,
                 }
 
                 if experience_year.educational_experience.education_name:
                     program_info['nom_formation'] = experience_year.educational_experience.education_name
-                    program_info['est_autre_formation'] = True
+                    program_info['formation_non_selectionnee_dans_liste_de_reference'] = True
 
                 if experience_year.educational_experience.program_id:
                     program_info['nom_formation'] = experience_year.educational_experience.program.title
@@ -538,7 +538,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                     program_info['grade_academique_formation'] = (
                         experience_year.educational_experience.program.code_grade_acad
                     )
-                    program_info['est_autre_formation'] = False
+                    program_info['formation_non_selectionnee_dans_liste_de_reference'] = False
 
                 if experience_year.educational_experience.fwb_equivalent_program_id:
                     program_info['nom_formation_equivalente_communaute_fr'] = (

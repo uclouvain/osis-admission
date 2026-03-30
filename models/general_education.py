@@ -517,6 +517,16 @@ class GeneralEducationAdmission(BaseAdmission):
         null=True,
         verbose_name=_('Foreign access title equivalence effective date'),
     )
+    is_concerned_by_bama_15 = models.BooleanField(
+        blank=True,
+        null=True,
+        verbose_name=_('Is concerned by BAMA15'),
+    )
+    bama_15_proof = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('Proof of re-enrolment for the bachelor\'s degree (BAMA15)'),
+    )
 
     class Meta:
         verbose_name = _("General education admission")

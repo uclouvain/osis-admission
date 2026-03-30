@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 ##############################################################################
 import datetime
 
+from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 
 from admission.ddd.admission.formation_generale.domain.model.enums import (
@@ -382,3 +383,16 @@ class InformationsEquivalenceNonSpecifieesChecklistException(BusinessException):
     def __init__(self, **kwargs):
         message = _('The "Sufficient" status requires the equivalence information to be specified.')
         super().__init__(message, **kwargs)
+
+
+class InformationsBama15NonCompleteesException(BusinessException):
+    status_code = "FORMATION-GENERALE-42"
+
+    def __init__(self, **kwargs):
+        super().__init__(
+            message=gettext(
+                "Mandatory fields are missing in the 'Additional information > "
+                "Dual bachelor-master registration (BAMA15)' tab."
+            ),
+            **kwargs,
+        )
