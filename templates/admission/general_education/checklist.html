@@ -1,5 +1,5 @@
 {% extends base_template %}
-{% load i18n static admission bootstrap3 enums osis_document_components statici18n strings gestion_des_comptes panel field_data %}
+{% load academic_year_display i18n static admission bootstrap3 enums osis_document_components statici18n strings gestion_des_comptes panel field_data %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -398,6 +398,16 @@
                 {% field_data _('Competent diplomatic post') resume_proposition.proposition.poste_diplomatique|safe %}
               {% endpanel %}
             {% endif %}
+            {% if display_bama_15_questions %}
+              {% panel _('Dual bachelor-master registration (BAMA15)') edit_link_button=specific_questions_url|add:next_url %}
+                {% with year=proposition.annee_demande|get_academic_year %}
+                  {% blocktranslate asvar is_concerned_by_bama_15_label trimmed with year=year %}
+                    According to our analysis, you have a maximum of 15 remaining credits from your bachelor's degree to complete in {{ year }}. Do you confirm this analysis?
+                  {% endblocktranslate %}
+                  {% field_data is_concerned_by_bama_15_label proposition.est_concerne_par_le_bama_15 %}
+                {% endwith %}
+              {% endpanel %}
+            {% endif %}
             {% multiple_field_data specific_questions_by_tab|get_item:'INFORMATIONS_ADDITIONNELLES' title=_('Specific questions') %}
           </div>
 
@@ -478,7 +488,13 @@
                   id="{{ tab }}-documents-select"
                   class="form-control documents-select"
                   name="identifier"
+                  {% if not documents %}disabled{% endif %}
               >
+                {% if documents %}
+                  <option value="" disabled>{% translate "Select a document to display it" %}</option>
+                {% else %}
+                  <option value="" disabled>{% translate "No document" %}</option>
+                {% endif %}
                 {% for document in documents %}
                   <option
                     value="{{ document.identifiant }}"
@@ -596,7 +612,6 @@
           const defaultDocumentSelect2Options = {
               templateResult: formatResultDocumentOption,
               templateSelection: formatSelectedDocumentOption,
-              placeholder: '{% translate "No document" %}',
           };
 
           $('.documents-select').select2(defaultDocumentSelect2Options);
@@ -609,7 +624,7 @@
               const nextOptionButton = jQuerySelect.siblings('.next-option-button');
               const documentSelectElement = jQuerySelect[0];
 
-              prevOptionButton.prop('disabled', documentSelectElement.selectedIndex <= 0);
+              prevOptionButton.prop('disabled', documentSelectElement.selectedIndex <= 1);
               nextOptionButton.prop('disabled', documentSelectElement.selectedIndex >= documentSelectElement.length - 1);
           }
 

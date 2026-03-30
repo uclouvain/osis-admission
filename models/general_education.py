@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -53,18 +53,14 @@ from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import
     TypeEquivalenceTitreAcces,
 )
 from admission.ddd.admission.shared_kernel.dtos.conditions import InfosDetermineesDTO
-from admission.models.base import (
-    BaseAdmission,
-    BaseAdmissionQuerySet,
-    admission_directory_path,
-)
+from admission.models.base import BaseAdmission, BaseAdmissionQuerySet, admission_directory_path
 from admission.models.specific_question import SpecificQuestionAnswer
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.academic_year import AcademicYear
 from base.models.person import Person
-from ddd.logic.financabilite.commands import DeterminerSiCandidatEstFinancableQuery
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
+from ddd.logic.financabilite.queries import DeterminerSiCandidatEstFinancableQuery
 from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd.interface import BusinessException
 
@@ -521,6 +517,16 @@ class GeneralEducationAdmission(BaseAdmission):
         null=True,
         verbose_name=_('Foreign access title equivalence effective date'),
     )
+    is_concerned_by_bama_15 = models.BooleanField(
+        blank=True,
+        null=True,
+        verbose_name=_('Is concerned by BAMA15'),
+    )
+    bama_15_proof = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('Proof of re-enrolment for the bachelor\'s degree (BAMA15)'),
+    )
 
     class Meta:
         verbose_name = _("General education admission")
@@ -572,9 +578,7 @@ class GeneralEducationAdmission(BaseAdmission):
         message_bus_instance.invoke(RecalculerEmplacementsDocumentsNonLibresPropositionCommand(self.uuid))
 
     def update_financability_computed_rule(self, author: 'Person'):
-        from admission.ddd.admission.formation_generale.commands import (
-            SpecifierFinancabiliteResultatCalculCommand,
-        )
+        from admission.ddd.admission.formation_generale.commands import SpecifierFinancabiliteResultatCalculCommand
         from infrastructure.messages_bus import message_bus_instance
 
         financabilite = message_bus_instance.invoke(

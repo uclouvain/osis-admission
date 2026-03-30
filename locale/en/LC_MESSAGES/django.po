@@ -27,8 +27,8 @@ msgstr ""
 
 #, python-format
 msgid ""
-"%(current_mimetype)s is not a valid mimetype for the field \"%(field)s\" "
-"(%(field_mimetypes_as_str)s)"
+"%(current_mimetype)s is not a valid mimetype for the field "
+"\"%(field)s\" (%(field_mimetypes_as_str)s)"
 msgstr ""
 
 #, python-format
@@ -326,6 +326,12 @@ msgid "Access experience details"
 msgstr ""
 
 msgid "Access title"
+msgstr ""
+
+#, python-format
+msgid ""
+"According to our analysis, you have a maximum of 15 remaining credits from "
+"your bachelor's degree to complete in %(year)s. Do you confirm this analysis?"
 msgstr ""
 
 msgid "Account holder first name"
@@ -2387,6 +2393,9 @@ msgstr ""
 msgid "Dr"
 msgstr ""
 
+msgid "Dual bachelor-master registration (BAMA15)"
+msgstr ""
+
 msgid "Dual degree scholarship"
 msgstr ""
 
@@ -3497,9 +3506,9 @@ msgid ""
 "Agreement between UCLouvain and the Host Hospitals drawn up as part of the "
 "UCLouvain bachelor's or master's course in medicine with a view to acquiring "
 "the corresponding course units, and I undertake to comply with its terms: <a "
-"href=\"https://cdn.uclouvain.be/groups/cms-editors-mede/"
-"ConventionStageMed.pdf\" target=\"_blank\">https://cdn.uclouvain.be/groups/"
-"cms-editors-mede/ConventionStageMed.pdf</a>"
+"href=\"https://cdn.uclouvain.be/groups/cms-editors-mede/ConventionStageMed."
+"pdf\" target=\"_blank\">https://cdn.uclouvain.be/groups/cms-editors-mede/"
+"ConventionStageMed.pdf</a>"
 msgstr ""
 
 msgid "I hereby declare that"
@@ -3668,20 +3677,20 @@ msgstr ""
 
 msgid ""
 "In accordance with the information at <a target=\"_blank\" href=\"https://"
-"uclouvain.be/en/study/inscriptions/acces-aux-professions-"
-"reglementees.html\">https://uclouvain.be/en/study/inscriptions/acces-aux-"
-"professions-reglementees.html</a>, I declare that, if the courses listed "
-"therein concern me, I have received the information relating to their "
-"requirements for admission or continuation and to the specific rules or "
-"restrictions of accreditation or professional establishment to which the "
-"professional or accredited title is subject and I accept the terms thereof."
+"uclouvain.be/en/study/inscriptions/acces-aux-professions-reglementees."
+"html\">https://uclouvain.be/en/study/inscriptions/acces-aux-professions-"
+"reglementees.html</a>, I declare that, if the courses listed therein concern "
+"me, I have received the information relating to their requirements for "
+"admission or continuation and to the specific rules or restrictions of "
+"accreditation or professional establishment to which the professional or "
+"accredited title is subject and I accept the terms thereof."
 msgstr ""
 
 msgid ""
 "In accordance with the information at <a target=\"_blank\" href=\"https://"
-"uclouvain.be/en/study/inscriptions/reglementations.html\">https://"
-"uclouvain.be/en/study/inscriptions/reglementations.html</a>, I declare that "
-"I have read the university regulations and accept their terms."
+"uclouvain.be/en/study/inscriptions/reglementations.html\">https://uclouvain."
+"be/en/study/inscriptions/reglementations.html</a>, I declare that I have "
+"read the university regulations and accept their terms."
 msgstr ""
 
 msgid ""
@@ -3700,9 +3709,9 @@ msgstr ""
 #, python-format
 msgid ""
 "In accordance with the registration calendar <a href=\"https://uclouvain.be/"
-"en/study/inscriptions/calendrier-inscriptions.html\" "
-"target=\"_blank\">www.uclouvain.be/enrolment-calendar</a>, I confirm that I "
-"am applying for the academic year %(year)s."
+"en/study/inscriptions/calendrier-inscriptions.html\" target=\"_blank\">www."
+"uclouvain.be/enrolment-calendar</a>, I confirm that I am applying for the "
+"academic year %(year)s."
 msgstr ""
 
 msgid "In draft form"
@@ -3870,6 +3879,9 @@ msgid "Is an external reorientation"
 msgstr ""
 
 msgid "Is belgian bachelor"
+msgstr ""
+
+msgid "Is concerned by BAMA15"
 msgstr ""
 
 msgid "Is it a Wallonia-Brussels Federation institution?"
@@ -4228,6 +4240,11 @@ msgid "Management of the enrolment applications"
 msgstr ""
 
 msgid "Manager follow-up"
+msgstr ""
+
+msgid ""
+"Mandatory fields are missing in the 'Additional information > Dual bachelor-"
+"master registration (BAMA15)' tab."
 msgstr ""
 
 msgid ""
@@ -5265,6 +5282,13 @@ msgstr ""
 msgid "Proof of passing the exam"
 msgstr ""
 
+msgid "Proof of re-enrolment for the bachelor's degree (BAMA15)"
+msgstr ""
+
+#, python-format
+msgid "Proof of re-enrolment for your %(year)s bachelor's degree"
+msgstr ""
+
 msgid "Proof of receipt of unemployment benefit, pension or compensation"
 msgstr ""
 
@@ -5861,6 +5885,9 @@ msgid "Secretary"
 msgstr ""
 
 msgid "Sector"
+msgstr ""
+
+msgid "Select a document to display it"
 msgstr ""
 
 #, python-format
@@ -7030,8 +7057,8 @@ msgstr ""
 msgid ""
 "This enrolment authorisation letter allows you to submit an application for "
 "accommodation to the Logistics and Student Accommodation Service (LOGE). To "
-"find out how, go to <a href=\"https://www.uclouvain.be/en/"
-"logement\">www.uclouvain.be/en/logement</a>."
+"find out how, go to <a href=\"https://www.uclouvain.be/en/logement\">www."
+"uclouvain.be/en/logement</a>."
 msgstr ""
 
 msgid "This experience cannot be updated as it has already been valuated."

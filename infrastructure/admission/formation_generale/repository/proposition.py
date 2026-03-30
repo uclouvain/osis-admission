@@ -49,37 +49,20 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     DerogationFinancement,
     PoursuiteDeCycle,
 )
-from admission.ddd.admission.formation_generale.domain.model.proposition import (
-    Proposition,
-    PropositionIdentity,
-)
+from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     StatutChecklist,
     StatutsChecklistGenerale,
 )
-from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
-    PropositionNonTrouveeException,
-)
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
-from admission.ddd.admission.formation_generale.dtos.condition_approbation import (
-    ConditionComplementaireApprobationDTO,
-)
+from admission.ddd.admission.formation_generale.dtos.condition_approbation import ConditionComplementaireApprobationDTO
 from admission.ddd.admission.formation_generale.dtos.motif_refus import MotifRefusDTO
-from admission.ddd.admission.formation_generale.dtos.proposition import (
-    PropositionGestionnaireDTO,
-)
-from admission.ddd.admission.formation_generale.repository.i_proposition import (
-    IPropositionRepository,
-)
-from admission.ddd.admission.shared_kernel.domain.builder.formation_identity import (
-    FormationIdentityBuilder,
-)
-from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import (
-    ProfilCandidat,
-)
-from admission.ddd.admission.shared_kernel.domain.model.complement_formation import (
-    ComplementFormationIdentity,
-)
+from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
+from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.shared_kernel.domain.builder.formation_identity import FormationIdentityBuilder
+from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import ProfilCandidat
+from admission.ddd.admission.shared_kernel.domain.model.complement_formation import ComplementFormationIdentity
 from admission.ddd.admission.shared_kernel.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
     ConditionComplementaireLibreApprobation,
@@ -89,41 +72,22 @@ from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import
     StatutEquivalenceTitreAcces,
     TypeEquivalenceTitreAcces,
 )
-from admission.ddd.admission.shared_kernel.domain.model.motif_refus import (
-    MotifRefusIdentity,
-)
-from admission.ddd.admission.shared_kernel.domain.model.poste_diplomatique import (
-    PosteDiplomatiqueIdentity,
-)
+from admission.ddd.admission.shared_kernel.domain.model.motif_refus import MotifRefusIdentity
+from admission.ddd.admission.shared_kernel.domain.model.poste_diplomatique import PosteDiplomatiqueIdentity
 from admission.ddd.admission.shared_kernel.domain.service.i_unites_enseignement_translator import (
     IUnitesEnseignementTranslator,
 )
-from admission.ddd.admission.shared_kernel.dtos.formation import (
-    BaseFormationDTO,
-    CampusDTO,
-    FormationDTO,
-)
+from admission.ddd.admission.shared_kernel.dtos.formation import BaseFormationDTO, CampusDTO, FormationDTO
 from admission.ddd.admission.shared_kernel.dtos.profil_candidat import ProfilCandidatDTO
-from admission.ddd.admission.shared_kernel.enums import (
-    TypeItemFormulaire,
-    TypeSituationAssimilation,
-)
+from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire, TypeSituationAssimilation
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
-from admission.infrastructure.admission.formation_generale.repository._comptabilite import (
-    get_accounting_from_admission,
-)
+from admission.infrastructure.admission.formation_generale.repository._comptabilite import get_accounting_from_admission
 from admission.infrastructure.admission.shared_kernel.domain.service.poste_diplomatique import (
     PosteDiplomatiqueTranslator,
 )
-from admission.infrastructure.admission.shared_kernel.repository.proposition import (
-    GlobalPropositionRepository,
-)
+from admission.infrastructure.admission.shared_kernel.repository.proposition import GlobalPropositionRepository
 from admission.infrastructure.utils import dto_to_dict
-from admission.models import (
-    Accounting,
-    AdmissionFormItem,
-    GeneralEducationAdmissionProxy,
-)
+from admission.models import Accounting, AdmissionFormItem, GeneralEducationAdmissionProxy
 from admission.models.checklist import FreeAdditionalApprovalCondition, RefusalReason
 from admission.models.general_education import GeneralEducationAdmission
 from admission.models.specific_question import SpecificQuestionAnswer
@@ -413,6 +377,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'must_provide_student_visa_d': entity.doit_fournir_visa_etudes,
                 'student_visa_d': entity.visa_etudes_d,
                 'signed_enrollment_authorization': entity.certificat_autorisation_signe,
+                'is_concerned_by_bama_15': entity.est_concerne_par_le_bama_15,
+                'bama_15_proof': entity.preuve_bama_15,
             },
         )
 
@@ -764,6 +730,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             doit_fournir_visa_etudes=admission.must_provide_student_visa_d,
             visa_etudes_d=admission.student_visa_d,
             certificat_autorisation_signe=admission.signed_enrollment_authorization,
+            est_concerne_par_le_bama_15=admission.is_concerned_by_bama_15,
+            preuve_bama_15=admission.bama_15_proof,
         )
 
     @classmethod
@@ -849,6 +817,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 or admission.sigle_entite_gestion,  # from annotation
                 credits=admission.training.credits,
                 grade_academique=admission.training_academic_grade,  # From annotation
+                active=admission.training.active,
             ),
             matricule_candidat=admission.candidate.global_id,
             prenom_candidat=admission.candidate.first_name,
@@ -932,6 +901,8 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             visa_etudes_d=admission.student_visa_d,
             certificat_autorisation_signe=admission.signed_enrollment_authorization,
             type=admission.type_demande,
+            est_concerne_par_le_bama_15=admission.is_concerned_by_bama_15,
+            preuve_bama_15=admission.bama_15_proof,
         )
 
     @classmethod
