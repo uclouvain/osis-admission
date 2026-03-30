@@ -7735,6 +7735,9 @@ msgstr ""
 msgid "There is no required exam for this training."
 msgstr "Il n'y a pas d'examen requis pour cette formation."
 
+msgid "There was an error while getting the EPC documents list."
+msgstr "Erreur lors de la récupération des documents EPC."
+
 msgid "Thesis field"
 msgstr "Domaine de la thèse"
 
@@ -9177,6 +9180,3 @@ msgstr "{items} types sur {total}"
 #, python-brace-format
 msgid "{obj.dates_formatees} : {obj.fonction} at {obj.employeur}"
 msgstr "{obj.dates_formatees} : {obj.fonction} à {obj.employeur}"
-
-#~ msgid "There was an error while getting the EPC documents list."
-#~ msgstr "Erreur lors de la récupération des documents EPC."
