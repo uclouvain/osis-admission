@@ -741,7 +741,9 @@ class ExtractExperiencesChecklistTestCase(TestCase):
                             {
                                 'extra': {
                                     'identifiant': str(validated_professional_experience.uuid),
-                                    'etat_authentification': EtatAuthentificationParcours.AUTHENTIFICATION_DEMANDEE.name,
+                                    'etat_authentification': (
+                                        EtatAuthentificationParcours.AUTHENTIFICATION_DEMANDEE.name
+                                    ),
                                 },
                                 'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
                             },
@@ -935,7 +937,9 @@ class ExtractExperienceAuthenticationStatusTestCase(TestCase):
                                 'statut': ChoixStatutChecklist.GEST_BLOCAGE.name,
                                 'extra': {
                                     'identifiant': 'ETUDES_SECONDAIRES',
-                                    'etat_authentification': EtatAuthentificationParcours.AUTHENTIFICATION_DEMANDEE.name,
+                                    'etat_authentification': (
+                                        EtatAuthentificationParcours.AUTHENTIFICATION_DEMANDEE.name,
+                                    )
                                 },
                             },
                         ]
