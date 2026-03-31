@@ -35,10 +35,11 @@
   {% endif %}
 >
   <button
-      autocomplete = "off"
+      autocomplete="off"
       id="{{ tab }}-{{ status_configuration.identifiant }}"
       type="button"
       class="checklist-state-button btn btn-default {% if selected_status_configuration == status_configuration %}btn-{{ class }} active{% endif %}"
+{#      a changer car vide dans profil#}
       data-status="{{ status_configuration.statut.name }}"
       data-class="btn-{{ class }}"
       data-icon="{{ icon }}"

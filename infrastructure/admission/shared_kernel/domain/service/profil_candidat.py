@@ -51,42 +51,21 @@ from django.db.models.functions import Cast, Concat, ExtractMonth, ExtractYear
 from django.utils.translation import get_language
 
 from admission.ddd import LANGUES_OBLIGATOIRES_DOCTORAT, NB_MOIS_MIN_VAE
-from admission.ddd.admission.doctorat.preparation.dtos import (
-    ConditionsComptabiliteDTO,
-)
-from admission.ddd.admission.doctorat.preparation.dtos.connaissance_langue import (
-    ConnaissanceLangueDTO,
-)
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
-    CurriculumAdmissionDTO,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
-    IProfilCandidatTranslator,
-)
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
-    ExperienceNonTrouveeException,
-)
-from admission.ddd.admission.shared_kernel.dtos import (
-    AdressePersonnelleDTO,
-    CoordonneesDTO,
-    IdentificationDTO,
-)
-from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import (
-    EtudesSecondairesAdmissionDTO,
-)
+from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO
+from admission.ddd.admission.doctorat.preparation.dtos.connaissance_langue import ConnaissanceLangueDTO
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import AdmissionExperienceNonTrouveeException
+from admission.ddd.admission.shared_kernel.dtos import AdressePersonnelleDTO, CoordonneesDTO, IdentificationDTO
+from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.shared_kernel.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.shared_kernel.dtos.resume import ResumeCandidatDTO
-from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
-    ExperiencesCVRecuperees,
-)
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
 from admission.models import EPCInjection as AdmissionEPCInjection
-from admission.models.epc_injection import (
-    EPCInjectionStatus as AdmissionEPCInjectionStatus,
-)
-from admission.models.epc_injection import EPCInjectionType
+from admission.models.epc_injection import EPCInjectionStatus as AdmissionEPCInjectionStatus, EPCInjectionType
 from admission.models.functions import ArrayLength
 from base.models.enums.community import CommunityEnum
 from base.models.enums.person_address_type import PersonAddressType
@@ -108,19 +87,13 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceNonAcademiqueDTO,
 )
 from osis_profile import BE_ISO_CODE
-from osis_profile.models import (
-    EducationalExperience,
-    EducationalExperienceYear,
-    Exam,
-    ExamType,
-    ProfessionalExperience,
-)
+from osis_profile.models import EducationalExperience, EducationalExperienceYear, Exam, ExamType, ProfessionalExperience
 from osis_profile.models.education import HighSchoolDiploma, LanguageKnowledge
-from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection
 from osis_profile.models.epc_injection import (
+    EPCInjection as CurriculumEPCInjection,
     EPCInjectionStatus as CurriculumEPCInjectionStatus,
+    ExperienceType,
 )
-from osis_profile.models.epc_injection import ExperienceType
 from osis_profile.models.exam import EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
 
 
@@ -738,30 +711,33 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
     @classmethod
     def get_examen(
         cls,
-        uuid_proposition: str,
-        matricule: str,
-        formation_sigle: str,
-        formation_annee: int,
+        uuid_experience: str = None,
+        matricule: str = None,
+        formation_sigle: str = None,
+        formation_annee: int = None,
+        uuid_proposition: str = None,
     ) -> 'ExamenDTO':
         exam_type = ExamType.objects.filter(
             education_group_years__acronym=formation_sigle,
             education_group_years__academic_year__year=formation_annee,
         ).first()
-        if exam_type is None:
+        if formation_annee and formation_sigle and exam_type is None:
             return ExamenDTO(uuid='', requis=False, titre='', attestation=[], annee=None)
         exam = (
-            Exam.objects.filter(
-                admissions__admission__uuid=uuid_proposition,
+            (
+                Exam.objects.filter(admissions__admission__uuid=uuid_proposition)
+                .annotate(**cls.get_examen_annotations())
+                .first()
             )
-            .annotate(**cls.get_examen_annotations())
-            .first()
+            if uuid_proposition
+            else (Exam.objects.filter(uuid=uuid_experience).annotate(**cls.get_examen_annotations()).first())
         )
         if exam is None:
             return ExamenDTO(uuid='', requis=True, titre=exam_type.title, attestation=[], annee=None)
         return ExamenDTO(
             uuid=str(exam.uuid),
             requis=True,
-            titre=exam_type.title,
+            titre=exam_type.title if exam_type else exam.type.title,
             attestation=exam.certificate,
             annee=exam.year.year if exam.year else None,
             identifiant_externe=exam.external_id,
@@ -881,9 +857,9 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
     @classmethod
     def get_experience_academique(
         cls,
-        matricule: str,
-        uuid_proposition: str,
         uuid_experience: str,
+        matricule: str = None,
+        uuid_proposition: str = None,
     ) -> 'ExperienceAcademiqueDTO':
         experiences = cls._get_academic_experiences_dtos(
             matricule,
@@ -893,7 +869,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         )
 
         if not experiences:
-            raise ExperienceNonTrouveeException
+            raise AdmissionExperienceNonTrouveeException
 
         return experiences[0]
 
@@ -911,7 +887,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         )
 
         if not experiences:
-            raise ExperienceNonTrouveeException
+            raise AdmissionExperienceNonTrouveeException
 
         return experiences[0]
 

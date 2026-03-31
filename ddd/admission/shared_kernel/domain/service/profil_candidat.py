@@ -25,9 +25,7 @@
 # ##############################################################################
 from typing import List, Optional
 
-from admission.ddd.admission.doctorat.preparation.domain.service.verifier_curriculum import (
-    VerifierCurriculumDoctorat,
-)
+from admission.ddd.admission.doctorat.preparation.domain.service.verifier_curriculum import VerifierCurriculumDoctorat
 from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_business_action import (
     ComptabiliteValidatorList,
     CurriculumPostSoumissionValidatorList,
@@ -35,9 +33,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
     ExperienceAcademiquePostSoumissionValidatorList,
     LanguesConnuesValidatorList,
 )
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
-    CurriculumAdmissionDTO,
-)
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
 from admission.ddd.admission.formation_continue.domain.validator.validator_by_business_actions import (
     FormationContinueCurriculumValidatorList,
 )
@@ -52,35 +48,21 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
     FormationGeneraleExperienceAcademiquePostSoumissionValidatorList,
     FormationGeneraleInformationsComplementairesValidatorList,
 )
-from admission.ddd.admission.shared_kernel.domain.model._candidat_adresse import (
-    CandidatAdresse,
-)
-from admission.ddd.admission.shared_kernel.domain.model._candidat_signaletique import (
-    CandidatSignaletique,
-)
+from admission.ddd.admission.shared_kernel.domain.model._candidat_adresse import CandidatAdresse
+from admission.ddd.admission.shared_kernel.domain.model._candidat_signaletique import CandidatSignaletique
 from admission.ddd.admission.shared_kernel.domain.model.formation import Formation
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
-    IProfilCandidatTranslator,
-)
-from admission.ddd.admission.shared_kernel.domain.service.verifier_curriculum import (
-    VerifierCurriculum,
-)
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.shared_kernel.domain.service.verifier_curriculum import VerifierCurriculum
 from admission.ddd.admission.shared_kernel.domain.validator.validator_by_business_action import (
     CoordonneesValidatorList,
     IdentificationValidatorList,
     QuarantaineValidatorList,
 )
-from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
-    ExperiencesCVRecuperees,
-)
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
 from base.models.enums.education_group_types import TrainingType
-from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
-    AcademicYear,
-)
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear
 from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
-from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
-    IExperienceParcoursInterneTranslator,
-)
+from ddd.logic.shared_kernel.profil.domain.service.i_parcours_interne import IExperienceParcoursInterneTranslator
 from osis_common.ddd import interface
 
 
@@ -196,17 +178,19 @@ class ProfilCandidat(interface.DomainService):
     @classmethod
     def verifier_examens(
         cls,
-        uuid_proposition: str,
-        matricule: str,
         profil_candidat_translator: 'IProfilCandidatTranslator',
-        sigle_formation: str,
-        annee_formation: int,
+        uuid_experience: str = None,
+        matricule: str = None,
+        sigle_formation: str = None,
+        annee_formation: int = None,
+        uuid_proposition: str = None,
     ) -> None:
         examen = profil_candidat_translator.get_examen(
-            uuid_proposition,
+            uuid_experience,
             matricule,
             sigle_formation,
             annee_formation,
+            uuid_proposition,
         )
 
         ExamenValidatorList(
@@ -326,11 +310,11 @@ class ProfilCandidat(interface.DomainService):
     @classmethod
     def verifier_experience_academique_curriculum_apres_soumission(
         cls,
-        proposition_id,
-        matricule_candidat: str,
         uuid_experience: str,
         profil_candidat_translator: 'IProfilCandidatTranslator',
-        grade_academique_formation_proposition: str,
+        grade_academique_formation_proposition: str = None,
+        proposition_id=None,
+        matricule_candidat: str = None,
     ) -> None:
         experience = profil_candidat_translator.get_experience_academique(
             matricule=matricule_candidat,

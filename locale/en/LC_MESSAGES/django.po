@@ -17,10 +17,6 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#, python-brace-format
-msgid " (last update by {author} on {date} at {time}):"
-msgstr ""
-
 #, python-format
 msgid "%(added)s ECTS added with %(validated)s validated by the CDD."
 msgstr ""
@@ -4939,9 +4935,6 @@ msgstr ""
 msgid "Passport number"
 msgstr ""
 
-msgid "Past experiences authentication"
-msgstr ""
-
 msgid "Past non-academic activities (prof. and not prof.)"
 msgstr ""
 
@@ -7984,9 +7977,6 @@ msgid "academic year"
 msgstr ""
 
 msgid "actions"
-msgstr ""
-
-msgid "an unknown author"
 msgstr ""
 
 msgid "approval"

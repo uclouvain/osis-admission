@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ import uuid
 from django.test import TestCase
 
 from admission.ddd.admission.shared_kernel.commands import RecupererExperienceNonAcademiqueQuery
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import ExperienceNonTrouveeException
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import AdmissionExperienceNonTrouveeException
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 
 
@@ -51,5 +51,5 @@ class TestRecupererExperienceNonAcademique(TestCase):
             global_id='0000000001',
             uuid_experience=str(uuid.uuid4()),
         )
-        with self.assertRaises(ExperienceNonTrouveeException):
+        with self.assertRaises(AdmissionExperienceNonTrouveeException):
             self.message_bus.invoke(cmd)

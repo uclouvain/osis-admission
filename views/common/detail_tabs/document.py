@@ -498,8 +498,8 @@ class DeleteDocumentView(DocumentFormView):
 class RequestStatusChangeDocumentView(DocumentFormView):
     form_class = ChangeRequestDocumentForm
     urlpatterns = {'candidate-request-status': 'candidate-request-status/<str:identifier>'}
-    template_name = 'admission/forms/default_form.html'
-    htmx_template_name = 'admission/forms/default_form.html'
+    template_name = 'forms/default_form.html'
+    htmx_template_name = 'forms/default_form.html'
     default_htmx_trigger_form_extra = {
         'refresh_list': False,
         'keep_modal_open': True,

@@ -30,7 +30,6 @@ from django.core.cache import cache
 from django.shortcuts import resolve_url
 from django.utils.functional import cached_property
 from django.views.generic import FormView, TemplateView
-from osis_comment.models import CommentEntry
 from rest_framework import serializers, status
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.parsers import FormParser
@@ -38,13 +37,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from admission.constants import COMMENT_TAG_FAC, COMMENT_TAG_SIC, CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutChecklist,
-)
-from admission.ddd.admission.formation_generale.events import (
-    DonneesPersonellesCandidatValidee,
-)
-from admission.forms.admission.checklist import CommentForm, PersonalDataStatusForm
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutChecklist
+from admission.ddd.admission.formation_generale.events import DonneesPersonellesCandidatValidee
+from admission.forms.admission.checklist import AdmissionCommentForm, PersonalDataStatusForm
 from admission.views.common.detail_tabs.comments import (
     COMMENT_TAG_CDD_FOR_SIC,
     COMMENT_TAG_FAC_FOR_IUFC,
@@ -60,7 +55,7 @@ from osis_common.ddd.interface import BusinessException
 
 __all__ = [
     'ChangeStatusView',
-    'SaveCommentView',
+    'AdmissionSaveCommentView',
     'PropositionFromResumeMixin',
     'ChecklistTabIcon',
     'FraudsterCheckView',
@@ -69,6 +64,7 @@ __all__ = [
 
 __namespace__ = False
 
+from osis_profile.views.comment import SaveCommentView
 
 COMMENT_FINANCABILITE_DISPENSATION = 'financabilite__derogation'
 
@@ -147,10 +143,9 @@ class ChangeStatusView(LoadDossierViewMixin, APIView):
         return Response(serializer_data, status=status.HTTP_200_OK)
 
 
-class SaveCommentView(AdmissionFormMixin, FormView):
+class AdmissionSaveCommentView(AdmissionFormMixin, SaveCommentView):
     urlpatterns = {'save-comment': 'save-comment/<uuid:object_uuid>/<str:tab>'}
-    form_class = CommentForm
-    template_name = 'admission/forms/default_form.html'
+    form_class = AdmissionCommentForm
 
     permission_by_custom_tag = {
         COMMENT_TAG_FAC: 'admission.checklist_change_fac_comment',
@@ -185,29 +180,20 @@ class SaveCommentView(AdmissionFormMixin, FormView):
         return resolve_url(
             f'{self.base_namespace}:save-comment',
             uuid=self.admission_uuid,
-            object_uuid=self.kwargs['object_uuid'],
+            object_uuid=self.object_uuid,
             tab=self.kwargs['tab'],
         )
 
     def get_prefix(self):
         return self.kwargs['tab']
 
-    def get_form_kwargs(self):
-        form_kwargs = super().get_form_kwargs()
-        form_kwargs['form_url'] = self.form_url
-        return form_kwargs
+    @property
+    def object_uuid(self):
+        return self.kwargs['object_uuid']
 
     def form_valid(self, form):
-        comment, _ = CommentEntry.objects.update_or_create(
-            object_uuid=self.kwargs['object_uuid'],
-            tags=self.tags,
-            defaults={
-                'content': form.cleaned_data['comment'],
-                'author': self.request.user.person,
-            },
-        )
         self.update_admission_author = self.is_continuing
-        return super().form_valid(CommentForm(comment=comment, **self.get_form_kwargs()))
+        return super().form_valid(form)
 
 
 class PropositionFromResumeMixin:
