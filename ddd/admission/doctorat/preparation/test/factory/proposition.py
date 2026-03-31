@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -203,7 +203,6 @@ class StatutChecklistFactory(factory.Factory):
         abstract = False
 
     libelle = FuzzyText(length=10, chars=string.digits)
-    enfants = factory.List([])
     statut = ChoixStatutChecklist.INITIAL_CANDIDAT
     extra = factory.Dict({})
 
@@ -213,7 +212,6 @@ class StatutsChecklistDoctoraleFactory(factory.Factory):
         model = StatutsChecklistDoctorale
         abstract = False
 
-    donnees_personnelles = factory.SubFactory(StatutChecklistFactory)
     assimilation = factory.SubFactory(StatutChecklistFactory)
     choix_formation = factory.SubFactory(StatutChecklistFactory)
     parcours_anterieur = factory.SubFactory(StatutChecklistFactory)
@@ -334,14 +332,13 @@ class _PropositionFactory(factory.Factory):
             commentaire_complements_formation=factory.fuzzy.FuzzyText(),
             nom_personne_contact_programme_annuel_annuel=factory.Faker('last_name'),
             email_personne_contact_programme_annuel_annuel=factory.Faker('email'),
-            droits_inscription_montant=DroitsInscriptionMontant.INSCRIPTION_REGULIERE,
+            droits_inscription_montant=DroitsInscriptionMontant.INSCRIPTION_REGULIERE_835,
             est_mobilite=False,
             doit_se_presenter_en_sic=False,
             checklist_actuelle=factory.SubFactory(
                 StatutsChecklistDoctoraleFactory,
                 financabilite__statut=ChoixStatutChecklist.GEST_REUSSITE,
                 financabilite__extra={'reussite': 'financable'},
-                donnees_personnelles__statut=ChoixStatutChecklist.GEST_REUSSITE,
                 decision_cdd__statut=ChoixStatutChecklist.GEST_REUSSITE,
             ),
         )
@@ -473,7 +470,6 @@ class PropositionAdmissionSC3DPConfirmeeFactory(PropositionAdmissionSC3DPAvecPro
         Checklist.initialiser(
             proposition=self,
             profil_candidat_translator=ProfilCandidatInMemoryTranslator(),
-            annee_courante=self.annee_calculee,
         )
 
 

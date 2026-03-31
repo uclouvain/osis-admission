@@ -44,6 +44,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
 from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.forms import get_academic_year_choices
+from base.forms.utils import EMPTY_CHOICE
 from base.models.academic_year import AcademicYear
 
 
@@ -81,7 +82,7 @@ class ChoixFormationForm(forms.Form):
     @classmethod
     def get_proximity_commission_choices(cls, training: FormationDTO):
         if training.sigle_entite_gestion in COMMISSIONS_CDE_CLSM:
-            return ChoixCommissionProximiteCDEouCLSM.choices()
+            return EMPTY_CHOICE + ChoixCommissionProximiteCDEouCLSM.choices()
         elif training.sigle_entite_gestion in COMMISSIONS_CDSS:
             return ChoixCommissionProximiteCDSS.choices()
         elif training.sigle in SIGLES_SCIENCES:
@@ -106,6 +107,9 @@ class ChoixFormationForm(forms.Form):
             self.fields['commission_proximite'].required = False
             self.fields['commission_proximite'].disabled = True
             self.fields['commission_proximite'].widget = forms.HiddenInput()
+
+        elif training.sigle_entite_gestion in COMMISSIONS_CDE_CLSM:
+            self.fields['commission_proximite'].required = False
 
         if hide_admission_type:
             self.fields['type_demande'].disabled = True

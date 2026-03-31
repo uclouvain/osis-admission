@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -34,7 +34,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formatio
     ENTITY_CDE,
 )
 from admission.ddd.admission.shared_kernel.enums import (
-    ChoixAffiliationSport,
     ChoixTypeCompteBancaire,
     TypeSituationAssimilation,
 )
@@ -76,7 +75,6 @@ class DoctorateAccountingDetailViewTestCase(TestCase):
             training__academic_year=self.academic_years[0],
             candidate__language=settings.LANGUAGE_CODE_EN,
             candidate__country_of_citizenship=CountryFactory(european_union=False),
-            candidate__graduated_from_high_school_year=None,
             candidate__last_registration_year=None,
             admitted=True,
         )

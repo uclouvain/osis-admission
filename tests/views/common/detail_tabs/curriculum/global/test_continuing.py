@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -69,6 +69,10 @@ from osis_profile.models.enums.curriculum import (
     Reduction,
     Result,
     TranscriptType,
+)
+from osis_profile.models.enums.experience_validation import (
+    ChoixStatutValidationExperience,
+    EtatAuthentificationParcours,
 )
 from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection
 from osis_profile.models.epc_injection import (
@@ -153,7 +157,7 @@ class CurriculumGlobalDetailsViewForContinuingTestCase(TestCase):
             country=self.foreign_country,
         )
 
-        educational_experience_year = EducationalExperienceYearFactory(
+        EducationalExperienceYearFactory(
             educational_experience=educational_experience,
             academic_year=self.academic_years[1],
         )
@@ -200,6 +204,8 @@ class CurriculumGlobalDetailsViewForContinuingTestCase(TestCase):
             with_complement=True,
             complement_registered_credit_number=40,
             complement_acquired_credit_number=39,
+            validation_status=ChoixStatutValidationExperience.AUTHENTIFICATION.name,
+            authentication_status=EtatAuthentificationParcours.VRAI.name,
         )
 
         educational_experience_year: EducationalExperienceYear = EducationalExperienceYearFactory(
@@ -252,7 +258,7 @@ class CurriculumGlobalDetailsViewForContinuingTestCase(TestCase):
         self.assertEqual(experience.systeme_evaluation, educational_experience.evaluation_type)
         self.assertEqual(experience.nom_formation, 'My custom program name')
         self.assertEqual(experience.nom_formation_equivalente_communaute_fr, '')
-        self.assertEqual(experience.est_autre_formation, True)
+        self.assertEqual(experience.formation_non_selectionnee_dans_liste_de_reference, True)
         self.assertEqual(experience.cycle_formation, '')
         self.assertEqual(experience.type_enseignement, educational_experience.study_system)
         self.assertEqual(experience.injectee, False)
@@ -268,6 +274,8 @@ class CurriculumGlobalDetailsViewForContinuingTestCase(TestCase):
             experience.credits_acquis_complements,
             educational_experience.complement_acquired_credit_number,
         )
+        self.assertEqual(experience.statut_validation, ChoixStatutValidationExperience.AUTHENTIFICATION.name)
+        self.assertEqual(experience.statut_authentification, EtatAuthentificationParcours.VRAI.name)
 
         self.assertEqual(len(experience.annees), 1)
         annee = experience.annees[0]
@@ -322,12 +330,12 @@ class CurriculumGlobalDetailsViewForContinuingTestCase(TestCase):
         self.assertEqual(experience.nom_formation, self.diploma.title)
         self.assertEqual(experience.nom_formation_equivalente_communaute_fr, self.other_diploma.title)
         self.assertEqual(experience.cycle_formation, self.other_diploma.cycle)
-        self.assertEqual(experience.est_autre_formation, False)
+        self.assertEqual(experience.formation_non_selectionnee_dans_liste_de_reference, False)
 
         self.assertEqual(len(experience.annees), 1)
 
         # With valuation by the current admission
-        valuation = AdmissionEducationalValuatedExperiencesFactory(
+        AdmissionEducationalValuatedExperiencesFactory(
             baseadmission=self.continuing_admission,
             educationalexperience=educational_experience,
         )
@@ -436,6 +444,8 @@ class CurriculumGlobalDetailsViewForContinuingTestCase(TestCase):
             role='Role',
             sector=ActivitySector.PUBLIC.name,
             activity='My custom activity',
+            validation_status=ChoixStatutValidationExperience.AUTHENTIFICATION.name,
+            authentication_status=EtatAuthentificationParcours.VRAI.name,
         )
 
         other_valuation = AdmissionProfessionalValuatedExperiencesFactory(
@@ -463,9 +473,11 @@ class CurriculumGlobalDetailsViewForContinuingTestCase(TestCase):
         self.assertEqual(experience.injectee, False)
         self.assertEqual(experience.valorisee_par_admissions, [other_valuation.baseadmission.uuid])
         self.assertEqual(experience.identifiant_externe, None)
+        self.assertEqual(experience.statut_validation, ChoixStatutValidationExperience.AUTHENTIFICATION.name)
+        self.assertEqual(experience.statut_authentification, EtatAuthentificationParcours.VRAI.name)
 
         # With valuation by the current admission
-        valuation = AdmissionProfessionalValuatedExperiencesFactory(
+        AdmissionProfessionalValuatedExperiencesFactory(
             baseadmission=self.continuing_admission,
             professionalexperience=non_academic_experience,
         )

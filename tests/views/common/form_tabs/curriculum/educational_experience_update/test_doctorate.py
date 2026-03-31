@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -72,6 +72,10 @@ from osis_profile.models.enums.curriculum import (
     Result,
     TranscriptType,
 )
+from osis_profile.models.enums.experience_validation import (
+    ChoixStatutValidationExperience,
+    EtatAuthentificationParcours,
+)
 from reference.models.enums.cycle import Cycle
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.diploma_title import DiplomaTitleFactory
@@ -100,7 +104,6 @@ class CurriculumEducationalExperienceFormViewForDoctorateTestCase(TestCase):
             training__academic_year=cls.academic_years[0],
             candidate__language=settings.LANGUAGE_CODE_EN,
             candidate__country_of_citizenship=CountryFactory(european_union=False),
-            candidate__graduated_from_high_school_year=None,
             candidate__last_registration_year=None,
             candidate__id_photo=[],
             submitted=True,
@@ -145,6 +148,8 @@ class CurriculumEducationalExperienceFormViewForDoctorateTestCase(TestCase):
             with_complement=True,
             complement_registered_credit_number=30,
             complement_acquired_credit_number=29,
+            validation_status=ChoixStatutValidationExperience.AUTHENTIFICATION.name,
+            authentication_status=EtatAuthentificationParcours.VRAI.name,
         )
         self.first_experience_year: EducationalExperienceYear = EducationalExperienceYearFactory(
             educational_experience=self.experience,
@@ -159,7 +164,9 @@ class CurriculumEducationalExperienceFormViewForDoctorateTestCase(TestCase):
         )
 
         # Mock osis document api
-        patcher = mock.patch("osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value)
+        patcher = mock.patch(
+            "osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
@@ -509,6 +516,8 @@ class CurriculumEducationalExperienceFormViewForDoctorateTestCase(TestCase):
         self.assertEqual(new_experience.dissertation_title, '')
         self.assertEqual(new_experience.dissertation_score, '')
         self.assertEqual(new_experience.dissertation_summary, [])
+        self.assertEqual(new_experience.validation_status, ChoixStatutValidationExperience.A_TRAITER.name)
+        self.assertEqual(new_experience.authentication_status, EtatAuthentificationParcours.NON_CONCERNE.name)
 
         # Check the years
         years = new_experience.educationalexperienceyear_set.all()
@@ -580,6 +589,8 @@ class CurriculumEducationalExperienceFormViewForDoctorateTestCase(TestCase):
         self.assertEqual(self.experience.dissertation_summary, self.files_uuids[0])
         self.assertEqual(self.experience.graduate_degree, self.files_uuids[1])
         self.assertEqual(self.experience.graduate_degree_translation, [])
+        self.assertEqual(self.experience.validation_status, ChoixStatutValidationExperience.AUTHENTIFICATION.name)
+        self.assertEqual(self.experience.authentication_status, EtatAuthentificationParcours.VRAI.name)
 
         # Check the years
         years = self.experience.educationalexperienceyear_set.all().order_by('academic_year__year')

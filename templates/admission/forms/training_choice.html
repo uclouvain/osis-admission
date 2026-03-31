@@ -72,9 +72,7 @@
             {% bootstrap_field form.doctorate_training %}
           </div>
           {% if form.proximity_commission_field %}
-            <div class="required_field">
-              {% bootstrap_field form|get_bound_field:form.proximity_commission_field %}
-            </div>
+            {% bootstrap_field form|get_bound_field:form.proximity_commission_field %}
           {% endif %}
         </div>
       {% elif view.is_continuing %}

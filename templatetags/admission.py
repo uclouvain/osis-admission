@@ -25,6 +25,7 @@
 # ##############################################################################
 
 import datetime
+import logging
 import re
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Union
@@ -37,8 +38,7 @@ from django.shortcuts import resolve_url
 from django.template.defaultfilters import unordered_list
 from django.urls import NoReverseMatch, reverse
 from django.utils.safestring import mark_safe
-from django.utils.translation import get_language, gettext, pgettext, pgettext_lazy
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import get_language, gettext, gettext_lazy as _, pgettext, pgettext_lazy
 from osis_document_components.enums import PostProcessingWanted
 from osis_document_components.services import get_remote_metadata, get_remote_token
 from osis_history.models import HistoryEntry
@@ -49,11 +49,11 @@ from admission.constants import (
     CONTEXT_CONTINUING,
     CONTEXT_DOCTORATE,
     CONTEXT_GENERAL,
+    IMAGE_EXTENSIONS,
     ORDERED_CAMPUSES_UUIDS,
+    PDF_EXTENSION,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixStatutPropositionDoctorale,
-)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
     INDEX_ONGLETS_CHECKLIST as INDEX_ONGLETS_CHECKLIST_DOCTORALE,
 )
@@ -64,9 +64,7 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
 from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
     INDEX_ONGLETS_CHECKLIST as INDEX_ONGLETS_CHECKLIST_CONTINUE,
 )
-from admission.ddd.admission.formation_continue.dtos.proposition import (
-    PropositionDTO as PropositionContinueDTO,
-)
+from admission.ddd.admission.formation_continue.dtos.proposition import PropositionDTO as PropositionContinueDTO
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_SOUMISE_POUR_SIC,
     ChoixStatutChecklist,
@@ -77,54 +75,29 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
 )
 from admission.ddd.admission.formation_generale.dtos.proposition import (
     PropositionDTO as PropositionGeneraleDTO,
-)
-from admission.ddd.admission.formation_generale.dtos.proposition import (
     PropositionGestionnaireDTO,
 )
-from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
-    EtatAuthentificationParcours,
-)
-from admission.ddd.admission.shared_kernel.dtos import (
-    CoordonneesDTO,
-    EtudesSecondairesAdmissionDTO,
-    IdentificationDTO,
-)
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
-    EmplacementDocumentDTO,
-)
+from admission.ddd.admission.shared_kernel.dtos import CoordonneesDTO, EtudesSecondairesAdmissionDTO, IdentificationDTO
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.shared_kernel.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.shared_kernel.dtos.profil_candidat import ProfilCandidatDTO
-from admission.ddd.admission.shared_kernel.dtos.question_specifique import (
-    QuestionSpecifiqueDTO,
-)
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
-from admission.ddd.admission.shared_kernel.dtos.titre_acces_selectionnable import (
-    TitreAccesSelectionnableDTO,
-)
+from admission.ddd.admission.shared_kernel.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
 from admission.ddd.admission.shared_kernel.enums import Onglets, TypeItemFormulaire
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
-    StatutReclamationEmplacementDocument,
-)
-from admission.ddd.admission.shared_kernel.repository.i_proposition import (
-    formater_reference,
-)
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import StatutReclamationEmplacementDocument
+from admission.ddd.admission.shared_kernel.repository.i_proposition import formater_reference
 from admission.exports.admission_recap.section import (
     get_educational_experience_context,
     get_non_educational_experience_context,
     get_secondary_studies_context,
 )
-from admission.forms.admission.doctorate.supervision import (
-    DoctorateAdmissionMemberSupervisionForm,
-)
+from admission.forms.admission.doctorate.supervision import DoctorateAdmissionMemberSupervisionForm
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
     AnneeInscriptionFormationTranslator,
 )
-from admission.models import (
-    ContinuingEducationAdmission,
-    DoctorateAdmission,
-    GeneralEducationAdmission,
-)
+from admission.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.models.base import BaseAdmission
 from admission.models.epc_injection import EPCInjectionStatus
 from admission.utils import get_access_conditions_url, get_experience_urls
@@ -140,17 +113,11 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceNonAcademiqueDTO,
     MessageCurriculumDTO,
 )
-from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
-    ExperienceParcoursInterneDTO,
-)
+from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
 from osis_profile.constants import IMAGE_MIME_TYPES
+from osis_profile.models.enums.experience_validation import EtatAuthentificationParcours
 from osis_profile.models.enums.person import ChoixSexe
-from osis_profile.utils.utils import (
-    format_address,
-    format_school_title,
-    get_superior_institute_queryset,
-)
-from osis_role.templatetags.osis_role import has_perm
+from osis_profile.utils.utils import format_address, format_school_title, get_superior_institute_queryset
 from reference.models.country import Country
 from reference.models.language import Language
 
@@ -168,6 +135,7 @@ WOLUWE = 'Bruxelles Woluwe'
 SAINT_LOUIS = 'Bruxelles Saint-Louis'
 SAINT_GILLES = 'Bruxelles Saint-Gilles'
 
+logger = logging.getLogger(__name__)
 register = template.Library()
 
 
@@ -470,6 +438,40 @@ def document_component(document_write_token, document_metadata, can_edit=True):
     }
 
 
+@register.inclusion_tag('admission/dummy.html')
+def document_epc_component(document_metadata):
+    """Display the right editor component depending on the file type."""
+    if document_metadata:
+        file_extension = document_metadata.get('filename', '').rsplit('.')[-1].lower()
+        if file_extension == PDF_EXTENSION:
+            return {
+                'template': 'osis_document_components/editor.html',
+                'attrs': {
+                    'pagination': True,
+                    'zoom': True,
+                    'rotation': True,
+                    'comment': False,
+                    'highlight': False,
+                    'save': False,
+                    'get-file-url': document_metadata.get('url'),
+                },
+            }
+        elif file_extension in IMAGE_EXTENSIONS:
+            return {
+                'template': 'admission/image.html',
+                'url': document_metadata.get('url'),
+                'alt': document_metadata.get('name'),
+            }
+        else:
+            logger.warning(
+                f'[document_epc_component] unsupported file extension ' f'"{file_extension}" "{document_metadata}"'
+            )
+    return {
+        'template': 'admission/no_document.html',
+        'message': _('No document'),
+    }
+
+
 @register.filter
 def phone_spaced(phone, with_optional_zero=False):
     if not phone:
@@ -631,11 +633,15 @@ def admission_status(status: str, osis_education_type: str):
     if admission_context is None:
         return status
 
-    return {
-        'general-education': ChoixStatutPropositionGenerale,
-        'continuing-education': ChoixStatutPropositionContinue,
-        'doctorate': ChoixStatutPropositionDoctorale,
-    }.get(admission_context).get_value(status)
+    return (
+        {
+            'general-education': ChoixStatutPropositionGenerale,
+            'continuing-education': ChoixStatutPropositionContinue,
+            'doctorate': ChoixStatutPropositionDoctorale,
+        }
+        .get(admission_context)
+        .get_value(status)
+    )
 
 
 @register.filter
@@ -654,19 +660,28 @@ def country_name_from_iso_code(iso_code: str):
 @register.filter
 def get_ordered_checklist_items_general_education(checklist_items: dict):
     """Return the ordered checklist items."""
-    return sorted(checklist_items.items(), key=lambda tab: INDEX_ONGLETS_CHECKLIST_GENERALE[tab[0]])
+    return sorted(
+        [(key, value) for key, value in checklist_items.items() if key in INDEX_ONGLETS_CHECKLIST_GENERALE],
+        key=lambda tab: INDEX_ONGLETS_CHECKLIST_GENERALE[tab[0]],
+    )
 
 
 @register.filter
 def get_ordered_checklist_items_doctorate(checklist_items: dict):
     """Return the ordered checklist items."""
-    return sorted(checklist_items.items(), key=lambda tab: INDEX_ONGLETS_CHECKLIST_DOCTORALE[tab[0]])
+    return sorted(
+        [(key, value) for key, value in checklist_items.items() if key in INDEX_ONGLETS_CHECKLIST_DOCTORALE],
+        key=lambda tab: INDEX_ONGLETS_CHECKLIST_DOCTORALE[tab[0]],
+    )
 
 
 @register.filter
 def get_ordered_checklist_items_continuing_education(checklist_items: dict):
     """Return the ordered checklist items."""
-    return sorted(checklist_items.items(), key=lambda tab: INDEX_ONGLETS_CHECKLIST_CONTINUE[tab[0]])
+    return sorted(
+        [(key, value) for key, value in checklist_items.items() if key in INDEX_ONGLETS_CHECKLIST_CONTINUE],
+        key=lambda tab: INDEX_ONGLETS_CHECKLIST_CONTINUE[tab[0]],
+    )
 
 
 @register.filter
@@ -702,11 +717,32 @@ def checklist_state_button(context, **kwargs):
         **expected_attrs,
         'extra': kwargs,
         'view': context['view'],
-        'submitted_extra': {
-            **kwargs,
-            'status': expected_attrs['state'],
-        },
     }
+
+
+@register.inclusion_tag('admission/checklist_macro_state_button.html', takes_context=True)
+def checklist_macro_state_button(context, **kwargs):
+    tag_context = {
+        arg_name: kwargs.pop(arg_name, None)
+        for arg_name in [
+            'icon',
+            'class',
+            'tab',
+            'tooltip',
+            'disabled',
+            'open_modal',
+            'htmx_post',
+            'sub_id',
+            'status_configuration',
+            'selected_status_configuration',
+        ]
+    }
+
+    force_enabled = kwargs.pop('force_enabled', False)
+    if context.get('can_update_checklist_tab') is False and not force_enabled:
+        tag_context['disabled'] = True
+
+    return tag_context
 
 
 @register.filter
@@ -997,8 +1033,9 @@ def experience_details_template(
     :param hide_files: Specify if the files should be hidden
     :return: The rendered template
     """
-    next_url_suffix = f'?next={context.get("request").path}&next_hash_url=parcours_anterieur__{experience.uuid}'
-    delete_next_url_suffix = f'?next={context.get("request").path}&next_hash_url=parcours_anterieur'
+    default_url_suffix = f'?next={context.get("request").path}&next_hash_url=parcours_anterieur'
+    next_url_suffix = f'{default_url_suffix}__{experience.uuid}' if experience.uuid else default_url_suffix
+    delete_next_url_suffix = default_url_suffix
     res_context = {
         'is_general': resume_proposition.est_proposition_generale,
         'is_continuing': resume_proposition.est_proposition_continue,
@@ -1281,6 +1318,17 @@ def get_document_details_url(context, document: EmplacementDocumentDTO):
         return f'{base_url}?{urlencode(query_params)}'
 
     return base_url
+
+
+@register.simple_tag(takes_context=True)
+def get_document_epc_details_url(context, document: Dict):
+    """From a document, return the url to the document detail page."""
+    match = context['request'].resolver_match
+    return resolve_url(
+        f'{match.namespace}:document:epc_detail',
+        uuid=context['view'].kwargs['uuid'],
+        token=document['token'],
+    )
 
 
 @register.filter

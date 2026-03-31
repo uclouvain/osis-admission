@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -171,11 +171,13 @@ from admission.tests.factories.person import (
 )
 from admission.tests.factories.roles import ProgramManagerRoleFactory
 from base.forms.utils.file_field import PDF_MIME_TYPE
+from base.models.enums.active_status import ActiveStatusEnum
 from base.models.enums.civil_state import CivilState
 from base.models.enums.community import CommunityEnum
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.models.enums.got_diploma import GotDiploma
+from base.models.enums.personal_data import ChoixStatutValidationDonneesPersonnelles
 from base.models.enums.state_iufc import StateIUFC
 from base.models.enums.teaching_type import TeachingTypeEnum
 from base.models.person import Person
@@ -1105,6 +1107,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             noma_derniere_inscription_ucl='0123456789',
             date_expiration_carte_identite=datetime.date(2023, 1, 1),
             date_expiration_passeport=datetime.date(2023, 1, 1),
+            statut_validation_donnees_personnelles=ChoixStatutValidationDonneesPersonnelles.A_TRAITER.name,
         )
         coordinates_dto = _CoordonneesDTO(
             domicile_legal=_AdressePersonnelleDTO(
@@ -1163,7 +1166,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             grade_academique_formation='1',
             type_institut=EstablishmentTypeEnum.UNIVERSITY.name,
             nom_formation_equivalente_communaute_fr='',
-            est_autre_formation=False,
+            formation_non_selectionnee_dans_liste_de_reference=False,
             identifiant_externe='123456789',
             credits_acquis_bloc_1=None,
             avec_complements=None,
@@ -1212,7 +1215,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             grade_academique_formation='1',
             type_institut=EstablishmentTypeEnum.UNIVERSITY.name,
             nom_formation_equivalente_communaute_fr='',
-            est_autre_formation=False,
+            formation_non_selectionnee_dans_liste_de_reference=False,
             identifiant_externe='123456789',
             credits_acquis_bloc_1=None,
             avec_complements=None,
@@ -1401,6 +1404,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 code='FC1',
                 credits=180,
                 grade_academique='1',
+                active=ActiveStatusEnum.ACTIVE.name,
             ),
             reference='0123',
             annee_calculee=2023,
@@ -1512,6 +1516,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
                 code='FG1',
                 credits=180,
                 grade_academique='1',
+                active=ActiveStatusEnum.ACTIVE.name,
             ),
             reference='0123',
             annee_calculee=2023,
@@ -1576,6 +1581,8 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             financabilite_derogation_premiere_notification_par='',
             financabilite_derogation_derniere_notification_le=None,
             financabilite_derogation_derniere_notification_par='',
+            est_concerne_par_le_bama_15=None,
+            preuve_bama_15=[],
         )
         doctorate_proposition_dto = _PropositionFormationDoctoraleDTO(
             uuid='uuid-proposition',
@@ -3207,6 +3214,130 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             )
             self.assertEqual(attachments[1].label, DocumentsQuestionsSpecifiques['ADDITIONAL_DOCUMENTS'])
             self.assertEqual(attachments[1].uuids, self.admission.additional_documents)
+
+    def test_bama_15_specific_questions_attachments_with_general_proposition(self):
+        bama_15_proof = [str(uuid.uuid4())]
+        academic_experiences = []
+
+        with (
+            mock.patch.multiple(
+                self.general_bachelor_context.curriculum,
+                experiences_academiques=academic_experiences,
+            ),
+            mock.patch.multiple(
+                self.general_bachelor_context.proposition.formation,
+                type=TrainingType.MASTER_M1.name,
+            ),
+        ):
+            with mock.patch.multiple(
+                self.general_bachelor_context.proposition,
+                annee_calculee=2024,
+                est_concerne_par_le_bama_15=True,
+                preuve_bama_15=bama_15_proof,
+            ):
+                academic_experiences[:] = [
+                    attr.evolve(
+                        self.belgian_academic_curriculum_experience,
+                        a_obtenu_diplome=False,
+                        communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
+                        cycle_formation=Cycle.FIRST_CYCLE.name,
+                    )
+                ]
+
+                section = get_specific_questions_section(self.general_bachelor_context, self.empty_questions, False)
+                attachments = section.attachments
+
+                self.assertEqual(len(attachments), 2)
+
+                self.assertEqual(attachments[0].identifier, 'PREUVE_BAMA_15')
+                self.assertEqual(
+                    attachments[0].label,
+                    DocumentsQuestionsSpecifiques['PREUVE_BAMA_15'] % {'year': '2024-2025'},
+                )
+                self.assertEqual(attachments[0].uuids, self.general_bachelor_context.proposition.preuve_bama_15)
+                self.assertTrue(attachments[0].required)
+
+                self.assertEqual(attachments[1].identifier, 'ADDITIONAL_DOCUMENTS')
+
+                academic_experiences[:] = [
+                    attr.evolve(
+                        self.belgian_academic_curriculum_experience,
+                        a_obtenu_diplome=False,
+                        formation_non_selectionnee_dans_liste_de_reference=True,
+                        communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
+                        cycle_formation=Cycle.FIRST_CYCLE.name,
+                    )
+                ]
+
+                section = get_specific_questions_section(self.general_bachelor_context, self.empty_questions, False)
+                attachments = section.attachments
+
+                self.assertEqual(len(attachments), 1)
+                self.assertEqual(attachments[0].identifier, 'ADDITIONAL_DOCUMENTS')
+
+                academic_experiences[:] = [
+                    attr.evolve(
+                        self.belgian_academic_curriculum_experience,
+                        a_obtenu_diplome=True,
+                        communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
+                        cycle_formation=Cycle.FIRST_CYCLE.name,
+                    )
+                ]
+
+                section = get_specific_questions_section(self.general_bachelor_context, self.empty_questions, False)
+                attachments = section.attachments
+
+                self.assertEqual(len(attachments), 1)
+                self.assertEqual(attachments[0].identifier, 'ADDITIONAL_DOCUMENTS')
+
+                academic_experiences[:] = [
+                    attr.evolve(
+                        self.belgian_academic_curriculum_experience,
+                        a_obtenu_diplome=False,
+                        communaute_institut=CommunityEnum.GERMAN_SPEAKING.name,
+                        cycle_formation=Cycle.FIRST_CYCLE.name,
+                    )
+                ]
+                section = get_specific_questions_section(self.general_bachelor_context, self.empty_questions, False)
+                attachments = section.attachments
+
+                self.assertEqual(len(attachments), 1)
+                self.assertEqual(attachments[0].identifier, 'ADDITIONAL_DOCUMENTS')
+
+                academic_experiences[:] = [
+                    attr.evolve(
+                        self.belgian_academic_curriculum_experience,
+                        a_obtenu_diplome=False,
+                        communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
+                        cycle_formation=Cycle.SECOND_CYCLE.name,
+                    )
+                ]
+                section = get_specific_questions_section(self.general_bachelor_context, self.empty_questions, False)
+                attachments = section.attachments
+
+                self.assertEqual(len(attachments), 1)
+                self.assertEqual(attachments[0].identifier, 'ADDITIONAL_DOCUMENTS')
+
+            with mock.patch.multiple(
+                self.general_bachelor_context.proposition,
+                annee_calculee=2024,
+                est_concerne_par_le_bama_15=False,
+                preuve_bama_15=bama_15_proof,
+            ):
+                academic_experiences[:] = [
+                    attr.evolve(
+                        self.belgian_academic_curriculum_experience,
+                        a_obtenu_diplome=False,
+                        communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
+                        cycle_formation=Cycle.FIRST_CYCLE.name,
+                    )
+                ]
+
+                section = get_specific_questions_section(self.general_bachelor_context, self.empty_questions, False)
+                attachments = section.attachments
+
+                self.assertEqual(len(attachments), 1)
+                self.assertEqual(attachments[0].identifier, 'ADDITIONAL_DOCUMENTS')
 
     def test_specific_questions_attachments_with_general_proposition_and_reorientation(self):
         with mock.patch.multiple(

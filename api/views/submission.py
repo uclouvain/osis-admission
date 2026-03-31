@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Union
 
 from django.utils import timezone
 from drf_spectacular.utils import OpenApiResponse, extend_schema
@@ -41,10 +40,6 @@ from admission.ddd.admission.doctorat.preparation.commands import (
     SoumettrePropositionCommand as SoumettrePropositionDoctoratCommand,
 )
 from admission.ddd.admission.doctorat.preparation.commands import VerifierProjetQuery
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
-    ConditionsAccessNonRempliesException,
-    PoolNonResidentContingenteNonOuvertException,
-)
 from admission.ddd.admission.formation_continue.commands import (
     RecupererElementsConfirmationQuery as RecupererElementsConfirmationContinueQuery,
 )
@@ -57,10 +52,9 @@ from admission.ddd.admission.formation_generale.commands import (
 from admission.ddd.admission.formation_generale.commands import (
     SoumettrePropositionCommand as SoumettrePropositionGeneraleCommand,
 )
-from admission.models import (
-    ContinuingEducationAdmission,
-    DoctorateAdmission,
-    GeneralEducationAdmission,
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
+    ConditionsAccessNonRempliesException,
+    PoolNonResidentContingenteNonOuvertException,
 )
 from admission.utils import (
     gather_business_exceptions,
@@ -72,7 +66,6 @@ from admission.utils import (
 from base.models.academic_calendar import AcademicCalendar
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from infrastructure.messages_bus import message_bus_instance
-from osis_profile.models import EducationalExperience, ProfessionalExperience
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 __all__ = [
@@ -81,26 +74,6 @@ __all__ = [
     "SubmitGeneralEducationPropositionView",
     "SubmitContinuingEducationPropositionView",
 ]
-
-
-def valuate_experiences(instance: Union[GeneralEducationAdmission, ContinuingEducationAdmission, DoctorateAdmission]):
-    # Valuate the secondary studies of the candidate
-    if isinstance(
-        instance,
-        (GeneralEducationAdmission, ContinuingEducationAdmission),
-    ):
-        instance.valuated_secondary_studies_person_id = instance.candidate_id
-        instance.save(update_fields=['valuated_secondary_studies_person_id'])
-
-    # Valuate curriculum experiences
-    instance.educational_valuated_experiences.add(
-        *EducationalExperience.objects.filter(person_id=instance.candidate_id)
-    )
-
-    # Valuate curriculum experiences
-    instance.professional_valuated_experiences.add(
-        *ProfessionalExperience.objects.filter(person_id=instance.candidate_id)
-    )
 
 
 class VerifyDoctoralProjectView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, GenericAPIView):
@@ -198,7 +171,6 @@ class SubmitDoctoralPropositionView(
         serializer.is_valid(raise_exception=True)
         cmd = SoumettrePropositionDoctoratCommand(**serializer.data, uuid_proposition=str(kwargs['uuid']))
         proposition_id = message_bus_instance.invoke(cmd)
-        valuate_experiences(self.get_permission_object())
         serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -263,7 +235,6 @@ class SubmitGeneralEducationPropositionView(
         cmd = SoumettrePropositionGeneraleCommand(**serializer.data, uuid_proposition=str(kwargs['uuid']))
         message_bus_instance.invoke(cmd)
         admission = self.get_permission_object()
-        valuate_experiences(admission)
         serializer = serializers.GeneralEducationPropositionIdentityWithStatusSerializer(instance=admission)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

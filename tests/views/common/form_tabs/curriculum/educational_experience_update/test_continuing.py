@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -69,6 +69,10 @@ from osis_profile.models.enums.curriculum import (
     Reduction,
     Result,
     TranscriptType,
+)
+from osis_profile.models.enums.experience_validation import (
+    ChoixStatutValidationExperience,
+    EtatAuthentificationParcours,
 )
 from reference.models.enums.cycle import Cycle
 from reference.tests.factories.country import CountryFactory
@@ -163,6 +167,8 @@ class CurriculumEducationalExperienceFormViewForContinuingTestCase(TestCase):
             with_complement=True,
             complement_registered_credit_number=40,
             complement_acquired_credit_number=39,
+            validation_status=ChoixStatutValidationExperience.AUTHENTIFICATION.name,
+            authentication_status=EtatAuthentificationParcours.VRAI.name,
         )
         self.first_experience_year: EducationalExperienceYear = EducationalExperienceYearFactory(
             educational_experience=self.experience,
@@ -188,7 +194,9 @@ class CurriculumEducationalExperienceFormViewForContinuingTestCase(TestCase):
         )
 
         # Mock osis document api
-        patcher = mock.patch("osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value)
+        patcher = mock.patch(
+            "osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
@@ -232,7 +240,7 @@ class CurriculumEducationalExperienceFormViewForContinuingTestCase(TestCase):
 
         doctorate_admission.delete()
 
-        general_admission = GeneralEducationAdmissionFactory(
+        GeneralEducationAdmissionFactory(
             candidate=self.continuing_admission.candidate,
             status=ChoixStatutPropositionContinue.CONFIRMEE.name,
         )
@@ -254,7 +262,7 @@ class CurriculumEducationalExperienceFormViewForContinuingTestCase(TestCase):
 
         doctorate_admission.delete()
 
-        general_admission = GeneralEducationAdmissionFactory(
+        GeneralEducationAdmissionFactory(
             candidate=self.continuing_admission.candidate,
             status=ChoixStatutPropositionContinue.CONFIRMEE.name,
         )
@@ -370,6 +378,8 @@ class CurriculumEducationalExperienceFormViewForContinuingTestCase(TestCase):
         self.assertEqual(experience.with_complement, None)
         self.assertEqual(experience.complement_registered_credit_number, None)
         self.assertEqual(experience.complement_acquired_credit_number, None)
+        self.assertEqual(experience.validation_status, ChoixStatutValidationExperience.A_TRAITER.name)
+        self.assertEqual(experience.authentication_status, EtatAuthentificationParcours.NON_CONCERNE.name)
 
         years = experience.educationalexperienceyear_set.all().order_by('academic_year__year')
 
@@ -473,6 +483,8 @@ class CurriculumEducationalExperienceFormViewForContinuingTestCase(TestCase):
         self.assertEqual(experience.with_complement, None)
         self.assertEqual(experience.complement_registered_credit_number, None)
         self.assertEqual(experience.complement_acquired_credit_number, None)
+        self.assertEqual(experience.validation_status, ChoixStatutValidationExperience.AUTHENTIFICATION.name)
+        self.assertEqual(experience.authentication_status, EtatAuthentificationParcours.VRAI.name)
 
         years = experience.educationalexperienceyear_set.all().order_by('academic_year__year')
 

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,12 +27,14 @@ from typing import Optional
 
 import attr
 
-from admission.ddd.admission.shared_kernel.domain.model.poste_diplomatique import PosteDiplomatiqueIdentity
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
+    InformationsBama15NonCompleteesException,
     InformationsVisaNonCompleteesException,
 )
+from admission.ddd.admission.shared_kernel.domain.model.poste_diplomatique import PosteDiplomatiqueIdentity
 from base.ddd.utils.business_validator import BusinessValidator
-from osis_profile import PLUS_5_ISO_CODES, BE_ISO_CODE
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO
+from osis_profile import BE_ISO_CODE, PLUS_5_ISO_CODES
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -53,3 +55,17 @@ class ShouldVisaEtreComplete(BusinessValidator):
             and not self.poste_diplomatique
         ):
             raise InformationsVisaNonCompleteesException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldInformationsBama15EtreCompletees(BusinessValidator):
+    experiences_academiques: list[ExperienceAcademiqueDTO]
+    est_potentiellement_concerne_par_le_bama_15: bool
+    est_concerne_par_le_bama_15: bool | None
+    preuve_bama_15: list[str]
+
+    def validate(self, *args, **kwargs):
+        if self.est_potentiellement_concerne_par_le_bama_15 and (
+            self.est_concerne_par_le_bama_15 is None or self.est_concerne_par_le_bama_15 and not self.preuve_bama_15
+        ):
+            raise InformationsBama15NonCompleteesException

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -52,6 +52,7 @@ from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldEquivalenceEtreSpecifiee,
     ShouldFacPeutDonnerDecision,
     ShouldFacPeutSoumettreAuSicLorsDeLaDecisionFacultaire,
+    ShouldInformationsBama15EtreCompletees,
     ShouldInformationsEquivalenceEtreRenseignees,
     ShouldPeutSpecifierInformationsDecisionFacultaire,
     ShouldPropositionEtreInscriptionTardiveAvecConditionAcces,
@@ -132,6 +133,7 @@ from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     DiplomeBelgeEtudesSecondairesDTO,
     DiplomeEtrangerEtudesSecondairesDTO,
 )
+from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
@@ -565,6 +567,8 @@ class ApprouverAdmissionParSicValidatorList(TwoStepsMultipleBusinessExceptionLis
     checklist: StatutsChecklistGenerale
     documents_dto: List[EmplacementDocumentDTO]
 
+    statut_validation_donnees_personnelles: str
+
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
@@ -574,7 +578,7 @@ class ApprouverAdmissionParSicValidatorList(TwoStepsMultipleBusinessExceptionLis
                 statut=self.statut,
             ),
             ShouldDonneesPersonnellesEtreDansEtatCorrectPourApprouverDemande(
-                checklist_actuelle=self.checklist,
+                statut_validation_donnees_personnelles=self.statut_validation_donnees_personnelles,
             ),
             ShouldFinancabiliteEtreDansEtatCorrectPourApprouverDemande(
                 checklist_actuelle=self.checklist,
@@ -609,6 +613,8 @@ class ApprouverInscriptionParSicValidatorList(TwoStepsMultipleBusinessExceptionL
 
     documents_dto: List[EmplacementDocumentDTO]
 
+    statut_validation_donnees_personnelles: str
+
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
@@ -618,7 +624,7 @@ class ApprouverInscriptionParSicValidatorList(TwoStepsMultipleBusinessExceptionL
                 statut=self.statut,
             ),
             ShouldDonneesPersonnellesEtreDansEtatCorrectPourApprouverDemande(
-                checklist_actuelle=self.checklist,
+                statut_validation_donnees_personnelles=self.statut_validation_donnees_personnelles,
             ),
             ShouldFinancabiliteEtreDansEtatCorrectPourApprouverDemande(
                 checklist_actuelle=self.checklist,
@@ -650,12 +656,12 @@ class ModifierStatutChecklistParcoursAnterieurValidatorList(TwoStepsMultipleBusi
     condition_acces: Optional[ConditionAcces]
     millesime_condition_acces: Optional[int]
 
-    uuids_experiences_valorisees: set[str]
-    checklist: StatutsChecklistGenerale
-
     type_formation: TrainingType
     type_equivalence_titre_acces: TypeEquivalenceTitreAcces | None
     etudes_secondaires: EtudesSecondairesAdmissionDTO
+    examen: ExamenDTO
+    experiences_academiques: list[ExperienceAcademiqueDTO]
+    experiences_non_academiques: list[ExperienceNonAcademiqueDTO]
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -672,10 +678,12 @@ class ModifierStatutChecklistParcoursAnterieurValidatorList(TwoStepsMultipleBusi
                 millesime_condition_acces=self.millesime_condition_acces,
             ),
             ShouldStatutsChecklistExperiencesEtreValidees(
-                uuids_experiences_valorisees=self.uuids_experiences_valorisees,
-                checklist=self.checklist,
                 statut=self.statut,
                 type_formation=self.type_formation,
+                etudes_secondaires=self.etudes_secondaires,
+                examen=self.examen,
+                experiences_academiques=self.experiences_academiques,
+                experiences_non_academiques=self.experiences_non_academiques,
             ),
             ShouldInformationsEquivalenceEtreRenseignees(
                 statut=self.statut,
@@ -729,6 +737,11 @@ class FormationGeneraleInformationsComplementairesValidatorList(TwoStepsMultiple
 
     poste_diplomatique: Optional[PosteDiplomatiqueIdentity]
 
+    experiences_academiques: list[ExperienceAcademiqueDTO]
+    est_potentiellement_concerne_par_le_bama_15: bool
+    est_concerne_par_le_bama_15: bool | None
+    preuve_bama_15: list[str]
+
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
@@ -739,6 +752,12 @@ class FormationGeneraleInformationsComplementairesValidatorList(TwoStepsMultiple
                 pays_nationalite_europeen=self.pays_nationalite_europeen,
                 pays_residence=self.pays_residence,
                 poste_diplomatique=self.poste_diplomatique,
+            ),
+            ShouldInformationsBama15EtreCompletees(
+                experiences_academiques=self.experiences_academiques,
+                est_potentiellement_concerne_par_le_bama_15=self.est_potentiellement_concerne_par_le_bama_15,
+                est_concerne_par_le_bama_15=self.est_concerne_par_le_bama_15,
+                preuve_bama_15=self.preuve_bama_15,
             ),
         ]
 

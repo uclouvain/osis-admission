@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -263,6 +263,9 @@ class CompleterQuestionsSpecifiquesCommand(interface.CommandRequest):
     documents_additionnels: List[str] = attr.Factory(list)
     poste_diplomatique: Optional[int] = None
 
+    est_concerne_par_le_bama_15: Optional[bool] = None
+    preuve_bama_15: List[str] = attr.Factory(list)
+
 
 @attr.dataclass(frozen=True, slots=True)
 class CompleterQuestionsSpecifiquesParGestionnaireCommand(interface.CommandRequest):
@@ -273,6 +276,9 @@ class CompleterQuestionsSpecifiquesParGestionnaireCommand(interface.CommandReque
     documents_additionnels: List[str] = attr.Factory(list)
 
     poste_diplomatique: Optional[int] = None
+
+    est_concerne_par_le_bama_15: Optional[bool] = None
+    preuve_bama_15: List[str] = attr.Factory(list)
 
     est_bachelier_belge: Optional[bool] = None
     est_reorientation_inscription_externe: Optional[bool] = None
@@ -595,10 +601,28 @@ class NotifierCandidatDerogationFinancabiliteCommand(interface.CommandRequest):
 class ModifierStatutChecklistExperienceParcoursAnterieurCommand(interface.CommandRequest):
     uuid_proposition: str
     uuid_experience: str
-    type_experience: str
     gestionnaire: str
     statut: str
-    statut_authentification: Optional[bool]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierStatutChecklistExperienceAcademiqueCommand(ModifierStatutChecklistExperienceParcoursAnterieurCommand):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierStatutChecklistExperienceNonAcademiqueCommand(ModifierStatutChecklistExperienceParcoursAnterieurCommand):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierStatutChecklistEtudesSecondairesCommand(ModifierStatutChecklistExperienceParcoursAnterieurCommand):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierStatutChecklistExamenCommand(ModifierStatutChecklistExperienceParcoursAnterieurCommand):
+    pass
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -607,6 +631,28 @@ class ModifierAuthentificationExperienceParcoursAnterieurCommand(interface.Comma
     uuid_experience: str
     gestionnaire: str
     etat_authentification: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierAuthentificationExperienceAcademiqueCommand(ModifierAuthentificationExperienceParcoursAnterieurCommand):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierAuthentificationExperienceNonAcademiqueCommand(
+    ModifierAuthentificationExperienceParcoursAnterieurCommand
+):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierAuthentificationEtudesSecondairesCommand(ModifierAuthentificationExperienceParcoursAnterieurCommand):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierAuthentificationExamenCommand(ModifierAuthentificationExperienceParcoursAnterieurCommand):
+    pass
 
 
 @attr.dataclass(frozen=True, slots=True)

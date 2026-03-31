@@ -53,6 +53,7 @@ from admission.tests.factories.roles import (
     ProgramManagerRoleFactory,
     SicManagementRoleFactory,
 )
+from base.forms.utils import EMPTY_CHOICE
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import MainEntityVersionFactory
@@ -207,11 +208,13 @@ class ChoixFormationFormViewTestCase(TestCase):
         self.assertFalse(admission_type_field.disabled)
         self.assertIsInstance(admission_type_field.widget, Select)
 
+        cde_clsm_choices = EMPTY_CHOICE + ChoixCommissionProximiteCDEouCLSM.choices()
+
         proximity_commission_field = response.context['form'].fields['commission_proximite']
-        self.assertTrue(proximity_commission_field.required)
+        self.assertFalse(proximity_commission_field.required)
         self.assertFalse(proximity_commission_field.disabled)
         self.assertIsInstance(proximity_commission_field.widget, Select)
-        self.assertCountEqual(proximity_commission_field.choices, ChoixCommissionProximiteCDEouCLSM.choices())
+        self.assertCountEqual(proximity_commission_field.choices, cde_clsm_choices)
 
         self.admission.training = self.other_cdss_training
         self.admission.save(update_fields=['training'])
@@ -221,6 +224,9 @@ class ChoixFormationFormViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('form', response.context)
 
+        proximity_commission_field = response.context['form'].fields['commission_proximite']
+        self.assertTrue(proximity_commission_field.required)
+        self.assertFalse(proximity_commission_field.disabled)
         proximity_commission_choices = response.context['form'].fields['commission_proximite'].choices
         self.assertCountEqual(proximity_commission_choices, ChoixCommissionProximiteCDSS.choices())
 
@@ -232,8 +238,11 @@ class ChoixFormationFormViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('form', response.context)
 
+        proximity_commission_field = response.context['form'].fields['commission_proximite']
+        self.assertFalse(proximity_commission_field.required)
+        self.assertFalse(proximity_commission_field.disabled)
         proximity_commission_choices = response.context['form'].fields['commission_proximite'].choices
-        self.assertCountEqual(proximity_commission_choices, ChoixCommissionProximiteCDEouCLSM.choices())
+        self.assertCountEqual(proximity_commission_choices, cde_clsm_choices)
 
         self.admission.training = self.other_science_training
         self.admission.save(update_fields=['training'])
@@ -243,6 +252,9 @@ class ChoixFormationFormViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('form', response.context)
 
+        proximity_commission_field = response.context['form'].fields['commission_proximite']
+        self.assertTrue(proximity_commission_field.required)
+        self.assertFalse(proximity_commission_field.disabled)
         proximity_commission_choices = response.context['form'].fields['commission_proximite'].choices
         self.assertCountEqual(proximity_commission_choices, ChoixSousDomaineSciences.choices())
 

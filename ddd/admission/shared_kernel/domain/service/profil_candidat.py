@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -41,6 +41,7 @@ from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
 from admission.ddd.admission.formation_continue.domain.validator.validator_by_business_actions import (
     FormationContinueCurriculumValidatorList,
 )
+from admission.ddd.admission.formation_generale.domain.model.enums import STATUTS_PROPOSITION_GENERALE_NON_SOUMISE
 from admission.ddd.admission.formation_generale.domain.validator.validator_by_business_actions import (
     BachelierEtudesSecondairesValidatorList,
     ChoixFormationValidatorList,
@@ -70,9 +71,11 @@ from admission.ddd.admission.shared_kernel.domain.validator.validator_by_busines
     IdentificationValidatorList,
     QuarantaineValidatorList,
 )
+from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
     ExperiencesCVRecuperees,
 )
+from base.models.enums.community import CommunityEnum
 from base.models.enums.education_group_types import TrainingType
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
     AcademicYear,
@@ -81,7 +84,9 @@ from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
 from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
     IExperienceParcoursInterneTranslator,
 )
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO
 from osis_common.ddd import interface
+from reference.models.enums.cycle import Cycle
 
 
 class ProfilCandidat(interface.DomainService):
@@ -199,13 +204,14 @@ class ProfilCandidat(interface.DomainService):
         uuid_proposition: str,
         matricule: str,
         profil_candidat_translator: 'IProfilCandidatTranslator',
-        formation: Formation,
+        sigle_formation: str,
+        annee_formation: int,
     ) -> None:
         examen = profil_candidat_translator.get_examen(
             uuid_proposition,
             matricule,
-            formation.entity_id.sigle,
-            formation.entity_id.annee,
+            sigle_formation,
+            annee_formation,
         )
 
         ExamenValidatorList(
@@ -251,15 +257,10 @@ class ProfilCandidat(interface.DomainService):
         cls,
         proposition,
         type_formation: TrainingType,
-        profil_candidat_translator: 'IProfilCandidatTranslator',
         annee_courante: int,
         annee_formation: AcademicYear,
+        curriculum: CurriculumAdmissionDTO,
     ) -> None:
-        curriculum = profil_candidat_translator.get_curriculum(
-            matricule=proposition.matricule_candidat,
-            annee_courante=annee_courante,
-            uuid_proposition=proposition.entity_id.uuid,
-        )
         experiences_academiques_incompletes = VerifierCurriculum.recuperer_experiences_academiques_incompletes(
             experiences=curriculum.experiences_academiques,
         )
@@ -320,6 +321,26 @@ class ProfilCandidat(interface.DomainService):
             verification_experiences_completees=verification_experiences_completees,
             grade_academique_formation_proposition=grade_academique_formation_proposition,
             annee_formation=annee_formation,
+        ).validate()
+
+    @classmethod
+    def verifier_experience_academique_curriculum_apres_soumission(
+        cls,
+        proposition_id,
+        matricule_candidat: str,
+        uuid_experience: str,
+        profil_candidat_translator: 'IProfilCandidatTranslator',
+        grade_academique_formation_proposition: str,
+    ) -> None:
+        experience = profil_candidat_translator.get_experience_academique(
+            matricule=matricule_candidat,
+            uuid_proposition=proposition_id.uuid,
+            uuid_experience=uuid_experience,
+        )
+
+        ExperienceAcademiquePostSoumissionValidatorList(
+            experience_academique=experience,
+            grade_academique_formation_proposition=grade_academique_formation_proposition,
         ).validate()
 
     @classmethod
@@ -475,13 +496,27 @@ class ProfilCandidat(interface.DomainService):
         cls,
         proposition,
         profil_candidat_translator: 'IProfilCandidatTranslator',
+        experiences_academiques: list[ExperienceAcademiqueDTO],
+        formation: Formation,
     ):
         identification = profil_candidat_translator.get_identification(proposition.matricule_candidat)
+        est_potentiellement_concerne_par_le_bama_15 = cls.est_potentiellement_concerne_par_le_bama_15(
+            uuid_proposition=proposition.entity_id.uuid,
+            statut_proposition=proposition.statut.name,
+            annee_formation=proposition.annee_calculee or proposition.formation_id.annee,
+            experiences_academiques=experiences_academiques,
+            formation=formation,
+        )
+
         FormationGeneraleInformationsComplementairesValidatorList(
             poste_diplomatique=proposition.poste_diplomatique,
             pays_nationalite=identification.pays_nationalite,
             pays_nationalite_europeen=identification.pays_nationalite_europeen,
             pays_residence=identification.pays_residence,
+            experiences_academiques=experiences_academiques,
+            est_potentiellement_concerne_par_le_bama_15=est_potentiellement_concerne_par_le_bama_15,
+            est_concerne_par_le_bama_15=proposition.est_concerne_par_le_bama_15,
+            preuve_bama_15=proposition.preuve_bama_15,
         ).validate()
 
     @classmethod
@@ -494,3 +529,24 @@ class ProfilCandidat(interface.DomainService):
         QuarantaineValidatorList(
             merge_proposal=merge_proposal,
         ).validate()
+
+    @classmethod
+    def est_potentiellement_concerne_par_le_bama_15(
+        cls,
+        uuid_proposition: str,
+        annee_formation: int,
+        statut_proposition: str,
+        formation: Formation | FormationDTO,
+        experiences_academiques: list[ExperienceAcademiqueDTO],
+    ):
+        demande_non_soumise = statut_proposition in STATUTS_PROPOSITION_GENERALE_NON_SOUMISE
+        annee_precedent_formation = annee_formation - 1
+        return formation.est_formation_pour_bama_15 and any(
+            (demande_non_soumise or xp.valorisee_par_admissions and uuid_proposition in xp.valorisee_par_admissions)
+            and xp.cycle_formation == Cycle.FIRST_CYCLE.name
+            and xp.communaute_institut == CommunityEnum.FRENCH_SPEAKING.name
+            and not xp.a_obtenu_diplome
+            and not xp.formation_non_selectionnee_dans_liste_de_reference
+            and any(annee for annee in xp.annees if annee.annee == annee_precedent_formation)
+            for xp in experiences_academiques
+        )

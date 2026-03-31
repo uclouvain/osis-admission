@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -574,6 +574,7 @@ CORRESPONDANCE_CHAMPS_INFORMATIONS_ADDITIONNELLES = {
         'regular_registration_proof_for_registration_change'
     ),
     'ADDITIONAL_DOCUMENTS': 'additional_documents',
+    'PREUVE_BAMA_15': 'bama_15_proof',
 }
 
 CORRESPONDANCE_CHAMPS_COMPTABILITE = {

@@ -1,5 +1,5 @@
 {% extends base_template %}
-{% load i18n static admission bootstrap3 enums osis_document_components statici18n strings gestion_des_comptes panel field_data %}
+{% load academic_year_display i18n static admission bootstrap3 enums osis_document_components statici18n strings gestion_des_comptes panel field_data %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -130,7 +130,7 @@
         </div>
       {% endwith %}
 
-      {% with initial=original_admission.checklist.initial.donnees_personnelles current=original_admission.checklist.current.donnees_personnelles next_url=next_base_url|add:'donnees_personnelles' %}
+      {% with next_url=next_base_url|add:'donnees_personnelles' %}
         <div role="tabpanel" class="tab-pane" id="donnees_personnelles">
           {% has_perm 'admission.merge_candidate_with_known_person' as can_merge_candidate %}
           {% has_perm 'admission.double_check_decision_informations_signaletique' as can_give_decision_double_check %}
@@ -319,11 +319,11 @@
           {% include 'admission/general_education/includes/checklist/previous_experiences_prevent_to_choose_success_modal.html' %}
         </div>
 
-        {% for child in current.enfants %}
-          <div role="tabpanel" class="tab-pane single-past-experience-container" id="parcours_anterieur__{{ child.extra.identifiant }}">
-            {% with experience=experiences_by_uuid|get_item:child.extra.identifiant %}
+        {% for experience_uuid, experience in experiences_by_uuid.items %}
+          {% concat 'parcours_anterieur__' experience_uuid as checklist_tab_name %}
+          <div role="tabpanel" class="tab-pane single-past-experience-container" id="{{ checklist_tab_name }}">
               {% if experience.valorisee_par_admissions != None and view.kwargs.uuid not in experience.valorisee_par_admissions %}
-                {% with last_valuated_admission_by_experience_uuid|get_item:child.extra.identifiant as last_valuated_admission %}
+                {% with last_valuated_admission_by_experience_uuid|get_item:experience_uuid as last_valuated_admission %}
                   <div class="flex-content alert alert-warning">
                     <p>
                       {% if last_valuated_admission %}
@@ -340,7 +340,7 @@
                     </p>
                     {% experience_valuation_url experience=experience as valuate_experience_url %}
                     {% if can_update_curriculum and valuate_experience_url %}
-                      {% concat 'valuate-experience-modal-single-' child.extra.identifiant as valuate_modal_id %}
+                      {% concat 'valuate-experience-modal-single-' experience_uuid as valuate_modal_id %}
                       <button
                         class="btn btn-warning"
                         data-toggle="modal"
@@ -358,12 +358,15 @@
                   {% experience_details_template resume_proposition=resume_proposition experience=experience with_edit_link_button=False specific_questions=specific_questions_by_tab %}
                 </div>
               {% else %}
-                {% include 'admission/general_education/includes/checklist/previous_experience_single.html' with current=child authentication_form=authentication_forms|get_item_or_none:child.extra.identifiant experience_authentication_history_entry=all_experience_authentication_history_entries|get_item_or_none:child.extra.identifiant experience_type=experience.type_experience %}
+                {% if experience.uuid %}
+                  {% include 'admission/general_education/includes/checklist/previous_experience_single.html' with experience=experience authentication_form=authentication_forms|get_item_or_none:experience_uuid experience_authentication_history_entry=all_experience_authentication_history_entries|get_item_or_none:experience_uuid %}
+                {% else %}
+                  {% include 'admission/general_education/includes/checklist/previous_experience_single_non_existent.html' with experience=experience %}
+                {% endif %}
                 <div>
                   {% experience_details_template resume_proposition=resume_proposition experience=experience with_edit_link_button=True specific_questions=specific_questions_by_tab %}
                 </div>
               {% endif %}
-            {% endwith %}
           </div>
         {% endfor %}
 
@@ -393,6 +396,16 @@
             {% if resume_proposition.identification.est_concerne_par_visa %}
               {% panel _("Visa") edit_link_button=specific_questions_url|add:next_url %}
                 {% field_data _('Competent diplomatic post') resume_proposition.proposition.poste_diplomatique|safe %}
+              {% endpanel %}
+            {% endif %}
+            {% if display_bama_15_questions %}
+              {% panel _('Dual bachelor-master registration (BAMA15)') edit_link_button=specific_questions_url|add:next_url %}
+                {% with year=proposition.annee_demande|get_academic_year %}
+                  {% blocktranslate asvar is_concerned_by_bama_15_label trimmed with year=year %}
+                    According to our analysis, you have a maximum of 15 remaining credits from your bachelor's degree to complete in {{ year }}. Do you confirm this analysis?
+                  {% endblocktranslate %}
+                  {% field_data is_concerned_by_bama_15_label proposition.est_concerne_par_le_bama_15 %}
+                {% endwith %}
               {% endpanel %}
             {% endif %}
             {% multiple_field_data specific_questions_by_tab|get_item:'INFORMATIONS_ADDITIONNELLES' title=_('Specific questions') %}
@@ -438,22 +451,16 @@
         {% include "admission/general_education/includes/checklist/sic_decision_approval_final_modal.html" %}
         {% include "admission/general_education/includes/checklist/sic_decision_delegate_vrae_dispensation_modal.html" %}
 
+        {% if autres_demandes %}
         <div class="info-part">
-          {% include 'admission/general_education/includes/checklist/sic_decision_sic_fraud_status.html' %}
           <dl>
-            <dt>{% trans "Fraudster status from ARES" %}</dt>
-            <dd class="mb-15">
-              Not implemented yet.
-            </dd>
-
-            {% if autres_demandes %}
               <dt>{% trans "Other demand(s) by the candidate." %}</dt>
               <dd>
                 {% include 'admission/includes/lite_admission_list.html' with with_title=True %}
               </dd>
-            {% endif %}
           </dl>
         </div>
+        {% endif %}
 
       </div>
 
@@ -481,7 +488,13 @@
                   id="{{ tab }}-documents-select"
                   class="form-control documents-select"
                   name="identifier"
+                  {% if not documents %}disabled{% endif %}
               >
+                {% if documents %}
+                  <option value="" disabled>{% translate "Select a document to display it" %}</option>
+                {% else %}
+                  <option value="" disabled>{% translate "No document" %}</option>
+                {% endif %}
                 {% for document in documents %}
                   <option
                     value="{{ document.identifiant }}"
@@ -599,7 +612,6 @@
           const defaultDocumentSelect2Options = {
               templateResult: formatResultDocumentOption,
               templateSelection: formatSelectedDocumentOption,
-              placeholder: '{% translate "No document" %}',
           };
 
           $('.documents-select').select2(defaultDocumentSelect2Options);
@@ -612,7 +624,7 @@
               const nextOptionButton = jQuerySelect.siblings('.next-option-button');
               const documentSelectElement = jQuerySelect[0];
 
-              prevOptionButton.prop('disabled', documentSelectElement.selectedIndex <= 0);
+              prevOptionButton.prop('disabled', documentSelectElement.selectedIndex <= 1);
               nextOptionButton.prop('disabled', documentSelectElement.selectedIndex >= documentSelectElement.length - 1);
           }
 
@@ -1069,6 +1081,19 @@
               htmx.trigger('#financabilite-computed-rule', 'financabiliteComputeRule');
           });
 
+          // Update ares result
+          $('#list-group-link-donnees_personnelles').on('show.bs.tab', function() {
+            if (document.getElementById('ares-fraudster-result-donnees_personnelles') !== null) {
+              htmx.trigger('#ares-fraudster-result-donnees_personnelles', 'fraudAresResult');
+            }
+          });
+
+          $('#list-group-link-decision_sic').on('show.bs.tab', function() {
+              if (document.getElementById('ares-fraudster-result-decision_sic') !== null) {
+                htmx.trigger('#ares-fraudster-result-decision_sic', 'fraudAresResult');
+              }
+          });
+
           // Pass the ckeditor data to the form data if necessary
           $(document).on('click', '.ckeditor-form [type="submit"], .ckeditor-form [name="save"]', function(event) {
             $(this).closest('form').find("textarea").each(function() {
@@ -1474,6 +1499,12 @@
       font-family: "Font Awesome 5 Pro";
       content: "\f522";
       margin-left: 5px;
+    }
+
+    .single-past-experience-container {
+      border: #269abc 3px solid;
+      padding: 1em;
+      border-radius: 6px;
     }
 
   </style>

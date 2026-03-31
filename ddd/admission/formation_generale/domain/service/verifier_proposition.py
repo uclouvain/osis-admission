@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -84,6 +84,11 @@ class VerifierProposition(interface.DomainService):
         pool_soumis: 'AcademicCalendarTypes' = None,
     ) -> None:
         profil_candidat_service = ProfilCandidat()
+        curriculum = profil_candidat_translator.get_curriculum(
+            matricule=proposition_candidat.matricule_candidat,
+            annee_courante=annee_courante,
+            uuid_proposition=proposition_candidat.entity_id.uuid,
+        )
         execute_functions_and_aggregate_exceptions(
             partial(
                 profil_candidat_service.verifier_identification,
@@ -105,16 +110,17 @@ class VerifierProposition(interface.DomainService):
                 profil_candidat_service.verifier_examens,
                 uuid_proposition=proposition_candidat.entity_id.uuid,
                 matricule=proposition_candidat.matricule_candidat,
-                formation=formation,
+                sigle_formation=formation.entity_id.sigle,
+                annee_formation=formation.entity_id.annee,
                 profil_candidat_translator=profil_candidat_translator,
             ),
             partial(
                 profil_candidat_service.verifier_curriculum_formation_generale,
                 proposition_candidat,
                 formation.type,
-                profil_candidat_translator,
                 annee_courante,
                 annee_formation=annee_formation,
+                curriculum=curriculum,
             ),
             partial(
                 VerifierQuestionsSpecifiques.verifier_onglet_curriculum,
@@ -137,6 +143,8 @@ class VerifierProposition(interface.DomainService):
                 profil_candidat_service.verifier_informations_complementaires_formation_generale,
                 proposition=proposition_candidat,
                 profil_candidat_translator=profil_candidat_translator,
+                experiences_academiques=curriculum.experiences_academiques,
+                formation=formation,
             ),
             partial(
                 VerifierQuestionsSpecifiques.verifier_onglet_etudes_secondaires,

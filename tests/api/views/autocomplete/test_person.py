@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,8 +27,7 @@ from django.shortcuts import resolve_url
 from django.test import override_settings
 from rest_framework.test import APITestCase
 
-from admission.tests.factories.person import InternalPersonFactory
-from base.tests.factories.person import PersonFactory
+from base.tests.factories.person import EmployeeInternalPersonFactory
 from base.tests.factories.student import StudentFactory
 from base.tests.factories.tutor import TutorFactory
 from base.tests.factories.user import UserFactory
@@ -43,7 +42,7 @@ class PersonAutocompleteTestCase(APITestCase):
     def test_autocomplete_persons(self):
         self.client.force_authenticate(user=self.user)
         internal_global_id = '00005789'
-        person = InternalPersonFactory(first_name="Jean-Marc", global_id=internal_global_id)
+        person = EmployeeInternalPersonFactory(first_name="Jean-Marc", global_id=internal_global_id)
         response = self.client.get(
             resolve_url('autocomplete-person') + '?search=jean',
             format="json",
@@ -98,18 +97,40 @@ class PersonAutocompleteTestCase(APITestCase):
 
         url = resolve_url('autocomplete-person') + '?search=5789'
 
-        person = InternalPersonFactory(global_id="00005789")
+        person = EmployeeInternalPersonFactory(global_id="00005789")
 
         response = self.client.get(url, format="json")
         self.assertEqual(response.status_code, 200, response.content)
         self.assertEqual(response.json()['count'], 1)
 
-        student = StudentFactory(person=person)
+        StudentFactory(person=person)
         response = self.client.get(url, format="json")
         self.assertEqual(response.status_code, 200, response.content)
         self.assertEqual(response.json()['count'], 0)
 
-        tutor = TutorFactory(person=person)
+        TutorFactory(person=person)
         response = self.client.get(url, format="json")
         self.assertEqual(response.status_code, 200, response.content)
         self.assertEqual(response.json()['count'], 1)
+
+    def test_autocomplete_persons_exclude_persons_who_are_not_employees(self):
+        self.client.force_authenticate(user=self.user)
+
+        person = EmployeeInternalPersonFactory(first_name="Jean-Marc", global_id='00005789')
+
+        path = resolve_url('autocomplete-person') + '?search=00005789'
+
+        response = self.client.get(path=path, format="json")
+        self.assertEqual(response.status_code, 200, response.content)
+
+        json_response = response.json()
+        self.assertEqual(json_response['count'], 1)
+
+        person.employee = False
+        person.save(update_fields=['employee'])
+
+        response = self.client.get(path=path, format="json")
+        self.assertEqual(response.status_code, 200, response.content)
+
+        json_response = response.json()
+        self.assertEqual(json_response['count'], 0)

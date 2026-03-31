@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -113,10 +113,7 @@ from admission.ddd.admission.shared_kernel.domain.service.i_question_specifique 
 from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import (
     ProfilCandidat as ProfilCandidatService,
 )
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
-    ExperienceNonTrouveeException,
-)
-from admission.ddd.admission.shared_kernel.dtos import EtudesSecondairesAdmissionDTO
+from admission.ddd.admission.shared_kernel.dtos import EtudesSecondairesAdmissionDTO, IdentificationDTO
 from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
     EmplacementDocumentDTO,
 )
@@ -135,7 +132,6 @@ from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.shared_kernel.repository.i_titre_acces_selectionnable import (
     ITitreAccesSelectionnableRepository,
 )
-from admission.ddd.admission.shared_kernel.utils import initialiser_checklist_experience
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
@@ -151,6 +147,8 @@ from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
 from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
     IExperienceParcoursInterneTranslator,
 )
+from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
 from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd import interface
 
@@ -281,6 +279,9 @@ class Proposition(interface.RootEntity):
     information_a_propos_de_la_restriction: str = ''
     etat_equivalence_titre_acces: Optional[EtatEquivalenceTitreAcces] = None
     date_prise_effet_equivalence_titre_acces: Optional[datetime.date] = None
+
+    est_concerne_par_le_bama_15: Optional[bool] = None
+    preuve_bama_15: List[str] = attr.Factory(list)
 
     @property
     def premiere_annee_de_bachelier(self) -> bool:
@@ -743,13 +744,13 @@ class Proposition(interface.RootEntity):
         statut_checklist_cible: str,
         titres_acces_selectionnes: List[TitreAccesSelectionnable],
         auteur_modification: str,
-        uuids_experiences_valorisees: set[str],
         type_formation: TrainingType,
         etudes_secondaires: EtudesSecondairesAdmissionDTO,
+        examen: ExamenDTO,
+        experiences_academiques: list[ExperienceAcademiqueDTO],
+        experiences_non_academiques: list[ExperienceNonAcademiqueDTO],
     ):
         ModifierStatutChecklistParcoursAnterieurValidatorList(
-            checklist=self.checklist_actuelle,
-            uuids_experiences_valorisees=uuids_experiences_valorisees,
             statut=ChoixStatutChecklist[statut_checklist_cible],
             titres_acces_selectionnes=titres_acces_selectionnes,
             condition_acces=self.condition_acces,
@@ -757,59 +758,12 @@ class Proposition(interface.RootEntity):
             type_formation=type_formation,
             type_equivalence_titre_acces=self.type_equivalence_titre_acces,
             etudes_secondaires=etudes_secondaires,
+            experiences_academiques=experiences_academiques,
+            experiences_non_academiques=experiences_non_academiques,
+            examen=examen,
         ).validate()
 
         self.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist[statut_checklist_cible]
-        self.auteur_derniere_modification = auteur_modification
-
-    def specifier_statut_checklist_experience_parcours_anterieur(
-        self,
-        statut_checklist_cible: str,
-        statut_checklist_authentification: Optional[bool],
-        uuid_experience: str,
-        auteur_modification: str,
-        type_experience: str,
-        profil_candidat_translator: IProfilCandidatTranslator,
-        grade_academique_formation_proposition: str,
-    ):
-        if statut_checklist_cible == ChoixStatutChecklist.GEST_REUSSITE.name:
-            # Une expérience académique ne peut passer à l'état "Validé" que si elle est complète
-            ProfilCandidatService.verifier_experience_curriculum_formation_generale_apres_soumission(
-                proposition=self,
-                uuid_experience=uuid_experience,
-                type_experience=type_experience,
-                profil_candidat_translator=profil_candidat_translator,
-                grade_academique_formation_proposition=grade_academique_formation_proposition,
-            )
-
-        try:
-            experience = self.checklist_actuelle.recuperer_enfant('parcours_anterieur', uuid_experience)
-        except StopIteration:
-            # Si l'expérience n'existe pas dans la checklist, on l'initialise
-            experience = initialiser_checklist_experience(experience_uuid=uuid_experience)
-            self.checklist_actuelle.parcours_anterieur.enfants.append(experience)
-
-        experience.statut = ChoixStatutChecklist[statut_checklist_cible]
-
-        if statut_checklist_authentification is None:
-            experience.extra.pop('authentification', None)
-        else:
-            experience.extra['authentification'] = '1' if statut_checklist_authentification else '0'
-
-        self.auteur_derniere_modification = auteur_modification
-
-    def specifier_authentification_experience_parcours_anterieur(
-        self,
-        uuid_experience: str,
-        auteur_modification: str,
-        etat_authentification: str,
-    ):
-        try:
-            experience = self.checklist_actuelle.recuperer_enfant('parcours_anterieur', uuid_experience)
-        except StopIteration:
-            raise ExperienceNonTrouveeException
-
-        experience.extra['etat_authentification'] = etat_authentification
         self.auteur_derniere_modification = auteur_modification
 
     def specifier_condition_acces(
@@ -876,11 +830,15 @@ class Proposition(interface.RootEntity):
         reponses_questions_specifiques: Dict,
         documents_additionnels: List[str],
         poste_diplomatique: Optional[PosteDiplomatiqueIdentity],
+        est_concerne_par_le_bama_15: Optional[bool],
+        preuve_bama_15: List[str],
     ):
         self.auteur_derniere_modification = self.matricule_candidat
         self.reponses_questions_specifiques = reponses_questions_specifiques
         self.documents_additionnels = documents_additionnels
         self.poste_diplomatique = poste_diplomatique
+        self.est_concerne_par_le_bama_15 = est_concerne_par_le_bama_15
+        self.preuve_bama_15 = preuve_bama_15
 
     def completer_informations_complementaires_par_gestionnaire(
         self,
@@ -888,6 +846,8 @@ class Proposition(interface.RootEntity):
         reponses_questions_specifiques: Dict,
         documents_additionnels: List[str],
         poste_diplomatique: Optional[PosteDiplomatiqueIdentity],
+        est_concerne_par_le_bama_15: Optional[bool],
+        preuve_bama_15: List[str],
         est_bachelier_belge: Optional[bool],
         est_reorientation_inscription_externe: Optional[bool],
         attestation_inscription_reguliere: List[str],
@@ -902,6 +862,9 @@ class Proposition(interface.RootEntity):
         self.documents_additionnels = documents_additionnels
 
         self.poste_diplomatique = poste_diplomatique
+
+        self.est_concerne_par_le_bama_15 = est_concerne_par_le_bama_15
+        self.preuve_bama_15 = preuve_bama_15
 
         self.est_non_resident_au_sens_decret = est_non_resident_au_sens_decret
         self.est_bachelier_belge = est_bachelier_belge
@@ -1205,6 +1168,7 @@ class Proposition(interface.RootEntity):
         experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
         grade_academique_formation_proposition: str,
         annee_formation: AcademicYear,
+        identification_dto: IdentificationDTO,
     ):
         if self.type_demande == TypeDemande.INSCRIPTION:
             ApprouverInscriptionParSicValidatorList(
@@ -1215,6 +1179,7 @@ class Proposition(interface.RootEntity):
                 conditions_complementaires_existantes=self.conditions_complementaires_existantes,
                 conditions_complementaires_libres=self.conditions_complementaires_libres,
                 documents_dto=documents_dto,
+                statut_validation_donnees_personnelles=identification_dto.statut_validation_donnees_personnelles,
             ).validate()
 
         else:
@@ -1228,6 +1193,7 @@ class Proposition(interface.RootEntity):
                 nombre_annees_prevoir_programme=self.nombre_annees_prevoir_programme,
                 checklist=self.checklist_actuelle,
                 documents_dto=documents_dto,
+                statut_validation_donnees_personnelles=identification_dto.statut_validation_donnees_personnelles,
             ).validate()
 
         try:

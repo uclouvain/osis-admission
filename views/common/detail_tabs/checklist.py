@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,9 +26,10 @@
 import datetime
 
 from django.contrib import messages
+from django.core.cache import cache
 from django.shortcuts import resolve_url
 from django.utils.functional import cached_property
-from django.views.generic import FormView
+from django.views.generic import FormView, TemplateView
 from osis_comment.models import CommentEntry
 from rest_framework import serializers, status
 from rest_framework.authentication import SessionAuthentication
@@ -36,33 +37,38 @@ from rest_framework.parsers import FormParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from admission.constants import COMMENT_TAG_FAC, COMMENT_TAG_SIC
+from admission.constants import COMMENT_TAG_FAC, COMMENT_TAG_SIC, CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
 )
 from admission.ddd.admission.formation_generale.events import (
     DonneesPersonellesCandidatValidee,
 )
-from admission.forms.admission.checklist import CommentForm
+from admission.forms.admission.checklist import CommentForm, PersonalDataStatusForm
 from admission.views.common.detail_tabs.comments import (
     COMMENT_TAG_CDD_FOR_SIC,
     COMMENT_TAG_FAC_FOR_IUFC,
     COMMENT_TAG_IUFC_FOR_FAC,
     COMMENT_TAG_SIC_FOR_CDD,
 )
-from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
+from admission.views.common.mixins import AdmissionFormMixin, AdmissionViewMixin, LoadDossierViewMixin
+from base.models.enums.personal_data import ChoixStatutValidationDonneesPersonnelles
+from base.services.fraudeurs import FraudeursService
+from base.utils.htmx import HtmxPermissionRequiredMixin
+from infrastructure.messages_bus import message_bus_instance
+from osis_common.ddd.interface import BusinessException
 
 __all__ = [
     'ChangeStatusView',
     'SaveCommentView',
     'PropositionFromResumeMixin',
     'ChecklistTabIcon',
+    'FraudsterCheckView',
+    'PersonalDataChangeStatusView',
 ]
 
 __namespace__ = False
 
-from infrastructure.messages_bus import message_bus_instance
-from osis_common.ddd.interface import BusinessException
 
 COMMENT_FINANCABILITE_DISPENSATION = 'financabilite__derogation'
 
@@ -142,7 +148,7 @@ class ChangeStatusView(LoadDossierViewMixin, APIView):
 
 
 class SaveCommentView(AdmissionFormMixin, FormView):
-    urlpatterns = {'save-comment': 'save-comment/<str:tab>'}
+    urlpatterns = {'save-comment': 'save-comment/<uuid:object_uuid>/<str:tab>'}
     form_class = CommentForm
     template_name = 'admission/forms/default_form.html'
 
@@ -179,6 +185,7 @@ class SaveCommentView(AdmissionFormMixin, FormView):
         return resolve_url(
             f'{self.base_namespace}:save-comment',
             uuid=self.admission_uuid,
+            object_uuid=self.kwargs['object_uuid'],
             tab=self.kwargs['tab'],
         )
 
@@ -192,7 +199,7 @@ class SaveCommentView(AdmissionFormMixin, FormView):
 
     def form_valid(self, form):
         comment, _ = CommentEntry.objects.update_or_create(
-            object_uuid=self.admission_uuid,
+            object_uuid=self.kwargs['object_uuid'],
             tags=self.tags,
             defaults={
                 'content': form.cleaned_data['comment'],
@@ -226,3 +233,89 @@ class ChecklistTabIcon:
         self.title = title
         self.identifier = identifier
         self.displayed = displayed
+
+
+class FraudsterCheckView(AdmissionViewMixin, HtmxPermissionRequiredMixin, TemplateView):
+    urlpatterns = {'fraudster-check': 'fraudster-check'}
+    template_name = 'admission/details/includes/checklist/fraud_ares_status.html'
+    permission_required = 'admission.view_checklist'
+    http_method_names = ['post']
+
+    WEBSERVICE_UNAVAILABLE_CACHE_KEY = 'admission-checklist-fraudster-webservice-unavailable'
+    WEBSERVICE_UNAVAILABLE_TIMEOUT = 7200
+
+    def post(self, request, *args, **kwargs):
+        if cache.get(self.WEBSERVICE_UNAVAILABLE_CACHE_KEY):
+            is_fraudster_from_ares = None
+        else:
+            admission = self.get_permission_object()
+            is_fraudster_from_ares = FraudeursService.verifier(
+                niss=admission.candidate.national_number,
+                nom=admission.candidate.last_name,
+                prenom=admission.candidate.first_name,
+                autres_prenoms=admission.candidate.middle_name,
+                date_naissance=admission.candidate.birth_date,
+            )
+            if is_fraudster_from_ares is None:
+                cache.set(
+                    self.WEBSERVICE_UNAVAILABLE_CACHE_KEY,
+                    True,
+                    timeout=self.WEBSERVICE_UNAVAILABLE_TIMEOUT,
+                )
+        return self.render_to_response(
+            self.get_context_data(
+                is_fraudster_from_ares_error=is_fraudster_from_ares is None,
+                is_fraudster_from_ares=is_fraudster_from_ares,
+            )
+        )
+
+
+class PersonalDataChangeStatusView(
+    AdmissionFormMixin,
+    LoadDossierViewMixin,
+    HtmxPermissionRequiredMixin,
+    FormView,
+):
+    urlpatterns = 'personal-data-change-status'
+    template_name = 'admission/general_education/includes/checklist/personal_data.html'
+    form_class = PersonalDataStatusForm
+    update_admission_author = True
+    permission_by_status = {
+        ChoixStatutValidationDonneesPersonnelles.A_TRAITER.name: (
+            'admission.change_personal_data_checklist_status_to_be_processed'
+        ),
+        ChoixStatutValidationDonneesPersonnelles.TOILETTEES.name: (
+            'admission.change_personal_data_checklist_status_cleaned'
+        ),
+    }
+    permission_by_context = {
+        CONTEXT_GENERAL: 'admission.change_checklist',
+        CONTEXT_DOCTORATE: 'admission.change_checklist',
+        CONTEXT_CONTINUING: 'admission.change_checklist_iufc',
+    }
+
+    def get_permission_required(self):
+        return (
+            self.permission_by_status.get(self.request.POST.get('status'))
+            or self.permission_by_context[self.current_context],
+        )
+
+    def form_valid(self, form):
+        if ChoixStatutValidationDonneesPersonnelles.FRAUDEUR.name in {
+            form.cleaned_data['status'],
+            self.admission.candidate.personal_data_validation_status,
+        }:
+            self.htmx_refresh = True
+
+        candidate = self.get_permission_object().candidate
+
+        candidate.personal_data_validation_status = form.cleaned_data['status']
+        candidate.save(update_fields=['personal_data_validation_status'])
+
+        if form.cleaned_data['status'] in (
+            ChoixStatutValidationDonneesPersonnelles.TOILETTEES.name,
+            ChoixStatutValidationDonneesPersonnelles.VALIDEES.name,
+        ):
+            message_bus_instance.publish(DonneesPersonellesCandidatValidee(matricule=candidate.global_id))
+
+        return super().form_valid(form)

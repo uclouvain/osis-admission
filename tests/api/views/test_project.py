@@ -67,7 +67,13 @@ from admission.tests import CheckActionLinksMixin
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
-from admission.tests.factories.curriculum import EducationalExperienceFactory, EducationalExperienceYearFactory
+from admission.tests.factories.curriculum import (
+    AdmissionEducationalValuatedExperiencesFactory,
+    AdmissionProfessionalValuatedExperiencesFactory,
+    EducationalExperienceFactory,
+    EducationalExperienceYearFactory,
+    ProfessionalExperienceFactory,
+)
 from admission.tests.factories.form_item import (
     AdmissionFormItemFactory,
     AdmissionFormItemInstantiationFactory,
@@ -90,6 +96,8 @@ from ddd.logic.financabilite.dtos.financabilite import FinancabiliteDTO
 from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
 from epc.tests.factories.email_fonction_programme import EmailFonctionProgrammeFactory
 from infrastructure.financabilite.domain.service.fetcher import PASS_ET_LAS_LABEL
+from osis_profile.models.enums.curriculum import ActivityType
+from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.language import FrenchLanguageFactory
 
@@ -139,9 +147,8 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
             candidate=cls.admission.candidate,
             training__management_entity=cls.other_commission.entity,
         )
-        cls.continuing_campus = (
-            cls.continuing_education_admission.training.educationgroupversion_set.first().root_group.main_teaching_campus
-        )
+        continuing_training = cls.continuing_education_admission.training
+        cls.continuing_campus = continuing_training.educationgroupversion_set.first().root_group.main_teaching_campus
 
         # Users
         cls.candidate = cls.admission.candidate
@@ -954,12 +961,42 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_submit_valid_proposition_using_api(self):
-        admission = DoctorateAdmissionFactory(
+        valuated_educational_experience = self.first_candidate.educationalexperience_set.first()
+        valuated_professional_experience = self.first_candidate.professionalexperience_set.first()
+
+        valuated_educational_experience.validation_status = ChoixStatutValidationExperience.EN_BROUILLON.name
+        valuated_educational_experience.save()
+
+        valuated_professional_experience.validation_status = ChoixStatutValidationExperience.EN_BROUILLON.name
+        valuated_professional_experience.save()
+
+        other_educational_experience = EducationalExperienceFactory(
+            person=self.first_candidate,
+            validation_status=ChoixStatutValidationExperience.EN_BROUILLON.name,
+        )
+
+        other_professional_experience = ProfessionalExperienceFactory(
+            person=self.first_candidate,
+            type=ActivityType.INTERNSHIP.name,
+            validation_status=ChoixStatutValidationExperience.EN_BROUILLON.name,
+        )
+
+        admission: DoctorateAdmission = DoctorateAdmissionFactory(
             training__academic_year__current=True,
             candidate=self.first_candidate,
             status=ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
             supervision_group=self.first_invited_promoter.actor_ptr.process,
         )
+
+        AdmissionEducationalValuatedExperiencesFactory(
+            baseadmission=admission,
+            educationalexperience=valuated_educational_experience,
+        )
+        AdmissionProfessionalValuatedExperiencesFactory(
+            baseadmission=admission,
+            professionalexperience=valuated_professional_experience,
+        )
+
         training_email = EmailFonctionProgrammeFactory(
             type=TypeEmailFonctionProgramme.DESTINATAIRE_ADMISSION.name,
             programme=admission.training.education_group,
@@ -1016,6 +1053,42 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         history_entry = HistoryEntry.objects.filter(object_uuid=admission.uuid).first()
         self.assertIsNotNone(history_entry)
         self.assertCountEqual(history_entry.tags, ['proposition', 'status-changed', 'soumission'])
+
+        # Check that the statuses of the in draft valuated experiences are updated
+        educational_experiences = {xp.uuid: xp for xp in self.first_candidate.educationalexperience_set.all()}
+        professional_experiences = {xp.uuid: xp for xp in self.first_candidate.professionalexperience_set.all()}
+
+        valuated_educational_experiences = admission.admissioneducationalvaluatedexperiences_set.values_list(
+            'educationalexperience_id',
+            flat=True,
+        )
+        valuated_professional_experiences = admission.admissionprofessionalvaluatedexperiences_set.values_list(
+            'professionalexperience_id',
+            flat=True,
+        )
+
+        self.assertEqual(len(valuated_educational_experiences), 1)
+        self.assertEqual(len(valuated_professional_experiences), 1)
+
+        self.assertIn(valuated_educational_experience.uuid, valuated_educational_experiences)
+        self.assertIn(valuated_professional_experience.uuid, valuated_professional_experiences)
+
+        self.assertEqual(
+            educational_experiences[valuated_educational_experience.uuid].validation_status,
+            ChoixStatutValidationExperience.A_TRAITER.name,
+        )
+        self.assertEqual(
+            educational_experiences[other_educational_experience.uuid].validation_status,
+            ChoixStatutValidationExperience.EN_BROUILLON.name,
+        )
+        self.assertEqual(
+            professional_experiences[valuated_professional_experience.uuid].validation_status,
+            ChoixStatutValidationExperience.A_TRAITER.name,
+        )
+        self.assertEqual(
+            professional_experiences[other_professional_experience.uuid].validation_status,
+            ChoixStatutValidationExperience.EN_BROUILLON.name,
+        )
 
     def test_submit_valid_proposition_using_api_but_too_much_submitted_propositions(self):
         self.client.force_authenticate(user=self.third_candidate.user)
@@ -1081,11 +1154,12 @@ class DoctorateAdmissionSubmitPropositionTestCase(APITestCase):
         admission = DoctorateAdmissionFactory(
             candidate=CompletePersonFactory(
                 last_registration_year=None,
-                graduated_from_high_school_year=None,
             ),
             status=ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
             supervision_group=self.first_invited_promoter.actor_ptr.process,
         )
+        admission.candidate.highschooldiploma.academic_graduation_year = None
+        admission.candidate.highschooldiploma.save()
         admission.candidate.educationalexperience_set.all().delete()
         admission.candidate.professionalexperience_set.all().delete()
         url = resolve_url("admission_api_v1:submit-doctoral-proposition", uuid=admission.uuid)

@@ -142,8 +142,8 @@ msgid ""
 msgstr ""
 
 msgid ""
-"<strong>Warning</strong> the candidate is reported as a <strong>fraudster</"
-"strong>"
+"<strong>Warning</strong> the candidate is reported as <strong>fraudster</"
+"strong> by the ARES"
 msgstr ""
 
 #, python-format
@@ -326,6 +326,12 @@ msgid "Access experience details"
 msgstr ""
 
 msgid "Access title"
+msgstr ""
+
+#, python-format
+msgid ""
+"According to our analysis, you have a maximum of 15 remaining credits from "
+"your bachelor's degree to complete in %(year)s. Do you confirm this analysis?"
 msgstr ""
 
 msgid "Account holder first name"
@@ -1140,6 +1146,9 @@ msgstr "Chemistry"
 msgid "CIRE, unlimited stay or foreigner`s card"
 msgstr ""
 
+msgid "CO_DIPLOMATION_1260"
+msgstr "1260 € - Joint degree"
+
 msgid "CO_DIPLOMATION_132"
 msgstr "132 € - Joint degree"
 
@@ -1459,10 +1468,6 @@ msgstr ""
 msgid "Claim cancelled on"
 msgstr ""
 
-msgid "Cleaned"
-msgstr ""
-
-msgctxt "plural"
 msgid "Cleaned"
 msgstr ""
 
@@ -1906,6 +1911,9 @@ msgstr ""
 msgid "DISPENSE_VCRC"
 msgstr ""
 
+msgid "DROITS_MAJORES"
+msgstr ""
+
 msgid "DROITS_MAJORES_DEMANDES"
 msgstr ""
 
@@ -2282,6 +2290,9 @@ msgstr ""
 msgid "Document"
 msgstr ""
 
+msgid "Document attached to the pre-admission enrolment authorisation"
+msgstr ""
+
 msgid "Document category"
 msgstr ""
 
@@ -2382,6 +2393,9 @@ msgstr ""
 msgid "Dr"
 msgstr ""
 
+msgid "Dual bachelor-master registration (BAMA15)"
+msgstr ""
+
 msgid "Dual degree scholarship"
 msgstr ""
 
@@ -2414,6 +2428,9 @@ msgstr ""
 
 #, python-format
 msgid "ENROLMENT AUTHORISATION<br>for the %(academic_year)s academic year"
+msgstr ""
+
+msgid "EPC"
 msgstr ""
 
 msgid "EPC injection"
@@ -2846,9 +2863,6 @@ msgstr ""
 msgid "Faculty process"
 msgstr ""
 
-msgid "False"
-msgstr ""
-
 msgid "Feedback from Fac"
 msgstr ""
 
@@ -3029,7 +3043,15 @@ msgid ""
 "showing that you have been awarded the scholarship on the dates indicated."
 msgstr ""
 
+msgid ""
+"For some reason, the experience isn't yet initialized. However, this is "
+"required to edit its status, its comments, etc."
+msgstr ""
+
 msgid "For the CDD Chair:"
+msgstr ""
+
+msgid "For the PhD Committee President CDD:"
 msgstr ""
 
 msgid "For the attention of"
@@ -3076,9 +3098,6 @@ msgid "Former UCLouvain student"
 msgstr ""
 
 msgid "Fraudster"
-msgstr ""
-
-msgid "Fraudster (ARES)"
 msgstr ""
 
 msgid "Fraudster status from ARES"
@@ -3534,7 +3553,10 @@ msgstr "Enrollment"
 msgid "INSCRIPTION_AU_ROLE"
 msgstr ""
 
-msgid "INSCRIPTION_REGULIERE"
+msgid "INSCRIPTION_REGULIERE_1194"
+msgstr ""
+
+msgid "INSCRIPTION_REGULIERE_835"
 msgstr ""
 
 msgid "INVALID"
@@ -3787,9 +3809,6 @@ msgstr ""
 msgid "Institution Federation Wallonie-Bruxelles"
 msgstr ""
 
-msgid "Institution contacted"
-msgstr ""
-
 msgid "Institution in which the PhD thesis has been realised / started"
 msgstr ""
 
@@ -3860,6 +3879,9 @@ msgid "Is an external reorientation"
 msgstr ""
 
 msgid "Is belgian bachelor"
+msgstr ""
+
+msgid "Is concerned by BAMA15"
 msgstr ""
 
 msgid "Is it a Wallonia-Brussels Federation institution?"
@@ -4218,6 +4240,11 @@ msgid "Management of the enrolment applications"
 msgstr ""
 
 msgid "Manager follow-up"
+msgstr ""
+
+msgid ""
+"Mandatory fields are missing in the 'Additional information > Dual bachelor-"
+"master registration (BAMA15)' tab."
 msgstr ""
 
 msgid ""
@@ -4642,9 +4669,6 @@ msgid "Not financeable - %(rule)s (Established by %(established_by)s)"
 msgstr ""
 
 msgid "Not free"
-msgstr ""
-
-msgid "Not fundable"
 msgstr ""
 
 msgctxt "dashboard-indicator admission"
@@ -5079,6 +5103,13 @@ msgid "Please note that the first term begins on %(date)s."
 msgstr ""
 
 msgid ""
+"Please note that these amounts are currently the subject of a draft decree "
+"under which the Wallonia-Brussels Federation is considering increasing them "
+"(see: <a href=\"https://www.uclouvain.be/en/enrolment/registration-fee-"
+"amount\" target=\"_blank\">The amount of tuition fees</a>)."
+msgstr ""
+
+msgid ""
 "Please note that this document will be removed from the list of the missing "
 "documents."
 msgstr ""
@@ -5249,6 +5280,13 @@ msgid "Proof of equivalency request"
 msgstr ""
 
 msgid "Proof of passing the exam"
+msgstr ""
+
+msgid "Proof of re-enrolment for the bachelor's degree (BAMA15)"
+msgstr ""
+
+#, python-format
+msgid "Proof of re-enrolment for your %(year)s bachelor's degree"
 msgstr ""
 
 msgid "Proof of receipt of unemployment benefit, pension or compensation"
@@ -5622,6 +5660,9 @@ msgstr ""
 msgid "Requested on"
 msgstr ""
 
+msgid "Requesting fraud status from the ARES"
+msgstr ""
+
 #, python-format
 msgid "Require changes for \"%(object)s\""
 msgstr ""
@@ -5846,6 +5887,9 @@ msgstr ""
 msgid "Sector"
 msgstr ""
 
+msgid "Select a document to display it"
+msgstr ""
+
 #, python-format
 msgid "Select valid choices. %(value)s is not one of the available choices."
 msgid_plural ""
@@ -5897,6 +5941,11 @@ msgid "Send to faculty"
 msgstr ""
 
 msgid "Sender"
+msgstr ""
+
+msgid ""
+"Sending the authorization is impossible while the personal data are in the "
+"\"Fraudster\" status."
 msgstr ""
 
 msgid "Sent to EPC"
@@ -6348,6 +6397,10 @@ msgid "The NOMA must contain 8 digits."
 msgstr ""
 
 msgid ""
+"The PhD Field Committee has approved your application for pre-admission."
+msgstr ""
+
+msgid ""
 "The PhD Field Committee has approved your proposal for a <span class=\"bold-"
 "text\">supervisor</span> and <span class=\"bold-text\">supervisory "
 "committee</span>, composed as follows:"
@@ -6562,6 +6615,9 @@ msgid ""
 msgstr ""
 
 msgid "The element has not been found."
+msgstr ""
+
+msgid "The experience has been initialized"
 msgstr ""
 
 msgid "The experience has been valuated."
@@ -6872,6 +6928,9 @@ msgstr ""
 msgid "The university tuition fee is EURO %(montant)s."
 msgstr "The university tuition fee is €%(montant)s."
 
+msgid "There are no EPC documents for this student."
+msgstr ""
+
 msgid "There can be no more CA members in the supervision group."
 msgstr ""
 "There can be no more supervision committee members in the supervision group."
@@ -6887,6 +6946,9 @@ msgid ""
 msgstr ""
 
 msgid "There is no required exam for this training."
+msgstr ""
+
+msgid "There was an error while getting the EPC documents list."
 msgstr ""
 
 msgid "Thesis field"
@@ -6969,11 +7031,6 @@ msgid "This activity will be restored"
 msgstr ""
 
 msgid ""
-"This amount is subject to change pending the adoption and publication of the "
-"decree setting it."
-msgstr ""
-
-msgid ""
 "This course is closed. The candidate can express its interest by ticking the "
 "box below or by contacting a course administrator."
 msgstr ""
@@ -7002,9 +7059,6 @@ msgid ""
 "accommodation to the Logistics and Student Accommodation Service (LOGE). To "
 "find out how, go to <a href=\"https://www.uclouvain.be/en/logement\">www."
 "uclouvain.be/en/logement</a>."
-msgstr ""
-
-msgid "This experience can't be validated if mandatory information is missing."
 msgstr ""
 
 msgid "This experience cannot be updated as it has already been valuated."
@@ -7176,9 +7230,6 @@ msgstr ""
 msgid "Trigger the payment hook"
 msgstr ""
 
-msgid "True"
-msgstr ""
-
 msgid "Tuition fees amount"
 msgstr ""
 
@@ -7236,6 +7287,9 @@ msgstr ""
 msgid "UUID"
 msgstr ""
 
+msgid "Unable to get fraud status from the ARES at the moment"
+msgstr ""
+
 msgid "Unavailable"
 msgstr ""
 
@@ -7250,6 +7304,9 @@ msgid "Unknown"
 msgstr ""
 
 msgid "Unknown PDF type."
+msgstr ""
+
+msgid "Unknown author"
 msgstr ""
 
 msgid "Unknown citizenship"
@@ -7312,10 +7369,6 @@ msgid "Validated"
 msgstr ""
 
 msgctxt "decision-checklist"
-msgid "Validated"
-msgstr ""
-
-msgctxt "plural"
 msgid "Validated"
 msgstr ""
 
@@ -7634,6 +7687,24 @@ msgid ""
 "(supporting documents, proof of language level, etc.)."
 msgstr ""
 
+#, python-format
+msgid ""
+"You can do it automatically by clicking <button type=\"submit\" class=\"btn-"
+"link p-0 no-border\">here</button> or manually through the <a "
+"href=\"%(edit_experience_url)s\">edit form</a>."
+msgstr ""
+
+msgid ""
+"You can do it automatically by clicking <button type=\"submit\" class=\"btn-"
+"link p-0 no-border\">here</button>."
+msgstr ""
+
+#, python-format
+msgid ""
+"You can do it manually through the <a href=\"%(edit_experience_url)s\">edit "
+"form</a>."
+msgstr ""
+
 msgid ""
 "You can find more information on the French Community webpage <a "
 "href=\"https://equisup.cfwb.be/\" target=\"_blank\">https://equisup.cfwb.be/"
@@ -7854,6 +7925,12 @@ msgid "You specified that no Belgian student status situation applies to you."
 msgstr ""
 
 msgid ""
+"You will find the PhD Regulations, specific provisions for your field, PhD "
+"programme stages and other helpful information on your PhD Field Committee "
+"website."
+msgstr ""
+
+msgid ""
 "You will find the PhD regulations, specific provisions for your field, the "
 "stages of the PhD programme and more helpful information on the website of "
 "your PhD Field Committee."
@@ -7880,6 +7957,12 @@ msgid "Your application is currently being reviewed by the course exam board"
 msgstr ""
 
 msgid "Your background is not suited to this course"
+msgstr ""
+
+msgid ""
+"Your complete application must be received by us within a maximum of 12 "
+"months. If it is not already attached to your application for admission, "
+"please:"
 msgstr ""
 
 msgid "Your completed and signed reorientation form"
@@ -7930,6 +8013,9 @@ msgstr ""
 msgid "actions"
 msgstr ""
 
+msgid "an unknown author"
+msgstr ""
+
 msgid "approval"
 msgstr ""
 
@@ -7967,6 +8053,16 @@ msgctxt "payment"
 msgid "creditcard"
 msgstr "Credit card"
 
+msgid ""
+"define and prepare a thesis project in collaboration with your supervisor;"
+msgstr ""
+
+msgid ""
+"define and propose a PhD programme in collaboration with your supervisor; "
+"credits are awarded for modules, reading seminars and other research "
+"activities completed during the pre-admission period;"
+msgstr ""
+
 msgid "education group type"
 msgstr ""
 
@@ -7980,6 +8076,11 @@ msgstr ""
 msgctxt "payment"
 msgid "failed"
 msgstr "Failed"
+
+msgid ""
+"identify and establish scientific collaboration with your supervisor, "
+"including the necessary contacts for a Supervisory Committee."
+msgstr ""
 
 msgid "items per page"
 msgstr ""

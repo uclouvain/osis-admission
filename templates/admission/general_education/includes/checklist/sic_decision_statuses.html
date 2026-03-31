@@ -7,7 +7,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -76,7 +76,7 @@
   {% else %}
     {% checklist_state_button tab='decision_sic' label=_("REFUSEE") icon='circle-stop' state='GEST_BLOCAGE' blocage="refusal" class='danger' disabled=True %}
   {% endif %}
-  {% if original_admission.checklist.current.donnees_personnelles.statut != 'GEST_REUSSITE' %}
+  {% if original_admission.candidate.personal_data_validation_status != 'VALIDEES' %}
     {% translate 'The status of the checklist for the personal data must be "Validated".' as approval_disabled_tooltip %}
     {% checklist_state_button tab='decision_sic' label=_("Approved") icon='check' state='GEST_REUSSITE' class='success' tooltip=approval_disabled_tooltip|force_escape disabled=True %}
   {% elif original_admission.checklist.current.financabilite.statut != 'INITIAL_NON_CONCERNE' and original_admission.checklist.current.financabilite.statut != 'GEST_REUSSITE' %}

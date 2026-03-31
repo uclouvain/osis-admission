@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -28,11 +28,12 @@ from email.message import EmailMessage
 from typing import List, Optional
 
 from django.conf import settings
-from django.utils import translation, formats
-from django.utils.translation import gettext as _, gettext
+from django.utils import formats, translation
+from django.utils.translation import gettext
+from django.utils.translation import gettext as _
 from osis_async.models import AsyncTask
-from osis_document_components.services import get_remote_token, get_remote_tokens
 from osis_document_components.enums import PostProcessingWanted
+from osis_document_components.services import get_remote_token, get_remote_tokens
 from osis_document_components.utils import get_file_url
 from osis_mail_template import generate_email
 from osis_mail_template.utils import transform_html_to_text
@@ -40,19 +41,19 @@ from osis_notification.contrib.handlers import EmailNotificationHandler
 from osis_notification.contrib.notification import EmailNotification
 
 from admission.ddd import MAIL_INSCRIPTION_DEFAUT, MAIL_VERIFICATEUR_CURSUS
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutChecklist,
+    ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
+from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
+from admission.ddd.admission.formation_generale.dtos import PropositionDTO
 from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import EmplacementDocument
+from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import IMatriculeEtudiantService
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import InformationsDestinatairePasTrouvee
 from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import StatutEmplacementDocument
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
-    ChoixStatutChecklist,
-)
-from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
-from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
-from admission.ddd.admission.formation_generale.dtos import PropositionDTO
-from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import IMatriculeEtudiantService
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import InformationsDestinatairePasTrouvee
 from admission.ddd.admission.shared_kernel.repository.i_email_destinataire import (
     IEmailDestinataireRepository,
 )
@@ -75,10 +76,10 @@ from admission.mail_templates.submission import ADMISSION_EMAIL_CONFIRM_SUBMISSI
 from admission.models import AdmissionTask, GeneralEducationAdmission
 from admission.models.base import BaseAdmission
 from admission.utils import (
-    get_portal_admission_url,
     get_backoffice_admission_url,
-    get_salutation_prefix,
     get_portal_admission_list_url,
+    get_portal_admission_url,
+    get_salutation_prefix,
 )
 from base.models.person import Person
 from base.utils.utils import format_academic_year
@@ -286,9 +287,9 @@ class Notification(INotification):
                 }[current_language],
             )
             common_tokens['training_acronym'] = admission.training.acronym
-            common_tokens[
-                'training_enrollment_campus_email'
-            ] = admission.training.enrollment_campus.sic_enrollment_email
+            common_tokens['training_enrollment_campus_email'] = (
+                admission.training.enrollment_campus.sic_enrollment_email
+            )
             common_tokens['application_type'] = admission.get_type_demande_display().lower()
 
             email_message = generate_email(
@@ -459,7 +460,7 @@ class Notification(INotification):
             try:
                 noma_genere = matricule_etudiant_service.recuperer(
                     msg_bus=message_bus,
-                    matricule_personne=admission.candidate.global_id
+                    matricule_personne=admission.candidate.global_id,
                 )
             except MatriculeEtudiantIntrouvableException:
                 noma_genere = gettext('NOMA not found')
@@ -482,11 +483,11 @@ class Notification(INotification):
         return candidate_email_message
 
     @classmethod
-    def demande_verification_titre_acces(cls, proposition: Proposition) -> EmailMessage:
+    def demande_verification_titre_acces(cls, proposition_id: PropositionIdentity) -> EmailMessage:
         admission: BaseAdmission = (
             BaseAdmission.objects.with_training_management_and_reference()
-            .select_related('candidate__country_of_citizenship', 'training')
-            .get(uuid=proposition.entity_id.uuid)
+            .select_related('candidate__country_of_citizenship', 'training__academic_year')
+            .get(uuid=proposition_id.uuid)
         )
 
         # Notifier le vérificateur par mail
@@ -505,7 +506,7 @@ class Notification(INotification):
                     settings.LANGUAGE_CODE_EN: admission.training.title_english,
                 }[current_language],
                 'training_acronym': admission.training.acronym,
-                'training_year': format_academic_year(proposition.annee_calculee),
+                'training_year': format_academic_year(admission.training.academic_year.year),
                 'admission_link_front': get_portal_admission_url('general-education', str(admission.uuid)),
                 'admission_link_back': get_backoffice_admission_url('general-education', str(admission.uuid)),
             }
@@ -522,11 +523,11 @@ class Notification(INotification):
             return email_message
 
     @classmethod
-    def informer_candidat_verification_parcours_en_cours(cls, proposition: Proposition) -> EmailMessage:
+    def informer_candidat_verification_parcours_en_cours(cls, proposition_id: PropositionIdentity) -> EmailMessage:
         admission: BaseAdmission = (
             BaseAdmission.objects.with_training_management_and_reference()
-            .select_related('candidate', 'training')
-            .get(uuid=proposition.entity_id.uuid)
+            .select_related('candidate', 'training__academic_year')
+            .get(uuid=proposition_id.uuid)
         )
 
         # Notifier le candidat par mail
@@ -541,7 +542,7 @@ class Notification(INotification):
                 }[admission.candidate.language],
                 'training_acronym': admission.training.acronym,
                 'training_campus': admission.teaching_campus,
-                'training_year': format_academic_year(proposition.annee_calculee),
+                'training_year': format_academic_year(admission.training.academic_year.year),
                 'admission_link_front': get_portal_admission_url('general-education', str(admission.uuid)),
                 'admission_link_back': get_backoffice_admission_url('general-education', str(admission.uuid)),
             }

@@ -78,6 +78,7 @@ from admission.tests.factories.roles import (
 )
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.enums.education_group_types import TrainingType
+from base.models.enums.personal_data import ChoixStatutValidationDonneesPersonnelles
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
@@ -256,7 +257,6 @@ class ChecklistViewTestCase(TestCase):
 
         self.continuing_admission.checklist['current']['decision'] = {
             'libelle': '',
-            'enfants': [],
             'extra': {'en_cours': 'fac_approval'},
             'statut': ChoixStatutChecklist.GEST_EN_COURS.name,
         }
@@ -537,17 +537,14 @@ class ChecklistViewTestCase(TestCase):
     def test_post_validation_iufc(self):
         self.continuing_admission.checklist['current']['decision'] = {
             'libelle': '',
-            'enfants': [],
             'extra': {'en_cours': 'fac_approval'},
             'statut': ChoixStatutChecklist.GEST_EN_COURS.name,
         }
-        self.continuing_admission.checklist['current']['donnees_personnelles'] = {
-            'libelle': '',
-            'enfants': [],
-            'extra': {},
-            'statut': ChoixStatutChecklist.GEST_REUSSITE.name,
-        }
         self.continuing_admission.save(update_fields=['checklist'])
+        self.continuing_admission.candidate.personal_data_validation_status = (
+            ChoixStatutValidationDonneesPersonnelles.VALIDEES.name
+        )
+        self.continuing_admission.candidate.save(update_fields=['personal_data_validation_status'])
         self.client.force_login(user=self.iufc_manager_user)
 
         url = resolve_url(
@@ -935,7 +932,6 @@ class ChecklistViewTestCase(TestCase):
 
         self.continuing_admission.checklist['current']['decision'] = {
             'libelle': '',
-            'enfants': [],
             'extra': {'en_cours': 'fac_approval'},
             'statut': ChoixStatutChecklist.GEST_EN_COURS.name,
         }
@@ -1203,7 +1199,6 @@ class ChecklistViewTestCase(TestCase):
     def test_post_validation_fac(self):
         self.continuing_admission.checklist['current']['decision'] = {
             'libelle': '',
-            'enfants': [],
             'extra': {'en_cours': 'fac_approval'},
             'statut': ChoixStatutChecklist.GEST_EN_COURS.name,
         }

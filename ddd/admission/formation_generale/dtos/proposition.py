@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -29,10 +29,6 @@ from typing import Dict, List, Optional, Union
 
 import attr
 
-from admission.ddd.admission.shared_kernel.dtos.formation import BaseFormationDTO, FormationDTO
-from admission.ddd.admission.shared_kernel.dtos.poste_diplomatique import PosteDiplomatiqueDTO
-from admission.ddd.admission.shared_kernel.dtos.profil_candidat import ProfilCandidatDTO
-from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_NON_SOUMISE,
     DroitsInscriptionMontant,
@@ -41,6 +37,10 @@ from admission.ddd.admission.formation_generale.dtos.condition_approbation impor
     ConditionComplementaireApprobationDTO,
 )
 from admission.ddd.admission.formation_generale.dtos.motif_refus import MotifRefusDTO
+from admission.ddd.admission.shared_kernel.dtos.formation import BaseFormationDTO, FormationDTO
+from admission.ddd.admission.shared_kernel.dtos.poste_diplomatique import PosteDiplomatiqueDTO
+from admission.ddd.admission.shared_kernel.dtos.profil_candidat import ProfilCandidatDTO
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from ddd.logic.learning_unit.dtos import LearningUnitSearchDTO, PartimSearchDTO
 from ddd.logic.reference.dtos.bourse import BourseDTO
 from osis_common.ddd import interface
@@ -128,6 +128,9 @@ class PropositionDTO(interface.DTO):
 
     type: str
 
+    est_concerne_par_le_bama_15: Optional[bool]
+    preuve_bama_15: List[str]
+
     @property
     def candidat_vip(self) -> bool:
         return any(
@@ -151,6 +154,10 @@ class PropositionDTO(interface.DTO):
     def est_admission(self):
         return self.type == TypeDemande.ADMISSION.name
 
+    @property
+    def annee_demande(self):
+        return self.annee_calculee or self.formation.annee
+
 
 @attr.dataclass(frozen=True, slots=True)
 class PropositionGestionnaireDTO(PropositionDTO):
@@ -172,10 +179,8 @@ class PropositionGestionnaireDTO(PropositionDTO):
 
     candidat_a_plusieurs_demandes: bool
 
-    titre_acces: str
     candidat_assimile: bool
-    fraudeur_ares: bool
-    non_financable: bool
+    est_fraudeur: bool
     est_inscription_tardive: bool
 
     profil_soumis_candidat: Optional[ProfilCandidatDTO]

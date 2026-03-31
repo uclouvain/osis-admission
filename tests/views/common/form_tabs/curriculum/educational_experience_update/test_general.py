@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -38,21 +38,17 @@ from rest_framework import status
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
     ENTITY_CDE,
 )
-from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
-    EtatAuthentificationParcours,
-)
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutChecklist,
     ChoixStatutPropositionGenerale,
 )
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from admission.models import EPCInjection as AdmissionEPCInjection
-from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences
 from admission.models.epc_injection import (
     EPCInjectionStatus as AdmissionEPCInjectionStatus,
 )
 from admission.models.epc_injection import EPCInjectionType
 from admission.models.general_education import GeneralEducationAdmission
+from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences
 from admission.tests.factories.curriculum import (
     AdmissionEducationalValuatedExperiencesFactory,
     EducationalExperienceFactory,
@@ -82,6 +78,10 @@ from osis_profile.models.enums.curriculum import (
     Reduction,
     Result,
     TranscriptType,
+)
+from osis_profile.models.enums.experience_validation import (
+    ChoixStatutValidationExperience,
+    EtatAuthentificationParcours,
 )
 from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection
 from osis_profile.models.epc_injection import (
@@ -116,7 +116,6 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
             training__academic_year=cls.academic_years[0],
             candidate__language=settings.LANGUAGE_CODE_EN,
             candidate__country_of_citizenship=CountryFactory(european_union=False),
-            candidate__graduated_from_high_school_year=None,
             candidate__last_registration_year=None,
             candidate__id_photo=[],
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
@@ -163,6 +162,8 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
             with_complement=True,
             complement_registered_credit_number=30,
             complement_acquired_credit_number=29,
+            validation_status=ChoixStatutValidationExperience.AUTHENTIFICATION.name,
+            authentication_status=EtatAuthentificationParcours.VRAI.name,
         )
         self.first_experience_year: EducationalExperienceYear = EducationalExperienceYearFactory(
             educational_experience=self.experience,
@@ -177,7 +178,9 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
         )
 
         # Mock osis document api
-        patcher = mock.patch("osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value)
+        patcher = mock.patch(
+            "osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
@@ -244,7 +247,7 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
         # The experience has been injected from another admission
         other_admission = GeneralEducationAdmissionFactory(candidate=self.general_admission.candidate)
 
-        other_admission_injection = AdmissionEPCInjection.objects.create(
+        AdmissionEPCInjection.objects.create(
             admission=other_admission,
             type=EPCInjectionType.DEMANDE.name,
             status=AdmissionEPCInjectionStatus.OK.name,
@@ -265,7 +268,7 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
         other_valuation.delete()
 
         # The current admission has been injected
-        admission_injection = AdmissionEPCInjection.objects.create(
+        AdmissionEPCInjection.objects.create(
             admission=self.general_admission,
             type=EPCInjectionType.DEMANDE.name,
             status=AdmissionEPCInjectionStatus.OK.name,
@@ -1796,6 +1799,8 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
         self.assertEqual(self.experience.transcript_type, TranscriptType.ONE_FOR_ALL_YEARS.name)
         self.assertEqual(self.experience.obtained_diploma, False)
         self.assertEqual(self.experience.transcript, [file_uuid])
+        self.assertEqual(self.experience.validation_status, ChoixStatutValidationExperience.AUTHENTIFICATION.name)
+        self.assertEqual(self.experience.authentication_status, EtatAuthentificationParcours.VRAI.name)
 
         # Check the years
         years = self.experience.educationalexperienceyear_set.all().order_by('academic_year__year')
@@ -1922,6 +1927,8 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
         self.assertEqual(new_experience.transcript_type, TranscriptType.ONE_FOR_ALL_YEARS.name)
         self.assertEqual(new_experience.obtained_diploma, False)
         self.assertEqual(new_experience.transcript, [file_uuid])
+        self.assertEqual(new_experience.validation_status, ChoixStatutValidationExperience.A_TRAITER.name)
+        self.assertEqual(new_experience.authentication_status, EtatAuthentificationParcours.NON_CONCERNE.name)
 
         # Check the years
         years = new_experience.educationalexperienceyear_set.all()
@@ -1939,29 +1946,6 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
                 baseadmission_id=self.general_admission.uuid,
                 educationalexperience_id=new_experience.uuid,
             ).exists()
-        )
-
-        # Check that the checklist has been updated
-        self.general_admission.refresh_from_db()
-
-        last_experience_checklist = self.general_admission.checklist['current']['parcours_anterieur']['enfants'][-1]
-
-        self.assertEqual(
-            last_experience_checklist['extra']['identifiant'],
-            str(new_experience.uuid),
-        )
-
-        self.assertEqual(
-            last_experience_checklist,
-            {
-                'libelle': 'To be processed',
-                'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
-                'extra': {
-                    'identifiant': str(new_experience.uuid),
-                    'etat_authentification': EtatAuthentificationParcours.NON_CONCERNE.name,
-                },
-                'enfants': [],
-            },
         )
 
     @mock.patch('admission.views.common.form_tabs.curriculum.CurriculumEducationalExperienceFormView.delete_url')
@@ -2025,6 +2009,8 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
         self.assertEqual(new_experience.transcript_type, TranscriptType.ONE_FOR_ALL_YEARS.name)
         self.assertEqual(new_experience.obtained_diploma, False)
         self.assertEqual(new_experience.transcript, [file_uuid])
+        self.assertEqual(new_experience.validation_status, ChoixStatutValidationExperience.A_TRAITER.name)
+        self.assertEqual(new_experience.authentication_status, EtatAuthentificationParcours.NON_CONCERNE.name)
 
         # Check the years
         years = new_experience.educationalexperienceyear_set.all().order_by('academic_year__year')
@@ -2047,27 +2033,4 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
                 baseadmission_id=self.general_admission.uuid,
                 educationalexperience_id=new_experience.uuid,
             ).exists()
-        )
-
-        # Check that the checklist has been updated
-        self.general_admission.refresh_from_db()
-
-        last_experience_checklist = self.general_admission.checklist['current']['parcours_anterieur']['enfants'][-1]
-
-        self.assertEqual(
-            last_experience_checklist['extra']['identifiant'],
-            str(new_experience.uuid),
-        )
-
-        self.assertEqual(
-            last_experience_checklist,
-            {
-                'libelle': 'To be processed',
-                'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
-                'extra': {
-                    'identifiant': str(new_experience.uuid),
-                    'etat_authentification': EtatAuthentificationParcours.NON_CONCERNE.name,
-                },
-                'enfants': [],
-            },
         )

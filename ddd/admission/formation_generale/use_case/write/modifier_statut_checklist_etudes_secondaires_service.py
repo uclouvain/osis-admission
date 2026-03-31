@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,20 +23,27 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from admission.ddd.admission.formation_generale.commands import ModifierStatutChecklistEtudesSecondairesCommand
+from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
+    PropositionIdentityBuilder,
+)
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    PropositionIdentity,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_modifier_checklist_experience_parcours_anterieur import (
+    IValidationExperienceParcoursAnterieurService,
+)
 
-from django.utils.translation import gettext_lazy as _
 
-from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import EtatAuthentificationParcours
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutChecklist
-from admission.ddd.admission.formation_generale.domain.model.statut_checklist import StatutChecklist
+def modifier_statut_checklist_etudes_secondaires(
+    cmd: 'ModifierStatutChecklistEtudesSecondairesCommand',
+    validation_experience_parcours_anterieur_service: 'IValidationExperienceParcoursAnterieurService',
+) -> 'PropositionIdentity':
+    proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
 
-
-def initialiser_checklist_experience(experience_uuid):
-    return StatutChecklist(
-        libelle=_('To be processed'),
-        statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
-        extra={
-            'identifiant': experience_uuid,
-            'etat_authentification': EtatAuthentificationParcours.NON_CONCERNE.name,
-        },
+    validation_experience_parcours_anterieur_service.modifier_statut_etudes_secondaires(
+        uuid_experience=cmd.uuid_experience,
+        statut=cmd.statut,
     )
+
+    return proposition_id

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,14 +27,17 @@
 from django.utils.functional import cached_property
 from django.views.generic import TemplateView
 
+from admission.api.serializers.person import (
+    candidate_is_potentially_concerned_by_bama_15,
+)
 from admission.calendar.admission_calendar import (
-    AdmissionPoolExternalReorientationCalendar,
     AdmissionPoolExternalEnrollmentChangeCalendar,
+    AdmissionPoolExternalReorientationCalendar,
 )
 from admission.ddd.admission.shared_kernel.enums import Onglets
 from admission.infrastructure.admission.shared_kernel.domain.service.calendrier_inscription import CalendrierInscription
 from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidatTranslator
-from admission.views.common.mixins import LoadDossierViewMixin, AdmissionFormMixin
+from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from base.models.enums.education_group_types import TrainingType
 
 __all__ = [
@@ -55,6 +58,10 @@ class SpecificQuestionsMixinView(AdmissionFormMixin, LoadDossierViewMixin):
     @property
     def display_visa_question(self):
         return self.is_general and self.identification_dto.est_concerne_par_visa
+
+    @cached_property
+    def display_bama_15_questions(self):
+        return self.is_general and candidate_is_potentially_concerned_by_bama_15(self.admission)
 
     @property
     def display_pool_questions(self):
@@ -82,6 +89,8 @@ class SpecificQuestionsDetailView(SpecificQuestionsMixinView, TemplateView):
 
         if self.is_general:
             context['display_visa_question'] = self.display_visa_question
+
+            context['display_bama_15_questions'] = self.display_bama_15_questions
 
             context['enrolled_for_contingent_training'] = self.enrolled_for_contingent_training
 
