@@ -379,6 +379,14 @@ msgstr "Accéder aux détails de l'expérience"
 msgid "Access title"
 msgstr "Titre d'accès"
 
+#, python-format
+msgid ""
+"According to our analysis, you have a maximum of 15 remaining credits from "
+"your bachelor's degree to complete in %(year)s. Do you confirm this analysis?"
+msgstr ""
+"Selon notre analyse, il vous reste maximum 15 crédits résiduels de votre "
+"bachelier à terminer en %(year)s. Confirmez-vous cette analyse ?"
+
 msgid "Account holder first name"
 msgstr "Prénom du titulaire du compte"
 
@@ -2589,6 +2597,9 @@ msgstr "Télécharger un document"
 msgid "Dr"
 msgstr "Dr."
 
+msgid "Dual bachelor-master registration (BAMA15)"
+msgstr "Double inscription bachelier-master (BAMA15)"
+
 msgid "Dual degree scholarship"
 msgstr "Bourse double diplomation"
 
@@ -4321,6 +4332,9 @@ msgstr "Est une réorientation externe"
 msgid "Is belgian bachelor"
 msgstr "Est bachelier belge"
 
+msgid "Is concerned by BAMA15"
+msgstr "Est concerné par le BAMA15"
+
 msgid "Is it a Wallonia-Brussels Federation institution?"
 msgstr "S'agit-il d'une institution de la Fédération Wallonie-Bruxelles ?"
 
@@ -4736,6 +4750,13 @@ msgstr "Gestion des demandes d'inscription"
 
 msgid "Manager follow-up"
 msgstr "Suivi gestionnaire"
+
+msgid ""
+"Mandatory fields are missing in the 'Additional information > Dual bachelor-"
+"master registration (BAMA15)' tab."
+msgstr ""
+"Les champs requis dans l'onglet 'Informations complémentaires > Double "
+"inscription bachelier-master (BAMA15)' sont manquants."
 
 msgid ""
 "Mandatory fields are missing in the 'Additional information > Specific "
@@ -5851,6 +5872,13 @@ msgstr "Preuve de la demande d'équivalence"
 
 msgid "Proof of passing the exam"
 msgstr "Attestation de réussite de l'examen"
+
+msgid "Proof of re-enrolment for the bachelor's degree (BAMA15)"
+msgstr "Preuve de réinscription au bachelier (BAMA15)"
+
+#, python-format
+msgid "Proof of re-enrolment for your %(year)s bachelor's degree"
+msgstr "Preuve de réinscription à votre bachelier %(year)s"
 
 msgid "Proof of receipt of unemployment benefit, pension or compensation"
 msgstr ""

@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -44,6 +44,15 @@
         <div class="col-md-6 required_field">
           {% bootstrap_field form.poste_diplomatique %}
         </div>
+      </div>
+    {% endpanel %}
+  {% endif %}
+
+  {% if view.display_bama_15_questions %}
+    {% panel _('Dual bachelor-master registration (BAMA15)') %}
+      {% bootstrap_field form.est_concerne_par_le_bama_15 form_group_class="form-group required_field" %}
+      <div id="bama-15-proof-container">
+        {% bootstrap_field form.preuve_bama_15 form_group_class="form-group required_field" %}
       </div>
     {% endpanel %}
   {% endif %}
@@ -92,6 +101,13 @@
 
   <script>
       $(function () {
+          {% if view.display_bama_15_questions %}
+            $('#bama-15-proof-container').dependsOn({
+                'input[name=est_concerne_par_le_bama_15]': {
+                    values: ['True'],
+                },
+            });
+          {% endif %}
           {% if view.display_pool_questions %}
               {% if form.est_non_resident_au_sens_decret %}
                   {# Whole panel depends on est_non_resident_au_sens_decret question #}

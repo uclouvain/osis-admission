@@ -30,6 +30,7 @@ import attr
 
 from admission.ddd.admission.shared_kernel.domain.model.formation import (
     FORMATIONS_AVEC_BOURSES,
+    FORMATIONS_POUR_BAMA_15,
     est_formation_medecine_ou_dentisterie,
 )
 from admission.ddd.admission.shared_kernel.dtos.campus import CampusDTO
@@ -73,6 +74,10 @@ class FormationDTO(interface.DTO):
     @property
     def est_active_uniquement_pour_reinscription(self) -> bool:
         return self.active == ActiveStatusEnum.RE_REGISTRATION.name
+
+    @property
+    def est_formation_pour_bama_15(self):
+        return self.type in FORMATIONS_POUR_BAMA_15
 
 
 @attr.dataclass(frozen=True, slots=True)

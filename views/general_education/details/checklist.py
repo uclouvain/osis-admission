@@ -145,6 +145,7 @@ from admission.ddd.admission.shared_kernel.commands import (
     RecupererInformationsValidationExperienceAcademiqueQuery,
     RecupererInformationsValidationExperienceNonAcademiqueQuery,
 )
+from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidat
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     ExperienceNonTrouveeException,
     InformationsDestinatairePasTrouvee,
@@ -3317,11 +3318,13 @@ class ChecklistView(
                 'ATTESTATION_ABSENCE_DETTE_ETABLISSEMENT',
                 'DIPLOME_EQUIVALENCE',
                 'CURRICULUM',
+                'PREUVE_BAMA_15',
                 'ADDITIONAL_DOCUMENTS',
                 *secondary_studies_attachments,
             },
             'donnees_personnelles': assimilation_documents,
             'specificites_formation': {
+                'PREUVE_BAMA_15',
                 'ADDITIONAL_DOCUMENTS',
             },
             'decision_facultaire': {
@@ -3400,6 +3403,14 @@ class ChecklistView(
             context['last_year_internal'] = self.last_year_internal
 
             specific_questions = command_result.resume.questions_specifiques_dtos
+
+            context['display_bama_15_questions'] = ProfilCandidat.est_potentiellement_concerne_par_le_bama_15(
+                uuid_proposition=command_result.resume.proposition.uuid,
+                annee_formation=command_result.resume.proposition.annee_demande,
+                statut_proposition=command_result.resume.proposition.statut,
+                formation=command_result.resume.proposition.formation,
+                experiences_academiques=command_result.resume.curriculum.experiences_academiques,
+            )
 
             context['specific_questions_by_tab'] = get_dynamic_questions_by_tab(specific_questions)
 

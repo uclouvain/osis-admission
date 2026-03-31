@@ -147,7 +147,8 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
             candidate=cls.admission.candidate,
             training__management_entity=cls.other_commission.entity,
         )
-        cls.continuing_campus = cls.continuing_education_admission.training.educationgroupversion_set.first().root_group.main_teaching_campus
+        continuing_training = cls.continuing_education_admission.training
+        cls.continuing_campus = continuing_training.educationgroupversion_set.first().root_group.main_teaching_campus
 
         # Users
         cls.candidate = cls.admission.candidate
