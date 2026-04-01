@@ -464,6 +464,121 @@ class RetrieveValidEnrolmentsTestCase(TestCase):
 
 
 @freezegun.freeze_time(datetime.date(2025, 1, 1))
+class RetrieveLastValidEnrolmentTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+
+        cls.academic_years = {year: AcademicYearFactory(year=year) for year in [2023, 2024, 2025, 2026]}
+
+    def setUp(self):
+        super().setUp()
+
+        self.enrolment = InscriptionProgrammeAnnuelFactory(
+            etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+            programme__offer__academic_type=AcademicTypes.ACADEMIC.name,
+            statut=StatutInscriptionProgrammAnnuel.ETUDIANT_UCL.name,
+            programme__root_group__academic_year=self.academic_years[2024],
+        )
+
+        self.previous_enrolment = InscriptionProgrammeAnnuelFactory(
+            programme_cycle__etudiant=self.enrolment.programme_cycle.etudiant,
+            etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+            programme__offer__academic_type=AcademicTypes.ACADEMIC.name,
+            statut=StatutInscriptionProgrammAnnuel.ETUDIANT_UCL.name,
+            programme__root_group__academic_year=self.academic_years[2023],
+        )
+
+        self.student = self.enrolment.programme_cycle.etudiant.person
+
+    def test_with_no_enrolment(self):
+        result = InscriptionsTranslatorService.recuperer_derniere_inscription(matricule_candidat='UNKNOWN')
+
+        self.assertIsNone(result)
+
+    def test_retrieve_valid_dto(self):
+        result = InscriptionsTranslatorService.recuperer_derniere_inscription(
+            matricule_candidat=self.student.global_id,
+        )
+
+        self.assertIsNotNone(result)
+
+        self.assertEqual(result.sigle, self.enrolment.programme.offer.acronym)
+        self.assertEqual(result.annee, self.enrolment.programme.offer.academic_year.year)
+        self.assertEqual(result.noma, self.enrolment.programme_cycle.etudiant.registration_id)
+        self.assertEqual(result.est_premiere_annee_bachelier, self.enrolment.est_premiere_annee_bachelier)
+
+    def test_depends_on_enrolment_state(self):
+        valid_values = {
+            EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+            EtatInscriptionFormation.PROVISOIRE.name,
+            EtatInscriptionFormation.CESSATION.name,
+        }
+
+        for value in EtatInscriptionFormation:
+            self.enrolment.etat_inscription = value.name
+            self.enrolment.save()
+
+            result = InscriptionsTranslatorService.recuperer_derniere_inscription(
+                matricule_candidat=self.student.global_id,
+            )
+
+            self.assertIsNotNone(result)
+
+            if value.name in valid_values:
+                self.assertEqual(result.sigle, self.enrolment.programme.offer.acronym)
+                self.assertEqual(result.annee, self.enrolment.programme.offer.academic_year.year)
+            else:
+                self.assertEqual(result.sigle, self.previous_enrolment.programme.offer.acronym)
+                self.assertEqual(result.annee, self.previous_enrolment.programme.offer.academic_year.year)
+
+    def test_depends_on_academic_type(self):
+        valid_values = {
+            AcademicTypes.ACADEMIC.name,
+            AcademicTypes.NON_ACADEMIC_CREF.name,
+        }
+
+        for value in AcademicTypes:
+            self.enrolment.programme.offer.academic_type = value.name
+            self.enrolment.programme.offer.save()
+
+            result = InscriptionsTranslatorService.recuperer_derniere_inscription(
+                matricule_candidat=self.student.global_id,
+            )
+
+            self.assertIsNotNone(result)
+
+            if value.name in valid_values:
+                self.assertEqual(result.sigle, self.enrolment.programme.offer.acronym)
+                self.assertEqual(result.annee, self.enrolment.programme.offer.academic_year.year)
+            else:
+                self.assertEqual(result.sigle, self.previous_enrolment.programme.offer.acronym)
+                self.assertEqual(result.annee, self.previous_enrolment.programme.offer.academic_year.year)
+
+    def test_depends_on_status(self):
+        valid_values = {
+            StatutInscriptionProgrammAnnuel.ETUDIANT_UCL.name,
+        }
+
+        for value in StatutInscriptionProgrammAnnuel:
+            self.enrolment.statut = value.name
+            self.enrolment.save()
+
+            result = InscriptionsTranslatorService.recuperer_derniere_inscription(
+                matricule_candidat=self.student.global_id,
+            )
+
+            self.assertIsNotNone(result)
+
+            if value.name in valid_values:
+                self.assertEqual(result.sigle, self.enrolment.programme.offer.acronym)
+                self.assertEqual(result.annee, self.enrolment.programme.offer.academic_year.year)
+            else:
+                self.assertEqual(result.sigle, self.previous_enrolment.programme.offer.acronym)
+                self.assertEqual(result.annee, self.previous_enrolment.programme.offer.academic_year.year)
+
+
+@freezegun.freeze_time(datetime.date(2025, 1, 1))
 class RetrieveValidEnrolmentsForDeliberationTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):

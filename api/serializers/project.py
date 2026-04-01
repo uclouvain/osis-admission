@@ -630,6 +630,7 @@ class GeneralEducationPropositionDTOSerializer(
             'preuve_bama_15',
             'raison_plusieurs_demandes_meme_cycle_meme_annee',
             'justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee',
+            'est_en_poursuite',
         ]
 
 

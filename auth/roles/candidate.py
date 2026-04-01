@@ -130,7 +130,9 @@ _CANDIDATE_RULESET = {
     & ~common.candidate_has_internal_account,
     'change_generaleducationadmission_coordinates': common.is_admission_request_author & general.in_progress,
     'change_generaleducationadmission_curriculum': common.is_admission_request_author & general.in_progress,
-    'change_generaleducationadmission_secondary_studies': common.is_admission_request_author & general.in_progress,
+    'change_generaleducationadmission_secondary_studies': common.is_admission_request_author
+    & general.in_progress
+    & common.candidate_is_not_recent_student,
     'change_generaleducationadmission_exam': common.is_admission_request_author & general.in_progress,
     'change_generaleducationadmission_languages': common.is_admission_request_author & general.in_progress,
     'change_generaleducationadmission_accounting': common.is_admission_request_author & general.in_progress,

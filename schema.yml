@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Admission API
-  version: 1.1.18.dev1735
+  version: 1.1.18.dev1785
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -9271,6 +9271,9 @@ components:
           type: string
         justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee:
           type: string
+        est_en_poursuite:
+          type: boolean
+          nullable: true
       required:
       - creee_le
       - curriculum

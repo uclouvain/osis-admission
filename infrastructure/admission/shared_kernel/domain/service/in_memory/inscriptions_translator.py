@@ -70,3 +70,10 @@ class InscriptionsInMemoryTranslator(IInscriptionsTranslatorService):
         annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
     ) -> bool:
         return False
+
+    @classmethod
+    def recuperer_derniere_inscription(
+        cls,
+        matricule_candidat: str,
+    ) -> InscriptionDTO | None:
+        return None

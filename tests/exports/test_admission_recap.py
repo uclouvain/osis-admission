@@ -1587,6 +1587,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             preuve_bama_15=[],
             justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee='',
             raison_plusieurs_demandes_meme_cycle_meme_annee='',
+            est_en_poursuite=None,
         )
         doctorate_proposition_dto = _PropositionFormationDoctoraleDTO(
             uuid='uuid-proposition',

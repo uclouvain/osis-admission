@@ -93,6 +93,7 @@ def determiner_annee_academique_et_pot(
         titres_acces=titres,
         profil_candidat_translator=profil_candidat_translator,
         formation=formation,
+        inscriptions_translator=inscriptions_translator,
     )
 
     informations_determinees.est_en_poursuite = InscriptionsUCLCandidatService.a_suivi_formation(

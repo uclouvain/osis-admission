@@ -50,8 +50,6 @@ class GeneralExamViewTestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
         # Data
-        cls.admission = GeneralEducationAdmissionFactory()
-
         cls.other_candidate = CandidateFactory().person
 
         cls.academic_years = {
@@ -59,12 +57,15 @@ class GeneralExamViewTestCase(APITestCase):
             for academic_year in AcademicYearFactory.produce(2020, number_past=2, number_future=2)
         }
 
-        # Target url
-        cls.url = resolve_url('general_exam', uuid=cls.admission.uuid)
-
         AdmissionAcademicCalendarFactory.produce_all_required()
 
     def setUp(self):
+        # Data
+        self.admission = GeneralEducationAdmissionFactory()
+
+        # Target url
+        self.url = resolve_url('general_exam', uuid=self.admission.uuid)
+
         # Mock files
         patcher = mock.patch(
             'osis_document_components.services.get_remote_token',
@@ -161,6 +162,17 @@ class GeneralExamViewTestCase(APITestCase):
             },
         )
 
+        # With pursuit
+        self.admission.is_in_pursuit = True
+        self.admission.save()
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check response data
+        self.assertFalse(response.json()['required'])
+
     def test_get_with_exam(self):
         self.client.force_authenticate(user=self.admission.candidate.user)
 
@@ -191,6 +203,17 @@ class GeneralExamViewTestCase(APITestCase):
                 'is_valuated': False,
             },
         )
+
+        # With pursuit
+        self.admission.is_in_pursuit = True
+        self.admission.save()
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check response data
+        self.assertFalse(response.json()['required'])
 
     def test_create_exam(self):
         self.client.force_authenticate(user=self.admission.candidate.user)

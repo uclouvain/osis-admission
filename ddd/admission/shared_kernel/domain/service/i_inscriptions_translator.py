@@ -62,6 +62,14 @@ class IInscriptionsTranslatorService(interface.DomainService):
 
     @classmethod
     @abstractmethod
+    def recuperer_derniere_inscription(
+        cls,
+        matricule_candidat: str,
+    ) -> InscriptionDTO | None:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
     def est_en_poursuite(
         cls,
         matricule_candidat: str,

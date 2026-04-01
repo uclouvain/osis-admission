@@ -926,6 +926,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee=(
                 admission.several_admissions_same_cycle_same_year_justification
             ),
+            est_en_poursuite=admission.is_in_pursuit,
         )
 
     @classmethod

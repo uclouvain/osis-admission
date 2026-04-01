@@ -133,6 +133,7 @@ class VerifierProposition(interface.DomainService):
                 matricule=proposition_candidat.matricule_candidat,
                 formation=formation,
                 profil_candidat_translator=profil_candidat_translator,
+                candidat_est_inscrit_recemment_ucl=candidat_est_inscrit_recemment_ucl,
             ),
             partial(
                 profil_candidat_service.verifier_examens,
@@ -141,6 +142,7 @@ class VerifierProposition(interface.DomainService):
                 sigle_formation=formation.entity_id.sigle,
                 annee_formation=formation.entity_id.annee,
                 profil_candidat_translator=profil_candidat_translator,
+                candidat_est_en_poursuite=proposition_candidat.est_en_poursuite,
             ),
             partial(
                 profil_candidat_service.verifier_curriculum_formation_generale,
@@ -149,6 +151,7 @@ class VerifierProposition(interface.DomainService):
                 annee_courante,
                 annee_formation=annee_formation,
                 curriculum=curriculum,
+                candidat_est_inscrit_recemment_ucl=candidat_est_inscrit_recemment_ucl,
             ),
             partial(
                 VerifierQuestionsSpecifiques.verifier_onglet_curriculum,
@@ -212,6 +215,7 @@ class VerifierProposition(interface.DomainService):
                 pool_soumis=pool_soumis,
                 formation=formation,
                 candidat_est_en_poursuite_directe=candidat_est_en_poursuite_directe,
+                inscriptions_translator=inscriptions_translator,
             ),
             partial(
                 maximum_propositions_service.verifier_nombre_propositions_envoyees_formation_generale,
