@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -58,8 +58,11 @@ _CANDIDATE_RULESET = {
     'api_change_doctorateadmission': common.is_admission_request_author & doctorate.unconfirmed_proposition,
     'api_change_admission_person': common.is_admission_request_author
     & doctorate.in_progress
-    & common.does_not_have_a_submitted_admission,
-    'change_admission_person_last_enrolment': common.is_admission_request_author & doctorate.in_progress,
+    & common.does_not_have_a_submitted_admission
+    & common.candidate_is_not_recent_student,
+    'change_admission_person_last_enrolment': common.is_admission_request_author
+    & doctorate.in_progress
+    & ~common.candidate_has_internal_account,
     'api_change_admission_coordinates': common.is_admission_request_author & doctorate.in_progress,
     'api_change_admission_curriculum': common.is_admission_request_author & doctorate.in_progress,
     'api_change_admission_secondary_studies': common.is_admission_request_author & doctorate.in_progress,
@@ -120,8 +123,11 @@ _CANDIDATE_RULESET = {
     'change_generaleducationadmission_training_choice': common.is_admission_request_author & general.in_progress,
     'change_generaleducationadmission_person': common.is_admission_request_author
     & general.in_progress
-    & common.does_not_have_a_submitted_admission,
-    'change_generaleducationadmission_person_last_enrolment': common.is_admission_request_author & general.in_progress,
+    & common.does_not_have_a_submitted_admission
+    & common.candidate_is_not_recent_student,
+    'change_generaleducationadmission_person_last_enrolment': common.is_admission_request_author
+    & general.in_progress
+    & ~common.candidate_has_internal_account,
     'change_generaleducationadmission_coordinates': common.is_admission_request_author & general.in_progress,
     'change_generaleducationadmission_curriculum': common.is_admission_request_author & general.in_progress,
     'change_generaleducationadmission_secondary_studies': common.is_admission_request_author & general.in_progress,
@@ -155,9 +161,11 @@ _CANDIDATE_RULESET = {
     'change_continuingeducationadmission_training_choice': common.is_admission_request_author & continuing.in_progress,
     'change_continuingeducationadmission_person': common.is_admission_request_author
     & continuing.in_progress
-    & common.does_not_have_a_submitted_admission,
+    & common.does_not_have_a_submitted_admission
+    & common.candidate_is_not_recent_student,
     'change_continuingeducationadmission_person_last_enrolment': common.is_admission_request_author
-    & continuing.in_progress,
+    & continuing.in_progress
+    & ~common.candidate_has_internal_account,
     'change_continuingeducationadmission_coordinates': common.is_admission_request_author & continuing.in_progress,
     'change_continuingeducationadmission_curriculum': common.is_admission_request_author & continuing.in_progress,
     'change_continuingeducationadmission_secondary_studies': common.is_admission_request_author

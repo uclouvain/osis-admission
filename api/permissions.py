@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,8 +26,10 @@
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import MaximumPropositionsAtteintException
-from admission.infrastructure.admission.shared_kernel.domain.service.maximum_propositions import \
-    MaximumPropositionsAutorisees
+from admission.ddd.admission.shared_kernel.commands import CandidatEstInscritRecemmentUCLQuery
+from admission.infrastructure.admission.shared_kernel.domain.service.maximum_propositions import (
+    MaximumPropositionsAutorisees,
+)
 from admission.models import SupervisionActor
 from admission.models.base import BaseAdmission
 
@@ -37,6 +39,37 @@ class DoesNotHaveSubmittedPropositions(BasePermission):
         if request.method in SAFE_METHODS:
             return True
         return not BaseAdmission.objects.candidate_has_submission(request.user.person)
+
+
+class IsNotRecentUCLStudentPermission(BasePermission):
+    def has_permission(self, request, view):
+        if request.method in SAFE_METHODS:
+            return True
+
+        if not request.user.person.global_id:
+            return False
+
+        from infrastructure.messages_bus import message_bus_instance
+
+        cache_key = f'admission_{request.user.person.pk}_candidate_is_recent_student'
+
+        if not hasattr(request.user, cache_key):
+            person_is_recent_url_student = message_bus_instance.invoke(
+                CandidatEstInscritRecemmentUCLQuery(matricule_candidat=request.user.person.global_id)
+            )
+            setattr(request.user, cache_key, person_is_recent_url_student)
+        return not getattr(request.user, cache_key)
+
+
+class HasExternalAccountPermission(BasePermission):
+    def has_permission(self, request, view):
+        if request.method in SAFE_METHODS:
+            return True
+
+        if request.user.person.global_id:
+            return request.user.person.global_id.startswith('8')
+
+        return False
 
 
 class IsSelfPersonTabOrTabPermission(BasePermission):

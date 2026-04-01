@@ -103,9 +103,9 @@ from reference.tests.factories.language import FrenchLanguageFactory
 
 
 @override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
+@freezegun.freeze_time('2023-01-01')
 class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinksMixin, APITestCase):
     @classmethod
-    @freezegun.freeze_time('2023-01-01')
     def setUpTestData(cls):
         # Create supervision group members
         cls.promoter = PromoterFactory()
@@ -149,6 +149,7 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
         )
         continuing_training = cls.continuing_education_admission.training
         cls.continuing_campus = continuing_training.educationgroupversion_set.first().root_group.main_teaching_campus
+        AdmissionAcademicCalendarFactory.produce_all_required()
 
         # Users
         cls.candidate = cls.admission.candidate
@@ -358,7 +359,6 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
             'retrieve_training_choice',
             'destroy_proposition',
             'update_person',
-            'update_person_last_enrolment',
             'update_coordinates',
             'update_secondary_studies',
             'update_languages',
@@ -371,6 +371,7 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
             'submit_proposition',
         ]
         forbidden_actions = [
+            'update_person_last_enrolment',
             'retrieve_documents',
             'update_documents',
         ]

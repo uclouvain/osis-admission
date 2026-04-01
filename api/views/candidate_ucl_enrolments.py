@@ -127,6 +127,9 @@ class GeneralCandidateEnrolmentInformationView(GeneralEducationPersonRelatedMixi
         'GET': 'admission.view_generaleducationadmission_candidate_enrolment_information',
     }
 
+    def get_object(self):
+        return CandidateEnrolmentInformationView.get_object(self)
+
 
 class ContinuingCandidateEnrolmentInformationView(
     ContinuingEducationPersonRelatedMixin,
@@ -136,3 +139,6 @@ class ContinuingCandidateEnrolmentInformationView(
     permission_mapping = {
         'GET': 'admission.view_continuingeducationadmission_candidate_enrolment_information',
     }
+
+    def get_object(self):
+        return CandidateEnrolmentInformationView.get_object(self)

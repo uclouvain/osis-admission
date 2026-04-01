@@ -74,6 +74,7 @@ class RecupererPropositionQuery(interface.QueryRequest):
 @attr.dataclass(frozen=True, slots=True)
 class RecupererResumePropositionQuery(interface.QueryRequest):
     uuid_proposition: str
+    pour_candidat: bool = False
 
 
 @attr.dataclass(frozen=True, slots=True)

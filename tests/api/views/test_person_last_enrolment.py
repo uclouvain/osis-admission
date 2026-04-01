@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ from admission.tests.factories.general_education import GeneralEducationAdmissio
 from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
 from base.tests.factories.entity import EntityFactory
-from base.tests.factories.person import PersonFactory
+from base.tests.factories.person import ExternalPersonFactory
 
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1')
@@ -58,21 +58,21 @@ class PersonLastEnrolmentTestCase(APITestCase):
             'last_registration_year': None,
         }
         cls.doctoral_commission = EntityFactory()
-        cls.candidate_user_without_admission = CandidateFactory().person.user
-        cls.no_role_user = PersonFactory(first_name='Joe').user
+        cls.candidate_user_without_admission = CandidateFactory(person=ExternalPersonFactory()).person.user
+        cls.no_role_user = ExternalPersonFactory(first_name='Joe').user
         AdmissionAcademicCalendarFactory.produce_all_required()
 
     def setUp(self):
         super().setUp()
 
-        promoter = PromoterFactory(actor_ptr__person__first_name='Jane')
+        promoter = PromoterFactory(actor_ptr__person=ExternalPersonFactory(first_name='Jane'))
         self.promoter_user = promoter.person.user
         self.committee_member_user = CaMemberFactory(
-            actor_ptr__person__first_name='James',
+            actor_ptr__person=ExternalPersonFactory(first_name='James'),
             process=promoter.process,
         ).person.user
         self.admission = DoctorateAdmissionFactory(
-            candidate__first_name='John',
+            candidate=ExternalPersonFactory(first_name='John'),
             training__management_entity=self.doctoral_commission,
         )
         self.admission_url = resolve_url('doctorate_person_last_enrolment', uuid=self.admission.uuid)
@@ -101,7 +101,19 @@ class PersonLastEnrolmentTestCase(APITestCase):
         response = self.client.put(self.admission_url, self.updated_data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.json())
 
-    def test_person_last_enrolment__with_candidate_depending_on_admission_statuses(self):
+    def test_person_last_enrolment_depending_on_existing_account(self):
+        self.client.force_authenticate(self.candidate_user)
+
+        self.candidate_user.person.global_id = '00101010'
+        self.candidate_user.person.save()
+
+        response = self.client.put(self.agnostic_url, self.updated_data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        response = self.client.put(self.admission_url, self.updated_data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_person_last_enrolment_with_candidate_depending_on_admission_statuses(self):
         self.client.force_authenticate(self.candidate_user)
 
         valid_statuses_on_update = {
@@ -126,7 +138,7 @@ class PersonLastEnrolmentTestCase(APITestCase):
     def test_person_last_enrolment_with_candidate_not_depending_on_other_doctorate_admissions(self):
         self.client.force_authenticate(self.candidate_user)
 
-        other_admission = DoctorateAdmissionFactory(
+        DoctorateAdmissionFactory(
             candidate=self.candidate_user.person,
             status=ChoixStatutPropositionDoctorale.EN_ATTENTE_DE_SIGNATURE.name,
         )
