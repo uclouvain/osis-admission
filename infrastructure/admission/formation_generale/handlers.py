@@ -320,6 +320,8 @@ COMMAND_HANDLERS = {
         i_comptabilite_translator=ComptabiliteTranslator(),
         academic_year_repository=AcademicYearRepository(),
         question_specifique_translator=QuestionSpecifiqueTranslator(),
+        annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
+        inscriptions_translator=InscriptionsTranslatorService(),
     ),
     RecupererPropositionGestionnaireQuery: lambda msg_bus, cmd: recuperer_proposition_gestionnaire(
         cmd,

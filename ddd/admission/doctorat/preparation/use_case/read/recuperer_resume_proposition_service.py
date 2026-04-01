@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -30,12 +30,6 @@ from admission.ddd.admission.doctorat.preparation.commands import (
 from admission.ddd.admission.doctorat.preparation.domain.service.i_comptabilite import (
     IComptabiliteTranslator,
 )
-from admission.ddd.admission.doctorat.preparation.domain.service.i_membre_CA import (
-    IMembreCATranslator,
-)
-from admission.ddd.admission.doctorat.preparation.domain.service.i_promoteur import (
-    IPromoteurTranslator,
-)
 from admission.ddd.admission.doctorat.preparation.domain.service.i_question_specifique import (
     IQuestionSpecifiqueTranslator,
 )
@@ -44,6 +38,12 @@ from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervi
 )
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
     IPropositionRepository,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import (
+    IAnneeInscriptionFormationTranslator,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
 )
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
@@ -63,6 +63,8 @@ def recuperer_resume_proposition(
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
     academic_year_repository: 'IAcademicYearRepository',
     question_specifique_translator: 'IQuestionSpecifiqueTranslator',
+    inscriptions_translator: 'IInscriptionsTranslatorService',
+    annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
 ) -> 'ResumePropositionDTO':
     # WHEN
     resume_dto = ResumeProposition.get_resume_demande_doctorat(
@@ -73,6 +75,9 @@ def recuperer_resume_proposition(
         academic_year_repository=academic_year_repository,
         groupe_supervision_repository=groupe_supervision_repository,
         question_specifique_translator=question_specifique_translator,
+        inscriptions_translator=inscriptions_translator,
+        annee_inscription_formation_translator=annee_inscription_formation_translator,
+        pour_candidat=cmd.pour_candidat,
     )
 
     # THEN

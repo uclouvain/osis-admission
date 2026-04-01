@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -35,13 +35,13 @@ from pikepdf import OutlineItem, PasswordError, Pdf, PdfError
 from admission.ddd.admission.doctorat.preparation import (
     commands as doctorate_education_commands,
 )
-from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.formation_continue import (
     commands as continuing_education_commands,
 )
 from admission.ddd.admission.formation_generale import (
     commands as general_education_commands,
 )
+from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
 from admission.exports.admission_recap.section import get_sections
 from admission.models import (
     ContinuingEducationAdmission,
@@ -57,6 +57,7 @@ def admission_pdf_recap(
     language: str,
     admission_class: Optional[type] = None,
     with_annotated_documents=False,
+    for_candidate=False,
 ):
     """Generates the admission pdf and returns a token to access it."""
     from osis_document_components.services import get_remote_tokens, get_several_remote_metadata
@@ -71,7 +72,10 @@ def admission_pdf_recap(
 
     with override(language=language):
         context: ResumePropositionDTO = message_bus_instance.invoke(
-            commands.RecupererResumePropositionQuery(uuid_proposition=admission.uuid),
+            commands.RecupererResumePropositionQuery(
+                uuid_proposition=admission.uuid,
+                pour_candidat=for_candidate,
+            ),
         )
 
         default_content = BytesIO(get_pdf_from_template('admission/exports/recap/default_content.html', [], {}))
