@@ -166,6 +166,10 @@ def get_identification_attachments(context: ResumePropositionDTO) -> List[Attach
             candidate_language=context.identification.langue_contact,
         )
     ]
+
+    if context.pour_candidat and context.candidat_est_etudiant_recent_ucl:
+        return attachments
+
     if context.identification.numero_carte_identite or context.identification.numero_registre_national_belge:
         attachments.append(
             Attachment(
