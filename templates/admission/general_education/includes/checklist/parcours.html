@@ -57,8 +57,12 @@
             </div>
         {% endfor %}
             <div class="panel panel-default">
-                <div class="panel-heading">
+                <div class="panel-heading" style="display:flex; align-items: baseline; justify-content: space-between;">
                     {% trans 'Previous experience' %}
+                    <button id="hide-rows-btn" class="btn btn-default btn-sm" onclick="toggleWhiteAndGreyRows()">
+                        <span id="eye-icon" class="fa-solid fa-eye"></span>
+                        {% trans 'Hide rows' %}
+                    </button>
                 </div>
                 <div class="panel-body">
                     {% include 'osis_profile/parcours_anterieur/parcours_anterieur.html' with parcours_tab_id=complete_parcours_id %}
@@ -120,3 +124,15 @@
   {% endif %}
 </div>
 </div>
+
+
+{% block script %}
+    <script>
+    function toggleWhiteAndGreyRows() {
+        document.querySelectorAll('tr.bg-parcours-blanc, tr.bg-parcours-gris').forEach(row => row.classList.toggle('hidden'))
+        document.querySelectorAll('#hide-rows-btn').forEach(btn => btn.classList.toggle('active'))
+        document.querySelectorAll('#eye-icon').forEach(icon => icon.classList.toggle('fa-eye'))
+        document.querySelectorAll('#eye-icon').forEach(icon => icon.classList.toggle('fa-eye-slash'))
+    }
+    </script>
+{% endblock %}
