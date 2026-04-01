@@ -3286,6 +3286,10 @@ class ChecklistView(
     def last_year_internal(self) -> int | None:
         return self.internal_experiences[0].derniere_annee_du_dernier_cycle()
 
+    @cached_property
+    def last_year_1BA_1(self) -> int | None:
+        return self.internal_experiences[0].derniere_annee_1BA_1()
+
     @classmethod
     def checklist_documents_by_tab(cls, specific_questions: List[QuestionSpecifiqueDTO]) -> Dict[str, Set[str]]:
         assimilation_documents = {
@@ -3401,6 +3405,7 @@ class ChecklistView(
             context['experiences_by_uuid'] = experiences_by_uuid
 
             context['last_year_internal'] = self.last_year_internal
+            context['last_year_1BA_1'] = self.last_year_1BA_1
 
             specific_questions = command_result.resume.questions_specifiques_dtos
 
