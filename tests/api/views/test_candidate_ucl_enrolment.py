@@ -30,7 +30,11 @@ from django.shortcuts import resolve_url
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
+from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
+from admission.tests.factories.supervision import PromoterFactory
 from base.models.enums.academic_type import AcademicTypes
 from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_calendar import (
@@ -533,4 +537,72 @@ class CandidateEnrolmentInformationViewTestCase(APITestCase):
 
         enrolment_information = response.json()
 
+        self.assertFalse(enrolment_information['est_inscrit_recemment'])
+
+    def test_with_endpoint_related_to_general_admission(self):
+        admission = GeneralEducationAdmissionFactory()
+
+        admission_url = resolve_url('admission_api_v1:general_candidate_enrolment_information', uuid=admission.uuid)
+
+        self.client.force_authenticate(user=admission.candidate.user)
+
+        response = self.client.get(admission_url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        enrolment_information = response.json()
+        self.assertFalse(enrolment_information['est_inscrit_recemment'])
+
+    def test_with_endpoint_related_to_continuing_admission(self):
+        admission = ContinuingEducationAdmissionFactory()
+
+        admission_url = resolve_url('admission_api_v1:continuing_candidate_enrolment_information', uuid=admission.uuid)
+
+        self.client.force_authenticate(user=admission.candidate.user)
+
+        response = self.client.get(admission_url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        enrolment_information = response.json()
+        self.assertFalse(enrolment_information['est_inscrit_recemment'])
+
+    def test_with_endpoint_related_to_doctorate_admission(self):
+        promoter = PromoterFactory()
+
+        admission = DoctorateAdmissionFactory(
+            supervision_group=promoter.process,
+        )
+
+        admission_url = resolve_url('admission_api_v1:candidate_enrolment_information', uuid=admission.uuid)
+
+        InscriptionProgrammeAnnuelFactory(
+            etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+            statut=StatutInscriptionProgrammAnnuel.ETUDIANT_UCL.name,
+            programme_cycle__etudiant__person=admission.candidate,
+            programme__root_group__academic_year__year=2024,
+            programme__offer__academic_type=AcademicTypes.ACADEMIC.name,
+        )
+
+        self.client.force_authenticate(user=admission.candidate.user)
+
+        # The candidate retrieves its enrolment information
+        response = self.client.get(admission_url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        enrolment_information = response.json()
+        self.assertTrue(enrolment_information['est_inscrit_recemment'])
+
+        # The promoter retrieves the candidate enrolment information
+        self.client.force_authenticate(user=promoter.person.user)
+
+        response = self.client.get(admission_url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        enrolment_information = response.json()
+        self.assertTrue(enrolment_information['est_inscrit_recemment'])
+
+        # The promoter retrieves its enrolment information
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        enrolment_information = response.json()
         self.assertFalse(enrolment_information['est_inscrit_recemment'])

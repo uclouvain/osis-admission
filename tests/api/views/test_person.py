@@ -40,9 +40,13 @@ from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
+from base.models.enums.academic_type import AcademicTypes
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.student import StudentFactory
+from epc.models.enums.etat_inscription import EtatInscriptionFormation
+from epc.models.enums.statut_inscription_programme_annuel import StatutInscriptionProgrammAnnuel
+from epc.tests.factories.inscription_programme_annuel import InscriptionProgrammeAnnuelFactory
 
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1')
@@ -105,6 +109,29 @@ class PersonTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         response = self.client.put(self.admission_url, self.updated_data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.json())
+
+    def test_person_with_candidate_depending_on_ucl_enrolment(self):
+        self.client.force_authenticate(self.candidate_user)
+
+        InscriptionProgrammeAnnuelFactory(
+            etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+            statut=StatutInscriptionProgrammAnnuel.ETUDIANT_UCL.name,
+            programme_cycle__etudiant__person=self.candidate_user.person,
+            programme__root_group__academic_year__year=2020,
+            programme__offer__academic_type=AcademicTypes.ACADEMIC.name,
+        )
+
+        response = self.client.get(self.agnostic_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response = self.client.get(self.admission_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response = self.client.put(self.admission_url, self.updated_data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        response = self.client.put(self.agnostic_url, self.updated_data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_person_with_candidate_depending_on_admission_statuses(self):
         self.client.force_authenticate(self.candidate_user)

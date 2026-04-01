@@ -70,18 +70,22 @@ from admission.tests.factories.curriculum import (
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory, ProgramManagerRoleFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
+from base.models.enums.academic_type import AcademicTypes
 from base.models.enums.entity_type import EntityType
 from base.models.specific_iufc_informations import SpecificIUFCInformations
 from base.tests import QueriesAssertionsMixin
 from base.tests.factories.entity_version import EntityVersionFactory
-from base.tests.factories.person import PersonFactory
+from base.tests.factories.person import ExternalPersonFactory, PersonFactory
+from epc.models.enums.etat_inscription import EtatInscriptionFormation
+from epc.models.enums.statut_inscription_programme_annuel import StatutInscriptionProgrammAnnuel
+from epc.tests.factories.inscription_programme_annuel import InscriptionProgrammeAnnuelFactory
 from osis_profile import BE_ISO_CODE
 from reference.tests.factories.country import CountryFactory
 
 
+@freezegun.freeze_time('2023-01-01')
 class PropositionCreatePermissionsViewTestCase(CheckActionLinksMixin, APITestCase):
     @classmethod
-    @freezegun.freeze_time('2023-01-01')
     def setUpTestData(cls):
         cls.commission = EntityVersionFactory(
             entity_type=EntityType.FACULTY.name,
@@ -89,6 +93,7 @@ class PropositionCreatePermissionsViewTestCase(CheckActionLinksMixin, APITestCas
         )
         cls.admission = GeneralEducationAdmissionFactory(training__management_entity=cls.commission.entity)
         cls.teaching_campus = cls.admission.training.educationgroupversion_set.first().root_group.main_teaching_campus
+        AdmissionAcademicCalendarFactory.produce_all_required()
         # Users
         cls.candidate = cls.admission.candidate
         cls.other_candidate = CandidateFactory().person
@@ -104,8 +109,8 @@ class PropositionCreatePermissionsViewTestCase(CheckActionLinksMixin, APITestCas
         json_response = response.json()
         self.assertActionLinks(
             json_response['links'],
-            ['create_person', 'create_person_last_enrolment', 'create_coordinates', 'create_training_choice'],
-            [],
+            ['create_person', 'create_coordinates', 'create_training_choice'],
+            ['create_person_last_enrolment'],
         )
 
     def test_get_with_submitted_admission(self):
@@ -119,14 +124,46 @@ class PropositionCreatePermissionsViewTestCase(CheckActionLinksMixin, APITestCas
         json_response = response.json()
         self.assertActionLinks(
             json_response['links'],
-            ['create_person_last_enrolment', 'create_training_choice', 'create_coordinates'],
-            ['create_person'],
+            ['create_training_choice', 'create_coordinates'],
+            ['create_person', 'create_person_last_enrolment'],
+        )
+
+    def test_get_with_external_user(self):
+        self.client.force_authenticate(user=ExternalPersonFactory().user)
+
+        response = self.client.get(self.url, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+
+        json_response = response.json()
+        self.assertActionLinks(
+            json_response['links'],
+            ['create_training_choice', 'create_coordinates', 'create_person', 'create_person_last_enrolment'],
+            [],
+        )
+
+    def test_get_with_recent_url_student(self):
+        enrolment = InscriptionProgrammeAnnuelFactory(
+            etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+            statut=StatutInscriptionProgrammAnnuel.ETUDIANT_UCL.name,
+            programme__root_group__academic_year__year=2023,
+            programme__offer__academic_type=AcademicTypes.ACADEMIC.name,
+        )
+        self.client.force_authenticate(user=enrolment.programme_cycle.etudiant.person.user)
+
+        response = self.client.get(self.url, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+
+        json_response = response.json()
+        self.assertActionLinks(
+            json_response['links'],
+            ['create_coordinates', 'create_training_choice'],
+            ['create_person', 'create_person_last_enrolment'],
         )
 
 
+@freezegun.freeze_time('2023-01-01')
 class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
     @classmethod
-    @freezegun.freeze_time('2023-01-01')
     def setUpTestData(cls):
         cls.commission = EntityVersionFactory(
             entity_type=EntityType.FACULTY.name,
@@ -140,6 +177,7 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
             several_admissions_same_cycle_same_year_justification='My justification',
         )
         cls.teaching_campus = cls.admission.training.educationgroupversion_set.first().root_group.main_teaching_campus
+        AdmissionAcademicCalendarFactory.produce_all_required()
         # Users
         cls.candidate = cls.admission.candidate
         cls.other_candidate = CandidateFactory().person
@@ -221,7 +259,6 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
                 'retrieve_training_choice',
                 'update_training_choice',
                 'update_person',
-                'update_person_last_enrolment',
                 'update_coordinates',
                 'update_secondary_studies',
                 'update_curriculum',
@@ -234,6 +271,7 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
                 'update_accounting',
             ],
             forbidden_actions=[
+                'update_person_last_enrolment',
                 'retrieve_documents',
                 'update_documents',
                 'pay_after_submission',
@@ -286,9 +324,9 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.content)
 
 
+@freezegun.freeze_time('2023-01-01')
 class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
     @classmethod
-    @freezegun.freeze_time('2023-01-01')
     def setUpTestData(cls):
         cls.commission = EntityVersionFactory(
             entity_type=EntityType.FACULTY.name,
@@ -330,6 +368,7 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
             training__credits=180,
         )
         cls.teaching_campus = cls.admission.training.educationgroupversion_set.first().root_group.main_teaching_campus
+        AdmissionAcademicCalendarFactory.produce_all_required()
         # Users
         cls.candidate = cls.admission.candidate
         cls.candidate.country_of_citizenship = CountryFactory(
@@ -431,7 +470,6 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
                 'retrieve_training_choice',
                 'update_training_choice',
                 'update_person',
-                'update_person_last_enrolment',
                 'update_coordinates',
                 'update_secondary_studies',
                 'update_curriculum',
@@ -441,6 +479,7 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
                 'destroy_proposition',
             ],
             forbidden_actions=[
+                'update_person_last_enrolment',
                 'retrieve_documents',
                 'update_documents',
             ],
@@ -573,6 +612,7 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
 
 
 @override_settings(WAFFLE_CREATE_MISSING_SWITCHES=False)
+@freezegun.freeze_time('2023-01-01')
 class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixin, APITestCase):
     @classmethod
     def setUpTestData(cls):
@@ -762,7 +802,6 @@ class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixi
         allowed_actions = [
             'retrieve_person',
             'update_person',
-            'update_person_last_enrolment',
             'retrieve_coordinates',
             'update_coordinates',
             'retrieve_training_choice',
@@ -789,6 +828,7 @@ class DoctorateAdmissionApiTestCase(CheckActionLinksMixin, QueriesAssertionsMixi
             'submit_proposition',
         ]
         forbidden_actions = [
+            'update_person_last_enrolment',
             'add_approval',
             'approve_by_pdf',
             'retrieve_documents',

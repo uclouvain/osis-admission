@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from django.db.models import Prefetch
 
 from admission.exports.admission_recap.admission_recap import admission_pdf_recap
 from admission.models import (
@@ -37,7 +36,12 @@ from admission.models import (
 def _base_education_admission_pdf_recap_from_task(task_uuid: str, admission_class):
     """Generates the admission pdf for an admission and save it."""
     task = AdmissionTask.objects.select_related('admission__candidate').get(task__uuid=task_uuid)
-    token = admission_pdf_recap(task.admission, task.admission.candidate.language, admission_class)
+    token = admission_pdf_recap(
+        admission=task.admission,
+        language=task.admission.candidate.language,
+        admission_class=admission_class,
+        for_candidate=True,
+    )
     task.admission.pdf_recap = [token]
     task.admission.save(update_fields=['pdf_recap'])
 

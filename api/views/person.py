@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@ from rest_framework.response import Response
 from admission.api import serializers
 from admission.api.permissions import (
     DoesNotHaveSubmittedPropositions,
+    IsNotRecentUCLStudentPermission,
     IsSelfPersonTabOrTabPermission,
 )
 from admission.api.views.mixins import (
@@ -90,6 +91,7 @@ class CommonPersonViewSet(PersonRelatedMixin, BasePersonViewSet):
     name = "person"
     permission_classes = [
         DoesNotHaveSubmittedPropositions,
+        IsNotRecentUCLStudentPermission,
         partial(IsSelfPersonTabOrTabPermission, permission_suffix='person', can_edit=True),
     ]
 
