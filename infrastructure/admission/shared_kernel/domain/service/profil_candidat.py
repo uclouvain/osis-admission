@@ -64,6 +64,7 @@ from admission.ddd.admission.shared_kernel.enums.valorisation_experience import 
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from admission.infrastructure.admission.shared_kernel.domain.service.inscriptions import InscriptionsTranslatorService
 from admission.models import EPCInjection as AdmissionEPCInjection
 from admission.models.epc_injection import EPCInjectionStatus as AdmissionEPCInjectionStatus, EPCInjectionType
 from admission.models.functions import ArrayLength
@@ -927,7 +928,12 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             .get(global_id=global_id)
         )
 
-        last_registration_year = person.last_registration_year.year if person.last_registration_year else None
+        last_ucl_enrolment = InscriptionsTranslatorService.recuperer_derniere_inscription(matricule_candidat=global_id)
+        last_registration_year = (
+            last_ucl_enrolment.annee
+            if last_ucl_enrolment
+            else (person.last_registration_year.year if person.last_registration_year else None)
+        )
 
         minimal_year = cls.get_annee_minimale_a_completer_cv(
             annee_courante=current_year,

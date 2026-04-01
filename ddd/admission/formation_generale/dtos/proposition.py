@@ -134,6 +134,8 @@ class PropositionDTO(interface.DTO):
     raison_plusieurs_demandes_meme_cycle_meme_annee: str
     justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee: str
 
+    est_en_poursuite: Optional[bool]
+
     @property
     def candidat_vip(self) -> bool:
         return any(

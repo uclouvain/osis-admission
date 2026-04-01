@@ -398,6 +398,7 @@ class PropositionInMemoryRepository(
             justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee=(
                 proposition.justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee
             ),
+            est_en_poursuite=proposition.est_en_poursuite,
         )
 
     @classmethod

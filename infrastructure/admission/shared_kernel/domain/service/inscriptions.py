@@ -135,6 +135,20 @@ class InscriptionsTranslatorService(IInscriptionsTranslatorService):
         ).exists()
 
     @classmethod
+    def recuperer_derniere_inscription(
+        cls,
+        matricule_candidat: str,
+    ) -> InscriptionDTO | None:
+        enrolment_qs = cls.enrolment_qs(global_id=matricule_candidat).order_by(
+            '-programme__offer__academic_year__year',
+        )[:1]
+
+        if enrolment_qs:
+            return cls._get_dto_from_qs(enrolment_qs=enrolment_qs)[0]
+
+        return None
+
+    @classmethod
     def est_en_poursuite(
         cls,
         matricule_candidat: str,

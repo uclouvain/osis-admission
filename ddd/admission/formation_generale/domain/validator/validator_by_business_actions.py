@@ -160,6 +160,8 @@ class FormationGeneraleCurriculumValidatorList(TwoStepsMultipleBusinessException
     equivalence_diplome: List[str]
     sigle_formation: str
     annee_formation: AcademicYear
+    candidat_est_inscrit_recemment_ucl: bool
+    candidat_est_en_poursuite: bool
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -169,6 +171,7 @@ class FormationGeneraleCurriculumValidatorList(TwoStepsMultipleBusinessException
             ShouldCurriculumFichierEtreSpecifie(
                 fichier_pdf=self.fichier_pdf,
                 type_formation=self.type_formation,
+                candidat_est_inscrit_recemment_ucl=self.candidat_est_inscrit_recemment_ucl,
             ),
             ShouldAnneesCVRequisesCompletees(
                 annee_courante=self.annee_courante,
@@ -182,14 +185,17 @@ class FormationGeneraleCurriculumValidatorList(TwoStepsMultipleBusinessException
             ),
             ShouldExperiencesAcademiquesEtreCompletees(
                 experiences_academiques_incompletes=self.experiences_academiques_incompletes,
+                candidat_est_inscrit_recemment_ucl=self.candidat_est_inscrit_recemment_ucl,
             ),
             ShouldExperiencesNonAcademiquesAvoirUnCertificat(
                 experiences_non_academiques=self.experiences_non_academiques,
+                candidat_est_inscrit_recemment_ucl=self.candidat_est_inscrit_recemment_ucl,
             ),
             ShouldEquivalenceEtreSpecifiee(
                 equivalence=self.equivalence_diplome,
                 type_formation=self.type_formation,
                 experiences_academiques=self.experiences_academiques,
+                candidat_est_en_poursuite=self.candidat_est_en_poursuite,
             ),
         ]
 

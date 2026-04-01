@@ -342,6 +342,16 @@ class TestVerifierPropositionService(TestCase):
             self.assertEqual(len(context.exception.exceptions), 1)
             self.assertIsInstance(context.exception.exceptions.pop(), FichierCurriculumNonRenseigneException)
 
+    def test_should_verifier_etre_ok_si_fichier_pdf_cv_non_fourni_master_etudiant_ucl(self):
+        with mock.patch.multiple(self.master_proposition, curriculum=[]):
+            with mock.patch(
+                'admission.infrastructure.admission.shared_kernel.domain.service.in_memory.inscriptions_translator.'
+                'InscriptionsInMemoryTranslator.est_inscrit_recemment',
+                return_value=True,
+            ):
+                id_proposition = self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+                self.assertEqual(id_proposition, self.master_proposition.entity_id)
+
     def test_should_retourner_erreur_si_bourses_non_remplies_pour_certificat(self):
         with mock.patch.multiple(self.certificate_proposition, avec_bourse_double_diplome=None):
             with self.assertRaises(MultipleBusinessExceptions) as context:
@@ -404,6 +414,11 @@ class TestVerifierPropositionService(TestCase):
                 self.message_bus.invoke(self.cmd(self.capaes_proposition.entity_id.uuid))
             self.assertEqual(len(context.exception.exceptions), 1)
             self.assertIsInstance(context.exception.exceptions.pop(), EquivalenceNonRenseigneeException)
+
+    def test_should_verifier_etre_ok_si_equivalence_non_fournie_capaes_poursuite(self):
+        with mock.patch.multiple(self.capaes_proposition, equivalence_diplome=[], est_en_poursuite=True):
+            id_proposition = self.message_bus.invoke(self.cmd(self.capaes_proposition.entity_id.uuid))
+            self.assertEqual(id_proposition, self.capaes_proposition.entity_id)
 
     def test_should_verifier_etre_ok_si_equivalence_non_fournie_avec_experience_belge_aggregation(self):
         self.experiences_academiques.append(
@@ -1135,6 +1150,18 @@ class TestVerifierPropositionService(TestCase):
             self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
         self.assertHasInstance(context.exception.exceptions, EtudesSecondairesNonCompleteesException)
 
+    def test_should_verifier_etre_ok_avec_etudes_secondaires_incompletes_si_etudiant_ucl(self):
+        self.etudes_secondaires[self.master_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
+            annee_diplome_etudes_secondaires=2020,
+        )
+        with mock.patch(
+            'admission.infrastructure.admission.shared_kernel.domain.service.in_memory.inscriptions_translator.'
+            'InscriptionsInMemoryTranslator.est_inscrit_recemment',
+            return_value=True,
+        ):
+            id_proposition = self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+            self.assertEqual(id_proposition, self.master_proposition.entity_id)
+
     def test_should_retourner_erreur_si_indication_annee_diplome_etudes_secondaires_non_specifiee_pour_master(self):
         self.etudes_secondaires[self.master_proposition.matricule_candidat] = EtudesSecondairesAdmissionDTO(
             diplome_etudes_secondaires=GotDiploma.YES.name,
@@ -1700,6 +1727,18 @@ class TestVerifierPropositionService(TestCase):
                 self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
 
             self.assertHasInstance(context.exception.exceptions, ExperiencesAcademiquesNonCompleteesException)
+
+    def test_should_verifer_etre_ok_si_experience_academique_incomplete_etudiant_ucl(self):
+        with mock.patch.multiple(self.experience_academiques_complete, releve_notes=[]):
+            self.experiences_academiques.append(self.experience_academiques_complete)
+
+            with mock.patch(
+                'admission.infrastructure.admission.shared_kernel.domain.service.in_memory.inscriptions_translator.'
+                'InscriptionsInMemoryTranslator.est_inscrit_recemment',
+                return_value=True,
+            ):
+                id_proposition = self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
+                self.assertEqual(id_proposition, self.master_proposition.entity_id)
 
     def test_should_verification_renvoyer_erreur_si_regime_linguistique_non_renseigne_experience_etranger(self):
         with mock.patch.multiple(self.experience_academiques_complete, regime_linguistique='', pays=FR_ISO_CODE):

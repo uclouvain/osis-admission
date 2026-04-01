@@ -173,7 +173,11 @@ class ProfilCandidat(interface.DomainService):
         matricule: str,
         profil_candidat_translator: 'IProfilCandidatTranslator',
         formation: Formation,
+        candidat_est_inscrit_recemment_ucl: bool | None = None,
     ) -> None:
+        if candidat_est_inscrit_recemment_ucl:
+            return
+
         etudes_secondaires = profil_candidat_translator.get_etudes_secondaires(matricule)
 
         if formation.type == TrainingType.BACHELOR:
@@ -212,7 +216,11 @@ class ProfilCandidat(interface.DomainService):
         sigle_formation: str = None,
         annee_formation: int = None,
         uuid_proposition: str = None,
+        candidat_est_en_poursuite: bool | None = None,
     ) -> None:
+        if candidat_est_en_poursuite:
+            return
+
         examen = profil_candidat_translator.get_examen(
             uuid_experience,
             matricule,
@@ -267,6 +275,7 @@ class ProfilCandidat(interface.DomainService):
         annee_courante: int,
         annee_formation: AcademicYear,
         curriculum: CurriculumAdmissionDTO,
+        candidat_est_inscrit_recemment_ucl: bool,
     ) -> None:
         experiences_academiques_incompletes = VerifierCurriculum.recuperer_experiences_academiques_incompletes(
             experiences=curriculum.experiences_academiques,
@@ -285,6 +294,8 @@ class ProfilCandidat(interface.DomainService):
             equivalence_diplome=proposition.equivalence_diplome,
             sigle_formation=proposition.formation_id.sigle,
             annee_formation=annee_formation,
+            candidat_est_inscrit_recemment_ucl=candidat_est_inscrit_recemment_ucl,
+            candidat_est_en_poursuite=proposition.est_en_poursuite,
         ).validate()
 
     @classmethod

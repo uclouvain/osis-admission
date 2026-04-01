@@ -173,8 +173,11 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
             status=ChoixStatutPropositionGenerale.EN_BROUILLON.name,
             training__management_entity=cls.commission.entity,
             training__credits=180,
-            several_admissions_same_cycle_same_year_reason=RaisonPlusieursDemandesMemesCycleEtAnnee.SUIVRE_EN_PARALLELE.name,
+            several_admissions_same_cycle_same_year_reason=(
+                RaisonPlusieursDemandesMemesCycleEtAnnee.SUIVRE_EN_PARALLELE.name
+            ),
             several_admissions_same_cycle_same_year_justification='My justification',
+            is_in_pursuit=True,
         )
         cls.teaching_campus = cls.admission.training.educationgroupversion_set.first().root_group.main_teaching_campus
         AdmissionAcademicCalendarFactory.produce_all_required()
@@ -248,6 +251,7 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
             json_response['justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee'],
             'My justification',
         )
+        self.assertEqual(json_response['est_en_poursuite'], True)
         self.assertEqual(json_response['erreurs'], [])
         self.assertActionLinks(
             links=json_response['links'],

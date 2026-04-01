@@ -83,7 +83,7 @@ class ExamSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(OpenApiTypes.BOOL)
     def get_required(self, exam):
-        return self.exam_type is not None
+        return self.exam_type is not None and not self.context['admission'].is_in_pursuit
 
     @cached_property
     def exam_type(self):

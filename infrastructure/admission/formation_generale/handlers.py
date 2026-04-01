@@ -293,6 +293,8 @@ COMMAND_HANDLERS = {
         profil_candidat_translator=ProfilCandidatTranslator(),
         academic_year_repository=AcademicYearRepository(),
         formation_translator=FormationGeneraleTranslator(),
+        inscriptions_translator=InscriptionsTranslatorService(),
+        annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
     ),
     DeterminerAnneeAcademiqueEtPotQuery: lambda msg_bus, cmd: determiner_annee_academique_et_pot(
         cmd,
