@@ -35,23 +35,14 @@ from admission.ddd.admission.doctorat.preparation.domain.model._comptabilite imp
     Comptabilite,
     comptabilite_non_remplie,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import (
-    DetailProjet,
-)
+from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import DetailProjet
 from admission.ddd.admission.doctorat.preparation.domain.model._experience_precedente_recherche import (
     ExperiencePrecedenteRecherche,
     aucune_experience_precedente_recherche,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model._financement import (
-    Financement,
-    financement_non_rempli,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model._institut import (
-    InstitutIdentity,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
-    DoctoratFormation,
-)
+from admission.ddd.admission.doctorat.preparation.domain.model._financement import Financement, financement_non_rempli
+from admission.ddd.admission.doctorat.preparation.domain.model._institut import InstitutIdentity
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import DoctoratFormation
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
@@ -101,43 +92,21 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
     SpecifierInformationsApprobationInscriptionValidatorList,
     SpecifierNouvellesInformationsDecisionCDDValidatorList,
 )
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
-    CurriculumAdmissionDTO,
-)
-from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import (
-    ProfilCandidat,
-)
-from admission.ddd.admission.shared_kernel.domain.model.complement_formation import (
-    ComplementFormationIdentity,
-)
-from admission.ddd.admission.shared_kernel.domain.model.enums.type_gestionnaire import (
-    TypeGestionnaire,
-)
-from admission.ddd.admission.shared_kernel.domain.model.formation import (
-    FormationIdentity,
-)
-from admission.ddd.admission.shared_kernel.domain.model.motif_refus import (
-    MotifRefusIdentity,
-)
-from admission.ddd.admission.shared_kernel.domain.model.question_specifique import (
-    QuestionSpecifique,
-)
-from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import (
-    TitreAccesSelectionnable,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
-    IProfilCandidatTranslator,
-)
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
+from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import ProfilCandidat
+from admission.ddd.admission.shared_kernel.domain.model.complement_formation import ComplementFormationIdentity
+from admission.ddd.admission.shared_kernel.domain.model.enums.type_gestionnaire import TypeGestionnaire
+from admission.ddd.admission.shared_kernel.domain.model.formation import FormationIdentity
+from admission.ddd.admission.shared_kernel.domain.model.motif_refus import MotifRefusIdentity
+from admission.ddd.admission.shared_kernel.domain.model.question_specifique import QuestionSpecifique
+from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.domain.service.i_question_specifique import (
     ISuperQuestionSpecifiqueTranslator,
 )
-from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import (
-    ProfilCandidat as ProfilCandidatService,
-)
+from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidat as ProfilCandidatService
 from admission.ddd.admission.shared_kernel.dtos import IdentificationDTO
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
-    EmplacementDocumentDTO,
-)
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.shared_kernel.enums import (
     ChoixAssimilation1,
     ChoixAssimilation2,
@@ -160,17 +129,11 @@ from ddd.logic.financabilite.domain.model.enums.situation import (
     SituationFinancabilite,
 )
 from ddd.logic.reference.domain.model.bourse import BourseIdentity
-from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
-    AcademicYear,
-)
-from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import (
-    IAcademicYearRepository,
-)
-from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
-    IExperienceParcoursInterneTranslator,
-)
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear
+from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
+from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
-from epc.models.enums.condition_acces import ConditionAcces
+from base.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd import interface
 
 
@@ -731,33 +694,6 @@ class Proposition(interface.RootEntity):
 
         self.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist[statut_checklist_cible]
         self.auteur_derniere_modification = auteur_modification
-
-    def specifier_condition_acces(
-        self,
-        auteur_modification: str,
-        condition_acces: str,
-        millesime_condition_acces: Optional[int],
-        titre_acces_selectionnable_repository: 'ITitreAccesSelectionnableRepository',
-        experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
-    ):
-        nouveau_millesime_condition_acces = millesime_condition_acces
-        nouvelle_condition_acces = getattr(ConditionAcces, condition_acces, None)
-
-        # Si la condition d'accès a changé
-        if nouvelle_condition_acces and nouvelle_condition_acces != self.condition_acces:
-            # Si un seul titre d'accès a été sélectionné,  le millésime correspond à l'année de ce titre
-            titres_selectionnes = titre_acces_selectionnable_repository.search_by_proposition(
-                proposition_identity=self.entity_id,
-                experience_parcours_interne_translator=experience_parcours_interne_translator,
-                seulement_selectionnes=True,
-            )
-
-            if len(titres_selectionnes) == 1:
-                nouveau_millesime_condition_acces = titres_selectionnes[0].annee
-
-        self.auteur_derniere_modification = auteur_modification
-        self.condition_acces = nouvelle_condition_acces
-        self.millesime_condition_acces = nouveau_millesime_condition_acces
 
     def specifier_financabilite_resultat_calcul(
         self,

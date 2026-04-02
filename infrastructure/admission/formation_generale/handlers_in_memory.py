@@ -593,11 +593,9 @@ COMMAND_HANDLERS = {
         formation_translator=_formation_generale_translator,
         academic_year_repository=_academic_year_repository,
     ),
-    SpecifierConditionAccesPropositionCommand: lambda msg_bus, cmd: specifier_condition_acces_proposition(
+    SpecifierAvecComplementsFormationPropositionCommand: lambda msg_bus, cmd: specifier_avec_complements_formation_proposition(
         cmd,
         proposition_repository=_proposition_repository,
-        titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
-        experience_parcours_interne_translator=_experience_parcours_interne_translator,
     ),
     SpecifierEquivalenceTitreAccesEtrangerPropositionCommand: (
         lambda msg_bus, cmd: specifier_equivalence_titre_acces_etranger_proposition(
@@ -619,6 +617,7 @@ COMMAND_HANDLERS = {
         )
     ),
     SpecifierExperienceEnTantQueTitreAccesCommand: lambda msg_bus, cmd: specifier_experience_en_tant_que_titre_acces(
+        msg_bus,
         cmd,
         titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
     ),

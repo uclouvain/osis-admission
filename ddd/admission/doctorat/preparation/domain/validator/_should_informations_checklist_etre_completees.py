@@ -85,7 +85,7 @@ from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from base.ddd.utils.business_validator import BusinessValidator
 from base.models.enums.personal_data import ChoixStatutValidationDonneesPersonnelles
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
-from epc.models.enums.condition_acces import ConditionAcces
+from base.models.enums.condition_acces import ConditionAcces
 from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
 
 

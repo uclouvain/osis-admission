@@ -77,7 +77,7 @@ from base.tests.factories.student import StudentFactory
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
 from ddd.logic.reference.dtos.bourse import BourseDTO
-from epc.models.enums.condition_acces import ConditionAcces
+from base.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.scholarship import DoctorateScholarshipFactory

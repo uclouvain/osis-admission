@@ -30,9 +30,7 @@ from typing import Dict, List, Optional
 import attr
 
 from admission.ddd.admission.shared_kernel import commands
-from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
-    ExperiencesCVRecuperees,
-)
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
 from osis_common.ddd import interface
 
 
@@ -514,11 +512,9 @@ class ModifierStatutChecklistParcoursAnterieurCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class SpecifierConditionAccesPropositionCommand(interface.CommandRequest):
+class SpecifierAvecComplementsFormationPropositionCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str
-    condition_acces: str = ''
-    millesime_condition_acces: Optional[int] = None
     avec_complements_formation: Optional[bool] = None
 
 

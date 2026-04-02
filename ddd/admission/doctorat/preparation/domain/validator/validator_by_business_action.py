@@ -111,7 +111,7 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
 from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
     ExperienceParcoursInterneDTO,
 )
-from epc.models.enums.condition_acces import ConditionAcces
+from base.models.enums.condition_acces import ConditionAcces
 
 
 @attr.dataclass(frozen=True, slots=True)

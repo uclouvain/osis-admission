@@ -28,9 +28,7 @@ from typing import Dict, List, Optional
 
 import attr
 
-from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
-    ExperiencesCVRecuperees,
-)
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.shared_kernel.interface import SortedQueryRequest
 from osis_common.ddd import interface
 from osis_common.ddd.interface import QueryRequest
@@ -227,3 +225,8 @@ class RecupererInformationsValidationEtudesSecondairesQuery(
 @attr.dataclass(frozen=True, slots=True)
 class RecupererInformationsValidationExamenQuery(RecupererInformationsValidationExperienceParcoursAnterieurQuery):
     pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class CalculerConditionDAccesCommand(interface.CommandRequest):
+    uuid_proposition: str

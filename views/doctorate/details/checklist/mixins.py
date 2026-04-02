@@ -72,7 +72,7 @@ from ddd.logic.shared_kernel.profil.commands import (
 from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
     ExperienceParcoursInterneDTO,
 )
-from epc.models.enums.condition_acces import ConditionAcces
+from base.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.templatetags.osis_role import has_perm
 

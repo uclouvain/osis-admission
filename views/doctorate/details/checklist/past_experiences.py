@@ -41,7 +41,6 @@ from admission.ddd.admission.doctorat.preparation.commands import (
     ModifierStatutChecklistExperienceNonAcademiqueCommand,
     ModifierStatutChecklistExperienceParcoursAnterieurCommand,
     ModifierStatutChecklistParcoursAnterieurCommand,
-    SpecifierConditionAccesPropositionCommand,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     ChoixStatutChecklist,
@@ -56,15 +55,12 @@ from admission.ddd.admission.shared_kernel.commands import (
     RecupererInformationsValidationExperienceNonAcademiqueQuery,
     SpecifierExperienceEnTantQueTitreAccesCommand,
 )
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
-    ExperienceNonTrouveeException,
-)
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import ExperienceNonTrouveeException
 from admission.ddd.admission.shared_kernel.dtos.validation_experience_parcours_anterieur import (
     ValidationExperienceParcoursAnterieurDTO,
 )
 from admission.forms.admission.checklist import (
     CommentForm,
-    DoctoratePastExperiencesAdmissionRequirementForm,
     ExperienceStatusForm,
     SinglePastExperienceAuthenticationForm,
     StatusForm,
@@ -73,9 +69,7 @@ from admission.templatetags.admission import authentication_css_class
 from admission.utils import get_missing_curriculum_periods_for_doctorate
 from admission.views.common.detail_tabs.checklist import ChecklistTabIcon
 from admission.views.common.mixins import AdmissionFormMixin, AdmissionViewMixin
-from admission.views.doctorate.details.checklist.mixins import (
-    CheckListDefaultContextMixin,
-)
+from admission.views.doctorate.details.checklist.mixins import CheckListDefaultContextMixin
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
@@ -86,7 +80,6 @@ from osis_profile.models.enums.experience_validation import EtatAuthentification
 __all__ = [
     'MissingCurriculumPeriodsView',
     'PastExperiencesStatusView',
-    'PastExperiencesAdmissionRequirementView',
     'PastExperiencesAccessTitleView',
     'SinglePastExperienceChangeStatusView',
     'SinglePastExperienceChangeAuthenticationView',
@@ -97,10 +90,6 @@ __namespace__ = False
 
 
 class PastExperiencesMixin:
-    @cached_property
-    def past_experiences_admission_requirement_form(self):
-        return DoctoratePastExperiencesAdmissionRequirementForm(instance=self.admission, data=self.request.POST or None)
-
     @property
     def access_title_url(self):
         return resolve_url(
@@ -121,13 +110,6 @@ class PastExperiencesStatusView(
     template_name = 'admission/general_education/includes/checklist/previous_experiences.html'
     htmx_template_name = 'admission/general_education/includes/checklist/previous_experiences.html'
     form_class = StatusForm
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['past_experiences_admission_requirement_form'] = DoctoratePastExperiencesAdmissionRequirementForm(
-            instance=self.admission,
-        )
-        return context
 
     def get_initial(self):
         return self.admission.checklist['current']['parcours_anterieur']['statut']
@@ -181,67 +163,6 @@ class PastExperiencesStatusView(
         return super().form_valid(form)
 
 
-class PastExperiencesAdmissionRequirementView(
-    PastExperiencesMixin,
-    AdmissionFormMixin,
-    CheckListDefaultContextMixin,
-    HtmxPermissionRequiredMixin,
-    FormView,
-):
-    name = 'past-experiences-admission-requirement'
-    urlpatterns = 'past-experiences-admission-requirement'
-    permission_required = 'admission.change_checklist'
-    template_name = (
-        'admission/general_education/includes/checklist/previous_experiences_admission_requirement_form.html'
-    )
-    htmx_template_name = (
-        'admission/general_education/includes/checklist/previous_experiences_admission_requirement_form.html'
-    )
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['past_experiences_admission_requirement_form'] = context['form']
-        return context
-
-    def get_form(self, form_class=None):
-        return self.past_experiences_admission_requirement_form
-
-    def reset_form_data(self, form):
-        form.data = {
-            'admission_requirement': self.admission.admission_requirement,
-            'admission_requirement_year': self.admission.admission_requirement_year_id,
-            'with_prerequisite_courses': self.admission.with_prerequisite_courses,
-        }
-
-    def form_valid(self, form):
-        try:
-            message_bus_instance.invoke(
-                SpecifierConditionAccesPropositionCommand(
-                    uuid_proposition=self.admission_uuid,
-                    gestionnaire=self.request.user.person.global_id,
-                    condition_acces=form.cleaned_data['admission_requirement'],
-                    millesime_condition_acces=form.cleaned_data['admission_requirement_year']
-                    and form.cleaned_data['admission_requirement_year'].year,
-                )
-            )
-
-            # The admission requirement year can be updated via the command
-            self.reset_form_data(form)
-
-        except (BusinessException, MultipleBusinessExceptions) as exception:
-            self.message_on_failure = (
-                exception.exceptions.pop().message
-                if isinstance(exception, MultipleBusinessExceptions)
-                else exception.message
-            )
-
-            self.reset_form_data(form)
-
-            return super().form_invalid(form)
-
-        return super().form_valid(form)
-
-
 class PastExperiencesAccessTitleView(
     PastExperiencesMixin,
     AdmissionFormMixin,
@@ -266,7 +187,17 @@ class PastExperiencesAccessTitleView(
         context['checked'] = self.checked
         context['url'] = self.request.get_full_path()
         context['experience_uuid'] = self.request.GET.get('experience_uuid')
-        context['can_choose_access_title'] = True  # True as the user can access to the current view
+        context['can_change_access_title'] = True  # True as the user can access to the current view
+
+        if self.request.htmx:
+            context['access_title_url'] = self.access_title_url
+            context['past_experiences_are_sufficient'] = (
+                    self.admission.checklist.get('current', {}).get('parcours_anterieur', {}).get('statut', '')
+                    == ChoixStatutChecklist.GEST_REUSSITE.name
+            )
+            context['access_titles'] = self.selectable_access_titles
+            context['with_swap_oob'] = True  # Update admission requirement div
+            context['original_admission'] = self.admission
 
         return context
 

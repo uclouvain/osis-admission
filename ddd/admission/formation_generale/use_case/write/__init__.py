@@ -102,8 +102,8 @@ from .redonner_main_au_gestionnaire_lors_de_la_reclamation_documents_service imp
 )
 from .refuser_proposition_par_faculte_service import refuser_proposition_par_faculte
 from .soumettre_proposition_service import soumettre_proposition
-from .specifier_condition_acces_proposition_service import (
-    specifier_condition_acces_proposition,
+from .specifier_avec_complements_formation_proposition_service import (
+    specifier_avec_complements_formation_proposition,
 )
 from .specifier_equivalence_titre_acces_etranger_proposition_service import (
     specifier_equivalence_titre_acces_etranger_proposition,

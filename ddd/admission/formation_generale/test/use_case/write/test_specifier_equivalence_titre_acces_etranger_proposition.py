@@ -33,7 +33,7 @@ from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import
     EtatEquivalenceTitreAcces,
 )
 from admission.ddd.admission.formation_generale.commands import (
-    SpecifierConditionAccesPropositionCommand,
+    SpecifierAvecComplementsFormationPropositionCommand,
     SpecifierEquivalenceTitreAccesEtrangerPropositionCommand,
 )
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (

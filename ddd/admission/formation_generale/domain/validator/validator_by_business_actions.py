@@ -28,9 +28,7 @@ from typing import Dict, List, Optional
 
 import attr
 
-from admission.ddd.admission.formation_generale.domain.model._comptabilite import (
-    Comptabilite,
-)
+from admission.ddd.admission.formation_generale.domain.model._comptabilite import Comptabilite
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     BesoinDeDerogation,
     ChoixStatutChecklist,
@@ -43,7 +41,6 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
 from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldAffiliationsEtreCompletees,
     ShouldAlternativeSecondairesEtreCompletee,
-    ShouldComplementsFormationEtreVidesSiPasDeComplementsFormation,
     ShouldConditionAccesEtreSelectionne,
     ShouldCurriculumFichierEtreSpecifie,
     ShouldDemandeEtreTypeAdmission,
@@ -81,26 +78,16 @@ from admission.ddd.admission.formation_generale.domain.validator._should_informa
     ShouldParcoursAnterieurEtreSuffisant,
     ShouldSicPeutDonnerDecision,
 )
-from admission.ddd.admission.shared_kernel.domain.model.complement_formation import (
-    ComplementFormationIdentity,
-)
+from admission.ddd.admission.shared_kernel.domain.model.complement_formation import ComplementFormationIdentity
 from admission.ddd.admission.shared_kernel.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
     ConditionComplementaireLibreApprobation,
 )
-from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import (
-    TypeEquivalenceTitreAcces,
-)
+from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import TypeEquivalenceTitreAcces
 from admission.ddd.admission.shared_kernel.domain.model.formation import Formation
-from admission.ddd.admission.shared_kernel.domain.model.motif_refus import (
-    MotifRefusIdentity,
-)
-from admission.ddd.admission.shared_kernel.domain.model.poste_diplomatique import (
-    PosteDiplomatiqueIdentity,
-)
-from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import (
-    TitreAccesSelectionnable,
-)
+from admission.ddd.admission.shared_kernel.domain.model.motif_refus import MotifRefusIdentity
+from admission.ddd.admission.shared_kernel.domain.model.poste_diplomatique import PosteDiplomatiqueIdentity
+from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
 from admission.ddd.admission.shared_kernel.domain.validator import (
     ShouldAbsenceDeDetteEtreCompletee,
     ShouldAnneesCVRequisesCompletees,
@@ -115,32 +102,20 @@ from admission.ddd.admission.shared_kernel.domain.validator._should_curriculum_e
     ShouldExperiencesNonAcademiquesAvoirUnCertificat,
 )
 from admission.ddd.admission.shared_kernel.dtos import EtudesSecondairesAdmissionDTO
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
-    EmplacementDocumentDTO,
-)
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
-from base.ddd.utils.business_validator import (
-    BusinessValidator,
-    TwoStepsMultipleBusinessExceptionListValidator,
-)
+from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
 from base.models.enums.education_group_types import TrainingType
-from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
-    AcademicYear,
-)
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     AlternativeSecondairesDTO,
     DiplomeBelgeEtudesSecondairesDTO,
     DiplomeEtrangerEtudesSecondairesDTO,
 )
 from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
-    ExperienceAcademiqueDTO,
-    ExperienceNonAcademiqueDTO,
-)
-from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
-    ExperienceParcoursInterneDTO,
-)
-from epc.models.enums.condition_acces import ConditionAcces
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
+from base.models.enums.condition_acces import ConditionAcces
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -689,26 +664,6 @@ class ModifierStatutChecklistParcoursAnterieurValidatorList(TwoStepsMultipleBusi
                 type_equivalence_titre_acces=self.type_equivalence_titre_acces,
                 type_formation=self.type_formation,
                 etudes_secondaires=self.etudes_secondaires,
-            ),
-        ]
-
-
-@attr.dataclass(frozen=True, slots=True)
-class SpecifierConditionAccesParcoursAnterieurValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
-    avec_complements_formation: Optional[bool]
-
-    complements_formation: Optional[List[ComplementFormationIdentity]]
-    commentaire_complements_formation: str
-
-    def get_data_contract_validators(self) -> List[BusinessValidator]:
-        return []
-
-    def get_invariants_validators(self) -> List[BusinessValidator]:
-        return [
-            ShouldComplementsFormationEtreVidesSiPasDeComplementsFormation(
-                avec_complements_formation=self.avec_complements_formation,
-                complements_formation=self.complements_formation,
-                commentaire_complements_formation=self.commentaire_complements_formation,
             ),
         ]
 

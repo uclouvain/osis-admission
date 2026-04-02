@@ -36,16 +36,18 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db.models import F, Q
 from django.utils.safestring import mark_safe
-from django.utils.translation import get_language, gettext, ngettext_lazy, override, pgettext, pgettext_lazy
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import (
+    get_language,
+    gettext,
+    gettext_lazy as _,
+    ngettext_lazy,
+    override,
+    pgettext,
+    pgettext_lazy,
+)
 from osis_document_components.utils import is_uuid
 
-from admission.constants import (
-    COMMENT_TAG_FAC,
-    COMMENT_TAG_SIC,
-    CONTEXT_DOCTORATE,
-    CONTEXT_GENERAL,
-)
+from admission.constants import COMMENT_TAG_FAC, COMMENT_TAG_SIC, CONTEXT_DOCTORATE, CONTEXT_GENERAL
 from admission.ddd import DUREE_MAXIMALE_PROGRAMME, DUREE_MINIMALE_PROGRAMME
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     BesoinDeDerogation,
@@ -57,18 +59,13 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     PoursuiteDeCycle,
     TypeDeRefus,
 )
-from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import (
-    recuperer_conditions_acces_par_formation,
-)
 from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import (
     EtatEquivalenceTitreAcces,
     StatutEquivalenceTitreAcces,
     TypeEquivalenceTitreAcces,
 )
 from admission.ddd.admission.shared_kernel.dtos import EtudesSecondairesAdmissionDTO
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
-    EmplacementDocumentDTO,
-)
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.shared_kernel.dtos.validation_experience_parcours_anterieur import (
     ValidationExperienceParcoursAnterieurDTO,
 )
@@ -85,26 +82,15 @@ from admission.forms import (
 from admission.forms.admission.document import ChangeRequestDocumentForm
 from admission.models import DoctorateAdmission, GeneralEducationAdmission
 from admission.models.base import training_campus_subquery
-from admission.models.checklist import (
-    AdditionalApprovalCondition,
-    DoctorateRefusalReason,
-    RefusalReason,
-)
-from admission.views.autocomplete.learning_unit_years import (
-    LearningUnitYearAutocomplete,
-)
+from admission.models.checklist import AdditionalApprovalCondition, DoctorateRefusalReason, RefusalReason
+from admission.views.autocomplete.learning_unit_years import LearningUnitYearAutocomplete
 from admission.views.common.detail_tabs.comments import (
     COMMENT_TAG_CDD_FOR_SIC,
     COMMENT_TAG_FAC_FOR_IUFC,
     COMMENT_TAG_IUFC_FOR_FAC,
     COMMENT_TAG_SIC_FOR_CDD,
 )
-from base.forms.utils import (
-    EMPTY_CHOICE,
-    FIELD_REQUIRED_MESSAGE,
-    autocomplete,
-    get_example_text,
-)
+from base.forms.utils import EMPTY_CHOICE, FIELD_REQUIRED_MESSAGE, autocomplete, get_example_text
 from base.forms.utils.academic_year_field import AcademicYearModelChoiceField
 from base.forms.utils.autocomplete import Select2MultipleWithTagWhenNoResultWidget
 from base.forms.utils.choice_field import BLANK_CHOICE
@@ -123,7 +109,7 @@ from ddd.logic.financabilite.domain.model.enums.situation import (
 from ddd.logic.learning_unit.commands import LearningUnitAndPartimSearchCommand
 from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
-from epc.models.enums.condition_acces import ConditionAcces
+from base.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile.forms import DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS
 from osis_profile.models.enums.experience_validation import (
@@ -752,57 +738,17 @@ class DoctorateCddDecisionApprovalForm(CommonApprovalForm):
 
 
 class PastExperiencesAdmissionRequirementForm(forms.ModelForm):
-    admission_requirement_year = AcademicYearModelChoiceField(
-        past_only=True,
-        required=False,
-        label=_('Admission requirement year'),
-    )
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        # Some options are only selectable if they were previously selected (temporary removal)
-        access_conditions_to_exclude = {
-            ConditionAcces.PARCOURS.name,
-        }
-
-        if self.instance.admission_requirement in access_conditions_to_exclude and (
-            not self.is_bound
-            or self.data.get(self.add_prefix('admission_requirement')) == self.instance.admission_requirement
-        ):
-            access_conditions_to_exclude.discard(self.instance.admission_requirement)
-
-        self.fields['admission_requirement'].choices = BLANK_CHOICE + recuperer_conditions_acces_par_formation(
-            type_formation=self.instance.training.education_group_type.name,
-            conditions_acces_a_exclure=access_conditions_to_exclude,
-        )
-
-        if self.instance.checklist.get('current', {}).get('parcours_anterieur', {}).get('statut') == 'GEST_REUSSITE':
-            self.fields['admission_requirement'].disabled = True
-            self.fields['admission_requirement_year'].disabled = True
-
-        for field in self.fields.values():
-            field.widget.attrs['class'] = 'past-experiences-admission-requirement-field'
-
     class Meta:
         model = GeneralEducationAdmission
         fields = [
-            'admission_requirement',
-            'admission_requirement_year',
             'with_prerequisite_courses',
         ]
         widgets = {
-            'with_prerequisite_courses': forms.RadioSelect(choices=[(True, _('Yes')), (False, _('No'))]),
+            'with_prerequisite_courses': forms.RadioSelect(
+                choices=[(True, _('Yes')), (False, _('No'))],
+                attrs={'class': 'past-experiences-admission-requirement-field'},
+            ),
         }
-
-
-class DoctoratePastExperiencesAdmissionRequirementForm(PastExperiencesAdmissionRequirementForm):
-    class Meta(PastExperiencesAdmissionRequirementForm.Meta):
-        model = DoctorateAdmission
-        fields = [
-            'admission_requirement',
-            'admission_requirement_year',
-        ]
 
 
 class PastExperiencesAdmissionAccessTitleForm(forms.ModelForm):

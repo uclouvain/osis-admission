@@ -38,21 +38,11 @@ from django.views.generic import FormView, TemplateView
 from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
 
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
-    OngletsChecklist,
-)
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
-    message_candidat_avec_pae_avant_2015,
-)
-from admission.ddd.admission.shared_kernel.commands import (
-    RechercherParcoursAnterieurQuery,
-)
-from admission.ddd.admission.shared_kernel.dtos.question_specifique import (
-    QuestionSpecifiqueDTO,
-)
-from admission.ddd.admission.shared_kernel.dtos.resume import (
-    ResumePropositionDTO,
-)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import OngletsChecklist
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import message_candidat_avec_pae_avant_2015
+from admission.ddd.admission.shared_kernel.commands import RechercherParcoursAnterieurQuery
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
+from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.shared_kernel.enums import Onglets, TypeItemFormulaire
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     DocumentsAssimilation,
@@ -62,56 +52,25 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
 )
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
 from admission.forms import disable_unavailable_forms
-from admission.forms.admission.checklist import (
-    AssimilationForm,
-    CommentForm,
-    SinglePastExperienceAuthenticationForm,
-)
+from admission.forms.admission.checklist import AssimilationForm, CommentForm, SinglePastExperienceAuthenticationForm
 from admission.mail_templates import (
     ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CANDIDATE_DOCTORATE,
     ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS_DOCTORATE,
 )
-from admission.models.epc_injection import (
-    EPCInjection,
-    EPCInjectionStatus,
-    EPCInjectionType,
-)
-from admission.templatetags.admission import (
-    authentication_css_class,
-    bg_class_by_checklist_experience,
-)
+from admission.models.epc_injection import EPCInjection, EPCInjectionStatus, EPCInjectionType
+from admission.templatetags.admission import authentication_css_class, bg_class_by_checklist_experience
 from admission.utils import get_salutation_prefix
-from admission.views.common.detail_tabs.checklist import (
-    ChecklistTabIcon,
-    PropositionFromResumeMixin,
-)
-from admission.views.common.detail_tabs.comments import (
-    COMMENT_TAG_CDD_FOR_SIC,
-    COMMENT_TAG_SIC_FOR_CDD,
-)
+from admission.views.common.detail_tabs.checklist import ChecklistTabIcon, PropositionFromResumeMixin
+from admission.views.common.detail_tabs.comments import COMMENT_TAG_CDD_FOR_SIC, COMMENT_TAG_SIC_FOR_CDD
 from admission.views.common.mixins import AdmissionFormMixin
 from admission.views.doctorate.details.checklist.cdd_decision import CddDecisionMixin
-from admission.views.doctorate.details.checklist.financeability import (
-    FinancabiliteContextMixin,
-)
-from admission.views.doctorate.details.checklist.mixins import (
-    get_email,
-    get_internal_experiences,
-)
-from admission.views.doctorate.details.checklist.past_experiences import (
-    PastExperiencesMixin,
-)
-from admission.views.doctorate.details.checklist.projet_recherche import (
-    ProjetRechercheContextMixin,
-)
+from admission.views.doctorate.details.checklist.financeability import FinancabiliteContextMixin
+from admission.views.doctorate.details.checklist.mixins import get_email, get_internal_experiences
+from admission.views.doctorate.details.checklist.past_experiences import PastExperiencesMixin
+from admission.views.doctorate.details.checklist.projet_recherche import ProjetRechercheContextMixin
 from admission.views.doctorate.details.checklist.sic_decision import SicDecisionMixin
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
-    ExperienceAcademiqueDTO,
-    ExperienceNonAcademiqueDTO,
-)
-from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
-    ExperienceParcoursInterneDTO,
-)
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile.models.enums.experience_validation import EtatAuthentificationParcours
 from osis_profile.utils.curriculum import ElementCurriculumDTO, groupe_curriculum_par_annee_decroissante
@@ -339,8 +298,6 @@ class ChecklistView(
             context['access_title_url'] = self.access_title_url
             context['access_titles'] = self.selectable_access_titles
 
-            context['past_experiences_admission_requirement_form'] = self.past_experiences_admission_requirement_form
-
             # Financabilité
             context['financabilite'] = self._get_financabilite()
 
@@ -492,10 +449,6 @@ class ChecklistView(
                 'admission.checklist_change_faculty_decision',
                 original_admission,
             )
-            can_change_past_experiences = self.request.user.has_perm(
-                'admission.checklist_change_past_experiences',
-                original_admission,
-            )
             can_change_access_title = self.request.user.has_perm(
                 'admission.checklist_select_access_title',
                 original_admission,
@@ -520,7 +473,6 @@ class ChecklistView(
                     context['assimilation_form']: can_change_checklist,
                     context['cdd_decision_refusal_form']: can_change_cdd_decision,
                     context['financabilite_approval_form']: can_change_checklist,
-                    context['past_experiences_admission_requirement_form']: can_change_past_experiences,
                     context['financabilite_approval_form']: can_change_checklist,
                     **{
                         authentication_form: can_change_checklist
@@ -532,15 +484,7 @@ class ChecklistView(
                     },
                 }
             )
-            context['can_choose_access_title'] = can_change_access_title
-            context['can_choose_access_title_tooltip'] = (
-                _(
-                    'Changes for the access title are not available when the state of the Previous experience '
-                    'is "Sufficient".'
-                )
-                if context.get('past_experiences_are_sufficient')
-                else ''
-            )
+            context['can_change_access_title'] = can_change_access_title
             if self.proposition_fusion:
                 context['proposition_fusion'] = self.proposition_fusion
 

@@ -70,7 +70,7 @@ from base.utils.cte import CTESubquery
 from ddd.logic.financabilite.commands import DeterminerSiCandidatEstFinancableQuery
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
-from epc.models.enums.condition_acces import ConditionAcces
+from base.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd.interface import BusinessException
 from .base import (
     BaseAdmission,

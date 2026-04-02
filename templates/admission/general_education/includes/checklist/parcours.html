@@ -6,7 +6,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@
   {% endif %}
 </ul>
 
-<div id="{{ prefix }}-parcours" class="tab-content parcours">
+<div id="{{ prefix }}-parcours" class="tab-content parcours" hx-indicator="#{{ prefix }}-parcours">
   {# Vue complète #}
   {% concat prefix '-parcours-complete' as complete_parcours_id %}
   <div role="tabpanel" class="parcours table-responsive tab-pane{% if not default_tab or default_tab == 'complete' %} active{% endif %}" id="{{ complete_parcours_id }}">

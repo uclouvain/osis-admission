@@ -63,26 +63,16 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
     TitreAccesEtreSelectionneException,
     TitreAccesEtreSelectionnePourEnvoyerASICException,
 )
-from admission.ddd.admission.shared_kernel.domain.model.complement_formation import (
-    ComplementFormationIdentity,
-)
+from admission.ddd.admission.shared_kernel.domain.model.complement_formation import ComplementFormationIdentity
 from admission.ddd.admission.shared_kernel.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
     ConditionComplementaireLibreApprobation,
 )
-from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import (
-    TypeEquivalenceTitreAcces,
-)
-from admission.ddd.admission.shared_kernel.domain.model.motif_refus import (
-    MotifRefusIdentity,
-)
-from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import (
-    TitreAccesSelectionnable,
-)
+from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import TypeEquivalenceTitreAcces
+from admission.ddd.admission.shared_kernel.domain.model.motif_refus import MotifRefusIdentity
+from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
 from admission.ddd.admission.shared_kernel.dtos import EtudesSecondairesAdmissionDTO
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
-    EmplacementDocumentDTO,
-)
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
     StatutReclamationEmplacementDocument,
@@ -93,7 +83,7 @@ from base.models.enums.education_group_types import TrainingType
 from base.models.enums.personal_data import ChoixStatutValidationDonneesPersonnelles
 from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
-from epc.models.enums.condition_acces import ConditionAcces
+from base.models.enums.condition_acces import ConditionAcces
 from osis_profile.models.enums.education import ForeignDiplomaTypes
 from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
 
@@ -357,20 +347,6 @@ class ShouldParcoursAnterieurEtreSuffisant(BusinessValidator):
     def validate(self, *args, **kwargs):
         if self.statut.statut != ChoixStatutChecklist.GEST_REUSSITE:
             raise ParcoursAnterieurNonSuffisantException
-
-
-@attr.dataclass(frozen=True, slots=True)
-class ShouldComplementsFormationEtreVidesSiPasDeComplementsFormation(BusinessValidator):
-    avec_complements_formation: Optional[bool]
-
-    complements_formation: Optional[List[ComplementFormationIdentity]]
-    commentaire_complements_formation: str
-
-    def validate(self, *args, **kwargs):
-        if not self.avec_complements_formation and (
-            self.complements_formation or self.commentaire_complements_formation
-        ):
-            raise ComplementsFormationEtreVidesSiPasDeComplementsFormationException
 
 
 @attr.dataclass(frozen=True, slots=True)

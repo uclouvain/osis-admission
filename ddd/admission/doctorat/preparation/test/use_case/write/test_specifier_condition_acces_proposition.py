@@ -50,7 +50,7 @@ from admission.infrastructure.admission.shared_kernel.repository.in_memory.titre
 from admission.infrastructure.message_bus_in_memory import (
     message_bus_in_memory_instance,
 )
-from epc.models.enums.condition_acces import ConditionAcces
+from base.models.enums.condition_acces import ConditionAcces
 
 
 class TestSpecifierConditionAccesPropositionService(SimpleTestCase):

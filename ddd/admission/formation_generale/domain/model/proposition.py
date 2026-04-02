@@ -32,13 +32,8 @@ import attr
 from django.utils.timezone import now
 from django.utils.translation import gettext_noop as __
 
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
-    CurriculumAdmissionDTO,
-)
-from admission.ddd.admission.formation_generale.domain.model._comptabilite import (
-    Comptabilite,
-    comptabilite_non_remplie,
-)
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
+from admission.ddd.admission.formation_generale.domain.model._comptabilite import Comptabilite, comptabilite_non_remplie
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     BesoinDeDerogation,
     BesoinDeDerogationDelegueVrae,
@@ -70,16 +65,11 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
     RefuserParSicValidatorList,
     SICPeutSoumettreAFacLorsDeLaDecisionFacultaireValidatorList,
     SicPeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList,
-    SpecifierConditionAccesParcoursAnterieurValidatorList,
     SpecifierInformationsApprobationInscriptionValidatorList,
     SpecifierNouvellesInformationsDecisionFacultaireValidatorList,
 )
-from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import (
-    ProfilCandidat,
-)
-from admission.ddd.admission.shared_kernel.domain.model.complement_formation import (
-    ComplementFormationIdentity,
-)
+from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import ProfilCandidat
+from admission.ddd.admission.shared_kernel.domain.model.complement_formation import ComplementFormationIdentity
 from admission.ddd.admission.shared_kernel.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
     ConditionComplementaireLibreApprobation,
@@ -89,34 +79,18 @@ from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import
     StatutEquivalenceTitreAcces,
     TypeEquivalenceTitreAcces,
 )
-from admission.ddd.admission.shared_kernel.domain.model.formation import (
-    FormationIdentity,
-)
-from admission.ddd.admission.shared_kernel.domain.model.motif_refus import (
-    MotifRefusIdentity,
-)
-from admission.ddd.admission.shared_kernel.domain.model.poste_diplomatique import (
-    PosteDiplomatiqueIdentity,
-)
-from admission.ddd.admission.shared_kernel.domain.model.question_specifique import (
-    QuestionSpecifique,
-)
-from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import (
-    TitreAccesSelectionnable,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
-    IProfilCandidatTranslator,
-)
+from admission.ddd.admission.shared_kernel.domain.model.formation import FormationIdentity
+from admission.ddd.admission.shared_kernel.domain.model.motif_refus import MotifRefusIdentity
+from admission.ddd.admission.shared_kernel.domain.model.poste_diplomatique import PosteDiplomatiqueIdentity
+from admission.ddd.admission.shared_kernel.domain.model.question_specifique import QuestionSpecifique
+from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.domain.service.i_question_specifique import (
     ISuperQuestionSpecifiqueTranslator,
 )
-from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import (
-    ProfilCandidat as ProfilCandidatService,
-)
+from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidat as ProfilCandidatService
 from admission.ddd.admission.shared_kernel.dtos import EtudesSecondairesAdmissionDTO, IdentificationDTO
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
-    EmplacementDocumentDTO,
-)
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.shared_kernel.enums import (
     ChoixAffiliationSport,
     ChoixAssimilation1,
@@ -141,15 +115,11 @@ from ddd.logic.financabilite.domain.model.enums.situation import (
     SituationFinancabilite,
 )
 from ddd.logic.reference.domain.model.bourse import BourseIdentity
-from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
-    AcademicYear,
-)
-from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
-    IExperienceParcoursInterneTranslator,
-)
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear
+from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
 from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
-from epc.models.enums.condition_acces import ConditionAcces
+from base.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd import interface
 
 
@@ -763,43 +733,12 @@ class Proposition(interface.RootEntity):
         self.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist[statut_checklist_cible]
         self.auteur_derniere_modification = auteur_modification
 
-    def specifier_condition_acces(
+    def specifier_avec_complements_formation(
         self,
         auteur_modification: str,
-        condition_acces: str,
-        millesime_condition_acces: Optional[int],
         avec_complements_formation: Optional[bool],
-        titre_acces_selectionnable_repository: 'ITitreAccesSelectionnableRepository',
-        experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
     ):
-        nouveau_millesime_condition_acces = millesime_condition_acces
-        nouvelle_condition_acces = getattr(ConditionAcces, condition_acces, None)
-
-        # Si la condition d'accès a changé
-        if nouvelle_condition_acces and nouvelle_condition_acces != self.condition_acces:
-            # Si un seul titre d'accès a été sélectionné,  le millésime correspond à l'année de ce titre
-            titres_selectionnes = titre_acces_selectionnable_repository.search_by_proposition(
-                proposition_identity=self.entity_id,
-                experience_parcours_interne_translator=experience_parcours_interne_translator,
-                seulement_selectionnes=True,
-            )
-
-            if len(titres_selectionnes) == 1:
-                nouveau_millesime_condition_acces = titres_selectionnes[0].annee
-
-            # Si la condition d'accès est "SNU Type Court", des compléments de formation sont demandés par défaut
-            if nouvelle_condition_acces == ConditionAcces.SNU_TYPE_COURT:
-                avec_complements_formation = True
-
-        SpecifierConditionAccesParcoursAnterieurValidatorList(
-            avec_complements_formation=avec_complements_formation,
-            complements_formation=self.complements_formation,
-            commentaire_complements_formation=self.commentaire_complements_formation,
-        ).validate()
-
         self.auteur_derniere_modification = auteur_modification
-        self.condition_acces = nouvelle_condition_acces
-        self.millesime_condition_acces = nouveau_millesime_condition_acces
         self.avec_complements_formation = avec_complements_formation
 
         if not avec_complements_formation:

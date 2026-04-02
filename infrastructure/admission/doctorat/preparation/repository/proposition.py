@@ -135,7 +135,7 @@ from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
 from ddd.logic.learning_unit.dtos import LearningUnitSearchDTO, PartimSearchDTO
 from ddd.logic.reference.domain.model.bourse import BourseIdentity
-from epc.models.enums.condition_acces import ConditionAcces
+from base.models.enums.condition_acces import ConditionAcces
 from infrastructure.reference.domain.service.bourse import BourseTranslator
 from osis_common.ddd.interface import ApplicationService
 from reference.models.language import Language

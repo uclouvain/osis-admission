@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,41 +23,25 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import (
+
+from admission.ddd.admission.formation_generale.commands import SpecifierAvecComplementsFormationPropositionCommand
+from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
-from admission.ddd.admission.doctorat.preparation.commands import (
-    SpecifierConditionAccesPropositionCommand,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
-    PropositionIdentity,
-)
-from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
-    IPropositionRepository,
-)
-from admission.ddd.admission.shared_kernel.repository.i_titre_acces_selectionnable import (
-    ITitreAccesSelectionnableRepository,
-)
-from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
-    IExperienceParcoursInterneTranslator,
-)
+from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 
 
-def specifier_condition_acces_proposition(
-    cmd: 'SpecifierConditionAccesPropositionCommand',
+def specifier_avec_complements_formation_proposition(
+    cmd: 'SpecifierAvecComplementsFormationPropositionCommand',
     proposition_repository: 'IPropositionRepository',
-    titre_acces_selectionnable_repository: 'ITitreAccesSelectionnableRepository',
-    experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
 ) -> 'PropositionIdentity':
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition = proposition_repository.get(entity_id=proposition_id)
 
-    proposition.specifier_condition_acces(
+    proposition.specifier_avec_complements_formation(
         auteur_modification=cmd.gestionnaire,
-        condition_acces=cmd.condition_acces,
-        millesime_condition_acces=cmd.millesime_condition_acces,
-        titre_acces_selectionnable_repository=titre_acces_selectionnable_repository,
-        experience_parcours_interne_translator=experience_parcours_interne_translator,
+        avec_complements_formation=cmd.avec_complements_formation,
     )
 
     proposition_repository.save(proposition)

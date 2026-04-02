@@ -65,7 +65,7 @@ from base.models.person import Person
 from ddd.logic.financabilite.commands import DeterminerSiCandidatEstFinancableQuery
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
-from epc.models.enums.condition_acces import ConditionAcces
+from base.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd.interface import BusinessException
 
 

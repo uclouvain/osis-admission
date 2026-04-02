@@ -33,9 +33,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixLangueRedactionThese,
 )
 from admission.ddd.admission.shared_kernel import commands
-from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
-    ExperiencesCVRecuperees,
-)
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.shared_kernel.interface import SortedQueryRequest
 from osis_common.ddd import interface
 
@@ -653,14 +651,6 @@ class ModifierStatutChecklistParcoursAnterieurCommand(interface.CommandRequest):
     uuid_proposition: str
     statut: str
     gestionnaire: str
-
-
-@attr.dataclass(frozen=True, slots=True)
-class SpecifierConditionAccesPropositionCommand(interface.CommandRequest):
-    uuid_proposition: str
-    gestionnaire: str
-    condition_acces: str = ''
-    millesime_condition_acces: Optional[int] = None
 
 
 @attr.dataclass(frozen=True, slots=True)

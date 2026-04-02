@@ -61,7 +61,7 @@ from admission.infrastructure.message_bus_in_memory import (
 )
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
-from epc.models.enums.condition_acces import ConditionAcces
+from base.models.enums.condition_acces import ConditionAcces
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
 

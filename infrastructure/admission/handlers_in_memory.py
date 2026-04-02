@@ -49,6 +49,8 @@ from infrastructure.shared_kernel.profil.domain.service.in_memory.parcours_inter
     ExperienceParcoursInterneInMemoryTranslator,
 )
 
+from ...ddd.admission.shared_kernel.use_case.write.calculer_condition_d_acces import calculer_condition_d_acces
+from .shared_kernel.domain.service.condition_d_acces import ConditionDAcces
 from .shared_kernel.domain.service.in_memory.modifier_checklist_experience_parcours_anterieur import (
     ValidationExperienceParcoursAnterieurInMemoryService,
 )
@@ -59,6 +61,7 @@ _titre_acces_selectionnable_repository = TitreAccesSelectionnableInMemoryReposit
 _experience_parcours_interne_translator = ExperienceParcoursInterneInMemoryTranslator()
 _gestionnaire_repository = GestionnaireInMemoryRepository()
 _validation_experience_parcours_anterieur = ValidationExperienceParcoursAnterieurInMemoryService()
+_condition_d_acces = ConditionDAcces()
 
 
 COMMAND_HANDLERS = {
@@ -94,6 +97,7 @@ COMMAND_HANDLERS = {
         )
     ),
     SpecifierExperienceEnTantQueTitreAccesCommand: lambda msg_bus, cmd: specifier_experience_en_tant_que_titre_acces(
+        msg_bus,
         cmd,
         titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
     ),
@@ -123,6 +127,12 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: recuperer_informations_validation_etudes_secondaires(
             cmd,
             validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur,
+        )
+    ),
+    CalculerConditionDAccesCommand: (
+        lambda msg_bus, cmd: calculer_condition_d_acces(
+            cmd,
+            condition_d_acces=_condition_d_acces,
         )
     ),
 }

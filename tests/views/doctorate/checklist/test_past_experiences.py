@@ -49,7 +49,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
 )
 from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import (
     TypeTitreAccesSelectionnable,
-    recuperer_conditions_acces_par_formation,
 )
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     OngletsDemande,
@@ -83,7 +82,7 @@ from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.student import StudentFactory
-from epc.models.enums.condition_acces import ConditionAcces
+from base.models.enums.condition_acces import ConditionAcces
 from epc.models.enums.decision_resultat_cycle import DecisionResultatCycle
 from epc.models.enums.etat_inscription import EtatInscriptionFormation
 from epc.models.enums.statut_inscription_programme_annuel import (
@@ -454,16 +453,6 @@ class PastExperiencesAdmissionRequirementViewTestCase(SicPatchMixin, TestCase):
         self.assertEqual(form.fields['admission_requirement'].choices, BLANK_CHOICE + admission_choices)
         self.assertFalse(form.fields['admission_requirement'].disabled)
         self.assertFalse(form.fields['admission_requirement_year'].disabled)
-
-        self.assertEqual(
-            recuperer_conditions_acces_par_formation(TrainingType.PHD.name),
-            [
-                (ConditionAcces.MASTER.name, ConditionAcces.MASTER.label),
-                (ConditionAcces.UNI_SNU_AUTRE.name, ConditionAcces.UNI_SNU_AUTRE.label),
-                (ConditionAcces.VALORISATION_300_ECTS.name, ConditionAcces.VALORISATION_300_ECTS.label),
-                (ConditionAcces.PARCOURS.name, ConditionAcces.PARCOURS.label),
-            ],
-        )
 
         self.admission.checklist['current']['parcours_anterieur']['statut'] = 'GEST_REUSSITE'
         self.admission.save(update_fields=['checklist'])
