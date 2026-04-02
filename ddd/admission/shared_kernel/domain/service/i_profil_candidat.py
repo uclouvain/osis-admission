@@ -36,6 +36,9 @@ from admission.ddd.admission.doctorat.preparation.dtos.comptabilite import (
     DerniersEtablissementsSuperieursCommunauteFrancaiseFrequentesDTO,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
+)
 from admission.ddd.admission.shared_kernel.dtos import CoordonneesDTO, IdentificationDTO
 from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
@@ -105,6 +108,7 @@ class IProfilCandidatTranslator(interface.DomainService):
         matricule: str,
         annee_courante: int,
         uuid_proposition: str,
+        inscriptions_translator: IInscriptionsTranslatorService,
         experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
     ) -> 'CurriculumAdmissionDTO':
         raise NotImplementedError
@@ -140,6 +144,7 @@ class IProfilCandidatTranslator(interface.DomainService):
         cls,
         matricule: str,
         annee_courante: int,
+        inscriptions_translator: IInscriptionsTranslatorService,
     ) -> 'ConditionsComptabiliteDTO':
         raise NotImplementedError
 
@@ -214,6 +219,7 @@ class IProfilCandidatTranslator(interface.DomainService):
         formation: Union['DoctoratFormationDTO', 'FormationDTO'],
         annee_courante: int,
         uuid_proposition: str,
+        inscriptions_translator: IInscriptionsTranslatorService,
         experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
     ) -> ResumeCandidatDTO:
         """Retourne toutes les données relatives à un candidat nécessaires à son admission."""

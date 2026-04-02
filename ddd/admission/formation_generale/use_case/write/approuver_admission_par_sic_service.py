@@ -31,6 +31,8 @@ from admission.ddd.admission.formation_generale.domain.service.i_historique impo
 from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation import IPDFGeneration
 from admission.ddd.admission.formation_generale.events import AdmissionApprouveeParSicEvent
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import \
+    IInscriptionsTranslatorService
 from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import IMatriculeEtudiantService
 from admission.ddd.admission.shared_kernel.domain.service.resume_proposition import ResumeProposition
 from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire
@@ -56,6 +58,7 @@ def approuver_admission_par_sic(
     personne_connue_translator: 'IPersonneConnueUclTranslator',
     experience_parcours_interne_translator: 'IExperienceParcoursInterneTranslator',
     matricule_etudiant_service: 'IMatriculeEtudiantService',
+    inscriptions_translator: IInscriptionsTranslatorService,
 ) -> PropositionIdentity:
     # GIVEN
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
@@ -69,6 +72,7 @@ def approuver_admission_par_sic(
         proposition_dto=proposition_dto,
         comptabilite_dto=comptabilite_dto,
         experiences_cv_recuperees=ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION,
+        inscriptions_translator=inscriptions_translator,
     )
     questions_specifiques_dtos = question_specifique_translator.search_dto_by_proposition(
         proposition_uuid=cmd.uuid_proposition,
@@ -92,6 +96,7 @@ def approuver_admission_par_sic(
         grade_academique_formation_proposition=proposition_dto.formation.grade_academique,
         annee_formation=annee_formation,
         identification_dto=identification,
+        inscriptions_translator=inscriptions_translator,
     )
 
     # THEN

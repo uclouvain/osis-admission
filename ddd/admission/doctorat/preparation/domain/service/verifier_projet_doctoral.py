@@ -48,6 +48,9 @@ from admission.ddd.admission.doctorat.preparation.domain.service.verifier_promot
 from admission.ddd.admission.shared_kernel.domain.model.question_specifique import (
     QuestionSpecifique,
 )
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
+)
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
@@ -76,6 +79,7 @@ class VerifierPropositionProjetDoctoral(interface.DomainService):
         annee_courante: int,
         annee_formation: AcademicYear,
         candidat_est_inscrit_recemment_ucl: bool,
+        inscriptions_translator: IInscriptionsTranslatorService,
     ) -> None:
         # Les vérifications sont limitées à ce qui est modifiable par le candidat dans ce statut
         if proposition_candidat.statut in {
@@ -134,6 +138,7 @@ class VerifierPropositionProjetDoctoral(interface.DomainService):
                 curriculum_pdf=proposition_candidat.curriculum,
                 uuid_proposition=proposition_candidat.entity_id.uuid,
                 annee_formation=annee_formation,
+                inscriptions_translator=inscriptions_translator,
             ),
             proposition_candidat.verifier_projet_doctoral,
             partial(GroupeDeSupervisionPossedeUnPromoteurMinimum.verifier, groupe_de_supervision, promoteur_translator),

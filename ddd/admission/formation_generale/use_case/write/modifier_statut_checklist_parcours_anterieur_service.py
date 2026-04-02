@@ -32,6 +32,8 @@ from admission.ddd.admission.formation_generale.domain.builder.proposition_ident
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.service.i_formation import IFormationGeneraleTranslator
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import \
+    IInscriptionsTranslatorService
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.shared_kernel.repository.i_titre_acces_selectionnable import (
@@ -50,6 +52,7 @@ def modifier_statut_checklist_parcours_anterieur(
     profil_candidat_translator: 'IProfilCandidatTranslator',
     formation_translator: 'IFormationGeneraleTranslator',
     academic_year_repository: 'IAcademicYearRepository',
+    inscriptions_translator: IInscriptionsTranslatorService,
 ) -> 'PropositionIdentity':
     annee_courante = (
         GetCurrentAcademicYear()
@@ -77,6 +80,7 @@ def modifier_statut_checklist_parcours_anterieur(
         experiences_cv_recuperees=ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION,
         uuid_proposition=proposition.entity_id.uuid,
         annee_courante=annee_courante,
+        inscriptions_translator=inscriptions_translator,
     )
 
     examen = profil_candidat_translator.get_examen(

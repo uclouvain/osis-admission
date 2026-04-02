@@ -58,6 +58,9 @@ from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat impo
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import AdmissionExperienceNonTrouveeException
 from admission.ddd.admission.shared_kernel.dtos import AdressePersonnelleDTO, CoordonneesDTO, IdentificationDTO
 from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
+)
 from admission.ddd.admission.shared_kernel.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.shared_kernel.dtos.resume import ResumeCandidatDTO
 from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
@@ -825,10 +828,11 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         matricule: str,
         annee_courante: int,
         uuid_proposition: str,
+        inscriptions_translator: IInscriptionsTranslatorService,
         experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
     ) -> Optional['CurriculumAdmissionDTO']:
         try:
-            minimal_years = cls.get_annees_minimum_curriculum(matricule, annee_courante)
+            minimal_years = cls.get_annees_minimum_curriculum(matricule, annee_courante, inscriptions_translator)
 
             academic_experiences_dtos = cls._get_academic_experiences_dtos(
                 matricule=matricule,
@@ -911,7 +915,12 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         )
 
     @classmethod
-    def get_annees_minimum_curriculum(cls, global_id, current_year):
+    def get_annees_minimum_curriculum(
+        cls,
+        global_id,
+        current_year,
+        inscriptions_translator: IInscriptionsTranslatorService,
+    ):
         person = (
             Person.objects.select_related(
                 'last_registration_year',
@@ -931,7 +940,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             .get(global_id=global_id)
         )
 
-        last_ucl_enrolment = InscriptionsTranslatorService.recuperer_derniere_inscription(matricule_candidat=global_id)
+        last_ucl_enrolment = inscriptions_translator.recuperer_derniere_inscription(matricule_candidat=global_id)
         last_registration_year = (
             last_ucl_enrolment.annee
             if last_ucl_enrolment
@@ -961,10 +970,12 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         cls,
         matricule: str,
         annee_courante: int,
+        inscriptions_translator: IInscriptionsTranslatorService,
     ) -> 'ConditionsComptabiliteDTO':
         minimal_years = cls.get_annees_minimum_curriculum(
             global_id=matricule,
             current_year=annee_courante,
+            inscriptions_translator=InscriptionsTranslatorService(),
         )
 
         person = (
@@ -1060,6 +1071,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         formation: Union['DoctoratFormationDTO', 'FormationDTO'],
         annee_courante: int,
         uuid_proposition: str,
+        inscriptions_translator: IInscriptionsTranslatorService,
         experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
     ) -> ResumeCandidatDTO:
         has_default_language = cls.has_default_language()
@@ -1130,7 +1142,12 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
         candidate: Person = queryset.get(global_id=matricule)
 
-        last_registration_year = candidate.last_registration_year.year if candidate.last_registration_year else None
+        last_ucl_enrolment = inscriptions_translator.recuperer_derniere_inscription(matricule_candidat=matricule)
+        last_registration_year = (
+            last_ucl_enrolment.annee
+            if last_ucl_enrolment
+            else (candidate.last_registration_year.year if candidate.last_registration_year else None)
+        )
         graduated_from_high_school_year = (
             candidate.highschooldiploma.academic_graduation_year.year
             if hasattr(candidate, 'highschooldiploma') and candidate.highschooldiploma.academic_graduation_year

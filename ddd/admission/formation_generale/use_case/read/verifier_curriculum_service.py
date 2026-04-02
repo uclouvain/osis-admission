@@ -87,6 +87,7 @@ def verifier_curriculum(
         matricule=proposition.matricule_candidat,
         annee_courante=annee_courante,
         uuid_proposition=proposition.entity_id.uuid,
+        inscriptions_translator=inscriptions_translator,
     )
 
     # WHEN
