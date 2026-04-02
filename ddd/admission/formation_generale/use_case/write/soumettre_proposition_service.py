@@ -143,6 +143,11 @@ def soumettre_proposition(
         matricule_candidat=proposition.matricule_candidat,
         annee_inscription_formation_translator=annee_inscription_formation_translator,
     )
+    candidat_est_en_poursuite_directe = inscriptions_translator.est_en_poursuite_directe(
+        matricule_candidat=proposition.matricule_candidat,
+        sigle_formation=formation.entity_id.sigle,
+        annee_inscription_formation_translator=annee_inscription_formation_translator,
+    )
     type_demande = VerifierProposition.determiner_type_demande(
         proposition=proposition,
         titres=titres,
@@ -153,6 +158,12 @@ def soumettre_proposition(
     pool = AcademicCalendarTypes[cmd.pool]
 
     identification = profil_candidat_translator.get_identification(proposition.matricule_candidat)
+
+    assimilation_passee = inscriptions_translator.recuperer_assimilation_inscription_formation_annee_precedente(
+        matricule_candidat=proposition.matricule_candidat,
+        sigle_formation=proposition.formation_id.sigle,
+        annee_inscription_formation_translator=annee_inscription_formation_translator,
+    )
 
     # WHEN
     VerifierProposition.verifier(
@@ -176,6 +187,8 @@ def soumettre_proposition(
         inscriptions_evaluations_translator=inscriptions_evaluations_translator,
         candidat_est_inscrit_recemment_ucl=candidat_est_inscrit_recemment_ucl,
         nomas_translator=nomas_translator,
+        assimilation_passee=assimilation_passee,
+        candidat_est_en_poursuite_directe=candidat_est_en_poursuite_directe,
     )
     element_confirmation.valider(
         soumis=cmd.elements_confirmation,
@@ -220,6 +233,7 @@ def soumettre_proposition(
         justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee=(
             cmd.justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee
         ),
+        assimilation_passee=assimilation_passee,
     )
 
     proposition.specifier_financabilite_resultat_calcul(
@@ -233,6 +247,8 @@ def soumettre_proposition(
         formation=formation,
         profil_candidat_translator=profil_candidat_translator,
         questions_specifiques_translator=questions_specifiques_translator,
+        candidat_est_en_poursuite_directe=candidat_est_en_poursuite_directe,
+        assimilation_passee=assimilation_passee,
     )
     proposition_repository.save(proposition)
 

@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 import datetime
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import freezegun
 import mock
@@ -32,11 +32,23 @@ from django.test import TestCase
 
 from admission.ddd.admission.formation_generale.commands import SoumettrePropositionCommand
 from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutChecklist,
     ChoixStatutPropositionGenerale,
     RaisonPlusieursDemandesMemesCycleEtAnnee,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.ddd.admission.formation_generale.test.factory.proposition import PropositionFactory
+from admission.ddd.admission.shared_kernel.domain.model.assimilation import Assimilation
+from admission.ddd.admission.shared_kernel.enums import (
+    ChoixAssimilation1,
+    ChoixAssimilation2,
+    ChoixAssimilation3,
+    ChoixAssimilation5,
+    ChoixAssimilation6,
+    LienParente,
+    TypeSituationAssimilation,
+)
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.formation import (
     FormationGeneraleInMemoryTranslator,
 )
@@ -122,6 +134,72 @@ class TestSoumettrePropositionGenerale(TestCase):
             RaisonPlusieursDemandesMemesCycleEtAnnee.SUIVRE_EN_PARALLELE,
         )
         self.assertEqual(updated_proposition.justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee, '1')
+
+    @freezegun.freeze_time('2023-11-01')
+    def test_should_soumettre_proposition_etre_ok_avec_assimilation_passee(self):
+        with mock.patch(
+            'admission.infrastructure.admission.shared_kernel.domain.service.in_memory.inscriptions_translator.'
+            'InscriptionsInMemoryTranslator.recuperer_assimilation_inscription_formation_annee_precedente',
+            return_value=Assimilation(
+                type_situation_assimilation=TypeSituationAssimilation.A_BOURSE_ARTICLE_105_PARAGRAPH_2,
+                sous_type_situation_assimilation_1=ChoixAssimilation1.TITULAIRE_CARTE_ETRANGER,
+                sous_type_situation_assimilation_2=ChoixAssimilation2.DEMANDEUR_ASILE,
+                sous_type_situation_assimilation_3=ChoixAssimilation3.AUTORISATION_SEJOUR_ET_REVENUS_DE_REMPLACEMENT,
+                relation_parente=LienParente.PERE,
+                sous_type_situation_assimilation_5=ChoixAssimilation5.A_NATIONALITE_UE,
+                sous_type_situation_assimilation_6=ChoixAssimilation6.A_BOURSE_COOPERATION_DEVELOPPEMENT,
+                source=Assimilation.Source.OSIS,
+            ),
+        ):
+            elements_confirmation = ElementsConfirmationInMemory.get_elements_for_tests(
+                self.proposition_repository.get(PropositionIdentity("uuid-MASTER-SCI")),
+                FormationGeneraleInMemoryTranslator(),
+            )
+            proposition_id = self.message_bus.invoke(
+                SoumettrePropositionCommand(
+                    uuid_proposition="uuid-BACHELIER-FINANCABILITE",
+                    pool=AcademicCalendarTypes.ADMISSION_POOL_VIP.name,
+                    annee=2024,
+                    elements_confirmation=elements_confirmation,
+                    raison_plusieurs_demandes_meme_cycle_meme_annee=(
+                        RaisonPlusieursDemandesMemesCycleEtAnnee.SUIVRE_EN_PARALLELE.name
+                    ),
+                    justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee='1',
+                ),
+            )
+
+            updated_proposition = self.proposition_repository.get(proposition_id)
+
+            # Command result
+            self.assertEqual(proposition_id.uuid, updated_proposition.entity_id.uuid)
+            self.assertEqual(
+                updated_proposition.comptabilite.type_situation_assimilation,
+                TypeSituationAssimilation.A_BOURSE_ARTICLE_105_PARAGRAPH_2,
+            )
+            self.assertEqual(
+                updated_proposition.comptabilite.sous_type_situation_assimilation_1,
+                ChoixAssimilation1.TITULAIRE_CARTE_ETRANGER,
+            )
+            self.assertEqual(
+                updated_proposition.comptabilite.sous_type_situation_assimilation_2,
+                ChoixAssimilation2.DEMANDEUR_ASILE,
+            )
+            self.assertEqual(
+                updated_proposition.comptabilite.sous_type_situation_assimilation_3,
+                ChoixAssimilation3.AUTORISATION_SEJOUR_ET_REVENUS_DE_REMPLACEMENT,
+            )
+            self.assertEqual(
+                updated_proposition.comptabilite.relation_parente,
+                LienParente.PERE,
+            )
+            self.assertEqual(
+                updated_proposition.comptabilite.sous_type_situation_assimilation_5,
+                ChoixAssimilation5.A_NATIONALITE_UE,
+            )
+            self.assertEqual(
+                updated_proposition.comptabilite.sous_type_situation_assimilation_6,
+                ChoixAssimilation6.A_BOURSE_COOPERATION_DEVELOPPEMENT,
+            )
 
     @freezegun.freeze_time('22/10/2024')
     def test_should_soumettre_proposition_tardive(self):
@@ -284,3 +362,130 @@ class TestSoumettrePropositionGenerale(TestCase):
                 '16de0c3d-3c06-4c93-8eb4-c8648f04f146': [],
             },
         )
+
+    def test_initialisation_checklist_assimilation(self):
+        # UE
+        statut_checklist = Checklist._recuperer_statut_checklist_initial_assimilation(
+            proposition=MagicMock(),
+            identification_dto=MagicMock(pays_nationalite_europeen=True),
+            candidat_est_en_poursuite_directe=True,
+            assimilation_passee=MagicMock(),
+        )
+
+        self.assertEqual(statut_checklist.statut, ChoixStatutChecklist.INITIAL_NON_CONCERNE)
+        self.assertEqual(statut_checklist.libelle, 'Not concerned')
+
+        # non UE sans poursuite
+        # > avec assimilation
+        statut_checklist = Checklist._recuperer_statut_checklist_initial_assimilation(
+            proposition=MagicMock(
+                comptabilite=MagicMock(
+                    type_situation_assimilation=TypeSituationAssimilation.AUTORISATION_ETABLISSEMENT_OU_RESIDENT_LONGUE_DUREE
+                )
+            ),
+            identification_dto=MagicMock(pays_nationalite_europeen=False),
+            candidat_est_en_poursuite_directe=False,
+            assimilation_passee=None,
+        )
+
+        self.assertEqual(statut_checklist.statut, ChoixStatutChecklist.INITIAL_CANDIDAT)
+        self.assertEqual(statut_checklist.libelle, 'Declared assimilated')
+
+        # > sans assimilation
+        statut_checklist = Checklist._recuperer_statut_checklist_initial_assimilation(
+            proposition=MagicMock(
+                comptabilite=MagicMock(type_situation_assimilation=TypeSituationAssimilation.AUCUNE_ASSIMILATION)
+            ),
+            identification_dto=MagicMock(pays_nationalite_europeen=False),
+            candidat_est_en_poursuite_directe=False,
+            assimilation_passee=None,
+        )
+
+        self.assertEqual(statut_checklist.statut, ChoixStatutChecklist.INITIAL_CANDIDAT)
+        self.assertEqual(statut_checklist.libelle, 'Declared not assimilated')
+
+        statut_checklist = Checklist._recuperer_statut_checklist_initial_assimilation(
+            proposition=MagicMock(comptabilite=MagicMock(type_situation_assimilation=None)),
+            identification_dto=MagicMock(pays_nationalite_europeen=False),
+            candidat_est_en_poursuite_directe=False,
+            assimilation_passee=None,
+        )
+
+        self.assertEqual(statut_checklist.statut, ChoixStatutChecklist.INITIAL_CANDIDAT)
+        self.assertEqual(statut_checklist.libelle, 'Declared not assimilated')
+
+        # non UE avec poursuite
+        # > avec assimilation passée complète
+        statut_checklist = Checklist._recuperer_statut_checklist_initial_assimilation(
+            proposition=MagicMock(
+                comptabilite=MagicMock(
+                    type_situation_assimilation=(
+                        TypeSituationAssimilation.AUTORISATION_ETABLISSEMENT_OU_RESIDENT_LONGUE_DUREE
+                    )
+                )
+            ),
+            identification_dto=MagicMock(pays_nationalite_europeen=False),
+            candidat_est_en_poursuite_directe=True,
+            assimilation_passee=MagicMock(source=Assimilation.Source.OSIS),
+        )
+
+        self.assertEqual(statut_checklist.statut, ChoixStatutChecklist.GEST_REUSSITE)
+        self.assertEqual(statut_checklist.libelle, 'Validated')
+
+        # > avec assimilation passée incomplète
+        statut_checklist = Checklist._recuperer_statut_checklist_initial_assimilation(
+            proposition=MagicMock(
+                comptabilite=MagicMock(
+                    type_situation_assimilation=(
+                        TypeSituationAssimilation.AUTORISATION_ETABLISSEMENT_OU_RESIDENT_LONGUE_DUREE
+                    )
+                )
+            ),
+            identification_dto=MagicMock(pays_nationalite_europeen=False),
+            candidat_est_en_poursuite_directe=True,
+            assimilation_passee=MagicMock(source=Assimilation.Source.EPC),
+        )
+
+        self.assertEqual(statut_checklist.statut, ChoixStatutChecklist.INITIAL_CANDIDAT)
+        self.assertEqual(statut_checklist.libelle, 'Declared assimilated')
+
+        # > sans assimilation passée et déclaré non assimilé
+        statut_checklist = Checklist._recuperer_statut_checklist_initial_assimilation(
+            proposition=MagicMock(
+                comptabilite=MagicMock(type_situation_assimilation=TypeSituationAssimilation.AUCUNE_ASSIMILATION)
+            ),
+            identification_dto=MagicMock(pays_nationalite_europeen=False),
+            candidat_est_en_poursuite_directe=True,
+            assimilation_passee=None,
+        )
+
+        self.assertEqual(statut_checklist.statut, ChoixStatutChecklist.GEST_REUSSITE)
+        self.assertEqual(statut_checklist.libelle, 'Validated')
+
+        # > sans assimilation passée et déclaré assimilé
+        statut_checklist = Checklist._recuperer_statut_checklist_initial_assimilation(
+            proposition=MagicMock(
+                comptabilite=MagicMock(
+                    type_situation_assimilation=(
+                        TypeSituationAssimilation.AUTORISATION_ETABLISSEMENT_OU_RESIDENT_LONGUE_DUREE
+                    )
+                )
+            ),
+            identification_dto=MagicMock(pays_nationalite_europeen=False),
+            candidat_est_en_poursuite_directe=True,
+            assimilation_passee=None,
+        )
+
+        self.assertEqual(statut_checklist.statut, ChoixStatutChecklist.INITIAL_CANDIDAT)
+        self.assertEqual(statut_checklist.libelle, 'Declared assimilated')
+
+        # > sans assimilation passée et sans nouvelle déclaration
+        statut_checklist = Checklist._recuperer_statut_checklist_initial_assimilation(
+            proposition=MagicMock(comptabilite=MagicMock(type_situation_assimilation=None)),
+            identification_dto=MagicMock(pays_nationalite_europeen=False),
+            candidat_est_en_poursuite_directe=True,
+            assimilation_passee=None,
+        )
+
+        self.assertEqual(statut_checklist.statut, ChoixStatutChecklist.INITIAL_CANDIDAT)
+        self.assertEqual(statut_checklist.libelle, 'Declared not assimilated')

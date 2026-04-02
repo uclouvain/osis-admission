@@ -51,9 +51,8 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
 )
 from admission.ddd.admission.shared_kernel.domain.model._candidat_adresse import CandidatAdresse
 from admission.ddd.admission.shared_kernel.domain.model._candidat_signaletique import CandidatSignaletique
+from admission.ddd.admission.shared_kernel.domain.model.assimilation import Assimilation
 from admission.ddd.admission.shared_kernel.domain.model.formation import Formation
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.shared_kernel.domain.service.verifier_curriculum import VerifierCurriculum
 from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import (
     IAnneeInscriptionFormationTranslator,
 )
@@ -66,9 +65,11 @@ from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_transla
     IInscriptionsTranslatorService,
 )
 from admission.ddd.admission.shared_kernel.domain.service.i_noma_translator import INomasTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.domain.service.inscriptions_ucl_candidat import (
     InscriptionsUCLCandidatService,
 )
+from admission.ddd.admission.shared_kernel.domain.service.verifier_curriculum import VerifierCurriculum
 from admission.ddd.admission.shared_kernel.domain.validator.validator_by_business_action import (
     CoordonneesValidatorList,
     IdentificationValidatorList,
@@ -511,6 +512,7 @@ class ProfilCandidat(interface.DomainService):
         annee_courante: int,
         formation: Formation,
         inscriptions_translator: IInscriptionsTranslatorService,
+        assimilation_passee: Assimilation | None,
     ):
         conditions_comptabilite = profil_candidat_translator.get_conditions_comptabilite(
             matricule=proposition.matricule_candidat,
@@ -524,6 +526,7 @@ class ProfilCandidat(interface.DomainService):
             ),
             comptabilite=proposition.comptabilite,
             formation=formation,
+            assimilation_passee=assimilation_passee,
         ).validate()
 
     @classmethod

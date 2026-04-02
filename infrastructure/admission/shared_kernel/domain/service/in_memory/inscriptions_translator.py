@@ -23,7 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+from admission.ddd.admission.shared_kernel.domain.model.assimilation import Assimilation
 from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import (
     IAnneeInscriptionFormationTranslator,
 )
@@ -76,4 +76,13 @@ class InscriptionsInMemoryTranslator(IInscriptionsTranslatorService):
         cls,
         matricule_candidat: str,
     ) -> InscriptionDTO | None:
+        return None
+
+    @classmethod
+    def recuperer_assimilation_inscription_formation_annee_precedente(
+        cls,
+        matricule_candidat: str,
+        sigle_formation: str,
+        annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
+    ) -> Assimilation | None:
         return None
