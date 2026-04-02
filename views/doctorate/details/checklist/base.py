@@ -300,8 +300,6 @@ class ChecklistView(
             context['access_title_url'] = self.access_title_url
             context['access_titles'] = self.selectable_access_titles
 
-            context['past_experiences_admission_requirement_form'] = self.past_experiences_admission_requirement_form
-
             # Financabilité
             context['financabilite'] = self._get_financabilite()
 
@@ -477,10 +475,6 @@ class ChecklistView(
                 'admission.checklist_change_faculty_decision',
                 original_admission,
             )
-            can_change_past_experiences = self.request.user.has_perm(
-                'admission.checklist_change_past_experiences',
-                original_admission,
-            )
             can_change_access_title = self.request.user.has_perm(
                 'admission.checklist_select_access_title',
                 original_admission,
@@ -505,7 +499,6 @@ class ChecklistView(
                     context['assimilation_form']: can_change_checklist,
                     context['cdd_decision_refusal_form']: can_change_cdd_decision,
                     context['financabilite_approval_form']: can_change_checklist,
-                    context['past_experiences_admission_requirement_form']: can_change_past_experiences,
                     context['financabilite_approval_form']: can_change_checklist,
                     **{
                         authentication_form: can_change_checklist
@@ -517,15 +510,7 @@ class ChecklistView(
                     },
                 }
             )
-            context['can_choose_access_title'] = can_change_access_title
-            context['can_choose_access_title_tooltip'] = (
-                _(
-                    'Changes for the access title are not available when the state of the Previous experience '
-                    'is "Sufficient".'
-                )
-                if context.get('past_experiences_are_sufficient')
-                else ''
-            )
+            context['can_change_access_title'] = can_change_access_title
             if self.proposition_fusion:
                 context['proposition_fusion'] = self.proposition_fusion
 

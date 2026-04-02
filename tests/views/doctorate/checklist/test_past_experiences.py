@@ -49,7 +49,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
 )
 from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import (
     TypeTitreAccesSelectionnable,
-    recuperer_conditions_acces_par_formation,
 )
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     OngletsDemande,
@@ -454,16 +453,6 @@ class PastExperiencesAdmissionRequirementViewTestCase(SicPatchMixin, TestCase):
         self.assertEqual(form.fields['admission_requirement'].choices, BLANK_CHOICE + admission_choices)
         self.assertFalse(form.fields['admission_requirement'].disabled)
         self.assertFalse(form.fields['admission_requirement_year'].disabled)
-
-        self.assertEqual(
-            recuperer_conditions_acces_par_formation(TrainingType.PHD.name),
-            [
-                (ConditionAcces.MASTER.name, ConditionAcces.MASTER.label),
-                (ConditionAcces.UNI_SNU_AUTRE.name, ConditionAcces.UNI_SNU_AUTRE.label),
-                (ConditionAcces.VALORISATION_300_ECTS.name, ConditionAcces.VALORISATION_300_ECTS.label),
-                (ConditionAcces.PARCOURS.name, ConditionAcces.PARCOURS.label),
-            ],
-        )
 
         self.admission.checklist['current']['parcours_anterieur']['statut'] = 'GEST_REUSSITE'
         self.admission.save(update_fields=['checklist'])

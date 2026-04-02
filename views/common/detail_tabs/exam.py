@@ -55,7 +55,7 @@ class ExamDetailView(LoadDossierViewMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
         try:
-            exam = Exam.objects.get(admissions__admission=self.admission)
+            exam = Exam.objects.annotate_sigles_formations().get(admissions__admission=self.admission)
             titre = '' if self.exam_type is None else self.exam_type.title
             context_data['examen'] = ExamenDTO(
                 uuid=str(exam.uuid),
@@ -63,6 +63,7 @@ class ExamDetailView(LoadDossierViewMixin, TemplateView):
                 titre=titre,
                 attestation=exam.certificate,
                 annee=exam.year.year if exam.year else None,
+                sigles_formations=exam.sigles_formations,
                 statut_validation=exam.validation_status,
                 statut_authentification=exam.authentication_status,
             )

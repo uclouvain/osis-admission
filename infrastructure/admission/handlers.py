@@ -30,12 +30,6 @@ from admission.ddd.admission.formation_continue.event_handler import (
 )
 from admission.ddd.admission.shared_kernel.commands import *
 from admission.ddd.admission.shared_kernel.commands import RecupererInformationsDestinataireQuery
-from admission.ddd.admission.shared_kernel.use_case.read import *
-from admission.ddd.admission.shared_kernel.use_case.write import specifier_experience_en_tant_que_titre_acces
-from admission.infrastructure.admission.shared_kernel.domain.service.lister_toutes_demandes import ListerToutesDemandes
-from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidatTranslator
-from admission.infrastructure.admission.shared_kernel.repository.email_destinataire import EmailDestinataireRepository
-from admission.infrastructure.admission.shared_kernel.repository.gestionnaire import GestionnaireRepository
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
@@ -50,6 +44,15 @@ from admission.infrastructure.admission.shared_kernel.domain.service.inscription
 from admission.infrastructure.admission.shared_kernel.domain.service.inscriptions_evaluations_translator import (
     InscriptionsEvaluationsTranslator,
 )
+from admission.ddd.admission.shared_kernel.events import TitreDAccesModifieEvent
+from admission.ddd.admission.shared_kernel.use_case.read import *
+from admission.ddd.admission.shared_kernel.use_case.write import specifier_experience_en_tant_que_titre_acces
+from admission.ddd.admission.shared_kernel.use_case.write.calculer_condition_d_acces import calculer_condition_d_acces
+from admission.infrastructure.admission.shared_kernel.domain.service.condition_d_acces import ConditionDAcces
+from admission.infrastructure.admission.shared_kernel.domain.service.lister_toutes_demandes import ListerToutesDemandes
+from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidatTranslator
+from admission.infrastructure.admission.shared_kernel.repository.email_destinataire import EmailDestinataireRepository
+from admission.infrastructure.admission.shared_kernel.repository.gestionnaire import GestionnaireRepository
 from admission.infrastructure.admission.shared_kernel.repository.titre_acces_selectionnable import (
     TitreAccesSelectionnableRepository,
 )
@@ -89,6 +92,7 @@ COMMAND_HANDLERS = {
         )
     ),
     SpecifierExperienceEnTantQueTitreAccesCommand: lambda msg_bus, cmd: specifier_experience_en_tant_que_titre_acces(
+        msg_bus,
         cmd,
         titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
     ),
@@ -120,6 +124,12 @@ COMMAND_HANDLERS = {
         annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
         deliberation_translator=DeliberationTranslator(),
     ),
+    CalculerConditionDAccesCommand: (
+        lambda msg_bus, cmd: calculer_condition_d_acces(
+            cmd,
+            condition_d_acces=ConditionDAcces(),
+        )
+    ),
 }
 
 EVENT_HANDLERS = {}
@@ -134,6 +144,9 @@ if 'admission' in settings.INSTALLED_APPS:
         AdmissionApprouveeParSicEvent,
         InscriptionApprouveeParSicEvent,
     )
+    from admission.infrastructure.admission.event_handler.calculer_condition_d_acces_handler import (
+        CalculerConditionDAccesHandler,
+    )
     from admission.infrastructure.admission.event_handler.reagir_a_approuver_proposition import (
         reagir_a_approuver_proposition,
     )
@@ -147,4 +160,5 @@ if 'admission' in settings.INSTALLED_APPS:
         PropositionFormationContinueValideeEvent: [
             GenererDocumentAnalysePropositionAutorisationHandler(consumption_mode=EventConsumptionMode.ASYNCHRONOUS),
         ],
+        TitreDAccesModifieEvent: [CalculerConditionDAccesHandler(consumption_mode=EventConsumptionMode.SYNCHRONOUS)],
     }

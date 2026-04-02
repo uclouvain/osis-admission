@@ -655,14 +655,6 @@ class ModifierStatutChecklistParcoursAnterieurCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class SpecifierConditionAccesPropositionCommand(interface.CommandRequest):
-    uuid_proposition: str
-    gestionnaire: str
-    condition_acces: str = ''
-    millesime_condition_acces: Optional[int] = None
-
-
-@attr.dataclass(frozen=True, slots=True)
 class SpecifierFinancabiliteResultatCalculCommand(interface.CommandRequest):
     uuid_proposition: str
     financabilite_regle_calcule: str

@@ -82,8 +82,8 @@ from admission.ddd.admission.formation_generale.commands import (
     RefuserAdmissionParSicCommand,
     RefuserInscriptionParSicCommand,
     RefuserPropositionParFaculteCommand,
+    SpecifierAvecComplementsFormationPropositionCommand,
     SpecifierBesoinDeDerogationSicCommand,
-    SpecifierConditionAccesPropositionCommand,
     SpecifierDerogationDelegueVraeSicCommand,
     SpecifierDerogationFinancabiliteCommand,
     SpecifierDerogationVraeFinancabiliteCommand,
@@ -503,6 +503,64 @@ def get_email(template_identifier, language, proposition_dto: PropositionGestion
             mail_template.render_subject(tokens),
             mail_template.body_as_html(tokens),
         )
+
+
+class ExperiencesMixin(LoadDossierViewMixin):
+
+    @cached_property
+    def proposition_resume(self) -> ResumeEtEmplacementsDocumentsPropositionDTO:
+        return message_bus_instance.invoke(
+            RecupererResumeEtEmplacementsDocumentsPropositionQuery(
+                uuid_proposition=self.admission_uuid,
+                avec_document_libres=True,
+            ),
+        )
+
+    @cached_property
+    def internal_experiences(self) -> List[ExperienceParcoursInterneDTO]:
+        return get_internal_experiences(matricule_candidat=self.proposition.matricule_candidat)
+
+    def curriculum_additional_messages(self):
+        # Get the messages to display into the past experiences views
+        additional_messages = []
+        if self.proposition.noma_candidat in etudiants_PCE_avant_2015.nomas:
+            additional_messages.append(message_candidat_avec_pae_avant_2015)
+        return additional_messages
+
+    def _get_experiences(self, resume: ResumePropositionDTO):
+        return groupe_curriculum_par_annee_decroissante(
+            experiences_academiques=resume.curriculum.experiences_academiques,
+            experiences_professionnelles=resume.curriculum.experiences_non_academiques,
+            etudes_secondaires=resume.etudes_secondaires,
+            examens=[resume.examen_formation],
+            experiences_parcours_interne=self.internal_experiences,
+            additional_messages=self.curriculum_additional_messages(),
+        )
+
+    def _get_experiences_by_uuid(self, experiences_by_year: dict[int, list[ElementCurriculumDTO]]):
+        # Get the experiences by uuid in chronological order
+        experiences: dict[
+            str,
+            ExperienceAcademiqueDTO | ExperienceNonAcademiqueDTO | ExamenDTO | EtudesSecondairesAdmissionDTO,
+        ] = {}
+
+        for year_experiences in experiences_by_year.values():
+            for experience in year_experiences:
+                experience_uuid_as_str: str | None = None
+
+                if isinstance(experience, (ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO)):
+                    experience_uuid_as_str = str(experience.uuid)
+
+                elif isinstance(experience, EtudesSecondairesDTO):
+                    experience_uuid_as_str = str(experience.uuid) or OngletsDemande.ETUDES_SECONDAIRES.name
+
+                elif isinstance(experience, ExamenDTO) and experience.requis:
+                    experience_uuid_as_str = str(experience.uuid) or OngletsDemande.EXAMS.name
+
+                if experience_uuid_as_str and experience_uuid_as_str not in experiences:
+                    experiences[experience_uuid_as_str] = experience
+
+        return experiences
 
 
 class PaymentsListView(AdmissionViewMixin, TemplateView):
@@ -2071,12 +2129,9 @@ class PastExperiencesAdmissionRequirementView(
     def form_valid(self, form):
         try:
             message_bus_instance.invoke(
-                SpecifierConditionAccesPropositionCommand(
+                SpecifierAvecComplementsFormationPropositionCommand(
                     uuid_proposition=self.admission_uuid,
                     gestionnaire=self.request.user.person.global_id,
-                    condition_acces=form.cleaned_data['admission_requirement'],
-                    millesime_condition_acces=form.cleaned_data['admission_requirement_year']
-                    and form.cleaned_data['admission_requirement_year'].year,
                     avec_complements_formation=form.cleaned_data['with_prerequisite_courses'],
                 )
             )
@@ -2099,6 +2154,7 @@ class PastExperiencesAdmissionRequirementView(
 
 
 class PastExperiencesAccessTitleView(
+    ExperiencesMixin,
     PastExperiencesMixin,
     AdmissionFormMixin,
     HtmxPermissionRequiredMixin,
@@ -2122,7 +2178,24 @@ class PastExperiencesAccessTitleView(
         context['checked'] = self.checked
         context['url'] = self.request.get_full_path()
         context['experience_uuid'] = self.request.GET.get('experience_uuid')
-        context['can_choose_access_title'] = True  # True as the user can access to the current view
+        context['can_change_access_title'] = True  # True as the user can access to the current view
+
+        if self.request.htmx:
+            context['access_title_url'] = self.access_title_url
+            context['past_experiences_are_sufficient'] = (
+                self.admission.checklist.get('current', {}).get('parcours_anterieur', {}).get('statut', '')
+                == ChoixStatutChecklist.GEST_REUSSITE.name
+            )
+
+            experiences = self._get_experiences(self.proposition_resume.resume)
+            experiences_by_uuid = self._get_experiences_by_uuid(experiences)
+            context['experiences'] = experiences
+            context['experiences_by_uuid'] = experiences_by_uuid
+
+            context['access_titles'] = self.selectable_access_titles
+            context['with_swap_oob'] = True  # Update admission requirement div
+            context['past_experiences_admission_requirement_form'] = self.past_experiences_admission_requirement_form
+            context['original_admission'] = self.admission
 
         return context
 
@@ -2945,6 +3018,7 @@ class SinglePastExperienceChangeAuthenticationView(ChangeExperienceAuthenticatio
 
 
 class ChecklistView(
+    ExperiencesMixin,
     PropositionFromResumeMixin,
     PastExperiencesMixin,
     FacultyDecisionMixin,
@@ -2956,10 +3030,6 @@ class ChecklistView(
     urlpatterns = 'checklist'
     template_name = "admission/general_education/checklist.html"
     permission_required = 'admission.view_checklist'
-
-    @cached_property
-    def internal_experiences(self) -> List[ExperienceParcoursInterneDTO]:
-        return get_internal_experiences(matricule_candidat=self.proposition.matricule_candidat)
 
     @classmethod
     def checklist_documents_by_tab(cls, specific_questions: List[QuestionSpecifiqueDTO]) -> Dict[str, Set[str]]:
@@ -3296,8 +3366,7 @@ class ChecklistView(
                         )
 
                 context['dernieres_vues_par'] = (
-                    AdmissionViewer.objects
-                    .filter(
+                    AdmissionViewer.objects.filter(
                         admission=self.admission,
                         viewed_at__gte=timezone.now() - datetime.timedelta(hours=1),
                     )
@@ -3411,27 +3480,12 @@ class ChecklistView(
                     },
                 }
             )
-            context['can_choose_access_title'] = can_change_access_title
-            context['can_choose_access_title_tooltip'] = (
-                _(
-                    'Changes for the access title are not available when the state of the Previous experience '
-                    'is "Sufficient".'
-                )
-                if context.get('past_experiences_are_sufficient')
-                else ''
-            )
+            context['can_change_access_title'] = can_change_access_title
             if self.proposition_fusion:
                 context['proposition_fusion'] = self.proposition_fusion
 
         context['injection_signaletique'] = self.injection_signaletique
         return context
-
-    def curriculum_additional_messages(self):
-        # Get the messages to display into the past experiences views
-        additional_messages = []
-        if self.proposition.noma_candidat in etudiants_PCE_avant_2015.nomas:
-            additional_messages.append(message_candidat_avec_pae_avant_2015)
-        return additional_messages
 
     def _merge_with_known_curriculum(self, curex_a_fusionner, resume):
         if curex_a_fusionner:
@@ -3448,44 +3502,9 @@ class ChecklistView(
                 if str(experience_academique.uuid) in curex_a_fusionner:
                     resume.curriculum.experiences_academiques.append(experience_academique)
 
-    def _get_experiences(self, resume: ResumePropositionDTO):
-        return groupe_curriculum_par_annee_decroissante(
-            experiences_academiques=resume.curriculum.experiences_academiques,
-            experiences_professionnelles=resume.curriculum.experiences_non_academiques,
-            etudes_secondaires=resume.etudes_secondaires,
-            examens=[resume.examen_formation],
-            experiences_parcours_interne=self.internal_experiences,
-            additional_messages=self.curriculum_additional_messages(),
-        )
-
     def _get_financabilite(self):
         # TODO
         return {
             'inscription_precedentes': 2,
             'inscription_supplementaire': 1,
         }
-
-    def _get_experiences_by_uuid(self, experiences_by_year: dict[int, list[ElementCurriculumDTO]]):
-        # Get the experiences by uuid in chronological order
-        experiences: dict[
-            str,
-            ExperienceAcademiqueDTO | ExperienceNonAcademiqueDTO | ExamenDTO | EtudesSecondairesAdmissionDTO,
-        ] = {}
-
-        for year_experiences in experiences_by_year.values():
-            for experience in year_experiences:
-                experience_uuid_as_str: str | None = None
-
-                if isinstance(experience, (ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO)):
-                    experience_uuid_as_str = str(experience.uuid)
-
-                elif isinstance(experience, EtudesSecondairesDTO):
-                    experience_uuid_as_str = str(experience.uuid) or OngletsDemande.ETUDES_SECONDAIRES.name
-
-                elif isinstance(experience, ExamenDTO) and experience.requis:
-                    experience_uuid_as_str = str(experience.uuid) or OngletsDemande.EXAMS.name
-
-                if experience_uuid_as_str and experience_uuid_as_str not in experiences:
-                    experiences[experience_uuid_as_str] = experience
-
-        return experiences

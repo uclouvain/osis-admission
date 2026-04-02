@@ -54,13 +54,13 @@ from admission.ddd import LANGUES_OBLIGATOIRES_DOCTORAT, NB_MOIS_MIN_VAE
 from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO
 from admission.ddd.admission.doctorat.preparation.dtos.connaissance_langue import ConnaissanceLangueDTO
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
+)
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import AdmissionExperienceNonTrouveeException
 from admission.ddd.admission.shared_kernel.dtos import AdressePersonnelleDTO, CoordonneesDTO, IdentificationDTO
 from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
-from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
-    IInscriptionsTranslatorService,
-)
 from admission.ddd.admission.shared_kernel.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.shared_kernel.dtos.resume import ResumeCandidatDTO
 from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
@@ -722,24 +722,33 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             education_group_years__academic_year__year=formation_annee,
         ).first()
         if formation_annee and formation_sigle and exam_type is None:
-            return ExamenDTO(uuid='', requis=False, titre='', attestation=[], annee=None)
+            return ExamenDTO(uuid='', requis=False, titre='', attestation=[], annee=None, sigles_formations=[])
         exam = (
             (
                 Exam.objects.filter(admissions__admission__uuid=uuid_proposition)
+                .annotate_sigles_formations()
                 .annotate(**cls.get_examen_annotations())
                 .first()
             )
             if uuid_proposition
-            else (Exam.objects.filter(uuid=uuid_experience).annotate(**cls.get_examen_annotations()).first())
+            else (
+                Exam.objects.filter(uuid=uuid_experience)
+                .annotate_sigles_formations()
+                .annotate(**cls.get_examen_annotations())
+                .first()
+            )
         )
         if exam is None:
-            return ExamenDTO(uuid='', requis=True, titre=exam_type.title, attestation=[], annee=None)
+            return ExamenDTO(
+                uuid='', requis=True, titre=exam_type.title, attestation=[], annee=None, sigles_formations=[]
+            )
         return ExamenDTO(
             uuid=str(exam.uuid),
             requis=True,
             titre=exam_type.title if exam_type else exam.type.title,
             attestation=exam.certificate,
             annee=exam.year.year if exam.year else None,
+            sigles_formations=exam.sigles_formations,
             identifiant_externe=exam.external_id,
             injectee=exam.injecte_par_admission or exam.injecte_par_cv,
             statut_validation=exam.validation_status,
@@ -757,6 +766,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 annee=exam.year.year if exam.year else None,
                 identifiant_externe=exam.external_id,
                 injectee=exam.injecte_par_cv or exam.injecte_par_admission,
+                sigles_formations=exam.sigles_formations,
                 statut_validation=exam.validation_status,
                 statut_authentification=exam.authentication_status,
             )

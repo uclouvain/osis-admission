@@ -556,12 +556,6 @@ COMMAND_HANDLERS = {
         academic_year_repository=AcademicYearRepository(),
         inscriptions_translator=InscriptionsTranslatorService(),
     ),
-    SpecifierConditionAccesPropositionCommand: lambda msg_bus, cmd: specifier_condition_acces_proposition(
-        cmd,
-        proposition_repository=PropositionRepository(),
-        titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
-        experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
-    ),
     SpecifierBesoinDeDerogationSicCommand: (
         lambda msg_bus, cmd: specifier_besoin_de_derogation(
             cmd,

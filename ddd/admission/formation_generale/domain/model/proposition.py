@@ -66,7 +66,6 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
     RefuserParSicValidatorList,
     SICPeutSoumettreAFacLorsDeLaDecisionFacultaireValidatorList,
     SicPeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList,
-    SpecifierConditionAccesParcoursAnterieurValidatorList,
     SpecifierInformationsApprobationInscriptionValidatorList,
     SpecifierNouvellesInformationsDecisionFacultaireValidatorList,
 )
@@ -778,43 +777,12 @@ class Proposition(interface.RootEntity):
         self.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist[statut_checklist_cible]
         self.auteur_derniere_modification = auteur_modification
 
-    def specifier_condition_acces(
+    def specifier_avec_complements_formation(
         self,
         auteur_modification: str,
-        condition_acces: str,
-        millesime_condition_acces: Optional[int],
         avec_complements_formation: Optional[bool],
-        titre_acces_selectionnable_repository: 'ITitreAccesSelectionnableRepository',
-        experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
     ):
-        nouveau_millesime_condition_acces = millesime_condition_acces
-        nouvelle_condition_acces = getattr(ConditionAcces, condition_acces, None)
-
-        # Si la condition d'accès a changé
-        if nouvelle_condition_acces and nouvelle_condition_acces != self.condition_acces:
-            # Si un seul titre d'accès a été sélectionné,  le millésime correspond à l'année de ce titre
-            titres_selectionnes = titre_acces_selectionnable_repository.search_by_proposition(
-                proposition_identity=self.entity_id,
-                experience_parcours_interne_translator=experience_parcours_interne_translator,
-                seulement_selectionnes=True,
-            )
-
-            if len(titres_selectionnes) == 1:
-                nouveau_millesime_condition_acces = titres_selectionnes[0].annee
-
-            # Si la condition d'accès est "SNU Type Court", des compléments de formation sont demandés par défaut
-            if nouvelle_condition_acces == ConditionAcces.SNU_TYPE_COURT:
-                avec_complements_formation = True
-
-        SpecifierConditionAccesParcoursAnterieurValidatorList(
-            avec_complements_formation=avec_complements_formation,
-            complements_formation=self.complements_formation,
-            commentaire_complements_formation=self.commentaire_complements_formation,
-        ).validate()
-
         self.auteur_derniere_modification = auteur_modification
-        self.condition_acces = nouvelle_condition_acces
-        self.millesime_condition_acces = nouveau_millesime_condition_acces
         self.avec_complements_formation = avec_complements_formation
 
         if not avec_complements_formation:

@@ -121,9 +121,6 @@ from admission.ddd.admission.shared_kernel.enums import (
     TypeSituationAssimilation,
 )
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
-from admission.ddd.admission.shared_kernel.repository.i_titre_acces_selectionnable import (
-    ITitreAccesSelectionnableRepository,
-)
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
@@ -697,33 +694,6 @@ class Proposition(interface.RootEntity):
 
         self.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist[statut_checklist_cible]
         self.auteur_derniere_modification = auteur_modification
-
-    def specifier_condition_acces(
-        self,
-        auteur_modification: str,
-        condition_acces: str,
-        millesime_condition_acces: Optional[int],
-        titre_acces_selectionnable_repository: 'ITitreAccesSelectionnableRepository',
-        experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
-    ):
-        nouveau_millesime_condition_acces = millesime_condition_acces
-        nouvelle_condition_acces = getattr(ConditionAcces, condition_acces, None)
-
-        # Si la condition d'accès a changé
-        if nouvelle_condition_acces and nouvelle_condition_acces != self.condition_acces:
-            # Si un seul titre d'accès a été sélectionné,  le millésime correspond à l'année de ce titre
-            titres_selectionnes = titre_acces_selectionnable_repository.search_by_proposition(
-                proposition_identity=self.entity_id,
-                experience_parcours_interne_translator=experience_parcours_interne_translator,
-                seulement_selectionnes=True,
-            )
-
-            if len(titres_selectionnes) == 1:
-                nouveau_millesime_condition_acces = titres_selectionnes[0].annee
-
-        self.auteur_derniere_modification = auteur_modification
-        self.condition_acces = nouvelle_condition_acces
-        self.millesime_condition_acces = nouveau_millesime_condition_acces
 
     def specifier_financabilite_resultat_calcul(
         self,

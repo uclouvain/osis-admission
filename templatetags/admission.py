@@ -77,6 +77,7 @@ from admission.ddd.admission.formation_generale.dtos.proposition import (
     PropositionDTO as PropositionGeneraleDTO,
     PropositionGestionnaireDTO,
 )
+from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import TypeTitreAccesSelectionnable
 from admission.ddd.admission.shared_kernel.dtos import CoordonneesDTO, EtudesSecondairesAdmissionDTO, IdentificationDTO
 from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.shared_kernel.dtos.liste import DemandeRechercheDTO
@@ -114,6 +115,7 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     MessageCurriculumDTO,
 )
 from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
+from osis_profile import BE_ISO_CODE
 from osis_profile.constants import IMAGE_MIME_TYPES
 from osis_profile.models.enums.experience_validation import EtatAuthentificationParcours
 from osis_profile.models.enums.person import ChoixSexe
@@ -134,6 +136,10 @@ CHARLEROI = 'Charleroi'
 WOLUWE = 'Bruxelles Woluwe'
 SAINT_LOUIS = 'Bruxelles Saint-Louis'
 SAINT_GILLES = 'Bruxelles Saint-Gilles'
+
+SIGLES_INGENIEUR_CIVIL = {'FSA1BA', 'ARCH1BA'}
+SIGLE_MEDICAL = 'MD1BA'
+SIGLE_DENTISTERIE = 'DENT1BA'
 
 logger = logging.getLogger(__name__)
 register = template.Library()
@@ -930,15 +936,73 @@ def input_field_data(label, value, editable=True, mask=None, select_key=None):
 )
 def access_title_checkbox(context, experience_uuid, experience_type, current_year):
     access_title: Optional[TitreAccesSelectionnableDTO] = context['access_titles'].get(experience_uuid)
-    if access_title and access_title.annee == current_year:
-        return {
-            'url': f'{context["access_title_url"]}?experience_uuid={experience_uuid}&experience_type={experience_type}',
-            'checked': access_title.selectionne,
-            'experience_uuid': experience_uuid,
-            'can_choose_access_title': context['can_choose_access_title'],
-            'can_choose_access_title_tooltip': context.get('can_choose_access_title_tooltip'),
+
+    if not access_title or access_title.annee != current_year:
+        return {}
+
+    # Compute can_choose_access_title
+    has_change_access_title_permission = context['can_change_access_title']
+    is_access_title_academic = access_title.type_titre in {
+        TypeTitreAccesSelectionnable.EXPERIENCE_ACADEMIQUE.name,
+        TypeTitreAccesSelectionnable.EXPERIENCE_PARCOURS_INTERNE.name,
+    }
+    has_selected_belgium_titles = any(
+        access_title_dto.selectionne
+        and access_title_dto.type_titre
+        in {
+            TypeTitreAccesSelectionnable.EXPERIENCE_ACADEMIQUE.name,
+            TypeTitreAccesSelectionnable.EXPERIENCE_PARCOURS_INTERNE.name,
         }
-    return {}
+        and access_title_dto.pays_iso_code == BE_ISO_CODE
+        for access_title_dto in context['access_titles'].values()
+    )
+    has_any_selected_title = any(access_title_dto.selectionne for access_title_dto in context['access_titles'].values())
+    has_selected_engineering_exam = any(
+        access_title_dto.selectionne
+        and access_title_dto.type_titre == TypeTitreAccesSelectionnable.EXAMENS.name
+        and SIGLES_INGENIEUR_CIVIL
+        & set(context['experiences_by_uuid'][access_title_dto.uuid_experience].sigles_formations)
+        for access_title_dto in context['access_titles'].values()
+    )
+    is_medical_exam = access_title.type_titre == TypeTitreAccesSelectionnable.EXAMENS.name and (
+        SIGLE_MEDICAL in set(context['experiences_by_uuid'][access_title.uuid_experience].sigles_formations)
+        or SIGLE_DENTISTERIE in set(context['experiences_by_uuid'][access_title.uuid_experience].sigles_formations)
+    )
+    is_engineering_exam = access_title.type_titre == TypeTitreAccesSelectionnable.EXAMENS.name and bool(
+        SIGLES_INGENIEUR_CIVIL & set(context['experiences_by_uuid'][access_title.uuid_experience].sigles_formations)
+    )
+
+    # Can always unselect selected titles
+    if not access_title.selectionne and (
+        # Can never select medical exam
+        is_medical_exam
+        # Can not select anything else if engineering exam is selected
+        or has_selected_engineering_exam
+        # Can not select engineering exam if anything else is selected
+        or (is_engineering_exam and has_any_selected_title)
+        # Can only select one belgium diploma
+        or (is_access_title_academic and has_selected_belgium_titles)
+    ):
+        can_choose_access_title = False
+    else:
+        can_choose_access_title = has_change_access_title_permission
+
+    can_choose_access_title_tooltip = (
+        _(
+            'Changes for the access title are not available when the state of the Previous experience '
+            'is "Sufficient".'
+        )
+        if context.get('past_experiences_are_sufficient')
+        else ''
+    )
+
+    return {
+        'url': f'{context["access_title_url"]}?experience_uuid={experience_uuid}&experience_type={experience_type}',
+        'checked': access_title.selectionne,
+        'experience_uuid': experience_uuid,
+        'can_choose_access_title': can_choose_access_title,
+        'can_choose_access_title_tooltip': can_choose_access_title_tooltip,
+    }
 
 
 @register.filter

@@ -48,6 +48,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     RaisonPlusieursDemandesMemesCycleEtAnnee,
     TypeDeRefus,
 )
+from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import ErreurConditionAcces
 from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import (
     EtatEquivalenceTitreAcces,
     StatutEquivalenceTitreAcces,
@@ -486,6 +487,13 @@ class GeneralEducationAdmission(BaseAdmission):
         null=True,
         blank=True,
         verbose_name=_('Admission requirement year'),
+    )
+    admission_requirement_error = models.CharField(
+        choices=ErreurConditionAcces.choices(),
+        blank=True,
+        default='',
+        max_length=30,
+        verbose_name=_('Admission requirement error'),
     )
     foreign_access_title_equivalency_type = models.CharField(
         choices=TypeEquivalenceTitreAcces.choices(),

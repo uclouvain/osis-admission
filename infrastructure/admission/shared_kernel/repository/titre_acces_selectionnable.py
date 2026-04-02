@@ -347,17 +347,18 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
 
     @classmethod
     def save(cls, entity: TitreAccesSelectionnable) -> None:
+        try:
+            current_admission = BaseAdmission.objects.get(uuid=entity.entity_id.uuid_proposition)
+        except BaseAdmission.DoesNotExist:
+            raise PropositionNonTrouveeException
+
         if entity.entity_id.type_titre == TypeTitreAccesSelectionnable.ETUDES_SECONDAIRES:
-            if not BaseAdmission.objects.filter(uuid=entity.entity_id.uuid_proposition).update(
-                are_secondary_studies_access_title=entity.selectionne,
-            ):
-                raise PropositionNonTrouveeException
+            current_admission.are_secondary_studies_access_title = entity.selectionne
+            current_admission.save(update_fields=['are_secondary_studies_access_title'])
 
         elif entity.entity_id.type_titre == TypeTitreAccesSelectionnable.EXAMENS:
-            if not BaseAdmission.objects.filter(uuid=entity.entity_id.uuid_proposition).update(
-                is_exam_access_title=entity.selectionne,
-            ):
-                raise PropositionNonTrouveeException
+            current_admission.is_exam_access_title = entity.selectionne
+            current_admission.save(update_fields=['is_exam_access_title'])
 
         elif entity.entity_id.type_titre == TypeTitreAccesSelectionnable.EXPERIENCE_ACADEMIQUE:
             if not AdmissionEducationalValuatedExperiences.objects.filter(
@@ -375,7 +376,6 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
 
         elif entity.entity_id.type_titre == TypeTitreAccesSelectionnable.EXPERIENCE_PARCOURS_INTERNE:
             experience_pk = uuid.UUID(entity.entity_id.uuid_experience).int
-            current_admission = BaseAdmission.objects.get(uuid=entity.entity_id.uuid_proposition)
 
             if entity.selectionne:
                 current_admission.internal_access_titles.add(experience_pk)
