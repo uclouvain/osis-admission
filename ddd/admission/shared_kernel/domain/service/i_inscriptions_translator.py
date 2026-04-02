@@ -25,6 +25,7 @@
 # ##############################################################################
 from abc import abstractmethod
 
+from admission.ddd.admission.shared_kernel.domain.model.assimilation import Assimilation
 from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import (
     IAnneeInscriptionFormationTranslator,
 )
@@ -85,4 +86,14 @@ class IInscriptionsTranslatorService(interface.DomainService):
         sigle_formation: str,
         annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
     ) -> bool:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def recuperer_assimilation_inscription_formation_annee_precedente(
+        cls,
+        matricule_candidat: str,
+        sigle_formation: str,
+        annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
+    ) -> Assimilation | None:
         raise NotImplementedError

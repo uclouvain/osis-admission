@@ -33,6 +33,7 @@ from admission.ddd.admission.formation_generale.domain.model.proposition import 
 from admission.ddd.admission.formation_generale.domain.service.i_formation import (
     IFormationGeneraleTranslator,
 )
+from admission.ddd.admission.shared_kernel.domain.model.assimilation import Assimilation
 from admission.ddd.admission.shared_kernel.domain.model.formation import Formation
 from admission.ddd.admission.shared_kernel.domain.model.question_specifique import (
     QuestionSpecifique,
@@ -99,6 +100,8 @@ class VerifierProposition(interface.DomainService):
         inscriptions_evaluations_translator: IInscriptionsEvaluationsTranslator,
         nomas_translator: INomasTranslator,
         candidat_est_inscrit_recemment_ucl: bool,
+        candidat_est_en_poursuite_directe: bool,
+        assimilation_passee: Assimilation | None,
         annee_soumise: int = None,
         pool_soumis: 'AcademicCalendarTypes' = None,
     ) -> None:
@@ -109,12 +112,6 @@ class VerifierProposition(interface.DomainService):
             annee_courante=annee_courante,
             uuid_proposition=proposition_candidat.entity_id.uuid,
             inscriptions_translator=inscriptions_translator,
-        )
-
-        candidat_est_en_poursuite_directe = inscriptions_translator.est_en_poursuite_directe(
-            matricule_candidat=proposition_candidat.matricule_candidat,
-            sigle_formation=formation.entity_id.sigle,
-            annee_inscription_formation_translator=annee_inscription_formation_translator,
         )
 
         execute_functions_and_aggregate_exceptions(
@@ -166,6 +163,7 @@ class VerifierProposition(interface.DomainService):
                 annee_courante=annee_courante,
                 formation=formation,
                 inscriptions_translator=inscriptions_translator,
+                assimilation_passee=assimilation_passee,
             ),
             partial(
                 profil_candidat_service.verifier_choix_formation_generale,

@@ -26,6 +26,8 @@
 
 from django.db.models import F, QuerySet
 
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.shared_kernel.domain.model.assimilation import Assimilation as AssimilationModel
 from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import (
     IAnneeInscriptionFormationTranslator,
 )
@@ -33,8 +35,19 @@ from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_transla
     IInscriptionsTranslatorService,
 )
 from admission.ddd.admission.shared_kernel.dtos.inscription import InscriptionDTO
+from admission.ddd.admission.shared_kernel.enums import (
+    ChoixAssimilation1,
+    ChoixAssimilation2,
+    ChoixAssimilation3,
+    ChoixAssimilation5,
+    ChoixAssimilation6,
+    LienParente,
+    TypeSituationAssimilation,
+)
+from admission.models import Accounting
 from base.models.enums.academic_type import AcademicTypes
 from base.models.enums.education_group_types import TrainingType
+from epc.models.enums.assimilation import Assimilation as AssimilationEnum
 from epc.models.enums.etat_inscription import EtatInscriptionFormation
 from epc.models.enums.statut_inscription_programme_annuel import StatutInscriptionProgrammAnnuel
 from epc.models.inscription_programme_annuel import InscriptionProgrammeAnnuel
@@ -172,3 +185,101 @@ class InscriptionsTranslatorService(IInscriptionsTranslatorService):
             sigle_formation=sigle_formation,
             years=[administrative_year - 1],
         ).exists()
+
+    @classmethod
+    def recuperer_assimilation_inscription_formation_annee_precedente(
+        cls,
+        matricule_candidat: str,
+        sigle_formation: str,
+        annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
+    ) -> AssimilationModel | None:
+        administrative_year = annee_inscription_formation_translator.recuperer_calendrier_administratif_courant().annee
+
+        target_year = administrative_year - 1
+
+        enrolment = (
+            cls.enrolment_qs(
+                global_id=matricule_candidat,
+                sigle_formation=sigle_formation,
+                years=[target_year],
+            )
+            .only('assimilation')
+            .first()
+        )
+
+        if not enrolment:
+            return None
+
+        admission_accounting = (
+            Accounting.objects.filter(
+                admission__candidate__global_id=matricule_candidat,
+                admission__training__academic_year__year=target_year,
+                admission__training__acronym=sigle_formation,
+                admission__generaleducationadmission__status=ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name,
+            )
+            .exclude(assimilation_situation__in=['', TypeSituationAssimilation.AUCUNE_ASSIMILATION.name])
+            .only(
+                'assimilation_situation',
+                'assimilation_1_situation_type',
+                'assimilation_2_situation_type',
+                'assimilation_3_situation_type',
+                'relationship',
+                'assimilation_5_situation_type',
+                'assimilation_6_situation_type',
+            )
+            .first()
+        )
+
+        if admission_accounting:
+            return AssimilationModel(
+                type_situation_assimilation=TypeSituationAssimilation[admission_accounting.assimilation_situation],
+                source=AssimilationModel.Source.OSIS,
+                sous_type_situation_assimilation_1=getattr(
+                    ChoixAssimilation1,
+                    admission_accounting.assimilation_1_situation_type,
+                    None,
+                ),
+                sous_type_situation_assimilation_2=getattr(
+                    ChoixAssimilation2,
+                    admission_accounting.assimilation_2_situation_type,
+                    None,
+                ),
+                sous_type_situation_assimilation_3=getattr(
+                    ChoixAssimilation3,
+                    admission_accounting.assimilation_3_situation_type,
+                    None,
+                ),
+                relation_parente=getattr(
+                    LienParente,
+                    admission_accounting.relationship,
+                    None,
+                ),
+                sous_type_situation_assimilation_5=getattr(
+                    ChoixAssimilation5,
+                    admission_accounting.assimilation_5_situation_type,
+                    None,
+                ),
+                sous_type_situation_assimilation_6=getattr(
+                    ChoixAssimilation6,
+                    admission_accounting.assimilation_6_situation_type,
+                    None,
+                ),
+            )
+
+        assimilation_mapping = {
+            AssimilationEnum.UNE.name: TypeSituationAssimilation.AUTORISATION_ETABLISSEMENT_OU_RESIDENT_LONGUE_DUREE,
+            AssimilationEnum.DEUX.name: TypeSituationAssimilation.REFUGIE_OU_APATRIDE_OU_PROTECTION_SUBSIDIAIRE_TEMPORAIRE,
+            AssimilationEnum.TROIS.name: TypeSituationAssimilation.AUTORISATION_SEJOUR_ET_REVENUS_PROFESSIONNELS_OU_REMPLACEMENT,
+            AssimilationEnum.QUATRE.name: TypeSituationAssimilation.PRIS_EN_CHARGE_OU_DESIGNE_CPAS,
+            AssimilationEnum.CINQ.name: TypeSituationAssimilation.PROCHE_A_NATIONALITE_UE_OU_RESPECTE_ASSIMILATIONS_1_A_4,
+            AssimilationEnum.SIX.name: TypeSituationAssimilation.A_BOURSE_ARTICLE_105_PARAGRAPH_2,
+            AssimilationEnum.SEPT.name: TypeSituationAssimilation.RESIDENT_LONGUE_DUREE_UE_HORS_BELGIQUE,
+        }
+
+        if enrolment.assimilation in assimilation_mapping:
+            return AssimilationModel(
+                type_situation_assimilation=assimilation_mapping[enrolment.assimilation],
+                source=AssimilationModel.Source.EPC,
+            )
+
+        return None

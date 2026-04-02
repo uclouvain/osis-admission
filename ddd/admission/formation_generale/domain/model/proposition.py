@@ -71,6 +71,7 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
     SpecifierNouvellesInformationsDecisionFacultaireValidatorList,
 )
 from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import ProfilCandidat
+from admission.ddd.admission.shared_kernel.domain.model.assimilation import Assimilation
 from admission.ddd.admission.shared_kernel.domain.model.complement_formation import ComplementFormationIdentity
 from admission.ddd.admission.shared_kernel.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
@@ -86,8 +87,9 @@ from admission.ddd.admission.shared_kernel.domain.model.motif_refus import Motif
 from admission.ddd.admission.shared_kernel.domain.model.poste_diplomatique import PosteDiplomatiqueIdentity
 from admission.ddd.admission.shared_kernel.domain.model.question_specifique import QuestionSpecifique
 from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
-from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import \
-    IInscriptionsTranslatorService
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
+)
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.domain.service.i_question_specifique import (
     ISuperQuestionSpecifiqueTranslator,
@@ -343,6 +345,7 @@ class Proposition(interface.RootEntity):
         doit_payer_frais_dossier: bool,
         raison_plusieurs_demandes_meme_cycle_meme_annee: str,
         justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee: str,
+        assimilation_passee: Assimilation | None,
     ):
         if doit_payer_frais_dossier:
             self.statut = ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE
@@ -371,6 +374,24 @@ class Proposition(interface.RootEntity):
         self.justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee = (
             justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee
         )
+        if assimilation_passee:
+            self.comptabilite.type_situation_assimilation = assimilation_passee.type_situation_assimilation
+            self.comptabilite.sous_type_situation_assimilation_1 = (
+                assimilation_passee.sous_type_situation_assimilation_1
+            )
+            self.comptabilite.sous_type_situation_assimilation_2 = (
+                assimilation_passee.sous_type_situation_assimilation_2
+            )
+            self.comptabilite.sous_type_situation_assimilation_3 = (
+                assimilation_passee.sous_type_situation_assimilation_3
+            )
+            self.comptabilite.relation_parente = assimilation_passee.relation_parente
+            self.comptabilite.sous_type_situation_assimilation_5 = (
+                assimilation_passee.sous_type_situation_assimilation_5
+            )
+            self.comptabilite.sous_type_situation_assimilation_6 = (
+                assimilation_passee.sous_type_situation_assimilation_6
+            )
 
     def payer_frais_dossier(self):
         self.statut = ChoixStatutPropositionGenerale.CONFIRMEE

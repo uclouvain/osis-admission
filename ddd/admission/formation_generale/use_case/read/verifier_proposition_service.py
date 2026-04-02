@@ -129,6 +129,18 @@ def verifier_proposition(
         annee_inscription_formation_translator=annee_inscription_formation_translator,
     )
 
+    candidat_est_en_poursuite_directe = inscriptions_translator.est_en_poursuite_directe(
+        matricule_candidat=proposition.matricule_candidat,
+        sigle_formation=formation.entity_id.sigle,
+        annee_inscription_formation_translator=annee_inscription_formation_translator,
+    )
+
+    assimilation_passee = inscriptions_translator.recuperer_assimilation_inscription_formation_annee_precedente(
+        matricule_candidat=proposition.matricule_candidat,
+        sigle_formation=proposition.formation_id.sigle,
+        annee_inscription_formation_translator=annee_inscription_formation_translator,
+    )
+
     # WHEN
     VerifierProposition.verifier(
         proposition_candidat=proposition,
@@ -149,6 +161,8 @@ def verifier_proposition(
         inscriptions_evaluations_translator=inscriptions_evaluations_translator,
         candidat_est_inscrit_recemment_ucl=candidat_est_inscrit_recemment_ucl,
         nomas_translator=nomas_translator,
+        assimilation_passee=assimilation_passee,
+        candidat_est_en_poursuite_directe=candidat_est_en_poursuite_directe,
     )
 
     # THEN

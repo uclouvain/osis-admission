@@ -84,6 +84,7 @@ from admission.ddd.admission.formation_generale.domain.validator._should_informa
     ShouldParcoursAnterieurEtreSuffisant,
     ShouldSicPeutDonnerDecision,
 )
+from admission.ddd.admission.shared_kernel.domain.model.assimilation import Assimilation
 from admission.ddd.admission.shared_kernel.domain.model.complement_formation import (
     ComplementFormationIdentity,
 )
@@ -266,6 +267,7 @@ class FormationGeneraleComptabiliteValidatorList(TwoStepsMultipleBusinessExcepti
     a_frequente_recemment_etablissement_communaute_fr: Optional[bool]
     comptabilite: Comptabilite
     formation: Formation
+    assimilation_passee: Assimilation | None
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -286,6 +288,7 @@ class FormationGeneraleComptabiliteValidatorList(TwoStepsMultipleBusinessExcepti
             ShouldAssimilationEtreCompletee(
                 pays_nationalite_ue=self.pays_nationalite_ue,
                 comptabilite=self.comptabilite,
+                assimilation_passee=self.assimilation_passee,
             ),
             ShouldAffiliationsEtreCompletees(
                 affiliation_sport=self.comptabilite.affiliation_sport,

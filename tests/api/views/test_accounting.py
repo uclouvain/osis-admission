@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -61,6 +61,7 @@ from admission.tests.factories.accounting import AccountingFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
+from base.models.enums.academic_type import AcademicTypes
 from base.models.enums.community import CommunityEnum
 from base.models.enums.entity_type import EntityType
 from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
@@ -68,6 +69,9 @@ from base.tests.factories.academic_year import AcademicYearFactory, get_current_
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
 from base.tests.factories.person import PersonFactory
+from epc.models.enums.etat_inscription import EtatInscriptionFormation
+from epc.models.enums.statut_inscription_programme_annuel import StatutInscriptionProgrammAnnuel
+from epc.tests.factories.inscription_programme_annuel import InscriptionProgrammeAnnuelFactory
 from osis_profile.tests.factories.curriculum import (
     EducationalExperienceFactory,
     EducationalExperienceYearFactory,
@@ -117,6 +121,7 @@ general_file_fields = doctorate_file_fields + [
 ]
 
 
+@freezegun.freeze_time('2023-01-01')
 @override_settings(OSIS_DOCUMENT_BASE_URL='http://dummyurl/')
 class DoctorateAccountingAPIViewTestCase(APITestCase):
     file_uuid = uuid.uuid4()
@@ -420,6 +425,18 @@ class DoctorateAccountingAPIViewTestCase(APITestCase):
         self.assertEqual(last_institutes_attended.get('academic_year'), current_year)
         self.assertCountEqual(last_institutes_attended.get('names'), ['First institute', 'Third institute'])
 
+        InscriptionProgrammeAnnuelFactory(
+            etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+            programme__offer__academic_type=AcademicTypes.ACADEMIC.name,
+            statut=StatutInscriptionProgrammAnnuel.ETUDIANT_UCL.name,
+            programme__root_group__academic_year__year=2023,
+            programme_cycle__etudiant__person=self.student,
+        )
+
+        response = self.client.get(self.admission_url)
+        last_institutes_attended = response.json().get('derniers_etablissements_superieurs_communaute_fr_frequentes')
+        self.assertIsNone(last_institutes_attended)
+
     def test_put_accounting_values_with_student(self):
         self.client.force_authenticate(user=self.student.user)
 
@@ -538,6 +555,7 @@ class GeneralAccountingAPIViewTestCase(APITestCase):
             'nom_titulaire_compte': 'Doe',
             'numero_compte_autre_format': '0203040506',
             'code_bic_swift_banque': 'GKCCBEBB',
+            'a_assimilation_meme_formation_annee_precedente': False,
             **cls.general_new_file_uuids,
         }
 
@@ -664,6 +682,7 @@ class GeneralAccountingAPIViewTestCase(APITestCase):
                 'nom_titulaire_compte': 'Doe',
                 'numero_compte_autre_format': '123456789',
                 'code_bic_swift_banque': 'GKCCBEBB',
+                'a_assimilation_meme_formation_annee_precedente': False,
                 **self.general_dto_file_uuids,
             },
         )
@@ -745,6 +764,18 @@ class GeneralAccountingAPIViewTestCase(APITestCase):
         self.assertIsNotNone(last_institutes_attended)
         self.assertEqual(last_institutes_attended.get('academic_year'), current_year)
         self.assertCountEqual(last_institutes_attended.get('names'), ['First institute', 'Third institute'])
+
+        InscriptionProgrammeAnnuelFactory(
+            etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+            programme__offer__academic_type=AcademicTypes.ACADEMIC.name,
+            statut=StatutInscriptionProgrammAnnuel.ETUDIANT_UCL.name,
+            programme__root_group__academic_year__year=2023,
+            programme_cycle__etudiant__person=self.student,
+        )
+
+        response = self.client.get(self.admission_url)
+        last_institutes_attended = response.json().get('derniers_etablissements_superieurs_communaute_fr_frequentes')
+        self.assertIsNone(last_institutes_attended)
 
     def test_get_accounting_with_student_with_ue_nationality(self):
         self.client.force_authenticate(user=self.student.user)

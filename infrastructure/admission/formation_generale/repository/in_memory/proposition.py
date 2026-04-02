@@ -522,4 +522,6 @@ class PropositionInMemoryRepository(
             formation=FormationGeneraleInMemoryTranslator.get(proposition.formation_id),
             profil_candidat_translator=ProfilCandidatInMemoryTranslator(),
             questions_specifiques_translator=QuestionSpecifiqueInMemoryTranslator(),
+            candidat_est_en_poursuite_directe=False,
+            assimilation_passee=None,
         )

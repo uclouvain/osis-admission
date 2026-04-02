@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,30 +23,31 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import List, Optional, Union, Dict
+from typing import Dict, List, Optional, Union
 
 import attr
 
 from admission.ddd.admission.doctorat.preparation.domain.model._comptabilite import Comptabilite as ComptabiliteDoctorat
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AbsenceDeDetteNonCompleteeException,
+    AssimilationNonCompleteeException,
     CarteBancaireRemboursementAutreFormatNonCompleteException,
     CarteBancaireRemboursementIbanNonCompleteException,
     TypeCompteBancaireRemboursementNonCompleteException,
-    AssimilationNonCompleteeException,
 )
+from admission.ddd.admission.formation_generale.domain.model._comptabilite import Comptabilite as ComptabiliteGenerale
+from admission.ddd.admission.shared_kernel.domain.model.assimilation import Assimilation
 from admission.ddd.admission.shared_kernel.dtos.resume import AdmissionComptabiliteDTO
 from admission.ddd.admission.shared_kernel.enums import (
-    ChoixTypeCompteBancaire,
     ChoixAssimilation1,
     ChoixAssimilation2,
     ChoixAssimilation3,
     ChoixAssimilation5,
     ChoixAssimilation6,
+    ChoixTypeCompteBancaire,
     LienParente,
     TypeSituationAssimilation,
 )
-from admission.ddd.admission.formation_generale.domain.model._comptabilite import Comptabilite as ComptabiliteGenerale
 from base.ddd.utils.business_validator import BusinessValidator
 
 
@@ -225,6 +226,7 @@ DEPENDANCES_CHAMPS_ASSIMILATION: Dict[str, Dict[str, List[str]]] = {
 class ShouldAssimilationEtreCompletee(BusinessValidator):
     pays_nationalite_ue: Optional[bool]
     comptabilite: Union[ComptabiliteGenerale, ComptabiliteDoctorat]
+    assimilation_passee: Assimilation | None
 
     def recuperer_champs_requis(self, nom_champ) -> List[str]:
         """Récuperer les champs d'assimilation qui sont requis à partir du nom d'un champ et des données."""
@@ -240,8 +242,7 @@ class ShouldAssimilationEtreCompletee(BusinessValidator):
         return champs_requis + nouveaux_champs_requis
 
     def validate(self, *args, **kwargs):
-        if self.pays_nationalite_ue is False:
-
+        if self.pays_nationalite_ue is False and not self.assimilation_passee:
             if not self.comptabilite.type_situation_assimilation:
                 raise AssimilationNonCompleteeException
 

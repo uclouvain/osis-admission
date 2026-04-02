@@ -49,12 +49,16 @@ from admission.tests.factories.roles import (
     ProgramManagerRoleFactory,
     SicManagementRoleFactory,
 )
+from base.models.enums.academic_type import AcademicTypes
 from base.models.enums.community import CommunityEnum
 from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
 from base.tests.factories.academic_year import AcademicYearFactory, get_current_year
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
+from epc.models.enums.etat_inscription import EtatInscriptionFormation
+from epc.models.enums.statut_inscription_programme_annuel import StatutInscriptionProgrammAnnuel
+from epc.tests.factories.inscription_programme_annuel import InscriptionProgrammeAnnuelFactory
 from reference.tests.factories.country import CountryFactory
 
 
@@ -222,3 +226,17 @@ class DoctorateAccountingDetailViewTestCase(TestCase):
                 'Third institute',
             ],
         )
+
+        InscriptionProgrammeAnnuelFactory(
+            etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+            programme__offer__academic_type=AcademicTypes.ACADEMIC.name,
+            statut=StatutInscriptionProgrammAnnuel.ETUDIANT_UCL.name,
+            programme__root_group__academic_year__year=2023,
+            programme_cycle__etudiant__person=self.doctorate_admission.candidate,
+        )
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.assertIsNone(response.context['accounting']['derniers_etablissements_superieurs_communaute_fr_frequentes'])
