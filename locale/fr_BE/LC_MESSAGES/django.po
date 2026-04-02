@@ -4751,6 +4751,9 @@ msgstr "Gestion des demandes d'inscription"
 msgid "Manager follow-up"
 msgstr "Suivi gestionnaire"
 
+msgid "Manager opinion"
+msgstr "Avis gestionnaire"
+
 msgid ""
 "Mandatory fields are missing in the 'Additional information > Dual bachelor-"
 "master registration (BAMA15)' tab."

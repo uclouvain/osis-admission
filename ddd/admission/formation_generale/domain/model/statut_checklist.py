@@ -27,8 +27,7 @@ from enum import Enum
 from typing import Dict, List, Optional
 
 import attr
-from django.utils.translation import gettext_lazy as _
-from django.utils.translation import pgettext_lazy
+from django.utils.translation import gettext_lazy as _, pgettext_lazy
 
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     BesoinDeDerogation,
@@ -87,8 +86,7 @@ class StatutsChecklistGenerale:
 
 
 INDEX_ONGLETS_CHECKLIST = {
-    onglet: index
-    for index, onglet in enumerate(attr.fields_dict(StatutsChecklistGenerale))  # type: ignore
+    onglet: index for index, onglet in enumerate(attr.fields_dict(StatutsChecklistGenerale))  # type: ignore
 }
 
 
@@ -264,6 +262,19 @@ onglet_parcours_anterieur = ConfigurationOngletChecklist(
             identifiant='TOILETTE',
             libelle=_('Cleaned'),
             statut=ChoixStatutChecklist.GEST_EN_COURS,
+            extra={'en_cours': 'toilette'},
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='AVIS_GESTIONNAIRE',
+            libelle=_('Manager opinion'),
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+            extra={'en_cours': 'avis_gestionnaire'},
+        ),
+        ConfigurationStatutChecklist(
+            identifiant='AVIS_EXPERT',
+            libelle=_('Expert opinion'),
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+            extra={'en_cours': 'avis_expert'},
         ),
         ConfigurationStatutChecklist(
             identifiant='INSUFFISANT',

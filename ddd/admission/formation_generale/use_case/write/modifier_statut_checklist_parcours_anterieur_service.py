@@ -25,33 +25,21 @@
 # ##############################################################################
 import datetime
 
-from admission.ddd.admission.formation_generale.commands import (
-    ModifierStatutChecklistParcoursAnterieurCommand,
-)
+from admission.ddd.admission.formation_generale.commands import ModifierStatutChecklistParcoursAnterieurCommand
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
-from admission.ddd.admission.formation_generale.domain.model.proposition import (
-    PropositionIdentity,
-)
-from admission.ddd.admission.formation_generale.domain.service.i_formation import (
-    IFormationGeneraleTranslator,
-)
-from admission.ddd.admission.formation_generale.repository.i_proposition import (
-    IPropositionRepository,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
-    IProfilCandidatTranslator,
-)
+from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.formation_generale.domain.service.i_formation import IFormationGeneraleTranslator
+from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.shared_kernel.repository.i_titre_acces_selectionnable import (
     ITitreAccesSelectionnableRepository,
 )
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
-from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
-    IExperienceParcoursInterneTranslator,
-)
+from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import IExperienceParcoursInterneTranslator
 
 
 def modifier_statut_checklist_parcours_anterieur(
@@ -100,6 +88,7 @@ def modifier_statut_checklist_parcours_anterieur(
 
     proposition.specifier_statut_checklist_parcours_anterieur(
         statut_checklist_cible=cmd.statut,
+        statut_checklist_cible_extra=cmd.extra,
         titres_acces_selectionnes=titres_acces_selectionnes,
         auteur_modification=cmd.gestionnaire,
         type_formation=formation.type,

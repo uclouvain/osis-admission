@@ -30,9 +30,7 @@ from typing import Dict, List, Optional
 import attr
 
 from admission.ddd.admission.shared_kernel import commands
-from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
-    ExperiencesCVRecuperees,
-)
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
 from osis_common.ddd import interface
 
 
@@ -516,6 +514,7 @@ class RecupererListePaiementsPropositionQuery(interface.QueryRequest):
 class ModifierStatutChecklistParcoursAnterieurCommand(interface.CommandRequest):
     uuid_proposition: str
     statut: str
+    extra: str
     gestionnaire: str
 
 

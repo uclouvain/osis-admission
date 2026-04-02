@@ -40,8 +40,7 @@ from django.urls import reverse
 from django.utils import timezone, translation
 from django.utils.formats import date_format
 from django.utils.functional import cached_property
-from django.utils.translation import gettext, ngettext, override, pgettext
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext, gettext_lazy as _, ngettext, override, pgettext
 from django.views.generic import FormView, TemplateView
 from django.views.generic.base import RedirectView, View
 from django_htmx.http import HttpResponseClientRefresh
@@ -57,9 +56,7 @@ from admission.ddd import MAIL_VERIFICATEUR_CURSUS, MONTANT_FRAIS_DOSSIER
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AnneesCurriculumNonSpecifieesException,
 )
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
-    message_candidat_avec_pae_avant_2015,
-)
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import message_candidat_avec_pae_avant_2015
 from admission.ddd.admission.formation_generale.commands import (
     ApprouverAdmissionParSicCommand,
     ApprouverInscriptionParSicCommand,
@@ -127,9 +124,7 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
     FormationNonTrouveeException,
     TitreAccesEtreSelectionneException,
 )
-from admission.ddd.admission.formation_generale.dtos.proposition import (
-    PropositionGestionnaireDTO,
-)
+from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
 from admission.ddd.admission.shared_kernel.commands import (
     ListerToutesDemandesQuery,
     RechercherParcoursAnterieurQuery,
@@ -146,9 +141,7 @@ from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
 )
 from admission.ddd.admission.shared_kernel.dtos import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.shared_kernel.dtos.liste import DemandeRechercheDTO
-from admission.ddd.admission.shared_kernel.dtos.question_specifique import (
-    QuestionSpecifiqueDTO,
-)
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.shared_kernel.dtos.resume import (
     ResumeEtEmplacementsDocumentsPropositionDTO,
     ResumePropositionDTO,
@@ -216,10 +209,7 @@ from admission.mail_templates.checklist import (
 from admission.models import EPCInjection
 from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
 from admission.models.online_payment import PaymentMethod, PaymentStatus
-from admission.templatetags.admission import (
-    authentication_css_class,
-    bg_class_by_checklist_experience,
-)
+from admission.templatetags.admission import authentication_css_class, bg_class_by_checklist_experience
 from admission.utils import (
     add_close_modal_into_htmx_response,
     get_access_titles_names,
@@ -235,30 +225,19 @@ from admission.views.common.detail_tabs.checklist import (
     PropositionFromResumeMixin,
     change_admission_status,
 )
-from admission.views.common.mixins import (
-    AdmissionFormMixin,
-    AdmissionViewMixin,
-    LoadDossierViewMixin,
-)
+from admission.views.common.mixins import AdmissionFormMixin, AdmissionViewMixin, LoadDossierViewMixin
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from base.utils.utils import format_academic_year
-from ddd.logic.shared_kernel.profil.commands import (
-    RecupererExperiencesParcoursInterneQuery,
-)
+from ddd.logic.shared_kernel.profil.commands import RecupererExperiencesParcoursInterneQuery
 from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import EtudesSecondairesDTO
 from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
-    ExperienceAcademiqueDTO,
-    ExperienceNonAcademiqueDTO,
-)
-from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
-    ExperienceParcoursInterneDTO,
-)
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
 from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
@@ -2028,6 +2007,7 @@ class PastExperiencesStatusView(
                 ModifierStatutChecklistParcoursAnterieurCommand(
                     uuid_proposition=self.admission_uuid,
                     statut=form.cleaned_data['status'],
+                    extra=self.request.GET.get('extra', ''),
                     gestionnaire=self.request.user.person.global_id,
                 )
             )
