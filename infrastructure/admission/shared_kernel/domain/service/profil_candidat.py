@@ -394,18 +394,20 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
     @classmethod
     def _get_academic_experiences_dtos(
         cls,
-        matricule: str,
         has_default_language: bool,
-        uuid_proposition: str,
         experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
+        uuid_proposition: str = '',
         uuid_experience: str = '',
+        matricule: str = '',
     ) -> List[ExperienceAcademiqueDTO]:
         """Returns the DTO of the academic experiences of the given candidate."""
-
+        filters = (
+            {'educational_experience__person__global_id': matricule}
+            if matricule
+            else {'educational_experience__uuid': uuid_experience}
+        )
         educational_experience_years: QuerySet[EducationalExperienceYear] = (
-            EducationalExperienceYear.objects.filter(
-                educational_experience__person__global_id=matricule,
-            )
+            EducationalExperienceYear.objects.filter(**filters)
             .select_related(
                 'academic_year',
                 'educational_experience__country',
@@ -434,11 +436,6 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 educational_experience__educational_valuated_experiences__baseadmission_id=uuid.UUID(
                     str(uuid_proposition)
                 )
-            )
-
-        if uuid_experience:
-            educational_experience_years = educational_experience_years.filter(
-                educational_experience__uuid=uuid_experience,
             )
 
         educational_experience_years = educational_experience_years.annotate(
@@ -831,9 +828,9 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             minimal_years = cls.get_annees_minimum_curriculum(matricule, annee_courante)
 
             academic_experiences_dtos = cls._get_academic_experiences_dtos(
-                matricule,
-                cls.has_default_language(),
-                uuid_proposition,
+                matricule=matricule,
+                has_default_language=cls.has_default_language(),
+                uuid_proposition=uuid_proposition,
                 experiences_cv_recuperees=experiences_cv_recuperees,
             )
 
@@ -862,9 +859,9 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         uuid_proposition: str = None,
     ) -> 'ExperienceAcademiqueDTO':
         experiences = cls._get_academic_experiences_dtos(
-            matricule,
-            cls.has_default_language(),
-            uuid_proposition,
+            matricule=matricule,
+            has_default_language=cls.has_default_language(),
+            uuid_proposition=uuid_proposition,
             uuid_experience=uuid_experience,
         )
 
@@ -1143,10 +1140,10 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             annee_diplome_etudes_secondaires=graduated_from_high_school_year,
             annee_alternative_diplome_etudes_secondaires=high_school_diploma_alternative_year,
             experiences_academiques=cls._get_academic_experiences_dtos(
-                matricule,
-                has_default_language,
-                uuid_proposition,
-                experiences_cv_recuperees,
+                matricule=matricule,
+                has_default_language=has_default_language,
+                uuid_proposition=uuid_proposition,
+                experiences_cv_recuperees=experiences_cv_recuperees,
             ),
             experiences_non_academiques=cls.get_experiences_non_academiques(
                 matricule=matricule,

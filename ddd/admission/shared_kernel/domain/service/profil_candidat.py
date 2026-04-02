@@ -312,9 +312,9 @@ class ProfilCandidat(interface.DomainService):
         cls,
         uuid_experience: str,
         profil_candidat_translator: 'IProfilCandidatTranslator',
-        grade_academique_formation_proposition: str = None,
-        proposition_id=None,
-        matricule_candidat: str = None,
+        grade_academique_formation: str,
+        proposition_id,
+        matricule_candidat: str,
     ) -> None:
         experience = profil_candidat_translator.get_experience_academique(
             matricule=matricule_candidat,
@@ -324,7 +324,21 @@ class ProfilCandidat(interface.DomainService):
 
         ExperienceAcademiquePostSoumissionValidatorList(
             experience_academique=experience,
-            grade_academique_formation_proposition=grade_academique_formation_proposition,
+            grade_academique_formation_proposition=grade_academique_formation,
+        ).validate()
+
+    @classmethod
+    def verifier_experience_academique_curriculum(
+        cls,
+        uuid_experience: str,
+        profil_candidat_translator: 'IProfilCandidatTranslator',
+        grade_academique_formation: str,
+    ) -> None:
+        experience = profil_candidat_translator.get_experience_academique(uuid_experience=uuid_experience)
+
+        ExperienceAcademiquePostSoumissionValidatorList(
+            experience_academique=experience,
+            grade_academique_formation_proposition=grade_academique_formation,
         ).validate()
 
     @classmethod

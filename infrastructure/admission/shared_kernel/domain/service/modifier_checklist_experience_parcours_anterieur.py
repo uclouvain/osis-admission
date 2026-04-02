@@ -54,9 +54,9 @@ class ValidationExperienceParcoursAnterieurService(IValidationExperienceParcours
         uuid_experience: str,
         statut: str,
         profil_candidat_translator: IProfilCandidatTranslator,
+        grade_academique_formation_proposition: str,
         proposition_id: PropositionIdentity = None,
         matricule_candidat: str = None,
-        grade_academique_formation_proposition: str = None,
     ):
         super().modifier_statut_experience_academique(
             proposition_id=proposition_id,
