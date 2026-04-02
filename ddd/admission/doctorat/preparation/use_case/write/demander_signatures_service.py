@@ -119,6 +119,7 @@ def demander_signatures(
         profil_candidat_translator=profil_candidat_translator,
         annee_formation=annee_formation,
         candidat_est_inscrit_recemment_ucl=candidat_est_inscrit_recemment_ucl,
+        inscriptions_translator=inscriptions_translator,
     )
 
     # WHEN

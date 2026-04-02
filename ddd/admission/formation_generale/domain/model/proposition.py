@@ -86,6 +86,8 @@ from admission.ddd.admission.shared_kernel.domain.model.motif_refus import Motif
 from admission.ddd.admission.shared_kernel.domain.model.poste_diplomatique import PosteDiplomatiqueIdentity
 from admission.ddd.admission.shared_kernel.domain.model.question_specifique import QuestionSpecifique
 from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import \
+    IInscriptionsTranslatorService
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.domain.service.i_question_specifique import (
     ISuperQuestionSpecifiqueTranslator,
@@ -1158,6 +1160,7 @@ class Proposition(interface.RootEntity):
         grade_academique_formation_proposition: str,
         annee_formation: AcademicYear,
         identification_dto: IdentificationDTO,
+        inscriptions_translator: IInscriptionsTranslatorService,
     ):
         if self.type_demande == TypeDemande.INSCRIPTION:
             ApprouverInscriptionParSicValidatorList(
@@ -1194,6 +1197,7 @@ class Proposition(interface.RootEntity):
                 verification_experiences_completees=False,
                 grade_academique_formation_proposition=grade_academique_formation_proposition,
                 annee_formation=annee_formation,
+                inscriptions_translator=inscriptions_translator,
             )
         except MultipleBusinessExceptions:
             raise MultipleBusinessExceptions(exceptions=[CurriculumNonCompletePourAcceptationException()])

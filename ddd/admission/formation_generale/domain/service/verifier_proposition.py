@@ -108,6 +108,7 @@ class VerifierProposition(interface.DomainService):
             matricule=proposition_candidat.matricule_candidat,
             annee_courante=annee_courante,
             uuid_proposition=proposition_candidat.entity_id.uuid,
+            inscriptions_translator=inscriptions_translator,
         )
 
         candidat_est_en_poursuite_directe = inscriptions_translator.est_en_poursuite_directe(
@@ -160,10 +161,11 @@ class VerifierProposition(interface.DomainService):
             ),
             partial(
                 profil_candidat_service.verifier_comptabilite_formation_generale,
-                proposition_candidat,
-                profil_candidat_translator,
-                annee_courante,
-                formation,
+                proposition=proposition_candidat,
+                profil_candidat_translator=profil_candidat_translator,
+                annee_courante=annee_courante,
+                formation=formation,
+                inscriptions_translator=inscriptions_translator,
             ),
             partial(
                 profil_candidat_service.verifier_choix_formation_generale,

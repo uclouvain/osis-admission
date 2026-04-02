@@ -244,11 +244,13 @@ class ProfilCandidat(interface.DomainService):
         curriculum_pdf: List[str],
         uuid_proposition: str,
         annee_formation: AcademicYear,
+        inscriptions_translator: IInscriptionsTranslatorService,
     ) -> None:
         curriculum = profil_candidat_translator.get_curriculum(
             matricule=matricule,
             annee_courante=annee_courante,
             uuid_proposition=uuid_proposition,
+            inscriptions_translator=inscriptions_translator,
         )
 
         experiences_academiques_incompletes = VerifierCurriculumDoctorat.recuperer_experiences_academiques_incompletes(
@@ -307,6 +309,7 @@ class ProfilCandidat(interface.DomainService):
         verification_experiences_completees: bool,
         grade_academique_formation_proposition: str,
         annee_formation: AcademicYear,
+        inscriptions_translator: IInscriptionsTranslatorService,
         curriculum_dto: Optional[CurriculumAdmissionDTO] = None,
     ) -> None:
         date_soumission = proposition.soumise_le.date()
@@ -322,6 +325,7 @@ class ProfilCandidat(interface.DomainService):
                 matricule=proposition.matricule_candidat,
                 annee_courante=annee_precedent_formation,
                 uuid_proposition=proposition.entity_id.uuid,
+                inscriptions_translator=inscriptions_translator,
                 experiences_cv_recuperees=ExperiencesCVRecuperees.SEULEMENT_VALORISEES,
             )
             if curriculum_dto is None
@@ -426,6 +430,7 @@ class ProfilCandidat(interface.DomainService):
         verification_experiences_completees: bool,
         grade_academique_formation_proposition: str,
         annee_formation: AcademicYear,
+        inscriptions_translator: IInscriptionsTranslatorService,
         curriculum_dto: Optional[CurriculumAdmissionDTO] = None,
     ) -> None:
         # Le CV est soumis lors de l'envoi de la demande des signatures
@@ -443,6 +448,7 @@ class ProfilCandidat(interface.DomainService):
                 matricule=proposition.matricule_candidat,
                 annee_courante=annee_precedent_formation,
                 uuid_proposition=proposition.entity_id.uuid,
+                inscriptions_translator=inscriptions_translator,
                 experiences_cv_recuperees=ExperiencesCVRecuperees.SEULEMENT_VALORISEES,
             )
             if curriculum_dto is None
@@ -481,10 +487,12 @@ class ProfilCandidat(interface.DomainService):
         proposition,
         profil_candidat_translator: 'IProfilCandidatTranslator',
         annee_courante: int,
+        inscriptions_translator: IInscriptionsTranslatorService,
     ):
         conditions_comptabilite = profil_candidat_translator.get_conditions_comptabilite(
             matricule=proposition.matricule_candidat,
             annee_courante=annee_courante,
+            inscriptions_translator=inscriptions_translator,
         )
 
         ComptabiliteValidatorList(
@@ -502,10 +510,12 @@ class ProfilCandidat(interface.DomainService):
         profil_candidat_translator: 'IProfilCandidatTranslator',
         annee_courante: int,
         formation: Formation,
+        inscriptions_translator: IInscriptionsTranslatorService,
     ):
         conditions_comptabilite = profil_candidat_translator.get_conditions_comptabilite(
             matricule=proposition.matricule_candidat,
             annee_courante=annee_courante,
+            inscriptions_translator=inscriptions_translator,
         )
         FormationGeneraleComptabiliteValidatorList(
             pays_nationalite_ue=conditions_comptabilite.pays_nationalite_ue,

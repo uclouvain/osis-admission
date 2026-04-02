@@ -112,6 +112,7 @@ class ResumeProposition(interface.DomainService):
             annee_courante=annee_courante,
             uuid_proposition=proposition_dto.uuid,
             experiences_cv_recuperees=experiences_cv_recuperees,
+            inscriptions_translator=inscriptions_translator,
         )
 
         parametres_additionnels = {}
@@ -145,6 +146,7 @@ class ResumeProposition(interface.DomainService):
         cls,
         profil_candidat_translator: IProfilCandidatTranslator,
         academic_year_repository: 'IAcademicYearRepository',
+        inscriptions_translator: IInscriptionsTranslatorService,
         proposition_dto: AdmissionPropositionGestionnaireDTO,
         comptabilite_dto: Optional[AdmissionComptabiliteDTO] = None,
         groupe_supervision_dto: Optional[GroupeDeSupervisionDTO] = None,
@@ -170,6 +172,7 @@ class ResumeProposition(interface.DomainService):
             annee_courante=annee_courante,
             uuid_proposition=proposition_dto.uuid,
             experiences_cv_recuperees=experiences_cv_recuperees,
+            inscriptions_translator=inscriptions_translator,
         )
 
         examen_dto = profil_candidat_translator.get_examen(
@@ -210,9 +213,9 @@ class ResumeProposition(interface.DomainService):
         academic_year_repository: 'IAcademicYearRepository',
         groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
         question_specifique_translator: 'IQuestionSpecifiqueTranslator',
+        inscriptions_translator: IInscriptionsTranslatorService,
         experiences_cv_recuperees: Optional[ExperiencesCVRecuperees] = None,
         pour_candidat: bool = False,
-        inscriptions_translator: 'IInscriptionsTranslatorService' = None,
         annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator = None,
     ) -> 'ResumePropositionDTO':
         proposition_dto = proposition_repository.get_dto(entity_id=PropositionDoctoraleIdentity(uuid=uuid_proposition))
@@ -253,6 +256,7 @@ class ResumeProposition(interface.DomainService):
         groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
         question_specifique_translator: 'IQuestionSpecifiqueTranslator',
         unites_enseignement_translator: 'IUnitesEnseignementTranslator',
+        inscriptions_translator: IInscriptionsTranslatorService,
         experiences_cv_recuperees: Optional[ExperiencesCVRecuperees] = None,
     ) -> 'ResumePropositionGestionnaireDTO':
         proposition_dto = proposition_repository.get_dto_for_gestionnaire(
@@ -280,4 +284,5 @@ class ResumeProposition(interface.DomainService):
                 else ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION
             ),
             questions_specifiques_dtos=questions_specifiques_dtos,
+            inscriptions_translator=inscriptions_translator,
         )

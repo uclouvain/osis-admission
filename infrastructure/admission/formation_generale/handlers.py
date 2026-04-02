@@ -339,6 +339,7 @@ COMMAND_HANDLERS = {
         emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
         academic_year_repository=AcademicYearRepository(),
         personne_connue_translator=PersonneConnueUclTranslator(),
+        inscriptions_translator=InscriptionsTranslatorService(),
     ),
     RecupererQuestionsSpecifiquesQuery: lambda msg_bus, cmd: recuperer_questions_specifiques_proposition(
         cmd,
@@ -353,6 +354,7 @@ COMMAND_HANDLERS = {
             question_specifique_translator=QuestionSpecifiqueTranslator(),
             academic_year_repository=AcademicYearRepository(),
             emplacement_document_repository=EmplacementDocumentRepository(),
+            inscriptions_translator=InscriptionsTranslatorService(),
         )
     ),
     ReclamerDocumentsAuCandidatParSICCommand: lambda msg_bus, cmd: reclamer_documents_au_candidat_par_sic(
@@ -374,6 +376,7 @@ COMMAND_HANDLERS = {
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
             emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
+            inscriptions_translator=InscriptionsTranslatorService(),
         )
     ),
     ReclamerDocumentsAuCandidatParFACCommand: lambda msg_bus, cmd: reclamer_documents_au_candidat_par_fac(
@@ -392,6 +395,7 @@ COMMAND_HANDLERS = {
         emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
         academic_year_repository=AcademicYearRepository(),
         personne_connue_translator=PersonneConnueUclTranslator(),
+        inscriptions_translator=InscriptionsTranslatorService(),
     ),
     CompleterEmplacementsDocumentsParCandidatCommand: lambda msg_bus, cmd: (
         completer_emplacements_documents_par_candidat(
@@ -406,6 +410,7 @@ COMMAND_HANDLERS = {
             personne_connue_translator=PersonneConnueUclTranslator(),
             emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
             notification=Notification(),
+            inscriptions_translator=InscriptionsTranslatorService(),
         )
     ),
     InitialiserEmplacementDocumentLibreNonReclamableCommand: lambda msg_bus, cmd: (
@@ -458,6 +463,7 @@ COMMAND_HANDLERS = {
             personne_connue_translator=PersonneConnueUclTranslator(),
             question_specifique_translator=QuestionSpecifiqueTranslator(),
             unites_enseignement_translator=UnitesEnseignementTranslator(),
+            inscriptions_translator=InscriptionsTranslatorService(),
         )
     ),
     SpecifierPaiementNecessaireCommand: lambda msg_bus, cmd: specifier_paiement_necessaire(
@@ -603,6 +609,7 @@ COMMAND_HANDLERS = {
         profil_candidat_translator=ProfilCandidatTranslator(),
         formation_translator=FormationGeneraleTranslator(),
         academic_year_repository=AcademicYearRepository(),
+        inscriptions_translator=InscriptionsTranslatorService(),
     ),
     SpecifierConditionAccesPropositionCommand: lambda msg_bus, cmd: specifier_condition_acces_proposition(
         cmd,
@@ -680,6 +687,7 @@ COMMAND_HANDLERS = {
             emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
+            inscriptions_translator=InscriptionsTranslatorService(),
         )
     ),
     ModifierAuthentificationExperienceNonAcademiqueCommand: (
@@ -760,6 +768,7 @@ COMMAND_HANDLERS = {
             personne_connue_translator=PersonneConnueUclTranslator(),
             experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
             matricule_etudiant_service=MatriculeEtudiantService(),
+            inscriptions_translator=InscriptionsTranslatorService(),
         )
     ),
     ApprouverInscriptionParSicCommand: (
@@ -775,6 +784,7 @@ COMMAND_HANDLERS = {
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
             experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
+            inscriptions_translator=InscriptionsTranslatorService(),
         )
     ),
     EnvoyerEmailApprobationInscriptionAuCandidatCommand: (
@@ -811,6 +821,7 @@ COMMAND_HANDLERS = {
         cmd,
         profil_candidat_translator=ProfilCandidatTranslator(),
         academic_year_repository=AcademicYearRepository(),
+        inscriptions_translator=InscriptionsTranslatorService(),
     ),
     SpecifierDerogationFinancabiliteCommand: (
         lambda msg_bus, cmd: specifier_derogation_financabilite(
@@ -842,6 +853,7 @@ COMMAND_HANDLERS = {
             experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
             formation_translator=FormationGeneraleTranslator(),
             academic_year_repository=AcademicYearRepository(),
+            inscriptions_translator=InscriptionsTranslatorService(),
         )
     ),
     RecupererPeriodeInscriptionSpecifiqueBachelierMedecineDentisterieQuery: (
@@ -869,6 +881,7 @@ COMMAND_HANDLERS = {
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
             emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
+            inscriptions_translator=InscriptionsTranslatorService(),
         )
     ),
     RecupererTypeDemandeQuery: lambda msg_bus, cmd: recuperer_type_demande(

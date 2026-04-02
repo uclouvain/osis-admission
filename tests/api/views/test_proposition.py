@@ -251,7 +251,7 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
             json_response['justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee'],
             'My justification',
         )
-        self.assertEqual(json_response['est_en_poursuite'], True)
+        self.assertTrue(json_response['est_en_poursuite'])
         self.assertEqual(json_response['erreurs'], [])
         self.assertActionLinks(
             links=json_response['links'],

@@ -894,7 +894,7 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
 
         self.assertEqual(len(admission.pdf_recap), 0)
 
-        with self.assertNumQueriesLessThan(20):
+        with self.assertNumQueriesLessThan(21):
             from admission.exports.admission_recap.admission_async_recap import (
                 continuing_education_admission_pdf_recap_from_task,
             )
@@ -919,7 +919,7 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
 
         self.assertEqual(len(admission.pdf_recap), 0)
 
-        with self.assertNumQueriesLessThan(21):
+        with self.assertNumQueriesLessThan(22):
             from admission.exports.admission_recap.admission_async_recap import (
                 general_education_admission_pdf_recap_from_task,
             )
@@ -940,7 +940,7 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
             admission=admission,
         )
 
-        with self.assertNumQueriesLessThan(25):
+        with self.assertNumQueriesLessThan(26):
             self.assertEqual(len(admission.pdf_recap), 0)
 
             from admission.exports.admission_recap.admission_async_recap import (

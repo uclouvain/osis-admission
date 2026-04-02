@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,12 +31,6 @@ from admission.ddd.admission.doctorat.preparation.commands import (
 from admission.ddd.admission.doctorat.preparation.domain.service.i_comptabilite import (
     IComptabiliteTranslator,
 )
-from admission.ddd.admission.doctorat.preparation.domain.service.i_membre_CA import (
-    IMembreCATranslator,
-)
-from admission.ddd.admission.doctorat.preparation.domain.service.i_promoteur import (
-    IPromoteurTranslator,
-)
 from admission.ddd.admission.doctorat.preparation.domain.service.i_question_specifique import (
     IQuestionSpecifiqueTranslator,
 )
@@ -48,6 +42,9 @@ from admission.ddd.admission.doctorat.preparation.repository.i_proposition impor
 )
 from admission.ddd.admission.shared_kernel.domain.service.i_emplacements_documents_proposition import (
     IEmplacementsDocumentsPropositionTranslator,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
 )
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
@@ -72,6 +69,7 @@ def recuperer_documents_proposition(
     academic_year_repository: 'IAcademicYearRepository',
     personne_connue_translator: 'IPersonneConnueUclTranslator',
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
+    inscriptions_translator: IInscriptionsTranslatorService,
 ) -> 'List[EmplacementDocumentDTO]':
     # GIVEN
     resume_dto = ResumeProposition.get_resume_demande_doctorat(
@@ -82,6 +80,7 @@ def recuperer_documents_proposition(
         academic_year_repository=academic_year_repository,
         groupe_supervision_repository=groupe_supervision_repository,
         question_specifique_translator=question_specifique_translator,
+        inscriptions_translator=inscriptions_translator,
     )
 
     # WHEN

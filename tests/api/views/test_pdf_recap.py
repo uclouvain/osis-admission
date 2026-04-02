@@ -120,7 +120,7 @@ class PDFRecapApiTestCase(APITestCase, QueriesAssertionsMixin):
 
     def test_doctorate_admission_doctorate_pdf_recap_using_api_candidate(self):
         self.client.force_authenticate(user=self.candidate)
-        with self.assertNumQueriesLessThan(26):
+        with self.assertNumQueriesLessThan(27):
             response = self.client.get(self.doctorate_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), {'token': 'pdf-token'})
@@ -137,14 +137,14 @@ class PDFRecapApiTestCase(APITestCase, QueriesAssertionsMixin):
 
     def test_admission_master_general_education_pdf_recap_using_api_candidate(self):
         self.client.force_authenticate(user=self.candidate)
-        with self.assertNumQueriesLessThan(21):
+        with self.assertNumQueriesLessThan(22):
             response = self.client.get(self.master_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), {'token': 'pdf-token'})
 
     def test_admission_bachelor_general_education_pdf_recap_using_api_candidate(self):
         self.client.force_authenticate(user=self.candidate)
-        with self.assertNumQueriesLessThan(23):
+        with self.assertNumQueriesLessThan(24):
             response = self.client.get(self.bachelor_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), {'token': 'pdf-token'})
@@ -167,7 +167,7 @@ class PDFRecapApiTestCase(APITestCase, QueriesAssertionsMixin):
 
     def test_admission_continuing_education_pdf_recap_using_api_candidate(self):
         self.client.force_authenticate(user=self.candidate)
-        with self.assertNumQueriesLessThan(21):
+        with self.assertNumQueriesLessThan(22):
             response = self.client.get(self.continuing_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), {'token': 'pdf-token'})
