@@ -529,6 +529,7 @@ class RecupererListePaiementsPropositionQuery(interface.QueryRequest):
 class ModifierStatutChecklistParcoursAnterieurCommand(interface.CommandRequest):
     uuid_proposition: str
     statut: str
+    extra: str
     gestionnaire: str
 
 
