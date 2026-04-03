@@ -401,11 +401,13 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         matricule: str = '',
     ) -> List[ExperienceAcademiqueDTO]:
         """Returns the DTO of the academic experiences of the given candidate."""
-        filters = (
-            {'educational_experience__person__global_id': matricule}
-            if matricule
-            else {'educational_experience__uuid': uuid_experience}
-        )
+        filters = {}
+        if matricule:
+            filters['educational_experience__person__global_id'] = matricule
+        if uuid_experience:
+            filters['educational_experience__uuid'] = uuid_experience
+        if not filters:
+            return []
         educational_experience_years: QuerySet[EducationalExperienceYear] = (
             EducationalExperienceYear.objects.filter(**filters)
             .select_related(
