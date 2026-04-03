@@ -354,10 +354,14 @@ class GeneralEducationAutocompleteTestCase(TrainingDateMockTestCase):
             data={'acronym_or_name': 'informatique 1'},
         )
         self.assertEqual(response.status_code, 200, response.content)
-        self.assertEqual(len(response.json()), 2)
+        self.assertEqual(len(response.json()), 3)
         self.assertCountEqual(
             [training['sigle'] for training in response.json()],
-            [self.current_year_computer_certificate.acronym, self.current_year_computer_master.acronym],
+            [
+                self.current_year_computer_certificate.acronym,
+                self.current_year_computer_master.acronym,
+                self.current_year_computer_master_but_active_for_reenrolment.acronym,
+            ],
         )
 
     def test_autocomplete_general_education_with_campus(self):
@@ -407,13 +411,14 @@ class GeneralEducationAutocompleteTestCase(TrainingDateMockTestCase):
             format='json',
         )
         self.assertEqual(response.status_code, 200, response.content)
-        self.assertEqual(len(response.json()), 3)
+        self.assertEqual(len(response.json()), 4)
         self.assertCountEqual(
             [doctorate['sigle'] for doctorate in response.json()],
             [
                 self.current_year_computer_certificate.acronym,
                 self.current_year_biologist_certificate.acronym,
                 self.current_year_computer_master.acronym,
+                self.current_year_computer_master_but_active_for_reenrolment.acronym,
             ],
         )
 
@@ -425,13 +430,14 @@ class GeneralEducationAutocompleteTestCase(TrainingDateMockTestCase):
             format='json',
         )
         self.assertEqual(response.status_code, 200, response.content)
-        self.assertEqual(len(response.json()), 3)
+        self.assertEqual(len(response.json()), 4)
         self.assertCountEqual(
             [doctorate['sigle'] for doctorate in response.json()],
             [
                 self.current_year_computer_certificate.acronym,
                 self.current_year_biologist_certificate.acronym,
                 self.current_year_computer_master.acronym,
+                self.current_year_computer_master_but_active_for_reenrolment.acronym,
             ],
         )
 

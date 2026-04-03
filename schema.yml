@@ -8798,10 +8798,13 @@ components:
         credits:
           type: integer
           nullable: true
+        active:
+          type: string
         campus_uuid:
           type: string
           default: ''
       required:
+      - active
       - annee
       - code
       - code_domaine
@@ -8850,10 +8853,13 @@ components:
         credits:
           type: integer
           nullable: true
+        active:
+          type: string
         campus_uuid:
           type: string
           default: ''
       required:
+      - active
       - annee
       - code
       - code_domaine

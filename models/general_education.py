@@ -574,6 +574,7 @@ class GeneralEducationAdmission(BaseAdmission):
             'detailed_status',
             'determined_academic_year',
             'determined_pool',
+            'is_in_pursuit',
         ]
 
         if author:
@@ -586,6 +587,7 @@ class GeneralEducationAdmission(BaseAdmission):
             dto: 'InfosDetermineesDTO' = message_bus_instance.invoke(DeterminerAnneeAcademiqueEtPotQuery(self.uuid))
             self.determined_academic_year = AcademicYear.objects.get(year=dto.annee)
             self.determined_pool = dto.pool.name
+            self.is_in_pursuit = dto.est_en_poursuite
 
         self.save(update_fields=update_fields)
 
