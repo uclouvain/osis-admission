@@ -27,8 +27,7 @@
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _
-from django.utils.translation import override, pgettext
+from django.utils.translation import gettext_lazy as _, override, pgettext
 from django.views.generic import FormView, TemplateView
 from django.views.generic.base import View
 from django_htmx.http import HttpResponseClientRefresh
@@ -48,18 +47,15 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
 )
 from admission.forms import disable_unavailable_forms
 from admission.forms.admission.checklist import (
-    CommentForm,
+    AdmissionCommentForm,
     DoctorateFinancabiliteApprovalForm,
     DoctorateFinancabiliteNotFinanceableForm,
     DoctorateFinancabilityDispensationRefusalForm,
     FinancabiliteDispensationForm,
     FinancabiliteNotificationForm,
 )
-from admission.mail_templates import (
-    ADMISSION_EMAIL_FINANCABILITY_DISPENSATION_NOTIFICATION_DOCTORATE,
-)
+from admission.mail_templates import ADMISSION_EMAIL_FINANCABILITY_DISPENSATION_NOTIFICATION_DOCTORATE
 from admission.utils import (
-    add_close_modal_into_htmx_response,
     get_backoffice_admission_url,
     get_portal_admission_url,
     get_salutation_prefix,
@@ -67,12 +63,10 @@ from admission.utils import (
 )
 from admission.views.common.detail_tabs.checklist import change_admission_status
 from admission.views.common.mixins import AdmissionFormMixin
-from admission.views.doctorate.details.checklist.mixins import (
-    CheckListDefaultContextMixin,
-)
+from admission.views.doctorate.details.checklist.mixins import CheckListDefaultContextMixin
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.utils.htmx import HtmxPermissionRequiredMixin
-from base.utils.utils import format_academic_year
+from base.utils.utils import add_close_modal_into_htmx_response, format_academic_year
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile.models.enums.person import ChoixGenre
 
@@ -239,7 +233,7 @@ class FinancabiliteContextMixin(CheckListDefaultContextMixin):
             }
 
             context['comment_forms'] = {
-                'financabilite': CommentForm(
+                'financabilite': AdmissionCommentForm(
                     comment=comments.get('financabilite'),
                     form_url=resolve_url(
                         f'{self.base_namespace}:save-comment',
@@ -249,7 +243,7 @@ class FinancabiliteContextMixin(CheckListDefaultContextMixin):
                     ),
                     prefix='financabilite',
                 ),
-                'financabilite__derogation': CommentForm(
+                'financabilite__derogation': AdmissionCommentForm(
                     comment=comments.get('financabilite__derogation'),
                     form_url=resolve_url(
                         f'{self.base_namespace}:save-comment',

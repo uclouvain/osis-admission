@@ -37,8 +37,8 @@ from admission.constants import DEFAULT_PAGINATOR_SIZE
 from admission.ddd.admission.shared_kernel.commands import ListerToutesDemandesQuery
 from admission.forms.admission.filter import AllAdmissionsFilterForm
 from admission.models.working_list import UNCHANGED_KEY
-from admission.utils import add_messages_into_htmx_response
 from admission.views import ListPaginator
+from base.utils.utils import add_messages_into_htmx_response
 from base.views.common import display_error_messages
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.utils.htmx import HtmxMixin

@@ -36,16 +36,18 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db.models import F, Q
 from django.utils.safestring import mark_safe
-from django.utils.translation import get_language, gettext, ngettext_lazy, override, pgettext, pgettext_lazy
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import (
+    get_language,
+    gettext,
+    gettext_lazy as _,
+    ngettext_lazy,
+    override,
+    pgettext,
+    pgettext_lazy,
+)
 from osis_document_components.utils import is_uuid
 
-from admission.constants import (
-    COMMENT_TAG_FAC,
-    COMMENT_TAG_SIC,
-    CONTEXT_DOCTORATE,
-    CONTEXT_GENERAL,
-)
+from admission.constants import COMMENT_TAG_FAC, COMMENT_TAG_SIC, CONTEXT_DOCTORATE, CONTEXT_GENERAL
 from admission.ddd import DUREE_MAXIMALE_PROGRAMME, DUREE_MINIMALE_PROGRAMME
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     BesoinDeDerogation,
@@ -65,19 +67,12 @@ from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import
     StatutEquivalenceTitreAcces,
     TypeEquivalenceTitreAcces,
 )
-from admission.ddd.admission.shared_kernel.dtos import EtudesSecondairesAdmissionDTO
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
-    EmplacementDocumentDTO,
-)
-from admission.ddd.admission.shared_kernel.dtos.validation_experience_parcours_anterieur import (
-    ValidationExperienceParcoursAnterieurDTO,
-)
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.forms import (
     EMPTY_CHOICE_AS_LIST,
     AdmissionHTMLCharField,
-    AutoGrowTextareaWidget,
     FilterFieldWidget,
     get_academic_year_choices,
     get_initial_choices_for_additional_approval_conditions,
@@ -85,31 +80,21 @@ from admission.forms import (
 from admission.forms.admission.document import ChangeRequestDocumentForm
 from admission.models import DoctorateAdmission, GeneralEducationAdmission
 from admission.models.base import training_campus_subquery
-from admission.models.checklist import (
-    AdditionalApprovalCondition,
-    DoctorateRefusalReason,
-    RefusalReason,
-)
-from admission.views.autocomplete.learning_unit_years import (
-    LearningUnitYearAutocomplete,
-)
+from admission.models.checklist import AdditionalApprovalCondition, DoctorateRefusalReason, RefusalReason
+from admission.views.autocomplete.learning_unit_years import LearningUnitYearAutocomplete
 from admission.views.common.detail_tabs.comments import (
     COMMENT_TAG_CDD_FOR_SIC,
     COMMENT_TAG_FAC_FOR_IUFC,
     COMMENT_TAG_IUFC_FOR_FAC,
     COMMENT_TAG_SIC_FOR_CDD,
 )
-from base.forms.utils import (
-    EMPTY_CHOICE,
-    FIELD_REQUIRED_MESSAGE,
-    autocomplete,
-    get_example_text,
-)
+from base.forms.utils import EMPTY_CHOICE, FIELD_REQUIRED_MESSAGE, autocomplete, get_example_text
 from base.forms.utils.academic_year_field import AcademicYearModelChoiceField
 from base.forms.utils.autocomplete import Select2MultipleWithTagWhenNoResultWidget
 from base.forms.utils.choice_field import BLANK_CHOICE
 from base.forms.utils.datefield import CustomDateInput
 from base.forms.utils.file_field import MaxOneFileUploadField
+from base.forms.widgets import AutoGrowTextareaWidget
 from base.models.academic_year import AcademicYear
 from base.models.education_group_year import EducationGroupYear
 from base.models.enums.education_group_types import TrainingType
@@ -121,85 +106,36 @@ from ddd.logic.financabilite.domain.model.enums.situation import (
     SituationFinancabilite,
 )
 from ddd.logic.learning_unit.commands import LearningUnitAndPartimSearchCommand
-from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
 from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile.forms import DEFAULT_AUTOCOMPLETE_WIDGET_ATTRS
-from osis_profile.models.enums.experience_validation import (
-    ChoixStatutValidationExperience,
-    EtatAuthentificationParcours,
-)
+from osis_profile.forms.comment import CommentForm
 
 FINANCABILITE_REFUS_CATEGORY = 'Finançabilité'
 
 
-class CommentForm(forms.Form):
-    comment = forms.CharField(
-        widget=AutoGrowTextareaWidget(
-            attrs={
-                'rows': 2,
-                'hx-trigger': 'keyup changed delay:2s',
-                'hx-target': 'closest .form-group',
-                'hx-swap': 'outerHTML',
-            }
-        ),
-        required=False,
-    )
-
-    def __init__(self, form_url, comment=None, label=None, permission=None, *args, **kwargs):
-        disabled = kwargs.pop('disabled', False)
-
-        super().__init__(*args, **kwargs)
-
-        comment_type = self.prefix.split('__')[-1]
-
-        self.fields['comment'].widget.attrs['hx-post'] = form_url
-
-        labels = {
-            COMMENT_TAG_SIC: _('SIC comment for the faculty'),
-            COMMENT_TAG_FAC: _('Faculty comment for the SIC'),
-            COMMENT_TAG_IUFC_FOR_FAC: _('IUFC comment for the Faculty'),
-            COMMENT_TAG_FAC_FOR_IUFC: _('Faculty comment for IUFC'),
-            COMMENT_TAG_CDD_FOR_SIC: _('CDD comment for the SIC'),
-            COMMENT_TAG_SIC_FOR_CDD: _('SIC comment for the CDD'),
-            'authentication': _('Comment about the authentication'),
-        }
-
-        labels_from_prefix = {
-            'financabilite__derogation': _('Faculty comment about financability dispensation'),
-            'decision_sic__derogation': _('Non-progression dispensation comment'),
-        }
-
-        permissions = {
-            COMMENT_TAG_SIC: 'admission.checklist_change_sic_comment',
-            COMMENT_TAG_FAC: 'admission.checklist_change_fac_comment',
-            COMMENT_TAG_SIC_FOR_CDD: 'admission.checklist_change_sic_comment',
-            COMMENT_TAG_CDD_FOR_SIC: 'admission.checklist_change_fac_comment',
-            COMMENT_TAG_IUFC_FOR_FAC: 'admission.continuing_checklist_change_iufc_comment',
-            COMMENT_TAG_FAC_FOR_IUFC: 'admission.continuing_checklist_change_fac_comment',
-        }
-
-        if self.prefix in labels_from_prefix:
-            self.fields['comment'].label = labels_from_prefix[self.prefix]
-        else:
-            self.fields['comment'].label = labels.get(comment_type, label or _('Comment'))
-
-        if permission is not None:
-            self.permission = permission
-        else:
-            self.permission = permissions.get(comment_type, 'admission.checklist_change_comment')
-
-        if comment:
-            self.fields['comment'].initial = comment.content
-            self.fields['comment'].label += _(" (last update by {author} on {date} at {time}):").format(
-                author=comment.author or _('an unknown author'),
-                date=comment.modified_at.strftime("%d/%m/%Y"),
-                time=comment.modified_at.strftime("%H:%M"),
-            )
-
-        if disabled:
-            self.fields['comment'].disabled = True
+class AdmissionCommentForm(CommentForm):
+    default_permission = 'admission.checklist_change_comment'
+    extra_labels = {
+        COMMENT_TAG_SIC: _('SIC comment for the faculty'),
+        COMMENT_TAG_FAC: _('Faculty comment for the SIC'),
+        COMMENT_TAG_IUFC_FOR_FAC: _('IUFC comment for the Faculty'),
+        COMMENT_TAG_FAC_FOR_IUFC: _('Faculty comment for IUFC'),
+        COMMENT_TAG_CDD_FOR_SIC: _('CDD comment for the SIC'),
+        COMMENT_TAG_SIC_FOR_CDD: _('SIC comment for the CDD'),
+    }
+    labels_from_prefix = {
+        'financabilite__derogation': _('Faculty comment about financability dispensation'),
+        'decision_sic__derogation': _('Non-progression dispensation comment'),
+    }
+    permissions = {
+        COMMENT_TAG_SIC: 'admission.checklist_change_sic_comment',
+        COMMENT_TAG_FAC: 'admission.checklist_change_fac_comment',
+        COMMENT_TAG_SIC_FOR_CDD: 'admission.checklist_change_sic_comment',
+        COMMENT_TAG_CDD_FOR_SIC: 'admission.checklist_change_fac_comment',
+        COMMENT_TAG_IUFC_FOR_FAC: 'admission.continuing_checklist_change_iufc_comment',
+        COMMENT_TAG_FAC_FOR_IUFC: 'admission.continuing_checklist_change_fac_comment',
+    }
 
 
 class DateInput(forms.DateInput):
@@ -210,12 +146,6 @@ class StatusForm(forms.Form):
     status = forms.ChoiceField(
         choices=ChoixStatutChecklist.choices(),
         required=True,
-    )
-
-
-class ExperienceStatusForm(forms.Form):
-    status = forms.ChoiceField(
-        choices=ChoixStatutValidationExperience.choices_except(ChoixStatutValidationExperience.EN_BROUILLON),
     )
 
 
@@ -1456,35 +1386,6 @@ class FinancabiliteNotificationForm(forms.Form):
                 'language': get_language(),
             }
         )
-
-
-class SinglePastExperienceAuthenticationForm(forms.Form):
-    state = forms.ChoiceField(
-        label=_('Past experiences authentication'),
-        choices=EtatAuthentificationParcours.choices(),
-        required=False,
-        widget=forms.RadioSelect,
-    )
-
-    def __init__(
-        self,
-        experience_validation_data: Union[
-            ValidationExperienceParcoursAnterieurDTO,
-            EtudesSecondairesAdmissionDTO,
-            ExperienceAcademiqueDTO,
-            ExperienceNonAcademiqueDTO,
-            ExamenDTO,
-        ],
-        *args,
-        **kwargs,
-    ):
-        super().__init__(*args, **kwargs)
-
-        self.initial['state'] = experience_validation_data.statut_authentification
-
-        self.prefix = str(experience_validation_data.uuid)
-
-        self.fields['state'].disabled = not experience_validation_data.authentification_en_cours
 
 
 class SendEMailForm(forms.Form):

@@ -623,12 +623,6 @@ COMMAND_HANDLERS = {
             validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur_service,
         )
     ),
-    ModifierStatutChecklistExperienceNonAcademiqueCommand: (
-        lambda msg_bus, cmd: modifier_statut_checklist_experience_non_academique(
-            cmd,
-            validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur_service,
-        )
-    ),
     SpecifierInformationsAcceptationPropositionParSicCommand: (
         lambda msg_bus, cmd: specifier_informations_acceptation_proposition_par_sic(
             cmd,

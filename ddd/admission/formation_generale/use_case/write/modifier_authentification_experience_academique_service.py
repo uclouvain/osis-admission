@@ -23,9 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.formation_generale.commands import (
-    ModifierAuthentificationExperienceAcademiqueCommand,
-)
+from admission.ddd.admission.formation_generale.commands import ModifierAuthentificationExperienceAcademiqueCommand
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )

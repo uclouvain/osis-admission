@@ -32,27 +32,18 @@ from django.conf import settings
 from django.db.models import Q
 from django.shortcuts import resolve_url
 from django.template.defaultfilters import truncatechars
+from django.urls import reverse
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, TemplateView
 from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
 
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
-    OngletsChecklist,
-)
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
-    message_candidat_avec_pae_avant_2015,
-)
-from admission.ddd.admission.shared_kernel.commands import (
-    RechercherParcoursAnterieurQuery,
-)
-from admission.ddd.admission.shared_kernel.dtos.question_specifique import (
-    QuestionSpecifiqueDTO,
-)
-from admission.ddd.admission.shared_kernel.dtos.resume import (
-    ResumePropositionDTO,
-)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import OngletsChecklist
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import message_candidat_avec_pae_avant_2015
+from admission.ddd.admission.shared_kernel.commands import RechercherParcoursAnterieurQuery
+from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
+from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.shared_kernel.enums import Onglets, TypeItemFormulaire
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     DocumentsAssimilation,
@@ -62,57 +53,27 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
 )
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
 from admission.forms import disable_unavailable_forms
-from admission.forms.admission.checklist import (
-    AssimilationForm,
-    CommentForm,
-    SinglePastExperienceAuthenticationForm,
-)
+from admission.forms.admission.checklist import AdmissionCommentForm, AssimilationForm
 from admission.mail_templates import (
     ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CANDIDATE_DOCTORATE,
     ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS_DOCTORATE,
 )
-from admission.models.epc_injection import (
-    EPCInjection,
-    EPCInjectionStatus,
-    EPCInjectionType,
-)
-from admission.templatetags.admission import (
-    authentication_css_class,
-    bg_class_by_checklist_experience,
-)
+from admission.models.epc_injection import EPCInjection, EPCInjectionStatus, EPCInjectionType
+from admission.templatetags.admission import authentication_css_class, bg_class_by_checklist_experience
 from admission.utils import get_salutation_prefix
-from admission.views.common.detail_tabs.checklist import (
-    ChecklistTabIcon,
-    PropositionFromResumeMixin,
-)
-from admission.views.common.detail_tabs.comments import (
-    COMMENT_TAG_CDD_FOR_SIC,
-    COMMENT_TAG_SIC_FOR_CDD,
-)
+from admission.views.common.detail_tabs.checklist import ChecklistTabIcon, PropositionFromResumeMixin
+from admission.views.common.detail_tabs.comments import COMMENT_TAG_CDD_FOR_SIC, COMMENT_TAG_SIC_FOR_CDD
 from admission.views.common.mixins import AdmissionFormMixin
 from admission.views.doctorate.details.checklist.cdd_decision import CddDecisionMixin
-from admission.views.doctorate.details.checklist.financeability import (
-    FinancabiliteContextMixin,
-)
-from admission.views.doctorate.details.checklist.mixins import (
-    get_email,
-    get_internal_experiences,
-)
-from admission.views.doctorate.details.checklist.past_experiences import (
-    PastExperiencesMixin,
-)
-from admission.views.doctorate.details.checklist.projet_recherche import (
-    ProjetRechercheContextMixin,
-)
+from admission.views.doctorate.details.checklist.financeability import FinancabiliteContextMixin
+from admission.views.doctorate.details.checklist.mixins import get_email, get_internal_experiences
+from admission.views.doctorate.details.checklist.past_experiences import PastExperiencesMixin
+from admission.views.doctorate.details.checklist.projet_recherche import ProjetRechercheContextMixin
 from admission.views.doctorate.details.checklist.sic_decision import SicDecisionMixin
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
-    ExperienceAcademiqueDTO,
-    ExperienceNonAcademiqueDTO,
-)
-from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
-    ExperienceParcoursInterneDTO,
-)
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
 from infrastructure.messages_bus import message_bus_instance
+from osis_profile.forms.experience_authentication_statut import ExperienceAuthenticationStatusForm
 from osis_profile.models.enums.experience_validation import EtatAuthentificationParcours
 from osis_profile.utils.curriculum import ElementCurriculumDTO, groupe_curriculum_par_annee_decroissante
 from parcours_interne import etudiants_PCE_avant_2015
@@ -286,7 +247,7 @@ class ChecklistView(
 
             # Add forms
             context['comment_forms'] = {
-                tab_name: CommentForm(
+                tab_name: AdmissionCommentForm(
                     comment=comments.get(tab_name, None),
                     form_url=resolve_url(
                         f'{self.base_namespace}:save-comment',
@@ -356,6 +317,8 @@ class ChecklistView(
 
             # Authentication forms (one by experience)
             context['authentication_forms'] = {}
+            context['authentication_urls'] = {}
+            context['validation_urls'] = {}
 
             extra_tokens = {
                 'sender_name': self.current_user_name,
@@ -405,11 +368,33 @@ class ChecklistView(
                 )
                 context['authentication_forms'].setdefault(
                     experience_uuid,
-                    SinglePastExperienceAuthenticationForm(current_experience),
+                    ExperienceAuthenticationStatusForm(current_experience),
+                )
+                context['authentication_urls'].setdefault(
+                    experience_uuid,
+                    reverse(
+                        f'{self.base_namespace}:single-past-experience-change-authentication',
+                        kwargs={
+                            'experience_type': current_experience.type_experience,
+                            'experience_uuid': str(current_experience.uuid),
+                            'uuid': self.admission_uuid,
+                        },
+                    ),
+                )
+                context['validation_urls'].setdefault(
+                    experience_uuid,
+                    reverse(
+                        f'{self.base_namespace}:single-past-experience-change-status',
+                        kwargs={
+                            'experience_type': current_experience.type_experience,
+                            'experience_uuid': str(current_experience.uuid),
+                            'uuid': self.admission_uuid,
+                        },
+                    ),
                 )
                 context['bg_classes'][tab_identifier] = bg_class_by_checklist_experience(current_experience)
                 context['checklist_tabs'][tab_identifier] = truncatechars(current_experience.titre_formate, 50)
-                context['comment_forms'][tab_identifier] = CommentForm(
+                context['comment_forms'][tab_identifier] = AdmissionCommentForm(
                     comment=comments.get(tab_identifier, None),
                     form_url=resolve_url(
                         f'{self.base_namespace}:save-comment',
@@ -420,7 +405,7 @@ class ChecklistView(
                     prefix=tab_identifier,
                 )
                 authentication_comment_identifier = f'{tab_identifier}__authentication'
-                context['comment_forms'][authentication_comment_identifier] = CommentForm(
+                context['comment_forms'][authentication_comment_identifier] = AdmissionCommentForm(
                     comment=comments.get(authentication_comment_identifier, None),
                     form_url=resolve_url(
                         f'{self.base_namespace}:save-comment',
@@ -602,7 +587,7 @@ class ChecklistView(
 class ChangeExtraView(AdmissionFormMixin, FormView):
     urlpatterns = {'change-checklist-extra': 'change-checklist-extra/<str:tab>'}
     permission_required = 'admission.change_checklist'
-    template_name = 'admission/forms/default_form.html'
+    template_name = 'forms/default_form.html'
 
     def get_form_kwargs(self):
         form_kwargs = super().get_form_kwargs()
