@@ -28,13 +28,12 @@ from typing import Dict, List, Optional
 
 import attr
 
-from admission.ddd.admission.formation_generale.domain.model._comptabilite import (
-    Comptabilite,
-)
+from admission.ddd.admission.formation_generale.domain.model._comptabilite import Comptabilite
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     BesoinDeDerogation,
     ChoixStatutChecklist,
     ChoixStatutPropositionGenerale,
+    PoursuiteDeCycle,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     StatutChecklist,
@@ -73,6 +72,10 @@ from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldTitreAccesEtreSelectionne,
     ShouldVisaEtreComplete,
 )
+from admission.ddd.admission.formation_generale.domain.validator._should_etudiant_deliberations_etre_correct import (
+    ShouldEtudiantNAPasDejaLeDiplome,
+    ShouldEtudiantPremiereAnneeNAPasReussiSonBloc1,
+)
 from admission.ddd.admission.formation_generale.domain.validator._should_examen_etre_completees import (
     ShouldSpecifieExamenSiRequis,
 )
@@ -84,27 +87,18 @@ from admission.ddd.admission.formation_generale.domain.validator._should_informa
     ShouldParcoursAnterieurEtreSuffisant,
     ShouldSicPeutDonnerDecision,
 )
+from admission.ddd.admission.shared_kernel.domain.deliberation import DecisionDeliberation
 from admission.ddd.admission.shared_kernel.domain.model.assimilation import Assimilation
-from admission.ddd.admission.shared_kernel.domain.model.complement_formation import (
-    ComplementFormationIdentity,
-)
+from admission.ddd.admission.shared_kernel.domain.model.complement_formation import ComplementFormationIdentity
 from admission.ddd.admission.shared_kernel.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
     ConditionComplementaireLibreApprobation,
 )
-from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import (
-    TypeEquivalenceTitreAcces,
-)
+from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import TypeEquivalenceTitreAcces
 from admission.ddd.admission.shared_kernel.domain.model.formation import Formation
-from admission.ddd.admission.shared_kernel.domain.model.motif_refus import (
-    MotifRefusIdentity,
-)
-from admission.ddd.admission.shared_kernel.domain.model.poste_diplomatique import (
-    PosteDiplomatiqueIdentity,
-)
-from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import (
-    TitreAccesSelectionnable,
-)
+from admission.ddd.admission.shared_kernel.domain.model.motif_refus import MotifRefusIdentity
+from admission.ddd.admission.shared_kernel.domain.model.poste_diplomatique import PosteDiplomatiqueIdentity
+from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
 from admission.ddd.admission.shared_kernel.domain.validator import (
     ShouldAbsenceDeDetteEtreCompletee,
     ShouldAnneesCVRequisesCompletees,
@@ -119,31 +113,19 @@ from admission.ddd.admission.shared_kernel.domain.validator._should_curriculum_e
     ShouldExperiencesNonAcademiquesAvoirUnCertificat,
 )
 from admission.ddd.admission.shared_kernel.dtos import EtudesSecondairesAdmissionDTO
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
-    EmplacementDocumentDTO,
-)
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
-from base.ddd.utils.business_validator import (
-    BusinessValidator,
-    TwoStepsMultipleBusinessExceptionListValidator,
-)
+from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
 from base.models.enums.education_group_types import TrainingType
-from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
-    AcademicYear,
-)
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     AlternativeSecondairesDTO,
     DiplomeBelgeEtudesSecondairesDTO,
     DiplomeEtrangerEtudesSecondairesDTO,
 )
 from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
-    ExperienceAcademiqueDTO,
-    ExperienceNonAcademiqueDTO,
-)
-from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
-    ExperienceParcoursInterneDTO,
-)
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
 from epc.models.enums.condition_acces import ConditionAcces
 
 
@@ -580,6 +562,9 @@ class ApprouverAdmissionParSicValidatorList(TwoStepsMultipleBusinessExceptionLis
 
     statut_validation_donnees_personnelles: str
 
+    decision_deliberation: DecisionDeliberation
+    poursuite_de_cycle: PoursuiteDeCycle
+
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
@@ -608,6 +593,13 @@ class ApprouverAdmissionParSicValidatorList(TwoStepsMultipleBusinessExceptionLis
             ShouldNePasAvoirDeDocumentReclameImmediat(
                 documents_dto=self.documents_dto,
             ),
+            ShouldEtudiantPremiereAnneeNAPasReussiSonBloc1(
+                decision_deliberation=self.decision_deliberation,
+                poursuite_de_cycle=self.poursuite_de_cycle,
+            ),
+            ShouldEtudiantNAPasDejaLeDiplome(
+                decision_deliberation=self.decision_deliberation,
+            ),
         ]
 
 
@@ -625,6 +617,9 @@ class ApprouverInscriptionParSicValidatorList(TwoStepsMultipleBusinessExceptionL
     documents_dto: List[EmplacementDocumentDTO]
 
     statut_validation_donnees_personnelles: str
+
+    decision_deliberation: DecisionDeliberation
+    poursuite_de_cycle: PoursuiteDeCycle
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -654,6 +649,13 @@ class ApprouverInscriptionParSicValidatorList(TwoStepsMultipleBusinessExceptionL
             ),
             ShouldNePasAvoirDeDocumentReclameImmediat(
                 documents_dto=self.documents_dto,
+            ),
+            ShouldEtudiantPremiereAnneeNAPasReussiSonBloc1(
+                decision_deliberation=self.decision_deliberation,
+                poursuite_de_cycle=self.poursuite_de_cycle,
+            ),
+            ShouldEtudiantNAPasDejaLeDiplome(
+                decision_deliberation=self.decision_deliberation,
             ),
         ]
 

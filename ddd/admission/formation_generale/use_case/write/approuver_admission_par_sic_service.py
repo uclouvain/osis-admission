@@ -31,13 +31,15 @@ from admission.ddd.admission.formation_generale.domain.service.i_historique impo
 from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation import IPDFGeneration
 from admission.ddd.admission.formation_generale.events import AdmissionApprouveeParSicEvent
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
-from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import \
-    IInscriptionsTranslatorService
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
+)
 from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import IMatriculeEtudiantService
 from admission.ddd.admission.shared_kernel.domain.service.resume_proposition import ResumeProposition
 from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire
 from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.shared_kernel.repository.i_emplacement_document import IEmplacementDocumentRepository
+from ddd.logic.deliberation.cloture.domain.service.deliberation import Deliberation
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYearIdentity
 from ddd.logic.shared_kernel.profil.domain.service.i_parcours_interne import IExperienceParcoursInterneTranslator
 
@@ -59,11 +61,16 @@ def approuver_admission_par_sic(
     experience_parcours_interne_translator: 'IExperienceParcoursInterneTranslator',
     matricule_etudiant_service: 'IMatriculeEtudiantService',
     inscriptions_translator: IInscriptionsTranslatorService,
+    deliberation_translator: 'IDeliberationTranslator',
+    unites_enseignement_translator: 'IUnitesEnseignementTranslator',
 ) -> PropositionIdentity:
     # GIVEN
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
-    proposition_dto = proposition_repository.get_dto(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
+    proposition_dto = proposition_repository.get_dto_for_gestionnaire(
+        entity_id=PropositionIdentity(uuid=cmd.uuid_proposition),
+        unites_enseignement_translator=unites_enseignement_translator,
+    )
     identification = profil_candidat_translator.get_identification(proposition.matricule_candidat)
     comptabilite_dto = comptabilite_translator.get_comptabilite_dto(proposition_uuid=cmd.uuid_proposition)
     resume_dto = ResumeProposition.get_resume(
@@ -86,6 +93,11 @@ def approuver_admission_par_sic(
     )
     annee_formation = academic_year_repository.get(entity_id=AcademicYearIdentity(year=proposition.formation_id.annee))
 
+    decision_deliberation = deliberation_translator.recuperer_decision_deliberation(
+        noma=proposition_dto.noma_candidat,
+        sigle_formation=proposition.formation_id.sigle,
+    )
+
     # WHEN
     proposition.approuver_par_sic(
         auteur_modification=cmd.auteur,
@@ -97,6 +109,7 @@ def approuver_admission_par_sic(
         annee_formation=annee_formation,
         identification_dto=identification,
         inscriptions_translator=inscriptions_translator,
+        decision_deliberation=decision_deliberation,
     )
 
     # THEN

@@ -70,6 +70,7 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
     SpecifierInformationsApprobationInscriptionValidatorList,
     SpecifierNouvellesInformationsDecisionFacultaireValidatorList,
 )
+from admission.ddd.admission.shared_kernel.domain.deliberation import DecisionDeliberation
 from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.shared_kernel.domain.model.assimilation import Assimilation
 from admission.ddd.admission.shared_kernel.domain.model.complement_formation import ComplementFormationIdentity
@@ -1184,6 +1185,7 @@ class Proposition(interface.RootEntity):
         annee_formation: AcademicYear,
         identification_dto: IdentificationDTO,
         inscriptions_translator: IInscriptionsTranslatorService,
+        decision_deliberation: DecisionDeliberation,
     ):
         if self.type_demande == TypeDemande.INSCRIPTION:
             ApprouverInscriptionParSicValidatorList(
@@ -1195,6 +1197,8 @@ class Proposition(interface.RootEntity):
                 conditions_complementaires_libres=self.conditions_complementaires_libres,
                 documents_dto=documents_dto,
                 statut_validation_donnees_personnelles=identification_dto.statut_validation_donnees_personnelles,
+                decision_deliberation=decision_deliberation,
+                poursuite_de_cycle=self.poursuite_de_cycle,
             ).validate()
 
         else:
@@ -1209,6 +1213,8 @@ class Proposition(interface.RootEntity):
                 checklist=self.checklist_actuelle,
                 documents_dto=documents_dto,
                 statut_validation_donnees_personnelles=identification_dto.statut_validation_donnees_personnelles,
+                decision_deliberation=decision_deliberation,
+                poursuite_de_cycle=self.poursuite_de_cycle,
             ).validate()
 
         try:

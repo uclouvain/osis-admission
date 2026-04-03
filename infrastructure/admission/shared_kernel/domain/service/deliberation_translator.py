@@ -25,15 +25,24 @@
 # ##############################################################################
 import datetime
 from collections import defaultdict
+from typing import Optional
 
+from admission.ddd.admission.shared_kernel.domain.deliberation import DecisionDeliberation
 from admission.ddd.admission.shared_kernel.domain.service.i_deliberation_translator import IDeliberationTranslator
-from ddd.logic.deliberation.cloture.dto.deliberation import DeliberationCycleDTO, DeliberationProgrammeAnnuelDTO
+from ddd.logic.deliberation.cloture.domain.validator.exceptions import DecisionDeliberationNonTrouveeException
+from ddd.logic.deliberation.cloture.dto.deliberation import (
+    DecisionDeliberationDTO,
+    DeliberationCycleDTO,
+    DeliberationProgrammeAnnuelDTO,
+)
 from ddd.logic.deliberation.cloture.queries import (
     RechercherDeliberationCycleQuery,
     RechercherDeliberationsProgrammesAnnuelsActeesQuery,
+    RecupererDecisionDeliberationQuery,
 )
 from ddd.logic.deliberation.shared_kernel.dto.calendrier_academique import PeriodeDeliberationDTO
 from ddd.logic.deliberation.shared_kernel.queries import GetPeriodeDeliberationQuery
+from epc.models.enums.reussite_bloc1 import ReussiteBloc1
 
 
 class DeliberationTranslator(IDeliberationTranslator):
@@ -95,3 +104,36 @@ class DeliberationTranslator(IDeliberationTranslator):
         )
 
         return periode_deliberation.date_debut
+
+    @classmethod
+    def recuperer_decision_deliberation(
+        cls,
+        noma: str,
+        sigle_formation: str,
+        annee: Optional[int] = None,
+    ) -> DecisionDeliberation:
+        from infrastructure.messages_bus import message_bus_instance
+
+        if not noma:
+            return None
+
+        try:
+            decision_deliberation: 'DecisionDeliberationDTO' = message_bus_instance.invoke(
+                RecupererDecisionDeliberationQuery(
+                    noma=noma,
+                    sigle_formation=sigle_formation,
+                    annee=annee,
+                )
+            )
+        except DecisionDeliberationNonTrouveeException:
+            return DecisionDeliberation(
+                est_diplome=False,
+                reussite_bloc_1=False,
+            )
+
+        return DecisionDeliberation(
+            est_diplome=decision_deliberation.est_diplome,
+            reussite_bloc_1=(
+                True if decision_deliberation.reussite_bloc_1 == ReussiteBloc1.REUSSITE_BLOC1.name else False
+            ),
+        )

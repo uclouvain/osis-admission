@@ -7182,6 +7182,13 @@ msgstr ""
 "L’autorisation ne peut avoir lieu tant qu’un ou plusieurs documents sont à "
 "réclamer immédiatement."
 
+msgid ""
+"The bloc 1 is successful for this training. The student should be in cycle "
+"pursuing"
+msgstr ""
+"Le bloc 1 est réussi pour cette formation. L'étudiant·e doit être en "
+"poursuite de cycle"
+
 #, python-format
 msgid ""
 "The cancel mail has been sent to the candidate the %(date)s by %(sender)s."
@@ -7701,6 +7708,9 @@ msgstr ""
 "Le statut de la demande est actuellement \"{current_status}\". Seuls les "
 "statuts \"{from_statuses}\" permettent de passer à l'état \"{to_status}\" "
 "pour les frais de dossier."
+
+msgid "The student already has a diploma for this training"
+msgstr "L'étudiant·e est déjà diplômé pour cette formation"
 
 msgid "The submitted information is not consistent with information requested."
 msgstr ""
