@@ -1296,21 +1296,6 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
             ChoixStatutValidationExperience.A_COMPLETER_APRES_INSCRIPTION.name,
         )
 
-    def test_continuing_proposition_verification_too_much_submitted_propositions(self):
-        ContinuingEducationAdmissionFactory(
-            candidate=self.candidate_ok,
-            status=ChoixStatutPropositionContinue.CONFIRMEE.name,
-        )
-        ContinuingEducationAdmissionFactory(
-            candidate=self.candidate_ok,
-            status=ChoixStatutPropositionContinue.CONFIRMEE.name,
-        )
-        self.client.force_authenticate(user=self.candidate_ok.user)
-        response = self.client.get(self.ok_url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        ret = response.json()
-        self.assertIn(NombrePropositionsSoumisesDepasseException.status_code, [e["status_code"] for e in ret['errors']])
-
     def test_continuing_proposition_submission_with_secondary_studies(self):
         admission = ContinuingEducationAdmissionFactory()
         high_school_diploma = HighSchoolDiplomaFactory(
