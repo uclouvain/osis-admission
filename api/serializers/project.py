@@ -191,7 +191,6 @@ class FormationGeneraleDTOSerializer(DTOSerializer):
     campus_uuid = serializers.CharField(source='campus.uuid', default='')
     campus_inscription = serializers.CharField(source='campus_inscription.nom', default='')
     grade_academique = None
-    active = None
 
     class Meta:
         source = FormationDTO
@@ -202,7 +201,6 @@ class FormationContinueDTOSerializer(DTOSerializer):
     campus_uuid = serializers.CharField(source='campus.uuid', default='')
     campus_inscription = serializers.CharField(source='campus_inscription.nom', default='')
     grade_academique = None
-    active = None
 
     class Meta:
         source = FormationDTO

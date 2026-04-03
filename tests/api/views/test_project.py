@@ -229,6 +229,7 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
                 'campus_inscription': self.general_education_admission.training.enrollment_campus.name,
                 'sigle_entite_gestion': self.other_commission.acronym,
                 'credits': self.general_education_admission.training.credits,
+                'active': self.continuing_education_admission.training.active,
             },
         )
 
@@ -296,6 +297,7 @@ class DoctorateAdmissionListApiTestCase(QueriesAssertionsMixin, CheckActionLinks
                 'campus_inscription': self.continuing_education_admission.training.enrollment_campus.name,
                 'sigle_entite_gestion': self.other_commission.acronym,
                 'credits': self.continuing_education_admission.training.credits,
+                'active': self.continuing_education_admission.training.active,
             },
         )
 

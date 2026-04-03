@@ -251,3 +251,7 @@ class InscriptionsUCLCandidatService(interface.DomainService):
         )
 
         return any(deliberation.est_diplome for deliberation in deliberations_cycle.values())
+
+    @classmethod
+    def a_suivi_formation(cls, sigle_formation: str, inscriptions: list[InscriptionUCLCandidatDTO]):
+        return any(inscription.sigle_formation == sigle_formation for inscription in inscriptions)

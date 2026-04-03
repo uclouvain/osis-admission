@@ -86,7 +86,7 @@ def determiner_annee_academique_et_pot(
         inscriptions_ucl_candidat=inscriptions_ucl_candidat,
     )
 
-    return calendrier_inscription.determiner_annee_academique_et_pot(
+    informations_determinees = calendrier_inscription.determiner_annee_academique_et_pot(
         formation_id=proposition.formation_id,
         proposition=proposition,
         matricule_candidat=proposition.matricule_candidat,
@@ -94,3 +94,10 @@ def determiner_annee_academique_et_pot(
         profil_candidat_translator=profil_candidat_translator,
         formation=formation,
     )
+
+    informations_determinees.est_en_poursuite = InscriptionsUCLCandidatService.a_suivi_formation(
+        sigle_formation=proposition.formation_id.sigle,
+        inscriptions=inscriptions_ucl_candidat,
+    )
+
+    return informations_determinees

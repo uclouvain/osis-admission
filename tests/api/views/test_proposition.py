@@ -208,6 +208,7 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
             'sigle_entite_gestion': self.commission.acronym,
             'code': self.admission.training.partial_acronym,
             'credits': 180,
+            'active': self.admission.training.active,
         }
         double_degree_scholarship_json = {
             'uuid': str(self.admission.double_degree_scholarship.uuid),
@@ -412,6 +413,7 @@ class ContinuingPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase
             'sigle_entite_gestion': self.commission.acronym,
             'code': self.admission.training.partial_acronym,
             'credits': 180,
+            'active': self.admission.training.active,
         }
         self.assertEqual(json_response['uuid'], str(self.admission.uuid))
         self.assertEqual(json_response['reference'], f'M-CMC22-{str(self.admission)}')
