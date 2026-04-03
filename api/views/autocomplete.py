@@ -220,7 +220,7 @@ class AutocompleteGeneralEducationView(ListAPIView):
                 type_formation=request.GET.get('type'),
                 campus=request.GET.get('campus'),
                 terme_de_recherche=request.GET.get('acronym_or_name'),
-                statuts=[ActiveStatusEnum.ACTIVE.name],
+                statuts=[ActiveStatusEnum.ACTIVE.name, ActiveStatusEnum.RE_REGISTRATION.name],
             )
         )
         serializer = serializers.FormationGeneraleDTOSerializer(instance=education_list, many=True)
