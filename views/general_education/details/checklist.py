@@ -3284,11 +3284,11 @@ class ChecklistView(
 
     @cached_property
     def last_year_internal(self) -> int | None:
-        return self.internal_experiences[0].derniere_annee_du_dernier_cycle()
+        return self.internal_experiences[0].derniere_annee_du_dernier_cycle() if self.internal_experiences else None
 
     @cached_property
     def last_year_1BA_1(self) -> int | None:
-        return self.internal_experiences[0].derniere_annee_1BA_1()
+        return self.internal_experiences[0].derniere_annee_1BA_1() if self.internal_experiences else None
 
     @classmethod
     def checklist_documents_by_tab(cls, specific_questions: List[QuestionSpecifiqueDTO]) -> Dict[str, Set[str]]:

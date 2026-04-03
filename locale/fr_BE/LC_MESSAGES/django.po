@@ -9183,3 +9183,6 @@ msgstr "{obj.dates_formatees} : {obj.fonction} à {obj.employeur}"
 
 msgid "Hide rows"
 msgstr "Cacher lignes"
+
+msgid "Show rows"
+msgstr "Montrer lignes"
