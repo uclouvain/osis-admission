@@ -29,7 +29,6 @@ import freezegun
 from django.test import TestCase
 
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
-    NombrePropositionsSoumisesDepasseException,
     QuestionsSpecifiquesCurriculumNonCompleteesException,
     QuestionsSpecifiquesEtudesSecondairesNonCompleteesException,
     QuestionsSpecifiquesInformationsComplementairesNonCompleteesException,
@@ -38,7 +37,6 @@ from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
 from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.formation_continue.commands import VerifierPropositionQuery
 from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutPropositionContinue,
     ChoixMoyensDecouverteFormation,
 )
 from admission.ddd.admission.formation_continue.domain.model.proposition import PropositionIdentity
@@ -86,19 +84,6 @@ class TestVerifierPropositionService(TestCase):
     def test_should_verifier_etre_ok_si_complet(self):
         proposition_id = self.message_bus.invoke(self.verifier_commande)
         self.assertEqual(proposition_id, self.complete_proposition.entity_id)
-
-    def test_should_verification_renvoyer_erreur_si_trop_de_demandes_envoyees(self):
-        propositions = self.proposition_repository.search(matricule_candidat='0123456789')
-        for proposition in propositions:
-            proposition.statut = ChoixStatutPropositionContinue.EN_BROUILLON
-
-        for proposition_index in range(2):
-            propositions[proposition_index].statut = ChoixStatutPropositionContinue.CONFIRMEE
-
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(VerifierPropositionQuery(uuid_proposition=propositions[2].entity_id.uuid))
-
-        self.assertHasInstance(context.exception.exceptions, NombrePropositionsSoumisesDepasseException)
 
     def test_should_retourner_erreur_si_indication_a_diplome_etudes_secondaires_non_specifiee(self):
         with mock.patch.dict(

@@ -140,8 +140,4 @@ class VerifierProposition(interface.DomainService):
                 pool_soumis=pool_soumis,
                 formation=formation,
             ),
-            partial(
-                maximum_propositions_service.verifier_nombre_propositions_envoyees_formation_continue,
-                matricule=proposition_candidat.matricule_candidat,
-            ),
         )
