@@ -41,9 +41,9 @@ class IValidationExperienceParcoursAnterieurService(interface.DomainService):
         uuid_experience: str,
         statut: str,
         profil_candidat_translator: IProfilCandidatTranslator,
+        grade_academique_formation_proposition: str,
         proposition_id=None,
         matricule_candidat: str = None,
-        grade_academique_formation_proposition: str = None,
     ):
         if statut == ChoixStatutValidationExperience.VALIDEE.name:
             # Une expérience académique ne peut passer à l'état "Validé" que si elle est complète
@@ -52,7 +52,7 @@ class IValidationExperienceParcoursAnterieurService(interface.DomainService):
                 matricule_candidat=matricule_candidat,
                 uuid_experience=uuid_experience,
                 profil_candidat_translator=profil_candidat_translator,
-                grade_academique_formation_proposition=grade_academique_formation_proposition,
+                grade_academique_formation=grade_academique_formation_proposition,
             )
 
     @classmethod
