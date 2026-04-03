@@ -328,6 +328,12 @@ msgstr ""
 msgid "Access title"
 msgstr ""
 
+#, python-format
+msgid ""
+"According to our analysis, you have a maximum of 15 remaining credits from "
+"your bachelor's degree to complete in %(year)s. Do you confirm this analysis?"
+msgstr ""
+
 msgid "Account holder first name"
 msgstr ""
 
@@ -1140,6 +1146,9 @@ msgstr "Chemistry"
 msgid "CIRE, unlimited stay or foreigner`s card"
 msgstr ""
 
+msgid "CO_DIPLOMATION_1260"
+msgstr "1260 € - Joint degree"
+
 msgid "CO_DIPLOMATION_132"
 msgstr "132 € - Joint degree"
 
@@ -1902,6 +1911,9 @@ msgstr ""
 msgid "DISPENSE_VCRC"
 msgstr ""
 
+msgid "DROITS_MAJORES"
+msgstr ""
+
 msgid "DROITS_MAJORES_DEMANDES"
 msgstr ""
 
@@ -2381,6 +2393,9 @@ msgstr ""
 msgid "Dr"
 msgstr ""
 
+msgid "Dual bachelor-master registration (BAMA15)"
+msgstr ""
+
 msgid "Dual degree scholarship"
 msgstr ""
 
@@ -2413,6 +2428,9 @@ msgstr ""
 
 #, python-format
 msgid "ENROLMENT AUTHORISATION<br>for the %(academic_year)s academic year"
+msgstr ""
+
+msgid "EPC"
 msgstr ""
 
 msgid "EPC injection"
@@ -3535,7 +3553,10 @@ msgstr "Enrollment"
 msgid "INSCRIPTION_AU_ROLE"
 msgstr ""
 
-msgid "INSCRIPTION_REGULIERE"
+msgid "INSCRIPTION_REGULIERE_1194"
+msgstr ""
+
+msgid "INSCRIPTION_REGULIERE_835"
 msgstr ""
 
 msgid "INVALID"
@@ -3858,6 +3879,9 @@ msgid "Is an external reorientation"
 msgstr ""
 
 msgid "Is belgian bachelor"
+msgstr ""
+
+msgid "Is concerned by BAMA15"
 msgstr ""
 
 msgid "Is it a Wallonia-Brussels Federation institution?"
@@ -4216,6 +4240,11 @@ msgid "Management of the enrolment applications"
 msgstr ""
 
 msgid "Manager follow-up"
+msgstr ""
+
+msgid ""
+"Mandatory fields are missing in the 'Additional information > Dual bachelor-"
+"master registration (BAMA15)' tab."
 msgstr ""
 
 msgid ""
@@ -5074,6 +5103,13 @@ msgid "Please note that the first term begins on %(date)s."
 msgstr ""
 
 msgid ""
+"Please note that these amounts are currently the subject of a draft decree "
+"under which the Wallonia-Brussels Federation is considering increasing them "
+"(see: <a href=\"https://www.uclouvain.be/en/enrolment/registration-fee-"
+"amount\" target=\"_blank\">The amount of tuition fees</a>)."
+msgstr ""
+
+msgid ""
 "Please note that this document will be removed from the list of the missing "
 "documents."
 msgstr ""
@@ -5244,6 +5280,13 @@ msgid "Proof of equivalency request"
 msgstr ""
 
 msgid "Proof of passing the exam"
+msgstr ""
+
+msgid "Proof of re-enrolment for the bachelor's degree (BAMA15)"
+msgstr ""
+
+#, python-format
+msgid "Proof of re-enrolment for your %(year)s bachelor's degree"
 msgstr ""
 
 msgid "Proof of receipt of unemployment benefit, pension or compensation"
@@ -5842,6 +5885,9 @@ msgid "Secretary"
 msgstr ""
 
 msgid "Sector"
+msgstr ""
+
+msgid "Select a document to display it"
 msgstr ""
 
 #, python-format
@@ -6882,6 +6928,9 @@ msgstr ""
 msgid "The university tuition fee is EURO %(montant)s."
 msgstr "The university tuition fee is €%(montant)s."
 
+msgid "There are no EPC documents for this student."
+msgstr ""
+
 msgid "There can be no more CA members in the supervision group."
 msgstr ""
 "There can be no more supervision committee members in the supervision group."
@@ -6897,6 +6946,9 @@ msgid ""
 msgstr ""
 
 msgid "There is no required exam for this training."
+msgstr ""
+
+msgid "There was an error while getting the EPC documents list."
 msgstr ""
 
 msgid "Thesis field"
@@ -6976,11 +7028,6 @@ msgid "This activity will be refused"
 msgstr ""
 
 msgid "This activity will be restored"
-msgstr ""
-
-msgid ""
-"This amount is subject to change pending the adoption and publication of the "
-"decree setting it."
 msgstr ""
 
 msgid ""

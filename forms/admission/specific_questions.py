@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -38,6 +38,7 @@ from base.forms.utils import FIELD_REQUIRED_MESSAGE, autocomplete
 from base.forms.utils.fields import RadioBooleanField
 from base.forms.utils.file_field import MaxOneFileUploadField
 from base.utils.mark_safe_lazy import mark_safe_lazy
+from base.utils.utils import format_academic_year
 from osis_profile.forms.coordonnees import BaseAddressForm
 
 
@@ -132,6 +133,20 @@ class GeneralSpecificQuestionsForm(CommonSpecificQuestionsForm):
         required=False,
     )
 
+    est_concerne_par_le_bama_15 = RadioBooleanField(
+        label=_(
+            "According to our analysis, you have a maximum of 15 remaining credits from your bachelor's degree to "
+            "complete in %(year)s. Do you confirm this analysis?"
+        ),
+        required=False,
+    )
+
+    preuve_bama_15 = MaxOneFileUploadField(
+        label=_("Proof of re-enrolment for your %(year)s bachelor's degree"),
+        max_files=1,
+        required=False,
+    )
+
     class Media:
         js = ('js/dependsOn.min.js',)
 
@@ -141,11 +156,14 @@ class GeneralSpecificQuestionsForm(CommonSpecificQuestionsForm):
         residential_country,
         display_pool_questions,
         enrolled_for_contingent_training,
+        display_bama_15_questions,
+        training_year,
         *args,
         **kwargs,
     ):
         self.display_pool_questions = display_pool_questions
         self.enrolled_for_contingent_training = enrolled_for_contingent_training
+        self.display_bama_15_questions = display_bama_15_questions
 
         super().__init__(*args, **kwargs)
 
@@ -167,6 +185,17 @@ class GeneralSpecificQuestionsForm(CommonSpecificQuestionsForm):
         else:
             self.fields['poste_diplomatique'].disabled = True
 
+        if self.display_bama_15_questions:
+            self.fields['est_concerne_par_le_bama_15'].required = True
+            label_interpolation_variable = {'year': format_academic_year(training_year)}
+            self.fields['est_concerne_par_le_bama_15'].label = (
+                self.fields['est_concerne_par_le_bama_15'].label % label_interpolation_variable
+            )
+            self.fields['preuve_bama_15'].label = self.fields['preuve_bama_15'].label % label_interpolation_variable
+        else:
+            self.fields['est_concerne_par_le_bama_15'].disabled = True
+            self.fields['preuve_bama_15'].disabled = True
+
         if not self.display_pool_questions:
             for field in [
                 'est_non_resident_au_sens_decret',
@@ -184,6 +213,12 @@ class GeneralSpecificQuestionsForm(CommonSpecificQuestionsForm):
 
     def clean(self):
         data = super().clean()
+
+        if not self.display_bama_15_questions:
+            data['est_concerne_par_le_bama_15'] = None
+
+        if not data.get('est_concerne_par_le_bama_15'):
+            data['preuve_bama_15'] = []
 
         if 'est_non_resident_au_sens_decret' in self.fields and data['est_non_resident_au_sens_decret'] is None:
             self.add_error('est_non_resident_au_sens_decret', FIELD_REQUIRED_MESSAGE)

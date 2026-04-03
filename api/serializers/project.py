@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -191,6 +191,7 @@ class FormationGeneraleDTOSerializer(DTOSerializer):
     campus_uuid = serializers.CharField(source='campus.uuid', default='')
     campus_inscription = serializers.CharField(source='campus_inscription.nom', default='')
     grade_academique = None
+    active = None
 
     class Meta:
         source = FormationDTO
@@ -201,6 +202,7 @@ class FormationContinueDTOSerializer(DTOSerializer):
     campus_uuid = serializers.CharField(source='campus.uuid', default='')
     campus_inscription = serializers.CharField(source='campus_inscription.nom', default='')
     grade_academique = None
+    active = None
 
     class Meta:
         source = FormationDTO
@@ -623,6 +625,8 @@ class GeneralEducationPropositionDTOSerializer(
             'pdf_recapitulatif',
             'documents_additionnels',
             'poste_diplomatique',
+            'est_concerne_par_le_bama_15',
+            'preuve_bama_15',
         ]
 
 

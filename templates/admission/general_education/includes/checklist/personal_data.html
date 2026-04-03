@@ -32,13 +32,13 @@
 {% with tab_statuses_configurations=checklist_tabs_organization.donnees_personnelles can_update_checklist_tab=can_update_personal_data_tab %}
 {% with selected_status_configuration=tab_statuses_configurations|get_item:original_admission.candidate.personal_data_validation_status %}
 
-  {% include 'admission/details/includes/checklist/fraud_ares_status.html' with container_id="donnees_personnelles" %}
   <div
     id="personal-data-statuses"
     class="form-group btn-group status-group"
     role="group"
     hx-swap-oob="true"
   >
+    {% include 'admission/details/includes/checklist/fraud_ares_status.html' with container_id="donnees_personnelles" %}
     {% concat view.base_namespace ':personal-data-change-status' as personal_data_base_url %}
     {% url personal_data_base_url uuid=view.kwargs.uuid as change_status_url %}
 
