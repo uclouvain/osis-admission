@@ -60,8 +60,9 @@
                 <div class="panel-heading" style="display:flex; align-items: baseline; justify-content: space-between;">
                     {% trans 'Previous experience' %}
                     <button id="hide-rows-btn" class="btn btn-default btn-sm" onclick="toggleWhiteAndGreyRows()">
-                        <span id="eye-icon" class="fa-solid fa-eye"></span>
-                        {% trans 'Hide rows' %}
+                        <span id="eye-icon" class="fa-solid fa-eye-slash"></span>
+                        <span id="hide-label">{% trans 'Hide rows' %}</span>
+                        <span id="show-label" class="hidden">{% trans 'Show rows' %}</span>
                     </button>
                 </div>
                 <div class="panel-body" style="overflow: auto;">
@@ -130,9 +131,10 @@
     <script>
     function toggleWhiteAndGreyRows() {
         document.querySelectorAll('tr.bg-parcours-blanc, tr.bg-parcours-gris').forEach(row => row.classList.toggle('hidden'))
-        document.querySelectorAll('#hide-rows-btn').forEach(btn => btn.classList.toggle('active'))
         document.querySelectorAll('#eye-icon').forEach(icon => icon.classList.toggle('fa-eye'))
         document.querySelectorAll('#eye-icon').forEach(icon => icon.classList.toggle('fa-eye-slash'))
+        document.querySelectorAll('#hide-label').forEach(el => el.classList.toggle('hidden'))
+        document.querySelectorAll('#show-label').forEach(el => el.classList.toggle('hidden'))
     }
     </script>
 {% endblock %}
