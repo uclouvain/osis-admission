@@ -221,7 +221,7 @@ from ddd.logic.shared_kernel.profil.commands import (
     ModifierStatutExperienceNonAcademiqueCommand,
     ModifierStatutExperienceParcoursAnterieurCommand,
 )
-from ddd.logic.shared_kernel.profil.commands import RecupererExperiencesParcoursInterneQuery
+from ddd.logic.shared_kernel.profil.queries import RecupererExperiencesParcoursInterneQuery
 from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import EtudesSecondairesDTO
 from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
