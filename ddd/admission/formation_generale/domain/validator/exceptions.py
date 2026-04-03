@@ -415,3 +415,19 @@ class CandidatDejaDiplomeFormationException(BusinessException):
     def __init__(self, **kwargs):
         message = _("You cannot apply for this course because you have already graduated.")
         super().__init__(message, **kwargs)
+
+
+class EtudiantPremiereAnneeADejaSonBloc1Exception(BusinessException):
+    status_code = "FORMATION-GENERALE-45"
+
+    def __init__(self, **kwargs):
+        message = _("The bloc 1 is successful for this training. The student should be in cycle pursuing")
+        super().__init__(message=message, **kwargs)
+
+
+class EtudiantDejaDiplomeException(BusinessException):
+    status_code = "FORMATION-GENERALE-46"
+
+    def __init__(self, **kwargs):
+        message = _("The student already has a diploma for this training")
+        super().__init__(message=message, **kwargs)

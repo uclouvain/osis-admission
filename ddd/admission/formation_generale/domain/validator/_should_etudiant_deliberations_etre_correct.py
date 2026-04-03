@@ -23,50 +23,33 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import datetime
-from abc import abstractmethod
-from typing import Optional
+from typing import List, Optional
 
+import attr
+
+from admission.ddd.admission.formation_generale.domain.model.enums import PoursuiteDeCycle
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
+    EtudiantDejaDiplomeException,
+    EtudiantPremiereAnneeADejaSonBloc1Exception,
+)
 from admission.ddd.admission.shared_kernel.domain.deliberation import DecisionDeliberation
-from ddd.logic.deliberation.cloture.dto.deliberation import DeliberationCycleDTO, DeliberationProgrammeAnnuelDTO
-from osis_common.ddd import interface
+from base.ddd.utils.business_validator import BusinessValidator
 
 
-class IDeliberationTranslator(interface.DomainService):
-    @classmethod
-    @abstractmethod
-    def recuperer_deliberations_cycles(
-        cls,
-        nomas: list[str],
-        annee: int | None = None,
-        sigle_formation: str | None = None,
-    ) -> dict[tuple[str, str], DeliberationCycleDTO]:
-        raise NotImplementedError
+@attr.dataclass(frozen=True, slots=True)
+class ShouldEtudiantPremiereAnneeNAPasReussiSonBloc1(BusinessValidator):
+    decision_deliberation: DecisionDeliberation
+    poursuite_de_cycle: PoursuiteDeCycle
 
-    @classmethod
-    @abstractmethod
-    def recuperer_deliberations_annuelles(
-        cls,
-        nomas: list[str],
-        annee: int,
-        sigle_formation: str = '',
-    ) -> dict[tuple[str, str], dict[int, DeliberationProgrammeAnnuelDTO | None]]:
-        raise NotImplementedError
+    def validate(self, *args, **kwargs):
+        if self.poursuite_de_cycle == PoursuiteDeCycle.NO and self.decision_deliberation.reussite_bloc_1:
+            raise EtudiantPremiereAnneeADejaSonBloc1Exception
 
-    @classmethod
-    @abstractmethod
-    def recuperer_date_debut_periode_deliberation_deuxieme_session(
-        cls,
-        annee: int,
-    ) -> datetime.date:
-        raise NotImplementedError
 
-    @classmethod
-    @abstractmethod
-    def recuperer_decision_deliberation(
-        cls,
-        noma: str,
-        sigle_formation: str,
-        annee: Optional[int] = None,
-    ) -> DecisionDeliberation:
-        raise NotImplementedError
+@attr.dataclass(frozen=True, slots=True)
+class ShouldEtudiantNAPasDejaLeDiplome(BusinessValidator):
+    decision_deliberation: DecisionDeliberation
+
+    def validate(self, *args, **kwargs):
+        if self.decision_deliberation.est_diplome:
+            raise EtudiantDejaDiplomeException
