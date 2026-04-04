@@ -401,7 +401,6 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         matricule: str = '',
     ) -> List[ExperienceAcademiqueDTO]:
         """Returns the DTO of the academic experiences of the given candidate."""
-        filters = {}
         if uuid_experience:
             filters = {'educational_experience__uuid': uuid_experience}
         elif matricule:
