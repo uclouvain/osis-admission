@@ -54,13 +54,13 @@ from admission.ddd import LANGUES_OBLIGATOIRES_DOCTORAT, NB_MOIS_MIN_VAE
 from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO
 from admission.ddd.admission.doctorat.preparation.dtos.connaissance_langue import ConnaissanceLangueDTO
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
+)
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import AdmissionExperienceNonTrouveeException
 from admission.ddd.admission.shared_kernel.dtos import AdressePersonnelleDTO, CoordonneesDTO, IdentificationDTO
 from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
-from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
-    IInscriptionsTranslatorService,
-)
 from admission.ddd.admission.shared_kernel.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.shared_kernel.dtos.resume import ResumeCandidatDTO
 from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
@@ -167,6 +167,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             etat_civil=candidate.civil_state,
             annee_derniere_inscription_ucl=candidate.last_registration_year and candidate.last_registration_year.year,
             noma_derniere_inscription_ucl=candidate.last_registration_id,
+            noma_etudiant=(candidate.student_set.values_list('registration_id', flat=True).first() or ''),
             pays_residence=residential_country,
             autres_prenoms=candidate.middle_name,
             statut_validation_donnees_personnelles=candidate.personal_data_validation_status,
@@ -586,6 +587,8 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                     ).values('country__iso_code')[:1]
                 )
             )
+            .select_related('country_of_citizenship', 'birth_country')
+            .prefetch_related('student_set')
             .get(global_id=matricule)
         )
 

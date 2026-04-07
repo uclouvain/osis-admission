@@ -181,7 +181,7 @@
           {% bootstrap_form comment_forms.donnees_personnelles %}
 
           <div class="info-part">
-            {% include 'admission/exports/recap/includes/person.html' with identification=resume_proposition.identification edit_link_button=person_url|add:next_url %}
+            {% include 'admission/exports/recap/includes/person.html' with identification=resume_proposition.identification display_to_candidate=False is_recent_ucl_student=resume_proposition.candidat_est_etudiant_recent_ucl edit_link_button=person_url|add:next_url %}
             {% include 'admission/exports/recap/includes/coordonnees.html' with coordonnees=resume_proposition.coordonnees edit_link_button=coordonnees_url|add:next_url %}
           </div>
         </div>

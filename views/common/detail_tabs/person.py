@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,7 +31,6 @@ from osis_profile.views.personne import PersonneDetailView
 __all__ = ['AdmissionPersonDetailView']
 
 
-
 class AdmissionPersonDetailView(LoadDossierViewMixin, PersonneDetailView):
     permission_required = 'admission.view_admission_person'
     template_name = 'admission/details/person_backoffice.html'
@@ -43,4 +42,6 @@ class AdmissionPersonDetailView(LoadDossierViewMixin, PersonneDetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['profil_candidat'] = context['admission'].profil_soumis_candidat
+        context['a_compte_interne'] = not self.person.global_id.startswith('8')
+        context['registration_id'] = self.person.student_set.values_list('registration_id', flat=True).first() or ''
         return context
