@@ -38,3 +38,12 @@ class TitreAccesSelectionnableDTO(DTO):
     annee: Optional[int]
     pays_iso_code: str
     nom: str
+
+@attr.dataclass(frozen=True, slots=True)
+class TitreAccesInterneSelectionnableDTO(DTO):
+    type_titre: str
+    selectionne: bool
+    sigle_formation: str
+    annee: Optional[int]
+    pays_iso_code: str
+    nom: str

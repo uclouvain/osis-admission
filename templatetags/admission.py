@@ -104,6 +104,9 @@ from admission.utils import get_access_conditions_url, get_experience_urls
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.enums.civil_state import CivilState
 from base.models.person import Person
+from ddd.logic.dossier_etudiant.read_view.dto.dossier_etudiant import DossierEtudiantLigneHistoriqueDTO
+from ddd.logic.dossier_etudiant.shared_kernel.dto.dossier_etudiant_lignes_annualisees import \
+    DossierEtudiantLignesAnnualiseesDTO
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
 from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
@@ -924,23 +927,6 @@ def input_field_data(label, value, editable=True, mask=None, select_key=None):
     }
 
 
-@register.inclusion_tag(
-    'admission/general_education/includes/checklist/parcours_row_access_title.html',
-    takes_context=True,
-)
-def access_title_checkbox(context, experience_uuid, experience_type, current_year):
-    access_title: Optional[TitreAccesSelectionnableDTO] = context['access_titles'].get(experience_uuid)
-    if access_title and access_title.annee == current_year:
-        return {
-            'url': f'{context["access_title_url"]}?experience_uuid={experience_uuid}&experience_type={experience_type}',
-            'checked': access_title.selectionne,
-            'experience_uuid': experience_uuid,
-            'can_choose_access_title': context['can_choose_access_title'],
-            'can_choose_access_title_tooltip': context.get('can_choose_access_title_tooltip'),
-        }
-    return {}
-
-
 @register.filter
 def document_request_status_css_class(document_request_status):
     return {
@@ -1106,7 +1092,7 @@ def checklist_experience_action_links_context(
         ExperienceAcademiqueDTO,
         ExperienceNonAcademiqueDTO,
         EtudesSecondairesAdmissionDTO,
-        ExperienceParcoursInterneDTO,
+        DossierEtudiantLignesAnnualiseesDTO,
         ExamenDTO,
     ],
     current_year,
@@ -1118,22 +1104,23 @@ def checklist_experience_action_links_context(
 
     result_context = {
         'prefix': prefix,
-        'experience_uuid': str(experience.uuid),
+        'experience_uuid': '',
         'edit_link_button_in_new_tab': getattr(experience, 'epc_experience', False),
         'update_url': '',
         'delete_url': '',
         'duplicate_url': '',
     }
 
-    if isinstance(experience, (ExperienceParcoursInterneDTO, MessageCurriculumDTO)):
+    if isinstance(experience, (DossierEtudiantLignesAnnualiseesDTO, DossierEtudiantLigneHistoriqueDTO, MessageCurriculumDTO)):
         return result_context
 
-    elif (
+    if (
         experience.__class__ in [EtudesSecondairesAdmissionDTO, ExamenDTO]
         or experience.valorisee_par_admissions
         and proposition_uuid in experience.valorisee_par_admissions
         and experience.derniere_annee == current_year
     ):
+        result_context['experience_uuid'] = str(experience.uuid)
         experience_urls = get_experience_urls(
             user=context['request'].user,
             admission=context['view'].admission,
