@@ -53,6 +53,7 @@ from admission.ddd.admission.formation_generale.commands import (
     RechercherFormationGeneraleQuery,
 )
 from admission.ddd.admission.shared_kernel.domain.enums import LISTE_TYPES_FORMATION_GENERALE
+from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
@@ -61,6 +62,7 @@ from base.auth.roles.tutor import Tutor
 from base.models.education_group_year import EducationGroupYear
 from base.models.entity_version import EntityVersion
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from base.models.enums.active_status import ActiveStatusEnum
 from base.models.enums.education_group_categories import Categories
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import SECTOR
@@ -214,13 +216,14 @@ class AutocompleteGeneralEducationView(ListAPIView):
     pagination_class = None
 
     def list(self, request, **kwargs):
-        education_list = message_bus_instance.invoke(
+        education_list: list[FormationDTO] = message_bus_instance.invoke(
             RechercherFormationGeneraleQuery(
                 type_formation=request.GET.get('type'),
                 campus=request.GET.get('campus'),
                 terme_de_recherche=request.GET.get('acronym_or_name'),
             )
         )
+        education_list = [training for training in education_list if training.active == ActiveStatusEnum.ACTIVE.name]
         serializer = serializers.FormationGeneraleDTOSerializer(instance=education_list, many=True)
         return Response(serializer.data)
 
