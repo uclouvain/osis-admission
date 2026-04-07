@@ -562,22 +562,24 @@ class TestVerifierPropositionService(TestCase):
         )
 
     def test_should_verification_etre_ok_si_assimilation_passee(self):
-        with mock.patch(
-            'admission.infrastructure.admission.shared_kernel.domain.service.in_memory.inscriptions_translator.'
-            'InscriptionsInMemoryTranslator.recuperer_assimilation_inscription_formation_annee_precedente',
-            return_value=Assimilation(
-                type_situation_assimilation=TypeSituationAssimilation.A_BOURSE_ARTICLE_105_PARAGRAPH_2,
-                source=Assimilation.Source.EPC,
+        with (
+            mock.patch(
+                'admission.infrastructure.admission.shared_kernel.domain.service.in_memory.inscriptions_translator.'
+                'InscriptionsInMemoryTranslator.recuperer_assimilation_inscription_formation_annee_precedente',
+                return_value=Assimilation(
+                    type_situation_assimilation=TypeSituationAssimilation.A_BOURSE_ARTICLE_105_PARAGRAPH_2,
+                    source=Assimilation.Source.EPC,
+                ),
+            ),
+            mock.patch.object(self.candidat, 'pays_nationalite', 'CA'),
+            mock.patch.object(
+                self.master_proposition,
+                'comptabilite',
+                _ComptabiliteFactory(type_situation_assimilation=None),
             ),
         ):
-            with mock.patch.object(self.candidat, 'pays_nationalite', 'CA'):
-                with mock.patch.object(
-                    self.master_proposition,
-                    'comptabilite',
-                    _ComptabiliteFactory(type_situation_assimilation=None),
-                ):
-                    res = self.message_bus.invoke(self.cmd(uuid='uuid-MASTER-SCI'))
-                    self.assertEqual(res, self.master_proposition.entity_id)
+            res = self.message_bus.invoke(self.cmd(uuid='uuid-MASTER-SCI'))
+            self.assertEqual(res, self.master_proposition.entity_id)
 
     def test_should_retourner_erreur_si_assimilation_incomplete_pour_type_assimilation_1(self):
         comptabilite = _ComptabiliteFactory(
