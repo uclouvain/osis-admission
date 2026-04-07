@@ -60,7 +60,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import Choi
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AnneesCurriculumNonSpecifieesException,
 )
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import message_candidat_avec_pae_avant_2015
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
     message_candidat_avec_pae_avant_2015,
 )
@@ -227,21 +226,18 @@ from base.models.enums.education_group_types import TrainingType
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
 from base.utils.htmx import HtmxPermissionRequiredMixin
-from base.utils.utils import add_close_modal_into_htmx_response, format_academic_year
+from base.utils.utils import add_close_modal_into_htmx_response
+from base.utils.utils import format_academic_year
+from ddd.logic.dossier_etudiant.read_view.dto.dossier_etudiant import DossierEtudiantDTO
+from ddd.logic.dossier_etudiant.read_view.queries import SearchDossierEtudiantQuery
 from ddd.logic.shared_kernel.profil.commands import (
     ModifierStatutEtudesSecondairesCommand,
     ModifierStatutExperienceNonAcademiqueCommand,
     ModifierStatutExperienceParcoursAnterieurCommand,
 )
-from base.utils.utils import format_academic_year
-from ddd.logic.dossier_etudiant.read_view.dto.dossier_etudiant import DossierEtudiantDTO
-from ddd.logic.dossier_etudiant.read_view.queries import SearchDossierEtudiantQuery
 from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import EtudesSecondairesDTO
 from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
-from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
-from ddd.logic.shared_kernel.profil.queries import RecupererExperiencesParcoursInterneQuery
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
