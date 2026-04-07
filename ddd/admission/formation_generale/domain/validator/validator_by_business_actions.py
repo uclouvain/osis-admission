@@ -771,6 +771,7 @@ class FormationGeneraleInformationsComplementairesValidatorList(TwoStepsMultiple
                 est_potentiellement_concerne_par_le_bama_15=self.est_potentiellement_concerne_par_le_bama_15,
                 est_concerne_par_le_bama_15=self.est_concerne_par_le_bama_15,
                 preuve_bama_15=self.preuve_bama_15,
+                candidat_est_inscrit_recemment_ucl=self.candidat_est_inscrit_recemment_ucl,
             ),
         ]
 
