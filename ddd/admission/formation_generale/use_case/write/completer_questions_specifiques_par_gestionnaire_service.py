@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,9 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.shared_kernel.domain.service.i_poste_diplomatique import (
-    IPosteDiplomatiqueTranslator,
-)
 from admission.ddd.admission.formation_generale.commands import (
     CompleterQuestionsSpecifiquesParGestionnaireCommand,
 )
@@ -37,6 +34,9 @@ from admission.ddd.admission.formation_generale.domain.model.proposition import 
 )
 from admission.ddd.admission.formation_generale.repository.i_proposition import (
     IPropositionRepository,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_poste_diplomatique import (
+    IPosteDiplomatiqueTranslator,
 )
 
 
@@ -57,6 +57,8 @@ def completer_questions_specifiques_par_gestionnaire(
         reponses_questions_specifiques=cmd.reponses_questions_specifiques,
         documents_additionnels=cmd.documents_additionnels,
         poste_diplomatique=poste_diplomatique,
+        est_concerne_par_le_bama_15=cmd.est_concerne_par_le_bama_15,
+        preuve_bama_15=cmd.preuve_bama_15,
         est_non_resident_au_sens_decret=cmd.est_non_resident_au_sens_decret,
         est_bachelier_belge=cmd.est_bachelier_belge,
         est_reorientation_inscription_externe=cmd.est_reorientation_inscription_externe,

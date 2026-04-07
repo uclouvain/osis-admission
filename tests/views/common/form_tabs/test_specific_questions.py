@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -55,6 +55,11 @@ from admission.models import ContinuingEducationAdmission, GeneralEducationAdmis
 from admission.tests.factories.continuing_education import (
     ContinuingEducationAdmissionFactory,
     ContinuingEducationTrainingFactory,
+)
+from admission.tests.factories.curriculum import (
+    AdmissionEducationalValuatedExperiencesFactory,
+    EducationalExperienceFactory,
+    EducationalExperienceYearFactory,
 )
 from admission.tests.factories.diplomatic_post import DiplomaticPostFactory
 from admission.tests.factories.form_item import (
@@ -144,6 +149,7 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
             'attestation_inscription_reguliere': uuid.uuid4(),
             'formulaire_reorientation': uuid.uuid4(),
             'documents_additionnels': uuid.uuid4(),
+            'preuve_bama_15': uuid.uuid4(),
         }
 
     def setUp(self):
@@ -220,6 +226,10 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
         # The visa question is not used
         self.assertEqual(form.fields['poste_diplomatique'].disabled, True)
 
+        # The bama 15 questions are not used
+        self.assertEqual(form.fields['est_concerne_par_le_bama_15'].disabled, True)
+        self.assertEqual(form.fields['preuve_bama_15'].disabled, True)
+
         # The pools questions are not used
         self.assertNotIn('est_non_resident_au_sens_decret', form.fields)
         self.assertNotIn('est_bachelier_belge', form.fields)
@@ -229,6 +239,41 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
         self.assertNotIn('est_reorientation_inscription_externe', form.fields)
         self.assertNotIn('attestation_inscription_reguliere', form.fields)
         self.assertNotIn('formulaire_reorientation', form.fields)
+
+        # With a fwb experience
+        experience = EducationalExperienceFactory(
+            person=general_admission.candidate,
+            with_fwb_bachelor_fields=True,
+        )
+        EducationalExperienceYearFactory(
+            educational_experience=experience,
+            academic_year__year=general_admission.determined_academic_year.year - 1,
+        )
+        AdmissionEducationalValuatedExperiencesFactory(
+            educationalexperience=experience,
+            baseadmission=general_admission,
+        )
+
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        form = response.context['form']
+
+        # The bama 15 questions are used
+        self.assertEqual(form.fields['est_concerne_par_le_bama_15'].disabled, False)
+        self.assertEqual(form.fields['preuve_bama_15'].disabled, False)
+        self.assertEqual(
+            form.fields['est_concerne_par_le_bama_15'].label,
+            gettext(
+                "According to our analysis, you have a maximum of 15 remaining credits from your bachelor's degree "
+                "to complete in %(year)s. Do you confirm this analysis?"
+            )
+            % {'year': '2022-2023'},
+        )
+        self.assertEqual(
+            form.fields['preuve_bama_15'].label,
+            gettext("Proof of re-enrolment for your %(year)s bachelor's degree") % {'year': '2022-2023'},
+        )
 
     def test_general_specific_questions_form_initialization_for_a_bachelor(self):
         self.client.force_login(self.sic_manager_user)
@@ -360,6 +405,8 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
                 'attestation_inscription_reguliere_0': [self.file_uuids['attestation_inscription_reguliere']],
                 'formulaire_reorientation_0': [self.file_uuids['formulaire_reorientation']],
                 'documents_additionnels_0': [self.file_uuids['documents_additionnels']],
+                'est_concerne_par_le_bama_15': True,
+                'preuve_bama_15': [self.file_uuids['preuve_bama_15']],
             },
         )
 
@@ -382,6 +429,8 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
         self.assertEqual(general_admission.registration_change_form, [])
         self.assertEqual(general_admission.regular_registration_proof_for_registration_change, [])
         self.assertTrue(general_admission.late_enrollment)
+        self.assertEqual(general_admission.is_concerned_by_bama_15, None)
+        self.assertEqual(general_admission.bama_15_proof, [])
 
         # With diplomatic post
         general_admission.candidate.country_of_citizenship = self.ca_country
@@ -405,6 +454,78 @@ class GeneralSpecificQuestionsFormViewTestCase(TestCase):
         general_admission.refresh_from_db()
 
         self.assertEqual(general_admission.diplomatic_post, self.diplomatic_post)
+
+    def test_general_specific_bama_15_questions_form_submit_with_a_master(self):
+        self.client.force_login(self.sic_manager_user)
+
+        general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
+            training=self.master_training,
+            candidate__language=settings.LANGUAGE_CODE_EN,
+            candidate__id_photo=[],
+            candidate__country_of_citizenship=self.be_country,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+            determined_academic_year=self.academic_years[1],
+            is_non_resident=False,
+            late_enrollment=True,
+        )
+
+        url = resolve_url('admission:general-education:update:specific-questions', uuid=general_admission.uuid)
+        detail_url = resolve_url('admission:general-education:specific-questions', uuid=general_admission.uuid)
+
+        # With bama 15 questions
+        experience = EducationalExperienceFactory(
+            person=general_admission.candidate,
+            with_fwb_bachelor_fields=True,
+        )
+
+        EducationalExperienceYearFactory(
+            educational_experience=experience,
+            academic_year__year=general_admission.determined_academic_year.year - 1,
+        )
+
+        AdmissionEducationalValuatedExperiencesFactory(
+            educationalexperience=experience,
+            baseadmission=general_admission,
+        )
+
+        response = self.client.post(url, data={})
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.context['form']
+
+        self.assertFalse(form.is_valid())
+
+        self.assertIn(FIELD_REQUIRED_MESSAGE, form.errors.get('est_concerne_par_le_bama_15', []))
+
+        response = self.client.post(
+            url,
+            data={
+                'est_concerne_par_le_bama_15': False,
+            },
+        )
+
+        self.assertRedirects(response=response, expected_url=detail_url, fetch_redirect_response=False)
+
+        general_admission.refresh_from_db()
+
+        self.assertEqual(general_admission.is_concerned_by_bama_15, False)
+        self.assertEqual(general_admission.bama_15_proof, [])
+
+        response = self.client.post(
+            url,
+            data={
+                'est_concerne_par_le_bama_15': True,
+                'preuve_bama_15_0': [self.file_uuids['preuve_bama_15']],
+            },
+        )
+
+        self.assertRedirects(response=response, expected_url=detail_url, fetch_redirect_response=False)
+
+        general_admission.refresh_from_db()
+
+        self.assertEqual(general_admission.is_concerned_by_bama_15, True)
+        self.assertEqual(general_admission.bama_15_proof, [self.file_uuids['preuve_bama_15']])
 
     def test_general_specific_questions_form_submit_with_a_bachelor_with_quota(self):
         self.client.force_login(self.sic_manager_user)

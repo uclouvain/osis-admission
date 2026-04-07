@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -196,6 +196,8 @@ class GeneralPropositionViewSetApiTestCase(CheckActionLinksMixin, APITestCase):
         self.assertEqual(json_response['bourse_double_diplome'], double_degree_scholarship_json)
         self.assertEqual(json_response['bourse_internationale'], international_scholarship_json)
         self.assertEqual(json_response['bourse_erasmus_mundus'], erasmus_mundus_scholarship_json)
+        self.assertEqual(json_response['est_concerne_par_le_bama_15'], self.admission.is_concerned_by_bama_15)
+        self.assertEqual(json_response['preuve_bama_15'], [])
         self.assertEqual(json_response['erreurs'], [])
         self.assertActionLinks(
             links=json_response['links'],
