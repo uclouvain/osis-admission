@@ -207,6 +207,8 @@ class InscriptionsTranslatorService(IInscriptionsTranslatorService):
             .first()
         )
 
+        # We only want to retrieve the assimilation (from epc or from admission) if the candidate is enrolled on the
+        # course in year N-1
         if not enrolment:
             return None
 
