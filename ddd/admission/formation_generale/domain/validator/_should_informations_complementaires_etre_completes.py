@@ -67,8 +67,14 @@ class ShouldInformationsBama15EtreCompletees(BusinessValidator):
     est_concerne_par_le_bama_15: bool | None
     preuve_bama_15: list[str]
 
+    candidat_est_inscrit_recemment_ucl: bool
+
     def validate(self, *args, **kwargs):
-        if self.est_potentiellement_concerne_par_le_bama_15 and (
-            self.est_concerne_par_le_bama_15 is None or self.est_concerne_par_le_bama_15 and not self.preuve_bama_15
+        if (
+            self.est_potentiellement_concerne_par_le_bama_15
+            and not self.candidat_est_inscrit_recemment_ucl
+            and (
+                self.est_concerne_par_le_bama_15 is None or self.est_concerne_par_le_bama_15 and not self.preuve_bama_15
+            )
         ):
             raise InformationsBama15NonCompleteesException

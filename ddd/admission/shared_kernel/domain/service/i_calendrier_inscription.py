@@ -244,7 +244,11 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
         ):
             raise FormationNonTrouveeException(formation_id.sigle, determination.annee)
 
-        cls.verifier_periode_inscription_specifique(formation=formation, annee_determinee=determination.annee)
+        cls.verifier_periode_inscription_specifique(
+            formation=formation,
+            annee_determinee=determination.annee,
+            candidat_est_en_poursuite=getattr(proposition, 'est_en_poursuite', None),
+        )
 
         # Vérifier la concordance entre l'année/pool soumis et ceux calculés
         if (
@@ -270,10 +274,16 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
         raise NotImplementedError()
 
     @classmethod
-    def verifier_periode_inscription_specifique(cls, formation: Optional[Formation], annee_determinee: Optional[int]):
+    def verifier_periode_inscription_specifique(
+        cls,
+        formation: Optional[Formation],
+        annee_determinee: Optional[int],
+        candidat_est_en_poursuite: Optional[bool],
+    ):
         """
         Vérifier, si une période d'inscription spécifique est définie pour une formation et une année données,
         si la soumission de la demande est possible.
+        :param candidat_est_en_poursuite: Le candidat continue la formation à laquelle il s'inscrit
         :param formation: La formation souhaitée
         :param annee_determinee: L'année souhaitée
         :return:
@@ -285,7 +295,11 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
         message = gettext('Your application cannot be submitted now.')
         date_jour = datetime.date.today()
 
-        if formation.type == TrainingType.BACHELOR and formation.est_formation_medecine_ou_dentisterie:
+        if (
+            formation.type == TrainingType.BACHELOR
+            and formation.est_formation_medecine_ou_dentisterie
+            and not candidat_est_en_poursuite
+        ):
             periode_inscription = cls.recuperer_periode_inscription_specifique_medecine_dentisterie(
                 annee=annee_determinee
             )

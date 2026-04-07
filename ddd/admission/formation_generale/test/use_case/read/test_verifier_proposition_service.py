@@ -2067,6 +2067,11 @@ class TestVerifierPropositionService(TestCase):
                         ),
                     )
 
+                # Pas de vérification en cas de poursuite
+                with mock.patch.object(self.bachelier_veto_proposition, 'est_en_poursuite', True):
+                    proposition_id = self.message_bus.invoke(self.cmd(self.bachelier_veto_proposition.entity_id.uuid))
+                    self.assertEqual(proposition_id.uuid, self.bachelier_veto_proposition.entity_id.uuid)
+
                 # Pas de vérification pour les bacheliers hors medecine ou dentisterie
                 proposition_id = self.message_bus.invoke(self.cmd(self.bachelier_proposition.entity_id.uuid))
                 self.assertEqual(proposition_id.uuid, self.bachelier_proposition.entity_id.uuid)
@@ -2115,6 +2120,15 @@ class TestVerifierPropositionService(TestCase):
                     self.message_bus.invoke(cmd)
 
                 self.assertHasInstance(context.exception.exceptions, InformationsBama15NonCompleteesException)
+
+                # Pas de question posée si la personne est en réinscription
+                with mock.patch(
+                    'admission.infrastructure.admission.shared_kernel.domain.service.in_memory.'
+                    'inscriptions_translator.InscriptionsInMemoryTranslator.est_inscrit_recemment',
+                    return_value=True,
+                ):
+                    result = self.message_bus.invoke(cmd)
+                    self.assertEqual(result, self.master_proposition.entity_id)
 
         # Pas en situation potentielle de bama 15 et les informations associées sont manquantes
         with mock.patch.multiple(
