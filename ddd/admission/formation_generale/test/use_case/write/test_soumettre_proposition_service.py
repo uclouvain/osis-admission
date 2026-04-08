@@ -34,6 +34,7 @@ from admission.ddd.admission.formation_generale.commands import SoumettreProposi
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
     ChoixStatutPropositionGenerale,
+    PoursuiteDeCycle,
     RaisonPlusieursDemandesMemesCycleEtAnnee,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
@@ -134,6 +135,7 @@ class TestSoumettrePropositionGenerale(TestCase):
             RaisonPlusieursDemandesMemesCycleEtAnnee.SUIVRE_EN_PARALLELE,
         )
         self.assertEqual(updated_proposition.justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee, '1')
+        self.assertEqual(updated_proposition.poursuite_de_cycle, PoursuiteDeCycle.TO_BE_DETERMINED)
 
     @freezegun.freeze_time('2023-11-01')
     def test_should_soumettre_proposition_etre_ok_avec_assimilation_passee(self):

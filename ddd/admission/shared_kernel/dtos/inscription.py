@@ -34,3 +34,4 @@ class InscriptionDTO(interface.DTO):
     annee: int
     noma: str
     est_premiere_annee_bachelier: bool
+    etat_concours_attestation: str

@@ -35,6 +35,10 @@ from base.utils.serializers import DTOSerializer
 class CandidateUCLEnrolmentDTOSerializer(DTOSerializer):
     """Data related to a candidate UCL enrolment."""
 
+    est_premiere_annee_bachelier = None
+    noma = None
+    etat_concours_attestation = None
+
     class Meta:
         source = InscriptionUCLCandidatDTO
 

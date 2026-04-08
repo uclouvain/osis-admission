@@ -59,11 +59,16 @@ class DeliberationTranslator(IDeliberationTranslator):
         cls,
         nomas: list[str],
         annee: int,
+        sigle_formation: str = '',
     ) -> dict[tuple[str, str], dict[int, DeliberationProgrammeAnnuelDTO | None]]:
         from infrastructure.messages_bus import message_bus_instance
 
         annual_deliberations: list[DeliberationProgrammeAnnuelDTO] = message_bus_instance.invoke(
-            RechercherDeliberationsProgrammesAnnuelsActeesQuery(nomas=nomas, annee=annee)
+            RechercherDeliberationsProgrammesAnnuelsActeesQuery(
+                nomas=nomas,
+                annee=annee,
+                sigle_formation=sigle_formation,
+            )
         )
 
         annual_deliberations_dict: dict[tuple[str, str], dict[int, DeliberationProgrammeAnnuelDTO | None]] = (
