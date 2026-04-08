@@ -3763,6 +3763,9 @@ msgstr ""
 msgid "Information about the restriction"
 msgstr ""
 
+msgid "Information not completed by the student"
+msgstr ""
+
 msgid "Information provided to the candidate."
 msgstr ""
 
