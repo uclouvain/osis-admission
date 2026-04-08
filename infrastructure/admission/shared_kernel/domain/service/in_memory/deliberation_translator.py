@@ -44,6 +44,7 @@ class DeliberationInMemoryTranslator(IDeliberationTranslator):
         cls,
         nomas: list[str],
         annee: int,
+        sigle_formation: str = '',
     ) -> dict[tuple[str, str], dict[int, DeliberationProgrammeAnnuelDTO | None]]:
         return {}
 

@@ -32,6 +32,7 @@ from osis_common.ddd import interface
 
 @attr.dataclass(frozen=True, slots=True)
 class InscriptionUCLCandidatDTO(interface.DTO):
+    noma: str
     sigle_formation: str
     intitule_formation_fr: str
     intitule_formation_en: str
@@ -39,6 +40,8 @@ class InscriptionUCLCandidatDTO(interface.DTO):
     lieu_enseignement: str
     annee: int
     est_diplome: bool
+    est_premiere_annee_bachelier: bool
+    etat_concours_attestation: str
 
 
 @attr.dataclass(frozen=True, slots=True)

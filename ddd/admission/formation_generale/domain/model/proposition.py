@@ -346,6 +346,7 @@ class Proposition(interface.RootEntity):
         raison_plusieurs_demandes_meme_cycle_meme_annee: str,
         justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee: str,
         assimilation_passee: Assimilation | None,
+        est_en_poursuite_cycle_bachelier: PoursuiteDeCycle,
     ):
         if doit_payer_frais_dossier:
             self.statut = ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE
@@ -374,6 +375,7 @@ class Proposition(interface.RootEntity):
         self.justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee = (
             justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee
         )
+        self.poursuite_de_cycle = est_en_poursuite_cycle_bachelier
         if assimilation_passee:
             self.comptabilite.type_situation_assimilation = assimilation_passee.type_situation_assimilation
             self.comptabilite.sous_type_situation_assimilation_1 = (
