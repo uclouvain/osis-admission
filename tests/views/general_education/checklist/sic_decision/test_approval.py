@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -39,6 +39,8 @@ from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formatio
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
     ChoixStatutPropositionGenerale,
+    DroitsInscriptionMontant,
+    DispenseOuDroitsMajores,
 )
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.models import GeneralEducationAdmission
@@ -100,9 +102,9 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         )
         cls.original_country_of_citizenship = cls.general_admission.candidate.country_of_citizenship
         cls.experience_uuid = str(cls.general_admission.candidate.educationalexperience_set.first().uuid)
-        cls.general_admission.checklist['current']['parcours_anterieur'][
-            'statut'
-        ] = ChoixStatutChecklist.GEST_REUSSITE.name
+        cls.general_admission.checklist['current']['parcours_anterieur']['statut'] = (
+            ChoixStatutChecklist.GEST_REUSSITE.name
+        )
         cls.general_admission.save()
         cls.url = resolve_url(
             'admission:general-education:sic-decision-approval',
@@ -564,7 +566,7 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
 
         form = response.context['sic_decision_approval_form']
 
-        # Only a subset of the form fields should be displayed and no one is required
+        # Only a subset of the form fields should be displayed and only some are required
         enrolment_fields = [
             'all_additional_approval_conditions',
             'prerequisite_courses',
@@ -576,14 +578,24 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
             'with_prerequisite_courses',
         ]
 
-        self.assertCountEqual(enrolment_fields, list(form.fields.keys()))
+        required_enrolment_fields = [
+            'tuition_fees_amount',
+            'tuition_fees_amount_other',
+            'tuition_fees_dispensation',
+        ]
+
+        self.assertCountEqual(enrolment_fields + required_enrolment_fields, list(form.fields.keys()))
 
         for field in enrolment_fields:
             self.assertFalse(form.fields[field].required)
 
         response = self.client.post(
             url,
-            data={'sic-decision-approval-program_planned_years_number': ''},
+            data={
+                'sic-decision-approval-program_planned_years_number': '',
+                'sic-decision-approval-tuition_fees_amount': DroitsInscriptionMontant.ANCIENS_DROITS_MAJORES_4175.name,
+                'sic-decision-approval-tuition_fees_dispensation': DispenseOuDroitsMajores.REDUCTION_VCRC.name,
+            },
             **self.default_headers,
         )
 
@@ -606,3 +618,11 @@ class SicApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.assertFalse(general_admission.additional_approval_conditions.exists())
         self.assertFalse(general_admission.freeadditionalapprovalcondition_set.exists())
         self.assertFalse(general_admission.prerequisite_courses.exists())
+        self.assertEqual(
+            general_admission.tuition_fees_amount,
+            DroitsInscriptionMontant.ANCIENS_DROITS_MAJORES_4175.name,
+        )
+        self.assertEqual(
+            general_admission.tuition_fees_dispensation,
+            DispenseOuDroitsMajores.REDUCTION_VCRC.name,
+        )

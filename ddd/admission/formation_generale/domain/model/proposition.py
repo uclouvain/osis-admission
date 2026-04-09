@@ -1012,6 +1012,9 @@ class Proposition(interface.RootEntity):
         nombre_annees_prevoir_programme: Optional[int],
         nom_personne_contact_programme_annuel: str,
         email_personne_contact_programme_annuel: str,
+        droits_inscription_montant: str,
+        droits_inscription_montant_autre: Optional[float],
+        dispense_ou_droits_majores: str,
     ):
         """Spécifier les informations d'acceptation par SIC communes entre les admissions et les inscriptions."""
         self.auteur_derniere_modification = auteur_modification
@@ -1046,6 +1049,10 @@ class Proposition(interface.RootEntity):
 
         self.nom_personne_contact_programme_annuel_annuel = nom_personne_contact_programme_annuel
         self.email_personne_contact_programme_annuel_annuel = email_personne_contact_programme_annuel
+
+        self.droits_inscription_montant = droits_inscription_montant
+        self.droits_inscription_montant_autre = droits_inscription_montant_autre
+        self.dispense_ou_droits_majores = dispense_ou_droits_majores
 
     def specifier_informations_acceptation_par_sic(
         self,
@@ -1096,11 +1103,11 @@ class Proposition(interface.RootEntity):
             nombre_annees_prevoir_programme=nombre_annees_prevoir_programme,
             nom_personne_contact_programme_annuel=nom_personne_contact_programme_annuel,
             email_personne_contact_programme_annuel=email_personne_contact_programme_annuel,
+            droits_inscription_montant=droits_inscription_montant,
+            droits_inscription_montant_autre=droits_inscription_montant_autre,
+            dispense_ou_droits_majores=dispense_ou_droits_majores,
         )
 
-        self.droits_inscription_montant = droits_inscription_montant
-        self.droits_inscription_montant_autre = droits_inscription_montant_autre
-        self.dispense_ou_droits_majores = dispense_ou_droits_majores
         self.tarif_particulier = tarif_particulier
         self.refacturation_ou_tiers_payant = refacturation_ou_tiers_payant
         self.annee_de_premiere_inscription_et_statut = annee_de_premiere_inscription_et_statut
@@ -1122,6 +1129,9 @@ class Proposition(interface.RootEntity):
         nombre_annees_prevoir_programme: Optional[int],
         nom_personne_contact_programme_annuel: str,
         email_personne_contact_programme_annuel: str,
+        droits_inscription_montant: str,
+        droits_inscription_montant_autre: Optional[float],
+        dispense_ou_droits_majores: str,
     ):
         SpecifierInformationsApprobationInscriptionValidatorList(
             statut=self.statut,
@@ -1138,6 +1148,9 @@ class Proposition(interface.RootEntity):
             nombre_annees_prevoir_programme=nombre_annees_prevoir_programme,
             nom_personne_contact_programme_annuel=nom_personne_contact_programme_annuel,
             email_personne_contact_programme_annuel=email_personne_contact_programme_annuel,
+            droits_inscription_montant=droits_inscription_montant,
+            droits_inscription_montant_autre=droits_inscription_montant_autre,
+            dispense_ou_droits_majores=dispense_ou_droits_majores,
         )
 
     def specifier_motifs_refus_par_sic(

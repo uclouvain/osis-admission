@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -34,6 +34,10 @@ from admission.ddd.admission.doctorat.preparation.commands import (
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixStatutPropositionDoctorale,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
+    DispenseOuDroitsMajores,
+    DroitsInscriptionMontant,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     SituationPropositionNonSICException,
@@ -94,6 +98,9 @@ class TestSpecifierInformationsAcceptationInscriptionParSic(TestCase):
             'nom_personne_contact_programme_annuel': '',
             'email_personne_contact_programme_annuel': '',
             'gestionnaire': '0123456789',
+            'droits_inscription_montant': '',
+            'droits_inscription_montant_autre': None,
+            'dispense_ou_droits_majores': '',
         }
 
     def test_should_etre_ok_avec_min_informations(self):
@@ -111,6 +118,9 @@ class TestSpecifierInformationsAcceptationInscriptionParSic(TestCase):
         self.assertEqual(proposition.commentaire_complements_formation, '')
         self.assertEqual(proposition.nom_personne_contact_programme_annuel_annuel, '')
         self.assertEqual(proposition.email_personne_contact_programme_annuel_annuel, '')
+        self.assertEqual(proposition.droits_inscription_montant, None)
+        self.assertEqual(proposition.droits_inscription_montant_autre, None)
+        self.assertEqual(proposition.dispense_ou_droits_majores, None)
 
     def test_should_lever_exception_si_statut_proposition_non_valide(self):
         self.proposition.statut = ChoixStatutPropositionDoctorale.TRAITEMENT_FAC
@@ -131,6 +141,9 @@ class TestSpecifierInformationsAcceptationInscriptionParSic(TestCase):
                 nom_personne_contact_programme_annuel='John Doe',
                 email_personne_contact_programme_annuel='john.doe@uclouvain.be',
                 gestionnaire='0123456789',
+                droits_inscription_montant=DroitsInscriptionMontant.AUTRE.name,
+                droits_inscription_montant_autre=10.5,
+                dispense_ou_droits_majores=DispenseOuDroitsMajores.REDUCTION_VCRC.name,
             )
         )
 
@@ -151,3 +164,6 @@ class TestSpecifierInformationsAcceptationInscriptionParSic(TestCase):
         self.assertEqual(proposition.nom_personne_contact_programme_annuel_annuel, 'John Doe')
         self.assertEqual(proposition.email_personne_contact_programme_annuel_annuel, 'john.doe@uclouvain.be')
         self.assertEqual(proposition.auteur_derniere_modification, '0123456789')
+        self.assertEqual(proposition.droits_inscription_montant, DroitsInscriptionMontant.AUTRE)
+        self.assertEqual(proposition.droits_inscription_montant_autre, 10.5)
+        self.assertEqual(proposition.dispense_ou_droits_majores, DispenseOuDroitsMajores.REDUCTION_VCRC)

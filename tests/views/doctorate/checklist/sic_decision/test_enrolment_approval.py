@@ -128,9 +128,6 @@ class SicEnrolmentApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.assertEqual(form.initial.get('annual_program_contact_person_email'), '')
 
         for field in [
-            'tuition_fees_amount',
-            'tuition_fees_amount_other',
-            'tuition_fees_dispensation',
             'is_mobility',
             'mobility_months_amount',
             'must_report_to_sic',
@@ -235,6 +232,9 @@ class SicEnrolmentApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
             'sic-decision-approval-annual_program_contact_person_name': 'John Doe',
             'sic-decision-approval-annual_program_contact_person_email': 'john.doe@example.be',
             'sic-decision-approval-join_program_fac_comment': 'Comment about the join program',
+            'sic-decision-approval-tuition_fees_amount': 'AUTRE',
+            'sic-decision-approval-tuition_fees_amount_other': 10.5,
+            'sic-decision-approval-tuition_fees_dispensation': 'DISPENSE_OFFRE',
         }
 
         response = self.client.post(self.url, data=data, **self.default_headers)
@@ -264,5 +264,8 @@ class SicEnrolmentApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         )
         self.assertEqual(self.admission.annual_program_contact_person_name, 'John Doe')
         self.assertEqual(self.admission.annual_program_contact_person_email, 'john.doe@example.be')
+        self.assertEqual(self.admission.tuition_fees_amount, 'AUTRE')
+        self.assertEqual(self.admission.tuition_fees_amount_other, 10.5)
+        self.assertEqual(self.admission.tuition_fees_dispensation, 'DISPENSE_OFFRE')
         self.assertEqual(self.admission.last_update_author, self.sic_manager_user.person)
         self.assertEqual(self.admission.modified_at, datetime.datetime.now())

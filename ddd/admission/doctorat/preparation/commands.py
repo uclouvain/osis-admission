@@ -769,6 +769,9 @@ class SpecifierInformationsAcceptationInscriptionParSicCommand(interface.Command
     commentaire_complements_formation: str = ''
     nom_personne_contact_programme_annuel: str = ''
     email_personne_contact_programme_annuel: str = ''
+    droits_inscription_montant: str = ''
+    droits_inscription_montant_autre: Optional[float] = None
+    dispense_ou_droits_majores: str = ''
 
 
 @attr.dataclass(frozen=True, slots=True)

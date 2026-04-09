@@ -39,11 +39,13 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import (
     get_language,
     gettext,
-    gettext_lazy as _,
     ngettext_lazy,
     override,
     pgettext,
     pgettext_lazy,
+)
+from django.utils.translation import (
+    gettext_lazy as _,
 )
 from osis_document_components.utils import is_uuid
 
@@ -944,10 +946,10 @@ class CommonSicDecisionApprovalForm(forms.ModelForm):
 
         self.fields['prerequisite_courses'].choices = LearningUnitYearAutocomplete.dtos_to_choices(learning_units)
 
-        self.fields['tuition_fees_amount'].required = True
+        self.fields['tuition_fees_amount'].required = self.is_admission
         self.fields['tuition_fees_amount'].choices = [(None, '-')] + self.fields['tuition_fees_amount'].choices
 
-        self.fields['tuition_fees_dispensation'].required = True
+        self.fields['tuition_fees_dispensation'].required = self.is_admission
         self.fields['tuition_fees_dispensation'].choices = [(None, '-')] + self.fields[
             'tuition_fees_dispensation'
         ].choices
@@ -967,9 +969,6 @@ class CommonSicDecisionApprovalForm(forms.ModelForm):
             del self.fields['must_provide_student_visa_d']
 
         if not self.is_admission:
-            self.fields.pop('tuition_fees_amount', None)
-            self.fields.pop('tuition_fees_amount_other', None)
-            self.fields.pop('tuition_fees_dispensation', None)
             self.fields.pop('is_mobility', None)
             self.fields.pop('mobility_months_amount', None)
             self.fields.pop('must_report_to_sic', None)
