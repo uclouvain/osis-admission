@@ -438,8 +438,11 @@ class PropositionInMemoryRepository(
             candidat_a_plusieurs_demandes=any(
                 proposition.statut == ChoixStatutPropositionGenerale.EN_BROUILLON for proposition in propositions
             ),
-            candidat_assimile=proposition.comptabilite.type_situation_assimilation
+            candidat_assimile=bool(proposition.comptabilite.type_situation_assimilation)
             and proposition.comptabilite.type_situation_assimilation != TypeSituationAssimilation.AUCUNE_ASSIMILATION,
+            situation_assimilation=proposition.comptabilite.type_situation_assimilation.name
+            if proposition.comptabilite.type_situation_assimilation
+            else '',
             est_inscription_tardive=proposition.est_inscription_tardive,
             profil_soumis_candidat=(
                 ProfilCandidatDTO(

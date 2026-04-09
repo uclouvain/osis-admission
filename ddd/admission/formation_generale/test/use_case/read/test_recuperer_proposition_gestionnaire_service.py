@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     PropositionNonTrouveeException,
 )
+from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation
 from admission.infrastructure.message_bus_in_memory import (
     message_bus_in_memory_instance,
 )
@@ -78,6 +79,7 @@ class RecupererPropositionGestionnaireServiceTestCase(TestCase):
         self.assertEqual(result.photo_identite_candidat, ['uuid11'])
         self.assertEqual(result.candidat_a_plusieurs_demandes, False)
         self.assertEqual(result.candidat_assimile, False)
+        self.assertEqual(result.situation_assimilation, TypeSituationAssimilation.AUCUNE_ASSIMILATION.name)
         self.assertEqual(result.est_inscription_tardive, False)
 
     def test_get_proposition_non_trouvee(self):

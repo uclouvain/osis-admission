@@ -40,7 +40,8 @@ from django.urls import reverse
 from django.utils import timezone, translation
 from django.utils.formats import date_format
 from django.utils.functional import cached_property
-from django.utils.translation import gettext, gettext_lazy as _, ngettext, override, pgettext
+from django.utils.translation import gettext, ngettext, override, pgettext
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, TemplateView
 from django.views.generic.base import RedirectView, View
 from django_htmx.http import HttpResponseClientRefresh
@@ -136,7 +137,7 @@ from admission.ddd.admission.shared_kernel.dtos.resume import (
     ResumeEtEmplacementsDocumentsPropositionDTO,
     ResumePropositionDTO,
 )
-from admission.ddd.admission.shared_kernel.enums import Onglets, TypeItemFormulaire
+from admission.ddd.admission.shared_kernel.enums import Onglets, TypeItemFormulaire, TypeSituationAssimilation
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     DocumentsAssimilation,
     DocumentsEtudesSecondaires,
@@ -454,6 +455,16 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
                     for admission in submitted_for_the_current_year_admissions
                     if admission.sigle_formation == self.proposition.formation.sigle
                 ),
+            )
+        )
+
+        assimilation_numero = TypeSituationAssimilation.numero_assimilation(self.proposition.situation_assimilation)
+        checklist_additional_icons['assimilation'].append(
+            ChecklistTabIcon(
+                identifier='numero',
+                icon=f'fa-solid fa-circle-{assimilation_numero}' if assimilation_numero else 'fa-solid fa-ban',
+                displayed=True,
+                title='',
             )
         )
 
@@ -3296,8 +3307,7 @@ class ChecklistView(
                         )
 
                 context['dernieres_vues_par'] = (
-                    AdmissionViewer.objects
-                    .filter(
+                    AdmissionViewer.objects.filter(
                         admission=self.admission,
                         viewed_at__gte=timezone.now() - datetime.timedelta(hours=1),
                     )

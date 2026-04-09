@@ -32,7 +32,6 @@ from django.test import TestCase, override_settings
 from django.utils.translation import pgettext
 from osis_history.models import HistoryEntry
 
-from admission.ddd.admission.formation_continue.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.formation_generale.commands import RecupererPropositionGestionnaireQuery
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
@@ -201,6 +200,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         self.assertEqual(result.est_inscription_tardive, None)
         self.assertEqual(result.candidat_vip, False)
         self.assertEqual(result.candidat_assimile, False)
+        self.assertEqual(result.situation_assimilation, self.admission.accounting.assimilation_situation)
         self.assertEqual(result.est_concerne_par_le_bama_15, True)
         self.assertEqual(result.preuve_bama_15, self.file_uuids['bama_15_proof'])
 
@@ -283,6 +283,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
 
         result = self._get_command_result()
         self.assertEqual(result.candidat_assimile, True)
+        self.assertEqual(result.situation_assimilation, TypeSituationAssimilation.PRIS_EN_CHARGE_OU_DESIGNE_CPAS.name)
 
     def test_get_unknown_proposition_triggers_exception(self):
         with self.assertRaises(PropositionNonTrouveeException):

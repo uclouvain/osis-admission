@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -47,7 +47,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
     DispenseOuDroitsMajores,
     DroitsInscriptionMontant,
     MobiliteNombreDeMois,
-    TypeDeRefus,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     PropositionNonTrouveeException,
@@ -284,6 +283,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         self.assertEqual(result.doit_fournir_visa_etudes, self.admission.must_provide_student_visa_d)
         self.assertEqual(result.visa_etudes_d, self.admission.student_visa_d)
         self.assertEqual(result.certificat_autorisation_signe, self.admission.signed_enrollment_authorization)
+        self.assertEqual(result.situation_assimilation, self.admission.accounting.assimilation_situation)
 
     def test_get_proposition_with_default_values_if_necessary(self):
         self.admission.tuition_fees_amount = ''
@@ -302,7 +302,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         self.assertEqual(result.financabilite_derogation_derniere_notification_par, '')
 
     def test_get_proposition_with_noma(self):
-        student = StudentFactory(person=self.admissions[2].candidate)
+        student = StudentFactory(person=self.admission.candidate)
 
         result = self._get_command_result()
 
@@ -362,13 +362,6 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         result = self._get_command_result()
 
         self.assertEqual(result.date_changement_statut, self.history_entry.created)
-
-    def test_get_proposition_with_noma(self):
-        student = StudentFactory(person=self.admission.candidate)
-
-        result = self._get_command_result()
-
-        self.assertEqual(result.noma_candidat, student.registration_id)
 
     def test_get_proposition_with_several_enrolments(self):
         second_admission = DoctorateAdmissionFactory(

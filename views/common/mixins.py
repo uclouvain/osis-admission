@@ -45,16 +45,24 @@ from admission.constants import (
 from admission.ddd.admission.doctorat.preparation.commands import (
     GetCotutelleCommand,
     RecupererAdmissionDoctoratQuery,
+)
+from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererPropositionGestionnaireQuery as RecupererPropositionDoctoraleGestionnaireQuery,
+)
+from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionDoctoraleQuery,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_DOCTORALE_PAR_STATUT,
 )
-from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO
+from admission.ddd.admission.doctorat.preparation.dtos import (
+    PropositionGestionnaireDTO as PropositionDoctoraleGestionnaireDTO,
+)
 from admission.ddd.admission.doctorat.validation.commands import RecupererDemandeQuery
 from admission.ddd.admission.formation_continue.commands import (
     RecupererPropositionQuery,
+)
+from admission.ddd.admission.formation_continue.commands import (
     RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionContinueQuery,
 )
 from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
@@ -63,14 +71,18 @@ from admission.ddd.admission.formation_continue.domain.model.statut_checklist im
 from admission.ddd.admission.formation_continue.dtos.proposition import PropositionDTO as PropositionContinueDTO
 from admission.ddd.admission.formation_generale.commands import (
     RecupererPropositionGestionnaireQuery,
-    RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionGeneraleQuery,
     RecupererTitresAccesSelectionnablesPropositionQuery,
+)
+from admission.ddd.admission.formation_generale.commands import (
+    RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionGeneraleQuery,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_GENERALE_PAR_STATUT,
 )
-from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
+from admission.ddd.admission.formation_generale.dtos.proposition import (
+    PropositionGestionnaireDTO as PropositionGeneraleGestionnaireDTO,
+)
 from admission.ddd.admission.shared_kernel.domain.model.enums.type_gestionnaire import TypeGestionnaire
 from admission.ddd.admission.shared_kernel.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
 from admission.ddd.admission.shared_kernel.enums import Onglets
@@ -190,7 +202,13 @@ class LoadDossierViewMixin(AdmissionViewMixin):
     specific_questions_tab: Optional[Onglets] = None
 
     @cached_property
-    def proposition(self) -> Union[PropositionDTO, PropositionGestionnaireDTO, PropositionContinueDTO]:
+    def proposition(
+        self,
+    ) -> Union[
+        PropositionDoctoraleGestionnaireDTO,
+        PropositionGeneraleGestionnaireDTO,
+        PropositionContinueDTO,
+    ]:
         cmd = {
             CONTEXT_DOCTORATE: RecupererPropositionDoctoraleGestionnaireQuery(uuid_proposition=self.admission_uuid),
             CONTEXT_CONTINUING: RecupererPropositionQuery(uuid_proposition=self.admission_uuid),
@@ -405,7 +423,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
                 documents_count = get_student_files_count_from_epc(self.proposition.noma_candidat).get('count', 0)
                 if documents_count > 0:
                     tab_label_suffixes['documents'] = mark_safe('<div class="badge">EPC</div>')
-        except Exception as e:
+        except Exception:
             logger.exception(
                 f"[Documents EPC] Erreur lors de la récupération du nombre de documents EPC pour le noma"
                 f" '{self.proposition.noma_candidat}'"

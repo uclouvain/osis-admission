@@ -185,6 +185,7 @@ class PropositionGestionnaireDTO(PropositionDTO):
     candidat_a_plusieurs_demandes: bool
 
     candidat_assimile: bool
+    situation_assimilation: str
     est_fraudeur: bool
     est_inscription_tardive: bool
 

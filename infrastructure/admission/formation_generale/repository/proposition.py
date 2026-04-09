@@ -971,8 +971,10 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             poursuite_de_cycle_a_specifier=poursuite_de_cycle_a_specifier,
             poursuite_de_cycle=admission.cycle_pursuit if poursuite_de_cycle_a_specifier else '',
             candidat_a_plusieurs_demandes=admission.has_several_admissions_in_progress,  # from annotation
-            candidat_assimile=admission.accounting
-            and admission.accounting.assimilation_situation
+            situation_assimilation=admission.accounting.assimilation_situation
+            if hasattr(admission, 'accounting')
+            else '',
+            candidat_assimile=bool(admission.accounting and admission.accounting.assimilation_situation)
             and admission.accounting.assimilation_situation != TypeSituationAssimilation.AUCUNE_ASSIMILATION.name,
             est_fraudeur=admission.candidate.personal_data_validation_status
             == ChoixStatutValidationDonneesPersonnelles.FRAUDEUR.name,

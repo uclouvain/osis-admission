@@ -803,6 +803,7 @@
                   const currentTabHref = $('#checklist-menu').find('.active').attr('href');
                   const currentItem = $('#checklist-menu').find('div[href="' + currentTabHref + '"] i');
                   currentItem[0].className = buttonClassByState[buttonToSelect.dataset.status];
+                  $('#checklist-menu').find('div[href="' + currentTabHref + '"] .checklist-menu-item-status').attr('data-status', buttonToSelect.dataset.status);
               } else {
                   if (formGroup) formGroup.classList.remove("saving");
                   elt.readOnly = false;
@@ -1348,6 +1349,16 @@
       font-family: "Font Awesome 5 Pro";
       content: "\f522";
       margin-left: 5px;
+    }
+
+    #checklist-menu-item-additional-icon-assimilation-numero {
+      visibility: hidden;
+      color: #5bc0de;
+      vertical-align: middle;
+    }
+
+    #checklist-menu-item-status-assimilation[data-status="GEST_REUSSITE"] + #checklist-menu-item-additional-icon-assimilation-numero {
+      visibility: visible;
     }
   </style>
 {% endblock style %}

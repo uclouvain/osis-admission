@@ -855,6 +855,7 @@ class PropositionManager(models.Manager.from_queryset(BaseAdmissionQuerySet)):
                 "financability_dispensation_first_notification_by",
                 "financability_dispensation_last_notification_by",
                 "admission_requirement_year",
+                "accounting",
             )
             .annotate_with_student_registration_id()
             .annotate_several_admissions_in_progress()

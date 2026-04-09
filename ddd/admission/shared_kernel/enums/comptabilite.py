@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -57,6 +57,18 @@ class TypeSituationAssimilation(ChoiceEnum):
         'I am a long-term resident of the European Union outside Belgium (Belgian student status category 7)'
     )
     AUCUNE_ASSIMILATION = _('None of these are relevant to me')
+
+    @classmethod
+    def numero_assimilation(cls, type_assimilation: str):
+        return {
+            cls.AUTORISATION_ETABLISSEMENT_OU_RESIDENT_LONGUE_DUREE.name: 1,
+            cls.REFUGIE_OU_APATRIDE_OU_PROTECTION_SUBSIDIAIRE_TEMPORAIRE.name: 2,
+            cls.AUTORISATION_SEJOUR_ET_REVENUS_PROFESSIONNELS_OU_REMPLACEMENT.name: 3,
+            cls.PRIS_EN_CHARGE_OU_DESIGNE_CPAS.name: 4,
+            cls.PROCHE_A_NATIONALITE_UE_OU_RESPECTE_ASSIMILATIONS_1_A_4.name: 5,
+            cls.A_BOURSE_ARTICLE_105_PARAGRAPH_2.name: 6,
+            cls.RESIDENT_LONGUE_DUREE_UE_HORS_BELGIQUE.name: 7,
+        }.get(type_assimilation)
 
 
 class ChoixAssimilation1(ChoiceEnum):

@@ -186,6 +186,8 @@ class PropositionGestionnaireDTO(PropositionDTO):
 
     candidat_a_plusieurs_demandes: bool
 
+    situation_assimilation: str
+
     cotutelle: Optional[CotutelleDTO]
 
     profil_soumis_candidat: Optional[ProfilCandidatDTO]

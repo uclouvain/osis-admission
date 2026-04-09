@@ -48,6 +48,7 @@ from admission.ddd.admission.doctorat.preparation.dtos import PropositionGestion
 from admission.ddd.admission.shared_kernel.commands import ListerToutesDemandesQuery
 from admission.ddd.admission.shared_kernel.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.shared_kernel.dtos.resume import ResumeEtEmplacementsDocumentsPropositionDTO
+from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation
 from admission.ddd.admission.shared_kernel.enums.statut import (
     STATUTS_TOUTE_PROPOSITION_AUTORISEE,
     STATUTS_TOUTE_PROPOSITION_SOUMISE,
@@ -204,6 +205,16 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
                     for admission in submitted_for_the_current_year_admissions
                     if admission.sigle_formation == self.proposition.formation.sigle
                 ),
+            )
+        )
+
+        assimilation_numero = TypeSituationAssimilation.numero_assimilation(self.proposition.situation_assimilation)
+        checklist_additional_icons['assimilation'].append(
+            ChecklistTabIcon(
+                identifier='numero',
+                icon=f'fa-solid fa-circle-{assimilation_numero}' if assimilation_numero else 'fa-solid fa-ban',
+                displayed=True,
+                title='',
             )
         )
 
