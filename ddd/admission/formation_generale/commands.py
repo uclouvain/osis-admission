@@ -30,8 +30,10 @@ from typing import Dict, List, Optional
 import attr
 
 from admission.ddd.admission.shared_kernel import commands
-from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
-    ExperiencesCVRecuperees,
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
+from ddd.logic.shared_kernel.profil.commands import (
+    ModifierStatutExamenCommand,
+    ModifierStatutExperienceAcademiqueCommand,
 )
 from osis_common.ddd import interface
 
@@ -598,31 +600,13 @@ class NotifierCandidatDerogationFinancabiliteCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class ModifierStatutChecklistExperienceParcoursAnterieurCommand(interface.CommandRequest):
+class ModifierChecklistStatutExperienceAcademiqueCommand(ModifierStatutExperienceAcademiqueCommand):
     uuid_proposition: str
-    uuid_experience: str
-    gestionnaire: str
-    statut: str
 
 
 @attr.dataclass(frozen=True, slots=True)
-class ModifierStatutChecklistExperienceAcademiqueCommand(ModifierStatutChecklistExperienceParcoursAnterieurCommand):
-    pass
-
-
-@attr.dataclass(frozen=True, slots=True)
-class ModifierStatutChecklistExperienceNonAcademiqueCommand(ModifierStatutChecklistExperienceParcoursAnterieurCommand):
-    pass
-
-
-@attr.dataclass(frozen=True, slots=True)
-class ModifierStatutChecklistEtudesSecondairesCommand(ModifierStatutChecklistExperienceParcoursAnterieurCommand):
-    pass
-
-
-@attr.dataclass(frozen=True, slots=True)
-class ModifierStatutChecklistExamenCommand(ModifierStatutChecklistExperienceParcoursAnterieurCommand):
-    pass
+class ModifierChecklistStatutExamenCommand(ModifierStatutExamenCommand):
+    uuid_proposition: str
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -631,11 +615,6 @@ class ModifierAuthentificationExperienceParcoursAnterieurCommand(interface.Comma
     uuid_experience: str
     gestionnaire: str
     etat_authentification: str
-
-
-@attr.dataclass(frozen=True, slots=True)
-class ModifierAuthentificationExperienceAcademiqueCommand(ModifierAuthentificationExperienceParcoursAnterieurCommand):
-    pass
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -652,6 +631,11 @@ class ModifierAuthentificationEtudesSecondairesCommand(ModifierAuthentificationE
 
 @attr.dataclass(frozen=True, slots=True)
 class ModifierAuthentificationExamenCommand(ModifierAuthentificationExperienceParcoursAnterieurCommand):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierAuthentificationExperienceAcademiqueCommand(ModifierAuthentificationExperienceParcoursAnterieurCommand):
     pass
 
 

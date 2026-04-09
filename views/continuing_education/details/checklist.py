@@ -33,16 +33,12 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, TemplateView
 from osis_comment.models import CommentEntry
 
-from admission.ddd.admission.formation_continue.commands import (
-    RecupererResumeEtEmplacementsDocumentsPropositionQuery,
-)
+from admission.ddd.admission.formation_continue.commands import RecupererResumeEtEmplacementsDocumentsPropositionQuery
 from admission.ddd.admission.formation_continue.domain.model.enums import OngletsChecklist
 from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
-from admission.ddd.admission.shared_kernel.dtos.resume import (
-    ResumeEtEmplacementsDocumentsPropositionDTO,
-)
+from admission.ddd.admission.shared_kernel.dtos.resume import ResumeEtEmplacementsDocumentsPropositionDTO
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
-from admission.forms.admission.checklist import CommentForm
+from admission.forms.admission.checklist import AdmissionCommentForm
 from admission.forms.admission.continuing_education.checklist import StudentReportForm
 from admission.views.common.detail_tabs.checklist import PropositionFromResumeMixin
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
@@ -163,7 +159,7 @@ class ChecklistView(
             }
 
             context['comment_forms'] = {
-                tab_name: CommentForm(
+                tab_name: AdmissionCommentForm(
                     comment=comments.get(tab_name, None),
                     form_url=resolve_url(
                         f'{self.base_namespace}:save-comment',

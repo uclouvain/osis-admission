@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -33,7 +33,6 @@ from rest_framework.test import APITestCase
 
 from admission.ddd.admission.shared_kernel.domain.enums import TypeFormation
 from admission.tests import TESTING_CACHE_SETTING
-from base.models.campus import Campus
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import DOCTORAL_COMMISSION, SECTOR
@@ -98,8 +97,8 @@ class DoctorateAutocompleteTestCase(TrainingDateMockTestCase):
     @classmethod
     def setUpTestData(cls):
         cls.academic_calendar_type = AcademicCalendarTypes.DOCTORATE_EDUCATION_ENROLLMENT.name
-        cls.first_campus = Campus.objects.get(external_id=CampusFactory().external_id)
-        cls.second_campus = Campus.objects.get(external_id=CampusFactory().external_id)
+        cls.first_campus = CampusFactory()
+        cls.second_campus = CampusFactory()
 
         super().setUpTestData()
         cls.user = UserFactory()
@@ -268,8 +267,8 @@ class GeneralEducationAutocompleteTestCase(TrainingDateMockTestCase):
     @classmethod
     def setUpTestData(cls):
         cls.academic_calendar_type = AcademicCalendarTypes.GENERAL_EDUCATION_ENROLLMENT.name
-        cls.first_campus = Campus.objects.get(external_id=CampusFactory().external_id)
-        cls.second_campus = Campus.objects.get(external_id=CampusFactory().external_id)
+        cls.first_campus = CampusFactory()
+        cls.second_campus = CampusFactory()
 
         super().setUpTestData()
         cls.user = UserFactory()
@@ -444,8 +443,8 @@ class ContinuingEducationAutocompleteTestCase(TrainingDateMockTestCase):
         super().setUpTestData()
 
         cls.user = UserFactory()
-        cls.first_campus = Campus.objects.get(external_id=CampusFactory().external_id)
-        cls.second_campus = Campus.objects.get(external_id=CampusFactory().external_id)
+        cls.first_campus = CampusFactory()
+        cls.second_campus = CampusFactory()
 
         cls.last_year_training = EducationGroupYearFactory(
             academic_year=cls.past_year,

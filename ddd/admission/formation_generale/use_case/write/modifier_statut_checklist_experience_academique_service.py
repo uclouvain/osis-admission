@@ -23,31 +23,21 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.formation_generale.commands import (
-    ModifierStatutChecklistExperienceAcademiqueCommand,
-)
+from admission.ddd.admission.formation_generale.commands import ModifierChecklistStatutExperienceAcademiqueCommand
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
-from admission.ddd.admission.formation_generale.domain.model.proposition import (
-    PropositionIdentity,
-)
-from admission.ddd.admission.formation_generale.domain.service.i_formation import (
-    IFormationGeneraleTranslator,
-)
-from admission.ddd.admission.formation_generale.repository.i_proposition import (
-    IPropositionRepository,
-)
+from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.formation_generale.domain.service.i_formation import IFormationGeneraleTranslator
+from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.shared_kernel.domain.service.i_modifier_checklist_experience_parcours_anterieur import (
     IValidationExperienceParcoursAnterieurService,
 )
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
-    IProfilCandidatTranslator,
-)
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 
 
 def modifier_statut_checklist_experience_academique(
-    cmd: 'ModifierStatutChecklistExperienceAcademiqueCommand',
+    cmd: 'ModifierChecklistStatutExperienceAcademiqueCommand',
     proposition_repository: 'IPropositionRepository',
     profil_candidat_translator: 'IProfilCandidatTranslator',
     formation_translator: 'IFormationGeneraleTranslator',

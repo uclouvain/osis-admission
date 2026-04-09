@@ -30,37 +30,21 @@ from typing import Dict, List, Optional, Union
 
 import attr
 
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
-    CandidatNonTrouveException,
-)
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import CandidatNonTrouveException
 from admission.ddd.admission.doctorat.preparation.dtos import (
     ConditionsComptabiliteDTO,
     ConnaissanceLangueDTO,
     DoctoratFormationDTO,
 )
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
-    CurriculumAdmissionDTO,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
-    IProfilCandidatTranslator,
-)
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
-    ExperienceNonTrouveeException,
-)
-from admission.ddd.admission.shared_kernel.dtos import (
-    AdressePersonnelleDTO,
-    CoordonneesDTO,
-    IdentificationDTO,
-)
-from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import (
-    EtudesSecondairesAdmissionDTO,
-)
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import AdmissionExperienceNonTrouveeException
+from admission.ddd.admission.shared_kernel.dtos import AdressePersonnelleDTO, CoordonneesDTO, IdentificationDTO
+from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from admission.ddd.admission.shared_kernel.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.shared_kernel.dtos.resume import ResumeCandidatDTO
-from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
-    ExperiencesCVRecuperees,
-)
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
 from base.models.enums.civil_state import CivilState
 from base.models.enums.community import CommunityEnum
 from base.models.enums.establishment_type import EstablishmentTypeEnum
@@ -1107,10 +1091,11 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
     @classmethod
     def get_examen(
         cls,
-        uuid_proposition: str,
-        matricule: str,
-        formation_sigle: str,
-        formation_annee: int,
+        uuid_experience: str = None,
+        matricule: str = None,
+        formation_sigle: str = None,
+        formation_annee: int = None,
+        uuid_proposition: str = None,
     ) -> 'ExamenDTO':
         return ExamenDTO(
             uuid='',
@@ -1340,9 +1325,9 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
     @classmethod
     def get_experience_academique(
         cls,
-        matricule: str,
-        uuid_proposition: str,
         uuid_experience: str,
+        matricule: str = None,
+        uuid_proposition: str = None,
     ) -> 'ExperienceAcademiqueDTO':
         curriculum = cls.get_curriculum(matricule, datetime.date.today().year, uuid_proposition)
 
@@ -1351,7 +1336,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 experience for experience in curriculum.experiences_academiques if experience.uuid == uuid_experience
             )
         except StopIteration:
-            raise ExperienceNonTrouveeException
+            raise AdmissionExperienceNonTrouveeException
 
     @classmethod
     def get_experience_non_academique(
@@ -1369,7 +1354,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
                 if experience.uuid == uuid_experience
             )
         except StopIteration:
-            raise ExperienceNonTrouveeException
+            raise AdmissionExperienceNonTrouveeException
 
     @classmethod
     def get_merge_proposal(cls, matricule: str) -> Optional['MergeProposalDTO']:
