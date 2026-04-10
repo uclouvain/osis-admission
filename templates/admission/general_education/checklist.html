@@ -431,11 +431,11 @@
             {% endif %}
             {% if display_bama_15_questions %}
               {% panel _('Dual bachelor-master registration (BAMA15)') edit_link_button=specific_questions_url|add:next_url %}
-                {% with year=proposition.annee_demande|get_academic_year %}
+                {% with year=resume_proposition.proposition.annee_demande|get_academic_year %}
                   {% blocktranslate asvar is_concerned_by_bama_15_label trimmed with year=year %}
                     According to our analysis, you have a maximum of 15 remaining credits from your bachelor's degree to complete in {{ year }}. Do you confirm this analysis?
                   {% endblocktranslate %}
-                  {% field_data is_concerned_by_bama_15_label proposition.est_concerne_par_le_bama_15 %}
+                  {% field_data is_concerned_by_bama_15_label resume_proposition.proposition.est_concerne_par_le_bama_15 %}
                 {% endwith %}
               {% endpanel %}
             {% endif %}

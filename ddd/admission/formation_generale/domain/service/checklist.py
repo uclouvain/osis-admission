@@ -43,9 +43,11 @@ from admission.ddd.admission.formation_generale.domain.service.i_question_specif
 from admission.ddd.admission.shared_kernel.domain.model.assimilation import Assimilation
 from admission.ddd.admission.shared_kernel.domain.model.formation import Formation
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidat
 from admission.ddd.admission.shared_kernel.dtos import IdentificationDTO
 from admission.ddd.admission.shared_kernel.enums import Onglets, TypeSituationAssimilation
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO
 from osis_common.ddd import interface
 from osis_profile.models.enums.experience_validation import EtatAuthentificationParcours
 
@@ -59,6 +61,8 @@ class Checklist(interface.DomainService):
         profil_candidat_translator: 'IProfilCandidatTranslator',
         questions_specifiques_translator: 'IQuestionSpecifiqueTranslator',
         candidat_est_en_poursuite_directe: bool,
+        candidat_est_inscrit_recemment_ucl: bool,
+        experiences_academiques: list[ExperienceAcademiqueDTO],
         assimilation_passee: Assimilation | None,
     ):
         checklist_initiale = cls.recuperer_checklist_initiale(
@@ -68,41 +72,53 @@ class Checklist(interface.DomainService):
             questions_specifiques_translator=questions_specifiques_translator,
             candidat_est_en_poursuite_directe=candidat_est_en_poursuite_directe,
             assimilation_passee=assimilation_passee,
+            candidat_est_inscrit_recemment_ucl=candidat_est_inscrit_recemment_ucl,
+            experiences_academiques=experiences_academiques,
         )
         proposition.checklist_initiale = checklist_initiale
         proposition.checklist_actuelle = copy.deepcopy(checklist_initiale)
 
     @classmethod
-    def _get_specific_questions_number(
+    def _recuperer_statut_checklist_initial_specificites_formation(
         cls,
         proposition: Proposition,
         identification_dto: IdentificationDTO,
         questions_specifiques_translator: IQuestionSpecifiqueTranslator,
-    ) -> int:
-        """
-        Return the number of specific questions
-        :param proposition: The proposition
-        :param identification_dto: The identification related to the candidate
-        :param questions_specifiques_translator: The translator for specific questions
-        :return: The number of specific questions
-        """
-
-        # Static questions
-        questions_number = 1  # Additional documents
-
-        # Visa question
-        if identification_dto.est_concerne_par_visa:
-            questions_number += 1
-
-        # Dynamic questions
-        questions_number += len(
-            questions_specifiques_translator.search_dto_by_proposition(
-                proposition_uuid=proposition.entity_id.uuid,
-                onglets=[Onglets.INFORMATIONS_ADDITIONNELLES.name],
+        experiences_academiques: list[ExperienceAcademiqueDTO],
+        formation: Formation,
+        candidat_est_inscrit_recemment_ucl: bool,
+    ) -> StatutChecklist:
+        return (
+            StatutChecklist(
+                libelle=_("To be processed"),
+                statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
+            )
+            if (
+                proposition.documents_additionnels
+                or (not candidat_est_inscrit_recemment_ucl and identification_dto.est_concerne_par_visa)
+                or (
+                    not candidat_est_inscrit_recemment_ucl
+                    and ProfilCandidat.est_potentiellement_concerne_par_le_bama_15(
+                        uuid_proposition=proposition.entity_id.uuid,
+                        formation=formation,
+                        experiences_academiques=experiences_academiques,
+                        statut_proposition=ChoixStatutPropositionGenerale.EN_BROUILLON.name,
+                        annee_formation=proposition.annee_calculee or proposition.formation_id.annee,
+                    )
+                )
+                or any(
+                    question.requis or question.valeur
+                    for question in questions_specifiques_translator.search_dto_by_proposition(
+                        proposition_uuid=proposition.entity_id.uuid,
+                        onglets=[Onglets.INFORMATIONS_ADDITIONNELLES.name],
+                    )
+                )
+            )
+            else StatutChecklist(
+                libelle=_('Sufficient'),
+                statut=ChoixStatutChecklist.GEST_REUSSITE,
             )
         )
-
-        return questions_number
 
     @classmethod
     def _recuperer_statut_checklist_initial_assimilation(
@@ -172,14 +188,19 @@ class Checklist(interface.DomainService):
         profil_candidat_translator: 'IProfilCandidatTranslator',
         questions_specifiques_translator: 'IQuestionSpecifiqueTranslator',
         candidat_est_en_poursuite_directe: bool,
+        candidat_est_inscrit_recemment_ucl: bool,
         assimilation_passee: Assimilation | None,
+        experiences_academiques: list[ExperienceAcademiqueDTO],
     ) -> Optional[StatutsChecklistGenerale]:
         identification_dto = profil_candidat_translator.get_identification(proposition.matricule_candidat)
 
-        nombre_questions = cls._get_specific_questions_number(
+        statut_specificites_formation = cls._recuperer_statut_checklist_initial_specificites_formation(
             proposition=proposition,
             identification_dto=identification_dto,
             questions_specifiques_translator=questions_specifiques_translator,
+            candidat_est_inscrit_recemment_ucl=candidat_est_inscrit_recemment_ucl,
+            experiences_academiques=experiences_academiques,
+            formation=formation,
         )
 
         statut_assimilation = cls._recuperer_statut_checklist_initial_assimilation(
@@ -204,15 +225,7 @@ class Checklist(interface.DomainService):
                 libelle=_("To be processed"),
                 statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
             ),
-            specificites_formation=StatutChecklist(
-                libelle=_("Not concerned"),
-                statut=ChoixStatutChecklist.INITIAL_NON_CONCERNE,
-            )
-            if nombre_questions < 2
-            else StatutChecklist(
-                libelle=_("To be processed"),
-                statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
-            ),
+            specificites_formation=statut_specificites_formation,
             choix_formation=StatutChecklist(
                 libelle=_("To be processed"),
                 statut=ChoixStatutChecklist.INITIAL_CANDIDAT,

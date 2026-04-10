@@ -165,6 +165,13 @@ def soumettre_proposition(
         annee_inscription_formation_translator=annee_inscription_formation_translator,
     )
 
+    curriculum = profil_candidat_translator.get_curriculum(
+        matricule=proposition.matricule_candidat,
+        annee_courante=annee_courante,
+        uuid_proposition=proposition.entity_id.uuid,
+        inscriptions_translator=inscriptions_translator,
+    )
+
     # WHEN
     VerifierProposition.verifier(
         proposition_candidat=proposition,
@@ -190,6 +197,7 @@ def soumettre_proposition(
         assimilation_passee=assimilation_passee,
         candidat_est_en_poursuite_directe=candidat_est_en_poursuite_directe,
         inscriptions_ucl_candidat=inscriptions_ucl_candidat,
+        curriculum=curriculum,
     )
     element_confirmation.valider(
         soumis=cmd.elements_confirmation,
@@ -249,7 +257,9 @@ def soumettre_proposition(
         profil_candidat_translator=profil_candidat_translator,
         questions_specifiques_translator=questions_specifiques_translator,
         candidat_est_en_poursuite_directe=candidat_est_en_poursuite_directe,
+        candidat_est_inscrit_recemment_ucl=candidat_est_inscrit_recemment_ucl,
         assimilation_passee=assimilation_passee,
+        experiences_academiques=curriculum.experiences_academiques,
     )
     proposition_repository.save(proposition)
 

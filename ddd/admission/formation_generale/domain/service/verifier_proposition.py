@@ -27,6 +27,7 @@ from functools import partial
 from typing import List
 
 from admission.calendar.admission_calendar import DIPLOMES_ACCES_BELGE
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
 from admission.ddd.admission.formation_generale.domain.model.proposition import (
     Proposition,
 )
@@ -102,19 +103,13 @@ class VerifierProposition(interface.DomainService):
         nomas_translator: INomasTranslator,
         candidat_est_inscrit_recemment_ucl: bool,
         candidat_est_en_poursuite_directe: bool,
+        curriculum: CurriculumAdmissionDTO,
         assimilation_passee: Assimilation | None,
         inscriptions_ucl_candidat: list[InscriptionUCLCandidatDTO],
         annee_soumise: int = None,
         pool_soumis: 'AcademicCalendarTypes' = None,
     ) -> None:
         profil_candidat_service = ProfilCandidat()
-
-        curriculum = profil_candidat_translator.get_curriculum(
-            matricule=proposition_candidat.matricule_candidat,
-            annee_courante=annee_courante,
-            uuid_proposition=proposition_candidat.entity_id.uuid,
-            inscriptions_translator=inscriptions_translator,
-        )
 
         execute_functions_and_aggregate_exceptions(
             partial(

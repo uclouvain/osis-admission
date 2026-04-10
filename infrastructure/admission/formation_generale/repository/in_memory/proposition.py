@@ -524,4 +524,6 @@ class PropositionInMemoryRepository(
             questions_specifiques_translator=QuestionSpecifiqueInMemoryTranslator(),
             candidat_est_en_poursuite_directe=False,
             assimilation_passee=None,
+            candidat_est_inscrit_recemment_ucl=False,
+            experiences_academiques=[],
         )
