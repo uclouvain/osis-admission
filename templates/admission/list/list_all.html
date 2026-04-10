@@ -8,7 +8,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -45,15 +45,16 @@
       <summary>{% translate "Advanced filters" %}</summary>
       <div id="additional-filters">
         <div class="row">
-          {% bootstrap_field filter_form.bourse_internationale form_group_class="form-group col-md-3" %}
-          {% bootstrap_field filter_form.bourse_erasmus_mundus form_group_class="form-group col-md-3" %}
-          {% bootstrap_field filter_form.bourse_double_diplomation form_group_class="form-group col-md-3" %}
-          {% bootstrap_field filter_form.bourse_recherche form_group_class="form-group col-md-3" %}
+          {% bootstrap_field filter_form.bourse_internationale form_group_class="form-group col-md-2" %}
+          {% bootstrap_field filter_form.bourse_erasmus_mundus form_group_class="form-group col-md-2" %}
+          {% bootstrap_field filter_form.bourse_double_diplomation form_group_class="form-group col-md-2" %}
+          {% bootstrap_field filter_form.bourse_recherche form_group_class="form-group col-md-2" %}
         </div>
         <div class="row">
-          {% bootstrap_field filter_form.quarantaine form_group_class="form-group col-md-3" %}
-          {% bootstrap_field filter_form.tardif_modif_reorientation form_group_class="form-group col-md-3" %}
-          {% bootstrap_field filter_form.delai_depasse_complements form_group_class="form-group col-md-3" %}
+          {% bootstrap_field filter_form.critere_express form_group_class="form-group col-md-2" %}
+          {% bootstrap_field filter_form.tardif_modif_reorientation form_group_class="form-group col-md-2" %}
+          {% bootstrap_field filter_form.delai_depasse_complements form_group_class="form-group col-md-2" %}
+          {% bootstrap_field filter_form.quarantaine form_group_class="form-group col-md-2" %}
         </div>
       </div>
     </details>

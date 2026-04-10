@@ -44,14 +44,11 @@ from django.db.models import (
 from django.db.models.functions import Coalesce, NullIf
 from django.utils.translation import get_language
 
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixStatutPropositionDoctorale,
-)
-from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutPropositionContinue,
-)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
+    DiplomeAccesBelge,
     OngletsChecklist,
     PoursuiteDeCycle,
 )
@@ -59,20 +56,14 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT,
     ConfigurationStatutChecklist,
 )
-from admission.ddd.admission.shared_kernel.domain.service.i_filtrer_toutes_demandes import (
-    IListerToutesDemandes,
-)
-from admission.ddd.admission.shared_kernel.dtos.liste import (
-    DemandeRechercheDTO,
-    VisualiseurAdmissionDTO,
-)
+from admission.ddd.admission.shared_kernel.domain.service.i_filtrer_toutes_demandes import IListerToutesDemandes
+from admission.ddd.admission.shared_kernel.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
 from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.shared_kernel.enums.liste import (
+    CritereExpressFiltre,
     TardiveModificationReorientationFiltre,
 )
-from admission.ddd.admission.shared_kernel.enums.statut import (
-    CHOIX_STATUT_TOUTE_PROPOSITION,
-)
+from admission.ddd.admission.shared_kernel.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
 from admission.infrastructure.utils import get_entities_with_descendants_ids
 from admission.models import AdmissionViewer
 from admission.models.base import BaseAdmission
@@ -115,6 +106,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
         filtres_etats_checklist: Optional[Dict[str, List[str]]] = '',
         tardif_modif_reorientation: Optional[str] = '',
         delai_depasse_complements: Optional[bool] = None,
+        critere_express: Optional[List[str]] = None,
     ) -> PaginatedList[DemandeRechercheDTO]:
         language_is_french = get_language() == settings.LANGUAGE_CODE_FR
 
@@ -170,6 +162,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
                 late_enrollment=F('generaleducationadmission__late_enrollment'),
                 is_external_reorientation=F('generaleducationadmission__is_external_reorientation'),
                 is_external_modification=F('generaleducationadmission__is_external_modification'),
+                is_in_pursuit=F('generaleducationadmission__is_in_pursuit'),
             )
             .select_related(
                 'candidate__country_of_citizenship',
@@ -296,6 +289,26 @@ class ListerToutesDemandes(IListerToutesDemandes):
                 ],
                 requested_documents_deadline__lt=today_date,
             )
+
+        if critere_express and len(critere_express) != len(CritereExpressFiltre):
+            filters = Q()
+
+            if CritereExpressFiltre.POURSUITE.name in critere_express:
+                filters |= Q(generaleducationadmission__is_in_pursuit=True)
+            if CritereExpressFiltre.DIPLOME_D_ACCES_BELGE.name in critere_express:
+                filters |= Q(generaleducationadmission__is_belgian_access_diploma=DiplomeAccesBelge.OUI.name)
+            if CritereExpressFiltre.AUCUN.name in critere_express:
+                filters |= (
+                    Q(generaleducationadmission__is_in_pursuit=False)
+                    & Q(
+                        generaleducationadmission__is_belgian_access_diploma__in=[
+                            DiplomeAccesBelge.NON.name,
+                            DiplomeAccesBelge.NON_CONCERNE.name,
+                        ]
+                    )
+                ) | Q(generaleducationadmission__isnull=True)
+
+            qs = qs.filter(filters)
 
         if mode_filtres_etats_checklist and filtres_etats_checklist:
             json_path_to_checks = defaultdict(set)
@@ -571,6 +584,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
             est_inscription_tardive=admission.late_enrollment,  # From annotation
             est_reorientation_inscription_externe=admission.is_external_reorientation,  # From annotation
             est_modification_inscription_externe=admission.is_external_modification,  # From annotation
+            est_en_poursuite=admission.is_in_pursuit,  # From annotation
             nationalite_candidat=(
                 getattr(
                     admission.candidate.country_of_citizenship,

@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import List
 
 from django.db.models import F, QuerySet
 

@@ -1137,6 +1137,9 @@ msgstr "Belge"
 msgid "Belgian National Register Number"
 msgstr "Numéro de registre national belge"
 
+msgid "Belgian access diploma"
+msgstr "Diplôme d’accès belge"
+
 msgid "Belgian diploma"
 msgstr "Diplôme belge"
 
@@ -4330,6 +4333,9 @@ msgstr "Est une modification externe"
 msgid "Is an external reorientation"
 msgstr "Est une réorientation externe"
 
+msgid "Is belgian access diploma"
+msgstr "Est diplôme d’accès belge"
+
 msgid "Is belgian bachelor"
 msgstr "Est bachelier belge"
 
@@ -4997,6 +5003,9 @@ msgstr "Non"
 msgid "NOMA not found"
 msgstr "NOMA non trouvé"
 
+msgid "NON"
+msgstr "Non"
+
 msgid "NON_CONCERNE"
 msgstr "Non concerné·e"
 
@@ -5166,6 +5175,9 @@ msgstr "Pièce jointe non récupérable"
 msgid "Non-retrievable document"
 msgstr "Document non récupérable"
 
+msgid "None"
+msgstr "Aucun"
+
 msgid "None of these are relevant to me"
 msgstr "Aucune de ces propositions ne me correspond"
 
@@ -5252,6 +5264,9 @@ msgstr ""
 
 msgid "OTHER"
 msgstr "Autre"
+
+msgid "OUI"
+msgstr "Oui"
 
 msgid "Obtained grade"
 msgstr "Grade obtenu"
@@ -5967,6 +5982,9 @@ msgstr ""
 "La commission de proximité doit être remplie uniquement si l'entité du "
 "doctorat est CDE, CLSM ou CDSS"
 
+msgid "Pursuit"
+msgstr "Poursuite"
+
 msgid "Quarantine"
 msgstr "Quarantaine"
 
@@ -5984,6 +6002,9 @@ msgstr ""
 "Texte du tooltip de la question pour les éléments de formulaire de type "
 "Document, Sélection et Texte. Contenu du message à afficher pour les "
 "éléments de type Message."
+
+msgid "Quick criteria"
+msgstr "Critère express"
 
 msgid "REDUCTION_VCRC"
 msgstr "Réduction VCRC"

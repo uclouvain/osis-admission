@@ -25,6 +25,7 @@
 # ##############################################################################
 import datetime
 from collections import defaultdict
+from typing import List
 
 from admission.ddd.admission.shared_kernel.domain.service.i_deliberation_translator import IDeliberationTranslator
 from ddd.logic.deliberation.cloture.dto.deliberation import DeliberationCycleDTO, DeliberationProgrammeAnnuelDTO
@@ -90,3 +91,16 @@ class DeliberationTranslator(IDeliberationTranslator):
         )
 
         return periode_deliberation.date_debut
+
+    @classmethod
+    def recuperer_deliberations(
+        cls,
+        noma_etudiant: str,
+    ) -> List['DeliberationProgrammeAnnuelDTO']:
+        from infrastructure.messages_bus import message_bus_instance
+
+        return message_bus_instance.invoke(
+            RechercherDeliberationsProgrammesAnnuelsActeesQuery(
+                nomas=[noma_etudiant],
+            )
+        )

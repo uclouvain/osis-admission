@@ -101,6 +101,9 @@ from admission.ddd.admission.shared_kernel.use_case.write import (
     supprimer_emplacement_document,
 )
 from admission.infrastructure.admission.formation_generale.domain.service.comptabilite import ComptabiliteTranslator
+from admission.infrastructure.admission.formation_generale.domain.service.diplome_acces_belge import (
+    DiplomeAccesBelgeService,
+)
 from admission.infrastructure.admission.formation_generale.domain.service.formation import FormationGeneraleTranslator
 from admission.infrastructure.admission.formation_generale.domain.service.historique import (
     Historique as HistoriqueFormationGenerale,
@@ -274,6 +277,7 @@ COMMAND_HANDLERS = {
         diffusion_notes_translator=DiffusionNotesTranslator(),
         inscriptions_evaluations_translator=InscriptionsEvaluationsTranslator(),
         nomas_translator=NomasTranslator(),
+        diplome_acces_belge_service=DiplomeAccesBelgeService(),
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,

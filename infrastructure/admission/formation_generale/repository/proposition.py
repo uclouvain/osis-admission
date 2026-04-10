@@ -47,6 +47,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     BesoinDeDerogationDelegueVrae,
     ChoixStatutPropositionGenerale,
     DerogationFinancement,
+    DiplomeAccesBelge,
     PoursuiteDeCycle,
     RaisonPlusieursDemandesMemesCycleEtAnnee,
 )
@@ -389,6 +390,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'several_admissions_same_cycle_same_year_justification': (
                     entity.justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee
                 ),
+                'is_belgian_access_diploma': entity.est_diplome_acces_belge.name,
             },
         )
 
@@ -751,6 +753,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee=(
                 admission.several_admissions_same_cycle_same_year_justification
             ),
+            est_diplome_acces_belge=DiplomeAccesBelge[admission.is_belgian_access_diploma],
         )
 
     @classmethod
