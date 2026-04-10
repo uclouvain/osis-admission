@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -37,9 +37,7 @@ from django.db.models import Case, Exists, F, OuterRef, Q, Subquery, Value, When
 from django.shortcuts import redirect, resolve_url, reverse
 from django.urls.conf import path
 from django.utils.safestring import mark_safe
-from django.utils.translation import get_language
-from django.utils.translation import gettext_lazy as _
-from django.utils.translation import ngettext, pgettext
+from django.utils.translation import get_language, gettext_lazy as _, ngettext, pgettext
 from django_admin_listfilter_dropdown.filters import RelatedDropdownFilter
 from django_json_widget.widgets import JSONEditorWidget
 from hijack.contrib.admin import HijackUserAdminMixin
@@ -58,28 +56,20 @@ from admission.auth.roles.promoter import Promoter
 from admission.auth.roles.sceb import Sceb
 from admission.auth.roles.sic_management import SicManagement
 from admission.auth.scope import Scope
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixStatutPropositionDoctorale,
-)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_POUR_LISTING,
 )
-from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutPropositionContinue,
-)
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST as ORGANISATION_ONGLETS_CHECKLIST_CONTINUE,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
-)
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST as ORGANISATION_ONGLETS_CHECKLIST_GENERALE,
 )
 from admission.ddd.admission.shared_kernel.enums import CritereItemFormulaireFormation
-from admission.ddd.admission.shared_kernel.enums.statut import (
-    CHOIX_STATUT_TOUTE_PROPOSITION,
-)
+from admission.ddd.admission.shared_kernel.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
 from admission.forms.checklist_state_filter import ChecklistStateFilterField
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
@@ -103,23 +93,13 @@ from admission.models.checklist import (
     RefusalReason,
     RefusalReasonCategory,
 )
-from admission.models.epc_injection import (
-    EPCInjection,
-    EPCInjectionStatus,
-    EPCInjectionType,
-)
+from admission.models.epc_injection import EPCInjection, EPCInjectionStatus, EPCInjectionType
 from admission.models.exam import AdmissionExam
 from admission.models.form_item import AdmissionFormItem, AdmissionFormItemInstantiation
 from admission.models.online_payment import OnlinePayment
-from admission.models.working_list import (
-    ContinuingWorkingList,
-    DoctorateWorkingList,
-    WorkingList,
-)
+from admission.models.working_list import ContinuingWorkingList, DoctorateWorkingList, WorkingList
 from admission.services.injection_epc.injection_dossier import InjectionEPCAdmission
-from admission.views.admin.doctorate_committee_members_import import (
-    DoctorateCommitteeMembersImportView,
-)
+from admission.views.admin.doctorate_committee_members_import import DoctorateCommitteeMembersImportView
 from admission.views.mollie_webhook import MollieWebHook
 from base.models.academic_year import AcademicYear
 from base.models.education_group_type import EducationGroupType
@@ -132,7 +112,6 @@ from education_group.contrib.admin import EducationGroupRoleModelAdmin
 from epc.models.inscription_programme_cycle import InscriptionProgrammeCycle
 from osis_profile.models import EducationalExperience, ProfessionalExperience
 from osis_role.contrib.admin import EntityRoleModelAdmin, RoleModelAdmin
-
 
 # ##############################################################################
 # Models
@@ -314,6 +293,8 @@ class GeneralEducationAdmissionAdmin(AdmissionAdminMixin):
         'financability_dispensation_first_notification_by',
         'financability_dispensation_last_notification_on',
         'financability_dispensation_last_notification_by',
+        'is_belgian_access_diploma',
+        'is_in_pursuit',
     ]
 
     @staticmethod

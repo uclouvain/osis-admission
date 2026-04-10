@@ -25,6 +25,7 @@
 # ##############################################################################
 import datetime
 from abc import abstractmethod
+from typing import List
 
 from ddd.logic.deliberation.cloture.dto.deliberation import DeliberationCycleDTO, DeliberationProgrammeAnnuelDTO
 from osis_common.ddd import interface
@@ -56,4 +57,12 @@ class IDeliberationTranslator(interface.DomainService):
         cls,
         annee: int,
     ) -> datetime.date:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def recuperer_deliberations(
+        cls,
+        noma_etudiant: str,
+    ) -> List['DeliberationProgrammeAnnuelDTO']:
         raise NotImplementedError

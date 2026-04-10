@@ -31,6 +31,7 @@ from admission.ddd.admission.formation_generale.domain.builder.proposition_ident
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
+from admission.ddd.admission.formation_generale.domain.service.i_diplome_acces_belge import IDiplomeAccesBelge
 from admission.ddd.admission.formation_generale.domain.service.i_formation import IFormationGeneraleTranslator
 from admission.ddd.admission.formation_generale.domain.service.i_inscription_tardive import IInscriptionTardive
 from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
@@ -103,6 +104,7 @@ def soumettre_proposition(
     inscriptions_evaluations_translator: IInscriptionsEvaluationsTranslator,
     annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
     nomas_translator: INomasTranslator,
+    diplome_acces_belge_service: 'IDiplomeAccesBelge',
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -210,6 +212,21 @@ def soumettre_proposition(
 
     est_inscription_tardive = inscription_tardive_service.est_inscription_tardive(pool)
 
+    etude_secondaire_dto = profil_candidat_translator.get_etudes_secondaires(matricule=proposition.matricule_candidat)
+    examen_dto = profil_candidat_translator.get_examen(
+        matricule=proposition.matricule_candidat,
+        formation_sigle=formation_id.sigle,
+        formation_annee=formation_id.annee,
+        uuid_proposition=proposition.entity_id.uuid,
+    )
+    est_diplome_acces_belge = diplome_acces_belge_service.est_diplome_acces_belge(
+        proposition=proposition,
+        type_demande=type_demande,
+        etude_secondaire_dto=etude_secondaire_dto,
+        examen_dto=examen_dto,
+        deliberation_translator=deliberation_translator,
+    )
+
     # THEN
     financabilite = Financabilite(annee=formation.entity_id.annee).determiner(
         sigle_formation=formation.entity_id.sigle,
@@ -234,6 +251,7 @@ def soumettre_proposition(
             cmd.justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee
         ),
         assimilation_passee=assimilation_passee,
+        est_diplome_acces_belge=est_diplome_acces_belge,
     )
 
     proposition.specifier_financabilite_resultat_calcul(

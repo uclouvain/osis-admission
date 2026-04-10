@@ -300,3 +300,9 @@ class OngletsChecklist(ChoiceEnum):
 class RaisonPlusieursDemandesMemesCycleEtAnnee(ChoiceEnum):
     ANNULER_PRECEDENTES_DEMANDES = _('Create this new application and cancel your other ones')
     SUIVRE_EN_PARALLELE = _('Take several courses at the same time')
+
+
+class DiplomeAccesBelge(ChoiceEnum):
+    NON_CONCERNE = _("NON_CONCERNE")
+    OUI = _("OUI")
+    NON = _("NON")

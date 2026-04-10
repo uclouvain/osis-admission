@@ -41,6 +41,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     DecisionFacultaireEnum,
     DerogationFinancement,
+    DiplomeAccesBelge,
     PoursuiteDeCycle,
     RaisonPlusieursDemandesMemesCycleEtAnnee,
     TypeDeRefus,
@@ -262,7 +263,8 @@ class Proposition(interface.RootEntity):
     raison_plusieurs_demandes_meme_cycle_meme_annee: Optional[RaisonPlusieursDemandesMemesCycleEtAnnee] = None
     justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee: str = ''
 
-    est_en_poursuite: Optional[bool] = None
+    est_en_poursuite: bool = False
+    est_diplome_acces_belge: DiplomeAccesBelge = DiplomeAccesBelge.NON_CONCERNE
 
     @property
     def premiere_annee_de_bachelier(self) -> bool:
@@ -346,6 +348,7 @@ class Proposition(interface.RootEntity):
         raison_plusieurs_demandes_meme_cycle_meme_annee: str,
         justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee: str,
         assimilation_passee: Assimilation | None,
+        est_diplome_acces_belge: 'DiplomeAccesBelge',
     ):
         if doit_payer_frais_dossier:
             self.statut = ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE
@@ -364,6 +367,7 @@ class Proposition(interface.RootEntity):
             self.formulaire_modification_inscription = []
             self.attestation_inscription_reguliere_pour_modification_inscription = []
         self.est_inscription_tardive = est_inscription_tardive
+        self.est_diplome_acces_belge = est_diplome_acces_belge
         self.profil_soumis_candidat = profil_candidat_soumis
         self.auteur_derniere_modification = self.matricule_candidat
         self.raison_plusieurs_demandes_meme_cycle_meme_annee = getattr(

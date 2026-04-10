@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,14 +26,10 @@
 import re
 
 from django import forms
-from django.utils.translation import get_language, ngettext, pgettext_lazy
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import get_language, gettext_lazy as _, ngettext, pgettext_lazy
 
 from admission.constants import DEFAULT_PAGINATOR_SIZE
-from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixEdition,
-    ChoixStatutPropositionContinue,
-)
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixEdition, ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST as ORGANISATION_ONGLETS_CHECKLIST_CONTINUE,
 )
@@ -42,25 +38,18 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
 )
 from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
 from admission.ddd.admission.shared_kernel.enums.liste import (
+    CritereExpressFiltre,
     TardiveModificationReorientationFiltre,
 )
-from admission.ddd.admission.shared_kernel.enums.statut import (
-    CHOIX_STATUT_TOUTE_PROPOSITION,
-)
+from admission.ddd.admission.shared_kernel.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
-from admission.forms import (
-    ALL_EMPTY_CHOICE,
-    NullBooleanSelectField,
-    get_academic_year_choices,
-)
+from admission.forms import ALL_EMPTY_CHOICE, NullBooleanSelectField, get_academic_year_choices
 from admission.forms.checklist_state_filter import ChecklistStateFilterField
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
 from admission.models.working_list import ContinuingWorkingList, WorkingList
-from admission.views.autocomplete.trainings import (
-    ContinuingManagedEducationTrainingsAutocomplete,
-)
+from admission.views.autocomplete.trainings import ContinuingManagedEducationTrainingsAutocomplete
 from base.forms.utils import EMPTY_CHOICE, autocomplete
 from base.forms.widgets import Select2MultipleCheckboxesWidget
 from base.models.entity_version import EntityVersion
@@ -303,6 +292,19 @@ class AllAdmissionsFilterForm(AdmissionFilterWithEntitiesAndTrainingTypesForm):
         ),
         widget=forms.Select(attrs={"class": "form-control"}),
         empty_value=None,
+    )
+
+    critere_express = forms.MultipleChoiceField(
+        choices=CritereExpressFiltre.choices(),
+        label=_('Quick criteria'),
+        required=False,
+        initial=CritereExpressFiltre.get_names,
+        widget=Select2MultipleCheckboxesWidget(
+            attrs={
+                'data-dropdown-auto-width': True,
+                'data-selection-template': _("{items} types out of {total}"),
+            }
+        ),
     )
 
     tardif_modif_reorientation = forms.ChoiceField(

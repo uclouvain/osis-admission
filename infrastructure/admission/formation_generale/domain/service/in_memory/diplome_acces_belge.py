@@ -23,19 +23,22 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
-from django.utils.translation import gettext_lazy as _
-
-from base.models.utils.utils import ChoiceEnum
-
-
-class TardiveModificationReorientationFiltre(ChoiceEnum):
-    INSCRIPTION_TARDIVE = _('Late enrollment')
-    MODIFICATION_INSCRIPTION = _('Change of enrolment')
-    REORIENTATION = _('Change of course')
+from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
+from admission.ddd.admission.formation_generale.domain.service.i_diplome_acces_belge import IDiplomeAccesBelge
+from admission.ddd.admission.shared_kernel.domain.service.i_deliberation_translator import IDeliberationTranslator
+from admission.ddd.admission.shared_kernel.dtos import EtudesSecondairesAdmissionDTO
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
+from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
 
 
-class CritereExpressFiltre(ChoiceEnum):
-    POURSUITE = _('Pursuit')
-    DIPLOME_D_ACCES_BELGE = _('Belgian access diploma')
-    AUCUN = _('None')
+class DiplomeAccesBelgeInMemory(IDiplomeAccesBelge):
+    @classmethod
+    def est_diplome_acces_belge(
+        cls,
+        proposition: Proposition,
+        type_demande: TypeDemande,
+        etude_secondaire_dto: EtudesSecondairesAdmissionDTO,
+        examen_dto: ExamenDTO,
+        deliberation_translator: IDeliberationTranslator,
+    ) -> 'DiplomeAccesBelge':
+        return False

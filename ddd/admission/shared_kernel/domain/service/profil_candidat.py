@@ -217,7 +217,7 @@ class ProfilCandidat(interface.DomainService):
         sigle_formation: str = None,
         annee_formation: int = None,
         uuid_proposition: str = None,
-        candidat_est_en_poursuite: bool | None = None,
+        candidat_est_en_poursuite: bool = False,
     ) -> None:
         if candidat_est_en_poursuite:
             return

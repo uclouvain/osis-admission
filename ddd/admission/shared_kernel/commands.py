@@ -52,6 +52,7 @@ class ListerToutesDemandesQuery(SortedQueryRequest):
     bourse_recherche: Optional[str] = ''
     quarantaine: Optional[bool] = None
     tardif_modif_reorientation: Optional[str] = ''
+    critere_express: Optional[str] = ''
     demandeur: Optional[str] = ''
     mode_filtres_etats_checklist: Optional[str] = ''
     filtres_etats_checklist: Optional[Dict[str, List[str]]] = ''
