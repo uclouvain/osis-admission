@@ -5,7 +5,7 @@ info:
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
-    url: https://github.com/uclouvain/osis
+    url: https://github.com/Osis-Uclouvain/osis
 paths:
   /autocomplete/continuing-education:
     get:
