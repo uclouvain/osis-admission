@@ -33,47 +33,22 @@ from django.utils.translation import override
 from osis_comment.models import CommentEntry
 
 from admission.constants import ORDERED_CAMPUSES_UUIDS
-from admission.ddd.admission.doctorat.preparation.commands import (
-    RecupererResumeEtEmplacementsDocumentsPropositionQuery,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixTypeAdmission,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
-    OngletsChecklist,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
-    Proposition,
-    PropositionIdentity,
-)
-from admission.ddd.admission.doctorat.preparation.domain.service.i_pdf_generation import (
-    IPDFGeneration,
-)
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
-    PdfSicInconnu,
-)
+from admission.ddd.admission.doctorat.preparation.commands import RecupererResumeEtEmplacementsDocumentsPropositionQuery
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixTypeAdmission
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import OngletsChecklist
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition, PropositionIdentity
+from admission.ddd.admission.doctorat.preparation.domain.service.i_pdf_generation import IPDFGeneration
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PdfSicInconnu
 from admission.ddd.admission.doctorat.preparation.dtos import GroupeDeSupervisionDTO
-from admission.ddd.admission.doctorat.preparation.dtos.proposition import (
-    PropositionGestionnaireDTO,
-)
-from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
-    IPropositionRepository,
-)
-from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import (
-    TitreAccesSelectionnable,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
-    IProfilCandidatTranslator,
-)
+from admission.ddd.admission.doctorat.preparation.dtos.proposition import PropositionGestionnaireDTO
+from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.domain.service.i_unites_enseignement_translator import (
     IUnitesEnseignementTranslator,
 )
-from admission.ddd.admission.shared_kernel.dtos.resume import (
-    ResumeEtEmplacementsDocumentsPropositionDTO,
-)
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
-    OngletsDemande,
-)
+from admission.ddd.admission.shared_kernel.dtos.resume import ResumeEtEmplacementsDocumentsPropositionDTO
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from admission.exports.utils import admission_generate_pdf
 from admission.infrastructure.admission.shared_kernel.domain.service.unites_enseignement_translator import (
     UnitesEnseignementTranslator,
@@ -83,20 +58,11 @@ from admission.utils import WeasyprintStylesheets
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
 from ddd.logic.formation_catalogue.commands import GetCreditsDeLaFormationQuery
-from ddd.logic.shared_kernel.campus.domain.model.uclouvain_campus import (
-    UclouvainCampusIdentity,
-)
-from ddd.logic.shared_kernel.campus.repository.i_uclouvain_campus import (
-    IUclouvainCampusRepository,
-)
+from ddd.logic.shared_kernel.campus.domain.model.uclouvain_campus import UclouvainCampusIdentity
+from ddd.logic.shared_kernel.campus.repository.i_uclouvain_campus import IUclouvainCampusRepository
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
-from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
-    IExperienceParcoursInterneTranslator,
-)
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
-    ExperienceAcademiqueDTO,
-    ExperienceNonAcademiqueDTO,
-)
+from ddd.logic.shared_kernel.profil.domain.service.i_parcours_interne import IExperienceParcoursInterneTranslator
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
 
 ENTITY_SIC = 'SIC'
 ENTITY_SICB = 'SICB'

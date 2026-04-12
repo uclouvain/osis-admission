@@ -18,10 +18,6 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Generator: Poedit 3.0.1\n"
 
-#, python-brace-format
-msgid " (last update by {author} on {date} at {time}):"
-msgstr " (dernière modification par {author} le {date} à {time}) :"
-
 #, python-format
 msgid "%(added)s ECTS added with %(validated)s validated by the CDD."
 msgstr "%(added)s ECTS ajoutés dont %(validated)s validés par la CDD."
@@ -5502,9 +5498,6 @@ msgstr "Date de fin de validité du passeport"
 msgid "Passport number"
 msgstr "Numéro de passeport"
 
-msgid "Past experiences authentication"
-msgstr "Authentification parcours"
-
 msgid "Past non-academic activities (prof. and not prof.)"
 msgstr "Activités non-académiques passées (prof. et non prof.)"
 
@@ -9014,9 +9007,6 @@ msgstr "année académique"
 
 msgid "actions"
 msgstr "actions"
-
-msgid "an unknown author"
-msgstr "un auteur inconnu"
 
 msgid "approval"
 msgstr "accord"

@@ -25,42 +25,25 @@
 # ##############################################################################
 from abc import abstractmethod
 
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
-    Proposition as PropositionDoctorale,
-)
-from admission.ddd.admission.formation_continue.domain.model.proposition import (
-    Proposition as PropositionContinue,
-)
-from admission.ddd.admission.formation_generale.domain.model.proposition import (
-    Proposition as PropositionGenerale,
-)
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition as PropositionDoctorale
+from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition as PropositionContinue
+from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition as PropositionGenerale
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidat
-from admission.ddd.admission.shared_kernel.dtos.validation_experience_parcours_anterieur import (
-    ValidationExperienceParcoursAnterieurDTO,
-)
 from osis_common.ddd import interface
 from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
 
 
 class IValidationExperienceParcoursAnterieurService(interface.DomainService):
     @classmethod
-    @abstractmethod
-    def recuperer_information_validation_experience_academique(
-        cls,
-        uuid_experience: str,
-    ) -> ValidationExperienceParcoursAnterieurDTO:
-        raise NotImplementedError
-
-    @classmethod
     def modifier_statut_experience_academique(
         cls,
-        proposition_id,
-        matricule_candidat: str,
         uuid_experience: str,
         statut: str,
         profil_candidat_translator: IProfilCandidatTranslator,
         grade_academique_formation_proposition: str,
+        proposition_id=None,
+        matricule_candidat: str = None,
     ):
         if statut == ChoixStatutValidationExperience.VALIDEE.name:
             # Une expérience académique ne peut passer à l'état "Validé" que si elle est complète
@@ -69,7 +52,7 @@ class IValidationExperienceParcoursAnterieurService(interface.DomainService):
                 matricule_candidat=matricule_candidat,
                 uuid_experience=uuid_experience,
                 profil_candidat_translator=profil_candidat_translator,
-                grade_academique_formation_proposition=grade_academique_formation_proposition,
+                grade_academique_formation=grade_academique_formation_proposition,
             )
 
     @classmethod
@@ -78,23 +61,6 @@ class IValidationExperienceParcoursAnterieurService(interface.DomainService):
         cls,
         uuid_experience: str,
         etat_authentification: str,
-    ):
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def recuperer_information_validation_experience_non_academique(
-        cls,
-        uuid_experience: str,
-    ) -> ValidationExperienceParcoursAnterieurDTO:
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def modifier_statut_experience_non_academique(
-        cls,
-        uuid_experience: str,
-        statut: str,
     ):
         raise NotImplementedError
 
@@ -109,36 +75,11 @@ class IValidationExperienceParcoursAnterieurService(interface.DomainService):
 
     @classmethod
     @abstractmethod
-    def recuperer_information_validation_etudes_secondaires(
-        cls,
-        uuid_experience: str,
-    ) -> ValidationExperienceParcoursAnterieurDTO:
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def modifier_statut_etudes_secondaires(
-        cls,
-        uuid_experience: str,
-        statut: str,
-    ):
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
     def modifier_authentification_etudes_secondaires(
         cls,
         uuid_experience: str,
         etat_authentification: str,
     ):
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def recuperer_information_validation_examen(
-        cls,
-        uuid_experience: str,
-    ) -> ValidationExperienceParcoursAnterieurDTO:
         raise NotImplementedError
 
     @classmethod

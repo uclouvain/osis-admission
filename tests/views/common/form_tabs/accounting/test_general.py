@@ -56,7 +56,6 @@ from admission.tests.factories.general_education import GeneralEducationAdmissio
 from admission.tests.factories.roles import CandidateFactory, ProgramManagerRoleFactory, SicManagementRoleFactory
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.file_field import PDF_MIME_TYPE
-from base.models.campus import Campus
 from base.models.enums.community import CommunityEnum
 from base.tests.factories.academic_year import AcademicYearFactory, get_current_year
 from base.tests.factories.campus import CampusFactory
@@ -89,9 +88,9 @@ class GeneralAccountingFormViewTestCase(TestCase):
         cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
         cls.be_country = CountryFactory(iso_code='BE', name='Belgique', name_en='Belgium')
         cls.first_doctoral_commission = EntityWithVersionFactory(version__acronym=ENTITY_CDE)
-        cls.louvain_campus = Campus.objects.get(external_id=CampusFactory(name='Louvain-la-Neuve').external_id)
-        cls.other_campus = Campus.objects.get(external_id=CampusFactory(name='Other').external_id)
-        cls.saint_louis_campus = Campus.objects.get(external_id=CampusFactory(name='Bruxelles Saint-Louis').external_id)
+        cls.louvain_campus = CampusFactory(name='Louvain-la-Neuve')
+        cls.other_campus = CampusFactory(name='Other')
+        cls.saint_louis_campus = CampusFactory(name='Bruxelles Saint-Louis')
         EntityVersionFactory(entity=cls.first_doctoral_commission)
         cls.default_form_data = {
             'demande_allocation_d_etudes_communaute_francaise_belgique': 'False',

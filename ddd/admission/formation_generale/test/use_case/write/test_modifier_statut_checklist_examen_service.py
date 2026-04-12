@@ -28,12 +28,8 @@ import uuid
 import mock
 from django.test import SimpleTestCase
 
-from admission.ddd.admission.formation_generale.commands import (
-    ModifierStatutChecklistExamenCommand,
-)
-from admission.ddd.admission.formation_generale.domain.model.proposition import (
-    PropositionIdentity,
-)
+from admission.ddd.admission.formation_generale.commands import ModifierChecklistStatutExamenCommand
+from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     ExamenNonCompletesException,
     PropositionNonTrouveeException,
@@ -47,14 +43,10 @@ from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.m
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
 )
-from admission.infrastructure.message_bus_in_memory import (
-    message_bus_in_memory_instance,
-)
+from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
-from osis_profile.models.enums.experience_validation import (
-    ChoixStatutValidationExperience,
-)
+from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
 
 
 class TestModifierStatutChecklistExamen(SimpleTestCase):
@@ -90,7 +82,7 @@ class TestModifierStatutChecklistExamen(SimpleTestCase):
         ):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(
-                    ModifierStatutChecklistExamenCommand(
+                    ModifierChecklistStatutExamenCommand(
                         uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                         uuid_experience=self.mock_examen_dto.uuid,
                         statut=ChoixStatutValidationExperience.VALIDEE.name,
@@ -115,7 +107,7 @@ class TestModifierStatutChecklistExamen(SimpleTestCase):
         ):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 proposition_id = self.message_bus.invoke(
-                    ModifierStatutChecklistExamenCommand(
+                    ModifierChecklistStatutExamenCommand(
                         uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                         uuid_experience=self.mock_examen_dto.uuid,
                         statut=ChoixStatutValidationExperience.VALIDEE.name,
@@ -133,7 +125,7 @@ class TestModifierStatutChecklistExamen(SimpleTestCase):
     def test_should_empecher_si_proposition_non_trouvee(self):
         with self.assertRaises(PropositionNonTrouveeException):
             self.message_bus.invoke(
-                ModifierStatutChecklistExamenCommand(
+                ModifierChecklistStatutExamenCommand(
                     uuid_proposition='INCONNUE',
                     uuid_experience=self.mock_examen_dto.uuid,
                     statut=ChoixStatutValidationExperience.A_COMPLETER.name,
