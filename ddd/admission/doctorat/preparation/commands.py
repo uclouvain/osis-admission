@@ -33,9 +33,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixLangueRedactionThese,
 )
 from admission.ddd.admission.shared_kernel import commands
-from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
-    ExperiencesCVRecuperees,
-)
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.shared_kernel.interface import SortedQueryRequest
 from osis_common.ddd import interface
 
@@ -712,11 +710,6 @@ class ModifierStatutChecklistExperienceParcoursAnterieurCommand(interface.Comman
 
 @attr.dataclass(frozen=True, slots=True)
 class ModifierStatutChecklistExperienceAcademiqueCommand(ModifierStatutChecklistExperienceParcoursAnterieurCommand):
-    pass
-
-
-@attr.dataclass(frozen=True, slots=True)
-class ModifierStatutChecklistExperienceNonAcademiqueCommand(ModifierStatutChecklistExperienceParcoursAnterieurCommand):
     pass
 
 

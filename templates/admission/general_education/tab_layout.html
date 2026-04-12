@@ -57,9 +57,17 @@
   <div>
     <span>
       {% if admission.noma_candidat %}
-        <a href="{% url 'consulter_dossier_etudiant' admission.noma_candidat %}" target="_blank">
-          {{ admission.noma_candidat }}
-        </a>
+        <span class="copy-to-clipboard">
+          <a class="copy-to-clipboard-element" href="{{ request.scheme }}://{{ request.get_host }}{% url 'consulter_dossier_etudiant' admission.noma_candidat %}" target="_blank">
+            {{ admission.noma_candidat }}
+          </a>
+          <button
+            class="copy-button"
+            data-html="true"
+          >
+            <i class="far fa-copy"></i>
+          </button>
+        </span>
       {% else %}
         {% translate 'Unknown noma' %}
       {% endif %}
@@ -112,7 +120,7 @@
     {% if admission.soumise_le %}
       <br>
       <span>
-        {% translate 'Submission date:' %} {{ admission.soumise_le|date:'d/m/Y' }}
+        {% translate 'Confirmation date:' %} {{ admission.soumise_le|date:'d/m/Y' }}
       </span>
     {% endif %}
     <br>

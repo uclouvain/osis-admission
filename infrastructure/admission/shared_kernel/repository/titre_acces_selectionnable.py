@@ -30,37 +30,27 @@ from django.conf import settings
 from django.db.models import F, Max, Prefetch, Q, QuerySet
 from django.utils.translation import get_language, gettext
 
-from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import (
-    TypeTitreAccesSelectionnable,
-)
-from admission.ddd.admission.shared_kernel.domain.model.proposition import (
-    PropositionIdentity,
-)
+from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import TypeTitreAccesSelectionnable
+from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import (
     TitreAccesSelectionnable,
     TitreAccesSelectionnableIdentity,
 )
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
-    ExperienceNonTrouveeException,
+    AdmissionExperienceNonTrouveeException,
     PropositionNonTrouveeException,
 )
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
-    OngletsDemande,
-)
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.shared_kernel.repository.i_titre_acces_selectionnable import (
     ITitreAccesSelectionnableRepository,
 )
-from admission.models.base import (
-    BaseAdmission,
-)
+from admission.models.base import BaseAdmission
 from admission.models.valuated_epxeriences import (
     AdmissionEducationalValuatedExperiences,
     AdmissionProfessionalValuatedExperiences,
 )
 from base.utils.utils import format_academic_year
-from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
-    IExperienceParcoursInterneTranslator,
-)
+from ddd.logic.shared_kernel.profil.domain.service.i_parcours_interne import IExperienceParcoursInterneTranslator
 from osis_profile import BE_ISO_CODE, MOIS_DEBUT_ANNEE_ACADEMIQUE
 from osis_profile.models import EXAM_TYPE_PREMIER_CYCLE_LABEL_FR, Exam
 from osis_profile.models.enums.curriculum import ActivityType, Result
@@ -374,14 +364,14 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
                 baseadmission_id=entity.entity_id.uuid_proposition,
                 educationalexperience_id=entity.entity_id.uuid_experience,
             ).update(is_access_title=entity.selectionne):
-                raise ExperienceNonTrouveeException
+                raise AdmissionExperienceNonTrouveeException
 
         elif entity.entity_id.type_titre == TypeTitreAccesSelectionnable.EXPERIENCE_NON_ACADEMIQUE:
             if not AdmissionProfessionalValuatedExperiences.objects.filter(
                 baseadmission_id=entity.entity_id.uuid_proposition,
                 professionalexperience_id=entity.entity_id.uuid_experience,
             ).update(is_access_title=entity.selectionne):
-                raise ExperienceNonTrouveeException
+                raise AdmissionExperienceNonTrouveeException
 
         elif entity.entity_id.type_titre == TypeTitreAccesSelectionnable.EXPERIENCE_PARCOURS_INTERNE:
             experience_pk = uuid.UUID(entity.entity_id.uuid_experience).int

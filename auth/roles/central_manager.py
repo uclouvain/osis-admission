@@ -235,6 +235,7 @@ class CentralManager(EntityRoleModel):
             & ~is_sent_to_epc,
             'profil.can_see_parcours_externe': rules.always_allow,
             'profil.can_edit_parcours_externe': rules.always_allow,
+            'profil.can_change_comment': rules.always_allow,
             'admission.can_inject_to_epc': ~is_sent_to_epc,
             # Fusion
             'admission.merge_candidate_with_known_person': has_scope(Scope.GENERAL)
