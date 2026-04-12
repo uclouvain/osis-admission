@@ -14,7 +14,7 @@ addons:
 install:
   - export PROJECT_DIR=`pwd`
   - cd /tmp
-  - git clone https://github.com/uclouvain/osis.git
+  - git clone https://github.com/Osis-Uclouvain/osis.git
   - cd osis
   - git checkout dev
   - git pull origin dev
