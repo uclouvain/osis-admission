@@ -38,7 +38,7 @@ class AdmissionSchemaGenerator(SchemaGenerator):
         schema["info"]["description"] = "This API delivers data for the Admission project."
         schema["info"]["contact"] = {
             "name": "UCLouvain - OSIS",
-            "url": "https://github.com/uclouvain/osis",
+            "url": "https://github.com/Osis-Uclouvain/osis",
         }
         schema["servers"] = [
             {
