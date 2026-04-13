@@ -1846,6 +1846,9 @@ msgstr ""
 msgid "Create the recap of the proposition"
 msgstr ""
 
+msgid "Create this new application and cancel your other ones"
+msgstr ""
+
 msgid "Created"
 msgstr ""
 
@@ -3880,6 +3883,9 @@ msgstr ""
 msgid "Is concerned by BAMA15"
 msgstr ""
 
+msgid "Is in pursuit"
+msgstr ""
+
 msgid "Is it a Wallonia-Brussels Federation institution?"
 msgstr ""
 
@@ -5455,6 +5461,9 @@ msgstr ""
 msgid "Reason for refusal"
 msgstr ""
 
+msgid "Reason to create several applications for a same cycle and a same year."
+msgstr ""
+
 msgid "Reasons"
 msgstr ""
 
@@ -6278,6 +6287,9 @@ msgstr "To be verified"
 msgid "Tab"
 msgstr ""
 
+msgid "Take several courses at the same time"
+msgstr ""
+
 msgid "Taken in charge"
 msgstr ""
 
@@ -6310,6 +6322,11 @@ msgid ""
 msgstr ""
 
 msgid "Text"
+msgstr ""
+
+msgid ""
+"Text justification to create several applications for a same cycle and a "
+"same year."
 msgstr ""
 
 msgid "Text size"
@@ -6469,7 +6486,13 @@ msgid ""
 "The candidate has already applied for this course for this academic year."
 msgstr ""
 
+msgid "The candidate is a UCL student."
+msgstr ""
+
 msgid "The candidate is doing a mobility"
+msgstr ""
+
+msgid "The candidate is not a UCL student."
 msgstr ""
 
 msgid "The candidate must provide a student visa"
@@ -7749,6 +7772,9 @@ msgid ""
 "with the same character."
 msgstr ""
 
+msgid "You cannot apply for this course because you have already graduated."
+msgstr ""
+
 msgid ""
 "You cannot ask for both modification and reorientation at the same time."
 msgstr ""
@@ -7801,12 +7827,29 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
+msgid ""
+"You cannot yet apply for this course because you are currently enrolled in a "
+"course that has not yet been deliberated."
+msgstr ""
+
 msgid "You do not meet the admission requirements"
 msgstr ""
 
 msgid ""
 "You do not specify if you are applying as resident or non-resident (as "
 "defined by government decree)."
+msgstr ""
+
+#, python-format
+msgid ""
+"You have already created another request for this training, please <a "
+"href=\"%(url)s\">continue with that one.</a>"
+msgstr ""
+
+#, python-format
+msgid ""
+"You have already submitted a request for this course which will take place "
+"during the year %(training_year)s."
 msgstr ""
 
 msgid "You have the option to integrate it in the current application."

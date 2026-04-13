@@ -131,6 +131,11 @@ class PropositionDTO(interface.DTO):
     est_concerne_par_le_bama_15: Optional[bool]
     preuve_bama_15: List[str]
 
+    raison_plusieurs_demandes_meme_cycle_meme_annee: str
+    justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee: str
+
+    est_en_poursuite: Optional[bool]
+
     @property
     def candidat_vip(self) -> bool:
         return any(

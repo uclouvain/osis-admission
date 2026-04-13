@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -55,8 +55,15 @@ class BaseAccountingView(
     def get(self, request, *args, **kwargs):
         """Get additional data conditioning the required accounting fields"""
         comptabilite = message_bus_instance.invoke(self.get_accounting_cmd_class(uuid_proposition=self.kwargs['uuid']))
-        candidate = self.get_permission_object().candidate
-        serializer = self.get_serializer_class(instance=comptabilite, context={'candidate': candidate})
+        admission = self.get_permission_object()
+        candidate = admission.candidate
+        serializer = self.get_serializer_class(
+            instance=comptabilite,
+            context={
+                'candidate': candidate,
+                'training_acronym': admission.training.acronym,
+            },
+        )
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request, *args, **kwargs):

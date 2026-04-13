@@ -57,10 +57,14 @@ from admission.tests.factories.form_item import (
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory
+from base.models.enums.academic_type import AcademicTypes
 from base.models.enums.got_diploma import GotDiploma
 from base.models.enums.teaching_type import TeachingTypeEnum
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.person import PersonFactory
+from epc.models.enums.etat_inscription import EtatInscriptionFormation
+from epc.models.enums.statut_inscription_programme_annuel import StatutInscriptionProgrammAnnuel
+from epc.tests.factories.inscription_programme_annuel import InscriptionProgrammeAnnuelFactory
 from osis_profile import FR_ISO_CODE
 from osis_profile.models import (
     EducationalExperience,
@@ -266,6 +270,30 @@ class BaseCurriculumTestCase:
 
         self.user.person.last_registration_year = self.academic_year_2018
         self.user.person.save()
+        response = self.client.get(self.url)
+
+        # Check response data
+        response = response.json()
+        self.assertEqual(response.get('minimal_date'), '2019-09-01')
+        self.assertEqual(
+            response.get('incomplete_periods'),
+            ['De Septembre 2019 à Décembre 2019'] if self.with_incomplete_periods else [],
+        )
+
+    def test_get_curriculum_minimal_year_with_automatic_last_registration(self):
+        create_educational_experiences(person=self.user.person, country=self.country)
+        create_professional_experiences(person=self.user.person)
+
+        self.client.force_authenticate(user=self.user)
+
+        InscriptionProgrammeAnnuelFactory(
+            etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+            programme__offer__academic_type=AcademicTypes.ACADEMIC.name,
+            statut=StatutInscriptionProgrammAnnuel.ETUDIANT_UCL.name,
+            programme__root_group__academic_year__year=2018,
+            programme_cycle__etudiant__person=self.user.person,
+        )
+
         response = self.client.get(self.url)
 
         # Check response data

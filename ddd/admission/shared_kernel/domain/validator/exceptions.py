@@ -30,6 +30,7 @@ from django.utils.translation import get_language, gettext_lazy as _
 
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from ddd.logic.shared_kernel.profil.domain.validator.exceptions import ExperienceNonTrouveeException
+from base.utils.utils import format_academic_year
 from osis_common.ddd.interface import BusinessException
 
 
@@ -260,4 +261,31 @@ class DocumentsReclamesException(BusinessException):
 
     def __init__(self, **kwargs):
         message = _("Some documents are still requested.")
+        super().__init__(message, **kwargs)
+
+
+class DemandePourCetteFormationDejaEnvoyeeException(BusinessException):
+    status_code = "ADMISSION-26"
+
+    def __init__(self, training_year: int, **kwargs):
+        message = _(
+            "You have already submitted a request for this course which will take place during "
+            "the year %(training_year)s."
+        ) % {'training_year': format_academic_year(training_year, short=True)}
+        super().__init__(message, **kwargs)
+
+
+class DemandeEnBrouillonDejaExistantePourCetteFormationException(BusinessException):
+    status_code = "ADMISSION-27"
+
+    def __init__(self, admission_context: str, admission_uuid: str, **kwargs):
+        from admission.utils import get_portal_admission_url
+
+        portal_admission_url = get_portal_admission_url(context=admission_context, admission_uuid=admission_uuid)
+
+        message = _(
+            'You have already created another request for this training, please '
+            '<a href="%(url)s">continue with that one.</a>'
+        ) % {'url': portal_admission_url}
+
         super().__init__(message, **kwargs)

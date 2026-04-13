@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -48,6 +48,9 @@ from admission.ddd.admission.shared_kernel.domain.service.i_emplacements_documen
 from admission.ddd.admission.shared_kernel.domain.service.i_historique import (
     IHistorique,
 )
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
+)
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
@@ -76,6 +79,7 @@ def redonner_main_au_gestionnaire_lors_de_la_reclamation_documents(
     academic_year_repository: 'IAcademicYearRepository',
     personne_connue_translator: 'IPersonneConnueUclTranslator',
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
+    inscriptions_translator: IInscriptionsTranslatorService,
 ) -> PropositionIdentity:
     # GIVEN
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
@@ -88,6 +92,7 @@ def redonner_main_au_gestionnaire_lors_de_la_reclamation_documents(
         academic_year_repository=academic_year_repository,
         groupe_supervision_repository=groupe_supervision_repository,
         question_specifique_translator=question_specifique_translator,
+        inscriptions_translator=inscriptions_translator,
     )
 
     # WHEN

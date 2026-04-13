@@ -43,6 +43,8 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
 from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldAffiliationsEtreCompletees,
     ShouldAlternativeSecondairesEtreCompletee,
+    ShouldCandidatEtreEligibleALaReinscription,
+    ShouldCandidatPasEtreDiplomeFormation,
     ShouldComplementsFormationEtreVidesSiPasDeComplementsFormation,
     ShouldConditionAccesEtreSelectionne,
     ShouldCurriculumFichierEtreSpecifie,
@@ -82,6 +84,7 @@ from admission.ddd.admission.formation_generale.domain.validator._should_informa
     ShouldParcoursAnterieurEtreSuffisant,
     ShouldSicPeutDonnerDecision,
 )
+from admission.ddd.admission.shared_kernel.domain.model.assimilation import Assimilation
 from admission.ddd.admission.shared_kernel.domain.model.complement_formation import (
     ComplementFormationIdentity,
 )
@@ -158,6 +161,8 @@ class FormationGeneraleCurriculumValidatorList(TwoStepsMultipleBusinessException
     equivalence_diplome: List[str]
     sigle_formation: str
     annee_formation: AcademicYear
+    candidat_est_inscrit_recemment_ucl: bool
+    candidat_est_en_poursuite: bool
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -167,6 +172,7 @@ class FormationGeneraleCurriculumValidatorList(TwoStepsMultipleBusinessException
             ShouldCurriculumFichierEtreSpecifie(
                 fichier_pdf=self.fichier_pdf,
                 type_formation=self.type_formation,
+                candidat_est_inscrit_recemment_ucl=self.candidat_est_inscrit_recemment_ucl,
             ),
             ShouldAnneesCVRequisesCompletees(
                 annee_courante=self.annee_courante,
@@ -180,14 +186,17 @@ class FormationGeneraleCurriculumValidatorList(TwoStepsMultipleBusinessException
             ),
             ShouldExperiencesAcademiquesEtreCompletees(
                 experiences_academiques_incompletes=self.experiences_academiques_incompletes,
+                candidat_est_inscrit_recemment_ucl=self.candidat_est_inscrit_recemment_ucl,
             ),
             ShouldExperiencesNonAcademiquesAvoirUnCertificat(
                 experiences_non_academiques=self.experiences_non_academiques,
+                candidat_est_inscrit_recemment_ucl=self.candidat_est_inscrit_recemment_ucl,
             ),
             ShouldEquivalenceEtreSpecifiee(
                 equivalence=self.equivalence_diplome,
                 type_formation=self.type_formation,
                 experiences_academiques=self.experiences_academiques,
+                candidat_est_en_poursuite=self.candidat_est_en_poursuite,
             ),
         ]
 
@@ -258,6 +267,7 @@ class FormationGeneraleComptabiliteValidatorList(TwoStepsMultipleBusinessExcepti
     a_frequente_recemment_etablissement_communaute_fr: Optional[bool]
     comptabilite: Comptabilite
     formation: Formation
+    assimilation_passee: Assimilation | None
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -278,6 +288,7 @@ class FormationGeneraleComptabiliteValidatorList(TwoStepsMultipleBusinessExcepti
             ShouldAssimilationEtreCompletee(
                 pays_nationalite_ue=self.pays_nationalite_ue,
                 comptabilite=self.comptabilite,
+                assimilation_passee=self.assimilation_passee,
             ),
             ShouldAffiliationsEtreCompletees(
                 affiliation_sport=self.comptabilite.affiliation_sport,
@@ -741,6 +752,7 @@ class FormationGeneraleInformationsComplementairesValidatorList(TwoStepsMultiple
     est_potentiellement_concerne_par_le_bama_15: bool
     est_concerne_par_le_bama_15: bool | None
     preuve_bama_15: list[str]
+    candidat_est_inscrit_recemment_ucl: bool
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -752,12 +764,14 @@ class FormationGeneraleInformationsComplementairesValidatorList(TwoStepsMultiple
                 pays_nationalite_europeen=self.pays_nationalite_europeen,
                 pays_residence=self.pays_residence,
                 poste_diplomatique=self.poste_diplomatique,
+                candidat_est_inscrit_recemment_ucl=self.candidat_est_inscrit_recemment_ucl,
             ),
             ShouldInformationsBama15EtreCompletees(
                 experiences_academiques=self.experiences_academiques,
                 est_potentiellement_concerne_par_le_bama_15=self.est_potentiellement_concerne_par_le_bama_15,
                 est_concerne_par_le_bama_15=self.est_concerne_par_le_bama_15,
                 preuve_bama_15=self.preuve_bama_15,
+                candidat_est_inscrit_recemment_ucl=self.candidat_est_inscrit_recemment_ucl,
             ),
         ]
 
@@ -821,6 +835,8 @@ class RefuserParSicAValiderValidatorList(TwoStepsMultipleBusinessExceptionListVa
 class ChoixFormationValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     formation: Formation
     proposition: 'Proposition'
+    candidat_est_eligible_a_la_reinscription: bool
+    candidat_est_diplome_formation: bool
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -830,5 +846,11 @@ class ChoixFormationValidatorList(TwoStepsMultipleBusinessExceptionListValidator
             ShouldRenseignerBoursesEtudesSelonFormation(
                 proposition=self.proposition,
                 formation=self.formation,
-            )
+            ),
+            ShouldCandidatEtreEligibleALaReinscription(
+                candidat_est_eligible_a_la_reinscription=self.candidat_est_eligible_a_la_reinscription,
+            ),
+            ShouldCandidatPasEtreDiplomeFormation(
+                candidat_est_diplome_formation=self.candidat_est_diplome_formation,
+            ),
         ]

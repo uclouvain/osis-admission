@@ -76,6 +76,7 @@ from infrastructure.shared_kernel.campus.repository.uclouvain_campus import Uclo
 from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
 from infrastructure.shared_kernel.profil.domain.service.parcours_interne import ExperienceParcoursInterneTranslator
 
+from ...shared_kernel.domain.service.inscriptions import InscriptionsTranslatorService
 from ...shared_kernel.domain.service.matricule_etudiant import MatriculeEtudiantService
 from ...shared_kernel.domain.service.modifier_checklist_experience_parcours_anterieur import (
     ValidationExperienceParcoursAnterieurService,
@@ -147,6 +148,8 @@ COMMAND_HANDLERS = {
         academic_year_repository=AcademicYearRepository(),
         profil_candidat_translator=ProfilCandidatTranslator(),
         raccrocher_experiences_curriculum=RaccrocherExperiencesCurriculum(),
+        annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
+        inscriptions_translator=InscriptionsTranslatorService(),
     ),
     RenvoyerInvitationSignatureCommand: lambda msg_bus, cmd: renvoyer_invitation_signature(
         cmd,
@@ -164,6 +167,7 @@ COMMAND_HANDLERS = {
         formation_translator=DoctoratTranslator(),
         calendrier_inscription=CalendrierInscription(),
         maximum_propositions_service=MaximumPropositionsAutorisees(),
+        inscriptions_translator=InscriptionsTranslatorService(),
     ),
     VerifierProjetQuery: lambda msg_bus, cmd: verifier_projet(
         cmd,
@@ -173,6 +177,8 @@ COMMAND_HANDLERS = {
         questions_specifiques_translator=QuestionSpecifiqueTranslator(),
         academic_year_repository=AcademicYearRepository(),
         profil_candidat_translator=ProfilCandidatTranslator(),
+        annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
+        inscriptions_translator=InscriptionsTranslatorService(),
     ),
     SupprimerPromoteurCommand: lambda msg_bus, cmd: supprimer_promoteur(
         cmd,
@@ -227,6 +233,7 @@ COMMAND_HANDLERS = {
         maximum_propositions_service=MaximumPropositionsAutorisees(),
         email_destinataire_repository=EmailDestinataireRepository(),
         validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
+        inscriptions_translator=InscriptionsTranslatorService(),
     ),
     DefinirCotutelleCommand: lambda msg_bus, cmd: definir_cotutelle(
         cmd,
@@ -289,6 +296,7 @@ COMMAND_HANDLERS = {
         proposition_repository=PropositionRepository(),
         profil_candidat_translator=ProfilCandidatTranslator(),
         academic_year_repository=AcademicYearRepository(),
+        inscriptions_translator=InscriptionsTranslatorService(),
     ),
     DeterminerAnneeAcademiqueEtPotQuery: lambda msg_bus, cmd: determiner_annee_academique_et_pot(
         cmd,
@@ -313,6 +321,8 @@ COMMAND_HANDLERS = {
         groupe_supervision_repository=GroupeDeSupervisionRepository(),
         academic_year_repository=AcademicYearRepository(),
         question_specifique_translator=QuestionSpecifiqueTranslator(),
+        annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
+        inscriptions_translator=InscriptionsTranslatorService(),
     ),
     RecupererQuestionsSpecifiquesQuery: lambda msg_bus, cmd: recuperer_questions_specifiques_proposition(
         cmd,
@@ -328,6 +338,7 @@ COMMAND_HANDLERS = {
         academic_year_repository=AcademicYearRepository(),
         personne_connue_translator=PersonneConnueUclTranslator(),
         groupe_supervision_repository=GroupeDeSupervisionRepository(),
+        inscriptions_translator=InscriptionsTranslatorService(),
     ),
     RecupererDocumentsReclamesPropositionQuery: lambda msg_bus, cmd: recuperer_documents_reclames_proposition(
         cmd,
@@ -339,6 +350,7 @@ COMMAND_HANDLERS = {
         academic_year_repository=AcademicYearRepository(),
         personne_connue_translator=PersonneConnueUclTranslator(),
         groupe_supervision_repository=GroupeDeSupervisionRepository(),
+        inscriptions_translator=InscriptionsTranslatorService(),
     ),
     AnnulerReclamationDocumentsAuCandidatCommand: (
         lambda msg_bus, cmd: annuler_reclamation_documents_au_candidat(
@@ -353,6 +365,7 @@ COMMAND_HANDLERS = {
             emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
             comptabilite_translator=ComptabiliteTranslator(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
+            inscriptions_translator=InscriptionsTranslatorService(),
         )
     ),
     CompleterEmplacementsDocumentsParCandidatCommand: lambda msg_bus, cmd: (
@@ -369,6 +382,7 @@ COMMAND_HANDLERS = {
             notification=Notification(),
             comptabilite_translator=ComptabiliteTranslator(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
+            inscriptions_translator=InscriptionsTranslatorService(),
         )
     ),
     RecalculerEmplacementsDocumentsNonLibresPropositionCommand: (
@@ -381,6 +395,7 @@ COMMAND_HANDLERS = {
             emplacement_document_repository=EmplacementDocumentRepository(),
             comptabilite_translator=ComptabiliteTranslator(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
+            inscriptions_translator=InscriptionsTranslatorService(),
         )
     ),
     InitialiserEmplacementDocumentLibreNonReclamableCommand: lambda msg_bus, cmd: (
@@ -466,6 +481,7 @@ COMMAND_HANDLERS = {
             personne_connue_translator=PersonneConnueUclTranslator(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
             unites_enseignement_translator=UnitesEnseignementTranslator(),
+            inscriptions_translator=InscriptionsTranslatorService(),
         )
     ),
     EnvoyerPropositionACddLorsDeLaDecisionCddCommand: (
@@ -538,6 +554,7 @@ COMMAND_HANDLERS = {
         experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
         profil_candidat_translator=ProfilCandidatTranslator(),
         academic_year_repository=AcademicYearRepository(),
+        inscriptions_translator=InscriptionsTranslatorService(),
     ),
     SpecifierConditionAccesPropositionCommand: lambda msg_bus, cmd: specifier_condition_acces_proposition(
         cmd,
@@ -584,6 +601,7 @@ COMMAND_HANDLERS = {
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
+            inscriptions_translator=InscriptionsTranslatorService(),
         )
     ),
     ModifierAuthentificationExperienceAcademiqueCommand: (
@@ -629,6 +647,7 @@ COMMAND_HANDLERS = {
             experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
             matricule_etudiant_service=MatriculeEtudiantService(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
+            inscriptions_translator=InscriptionsTranslatorService(),
         )
     ),
     ApprouverInscriptionParSicCommand: (
@@ -645,6 +664,7 @@ COMMAND_HANDLERS = {
             personne_connue_translator=PersonneConnueUclTranslator(),
             experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
+            inscriptions_translator=InscriptionsTranslatorService(),
         )
     ),
     RefuserPropositionParSicCommand: (
@@ -705,6 +725,7 @@ COMMAND_HANDLERS = {
             experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
             doctorat_translator=DoctoratTranslator(),
             academic_year_repository=AcademicYearRepository(),
+            inscriptions_translator=InscriptionsTranslatorService(),
         )
     ),
     VerifierExperienceCurriculumApresSoumissionQuery: (
@@ -759,6 +780,7 @@ COMMAND_HANDLERS = {
             emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
             comptabilite_translator=ComptabiliteTranslator(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
+            inscriptions_translator=InscriptionsTranslatorService(),
         )
     ),
 }

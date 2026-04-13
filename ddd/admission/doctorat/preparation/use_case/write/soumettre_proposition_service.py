@@ -46,6 +46,9 @@ from admission.ddd.admission.doctorat.validation.repository.i_demande import IDe
 from admission.ddd.admission.shared_kernel.domain.builder.formation_identity import FormationIdentityBuilder
 from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription import ICalendrierInscription
 from admission.ddd.admission.shared_kernel.domain.service.i_elements_confirmation import IElementsConfirmation
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
+)
 from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
 from admission.ddd.admission.shared_kernel.domain.service.i_modifier_checklist_experience_parcours_anterieur import (
     IValidationExperienceParcoursAnterieurService,
@@ -81,6 +84,7 @@ def soumettre_proposition(
     maximum_propositions_service: 'IMaximumPropositionsAutorisees',
     email_destinataire_repository: 'IEmailDestinataireRepository',
     validation_experience_parcours_anterieur_service: 'IValidationExperienceParcoursAnterieurService',
+    inscriptions_translator: IInscriptionsTranslatorService,
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -125,6 +129,7 @@ def soumettre_proposition(
         formation=formation,
         annee_soumise=cmd.annee,
         pool_soumis=AcademicCalendarTypes[cmd.pool],
+        inscriptions_translator=inscriptions_translator,
     )
     element_confirmation.valider(
         cmd.elements_confirmation,

@@ -191,7 +191,6 @@ class FormationGeneraleDTOSerializer(DTOSerializer):
     campus_uuid = serializers.CharField(source='campus.uuid', default='')
     campus_inscription = serializers.CharField(source='campus_inscription.nom', default='')
     grade_academique = None
-    active = None
 
     class Meta:
         source = FormationDTO
@@ -202,7 +201,6 @@ class FormationContinueDTOSerializer(DTOSerializer):
     campus_uuid = serializers.CharField(source='campus.uuid', default='')
     campus_inscription = serializers.CharField(source='campus_inscription.nom', default='')
     grade_academique = None
-    active = None
 
     class Meta:
         source = FormationDTO
@@ -273,6 +271,7 @@ class DoctoratePropositionSearchDTOSerializer(IncludedFieldsMixin, DoctorateProp
             'statut',
             'links',
             'pdf_recapitulatif',
+            'annee_calculee',
         ]
 
 
@@ -338,6 +337,7 @@ class GeneralEducationPropositionSearchDTOSerializer(
             'statut',
             'links',
             'pdf_recapitulatif',
+            'annee_calculee',
         ]
 
 
@@ -396,6 +396,7 @@ class ContinuingEducationPropositionSearchDTOSerializer(
             'statut',
             'links',
             'pdf_recapitulatif',
+            'annee_calculee',
         ]
 
 
@@ -627,6 +628,9 @@ class GeneralEducationPropositionDTOSerializer(
             'poste_diplomatique',
             'est_concerne_par_le_bama_15',
             'preuve_bama_15',
+            'raison_plusieurs_demandes_meme_cycle_meme_annee',
+            'justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee',
+            'est_en_poursuite',
         ]
 
 

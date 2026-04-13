@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -398,6 +398,30 @@ class TestVerifierPropositionService(AdmissionTestMixin, TestCase):
                     self.message_bus.invoke(cmd)
                 self.assertHasInstance(context.exception.exceptions, MembreCAManquantException)
                 self.assertHasNoInstance(context.exception.exceptions, IdentificationNonCompleteeException)
+
+    def test_should_pas_verifier_identification_si_etudiant_ucl(self):
+        proposition = self.proposition_repository.get(entity_id=PropositionIdentity(uuid='uuid-SC3DP-sans-membre_CA'))
+
+        cmd = attr.evolve(self.cmd, uuid_proposition=proposition.entity_id.uuid)
+
+        with mock.patch.multiple(self.candidat, pays_naissance=''):
+            with mock.patch(
+                'admission.infrastructure.admission.shared_kernel.domain.service.in_memory.inscriptions_translator.'
+                'InscriptionsInMemoryTranslator.est_inscrit_recemment',
+                return_value=True,
+            ):
+                with self.assertRaises(MultipleBusinessExceptions) as context:
+                    self.message_bus.invoke(cmd)
+                self.assertHasNoInstance(context.exception.exceptions, IdentificationNonCompleteeException)
+
+            with mock.patch(
+                'admission.infrastructure.admission.shared_kernel.domain.service.in_memory.inscriptions_translator.'
+                'InscriptionsInMemoryTranslator.est_inscrit_recemment',
+                return_value=False,
+            ):
+                with self.assertRaises(MultipleBusinessExceptions) as context:
+                    self.message_bus.invoke(cmd)
+                self.assertHasInstance(context.exception.exceptions, IdentificationNonCompleteeException)
 
     def test_should_retourner_erreur_si_questions_specifiques_pas_completees(self):
         proposition = next(

@@ -55,6 +55,16 @@ from infrastructure.shared_kernel.profil.domain.service.in_memory.parcours_inter
     ExperienceParcoursInterneInMemoryTranslator,
 )
 
+from .shared_kernel.domain.service.in_memory.annee_inscription_formation import (
+    AnneeInscriptionFormationInMemoryTranslator,
+)
+from .shared_kernel.domain.service.in_memory.deliberation_translator import DeliberationInMemoryTranslator
+from .shared_kernel.domain.service.in_memory.diffusion_notes_translator import DiffusionNotesInMemoryTranslator
+from .shared_kernel.domain.service.in_memory.formation_translator import BaseFormationInMemoryTranslator
+from .shared_kernel.domain.service.in_memory.inscriptions_evaluations_translator import (
+    InscriptionsEvaluationsInMemoryTranslator,
+)
+from .shared_kernel.domain.service.in_memory.inscriptions_translator import InscriptionsInMemoryTranslator
 from .shared_kernel.domain.service.in_memory.modifier_checklist_experience_parcours_anterieur import (
     ValidationExperienceParcoursAnterieurInMemoryService,
 )
@@ -65,7 +75,12 @@ _titre_acces_selectionnable_repository = TitreAccesSelectionnableInMemoryReposit
 _experience_parcours_interne_translator = ExperienceParcoursInterneInMemoryTranslator()
 _gestionnaire_repository = GestionnaireInMemoryRepository()
 _validation_experience_parcours_anterieur = ValidationExperienceParcoursAnterieurInMemoryService()
-
+_annee_inscription_formation_translator = AnneeInscriptionFormationInMemoryTranslator()
+_inscriptions_translator = InscriptionsInMemoryTranslator()
+_deliberation_translator = DeliberationInMemoryTranslator()
+_base_formation_translator = BaseFormationInMemoryTranslator()
+_diffusion_notes_translator = DiffusionNotesInMemoryTranslator()
+_inscriptions_evaluations_translator = InscriptionsEvaluationsInMemoryTranslator()
 
 COMMAND_HANDLERS = {
     ListerToutesDemandesQuery: lambda msg_bus, cmd: lister_demandes(
@@ -130,5 +145,29 @@ COMMAND_HANDLERS = {
             cmd,
             validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur,
         )
+    ),
+    RecupererInscriptionsCandidatQuery: lambda msg_bus, cmd: recuperer_inscriptions_candidat(
+        cmd,
+        inscriptions_translator=_inscriptions_translator,
+        deliberation_translator=_deliberation_translator,
+        formation_translator=_base_formation_translator,
+    ),
+    CandidatEstInscritRecemmentUCLQuery: lambda msg_bus, cmd: candidat_est_inscrit_recemment_ucl(
+        cmd,
+        annee_inscription_formation_translator=_annee_inscription_formation_translator,
+        inscriptions_translator=_inscriptions_translator,
+    ),
+    CandidatEstEligibleALaReinscriptionQuery: lambda msg_bus, cmd: candidat_est_eligible_a_la_reinscription(
+        cmd,
+        annee_inscription_formation_translator=_annee_inscription_formation_translator,
+        inscriptions_translator=_inscriptions_translator,
+        deliberation_translator=_deliberation_translator,
+        diffusion_notes_translator=_diffusion_notes_translator,
+        inscriptions_evaluations_translator=_inscriptions_evaluations_translator,
+    ),
+    RecupererPeriodeReinscriptionQuery: lambda msg_bus, cmd: recuperer_periode_reinscription(
+        cmd,
+        annee_inscription_formation_translator=_annee_inscription_formation_translator,
+        deliberation_translator=_deliberation_translator,
     ),
 }

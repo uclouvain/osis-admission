@@ -48,6 +48,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
     DerogationFinancement,
     PoursuiteDeCycle,
+    RaisonPlusieursDemandesMemesCycleEtAnnee,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
@@ -379,6 +380,15 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'signed_enrollment_authorization': entity.certificat_autorisation_signe,
                 'is_concerned_by_bama_15': entity.est_concerne_par_le_bama_15,
                 'bama_15_proof': entity.preuve_bama_15,
+                'is_in_pursuit': entity.est_en_poursuite,
+                'several_admissions_same_cycle_same_year_reason': (
+                    entity.raison_plusieurs_demandes_meme_cycle_meme_annee.name
+                    if entity.raison_plusieurs_demandes_meme_cycle_meme_annee
+                    else ''
+                ),
+                'several_admissions_same_cycle_same_year_justification': (
+                    entity.justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee
+                ),
             },
         )
 
@@ -732,6 +742,15 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             certificat_autorisation_signe=admission.signed_enrollment_authorization,
             est_concerne_par_le_bama_15=admission.is_concerned_by_bama_15,
             preuve_bama_15=admission.bama_15_proof,
+            est_en_poursuite=admission.is_in_pursuit,
+            raison_plusieurs_demandes_meme_cycle_meme_annee=getattr(
+                RaisonPlusieursDemandesMemesCycleEtAnnee,
+                admission.several_admissions_same_cycle_same_year_reason,
+                None,
+            ),
+            justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee=(
+                admission.several_admissions_same_cycle_same_year_justification
+            ),
         )
 
     @classmethod
@@ -903,6 +922,11 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             type=admission.type_demande,
             est_concerne_par_le_bama_15=admission.is_concerned_by_bama_15,
             preuve_bama_15=admission.bama_15_proof,
+            raison_plusieurs_demandes_meme_cycle_meme_annee=admission.several_admissions_same_cycle_same_year_reason,
+            justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee=(
+                admission.several_admissions_same_cycle_same_year_justification
+            ),
+            est_en_poursuite=admission.is_in_pursuit,
         )
 
     @classmethod

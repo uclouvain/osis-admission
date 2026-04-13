@@ -83,3 +83,6 @@ class IdentificationDTO(interface.DTO):
             and self.pays_residence
             and self.pays_residence != BE_ISO_CODE
         )
+
+    def a_compte_interne(self):
+        return not self.matricule.startswith('8')

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,10 +26,12 @@
 
 import attr
 
-from admission.ddd.admission.shared_kernel.domain.model.formation import Formation
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     BoursesEtudesNonRenseignees,
+    CandidatDejaDiplomeFormationException,
+    CandidatNonEligibleALaReinscriptionException,
 )
+from admission.ddd.admission.shared_kernel.domain.model.formation import Formation
 from base.ddd.utils.business_validator import BusinessValidator
 
 
@@ -54,3 +56,21 @@ class ShouldRenseignerBoursesEtudesSelonFormation(BusinessValidator):
             and not self.proposition.bourse_double_diplome_id
         ):
             raise BoursesEtudesNonRenseignees
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldCandidatEtreEligibleALaReinscription(BusinessValidator):
+    candidat_est_eligible_a_la_reinscription: bool
+
+    def validate(self, *args, **kwargs):
+        if not self.candidat_est_eligible_a_la_reinscription:
+            raise CandidatNonEligibleALaReinscriptionException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldCandidatPasEtreDiplomeFormation(BusinessValidator):
+    candidat_est_diplome_formation: bool
+
+    def validate(self, *args, **kwargs):
+        if self.candidat_est_diplome_formation:
+            raise CandidatDejaDiplomeFormationException

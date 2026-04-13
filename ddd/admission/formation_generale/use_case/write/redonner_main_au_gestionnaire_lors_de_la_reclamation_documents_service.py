@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,10 +23,8 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Any
 
 from admission.ddd.admission.formation_generale.commands import (
-    RecupererDocumentsReclamesPropositionQuery,
     RedonnerMainAuGestionnaireLorsDeLaReclamationDocumentsCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import (
@@ -46,6 +44,9 @@ from admission.ddd.admission.shared_kernel.domain.service.i_emplacements_documen
 )
 from admission.ddd.admission.shared_kernel.domain.service.i_historique import (
     IHistorique,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
 )
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
@@ -78,6 +79,7 @@ def redonner_main_au_gestionnaire_lors_de_la_reclamation_documents(
     academic_year_repository: 'IAcademicYearRepository',
     personne_connue_translator: 'IPersonneConnueUclTranslator',
     emplacements_documents_demande_translator: 'IEmplacementsDocumentsPropositionTranslator',
+    inscriptions_translator: IInscriptionsTranslatorService,
 ) -> PropositionIdentity:
     # GIVEN
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
@@ -90,6 +92,7 @@ def redonner_main_au_gestionnaire_lors_de_la_reclamation_documents(
         proposition_dto=proposition_dto,
         comptabilite_dto=comptabilite_dto,
         experiences_cv_recuperees=ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION,
+        inscriptions_translator=inscriptions_translator,
     )
     questions_specifiques_dtos = question_specifique_translator.search_dto_by_proposition(
         proposition_uuid=cmd.uuid_proposition,

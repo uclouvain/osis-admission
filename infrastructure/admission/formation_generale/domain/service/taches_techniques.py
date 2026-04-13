@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,11 +24,11 @@
 #
 # ##############################################################################
 
-from admission.models import GeneralEducationAdmission
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutChecklist
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import StatutChecklist
 from admission.ddd.admission.formation_generale.domain.service.i_taches_techniques import ITachesTechniques
+from admission.models import GeneralEducationAdmission
 
 
 class TachesTechniques(ITachesTechniques):
@@ -55,7 +55,11 @@ class TachesTechniques(ITachesTechniques):
 
             from admission.exports.admission_recap.admission_recap import admission_pdf_recap
 
-            token = admission_pdf_recap(admission=admission, language=admission.candidate.language)
+            token = admission_pdf_recap(
+                admission=admission,
+                language=admission.candidate.language,
+                for_candidate=True,
+            )
 
             admission.pdf_recap = [token]
             admission.save(update_fields=['pdf_recap'])

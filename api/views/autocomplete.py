@@ -61,6 +61,7 @@ from base.auth.roles.tutor import Tutor
 from base.models.education_group_year import EducationGroupYear
 from base.models.entity_version import EntityVersion
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from base.models.enums.active_status import ActiveStatusEnum
 from base.models.enums.education_group_categories import Categories
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import SECTOR
@@ -219,6 +220,7 @@ class AutocompleteGeneralEducationView(ListAPIView):
                 type_formation=request.GET.get('type'),
                 campus=request.GET.get('campus'),
                 terme_de_recherche=request.GET.get('acronym_or_name'),
+                statuts=[ActiveStatusEnum.ACTIVE.name, ActiveStatusEnum.RE_REGISTRATION.name],
             )
         )
         serializer = serializers.FormationGeneraleDTOSerializer(instance=education_list, many=True)
