@@ -38,6 +38,7 @@ from admission.ddd.admission.formation_generale import commands as general_comma
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from admission.infrastructure.admission.shared_kernel.domain.service.inscriptions import InscriptionsTranslatorService
 from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import (
     ProfilCandidatTranslator,
 )
@@ -317,6 +318,7 @@ class CurriculumDetailsSerializer(serializers.Serializer):
         return ProfilCandidatTranslator.get_annees_minimum_curriculum(
             global_id=self.context.get('related_person').global_id,
             current_year=current_year.year,
+            inscriptions_translator=InscriptionsTranslatorService(),
         ).get('minimal_date')
 
     @extend_schema_field(OpenApiTypes.DATE)

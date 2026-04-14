@@ -938,8 +938,8 @@ class ExtractExperienceAuthenticationStatusTestCase(TestCase):
                                 'extra': {
                                     'identifiant': 'ETUDES_SECONDAIRES',
                                     'etat_authentification': (
-                                        EtatAuthentificationParcours.AUTHENTIFICATION_DEMANDEE.name,
-                                    )
+                                        EtatAuthentificationParcours.AUTHENTIFICATION_DEMANDEE.name
+                                    ),
                                 },
                             },
                         ]

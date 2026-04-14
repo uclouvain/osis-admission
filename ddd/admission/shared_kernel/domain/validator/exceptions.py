@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,10 +26,11 @@
 from typing import Optional
 
 from django.conf import settings
-from django.utils.translation import get_language
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import get_language, gettext_lazy as _
 
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from ddd.logic.shared_kernel.profil.domain.validator.exceptions import ExperienceNonTrouveeException
+from base.utils.utils import format_academic_year
 from osis_common.ddd.interface import BusinessException
 
 
@@ -230,12 +231,8 @@ class DocumentsReclamesImmediatementNonCompletesException(BusinessException):
         super().__init__(message, **kwargs)
 
 
-class ExperienceNonTrouveeException(BusinessException):
+class AdmissionExperienceNonTrouveeException(ExperienceNonTrouveeException):
     status_code = "ADMISSION-22"
-    message = _("Experience not found.")
-
-    def __init__(self, **kwargs):
-        super().__init__(self.message, **kwargs)
 
 
 class EnQuarantaineException(BusinessException):
@@ -264,4 +261,31 @@ class DocumentsReclamesException(BusinessException):
 
     def __init__(self, **kwargs):
         message = _("Some documents are still requested.")
+        super().__init__(message, **kwargs)
+
+
+class DemandePourCetteFormationDejaEnvoyeeException(BusinessException):
+    status_code = "ADMISSION-26"
+
+    def __init__(self, training_year: int, **kwargs):
+        message = _(
+            "You have already submitted a request for this course which will take place during "
+            "the year %(training_year)s."
+        ) % {'training_year': format_academic_year(training_year, short=True)}
+        super().__init__(message, **kwargs)
+
+
+class DemandeEnBrouillonDejaExistantePourCetteFormationException(BusinessException):
+    status_code = "ADMISSION-27"
+
+    def __init__(self, admission_context: str, admission_uuid: str, **kwargs):
+        from admission.utils import get_portal_admission_url
+
+        portal_admission_url = get_portal_admission_url(context=admission_context, admission_uuid=admission_uuid)
+
+        message = _(
+            'You have already created another request for this training, please '
+            '<a href="%(url)s">continue with that one.</a>'
+        ) % {'url': portal_admission_url}
+
         super().__init__(message, **kwargs)

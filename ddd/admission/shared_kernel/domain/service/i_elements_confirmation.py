@@ -178,6 +178,7 @@ class IElementsConfirmation(interface.DomainService):
         formation_translator: 'IFormationTranlator',
         profil_candidat_translator: 'IProfilCandidatTranslator',
         annee_soumise: int = None,
+        candidat_est_inscrit_recemment_ucl: bool = None,
     ) -> List['ElementConfirmation']:
         elements = []
         identification_dto = (
@@ -259,6 +260,8 @@ class IElementsConfirmation(interface.DomainService):
             and formation_translator.get(proposition.formation_id).type != TrainingType.MASTER_MC
             # et HUE
             and not identification_dto.pays_nationalite_europeen
+            # excepté réinscription en poursuite étendue
+            and not proposition.est_en_poursuite
         ):
             elements.append(
                 ElementConfirmation(
@@ -285,7 +288,10 @@ class IElementsConfirmation(interface.DomainService):
             ]
 
         # Documents spécifiques aux études contingentées
-        if proposition.pot_calcule == AcademicCalendarTypes.ADMISSION_POOL_NON_RESIDENT_QUOTA:
+        if (
+            proposition.pot_calcule == AcademicCalendarTypes.ADMISSION_POOL_NON_RESIDENT_QUOTA
+            and not proposition.est_en_poursuite
+        ):
             elements.append(
                 ElementConfirmation(
                     nom='documents_etudes_contingentees',
@@ -295,7 +301,11 @@ class IElementsConfirmation(interface.DomainService):
             )
 
         # Visa
-        if isinstance(proposition, PropositionGenerale) and identification_dto.est_concerne_par_visa:
+        if (
+            isinstance(proposition, PropositionGenerale)
+            and identification_dto.est_concerne_par_visa
+            and not candidat_est_inscrit_recemment_ucl
+        ):
             elements.append(
                 ElementConfirmation(
                     nom='visa',
@@ -373,8 +383,15 @@ class IElementsConfirmation(interface.DomainService):
         annee_soumise: int,
         formation_translator: 'IFormationTranlator',
         profil_candidat_translator: 'IProfilCandidatTranslator',
+        candidat_est_inscrit_recemment_ucl: bool = None,
     ) -> None:
-        attendu = cls.recuperer(proposition, formation_translator, profil_candidat_translator, annee_soumise)
+        attendu = cls.recuperer(
+            proposition=proposition,
+            formation_translator=formation_translator,
+            profil_candidat_translator=profil_candidat_translator,
+            annee_soumise=annee_soumise,
+            candidat_est_inscrit_recemment_ucl=candidat_est_inscrit_recemment_ucl,
+        )
         if len(soumis) != len(attendu):
             raise ElementsConfirmationNonConcordants
         for element in attendu:

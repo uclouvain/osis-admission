@@ -76,6 +76,9 @@ from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.e
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.historique import (
     HistoriqueInMemory as HistoriqueGlobalInMemory,
 )
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.inscriptions_translator import (
+    InscriptionsInMemoryTranslator,
+)
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.maximum_propositions import (
     MaximumPropositionsAutoriseesInMemory,
 )
@@ -126,6 +129,7 @@ _raccrocher_experiences_curriculum = RaccrocherExperiencesCurriculumInMemory()
 _pdf_generation = PDFGenerationInMemory()
 _email_destinataire_repository = EmailDestinataireInMemoryRepository()
 _validation_experience_parcours_anterieur_service = ValidationExperienceParcoursAnterieurInMemoryService()
+_inscriptions_translator = InscriptionsInMemoryTranslator()
 
 
 COMMAND_HANDLERS = {
@@ -172,6 +176,8 @@ COMMAND_HANDLERS = {
         calendrier_inscription=CalendrierInscriptionInMemory(),
         maximum_propositions_service=_maximum_propositions_autorisees,
         questions_specifiques_translator=_question_specific_translator,
+        annee_inscription_formation_translator=_annee_inscription_formation_translator,
+        inscriptions_translator=_inscriptions_translator,
     ),
     SoumettrePropositionCommand: lambda msg_bus, cmd: soumettre_proposition(
         msg_bus,
@@ -189,6 +195,8 @@ COMMAND_HANDLERS = {
         raccrocher_experiences_curriculum=_raccrocher_experiences_curriculum,
         email_destinataire_repository=_email_destinataire_repository,
         validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur_service,
+        annee_inscription_formation_translator=_annee_inscription_formation_translator,
+        inscriptions_translator=_inscriptions_translator,
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,
@@ -219,6 +227,8 @@ COMMAND_HANDLERS = {
         i_profil_candidat_translator=_profil_candidat_translator,
         academic_year_repository=_academic_year_repository,
         question_specifique_translator=_question_specific_translator,
+        inscriptions_translator=_inscriptions_translator,
+        annee_inscription_formation_translator=_annee_inscription_formation_translator,
     ),
     RecupererQuestionsSpecifiquesQuery: lambda msg_bus, cmd: recuperer_questions_specifiques_proposition(
         cmd,
@@ -232,6 +242,7 @@ COMMAND_HANDLERS = {
         emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
         academic_year_repository=_academic_year_repository,
         personne_connue_translator=_personne_connue_ucl_translator,
+        inscriptions_translator=_inscriptions_translator,
     ),
     RecupererResumeEtEmplacementsDocumentsPropositionQuery: (
         lambda msg_bus, cmd: recuperer_resume_et_emplacements_documents_proposition(
@@ -242,6 +253,7 @@ COMMAND_HANDLERS = {
             academic_year_repository=_academic_year_repository,
             personne_connue_translator=_personne_connue_ucl_translator,
             question_specifique_translator=_question_specific_translator,
+            inscriptions_translator=_inscriptions_translator,
         )
     ),
     ListerDemandesQuery: lambda msg_bus, cmd: lister_demandes(
@@ -308,6 +320,7 @@ COMMAND_HANDLERS = {
         emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
         academic_year_repository=_academic_year_repository,
         personne_connue_translator=_personne_connue_ucl_translator,
+        inscriptions_translator=_inscriptions_translator,
     ),
     AnnulerReclamationDocumentsAuCandidatCommand: (
         lambda msg_bus, cmd: annuler_reclamation_documents_au_candidat(
@@ -320,6 +333,7 @@ COMMAND_HANDLERS = {
             academic_year_repository=_academic_year_repository,
             personne_connue_translator=_personne_connue_ucl_translator,
             emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
+            inscriptions_translator=_inscriptions_translator,
         )
     ),
     CompleterEmplacementsDocumentsParCandidatCommand: lambda msg_bus, cmd: (
@@ -334,6 +348,7 @@ COMMAND_HANDLERS = {
             personne_connue_translator=_personne_connue_ucl_translator,
             emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
             notification=_notification,
+            inscriptions_translator=_inscriptions_translator,
         )
     ),
     RecalculerEmplacementsDocumentsNonLibresPropositionCommand: (
@@ -344,6 +359,7 @@ COMMAND_HANDLERS = {
             question_specifique_translator=_question_specific_translator,
             academic_year_repository=_academic_year_repository,
             emplacement_document_repository=_emplacement_document_repository,
+            inscriptions_translator=_inscriptions_translator,
         )
     ),
     ReclamerDocumentsAuCandidatCommand: lambda msg_bus, cmd: reclamer_documents_au_candidat(
@@ -406,6 +422,7 @@ COMMAND_HANDLERS = {
             academic_year_repository=_academic_year_repository,
             personne_connue_translator=_personne_connue_ucl_translator,
             emplacements_documents_demande_translator=_emplacements_documents_demande_translator,
+            inscriptions_translator=_inscriptions_translator,
         )
     ),
     GenererDocumentAnalysePropositionAutorisationCommand: (

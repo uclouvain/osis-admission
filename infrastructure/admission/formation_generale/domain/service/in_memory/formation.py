@@ -32,11 +32,14 @@ from admission.ddd.admission.shared_kernel.domain.enums import TYPES_FORMATION_G
 from admission.ddd.admission.shared_kernel.domain.model.formation import Formation, FormationIdentity
 from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationFactory
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.formation_translator import (
+    BaseFormationInMemoryTranslator,
+)
 from base.models.enums.active_status import ActiveStatusEnum
 from base.models.enums.education_group_types import TrainingType
 
 
-class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
+class FormationGeneraleInMemoryTranslator(BaseFormationInMemoryTranslator, IFormationGeneraleTranslator):
     trainings = [
         FormationFactory(
             intitule='Bachelier en sciences économiques et de gestion',
@@ -325,6 +328,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
         intitule: Optional[str],
         terme_de_recherche: Optional[str],
         campus: Optional[str],
+        statuts: Optional[List[str]],
     ) -> List['FormationDTO']:
         return [
             cls._build_dto(entity=training)
@@ -339,7 +343,7 @@ class FormationGeneraleInMemoryTranslator(IFormationGeneraleTranslator):
         ]
 
     @classmethod
-    def verifier_existence(cls, sigle: str, annee: int) -> bool:
+    def verifier_existence(cls, sigle: str, annee: int, candidat_est_en_poursuite_directe: bool = None) -> bool:
         return any(
             training
             for training in cls.trainings

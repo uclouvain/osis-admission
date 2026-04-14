@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ from rest_framework import mixins
 from rest_framework.generics import GenericAPIView
 
 from admission.api import serializers
-from admission.api.permissions import IsSelfPersonTabOrTabPermission
+from admission.api.permissions import HasExternalAccountPermission, IsSelfPersonTabOrTabPermission
 from admission.api.views.mixins import (
     ContinuingEducationPersonRelatedMixin,
     GeneralEducationPersonRelatedMixin,
@@ -53,6 +53,7 @@ class BasePersonLastEnrolmentViewSet(
     GenericAPIView,
 ):
     """Change view of the information concerning the person's last registration"""
+
     pagination_class = None
     filter_backends = []
     serializer_class = serializers.PersonLastEnrolmentSerializer
@@ -67,6 +68,7 @@ class BasePersonLastEnrolmentViewSet(
 class CommonPersonLastEnrolmentViewSet(PersonRelatedMixin, BasePersonLastEnrolmentViewSet):
     name = "person_last_enrolment"
     permission_classes = [
+        HasExternalAccountPermission,
         partial(IsSelfPersonTabOrTabPermission, permission_suffix='person_last_enrolment', can_edit=True),
     ]
 

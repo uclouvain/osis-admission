@@ -23,13 +23,26 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 
 import attr
 
-from ddd.logic.shared_kernel.profil.dtos.validation_experience import ExperienceAvecValidationDTO
+from osis_common.ddd import interface
 
 
 @attr.dataclass(frozen=True, slots=True)
-class ValidationExperienceParcoursAnterieurDTO(ExperienceAvecValidationDTO):
-    uuid: str
-    type_experience: str
+class InscriptionUCLCandidatDTO(interface.DTO):
+    sigle_formation: str
+    intitule_formation_fr: str
+    intitule_formation_en: str
+    type_formation: str
+    lieu_enseignement: str
+    annee: int
+    est_diplome: bool
+
+
+@attr.dataclass(frozen=True, slots=True)
+class PeriodeReinscriptionDTO(interface.DTO):
+    date_debut: datetime.date
+    date_fin: datetime.date
+    annee_formation: int

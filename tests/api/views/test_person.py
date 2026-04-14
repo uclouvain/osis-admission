@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -40,8 +40,13 @@ from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
+from base.models.enums.academic_type import AcademicTypes
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.person import PersonFactory
+from base.tests.factories.student import StudentFactory
+from epc.models.enums.etat_inscription import EtatInscriptionFormation
+from epc.models.enums.statut_inscription_programme_annuel import StatutInscriptionProgrammAnnuel
+from epc.tests.factories.inscription_programme_annuel import InscriptionProgrammeAnnuelFactory
 
 
 @override_settings(ROOT_URLCONF='admission.api.url_v1')
@@ -67,8 +72,11 @@ class PersonTestCase(APITestCase):
         ).person.user
         admission = DoctorateAdmissionFactory(
             candidate__first_name="John",
+            candidate__private_email="john.doe@private.be",
+            candidate__email="john.doe@public.be",
             training__management_entity=self.doctoral_commission,
         )
+        self.admission_student = StudentFactory(person=admission.candidate)
         self.admission_url = resolve_url('doctorate_person', uuid=admission.uuid)
         self.candidate_user = admission.candidate.user
 
@@ -101,6 +109,29 @@ class PersonTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         response = self.client.put(self.admission_url, self.updated_data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.json())
+
+    def test_person_with_candidate_depending_on_ucl_enrolment(self):
+        self.client.force_authenticate(self.candidate_user)
+
+        InscriptionProgrammeAnnuelFactory(
+            etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+            statut=StatutInscriptionProgrammAnnuel.ETUDIANT_UCL.name,
+            programme_cycle__etudiant__person=self.candidate_user.person,
+            programme__root_group__academic_year__year=2020,
+            programme__offer__academic_type=AcademicTypes.ACADEMIC.name,
+        )
+
+        response = self.client.get(self.agnostic_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response = self.client.get(self.admission_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response = self.client.put(self.admission_url, self.updated_data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        response = self.client.put(self.agnostic_url, self.updated_data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_person_with_candidate_depending_on_admission_statuses(self):
         self.client.force_authenticate(self.candidate_user)
@@ -181,6 +212,9 @@ class PersonTestCase(APITestCase):
         response = self.client.get(self.admission_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         self.assertEqual(response.json()['first_name'], "John")
+        self.assertEqual(response.json()['email'], "john.doe@public.be")
+        self.assertEqual(response.json()['private_email'], "john.doe@private.be")
+        self.assertEqual(response.json()['registration_id'], self.admission_student.registration_id)
 
     def test_person_update_candidate(self):
         self.client.force_authenticate(self.candidate_user_without_admission)

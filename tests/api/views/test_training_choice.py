@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -68,6 +68,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
 from admission.ddd.admission.formation_generale.domain.validator import (
     exceptions as general_education_exceptions,
 )
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import FormationNonTrouveeException
 from admission.ddd.admission.shared_kernel.enums import (
     ChoixAssimilation1,
     ChoixAssimilation2,
@@ -805,7 +806,7 @@ class DoctorateAdmissionTrainingChoiceInitializationApiTestCase(APITestCase):
 
     def test_admission_doctorate_creation_using_api_with_too_much_doctorate_propositions_in_parallel(self):
         self.client.force_authenticate(user=self.candidate.user)
-        other_admission = DoctorateAdmissionFactory(
+        DoctorateAdmissionFactory(
             status=ChoixStatutPropositionDoctorale.CONFIRMEE.name,
             candidate=self.candidate,
         )
@@ -881,7 +882,7 @@ class GeneralEducationAdmissionTrainingChoiceInitializationApiTestCase(APITestCa
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(
             response.json()['non_field_errors'][0]['status_code'],
-            general_education_exceptions.FormationNonTrouveeException.status_code,
+            FormationNonTrouveeException.status_code,
         )
 
     def test_training_choice_initialization_using_api_candidate_with_wrong_scholarship(self):

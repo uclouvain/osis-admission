@@ -25,30 +25,20 @@
 # ##############################################################################
 import datetime
 
-from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import (
-    PropositionIdentityBuilder,
-)
-from admission.ddd.admission.doctorat.preparation.commands import (
-    ModifierStatutChecklistParcoursAnterieurCommand,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
-    PropositionIdentity,
-)
-from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
-    IPropositionRepository,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
-    IProfilCandidatTranslator,
-)
+from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
+from admission.ddd.admission.doctorat.preparation.commands import ModifierStatutChecklistParcoursAnterieurCommand
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import \
+    IInscriptionsTranslatorService
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.shared_kernel.repository.i_titre_acces_selectionnable import (
     ITitreAccesSelectionnableRepository,
 )
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
-from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
-    IExperienceParcoursInterneTranslator,
-)
+from ddd.logic.shared_kernel.profil.domain.service.i_parcours_interne import IExperienceParcoursInterneTranslator
 
 
 def modifier_statut_checklist_parcours_anterieur(
@@ -58,6 +48,7 @@ def modifier_statut_checklist_parcours_anterieur(
     experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
     profil_candidat_translator: 'IProfilCandidatTranslator',
     academic_year_repository: 'IAcademicYearRepository',
+    inscriptions_translator: IInscriptionsTranslatorService,
 ) -> 'PropositionIdentity':
     annee_courante = (
         GetCurrentAcademicYear()
@@ -81,6 +72,7 @@ def modifier_statut_checklist_parcours_anterieur(
         experiences_cv_recuperees=ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION,
         uuid_proposition=proposition.entity_id.uuid,
         annee_courante=annee_courante,
+        inscriptions_translator=inscriptions_translator,
     )
 
     proposition.specifier_statut_checklist_parcours_anterieur(

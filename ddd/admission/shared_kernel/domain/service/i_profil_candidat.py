@@ -35,28 +35,21 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
 from admission.ddd.admission.doctorat.preparation.dtos.comptabilite import (
     DerniersEtablissementsSuperieursCommunauteFrancaiseFrequentesDTO,
 )
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
-    CurriculumAdmissionDTO,
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
 )
 from admission.ddd.admission.shared_kernel.dtos import CoordonneesDTO, IdentificationDTO
-from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import (
-    EtudesSecondairesAdmissionDTO,
-)
+from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from admission.ddd.admission.shared_kernel.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.shared_kernel.dtos.resume import ResumeCandidatDTO
-from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
-    ExperiencesCVRecuperees,
-)
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
 from base.models.academic_year import AcademicYear as AcademicYearModel
 from base.models.enums.community import CommunityEnum
 from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
-from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
-    AcademicYear,
-)
-from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
-    ValorisationEtudesSecondairesDTO,
-)
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear
+from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import ValorisationEtudesSecondairesDTO
 from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     CurriculumAExperiencesDTO,
@@ -100,10 +93,11 @@ class IProfilCandidatTranslator(interface.DomainService):
     @abstractmethod
     def get_examen(
         cls,
-        uuid_proposition: str,
-        matricule: str,
-        formation_sigle: str,
-        formation_annee: int,
+        uuid_experience: str = None,
+        matricule: str = None,
+        formation_sigle: str = None,
+        formation_annee: int = None,
+        uuid_proposition: str = None,
     ) -> 'ExamenDTO':
         raise NotImplementedError
 
@@ -114,6 +108,7 @@ class IProfilCandidatTranslator(interface.DomainService):
         matricule: str,
         annee_courante: int,
         uuid_proposition: str,
+        inscriptions_translator: IInscriptionsTranslatorService,
         experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
     ) -> 'CurriculumAdmissionDTO':
         raise NotImplementedError
@@ -122,9 +117,9 @@ class IProfilCandidatTranslator(interface.DomainService):
     @abstractmethod
     def get_experience_academique(
         cls,
-        matricule: str,
-        uuid_proposition: str,
         uuid_experience: str,
+        matricule: str = None,
+        uuid_proposition: str = None,
     ) -> 'ExperienceAcademiqueDTO':
         raise NotImplementedError
 
@@ -149,6 +144,7 @@ class IProfilCandidatTranslator(interface.DomainService):
         cls,
         matricule: str,
         annee_courante: int,
+        inscriptions_translator: IInscriptionsTranslatorService,
     ) -> 'ConditionsComptabiliteDTO':
         raise NotImplementedError
 
@@ -223,6 +219,7 @@ class IProfilCandidatTranslator(interface.DomainService):
         formation: Union['DoctoratFormationDTO', 'FormationDTO'],
         annee_courante: int,
         uuid_proposition: str,
+        inscriptions_translator: IInscriptionsTranslatorService,
         experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
     ) -> ResumeCandidatDTO:
         """Retourne toutes les données relatives à un candidat nécessaires à son admission."""

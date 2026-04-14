@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -28,8 +28,8 @@ from typing import List
 import attr
 
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
-    FichierCurriculumNonRenseigneException,
     EquivalenceNonRenseigneeException,
+    FichierCurriculumNonRenseigneException,
 )
 from base.ddd.utils.business_validator import BusinessValidator
 from base.models.enums.education_group_types import TrainingType
@@ -41,9 +41,14 @@ from osis_profile import BE_ISO_CODE
 class ShouldCurriculumFichierEtreSpecifie(BusinessValidator):
     fichier_pdf: List[str]
     type_formation: TrainingType
+    candidat_est_inscrit_recemment_ucl: bool
 
     def validate(self, *args, **kwargs):
-        if self.type_formation != TrainingType.BACHELOR and not self.fichier_pdf:
+        if (
+            not self.candidat_est_inscrit_recemment_ucl
+            and self.type_formation != TrainingType.BACHELOR
+            and not self.fichier_pdf
+        ):
             raise FichierCurriculumNonRenseigneException
 
 
@@ -52,13 +57,15 @@ class ShouldEquivalenceEtreSpecifiee(BusinessValidator):
     equivalence: List[str]
     type_formation: TrainingType
     experiences_academiques: List[ExperienceAcademiqueDTO]
+    candidat_est_en_poursuite: bool
 
     def validate(self, *args, **kwargs):
         experiences_avec_diplome = [
             experience for experience in self.experiences_academiques if experience.a_obtenu_diplome
         ]
         if (
-            self.type_formation in [TrainingType.AGGREGATION, TrainingType.CAPAES]
+            not self.candidat_est_en_poursuite
+            and self.type_formation in [TrainingType.AGGREGATION, TrainingType.CAPAES]
             and not self.equivalence
             and experiences_avec_diplome
             and all(experience.pays != BE_ISO_CODE for experience in experiences_avec_diplome)

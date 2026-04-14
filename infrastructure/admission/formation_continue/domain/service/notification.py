@@ -134,7 +134,12 @@ class Notification(INotification):
         )
 
         # Generate the pdf recap
-        token = admission_pdf_recap(admission, admission.candidate.language, ContinuingEducationAdmission)
+        token = admission_pdf_recap(
+            admission=admission,
+            language=admission.candidate.language,
+            admission_class=ContinuingEducationAdmission,
+            for_candidate=True,
+        )
         admission.pdf_recap = [token]
         admission.save(update_fields=['pdf_recap'])
         read_token = get_remote_token(

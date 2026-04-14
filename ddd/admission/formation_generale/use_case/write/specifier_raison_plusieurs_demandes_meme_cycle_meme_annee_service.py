@@ -23,27 +23,32 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import (
+
+from admission.ddd.admission.formation_generale.commands import (
+    SpecifierRaisonPlusieursDemandesMemeCycleMemeAnneeCommand,
+)
+from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
-from admission.ddd.admission.doctorat.preparation.commands import ModifierStatutChecklistExperienceNonAcademiqueCommand
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
-    PropositionIdentity,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_modifier_checklist_experience_parcours_anterieur import (
-    IValidationExperienceParcoursAnterieurService,
-)
+from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 
 
-def modifier_statut_checklist_experience_non_academique(
-    cmd: 'ModifierStatutChecklistExperienceNonAcademiqueCommand',
-    validation_experience_parcours_anterieur_service: 'IValidationExperienceParcoursAnterieurService',
+def specifier_raison_plusieurs_demandes_meme_cycle_meme_annee(
+    cmd: 'SpecifierRaisonPlusieursDemandesMemeCycleMemeAnneeCommand',
+    proposition_repository: 'IPropositionRepository',
 ) -> 'PropositionIdentity':
+    # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
+    proposition = proposition_repository.get(entity_id=proposition_id)
 
-    validation_experience_parcours_anterieur_service.modifier_statut_experience_non_academique(
-        uuid_experience=cmd.uuid_experience,
-        statut=cmd.statut,
+    proposition.specifier_raison_plusieurs_demandes_meme_cycle_meme_annee(
+        raison_plusieurs_demandes_meme_cycle_meme_annee=cmd.raison_plusieurs_demandes_meme_cycle_meme_annee,
+        justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee=(
+            cmd.justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee
+        ),
     )
+
+    proposition_repository.save(proposition)
 
     return proposition_id

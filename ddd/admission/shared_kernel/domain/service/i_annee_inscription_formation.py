@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,10 +24,10 @@
 #
 ##############################################################################
 import abc
-import datetime
 from dataclasses import dataclass
 from typing import Optional
 
+from admission.ddd.admission.shared_kernel.domain.model.calendrier_academique import CalendrierAcademique
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from osis_common.ddd import interface
 
@@ -36,13 +36,6 @@ from osis_common.ddd import interface
 class Date:
     jour: int
     mois: int
-    annee: int
-
-
-@dataclass()
-class CalendrierAcademique:
-    date_debut: datetime.date
-    date_fin: datetime.date
     annee: int
 
 
@@ -64,5 +57,21 @@ class IAnneeInscriptionFormationTranslator(interface.DomainService):
 
     @classmethod
     @abc.abstractmethod
-    def recuperer(cls, type_calendrier_academique: AcademicCalendarTypes, annee: Optional[int] = None) -> Optional[int]:
+    def recuperer_calendrier_academique_courant(
+        cls,
+        type_calendrier_academique: AcademicCalendarTypes,
+    ) -> CalendrierAcademique | None:
         raise NotImplementedError
+
+    @classmethod
+    def recuperer(cls, type_calendrier_academique: AcademicCalendarTypes, annee: Optional[int] = None) -> Optional[int]:
+        if annee is not None:
+            return annee
+
+        calendrier_courant = cls.recuperer_calendrier_academique_courant(type_calendrier_academique)
+
+        return calendrier_courant.annee if calendrier_courant else None
+
+    @classmethod
+    def recuperer_calendrier_administratif_courant(cls) -> CalendrierAcademique:
+        return cls.recuperer_calendrier_academique_courant(AcademicCalendarTypes.GENERAL_EDUCATION_ENROLLMENT)

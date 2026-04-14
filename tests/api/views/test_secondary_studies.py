@@ -50,12 +50,16 @@ from admission.tests.factories.secondary_studies import (
     HighSchoolDiplomaAlternativeFactory,
 )
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
+from base.models.enums.academic_type import AcademicTypes
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import GotDiploma
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version_address import EntityVersionAddressFactory
 from base.tests.factories.person import PersonFactory
+from epc.models.enums.etat_inscription import EtatInscriptionFormation
+from epc.models.enums.statut_inscription_programme_annuel import StatutInscriptionProgrammAnnuel
+from epc.tests.factories.inscription_programme_annuel import InscriptionProgrammeAnnuelFactory
 from osis_profile.models import BelgianHighSchoolDiploma, Exam, ForeignHighSchoolDiploma
 from osis_profile.models.education import HighSchoolDiploma
 from osis_profile.models.enums.education import EducationalType
@@ -243,6 +247,20 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         )
         self.assertEqual(updated_admission.modified_at, datetime.datetime.now())
         self.assertEqual(updated_admission.last_update_author, self.candidate_user.person)
+
+    def test_diploma_create_with_general_admission_and_ucl_student(self):
+        self.client.force_authenticate(user=self.candidate_user)
+
+        InscriptionProgrammeAnnuelFactory(
+            programme_cycle__etudiant__person=self.candidate_user.person,
+            etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+            programme__offer__academic_type=AcademicTypes.ACADEMIC.name,
+            statut=StatutInscriptionProgrammAnnuel.ETUDIANT_UCL.name,
+            programme__root_group__academic_year__year=2023,
+        )
+
+        response = self.create_belgian_diploma_with_general_admission(self.diploma_data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_diploma_create_with_continuing_admission(self):
         self.client.force_authenticate(user=self.candidate_user)
