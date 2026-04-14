@@ -27,8 +27,7 @@ from enum import Enum
 from typing import Dict, List, Optional
 
 import attr
-from django.utils.translation import gettext_lazy as _
-from django.utils.translation import pgettext_lazy
+from django.utils.translation import gettext_lazy as _, pgettext_lazy
 
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     BesoinDeDerogation,
@@ -87,8 +86,7 @@ class StatutsChecklistGenerale:
 
 
 INDEX_ONGLETS_CHECKLIST = {
-    onglet: index
-    for index, onglet in enumerate(attr.fields_dict(StatutsChecklistGenerale))  # type: ignore
+    onglet: index for index, onglet in enumerate(attr.fields_dict(StatutsChecklistGenerale))  # type: ignore
 }
 
 
@@ -181,6 +179,16 @@ onglet_donnees_personnelles = ConfigurationOngletChecklist(
             libelle=ChoixStatutValidationDonneesPersonnelles.FRAUDEUR.value,
             statut=ChoixStatutChecklist.GEST_BLOCAGE,
             extra={'fraud': '1'},
+        ),
+        ConfigurationStatutChecklist(
+            identifiant=ChoixStatutValidationDonneesPersonnelles.EXCLU.name,
+            libelle=ChoixStatutValidationDonneesPersonnelles.EXCLU.value,
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
+        ),
+        ConfigurationStatutChecklist(
+            identifiant=ChoixStatutValidationDonneesPersonnelles.DETTE_ACTIVE.name,
+            libelle=ChoixStatutValidationDonneesPersonnelles.DETTE_ACTIVE.value,
+            statut=ChoixStatutChecklist.GEST_BLOCAGE,
         ),
         ConfigurationStatutChecklist(
             identifiant=ChoixStatutValidationDonneesPersonnelles.VALIDEES.name,
