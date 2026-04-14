@@ -29,8 +29,9 @@ from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_b
 from admission.ddd.admission.doctorat.preparation.commands import ModifierStatutChecklistParcoursAnterieurCommand
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
-from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import \
-    IInscriptionsTranslatorService
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
+)
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.shared_kernel.repository.i_titre_acces_selectionnable import (
@@ -79,8 +80,7 @@ def modifier_statut_checklist_parcours_anterieur(
         statut_checklist_cible=cmd.statut,
         titres_acces_selectionnes=titres_acces_selectionnes,
         auteur_modification=cmd.gestionnaire,
-        experiences_academiques=curriculum.experiences_academiques,
-        experiences_non_academiques=curriculum.experiences_non_academiques,
+        curriculum=curriculum,
     )
 
     proposition_repository.save(proposition)

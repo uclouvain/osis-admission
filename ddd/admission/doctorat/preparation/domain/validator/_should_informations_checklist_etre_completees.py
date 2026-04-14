@@ -46,6 +46,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist 
     StatutsChecklistDoctorale,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    ApurementDettesNonVerifieException,
     ComplementsFormationEtreVidesSiPasDeComplementsFormationException,
     ConditionAccesEtreSelectionneException,
     DemandeDoitEtreAdmissionException,
@@ -74,6 +75,7 @@ from admission.ddd.admission.shared_kernel.domain.model.motif_refus import (
 from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import (
     TitreAccesSelectionnable,
 )
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
     EmplacementDocumentDTO,
 )
@@ -82,9 +84,14 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     StatutReclamationEmplacementDocument,
 )
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
 from base.ddd.utils.business_validator import BusinessValidator
 from base.models.enums.personal_data import ChoixStatutValidationDonneesPersonnelles
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
+    CurriculumDTO,
+    ExperienceAcademiqueDTO,
+    ExperienceNonAcademiqueDTO,
+)
 from epc.models.enums.condition_acces import ConditionAcces
 from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
 
@@ -256,6 +263,26 @@ class ShouldStatutsChecklistExperiencesEtreValidees(BusinessValidator):
                 )
             ):
                 raise StatutsChecklistExperiencesEtreValidesException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldApurementDettesEtreVerifie(BusinessValidator):
+    statut: ChoixStatutChecklist
+    curriculum: CurriculumDTO
+    apurement_dettes_verifie: bool
+    uuid_proposition: str
+
+    def validate(self, *args, **kwargs):
+        if (
+            self.statut == ChoixStatutChecklist.GEST_REUSSITE
+            and not self.apurement_dettes_verifie
+            and IProfilCandidatTranslator.avec_apurement_dettes(
+                curriculum=self.curriculum,
+                experiences_cv_recuperees=ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION,
+                uuid_proposition=self.uuid_proposition,
+            )
+        ):
+            raise ApurementDettesNonVerifieException
 
 
 @attr.dataclass(frozen=True, slots=True)

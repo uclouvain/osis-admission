@@ -54,13 +54,13 @@ from admission.ddd import LANGUES_OBLIGATOIRES_DOCTORAT, NB_MOIS_MIN_VAE
 from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO
 from admission.ddd.admission.doctorat.preparation.dtos.connaissance_langue import ConnaissanceLangueDTO
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
+)
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import AdmissionExperienceNonTrouveeException
 from admission.ddd.admission.shared_kernel.dtos import AdressePersonnelleDTO, CoordonneesDTO, IdentificationDTO
 from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
-from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
-    IInscriptionsTranslatorService,
-)
 from admission.ddd.admission.shared_kernel.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.shared_kernel.dtos.resume import ResumeCandidatDTO
 from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
@@ -93,6 +93,7 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
 from osis_profile import BE_ISO_CODE
 from osis_profile.models import EducationalExperience, EducationalExperienceYear, Exam, ExamType, ProfessionalExperience
 from osis_profile.models.education import HighSchoolDiploma, LanguageKnowledge
+from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
 from osis_profile.models.epc_injection import (
     EPCInjection as CurriculumEPCInjection,
     EPCInjectionStatus as CurriculumEPCInjectionStatus,
@@ -854,6 +855,18 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             )
         except Person.DoesNotExist:
             return None
+
+    @classmethod
+    def get_annee_premiere_experience_academique(cls, matricule: str) -> int | None:
+        return (
+            EducationalExperienceYear.objects.filter(educational_experience__person__global_id=matricule)
+            .exclude(
+                educational_experience__validation_status=ChoixStatutValidationExperience.EN_BROUILLON.name,
+            )
+            .order_by('academic_year__year')
+            .values_list('academic_year__year', flat=True)
+            .first()
+        )
 
     @classmethod
     def get_experience_academique(

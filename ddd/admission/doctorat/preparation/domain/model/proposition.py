@@ -100,10 +100,10 @@ from admission.ddd.admission.shared_kernel.domain.model.formation import Formati
 from admission.ddd.admission.shared_kernel.domain.model.motif_refus import MotifRefusIdentity
 from admission.ddd.admission.shared_kernel.domain.model.question_specifique import QuestionSpecifique
 from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
     IInscriptionsTranslatorService,
 )
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.domain.service.i_question_specifique import (
     ISuperQuestionSpecifiqueTranslator,
 )
@@ -135,7 +135,6 @@ from ddd.logic.reference.domain.model.bourse import BourseIdentity
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 from ddd.logic.shared_kernel.profil.domain.service.i_parcours_interne import IExperienceParcoursInterneTranslator
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
 from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd import interface
 
@@ -683,16 +682,16 @@ class Proposition(interface.RootEntity):
         statut_checklist_cible: str,
         titres_acces_selectionnes: List[TitreAccesSelectionnable],
         auteur_modification: str,
-        experiences_academiques: list[ExperienceAcademiqueDTO],
-        experiences_non_academiques: list[ExperienceNonAcademiqueDTO],
+        curriculum: CurriculumAdmissionDTO,
     ):
         ModifierStatutChecklistParcoursAnterieurValidatorList(
-            experiences_academiques=experiences_academiques,
-            experiences_non_academiques=experiences_non_academiques,
+            uuid_proposition=self.entity_id.uuid,
+            curriculum=curriculum,
             statut=ChoixStatutChecklist[statut_checklist_cible],
             titres_acces_selectionnes=titres_acces_selectionnes,
             condition_acces=self.condition_acces,
             millesime_condition_acces=self.millesime_condition_acces,
+            apurement_dettes_verifie=self.comptabilite.apurement_dettes_verifie,
         ).validate()
 
         self.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist[statut_checklist_cible]
@@ -1169,4 +1168,12 @@ class Proposition(interface.RootEntity):
             libelle=__('To be completed by SIC'),
             extra={'decision': DecisionCDDEnum.HORS_DECISION.name},
         )
+        self.auteur_derniere_modification = auteur_modification
+
+    def verifier_apurement_dettes(
+        self,
+        auteur_modification: str,
+        verifie: bool,
+    ):
+        self.comptabilite.apurement_dettes_verifie = verifie
         self.auteur_derniere_modification = auteur_modification

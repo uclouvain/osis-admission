@@ -825,4 +825,8 @@ COMMAND_HANDLERS = {
             inscriptions_translator=_inscriptions_translator,
         )
     ),
+    VerifierApurementDettesCommand: lambda msg_bus, cmd: verifier_apurement_dettes(
+        cmd=cmd,
+        proposition_repository=_proposition_repository,
+    ),
 }

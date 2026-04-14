@@ -901,4 +901,8 @@ COMMAND_HANDLERS = {
             proposition_repository=PropositionRepository(),
         )
     ),
+    VerifierApurementDettesCommand: lambda msg_bus, cmd: verifier_apurement_dettes(
+        cmd=cmd,
+        proposition_repository=PropositionRepository(),
+    ),
 }

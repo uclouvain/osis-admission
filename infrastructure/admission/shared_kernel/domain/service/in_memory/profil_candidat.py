@@ -37,8 +37,9 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
     DoctoratFormationDTO,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
-from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import \
-    IInscriptionsTranslatorService
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
+)
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import AdmissionExperienceNonTrouveeException
 from admission.ddd.admission.shared_kernel.dtos import AdressePersonnelleDTO, CoordonneesDTO, IdentificationDTO
@@ -47,8 +48,9 @@ from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from admission.ddd.admission.shared_kernel.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.shared_kernel.dtos.resume import ResumeCandidatDTO
 from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
-from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.inscriptions_translator import \
-    InscriptionsInMemoryTranslator
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.inscriptions_translator import (
+    InscriptionsInMemoryTranslator,
+)
 from base.models.enums.civil_state import CivilState
 from base.models.enums.community import CommunityEnum
 from base.models.enums.establishment_type import EstablishmentTypeEnum
@@ -1236,6 +1238,10 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
             )
         except StopIteration:
             raise CandidatNonTrouveException
+
+    @classmethod
+    def get_annee_premiere_experience_academique(cls, matricule: str) -> int | None:
+        return None
 
     @classmethod
     def get_existence_experiences_curriculum(cls, matricule: str) -> 'CurriculumAExperiencesDTO':

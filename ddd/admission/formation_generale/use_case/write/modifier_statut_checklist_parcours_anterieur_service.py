@@ -32,8 +32,9 @@ from admission.ddd.admission.formation_generale.domain.builder.proposition_ident
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.service.i_formation import IFormationGeneraleTranslator
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
-from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import \
-    IInscriptionsTranslatorService
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
+)
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.shared_kernel.repository.i_titre_acces_selectionnable import (
@@ -90,6 +91,8 @@ def modifier_statut_checklist_parcours_anterieur(
         formation_annee=proposition.formation_id.annee,
     )
 
+    inscriptions = inscriptions_translator.recuperer(matricule_candidat=proposition.matricule_candidat)
+
     proposition.specifier_statut_checklist_parcours_anterieur(
         statut_checklist_cible=cmd.statut,
         titres_acces_selectionnes=titres_acces_selectionnes,
@@ -97,8 +100,8 @@ def modifier_statut_checklist_parcours_anterieur(
         type_formation=formation.type,
         etudes_secondaires=etudes_secondaires,
         examen=examen,
-        experiences_academiques=curriculum.experiences_academiques,
-        experiences_non_academiques=curriculum.experiences_non_academiques,
+        curriculum=curriculum,
+        inscriptions=inscriptions,
     )
 
     proposition_repository.save(proposition)

@@ -76,6 +76,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator import *
 from admission.ddd.admission.doctorat.preparation.domain.validator._should_statut_etre_en_attente_de_signature import (
     ShouldStatutEtreEnAttenteDeSignature,
 )
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
 from admission.ddd.admission.shared_kernel.domain.model.complement_formation import (
     ComplementFormationIdentity,
 )
@@ -807,14 +808,16 @@ class ApprouverInscriptionParSicValidatorList(TwoStepsMultipleBusinessExceptionL
 @attr.dataclass(frozen=True, slots=True)
 class ModifierStatutChecklistParcoursAnterieurValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     statut: ChoixStatutChecklist
+    uuid_proposition: str
 
     titres_acces_selectionnes: List[TitreAccesSelectionnable]
 
     condition_acces: Optional[ConditionAcces]
     millesime_condition_acces: Optional[int]
 
-    experiences_academiques: list[ExperienceAcademiqueDTO]
-    experiences_non_academiques: list[ExperienceNonAcademiqueDTO]
+    apurement_dettes_verifie: bool
+
+    curriculum: CurriculumAdmissionDTO
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -831,9 +834,15 @@ class ModifierStatutChecklistParcoursAnterieurValidatorList(TwoStepsMultipleBusi
                 millesime_condition_acces=self.millesime_condition_acces,
             ),
             ShouldStatutsChecklistExperiencesEtreValidees(
-                experiences_academiques=self.experiences_academiques,
-                experiences_non_academiques=self.experiences_non_academiques,
+                experiences_academiques=self.curriculum.experiences_academiques,
+                experiences_non_academiques=self.curriculum.experiences_non_academiques,
                 statut=self.statut,
+            ),
+            ShouldApurementDettesEtreVerifie(
+                statut=self.statut,
+                curriculum=self.curriculum,
+                apurement_dettes_verifie=self.apurement_dettes_verifie,
+                uuid_proposition=self.uuid_proposition,
             ),
         ]
 

@@ -81,3 +81,4 @@ from .specifier_raison_plusieurs_demandes_meme_cycle_meme_annee_service import (
     specifier_raison_plusieurs_demandes_meme_cycle_meme_annee,
 )
 from .supprimer_proposition_service import supprimer_proposition
+from .verifier_apurement_dettes_service import verifier_apurement_dettes

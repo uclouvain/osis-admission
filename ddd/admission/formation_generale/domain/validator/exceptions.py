@@ -25,13 +25,13 @@
 ##############################################################################
 import datetime
 
-from django.utils.translation import gettext
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext, gettext_lazy as _
 
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_GESTIONNAIRE_PEUT_DEMANDER_PAIEMENT,
     ChoixStatutPropositionGenerale,
 )
+from base.utils.utils import format_academic_year
 from education_group.templatetags.academic_year_display import display_as_academic_year
 from osis_common.ddd.interface import BusinessException
 
@@ -414,4 +414,25 @@ class CandidatDejaDiplomeFormationException(BusinessException):
 
     def __init__(self, **kwargs):
         message = _("You cannot apply for this course because you have already graduated.")
+        super().__init__(message, **kwargs)
+
+
+class PasInscriptionBachelierPourBama15Exception(BusinessException):
+    status_code = "FORMATION-GENERALE-45"
+
+    def __init__(self, annee_formation: int, **kwargs):
+        message = _(
+            'A valid enrolment in %(annee_formation)s for the UCL training '
+            'selected as an access title is required (BAMA 15 condition).'
+        ) % {
+            'annee_formation': format_academic_year(annee_formation),
+        }
+        super().__init__(message, **kwargs)
+
+
+class ApurementDettesNonVerifieException(BusinessException):
+    status_code = "FORMATION-GENERALE-46"
+
+    def __init__(self, **kwargs):
+        message = _('Please check the debt clearance.')
         super().__init__(message, **kwargs)

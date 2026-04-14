@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@ from osis_common.ddd import interface
 class ComptabiliteDTO(interface.DTO):
     # Absence de dettes
     attestation_absence_dette_etablissement: List[str]
+    apurement_dettes_verifie: bool
 
     # Réduction des droits d'inscription
     demande_allocation_d_etudes_communaute_francaise_belgique: Optional[bool]

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -42,6 +42,7 @@ class ComptabiliteInMemoryTranslator(IComptabiliteTranslator):
 
         return ComptabiliteDTO(
             attestation_absence_dette_etablissement=comptabilite.attestation_absence_dette_etablissement,
+            apurement_dettes_verifie=comptabilite.apurement_dettes_verifie,
             type_situation_assimilation=comptabilite.type_situation_assimilation.name
             if comptabilite.type_situation_assimilation
             else '',

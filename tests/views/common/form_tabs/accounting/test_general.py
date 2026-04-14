@@ -51,6 +51,7 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import Ong
 from admission.forms.admission.accounting import AccountingForm
 from admission.models import Accounting
 from admission.models.general_education import GeneralEducationAdmission
+from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences
 from admission.tests.factories.curriculum import EducationalExperienceFactory, EducationalExperienceYearFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory, ProgramManagerRoleFactory, SicManagementRoleFactory
@@ -235,6 +236,10 @@ class GeneralAccountingFormViewTestCase(TestCase):
             educational_experience=first_experience,
             academic_year=AcademicYearFactory(year=current_year),
         )
+        AdmissionEducationalValuatedExperiences.objects.create(
+            baseadmission=self.general_admission,
+            educationalexperience=first_experience,
+        )
 
         response = self.client.get(self.form_url)
 
@@ -262,6 +267,10 @@ class GeneralAccountingFormViewTestCase(TestCase):
         EducationalExperienceYearFactory(
             educational_experience=second_experience,
             academic_year=AcademicYearFactory(year=current_year),
+        )
+        AdmissionEducationalValuatedExperiences.objects.create(
+            baseadmission=self.general_admission,
+            educationalexperience=second_experience,
         )
 
         response = self.client.get(self.form_url)

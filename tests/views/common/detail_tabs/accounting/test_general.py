@@ -37,6 +37,7 @@ from admission.ddd.admission.shared_kernel.enums import (
     TypeSituationAssimilation,
 )
 from admission.models.general_education import GeneralEducationAdmission
+from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences
 from admission.tests.factories.curriculum import EducationalExperienceFactory, EducationalExperienceYearFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory, ProgramManagerRoleFactory, SicManagementRoleFactory
@@ -120,6 +121,7 @@ class GeneralAccountingDetailViewTestCase(TestCase):
         self.assertEqual(accounting['type_numero_compte'], ChoixTypeCompteBancaire.NON.name)
 
         self.assertEqual(accounting['derniers_etablissements_superieurs_communaute_fr_frequentes'], None)
+        self.assertEqual(accounting['apurement_dettes_verifie'], False)
 
     def test_get_general_accounting_with_frequented_fr_institutes(self):
         self.client.force_login(self.sic_manager_user)
@@ -177,6 +179,10 @@ class GeneralAccountingDetailViewTestCase(TestCase):
                 educational_experience=experience,
                 academic_year=AcademicYearFactory(year=current_year),
             )
+            AdmissionEducationalValuatedExperiences.objects.create(
+                baseadmission=self.general_admission,
+                educationalexperience=experience,
+            )
 
         # French community institute but out of the range of require years -> must be excluded
         experience = EducationalExperienceFactory(
@@ -193,6 +199,10 @@ class GeneralAccountingDetailViewTestCase(TestCase):
             educational_experience=experience,
             academic_year=AcademicYearFactory(year=current_year - 1),
         )
+        AdmissionEducationalValuatedExperiences.objects.create(
+            baseadmission=self.general_admission,
+            educationalexperience=experience,
+        )
 
         response = self.client.get(self.url)
 
@@ -203,7 +213,7 @@ class GeneralAccountingDetailViewTestCase(TestCase):
 
         accounting = response.context['accounting']
         self.assertCountEqual(
-            accounting['derniers_etablissements_superieurs_communaute_fr_frequentes']['names'],
+            accounting['derniers_etablissements_superieurs_communaute_fr_frequentes'].noms,
             [
                 'First institute',
                 'Third institute',

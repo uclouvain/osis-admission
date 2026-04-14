@@ -98,6 +98,7 @@ from admission.ddd.admission.formation_generale.commands import (
     SpecifierMotifsRefusPropositionParSicCommand,
     SpecifierPaiementNecessaireCommand,
     SpecifierPaiementPlusNecessaireCommand,
+    VerifierApurementDettesCommand,
     VerifierCurriculumApresSoumissionQuery,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
@@ -127,6 +128,7 @@ from admission.ddd.admission.shared_kernel.commands import (
     RechercherParcoursAnterieurQuery,
     RecupererInformationsDestinataireQuery,
 )
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidat
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import InformationsDestinatairePasTrouvee
 from admission.ddd.admission.shared_kernel.dtos import EtudesSecondairesAdmissionDTO
@@ -149,6 +151,7 @@ from admission.ddd.admission.shared_kernel.enums.statut import (
     STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER_OU_ANNULEE,
 )
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
 from admission.forms import disable_unavailable_forms
 from admission.forms.admission.checklist import (
@@ -166,6 +169,7 @@ from admission.forms.admission.checklist import (
     FreeAdditionalApprovalConditionForm,
     PastExperiencesAdmissionAccessTitleForm,
     PastExperiencesAdmissionRequirementForm,
+    PastExperiencesVerifyDebtClearanceForm,
     SicDecisionApprovalDocumentsForm,
     SicDecisionApprovalForm,
     SicDecisionDelegateVraeDerogationForm,
@@ -259,6 +263,7 @@ __all__ = [
     'PastExperiencesAdmissionRequirementView',
     'PastExperiencesAccessTitleEquivalencyView',
     'PastExperiencesAccessTitleView',
+    'PastExperiencesVerifyDebtClearanceView',
     'MissingCurriculumPeriodsView',
     'FinancabiliteComputeRuleView',
     'FinancabiliteChangeStatusView',
@@ -2198,6 +2203,35 @@ class PastExperiencesAccessTitleEquivalencyView(
         return super().form_valid(form)
 
 
+class PastExperiencesVerifyDebtClearanceView(
+    AdmissionFormMixin,
+    CheckListDefaultContextMixin,
+    HtmxPermissionRequiredMixin,
+    FormView,
+):
+    name = 'verify-debt-clearance'
+    urlpatterns = 'verify-debt-clearance'
+    permission_required = 'admission.change_checklist'
+    template_name = 'admission/general_education/includes/checklist/debt_clearance.html'
+    htmx_template_name = 'admission/general_education/includes/checklist/debt_clearance.html'
+    form_class = PastExperiencesVerifyDebtClearanceForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['debt_clearance_form'] = context['form']
+        return context
+
+    def form_valid(self, form):
+        message_bus_instance.invoke(
+            VerifierApurementDettesCommand(
+                uuid_proposition=self.admission_uuid,
+                gestionnaire=self.request.user.person.global_id,
+                verifie=form.cleaned_data['verified_debt_clearance'],
+            )
+        )
+        return super().form_valid(form)
+
+
 class ChangeExtraView(AdmissionFormMixin, FormView):
     urlpatterns = {'change-checklist-extra': 'change-checklist-extra/<str:tab>'}
     permission_required = 'admission.change_checklist'
@@ -2913,6 +2947,8 @@ class SinglePastExperienceChangeStatusView(ChangeExperienceValidationStatus, Sin
             ModifierChecklistStatutExamenCommand,
         ]:
             cmd_parameters['uuid_proposition'] = self.admission_uuid
+        elif update_status_experience_cmd == ModifierStatutEtudesSecondairesCommand:
+            cmd_parameters['matricule'] = self.admission.candidate.global_id
         message_bus_instance.invoke(update_status_experience_cmd(**cmd_parameters))
 
 
@@ -3183,6 +3219,19 @@ class ChecklistView(
             context['past_experiences_admission_access_title_equivalency_form'] = (
                 self.past_experiences_admission_access_title_equivalency_form
             )
+            # Clearance debts
+            context['with_debt_clearance'] = IProfilCandidatTranslator.avec_apurement_dettes(
+                curriculum=command_result.resume.curriculum,
+                experiences_cv_recuperees=ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION,
+                uuid_proposition=command_result.resume.proposition.uuid,
+            )
+            context['debt_clearance_form'] = PastExperiencesVerifyDebtClearanceForm(
+                initial={
+                    'verified_debt_clearance': command_result.resume.comptabilite.apurement_dettes_verifie,
+                }
+                if command_result.resume.comptabilite
+                else {}
+            )
 
             # Financabilité
             context['financabilite'] = self._get_financabilite()
@@ -3296,8 +3345,7 @@ class ChecklistView(
                         )
 
                 context['dernieres_vues_par'] = (
-                    AdmissionViewer.objects
-                    .filter(
+                    AdmissionViewer.objects.filter(
                         admission=self.admission,
                         viewed_at__gte=timezone.now() - datetime.timedelta(hours=1),
                     )

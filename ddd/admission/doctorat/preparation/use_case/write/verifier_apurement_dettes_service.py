@@ -23,15 +23,25 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import attr
+from admission.ddd.admission.doctorat.preparation.commands import (
+    VerifierApurementDettesCommand,
+)
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
 
-from osis_common.ddd import interface
 
+def verifier_apurement_dettes(
+    cmd: VerifierApurementDettesCommand,
+    proposition_repository: 'IPropositionRepository',
+) -> PropositionIdentity:
+    proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
-@attr.dataclass(frozen=True, slots=True)
-class InscriptionDTO(interface.DTO):
-    sigle: str
-    annee: int
-    noma: str
-    est_premiere_annee_bachelier: bool
-    uuid_cycle: str
+    proposition.verifier_apurement_dettes(
+        auteur_modification=cmd.gestionnaire,
+        verifie=cmd.verifie,
+    )
+
+    proposition_repository.save(entity=proposition)
+
+    return proposition.entity_id

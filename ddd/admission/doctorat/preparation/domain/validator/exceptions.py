@@ -25,8 +25,7 @@
 # ##############################################################################
 from django.utils import formats
 from django.utils.text import capfirst
-from django.utils.translation import gettext_lazy as _
-from django.utils.translation import ngettext_lazy
+from django.utils.translation import gettext_lazy as _, ngettext_lazy
 
 from osis_common.ddd.interface import BusinessException
 
@@ -702,6 +701,14 @@ class SignataireADejaApprouveException(BusinessException):
 
     def __init__(self, **kwargs):  # pragma: no cover
         message = _("The member of the supervision group can't be invited because he has already agreed.")
+        super().__init__(message, **kwargs)
+
+
+class ApurementDettesNonVerifieException(BusinessException):
+    status_code = "PROPOSITION-78"
+
+    def __init__(self, **kwargs):
+        message = _('Please check the debt clearance.')
         super().__init__(message, **kwargs)
 
 

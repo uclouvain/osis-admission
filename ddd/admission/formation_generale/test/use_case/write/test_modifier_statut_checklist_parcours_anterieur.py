@@ -24,6 +24,8 @@
 #
 # ##############################################################################
 import datetime
+from unittest import mock
+from unittest.mock import MagicMock
 
 import freezegun
 from django.test import SimpleTestCase
@@ -35,11 +37,14 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    Proposition,
     PropositionIdentity,
 )
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
+    ApurementDettesNonVerifieException,
     ConditionAccesEtreSelectionneException,
     InformationsEquivalenceNonSpecifieesChecklistException,
+    PasInscriptionBachelierPourBama15Exception,
     PropositionNonTrouveeException,
     StatutsChecklistExperiencesEtreValidesException,
     TitreAccesEtreSelectionneException,
@@ -48,6 +53,7 @@ from admission.ddd.admission.formation_generale.test.factory.proposition import 
 from admission.ddd.admission.formation_generale.test.factory.titre_acces import (
     TitreAccesSelectionnableFactory,
 )
+from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import TypeTitreAccesSelectionnable
 from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import TypeEquivalenceTitreAcces
 from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationIdentityFactory
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
@@ -332,6 +338,111 @@ class TestModifierStatutChecklistParcoursAnterieurService(SimpleTestCase):
                     TitreAccesEtreSelectionneException,
                 ],
             )
+
+    def test_should_renvoyer_erreur_si_apurement_dettes_non_verifie(self):
+        proposition_id = PropositionIdentity(uuid='uuid-MASTER-SCI')
+
+        master_proposition: Proposition = self.proposition_repository.get(entity_id=proposition_id)
+
+        cmd = ModifierStatutChecklistParcoursAnterieurCommand(
+            uuid_proposition='uuid-MASTER-SCI',
+            statut=ChoixStatutChecklist.GEST_REUSSITE.name,
+            gestionnaire='0123456789',
+        )
+
+        with mock.patch(
+            'admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat.IProfilCandidatTranslator.'
+            'avec_apurement_dettes',
+            return_value=True,
+        ):
+            master_proposition.comptabilite.apurement_dettes_verifie = False
+
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(cmd)
+
+            self.assertHasInstance(context.exception.exceptions, ApurementDettesNonVerifieException)
+
+            master_proposition.comptabilite.apurement_dettes_verifie = True
+
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(cmd)
+
+            self.assertHasNoInstance(context.exception.exceptions, ApurementDettesNonVerifieException)
+
+        with mock.patch(
+            'admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat.IProfilCandidatTranslator.'
+            'avec_apurement_dettes',
+            return_value=False,
+        ):
+            master_proposition.comptabilite.apurement_dettes_verifie = False
+
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(cmd)
+
+            self.assertHasNoInstance(context.exception.exceptions, ApurementDettesNonVerifieException)
+
+            master_proposition.comptabilite.apurement_dettes_verifie = True
+
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(cmd)
+
+            self.assertHasNoInstance(context.exception.exceptions, ApurementDettesNonVerifieException)
+
+    def test_should_renvoyer_erreur_si_pas_inscription_au_bachelier_pour_bama_15(self):
+        proposition_id = PropositionIdentity(uuid='uuid-MASTER-SCI')
+
+        master_proposition: Proposition = self.proposition_repository.get(entity_id=proposition_id)
+        master_proposition.condition_acces = ConditionAcces.BAMA15
+
+        cmd = ModifierStatutChecklistParcoursAnterieurCommand(
+            uuid_proposition='uuid-MASTER-SCI',
+            statut=ChoixStatutChecklist.GEST_REUSSITE.name,
+            gestionnaire='0123456789',
+        )
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(cmd)
+
+        self.assertHasNoInstance(context.exception.exceptions, PasInscriptionBachelierPourBama15Exception)
+
+        titre_acces_interne = TitreAccesSelectionnableFactory(
+            entity_id__uuid_proposition='uuid-MASTER-SCI',
+            entity_id__type_titre=TypeTitreAccesSelectionnable.EXPERIENCE_PARCOURS_INTERNE,
+            selectionne=True,
+        )
+
+        self.titre_acces_repository.entities.append(titre_acces_interne)
+
+        with self.assertRaises(MultipleBusinessExceptions) as context:
+            self.message_bus.invoke(cmd)
+
+        self.assertHasInstance(context.exception.exceptions, PasInscriptionBachelierPourBama15Exception)
+
+        inscription = MagicMock(
+            annee=master_proposition.formation_id.annee,
+            uuid_cycle=titre_acces_interne.entity_id.uuid_experience,
+        )
+        with mock.patch(
+            'admission.infrastructure.admission.shared_kernel.domain.service.in_memory.inscriptions_translator.'
+            'InscriptionsInMemoryTranslator.recuperer',
+            return_value=[inscription],
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(cmd)
+
+            self.assertHasNoInstance(context.exception.exceptions, PasInscriptionBachelierPourBama15Exception)
+
+        inscription.annee = 2020
+
+        with mock.patch(
+            'admission.infrastructure.admission.shared_kernel.domain.service.in_memory.inscriptions_translator.'
+            'InscriptionsInMemoryTranslator.recuperer',
+            return_value=[inscription],
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(cmd)
+
+            self.assertHasInstance(context.exception.exceptions, PasInscriptionBachelierPourBama15Exception)
 
     def test_should_empecher_si_proposition_non_trouvee(self):
         with self.assertRaises(PropositionNonTrouveeException):

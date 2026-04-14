@@ -41,6 +41,7 @@ from admission.ddd.admission.doctorat.preparation.commands import (
     ModifierStatutChecklistExperienceAcademiqueCommand,
     ModifierStatutChecklistParcoursAnterieurCommand,
     SpecifierConditionAccesPropositionCommand,
+    VerifierApurementDettesCommand,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     ChoixStatutChecklist,
@@ -51,7 +52,11 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     TitreAccesEtreSelectionneException,
 )
 from admission.ddd.admission.shared_kernel.commands import SpecifierExperienceEnTantQueTitreAccesCommand
-from admission.forms.admission.checklist import DoctoratePastExperiencesAdmissionRequirementForm, StatusForm
+from admission.forms.admission.checklist import (
+    DoctoratePastExperiencesAdmissionRequirementForm,
+    PastExperiencesVerifyDebtClearanceForm,
+    StatusForm,
+)
 from admission.templatetags.admission import authentication_css_class
 from admission.utils import get_missing_curriculum_periods_for_doctorate
 from admission.views.common.detail_tabs.checklist import ChecklistTabIcon
@@ -76,6 +81,7 @@ __all__ = [
     'PastExperiencesStatusView',
     'PastExperiencesAdmissionRequirementView',
     'PastExperiencesAccessTitleView',
+    'PastExperiencesVerifyDebtClearanceView',
     'SinglePastExperienceChangeStatusView',
     'SinglePastExperienceChangeAuthenticationView',
 ]
@@ -411,3 +417,32 @@ class MissingCurriculumPeriodsView(AdmissionViewMixin, TemplateView):
         ]
 
         return context
+
+
+class PastExperiencesVerifyDebtClearanceView(
+    AdmissionFormMixin,
+    CheckListDefaultContextMixin,
+    HtmxPermissionRequiredMixin,
+    FormView,
+):
+    name = 'verify-debt-clearance'
+    urlpatterns = 'verify-debt-clearance'
+    permission_required = 'admission.change_checklist'
+    template_name = 'admission/general_education/includes/checklist/debt_clearance.html'
+    htmx_template_name = 'admission/general_education/includes/checklist/debt_clearance.html'
+    form_class = PastExperiencesVerifyDebtClearanceForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['debt_clearance_form'] = context['form']
+        return context
+
+    def form_valid(self, form):
+        message_bus_instance.invoke(
+            VerifierApurementDettesCommand(
+                uuid_proposition=self.admission_uuid,
+                gestionnaire=self.request.user.person.global_id,
+                verifie=form.cleaned_data['verified_debt_clearance'],
+            )
+        )
+        return super().form_valid(form)

@@ -39,6 +39,8 @@ from ._should_etudes_secondaires_etre_completees import (
     ShouldSpecifieSiDiplomeEtudesSecondairesPourBachelier,
 )
 from ._should_informations_checklist_etre_completees import (
+    ShouldApurementDettesEtreVerifie,
+    ShouldAvoirInscriptionBachelierPourBama15,
     ShouldChecklistEtreDansEtatCorrectPourApprouverInscription,
     ShouldComplementsFormationEtreVidesSiPasDeComplementsFormation,
     ShouldConditionAccesEtreSelectionne,

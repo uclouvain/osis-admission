@@ -1412,3 +1412,10 @@ class PersonalDataStatusForm(forms.Form):
     status = forms.ChoiceField(
         choices=ChoixStatutValidationDonneesPersonnelles.choices(),
     )
+
+
+class PastExperiencesVerifyDebtClearanceForm(forms.Form):
+    verified_debt_clearance = forms.BooleanField(
+        label=_('Verified debt clearance'),
+        required=False,
+    )

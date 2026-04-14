@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,14 +29,14 @@ from django.test import SimpleTestCase
 from admission.ddd.admission.doctorat.preparation.commands import GetComptabiliteQuery
 from admission.ddd.admission.doctorat.preparation.dtos import ComptabiliteDTO
 from admission.ddd.admission.shared_kernel.enums import (
-    ChoixTypeCompteBancaire,
-    TypeSituationAssimilation,
     ChoixAssimilation1,
     ChoixAssimilation2,
     ChoixAssimilation3,
     ChoixAssimilation5,
     ChoixAssimilation6,
+    ChoixTypeCompteBancaire,
     LienParente,
+    TypeSituationAssimilation,
 )
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
@@ -105,5 +105,6 @@ class GetComptabiliteTestCase(SimpleTestCase):
                 nom_titulaire_compte='Doe',
                 preuve_statut_apatride=['file_token.pdf'],
                 carte_a=['file_token.pdf'],
+                apurement_dettes_verifie=False,
             ),
         )

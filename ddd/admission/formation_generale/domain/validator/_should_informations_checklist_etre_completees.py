@@ -43,6 +43,7 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
     StatutsChecklistGenerale,
 )
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
+    ApurementDettesNonVerifieException,
     ComplementsFormationEtreVidesSiPasDeComplementsFormationException,
     ConditionAccesEtreSelectionneException,
     DemandeDoitEtreAdmissionException,
@@ -56,6 +57,7 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
     InscriptionTardiveAvecConditionAccesException,
     MotifRefusFacultaireNonSpecifieException,
     ParcoursAnterieurNonSuffisantException,
+    PasInscriptionBachelierPourBama15Exception,
     ReorientationExterneAvecConditionAccesException,
     SituationPropositionNonFACException,
     SituationPropositionNonSICException,
@@ -70,6 +72,7 @@ from admission.ddd.admission.shared_kernel.domain.model.condition_complementaire
     ConditionComplementaireApprobationIdentity,
     ConditionComplementaireLibreApprobation,
 )
+from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import TypeTitreAccesSelectionnable
 from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import (
     TypeEquivalenceTitreAcces,
 )
@@ -79,20 +82,27 @@ from admission.ddd.admission.shared_kernel.domain.model.motif_refus import (
 from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import (
     TitreAccesSelectionnable,
 )
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.dtos import EtudesSecondairesAdmissionDTO
 from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
     EmplacementDocumentDTO,
 )
+from admission.ddd.admission.shared_kernel.dtos.inscription import InscriptionDTO
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
     StatutReclamationEmplacementDocument,
 )
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
 from base.ddd.utils.business_validator import BusinessValidator
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.personal_data import ChoixStatutValidationDonneesPersonnelles
 from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
+    CurriculumDTO,
+    ExperienceAcademiqueDTO,
+    ExperienceNonAcademiqueDTO,
+)
 from epc.models.enums.condition_acces import ConditionAcces
 from osis_profile.models.enums.education import ForeignDiplomaTypes
 from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
@@ -348,6 +358,48 @@ class ShouldInformationsEquivalenceEtreRenseignees(BusinessValidator):
             )
         ):
             raise InformationsEquivalenceNonSpecifieesChecklistException
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldAvoirInscriptionBachelierPourBama15(BusinessValidator):
+    statut: ChoixStatutChecklist
+    condition_acces: Optional[ConditionAcces]
+    annee_formation: int
+    titres_acces_selectionnes: List[TitreAccesSelectionnable]
+    inscriptions: list[InscriptionDTO]
+
+    def validate(self, *args, **kwargs):
+        if self.statut == ChoixStatutChecklist.GEST_REUSSITE and self.condition_acces == ConditionAcces.BAMA15:
+            for titre_acces in self.titres_acces_selectionnes:
+                if (
+                    titre_acces.entity_id.type_titre == TypeTitreAccesSelectionnable.EXPERIENCE_PARCOURS_INTERNE
+                    and not any(
+                        inscription.uuid_cycle == titre_acces.entity_id.uuid_experience
+                        and inscription.annee == self.annee_formation
+                        for inscription in self.inscriptions
+                    )
+                ):
+                    raise PasInscriptionBachelierPourBama15Exception(annee_formation=self.annee_formation)
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldApurementDettesEtreVerifie(BusinessValidator):
+    statut: ChoixStatutChecklist
+    curriculum: CurriculumDTO
+    apurement_dettes_verifie: bool
+    uuid_proposition: str
+
+    def validate(self, *args, **kwargs):
+        if (
+            self.statut == ChoixStatutChecklist.GEST_REUSSITE
+            and not self.apurement_dettes_verifie
+            and IProfilCandidatTranslator.avec_apurement_dettes(
+                curriculum=self.curriculum,
+                experiences_cv_recuperees=ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION,
+                uuid_proposition=self.uuid_proposition,
+            )
+        ):
+            raise ApurementDettesNonVerifieException
 
 
 @attr.dataclass(frozen=True, slots=True)

@@ -967,4 +967,8 @@ COMMAND_HANDLERS = {
             proposition_repository=_proposition_repository,
         )
     ),
+    VerifierApurementDettesCommand: lambda msg_bus, cmd: verifier_apurement_dettes(
+        cmd=cmd,
+        proposition_repository=_proposition_repository,
+    ),
 }

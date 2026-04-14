@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import uuid
 
 from django.db.models import F, QuerySet
 
@@ -91,11 +92,13 @@ class InscriptionsTranslatorService(IInscriptionsTranslatorService):
             sigle_formation=F('programme__offer__acronym'),
             annee_formation=F('programme__offer__academic_year__year'),
             noma=F('programme_cycle__etudiant__registration_id'),
+            id_cycle=F('programme_cycle__id'),
         ).values(
             'sigle_formation',
             'annee_formation',
             'noma',
             'est_premiere_annee_bachelier',
+            'id_cycle',
         )
 
         return [
@@ -104,6 +107,7 @@ class InscriptionsTranslatorService(IInscriptionsTranslatorService):
                 annee=enrolment['annee_formation'],
                 noma=enrolment['noma'],
                 est_premiere_annee_bachelier=enrolment['est_premiere_annee_bachelier'],
+                uuid_cycle=str(uuid.UUID(int=enrolment['id_cycle'])),
             )
             for enrolment in enrolment_qs
         ]
