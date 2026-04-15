@@ -130,7 +130,7 @@
 {% block script %}
     <script>
     function toggleWhiteAndGreyRows() {
-        document.querySelectorAll('tr.bg-parcours-blanc, tr.bg-parcours-gris').forEach(row => row.classList.toggle('hidden'))
+        document.querySelectorAll('tr.bg-parcours-blanc, tr.bg-parcours-gris, tr.empty-row').forEach(row => row.classList.toggle('hidden'))
         document.querySelectorAll('#eye-icon').forEach(icon => icon.classList.toggle('fa-eye'))
         document.querySelectorAll('#eye-icon').forEach(icon => icon.classList.toggle('fa-eye-slash'))
         document.querySelectorAll('#hide-label').forEach(el => el.classList.toggle('hidden'))
