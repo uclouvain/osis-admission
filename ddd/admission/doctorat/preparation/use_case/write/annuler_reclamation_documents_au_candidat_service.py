@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -33,12 +33,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.proposition impor
 from admission.ddd.admission.doctorat.preparation.domain.service.i_comptabilite import (
     IComptabiliteTranslator,
 )
-from admission.ddd.admission.doctorat.preparation.domain.service.i_membre_CA import (
-    IMembreCATranslator,
-)
-from admission.ddd.admission.doctorat.preparation.domain.service.i_promoteur import (
-    IPromoteurTranslator,
-)
 from admission.ddd.admission.doctorat.preparation.domain.service.i_question_specifique import (
     IQuestionSpecifiqueTranslator,
 )
@@ -58,6 +52,9 @@ from admission.ddd.admission.shared_kernel.domain.service.i_emplacements_documen
     IEmplacementsDocumentsPropositionTranslator,
 )
 from admission.ddd.admission.shared_kernel.domain.service.i_historique import IHistorique
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
+)
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
@@ -86,6 +83,7 @@ def annuler_reclamation_documents_au_candidat(
     personne_connue_translator: 'IPersonneConnueUclTranslator',
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
     historique: 'IHistorique',
+    inscriptions_translator: IInscriptionsTranslatorService,
 ) -> PropositionIdentity:
     # GIVEN
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
@@ -97,6 +95,7 @@ def annuler_reclamation_documents_au_candidat(
         academic_year_repository=academic_year_repository,
         groupe_supervision_repository=groupe_supervision_repository,
         question_specifique_translator=question_specifique_translator,
+        inscriptions_translator=inscriptions_translator,
     )
 
     documents_reclames_dtos = emplacements_documents_demande_translator.recuperer_emplacements_reclames_dto(

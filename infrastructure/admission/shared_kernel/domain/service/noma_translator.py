@@ -23,18 +23,21 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.shared_kernel.commands import (
-    RecupererInformationsValidationExperienceNonAcademiqueQuery,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_modifier_checklist_experience_parcours_anterieur import (
-    IValidationExperienceParcoursAnterieurService,
-)
+from admission.ddd.admission.shared_kernel.domain.service.i_noma_translator import INomasTranslator
+from ddd.logic.shared_kernel.signaletique_etudiant.commands import RechercherSignaletiqueEtudiantQuery
+from ddd.logic.shared_kernel.signaletique_etudiant.dto.signaletique_etudiant import SignaletiqueEtudiantDTO
 
 
-def recuperer_informations_validation_experience_non_academique(
-    cmd: 'RecupererInformationsValidationExperienceNonAcademiqueQuery',
-    validation_experience_parcours_anterieur_service: 'IValidationExperienceParcoursAnterieurService',
-):
-    return validation_experience_parcours_anterieur_service.recuperer_information_validation_experience_non_academique(
-        uuid_experience=cmd.uuid_experience,
-    )
+class NomasTranslator(INomasTranslator):
+    @classmethod
+    def recuperer(
+        cls,
+        matricule_candidat: str,
+    ) -> list[str]:
+        from infrastructure.messages_bus import message_bus_instance
+
+        students: set[SignaletiqueEtudiantDTO] = message_bus_instance.invoke(
+            RechercherSignaletiqueEtudiantQuery(matricule_fgs=matricule_candidat),
+        )
+
+        return [student.noma for student in students]

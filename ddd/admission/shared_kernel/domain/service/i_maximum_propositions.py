@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
+from abc import abstractmethod
 from typing import Optional
 
 from django.utils.translation import ngettext
@@ -37,12 +38,15 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 from admission.ddd.admission.formation_generale.domain.model.proposition import (
     Proposition as PropositionGenerale,
 )
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     NombrePropositionsSoumisesDepasseException,
 )
 from osis_common.ddd import interface
+from osis_profile import BE_ISO_CODE
 
-MAXIMUM_PROPOSITIONS_ENVOYEES_FORMATION_GENERALE = 2
+MAXIMUM_PROPOSITIONS_ENVOYEES_FORMATION_GENERALE_HORS_UE_RESIDENT_ETRANGER = 2
+MAXIMUM_PROPOSITIONS_ENVOYEES_FORMATION_GENERALE_DEFAUT = 3
 MAXIMUM_PROPOSITIONS_ENVOYEES_FORMATION_CONTINUE = 2
 MAXIMUM_PROPOSITIONS_EN_COURS = 5
 MAXIMUM_PROPOSITIONS_EN_COURS_FORMATION_DOCTORALE = 1
@@ -74,15 +78,39 @@ class IMaximumPropositionsAutorisees(interface.DomainService):
         raise NotImplementedError
 
     @classmethod
+    def recuperer_nombre_maximal_propositions_envoyables_formation_generale(
+        cls,
+        matricule_candidat: str,
+        profil_candidat_translator: IProfilCandidatTranslator,
+    ):
+        identification = profil_candidat_translator.get_identification(matricule=matricule_candidat)
+        coordonnees = profil_candidat_translator.get_coordonnees(matricule=matricule_candidat)
+
+        if (
+            identification.pays_nationalite_europeen is False
+            and coordonnees.domicile_legal
+            and coordonnees.domicile_legal.pays != BE_ISO_CODE
+        ):
+            return MAXIMUM_PROPOSITIONS_ENVOYEES_FORMATION_GENERALE_HORS_UE_RESIDENT_ETRANGER
+        return MAXIMUM_PROPOSITIONS_ENVOYEES_FORMATION_GENERALE_DEFAUT
+
+    @classmethod
     def verifier_nombre_propositions_envoyees_formation_generale(
         cls,
         proposition_candidat: 'PropositionGenerale',
+        profil_candidat_translator: IProfilCandidatTranslator,
         annee_soumise: int = None,
     ) -> None:
         annee_cible = annee_soumise or proposition_candidat.annee_calculee or proposition_candidat.formation_id.annee
+
+        nombre_max_propositions_envoyables = cls.recuperer_nombre_maximal_propositions_envoyables_formation_generale(
+            matricule_candidat=proposition_candidat.matricule_candidat,
+            profil_candidat_translator=profil_candidat_translator,
+        )
+
         if (
             cls.nb_propositions_envoyees_formation_generale(proposition_candidat.matricule_candidat, annee_cible)
-            >= MAXIMUM_PROPOSITIONS_ENVOYEES_FORMATION_GENERALE
+            >= nombre_max_propositions_envoyables
         ):
             raise NombrePropositionsSoumisesDepasseException(
                 ngettext(
@@ -90,10 +118,10 @@ class IMaximumPropositionsAutorisees(interface.DomainService):
                     'the year %(annee_cible)s.',
                     'You cannot submit this admission for a general education as '
                     'you already have submitted %(maximum_number)s of them for the year %(annee_cible)s.',
-                    MAXIMUM_PROPOSITIONS_ENVOYEES_FORMATION_GENERALE,
+                    nombre_max_propositions_envoyables,
                 )
                 % {
-                    'maximum_number': MAXIMUM_PROPOSITIONS_ENVOYEES_FORMATION_GENERALE,
+                    'maximum_number': nombre_max_propositions_envoyables,
                     'annee_cible': annee_cible,
                 }
             )
@@ -132,3 +160,22 @@ class IMaximumPropositionsAutorisees(interface.DomainService):
             >= MAXIMUM_PROPOSITIONS_EN_COURS_FORMATION_DOCTORALE
         ):
             raise MaximumPropositionsDoctoralesAtteintException(MAXIMUM_PROPOSITIONS_EN_COURS_FORMATION_DOCTORALE)
+
+    @classmethod
+    @abstractmethod
+    def verifier_une_seule_demande_envoyee_par_formation_generale_par_annee(
+        cls,
+        proposition_candidat: PropositionGenerale,
+        annee_soumise: int = None,
+    ):
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def verifier_une_seule_demande_non_soumise_par_formation_generale(
+        cls,
+        matricule_candidat: str,
+        sigle_formation: str,
+        uuid_proposition: str = '',
+    ):
+        raise NotImplementedError

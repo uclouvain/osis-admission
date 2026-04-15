@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,14 +25,6 @@
 # ##############################################################################
 from typing import List
 
-from admission.ddd.admission.shared_kernel.domain.service.i_emplacements_documents_proposition import (
-    IEmplacementsDocumentsPropositionTranslator,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.shared_kernel.domain.service.resume_proposition import ResumeProposition
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
-from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire
-from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.formation_generale.commands import RecupererDocumentsReclamesPropositionQuery
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
@@ -42,6 +34,17 @@ from admission.ddd.admission.formation_generale.domain.service.i_question_specif
     IQuestionSpecifiqueTranslator,
 )
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.shared_kernel.domain.service.i_emplacements_documents_proposition import (
+    IEmplacementsDocumentsPropositionTranslator,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.shared_kernel.domain.service.resume_proposition import ResumeProposition
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
 
@@ -55,6 +58,7 @@ def recuperer_documents_reclames_proposition(
     emplacements_documents_demande_translator: 'IEmplacementsDocumentsPropositionTranslator',
     academic_year_repository: 'IAcademicYearRepository',
     personne_connue_translator: 'IPersonneConnueUclTranslator',
+    inscriptions_translator: IInscriptionsTranslatorService,
 ) -> 'List[EmplacementDocumentDTO]':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -66,6 +70,7 @@ def recuperer_documents_reclames_proposition(
         proposition_dto=proposition_dto,
         comptabilite_dto=comptabilite_dto,
         experiences_cv_recuperees=ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION,
+        inscriptions_translator=inscriptions_translator,
     )
     questions_specifiques_dtos = question_specifique_translator.search_dto_by_proposition(
         proposition_uuid=cmd.uuid_proposition,

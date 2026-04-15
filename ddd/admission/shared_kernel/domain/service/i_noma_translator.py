@@ -23,18 +23,16 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.shared_kernel.commands import (
-    RecupererInformationsValidationEtudesSecondairesQuery,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_modifier_checklist_experience_parcours_anterieur import (
-    IValidationExperienceParcoursAnterieurService,
-)
+from abc import abstractmethod
+
+from osis_common.ddd import interface
 
 
-def recuperer_informations_validation_etudes_secondaires(
-    cmd: 'RecupererInformationsValidationEtudesSecondairesQuery',
-    validation_experience_parcours_anterieur_service: 'IValidationExperienceParcoursAnterieurService',
-):
-    return validation_experience_parcours_anterieur_service.recuperer_information_validation_etudes_secondaires(
-        uuid_experience=cmd.uuid_experience,
-    )
+class INomasTranslator(interface.DomainService):
+    @classmethod
+    @abstractmethod
+    def recuperer(
+        cls,
+        matricule_candidat: str,
+    ) -> list[str]:
+        raise NotImplementedError

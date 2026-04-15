@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -39,8 +39,7 @@ from django.urls import reverse
 from django.utils.functional import cached_property
 from django.utils.html import format_html
 from django.utils.text import slugify
-from django.utils.translation import get_language, gettext_lazy, pgettext
-from django.utils.translation import gettext as _
+from django.utils.translation import get_language, gettext as _, gettext_lazy, pgettext
 from django.views import View
 from osis_async.models import AsyncTask
 from osis_comment.models import CommentEntry
@@ -49,9 +48,7 @@ from osis_export.models import Export
 from osis_export.models.enums.types import ExportTypes
 
 from admission.admission_utils.get_actor_option_text import get_actor_option_text
-from admission.ddd.admission.doctorat.preparation.commands import (
-    ListerDemandesQuery as ListerDemandesDoctoralesQuery,
-)
+from admission.ddd.admission.doctorat.preparation.commands import ListerDemandesQuery as ListerDemandesDoctoralesQuery
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     TOUS_CHOIX_COMMISSION_PROXIMITE,
     ChoixStatutPropositionDoctorale,
@@ -70,8 +67,6 @@ from admission.ddd.admission.doctorat.preparation.read_view.repository.i_tableau
 )
 from admission.ddd.admission.formation_continue.commands import (
     ListerDemandesQuery as ListerDemandesContinuesQuery,
-)
-from admission.ddd.admission.formation_continue.commands import (
     RecupererResumePropositionQuery as RecupererResumePropositionContinueQuery,
 )
 from admission.ddd.admission.formation_continue.domain.model.enums import (
@@ -80,45 +75,29 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixMoyensDecouverteFormation,
     ChoixStatutPropositionContinue,
     ChoixTypeAdresseFacturation,
-)
-from admission.ddd.admission.formation_continue.domain.model.enums import (
     OngletsChecklist as OngletsChecklistContinue,
 )
 from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT_CONTINUE,
 )
 from admission.ddd.admission.formation_continue.dtos import PropositionDTO
-from admission.ddd.admission.formation_continue.dtos.liste import (
-    DemandeRechercheDTO as DemandeContinueRechercheDTO,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    OngletsChecklist as OngletsChecklistGenerale,
-)
+from admission.ddd.admission.formation_continue.dtos.liste import DemandeRechercheDTO as DemandeContinueRechercheDTO
+from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist as OngletsChecklistGenerale
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
     ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT_GENERALE,
 )
 from admission.ddd.admission.shared_kernel.commands import ListerToutesDemandesQuery
-from admission.ddd.admission.shared_kernel.dtos.liste import (
-    DemandeRechercheDTO as TouteDemandeRechercheDTO,
-)
+from admission.ddd.admission.shared_kernel.dtos.liste import DemandeRechercheDTO as TouteDemandeRechercheDTO
 from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire
 from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
-from admission.ddd.admission.shared_kernel.enums.liste import (
-    TardiveModificationReorientationFiltre,
-)
-from admission.ddd.admission.shared_kernel.enums.statut import (
-    CHOIX_STATUT_TOUTE_PROPOSITION_DICT,
-)
+from admission.ddd.admission.shared_kernel.enums.liste import TardiveModificationReorientationFiltre
+from admission.ddd.admission.shared_kernel.enums.statut import CHOIX_STATUT_TOUTE_PROPOSITION_DICT
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
-from admission.forms.admission.filter import (
-    AllAdmissionsFilterForm,
-    ContinuingAdmissionsFilterForm,
-)
+from admission.forms.admission.filter import AllAdmissionsFilterForm, ContinuingAdmissionsFilterForm
 from admission.forms.doctorate.cdd.filter import DoctorateListFilterForm
 from admission.models import AdmissionFormItem
 from admission.templatetags.admission import admission_status
-from admission.utils import add_messages_into_htmx_response
 from admission.views import PaginatedList
 from base.models.campus import Campus
 from base.models.entity_version import EntityVersion
@@ -126,7 +105,7 @@ from base.models.enums.civil_state import CivilState
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import GotDiploma
 from base.models.person import Person
-from base.utils.utils import format_academic_year
+from base.utils.utils import add_messages_into_htmx_response, format_academic_year
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile.models.enums.curriculum import ActivitySector, ActivityType
 from osis_profile.models.enums.person import ChoixGenre

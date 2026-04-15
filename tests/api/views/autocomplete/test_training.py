@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -33,8 +33,8 @@ from rest_framework.test import APITestCase
 
 from admission.ddd.admission.shared_kernel.domain.enums import TypeFormation
 from admission.tests import TESTING_CACHE_SETTING
-from base.models.campus import Campus
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from base.models.enums.active_status import ActiveStatusEnum
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import DOCTORAL_COMMISSION, SECTOR
 from base.tests.factories.academic_calendar import AcademicCalendarFactory
@@ -98,8 +98,8 @@ class DoctorateAutocompleteTestCase(TrainingDateMockTestCase):
     @classmethod
     def setUpTestData(cls):
         cls.academic_calendar_type = AcademicCalendarTypes.DOCTORATE_EDUCATION_ENROLLMENT.name
-        cls.first_campus = Campus.objects.get(external_id=CampusFactory().external_id)
-        cls.second_campus = Campus.objects.get(external_id=CampusFactory().external_id)
+        cls.first_campus = CampusFactory()
+        cls.second_campus = CampusFactory()
 
         super().setUpTestData()
         cls.user = UserFactory()
@@ -268,8 +268,8 @@ class GeneralEducationAutocompleteTestCase(TrainingDateMockTestCase):
     @classmethod
     def setUpTestData(cls):
         cls.academic_calendar_type = AcademicCalendarTypes.GENERAL_EDUCATION_ENROLLMENT.name
-        cls.first_campus = Campus.objects.get(external_id=CampusFactory().external_id)
-        cls.second_campus = Campus.objects.get(external_id=CampusFactory().external_id)
+        cls.first_campus = CampusFactory()
+        cls.second_campus = CampusFactory()
 
         super().setUpTestData()
         cls.user = UserFactory()
@@ -314,6 +314,28 @@ class GeneralEducationAutocompleteTestCase(TrainingDateMockTestCase):
             offer=cls.current_year_computer_master,
         )
 
+        cls.current_year_computer_master_but_inactive = EducationGroupYearFactory(
+            academic_year=cls.current_year,
+            education_group_type__name=TrainingType.MASTER_MA_120.name,
+            title='Master en informatique 1 inactif',
+            active=ActiveStatusEnum.INACTIVE.name,
+        )
+        EducationGroupVersionFactory(
+            root_group__main_teaching_campus=cls.second_campus,
+            offer=cls.current_year_computer_master_but_inactive,
+        )
+
+        cls.current_year_computer_master_but_active_for_reenrolment = EducationGroupYearFactory(
+            academic_year=cls.current_year,
+            education_group_type__name=TrainingType.MASTER_MA_120.name,
+            title='Master en informatique 1 actif pour réinscription uniquement',
+            active=ActiveStatusEnum.RE_REGISTRATION.name,
+        )
+        EducationGroupVersionFactory(
+            root_group__main_teaching_campus=cls.second_campus,
+            offer=cls.current_year_computer_master_but_active_for_reenrolment,
+        )
+
         cls.next_year_training = EducationGroupYearFactory(
             academic_year=cls.next_year,
             education_group_type__name=TrainingType.CERTIFICATE.name,
@@ -332,10 +354,14 @@ class GeneralEducationAutocompleteTestCase(TrainingDateMockTestCase):
             data={'acronym_or_name': 'informatique 1'},
         )
         self.assertEqual(response.status_code, 200, response.content)
-        self.assertEqual(len(response.json()), 2)
+        self.assertEqual(len(response.json()), 3)
         self.assertCountEqual(
             [training['sigle'] for training in response.json()],
-            [self.current_year_computer_certificate.acronym, self.current_year_computer_master.acronym],
+            [
+                self.current_year_computer_certificate.acronym,
+                self.current_year_computer_master.acronym,
+                self.current_year_computer_master_but_active_for_reenrolment.acronym,
+            ],
         )
 
     def test_autocomplete_general_education_with_campus(self):
@@ -385,13 +411,14 @@ class GeneralEducationAutocompleteTestCase(TrainingDateMockTestCase):
             format='json',
         )
         self.assertEqual(response.status_code, 200, response.content)
-        self.assertEqual(len(response.json()), 3)
+        self.assertEqual(len(response.json()), 4)
         self.assertCountEqual(
             [doctorate['sigle'] for doctorate in response.json()],
             [
                 self.current_year_computer_certificate.acronym,
                 self.current_year_biologist_certificate.acronym,
                 self.current_year_computer_master.acronym,
+                self.current_year_computer_master_but_active_for_reenrolment.acronym,
             ],
         )
 
@@ -403,13 +430,14 @@ class GeneralEducationAutocompleteTestCase(TrainingDateMockTestCase):
             format='json',
         )
         self.assertEqual(response.status_code, 200, response.content)
-        self.assertEqual(len(response.json()), 3)
+        self.assertEqual(len(response.json()), 4)
         self.assertCountEqual(
             [doctorate['sigle'] for doctorate in response.json()],
             [
                 self.current_year_computer_certificate.acronym,
                 self.current_year_biologist_certificate.acronym,
                 self.current_year_computer_master.acronym,
+                self.current_year_computer_master_but_active_for_reenrolment.acronym,
             ],
         )
 
@@ -444,8 +472,8 @@ class ContinuingEducationAutocompleteTestCase(TrainingDateMockTestCase):
         super().setUpTestData()
 
         cls.user = UserFactory()
-        cls.first_campus = Campus.objects.get(external_id=CampusFactory().external_id)
-        cls.second_campus = Campus.objects.get(external_id=CampusFactory().external_id)
+        cls.first_campus = CampusFactory()
+        cls.second_campus = CampusFactory()
 
         cls.last_year_training = EducationGroupYearFactory(
             academic_year=cls.past_year,

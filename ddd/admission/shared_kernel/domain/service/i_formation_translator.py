@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,11 +25,37 @@
 # ##############################################################################
 from abc import abstractmethod
 
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import FormationNonTrouveeException
+from admission.ddd.admission.shared_kernel.dtos.formation import FormationInscriteDTO
 from osis_common.ddd import interface
+
+
+class IBaseFormationTranslator(interface.DomainService):
+    @classmethod
+    @abstractmethod
+    def recuperer_informations_formations_inscrites(
+        cls,
+        sigles_annees: list[tuple[str, int]],
+    ) -> dict[tuple[str, int], FormationInscriteDTO]:
+        raise NotImplementedError
 
 
 class IFormationTranslator(interface.DomainService):
     @classmethod
     @abstractmethod
-    def verifier_existence(cls, sigle: str, annee: int) -> bool:
+    def verifier_existence(cls, sigle: str, annee: int, candidat_est_en_poursuite_directe: bool = None) -> bool:
         raise NotImplementedError
+
+    @classmethod
+    def lever_exception_si_formation_inexistante(
+        cls,
+        sigle: str,
+        annee: int,
+        candidat_est_en_poursuite_directe: bool = None,
+    ):
+        if not cls.verifier_existence(
+            sigle=sigle,
+            annee=annee,
+            candidat_est_en_poursuite_directe=candidat_est_en_poursuite_directe,
+        ):
+            raise FormationNonTrouveeException

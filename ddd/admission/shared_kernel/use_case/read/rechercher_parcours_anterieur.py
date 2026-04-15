@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,6 +26,9 @@
 import datetime
 
 from admission.ddd.admission.shared_kernel.commands import RechercherParcoursAnterieurQuery
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
+)
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
@@ -35,6 +38,7 @@ def rechercher_parcours_anterieur(
     cmd: 'RechercherParcoursAnterieurQuery',
     profil_candidat_translator: 'IProfilCandidatTranslator',
     academic_year_repository: 'IAcademicYearRepository',
+    inscriptions_translator: IInscriptionsTranslatorService,
 ):
     annee_courante = (
         GetCurrentAcademicYear()
@@ -49,4 +53,5 @@ def rechercher_parcours_anterieur(
         annee_courante=annee_courante,
         uuid_proposition=cmd.uuid_proposition,
         experiences_cv_recuperees=cmd.experiences_cv_recuperees,
+        inscriptions_translator=inscriptions_translator,
     )

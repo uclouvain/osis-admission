@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -207,8 +207,12 @@ class ShouldAnneesCVRequisesCompletees(BusinessValidator):
 @attr.dataclass(frozen=True, slots=True)
 class ShouldExperiencesAcademiquesEtreCompletees(BusinessValidator):
     experiences_academiques_incompletes: Dict[str, str]
+    candidat_est_inscrit_recemment_ucl: bool | None = None
 
     def validate(self, *args, **kwargs):
+        if self.candidat_est_inscrit_recemment_ucl:
+            return
+
         if self.experiences_academiques_incompletes:
             raise MultipleBusinessExceptions(
                 exceptions=set(
@@ -224,8 +228,12 @@ class ShouldExperiencesAcademiquesEtreCompletees(BusinessValidator):
 @attr.dataclass(frozen=True, slots=True)
 class ShouldExperiencesNonAcademiquesAvoirUnCertificat(BusinessValidator):
     experiences_non_academiques: List[ExperienceNonAcademiqueDTO]
+    candidat_est_inscrit_recemment_ucl: bool | None = None
 
     def validate(self, *args, **kwargs):
+        if self.candidat_est_inscrit_recemment_ucl:
+            return
+
         experiences_incompletes = [
             experience for experience in self.experiences_non_academiques if not experience.certificat
         ]

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,15 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
-    IProfilCandidatTranslator,
-)
-from admission.ddd.admission.shared_kernel.domain.service.resume_proposition import ResumeProposition
-from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
-from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
-    ExperiencesCVRecuperees,
-)
 from admission.ddd.admission.formation_continue.commands import (
     RecupererResumePropositionQuery,
 )
@@ -44,6 +35,20 @@ from admission.ddd.admission.formation_continue.domain.service.i_question_specif
 from admission.ddd.admission.formation_continue.repository.i_proposition import (
     IPropositionRepository,
 )
+from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import (
+    IAnneeInscriptionFormationTranslator,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
+    IProfilCandidatTranslator,
+)
+from admission.ddd.admission.shared_kernel.domain.service.resume_proposition import ResumeProposition
+from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
+    ExperiencesCVRecuperees,
+)
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import (
     IAcademicYearRepository,
 )
@@ -55,6 +60,8 @@ def recuperer_resume_proposition(
     i_profil_candidat_translator: 'IProfilCandidatTranslator',
     academic_year_repository: 'IAcademicYearRepository',
     question_specifique_translator: 'IQuestionSpecifiqueTranslator',
+    inscriptions_translator: 'IInscriptionsTranslatorService',
+    annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
 ) -> 'ResumePropositionDTO':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -74,6 +81,9 @@ def recuperer_resume_proposition(
             if proposition_dto.est_non_soumise
             else ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION
         ),
+        inscriptions_translator=inscriptions_translator,
+        annee_inscription_formation_translator=annee_inscription_formation_translator,
+        pour_candidat=cmd.pour_candidat,
     )
 
     # THEN

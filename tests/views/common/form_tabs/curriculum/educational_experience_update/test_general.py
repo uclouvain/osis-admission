@@ -35,18 +35,11 @@ from django.test import TestCase
 from django.utils.translation import gettext
 from rest_framework import status
 
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
-    ENTITY_CDE,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
-)
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from admission.models import EPCInjection as AdmissionEPCInjection
-from admission.models.epc_injection import (
-    EPCInjectionStatus as AdmissionEPCInjectionStatus,
-)
-from admission.models.epc_injection import EPCInjectionType
+from admission.models.epc_injection import EPCInjectionStatus as AdmissionEPCInjectionStatus, EPCInjectionType
 from admission.models.general_education import GeneralEducationAdmission
 from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences
 from admission.tests.factories.curriculum import (
@@ -55,15 +48,11 @@ from admission.tests.factories.curriculum import (
     EducationalExperienceYearFactory,
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
-from admission.tests.factories.roles import (
-    ProgramManagerRoleFactory,
-    SicManagementRoleFactory,
-)
+from admission.tests.factories.roles import ProgramManagerRoleFactory, SicManagementRoleFactory
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.choice_field import BLANK_CHOICE_DISPLAY
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.academic_year import AcademicYear
-from base.models.campus import Campus
 from base.models.enums.community import CommunityEnum
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.tests.factories.academic_year import AcademicYearFactory
@@ -73,21 +62,16 @@ from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.hops import HopsFactory
 from base.tests.factories.organization import OrganizationFactory
 from osis_profile.models import EducationalExperience, EducationalExperienceYear
-from osis_profile.models.enums.curriculum import (
-    EvaluationSystem,
-    Reduction,
-    Result,
-    TranscriptType,
-)
+from osis_profile.models.enums.curriculum import EvaluationSystem, Reduction, Result, TranscriptType
 from osis_profile.models.enums.experience_validation import (
     ChoixStatutValidationExperience,
     EtatAuthentificationParcours,
 )
-from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection
 from osis_profile.models.epc_injection import (
+    EPCInjection as CurriculumEPCInjection,
     EPCInjectionStatus as CurriculumEPCInjectionStatus,
+    ExperienceType,
 )
-from osis_profile.models.epc_injection import ExperienceType
 from reference.models.enums.cycle import Cycle
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.diploma_title import DiplomaTitleFactory
@@ -105,8 +89,8 @@ class CurriculumEducationalExperienceFormViewForGeneralTestCase(TestCase):
         cls.be_country = CountryFactory(iso_code='BE', name='Belgique', name_en='Belgium')
         cls.fr_country = CountryFactory(iso_code='FR', name='France', name_en='France')
         first_doctoral_commission = EntityWithVersionFactory(version__acronym=ENTITY_CDE)
-        cls.louvain_campus = Campus.objects.get(external_id=CampusFactory(name='Louvain-la-Neuve').external_id)
-        cls.other_campus = Campus.objects.get(external_id=CampusFactory(name='Other').external_id)
+        cls.louvain_campus = CampusFactory(name='Louvain-la-Neuve')
+        cls.other_campus = CampusFactory(name='Other')
         EntityVersionFactory(entity=first_doctoral_commission)
         cls.greek = LanguageFactory(code='EL')
         cls.french = LanguageFactory(code='FR')

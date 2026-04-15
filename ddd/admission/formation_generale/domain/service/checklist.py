@@ -40,6 +40,7 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
 from admission.ddd.admission.formation_generale.domain.service.i_question_specifique import (
     IQuestionSpecifiqueTranslator,
 )
+from admission.ddd.admission.shared_kernel.domain.model.assimilation import Assimilation
 from admission.ddd.admission.shared_kernel.domain.model.formation import Formation
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.dtos import IdentificationDTO
@@ -57,12 +58,16 @@ class Checklist(interface.DomainService):
         formation: Formation,
         profil_candidat_translator: 'IProfilCandidatTranslator',
         questions_specifiques_translator: 'IQuestionSpecifiqueTranslator',
+        candidat_est_en_poursuite_directe: bool,
+        assimilation_passee: Assimilation | None,
     ):
         checklist_initiale = cls.recuperer_checklist_initiale(
             proposition=proposition,
             formation=formation,
             profil_candidat_translator=profil_candidat_translator,
             questions_specifiques_translator=questions_specifiques_translator,
+            candidat_est_en_poursuite_directe=candidat_est_en_poursuite_directe,
+            assimilation_passee=assimilation_passee,
         )
         proposition.checklist_initiale = checklist_initiale
         proposition.checklist_actuelle = copy.deepcopy(checklist_initiale)
@@ -100,12 +105,74 @@ class Checklist(interface.DomainService):
         return questions_number
 
     @classmethod
+    def _recuperer_statut_checklist_initial_assimilation(
+        cls,
+        proposition: Proposition,
+        identification_dto: IdentificationDTO,
+        candidat_est_en_poursuite_directe: bool,
+        assimilation_passee: Assimilation | None,
+    ) -> StatutChecklist:
+        if identification_dto.pays_nationalite_europeen:
+            return StatutChecklist(
+                statut=ChoixStatutChecklist.INITIAL_NON_CONCERNE,
+                libelle=_('Not concerned'),
+            )
+
+        if candidat_est_en_poursuite_directe:
+            if assimilation_passee:
+                if assimilation_passee.source == Assimilation.Source.OSIS:
+                    return StatutChecklist(
+                        statut=ChoixStatutChecklist.GEST_REUSSITE,
+                        libelle=_('Validated'),
+                    )
+                else:
+                    return StatutChecklist(
+                        statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
+                        libelle=_('Declared assimilated'),
+                    )
+            else:
+                if (
+                    proposition.comptabilite.type_situation_assimilation
+                    == TypeSituationAssimilation.AUCUNE_ASSIMILATION
+                ):
+                    return StatutChecklist(
+                        statut=ChoixStatutChecklist.GEST_REUSSITE,
+                        libelle=_('Validated'),
+                    )
+                elif proposition.comptabilite.type_situation_assimilation:
+                    return StatutChecklist(
+                        statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
+                        libelle=_('Declared assimilated'),
+                    )
+                else:
+                    return StatutChecklist(
+                        statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
+                        libelle=_('Declared not assimilated'),
+                    )
+
+        if (
+            not proposition.comptabilite.type_situation_assimilation
+            or proposition.comptabilite.type_situation_assimilation == TypeSituationAssimilation.AUCUNE_ASSIMILATION
+        ):
+            return StatutChecklist(
+                statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
+                libelle=_('Declared not assimilated'),
+            )
+        else:
+            return StatutChecklist(
+                statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
+                libelle=_('Declared assimilated'),
+            )
+
+    @classmethod
     def recuperer_checklist_initiale(
         cls,
         proposition: Proposition,
         formation: Formation,
         profil_candidat_translator: 'IProfilCandidatTranslator',
         questions_specifiques_translator: 'IQuestionSpecifiqueTranslator',
+        candidat_est_en_poursuite_directe: bool,
+        assimilation_passee: Assimilation | None,
     ) -> Optional[StatutsChecklistGenerale]:
         identification_dto = profil_candidat_translator.get_identification(proposition.matricule_candidat)
 
@@ -115,18 +182,15 @@ class Checklist(interface.DomainService):
             questions_specifiques_translator=questions_specifiques_translator,
         )
 
+        statut_assimilation = cls._recuperer_statut_checklist_initial_assimilation(
+            proposition=proposition,
+            identification_dto=identification_dto,
+            candidat_est_en_poursuite_directe=candidat_est_en_poursuite_directe,
+            assimilation_passee=assimilation_passee,
+        )
+
         return StatutsChecklistGenerale(
-            assimilation=StatutChecklist(
-                libelle=_("Not concerned")
-                if identification_dto.pays_nationalite_europeen
-                else _("Declared not assimilated")
-                if not proposition.comptabilite.type_situation_assimilation
-                or proposition.comptabilite.type_situation_assimilation == TypeSituationAssimilation.AUCUNE_ASSIMILATION
-                else _("Declared assimilated"),
-                statut=ChoixStatutChecklist.INITIAL_NON_CONCERNE
-                if identification_dto.pays_nationalite_europeen
-                else ChoixStatutChecklist.INITIAL_CANDIDAT,
-            ),
+            assimilation=statut_assimilation,
             parcours_anterieur=StatutChecklist(
                 libelle=_("To be processed"),
                 statut=ChoixStatutChecklist.INITIAL_CANDIDAT,

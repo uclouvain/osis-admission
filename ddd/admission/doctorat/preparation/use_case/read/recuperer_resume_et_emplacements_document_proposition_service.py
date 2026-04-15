@@ -29,12 +29,6 @@ from admission.ddd.admission.doctorat.preparation.commands import (
 from admission.ddd.admission.doctorat.preparation.domain.service.i_comptabilite import (
     IComptabiliteTranslator,
 )
-from admission.ddd.admission.doctorat.preparation.domain.service.i_membre_CA import (
-    IMembreCATranslator,
-)
-from admission.ddd.admission.doctorat.preparation.domain.service.i_promoteur import (
-    IPromoteurTranslator,
-)
 from admission.ddd.admission.doctorat.preparation.domain.service.i_question_specifique import (
     IQuestionSpecifiqueTranslator,
 )
@@ -47,6 +41,9 @@ from admission.ddd.admission.doctorat.preparation.repository.i_proposition impor
 from admission.ddd.admission.shared_kernel.domain.service.i_emplacements_documents_proposition import (
     IEmplacementsDocumentsPropositionTranslator,
 )
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
+)
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
@@ -56,9 +53,6 @@ from admission.ddd.admission.shared_kernel.domain.service.i_unites_enseignement_
 from admission.ddd.admission.shared_kernel.domain.service.resume_proposition import ResumeProposition
 from admission.ddd.admission.shared_kernel.dtos.resume import (
     ResumeEtEmplacementsDocumentsPropositionDTO,
-)
-from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
-    ExperiencesCVRecuperees,
 )
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import (
     IAcademicYearRepository,
@@ -79,6 +73,7 @@ def recuperer_resume_et_emplacements_documents_proposition(
     question_specifique_translator: 'IQuestionSpecifiqueTranslator',
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
     unites_enseignement_translator: 'IUnitesEnseignementTranslator',
+    inscriptions_translator: IInscriptionsTranslatorService,
 ) -> ResumeEtEmplacementsDocumentsPropositionDTO:
     # GIVEN
     resume_dto = ResumeProposition.get_resume_demande_doctorat_pour_gestionnaire(
@@ -91,6 +86,7 @@ def recuperer_resume_et_emplacements_documents_proposition(
         question_specifique_translator=question_specifique_translator,
         experiences_cv_recuperees=cmd.experiences_cv_recuperees,
         unites_enseignement_translator=unites_enseignement_translator,
+        inscriptions_translator=inscriptions_translator,
     )
 
     # WHEN

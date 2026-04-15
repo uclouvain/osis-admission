@@ -390,6 +390,15 @@ class PropositionInMemoryRepository(
             type=proposition.type_demande.name if proposition.type_demande else '',
             est_concerne_par_le_bama_15=proposition.est_concerne_par_le_bama_15,
             preuve_bama_15=proposition.preuve_bama_15,
+            raison_plusieurs_demandes_meme_cycle_meme_annee=(
+                proposition.raison_plusieurs_demandes_meme_cycle_meme_annee.name
+                if proposition.raison_plusieurs_demandes_meme_cycle_meme_annee
+                else ''
+            ),
+            justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee=(
+                proposition.justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee
+            ),
+            est_en_poursuite=proposition.est_en_poursuite,
         )
 
     @classmethod
@@ -513,4 +522,6 @@ class PropositionInMemoryRepository(
             formation=FormationGeneraleInMemoryTranslator.get(proposition.formation_id),
             profil_candidat_translator=ProfilCandidatInMemoryTranslator(),
             questions_specifiques_translator=QuestionSpecifiqueInMemoryTranslator(),
+            candidat_est_en_poursuite_directe=False,
+            assimilation_passee=None,
         )
