@@ -566,6 +566,7 @@ class ListerToutesDemandes(IListerToutesDemandes):
             code_formation=admission.training.partial_acronym,
             intitule_formation=getattr(admission.training, 'title' if language_is_french else 'title_english'),
             type_formation=admission.training.education_group_type.name,
+            cycle_formation=admission.training.education_group_type.cycle,
             annee_formation=admission.training.academic_year.year,
             lieu_formation=admission.teaching_campus,  # From annotation
             est_inscription_tardive=admission.late_enrollment,  # From annotation

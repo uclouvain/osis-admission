@@ -201,6 +201,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 code_formation=cls.admissions[0].training.partial_acronym,
                 intitule_formation=cls.admissions[0].training.title,
                 type_formation=cls.admissions[0].training.education_group_type.name,
+                cycle_formation=cls.admissions[0].training.education_group_type.cycle,
                 lieu_formation=teaching_campus,
                 est_inscription_tardive=None,
                 est_modification_inscription_externe=None,
