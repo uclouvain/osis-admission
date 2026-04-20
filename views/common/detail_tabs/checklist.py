@@ -27,8 +27,10 @@ import datetime
 
 from django.contrib import messages
 from django.core.cache import cache
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import resolve_url
 from django.utils.functional import cached_property
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, TemplateView
 from rest_framework import serializers, status
 from rest_framework.authentication import SessionAuthentication
@@ -287,6 +289,12 @@ class PersonalDataChangeStatusView(
         )
 
     def form_valid(self, form):
+        if ChoixStatutValidationDonneesPersonnelles.DETTE_ACTIVE.name in {
+            form.cleaned_data['status'],
+            self.admission.candidate.personal_data_validation_status,
+        }:
+            raise PermissionDenied(_('Cannot change from or to the "Active debt" status.'))
+
         if ChoixStatutValidationDonneesPersonnelles.FRAUDEUR.name in {
             form.cleaned_data['status'],
             self.admission.candidate.personal_data_validation_status,

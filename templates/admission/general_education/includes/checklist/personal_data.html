@@ -48,12 +48,25 @@
     {% not_bool can_change_personal_data_checklist_status_to_be_processed as cannot_change_personal_data_checklist_status_to_be_processed %}
     {% not_bool can_change_personal_data_checklist_status_cleaned as cannot_change_personal_data_checklist_status_cleaned %}
 
-    {% checklist_macro_state_button tab='donnees_personnelles' status_configuration=tab_statuses_configurations.A_TRAITER selected_status_configuration=selected_status_configuration icon='user' class='muted' htmx_post=change_status_url disabled=cannot_change_personal_data_checklist_status_to_be_processed force_enabled=True %}
-    {% checklist_macro_state_button tab='donnees_personnelles' status_configuration=tab_statuses_configurations.TOILETTEES selected_status_configuration=selected_status_configuration icon='pencil' class='warning' htmx_post=change_status_url disabled=cannot_change_personal_data_checklist_status_cleaned force_enabled=True %}
-    {% checklist_macro_state_button tab='donnees_personnelles' status_configuration=tab_statuses_configurations.A_COMPLETER selected_status_configuration=selected_status_configuration icon='circle-stop' class='danger' htmx_post=change_status_url %}
-    {% checklist_macro_state_button tab='donnees_personnelles' status_configuration=tab_statuses_configurations.AVIS_EXPERT selected_status_configuration=selected_status_configuration icon='pencil' class='warning' htmx_post=change_status_url %}
-    {% checklist_macro_state_button tab='donnees_personnelles' status_configuration=tab_statuses_configurations.FRAUDEUR selected_status_configuration=selected_status_configuration icon='circle-stop' class='danger' htmx_post=change_status_url %}
-    {% checklist_macro_state_button tab='donnees_personnelles' status_configuration=tab_statuses_configurations.VALIDEES selected_status_configuration=selected_status_configuration icon='check' class='success' htmx_post=change_status_url %}
+    {% if original_admission.candidate.personal_data_validation_status == 'DETTE_ACTIVE' %}
+      {% checklist_macro_state_button tab='donnees_personnelles' status_configuration=tab_statuses_configurations.A_TRAITER selected_status_configuration=selected_status_configuration icon='user' class='muted' disabled=True %}
+      {% checklist_macro_state_button tab='donnees_personnelles' status_configuration=tab_statuses_configurations.TOILETTEES selected_status_configuration=selected_status_configuration icon='pencil' class='warning' disabled=True %}
+      {% checklist_macro_state_button tab='donnees_personnelles' status_configuration=tab_statuses_configurations.A_COMPLETER selected_status_configuration=selected_status_configuration icon='circle-stop' class='danger' disabled=True %}
+      {% checklist_macro_state_button tab='donnees_personnelles' status_configuration=tab_statuses_configurations.AVIS_EXPERT selected_status_configuration=selected_status_configuration icon='pencil' class='warning' disabled=True %}
+      {% checklist_macro_state_button tab='donnees_personnelles' status_configuration=tab_statuses_configurations.FRAUDEUR selected_status_configuration=selected_status_configuration icon='circle-stop' class='danger' disabled=True %}
+      {% checklist_macro_state_button tab='donnees_personnelles' status_configuration=tab_statuses_configurations.EXCLU selected_status_configuration=selected_status_configuration icon='circle-stop' class='danger' disabled=True %}
+      {% checklist_macro_state_button tab='donnees_personnelles' status_configuration=tab_statuses_configurations.DETTE_ACTIVE selected_status_configuration=selected_status_configuration icon='circle-stop' class='danger' disabled=True %}
+      {% checklist_macro_state_button tab='donnees_personnelles' status_configuration=tab_statuses_configurations.VALIDEES selected_status_configuration=selected_status_configuration icon='check' class='success' disabled=True %}
+    {% else %}
+      {% checklist_macro_state_button tab='donnees_personnelles' status_configuration=tab_statuses_configurations.A_TRAITER selected_status_configuration=selected_status_configuration icon='user' class='muted' htmx_post=change_status_url disabled=cannot_change_personal_data_checklist_status_to_be_processed force_enabled=True %}
+      {% checklist_macro_state_button tab='donnees_personnelles' status_configuration=tab_statuses_configurations.TOILETTEES selected_status_configuration=selected_status_configuration icon='pencil' class='warning' htmx_post=change_status_url disabled=cannot_change_personal_data_checklist_status_cleaned force_enabled=True %}
+      {% checklist_macro_state_button tab='donnees_personnelles' status_configuration=tab_statuses_configurations.A_COMPLETER selected_status_configuration=selected_status_configuration icon='circle-stop' class='danger' htmx_post=change_status_url %}
+      {% checklist_macro_state_button tab='donnees_personnelles' status_configuration=tab_statuses_configurations.AVIS_EXPERT selected_status_configuration=selected_status_configuration icon='pencil' class='warning' htmx_post=change_status_url %}
+      {% checklist_macro_state_button tab='donnees_personnelles' status_configuration=tab_statuses_configurations.FRAUDEUR selected_status_configuration=selected_status_configuration icon='circle-stop' class='danger' htmx_post=change_status_url %}
+      {% checklist_macro_state_button tab='donnees_personnelles' status_configuration=tab_statuses_configurations.EXCLU selected_status_configuration=selected_status_configuration icon='circle-stop' class='danger' htmx_post=change_status_url %}
+      {% checklist_macro_state_button tab='donnees_personnelles' status_configuration=tab_statuses_configurations.DETTE_ACTIVE selected_status_configuration=selected_status_configuration icon='circle-stop' class='danger' disabled=True %}
+      {% checklist_macro_state_button tab='donnees_personnelles' status_configuration=tab_statuses_configurations.VALIDEES selected_status_configuration=selected_status_configuration icon='check' class='success' htmx_post=change_status_url %}
+    {% endif %}
 
   </div>
   {% if request.htmx %}
