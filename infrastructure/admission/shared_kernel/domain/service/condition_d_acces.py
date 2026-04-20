@@ -23,11 +23,46 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import ErreurConditionAcces
 from admission.ddd.admission.shared_kernel.domain.service.conditions_d_acces import IConditionDAcces
+from admission.models import GeneralEducationAdmission, DoctorateAdmission
+from ddd.logic.condition_acces.domain.service.calcul_condition_acces import ConditionAccesInsuffisant, \
+    ConditionAccesIncomplet
 
 
 class ConditionDAcces(IConditionDAcces):
 
     @classmethod
     def calculer_condition_d_acces(cls, uuid_proposition: str):
-        pass # TODO Appeler le translator qui invoke calculer_condition_acces puis sauvegarder les infos sur l'admission
+        # TODO Appeler le translator qui invoke calculer_condition_acces puis sauvegarder les infos sur l'admission
+        try:
+            condition_acces = TRANSLATOR.calculer(uuid_proposition)
+            if condition_acces is None:
+                admission_requirement = ''
+                admission_requirement_year = None
+                admission_requirement_error = ''
+            else:
+                admission_requirement = condition_acces.condition
+                admission_requirement_year = condition_acces.millesime
+                admission_requirement_error = ''
+        except ConditionAccesInsuffisant:
+            admission_requirement = ''
+            admission_requirement_year = None
+            admission_requirement_error = ErreurConditionAcces.INSUFFISANT.name
+        except ConditionAccesIncomplet:
+            admission_requirement = ''
+            admission_requirement_year = None
+            admission_requirement_error = ErreurConditionAcces.INCOMPLET.name
+
+        GeneralEducationAdmission.objects.filter(uuid=uuid_proposition).update(
+            admission_requirement=admission_requirement,
+            admission_requirement_year=admission_requirement_year,
+            admission_requirement_error=admission_requirement_error,
+        )
+        DoctorateAdmission.objects.filter(uuid=uuid_proposition).update(
+            admission_requirement=admission_requirement,
+            admission_requirement_year=admission_requirement_year,
+            admission_requirement_error=admission_requirement_error,
+        )
+
+        return condition_acces
