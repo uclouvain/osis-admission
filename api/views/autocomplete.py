@@ -224,7 +224,6 @@ class AutocompleteGeneralEducationView(ListAPIView):
                 statuts=[ActiveStatusEnum.ACTIVE.name, ActiveStatusEnum.RE_REGISTRATION.name],
             )
         )
-        education_list = [training for training in education_list if training.active == ActiveStatusEnum.ACTIVE.name]
         serializer = serializers.FormationGeneraleDTOSerializer(instance=education_list, many=True)
         return Response(serializer.data)
 
