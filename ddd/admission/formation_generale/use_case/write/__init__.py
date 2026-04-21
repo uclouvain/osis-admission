@@ -41,6 +41,8 @@ from .envoyer_proposition_au_sic_lors_de_la_decision_facultaire_service import (
 )
 from .envoyer_rappel_paiement_service import envoyer_rappel_paiement
 from .initier_proposition_service import initier_proposition
+from .marquer_apurement_dettes_a_verifier_service import marquer_apurement_dettes_a_verifier
+from .marquer_apurement_dettes_verifie_service import marquer_apurement_dettes_verifie
 from .modifier_checklist_choix_formation_service import modifier_checklist_choix_formation
 from .modifier_choix_formation_par_gestionnaire_service import modifier_choix_formation_par_gestionnaire
 from .modifier_choix_formation_service import modifier_choix_formation
@@ -81,4 +83,3 @@ from .specifier_raison_plusieurs_demandes_meme_cycle_meme_annee_service import (
     specifier_raison_plusieurs_demandes_meme_cycle_meme_annee,
 )
 from .supprimer_proposition_service import supprimer_proposition
-from .verifier_apurement_dettes_service import verifier_apurement_dettes

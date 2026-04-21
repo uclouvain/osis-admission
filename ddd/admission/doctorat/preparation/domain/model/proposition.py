@@ -1170,10 +1170,16 @@ class Proposition(interface.RootEntity):
         )
         self.auteur_derniere_modification = auteur_modification
 
-    def verifier_apurement_dettes(
+    def marquer_apurement_dettes_verifie(
         self,
         auteur_modification: str,
-        verifie: bool,
     ):
-        self.comptabilite.apurement_dettes_verifie = verifie
+        self.comptabilite.apurement_dettes_verifie = True
+        self.auteur_derniere_modification = auteur_modification
+
+    def marquer_apurement_dettes_a_verifier(
+        self,
+        auteur_modification: str,
+    ):
+        self.comptabilite.apurement_dettes_verifie = False
         self.auteur_derniere_modification = auteur_modification

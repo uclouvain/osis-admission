@@ -23,23 +23,22 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.formation_generale.commands import (
-    VerifierApurementDettesCommand,
+from admission.ddd.admission.doctorat.preparation.commands import (
+    MarquerApurementDettesAVerifierCommand,
 )
-from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
 
 
-def verifier_apurement_dettes(
-    cmd: VerifierApurementDettesCommand,
+def marquer_apurement_dettes_a_verifier(
+    cmd: MarquerApurementDettesAVerifierCommand,
     proposition_repository: 'IPropositionRepository',
 ) -> PropositionIdentity:
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
-    proposition.verifier_apurement_dettes(
+    proposition.marquer_apurement_dettes_a_verifier(
         auteur_modification=cmd.gestionnaire,
-        verifie=cmd.verifie,
     )
 
     proposition_repository.save(entity=proposition)

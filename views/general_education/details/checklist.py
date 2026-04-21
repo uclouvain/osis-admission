@@ -66,6 +66,8 @@ from admission.ddd.admission.formation_generale.commands import (
     EnvoyerPropositionAFacLorsDeLaDecisionFacultaireCommand,
     EnvoyerPropositionAuSicLorsDeLaDecisionFacultaireCommand,
     EnvoyerRappelPaiementCommand,
+    MarquerApurementDettesAVerifierCommand,
+    MarquerApurementDettesVerifieCommand,
     ModifierAuthentificationEtudesSecondairesCommand,
     ModifierAuthentificationExamenCommand,
     ModifierAuthentificationExperienceAcademiqueCommand,
@@ -98,7 +100,6 @@ from admission.ddd.admission.formation_generale.commands import (
     SpecifierMotifsRefusPropositionParSicCommand,
     SpecifierPaiementNecessaireCommand,
     SpecifierPaiementPlusNecessaireCommand,
-    VerifierApurementDettesCommand,
     VerifierCurriculumApresSoumissionQuery,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
@@ -2222,11 +2223,15 @@ class PastExperiencesVerifyDebtClearanceView(
         return context
 
     def form_valid(self, form):
+        cmd = (
+            MarquerApurementDettesVerifieCommand
+            if form.cleaned_data['verified_debt_clearance']
+            else MarquerApurementDettesAVerifierCommand
+        )
         message_bus_instance.invoke(
-            VerifierApurementDettesCommand(
+            cmd(
                 uuid_proposition=self.admission_uuid,
                 gestionnaire=self.request.user.person.global_id,
-                verifie=form.cleaned_data['verified_debt_clearance'],
             )
         )
         return super().form_valid(form)

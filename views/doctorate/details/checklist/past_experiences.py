@@ -35,13 +35,14 @@ from osis_history.models import HistoryEntry
 from typing_extensions import Type
 
 from admission.ddd.admission.doctorat.preparation.commands import (
+    MarquerApurementDettesAVerifierCommand,
+    MarquerApurementDettesVerifieCommand,
     ModifierAuthentificationExperienceAcademiqueCommand,
     ModifierAuthentificationExperienceNonAcademiqueCommand,
     ModifierAuthentificationExperienceParcoursAnterieurCommand,
     ModifierStatutChecklistExperienceAcademiqueCommand,
     ModifierStatutChecklistParcoursAnterieurCommand,
     SpecifierConditionAccesPropositionCommand,
-    VerifierApurementDettesCommand,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     ChoixStatutChecklist,
@@ -438,11 +439,15 @@ class PastExperiencesVerifyDebtClearanceView(
         return context
 
     def form_valid(self, form):
+        cmd = (
+            MarquerApurementDettesVerifieCommand
+            if form.cleaned_data['verified_debt_clearance']
+            else MarquerApurementDettesAVerifierCommand
+        )
         message_bus_instance.invoke(
-            VerifierApurementDettesCommand(
+            cmd(
                 uuid_proposition=self.admission_uuid,
                 gestionnaire=self.request.user.person.global_id,
-                verifie=form.cleaned_data['verified_debt_clearance'],
             )
         )
         return super().form_valid(form)

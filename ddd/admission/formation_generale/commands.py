@@ -782,7 +782,12 @@ class RecupererTypeDemandeQuery(interface.QueryRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class VerifierApurementDettesCommand(interface.CommandRequest):
+class MarquerApurementDettesVerifieCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str
-    verifie: bool
+
+
+@attr.dataclass(frozen=True, slots=True)
+class MarquerApurementDettesAVerifierCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str

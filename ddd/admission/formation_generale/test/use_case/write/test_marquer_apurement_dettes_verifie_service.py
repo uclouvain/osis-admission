@@ -28,7 +28,7 @@ import attr
 from django.test import SimpleTestCase
 
 from admission.ddd.admission.formation_generale.commands import (
-    VerifierApurementDettesCommand,
+    MarquerApurementDettesVerifieCommand,
 )
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     PropositionNonTrouveeException,
@@ -41,19 +41,18 @@ from admission.infrastructure.message_bus_in_memory import (
 )
 
 
-class TestVerifierApurementDettesService(SimpleTestCase):
+class TestMarquerApurementDettesVerifieService(SimpleTestCase):
     def setUp(self) -> None:
         self.proposition_repository = PropositionInMemoryRepository()
         self.addCleanup(self.proposition_repository.reset)
 
         self.message_bus = message_bus_in_memory_instance
-        self.cmd = VerifierApurementDettesCommand(
+        self.cmd = MarquerApurementDettesVerifieCommand(
             uuid_proposition='uuid-BACHELIER-ECO1',
             gestionnaire='0123456789',
-            verifie=True,
         )
 
-    def test_should_verifier_apurement_dettes(self):
+    def test_should_marquer_apurement_dettes_verifie(self):
         proposition_id = self.message_bus.invoke(self.cmd)
 
         proposition = self.proposition_repository.get(proposition_id)

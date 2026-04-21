@@ -46,6 +46,8 @@ from .envoyer_proposition_au_sic_lors_de_la_decision_cdd_service import (
 from .identifier_membre_CA_service import identifier_membre_ca
 from .identifier_promoteur_service import identifier_promoteur
 from .initier_proposition_service import initier_proposition
+from .marquer_apurement_dettes_a_verifier_service import marquer_apurement_dettes_a_verifier
+from .marquer_apurement_dettes_verifie_service import marquer_apurement_dettes_verifie
 from .modifier_authentification_experience_academique_service import modifier_authentification_experience_academique
 from .modifier_authentification_experience_non_academique_service import (
     modifier_authentification_experience_non_academique,
@@ -93,4 +95,3 @@ from .specifier_motifs_refus_proposition_par_sic_service import specifier_motifs
 from .supprimer_membre_CA_service import supprimer_membre_CA
 from .supprimer_promoteur_service import supprimer_promoteur
 from .supprimer_proposition_service import supprimer_proposition
-from .verifier_apurement_dettes_service import verifier_apurement_dettes
