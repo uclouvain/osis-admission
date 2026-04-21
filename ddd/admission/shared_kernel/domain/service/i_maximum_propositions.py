@@ -38,10 +38,14 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 from admission.ddd.admission.formation_generale.domain.model.proposition import (
     Proposition as PropositionGenerale,
 )
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
+    DejaInscritFormationAnnualiseeException,
+)
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     NombrePropositionsSoumisesDepasseException,
 )
+from admission.ddd.admission.shared_kernel.dtos.inscription_ucl_candidat import InscriptionUCLCandidatDTO
 from osis_common.ddd import interface
 from osis_profile import BE_ISO_CODE
 
@@ -179,3 +183,16 @@ class IMaximumPropositionsAutorisees(interface.DomainService):
         uuid_proposition: str = '',
     ):
         raise NotImplementedError
+
+    @classmethod
+    def verifier_pas_deja_inscrit_formation(
+        cls,
+        sigle_formation: bool,
+        annee_formation: int,
+        inscriptions_ucl_candidat: list[InscriptionUCLCandidatDTO],
+    ):
+        if any(
+            inscription.sigle_formation == sigle_formation and inscription.annee == annee_formation
+            for inscription in inscriptions_ucl_candidat
+        ):
+            raise DejaInscritFormationAnnualiseeException(annee=annee_formation)

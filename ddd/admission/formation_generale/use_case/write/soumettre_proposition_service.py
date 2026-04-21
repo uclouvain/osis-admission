@@ -189,6 +189,7 @@ def soumettre_proposition(
         nomas_translator=nomas_translator,
         assimilation_passee=assimilation_passee,
         candidat_est_en_poursuite_directe=candidat_est_en_poursuite_directe,
+        inscriptions_ucl_candidat=inscriptions_ucl_candidat,
     )
     element_confirmation.valider(
         soumis=cmd.elements_confirmation,

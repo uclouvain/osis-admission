@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+import datetime
 from unittest.mock import patch
 
 import freezegun
@@ -38,8 +38,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.proposition impor
 )
 from admission.ddd.admission.formation_continue.commands import (
     RecupererElementsConfirmationQuery as RecupererElementsConfirmationContinueQuery,
-)
-from admission.ddd.admission.formation_continue.commands import (
     SoumettrePropositionCommand as SoumettrePropositionContinueCommand,
 )
 from admission.ddd.admission.formation_continue.domain.model.proposition import (
@@ -47,8 +45,6 @@ from admission.ddd.admission.formation_continue.domain.model.proposition import 
 )
 from admission.ddd.admission.formation_generale.commands import (
     RecupererElementsConfirmationQuery as RecupererElementsConfirmationGeneraleQuery,
-)
-from admission.ddd.admission.formation_generale.commands import (
     SoumettrePropositionCommand as SoumettrePropositionGeneraleCommand,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import (
@@ -81,6 +77,7 @@ from ddd.logic.financabilite.domain.model.parcours import Parcours, ParcoursAcad
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from infrastructure.financabilite.domain.service.in_memory.fetcher import InMemoryFetcher
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 
 
 @freezegun.freeze_time('2020-10-15')
@@ -92,6 +89,21 @@ class ElementsConfirmationTestCase(TestCase):
         PropositionDoctoraleRepository.reset()
         PropositionContinueRepository.reset()
         PropositionGeneraleRepository.reset()
+        cls.academic_year_repository = AcademicYearInMemoryRepository()
+        cls.academic_year_repository.save(
+            AcademicYear(
+                entity_id=AcademicYearIdentity(year=2020),
+                start_date=datetime.date(2020, 9, 15),
+                end_date=datetime.date(2021, 9, 14),
+            )
+        )
+        cls.academic_year_repository.save(
+            AcademicYear(
+                entity_id=AcademicYearIdentity(year=2024),
+                start_date=datetime.date(2024, 9, 15),
+                end_date=datetime.date(2025, 9, 14),
+            )
+        )
 
     def setUp(self):
         # Mock publish
