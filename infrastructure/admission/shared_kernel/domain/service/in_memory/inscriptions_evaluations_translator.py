@@ -23,27 +23,16 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.formation_generale.commands import ModifierStatutChecklistEtudesSecondairesCommand
-from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
-    PropositionIdentityBuilder,
-)
-from admission.ddd.admission.formation_generale.domain.model.proposition import (
-    PropositionIdentity,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_modifier_checklist_experience_parcours_anterieur import (
-    IValidationExperienceParcoursAnterieurService,
+import datetime
+
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_evaluations_translator import (
+    IInscriptionsEvaluationsTranslator,
 )
 
 
-def modifier_statut_checklist_etudes_secondaires(
-    cmd: 'ModifierStatutChecklistEtudesSecondairesCommand',
-    validation_experience_parcours_anterieur_service: 'IValidationExperienceParcoursAnterieurService',
-) -> 'PropositionIdentity':
-    proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
+class InscriptionsEvaluationsInMemoryTranslator(IInscriptionsEvaluationsTranslator):
+    def recuperer_date_fin_periode_inscription_etudiants_derniere_session(self, annee: int) -> datetime.date:
+        return datetime.date(year=annee, month=7, day=15)
 
-    validation_experience_parcours_anterieur_service.modifier_statut_etudes_secondaires(
-        uuid_experience=cmd.uuid_experience,
-        statut=cmd.statut,
-    )
-
-    return proposition_id
+    def recuperer_inscriptions_etudiants_derniere_session(self, nomas: list[str], annee: int) -> set[tuple[str, str]]:
+        return set()

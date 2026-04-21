@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,14 +26,23 @@
 
 from typing import List
 
-from admission.ddd.admission.shared_kernel.domain.service.i_elements_confirmation import ElementConfirmation, IElementsConfirmation
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.formation_generale.commands import RecupererElementsConfirmationQuery
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
 from admission.ddd.admission.formation_generale.domain.service.i_formation import IFormationGeneraleTranslator
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import (
+    IAnneeInscriptionFormationTranslator,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_elements_confirmation import (
+    ElementConfirmation,
+    IElementsConfirmation,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 
 
 def recuperer_elements_confirmation(
@@ -42,10 +51,16 @@ def recuperer_elements_confirmation(
     element_confirmation: 'IElementsConfirmation',
     formation_translator: 'IFormationGeneraleTranslator',
     profil_candidat_translator: 'IProfilCandidatTranslator',
+    inscriptions_translator: IInscriptionsTranslatorService,
+    annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
 ) -> List['ElementConfirmation']:
     # GIVEN
     entity_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition = proposition_repository.get(entity_id=entity_id)
+    candidat_est_inscrit_recemment_ucl = inscriptions_translator.est_inscrit_recemment(
+        matricule_candidat=proposition.matricule_candidat,
+        annee_inscription_formation_translator=annee_inscription_formation_translator,
+    )
 
     # WHEN
 
@@ -54,4 +69,5 @@ def recuperer_elements_confirmation(
         proposition=proposition,
         formation_translator=formation_translator,
         profil_candidat_translator=profil_candidat_translator,
+        candidat_est_inscrit_recemment_ucl=candidat_est_inscrit_recemment_ucl,
     )

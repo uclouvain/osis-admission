@@ -24,17 +24,22 @@
 #
 # ##############################################################################
 from admission.ddd.admission.shared_kernel.commands import (
-    RecupererInformationsValidationExamenQuery,
+    CandidatEstInscritRecemmentUCLQuery,
 )
-from admission.ddd.admission.shared_kernel.domain.service.i_modifier_checklist_experience_parcours_anterieur import (
-    IValidationExperienceParcoursAnterieurService,
+from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import (
+    IAnneeInscriptionFormationTranslator,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
 )
 
 
-def recuperer_informations_validation_examen(
-    cmd: 'RecupererInformationsValidationExamenQuery',
-    validation_experience_parcours_anterieur_service: 'IValidationExperienceParcoursAnterieurService',
+def candidat_est_inscrit_recemment_ucl(
+    cmd: CandidatEstInscritRecemmentUCLQuery,
+    annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
+    inscriptions_translator: IInscriptionsTranslatorService,
 ):
-    return validation_experience_parcours_anterieur_service.recuperer_information_validation_examen(
-        uuid_experience=cmd.uuid_experience,
+    return inscriptions_translator.est_inscrit_recemment(
+        matricule_candidat=cmd.matricule_candidat,
+        annee_inscription_formation_translator=annee_inscription_formation_translator,
     )

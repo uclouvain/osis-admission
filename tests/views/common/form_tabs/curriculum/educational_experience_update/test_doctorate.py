@@ -34,29 +34,18 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
-    ENTITY_CDE,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixStatutPropositionDoctorale,
-)
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from admission.models import DoctorateAdmission
 from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.curriculum import (
-    EducationalExperienceFactory,
-    EducationalExperienceYearFactory,
-)
-from admission.tests.factories.roles import (
-    ProgramManagerRoleFactory,
-    SicManagementRoleFactory,
-)
+from admission.tests.factories.curriculum import EducationalExperienceFactory, EducationalExperienceYearFactory
+from admission.tests.factories.roles import ProgramManagerRoleFactory, SicManagementRoleFactory
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.choice_field import BLANK_CHOICE_DISPLAY
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.academic_year import AcademicYear
-from base.models.campus import Campus
 from base.models.enums.community import CommunityEnum
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.tests.factories.academic_year import AcademicYearFactory
@@ -65,13 +54,7 @@ from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
 from osis_profile.models import EducationalExperience, EducationalExperienceYear
-from osis_profile.models.enums.curriculum import (
-    EvaluationSystem,
-    Grade,
-    Reduction,
-    Result,
-    TranscriptType,
-)
+from osis_profile.models.enums.curriculum import EvaluationSystem, Grade, Reduction, Result, TranscriptType
 from osis_profile.models.enums.experience_validation import (
     ChoixStatutValidationExperience,
     EtatAuthentificationParcours,
@@ -93,8 +76,8 @@ class CurriculumEducationalExperienceFormViewForDoctorateTestCase(TestCase):
         cls.be_country = CountryFactory(iso_code='BE', name='Belgique', name_en='Belgium')
         cls.fr_country = CountryFactory(iso_code='FR', name='France', name_en='France')
         first_doctoral_commission = EntityWithVersionFactory(version__acronym=ENTITY_CDE)
-        cls.louvain_campus = Campus.objects.get(external_id=CampusFactory(name='Louvain-la-Neuve').external_id)
-        cls.other_campus = Campus.objects.get(external_id=CampusFactory(name='Other').external_id)
+        cls.louvain_campus = CampusFactory(name='Louvain-la-Neuve')
+        cls.other_campus = CampusFactory(name='Other')
         EntityVersionFactory(entity=first_doctoral_commission)
         cls.greek = LanguageFactory(code='EL')
         cls.french = LanguageFactory(code='FR')

@@ -33,6 +33,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from admission.tests.factories import DoctorateAdmissionFactory
+from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.continuing_education import (
     ContinuingEducationAdmissionFactory,
 )
@@ -62,6 +63,7 @@ class PDFRecapApiTestCase(APITestCase, QueriesAssertionsMixin):
         )
         cls.candidate = doctorate_admission.candidate.user
         cls.other_candidate = CandidateFactory().person.user
+        AdmissionAcademicCalendarFactory.produce_all_required()
 
         cls.doctorate_url = resolve_url("admission_api_v1:doctorate_pdf_recap", uuid=doctorate_admission.uuid)
         cls.master_url = resolve_url("admission_api_v1:general_pdf_recap", uuid=master_proposition.uuid)
@@ -118,7 +120,7 @@ class PDFRecapApiTestCase(APITestCase, QueriesAssertionsMixin):
 
     def test_doctorate_admission_doctorate_pdf_recap_using_api_candidate(self):
         self.client.force_authenticate(user=self.candidate)
-        with self.assertNumQueriesLessThan(24):
+        with self.assertNumQueriesLessThan(27):
             response = self.client.get(self.doctorate_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), {'token': 'pdf-token'})
@@ -135,14 +137,14 @@ class PDFRecapApiTestCase(APITestCase, QueriesAssertionsMixin):
 
     def test_admission_master_general_education_pdf_recap_using_api_candidate(self):
         self.client.force_authenticate(user=self.candidate)
-        with self.assertNumQueriesLessThan(19):
+        with self.assertNumQueriesLessThan(22):
             response = self.client.get(self.master_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), {'token': 'pdf-token'})
 
     def test_admission_bachelor_general_education_pdf_recap_using_api_candidate(self):
         self.client.force_authenticate(user=self.candidate)
-        with self.assertNumQueriesLessThan(21):
+        with self.assertNumQueriesLessThan(24):
             response = self.client.get(self.bachelor_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), {'token': 'pdf-token'})
@@ -165,7 +167,7 @@ class PDFRecapApiTestCase(APITestCase, QueriesAssertionsMixin):
 
     def test_admission_continuing_education_pdf_recap_using_api_candidate(self):
         self.client.force_authenticate(user=self.candidate)
-        with self.assertNumQueriesLessThan(19):
+        with self.assertNumQueriesLessThan(22):
             response = self.client.get(self.continuing_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), {'token': 'pdf-token'})

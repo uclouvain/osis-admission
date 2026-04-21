@@ -151,6 +151,7 @@ from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.p
 )
 from admission.models import AdmissionTask
 from admission.tests.factories import DoctorateAdmissionFactory
+from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.continuing_education import (
     ContinuingEducationAdmissionFactory,
 )
@@ -324,6 +325,7 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
     @classmethod
     def setUpTestData(cls):
         cls.academic_year = AcademicYearFactory(current=True)
+        AdmissionAcademicCalendarFactory.produce_all_required()
         cls.specific_questions = {
             tab.name: [
                 AdmissionFormItemInstantiationFactory(
@@ -892,7 +894,7 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
 
         self.assertEqual(len(admission.pdf_recap), 0)
 
-        with self.assertNumQueriesLessThan(18):
+        with self.assertNumQueriesLessThan(21):
             from admission.exports.admission_recap.admission_async_recap import (
                 continuing_education_admission_pdf_recap_from_task,
             )
@@ -917,7 +919,7 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
 
         self.assertEqual(len(admission.pdf_recap), 0)
 
-        with self.assertNumQueriesLessThan(19):
+        with self.assertNumQueriesLessThan(22):
             from admission.exports.admission_recap.admission_async_recap import (
                 general_education_admission_pdf_recap_from_task,
             )
@@ -938,14 +940,14 @@ class AdmissionRecapTestCase(TestCaseWithQueriesAssertions, QueriesAssertionsMix
             admission=admission,
         )
 
-        with self.assertNumQueriesLessThan(16):
+        with self.assertNumQueriesLessThan(26):
             self.assertEqual(len(admission.pdf_recap), 0)
 
-        from admission.exports.admission_recap.admission_async_recap import (
-            doctorate_education_admission_pdf_recap_from_task,
-        )
+            from admission.exports.admission_recap.admission_async_recap import (
+                doctorate_education_admission_pdf_recap_from_task,
+            )
 
-        doctorate_education_admission_pdf_recap_from_task(str(async_task.uuid))
+            doctorate_education_admission_pdf_recap_from_task(str(async_task.uuid))
 
         admission.refresh_from_db()
         self.assertEqual(len(admission.pdf_recap), 1)
@@ -1583,6 +1585,9 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             financabilite_derogation_derniere_notification_par='',
             est_concerne_par_le_bama_15=None,
             preuve_bama_15=[],
+            justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee='',
+            raison_plusieurs_demandes_meme_cycle_meme_annee='',
+            est_en_poursuite=None,
         )
         doctorate_proposition_dto = _PropositionFormationDoctoraleDTO(
             uuid='uuid-proposition',
@@ -1843,6 +1848,17 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             self.assertEqual(attachments[1].uuids, self.continuing_context.identification.carte_identite)
             self.assertTrue(attachments[1].required)
 
+            with mock.patch.multiple(
+                self.continuing_context,
+                candidat_est_etudiant_recent_ucl=True,
+                pour_candidat=True,
+            ):
+                section = get_identification_section(self.continuing_context, False)
+                attachments = section.attachments
+
+                self.assertEqual(len(attachments), 1)
+                self.assertEqual(attachments[0].identifier, 'PHOTO_IDENTITE')
+
     def test_identification_attachments_with_id_card_number(self):
         with mock.patch.multiple(
             self.continuing_context.identification,
@@ -1865,6 +1881,17 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             self.assertEqual(attachments[1].uuids, self.continuing_context.identification.carte_identite)
             self.assertTrue(attachments[1].required)
 
+            with mock.patch.multiple(
+                self.continuing_context,
+                candidat_est_etudiant_recent_ucl=True,
+                pour_candidat=True,
+            ):
+                section = get_identification_section(self.continuing_context, False)
+                attachments = section.attachments
+
+                self.assertEqual(len(attachments), 1)
+                self.assertEqual(attachments[0].identifier, 'PHOTO_IDENTITE')
+
     def test_identification_attachments_with_passport_number(self):
         with mock.patch.multiple(
             self.continuing_context.identification,
@@ -1886,6 +1913,17 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             self.assertEqual(attachments[1].label, DocumentsIdentification['PASSEPORT'])
             self.assertEqual(attachments[1].uuids, self.continuing_context.identification.passeport)
             self.assertTrue(attachments[1].required)
+
+            with mock.patch.multiple(
+                self.continuing_context,
+                candidat_est_etudiant_recent_ucl=True,
+                pour_candidat=True,
+            ):
+                section = get_identification_section(self.continuing_context, False)
+                attachments = section.attachments
+
+                self.assertEqual(len(attachments), 1)
+                self.assertEqual(attachments[0].identifier, 'PHOTO_IDENTITE')
 
     # Secondary studies attachments
     def test_secondary_studies_attachments_for_continuing_proposition(self):

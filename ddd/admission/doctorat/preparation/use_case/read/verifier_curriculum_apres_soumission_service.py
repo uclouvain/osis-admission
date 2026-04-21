@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,36 +23,19 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import (
-    PropositionIdentityBuilder,
+from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
+from admission.ddd.admission.doctorat.preparation.commands import VerifierCurriculumApresSoumissionQuery
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import IDoctoratTranslator
+from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService
 )
-from admission.ddd.admission.doctorat.preparation.commands import (
-    VerifierCurriculumApresSoumissionQuery,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
-    PropositionIdentity,
-)
-from admission.ddd.admission.doctorat.preparation.domain.service.i_doctorat import (
-    IDoctoratTranslator,
-)
-from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
-    IPropositionRepository,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
-    IProfilCandidatTranslator,
-)
-from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import (
-    ProfilCandidat,
-)
-from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
-    AcademicYearIdentity,
-)
-from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import (
-    IAcademicYearRepository,
-)
-from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
-    IExperienceParcoursInterneTranslator,
-)
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidat
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYearIdentity
+from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
+from ddd.logic.shared_kernel.profil.domain.service.i_parcours_interne import IExperienceParcoursInterneTranslator
 
 
 def verifier_curriculum_apres_soumission(
@@ -62,6 +45,7 @@ def verifier_curriculum_apres_soumission(
     experience_parcours_interne_translator: 'IExperienceParcoursInterneTranslator',
     doctorat_translator: 'IDoctoratTranslator',
     academic_year_repository: 'IAcademicYearRepository',
+    inscriptions_translator: IInscriptionsTranslatorService,
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -79,6 +63,7 @@ def verifier_curriculum_apres_soumission(
         verification_experiences_completees=True,
         grade_academique_formation_proposition=formation.grade_academique,
         annee_formation=annee_formation,
+        inscriptions_translator=inscriptions_translator,
     )
 
     # THEN

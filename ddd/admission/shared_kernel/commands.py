@@ -28,9 +28,7 @@ from typing import Dict, List, Optional
 
 import attr
 
-from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
-    ExperiencesCVRecuperees,
-)
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.shared_kernel.interface import SortedQueryRequest
 from osis_common.ddd import interface
 from osis_common.ddd.interface import QueryRequest
@@ -199,31 +197,21 @@ class RecupererInformationsDestinataireQuery(QueryRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class RecupererInformationsValidationExperienceParcoursAnterieurQuery(interface.CommandRequest):
-    uuid_experience: str
+class RecupererInscriptionsCandidatQuery(QueryRequest):
+    matricule_candidat: str
+    annees: list[int] | None = None
 
 
 @attr.dataclass(frozen=True, slots=True)
-class RecupererInformationsValidationExperienceAcademiqueQuery(
-    RecupererInformationsValidationExperienceParcoursAnterieurQuery
-):
-    pass
+class CandidatEstInscritRecemmentUCLQuery(QueryRequest):
+    matricule_candidat: str
 
 
 @attr.dataclass(frozen=True, slots=True)
-class RecupererInformationsValidationExperienceNonAcademiqueQuery(
-    RecupererInformationsValidationExperienceParcoursAnterieurQuery
-):
-    pass
+class CandidatEstEligibleALaReinscriptionQuery(QueryRequest):
+    matricule_candidat: str
 
 
 @attr.dataclass(frozen=True, slots=True)
-class RecupererInformationsValidationEtudesSecondairesQuery(
-    RecupererInformationsValidationExperienceParcoursAnterieurQuery
-):
-    pass
-
-
-@attr.dataclass(frozen=True, slots=True)
-class RecupererInformationsValidationExamenQuery(RecupererInformationsValidationExperienceParcoursAnterieurQuery):
+class RecupererPeriodeReinscriptionQuery(QueryRequest):
     pass

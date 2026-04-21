@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -65,6 +65,7 @@ class CommitteeMember(RoleModel):
             'admission.api_view_admission_accounting': is_part_of_committee & is_being_enrolled,
             # A ca member can view as long as he belongs to the committee
             'admission.api_view_doctorateadmission': is_part_of_committee,
+            'admission.api_view_admission_candidate_enrolment_information': is_part_of_committee,
             'admission.api_view_admission_training_choice': is_part_of_committee,
             'admission.api_view_admission_project': is_part_of_committee,
             'admission.api_view_admission_cotutelle': is_admission & is_part_of_committee,

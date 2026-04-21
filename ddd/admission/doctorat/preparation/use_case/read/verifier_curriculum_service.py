@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -37,6 +37,9 @@ from admission.ddd.admission.doctorat.preparation.domain.model.proposition impor
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
     IPropositionRepository,
 )
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
+)
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
@@ -59,6 +62,7 @@ def verifier_curriculum(
     proposition_repository: 'IPropositionRepository',
     profil_candidat_translator: 'IProfilCandidatTranslator',
     academic_year_repository: 'IAcademicYearRepository',
+    inscriptions_translator: IInscriptionsTranslatorService,
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -83,6 +87,7 @@ def verifier_curriculum(
         curriculum_pdf=proposition.curriculum,
         uuid_proposition=proposition_id.uuid,
         annee_formation=annee_formation,
+        inscriptions_translator=inscriptions_translator,
     )
 
     # THEN

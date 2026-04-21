@@ -146,6 +146,8 @@ class Section:
                     'is_general': context.est_proposition_generale,
                     'is_continuing': context.est_proposition_continue,
                     'is_doctorate': context.est_proposition_doctorale,
+                    'display_to_candidate': context.pour_candidat,
+                    'is_recent_ucl_student': context.candidat_est_etudiant_recent_ucl,
                     'all_inline': True,
                     'hide_files': True,
                     **(extra_context or {}),

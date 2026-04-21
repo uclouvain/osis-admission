@@ -23,27 +23,32 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.formation_generale.commands import ModifierStatutChecklistExperienceNonAcademiqueCommand
-from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
-    PropositionIdentityBuilder,
-)
-from admission.ddd.admission.formation_generale.domain.model.proposition import (
-    PropositionIdentity,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_modifier_checklist_experience_parcours_anterieur import (
-    IValidationExperienceParcoursAnterieurService,
-)
+import datetime
+
+from admission.ddd.admission.shared_kernel.domain.service.i_diffusion_notes_translator import IDiffusionNotesTranslator
+from ddd.logic.diffusion_des_notes.dto.date_diffusion_de_notes_individuelle import DateDiffusionDeNotesDTO
+from ddd.logic.diffusion_des_notes.queries import GetDateDiffusionDeNotesQuery
 
 
-def modifier_statut_checklist_experience_non_academique(
-    cmd: 'ModifierStatutChecklistExperienceNonAcademiqueCommand',
-    validation_experience_parcours_anterieur_service: 'IValidationExperienceParcoursAnterieurService',
-) -> 'PropositionIdentity':
-    proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
+class DiffusionNotesTranslator(IDiffusionNotesTranslator):
+    @classmethod
+    def recuperer_date_diffusion_notes_derniere_session(
+        cls,
+        sigle_formation: str,
+        est_premiere_annee_bachelier: bool,
+        noma: str,
+        annee: int,
+    ) -> datetime.date:
+        from infrastructure.messages_bus import message_bus_instance
 
-    validation_experience_parcours_anterieur_service.modifier_statut_experience_non_academique(
-        uuid_experience=cmd.uuid_experience,
-        statut=cmd.statut,
-    )
+        marks_diffusion_date: DateDiffusionDeNotesDTO = message_bus_instance.invoke(
+            GetDateDiffusionDeNotesQuery(
+                sigle_formation=sigle_formation,
+                premiere_annee=est_premiere_annee_bachelier,
+                noma=noma,
+                annee=annee,
+                numero_session=3,
+            )
+        )
 
-    return proposition_id
+        return marks_diffusion_date.date

@@ -221,6 +221,7 @@ class AutocompleteGeneralEducationView(ListAPIView):
                 type_formation=request.GET.get('type'),
                 campus=request.GET.get('campus'),
                 terme_de_recherche=request.GET.get('acronym_or_name'),
+                statuts=[ActiveStatusEnum.ACTIVE.name, ActiveStatusEnum.RE_REGISTRATION.name],
             )
         )
         education_list = [training for training in education_list if training.active == ActiveStatusEnum.ACTIVE.name]
