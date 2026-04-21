@@ -251,3 +251,26 @@ def personal_data_checklist_status_is_to_be_processed(self, user: User, obj: Bas
 )
 def personal_data_checklist_status_is_not_validated(self, user: User, obj: BaseAdmission):
     return obj.candidate.personal_data_validation_status != ChoixStatutValidationDonneesPersonnelles.VALIDEES.name
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("The candidate is not a UCL student."))
+def candidate_is_recent_student(self, user: User, obj: BaseAdmission):
+    cache_key = f'admission_{obj.candidate_id}_candidate_is_recent_student'
+    if not hasattr(user, cache_key):
+        setattr(user, cache_key, obj.candidate_is_recent_student)
+    return getattr(user, cache_key)
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("The candidate is a UCL student."))
+def candidate_is_not_recent_student(self, user: User, obj: BaseAdmission):
+    cache_key = f'admission_{obj.candidate_id}_candidate_is_recent_student'
+    if not hasattr(user, cache_key):
+        setattr(user, cache_key, obj.candidate_is_recent_student)
+    return not getattr(user, cache_key)
+
+
+@predicate(bind=True)
+def candidate_has_internal_account(self, user: User, obj: BaseAdmission):
+    return not obj.candidate.global_id.startswith('8')

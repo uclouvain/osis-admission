@@ -31,6 +31,8 @@ from admission.ddd.admission.formation_generale.domain.builder.proposition_ident
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.service.i_formation import IFormationGeneraleTranslator
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import \
+    IInscriptionsTranslatorService
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidat
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYearIdentity
@@ -45,6 +47,7 @@ def verifier_curriculum_apres_soumission(
     experience_parcours_interne_translator: 'IExperienceParcoursInterneTranslator',
     formation_translator: 'IFormationGeneraleTranslator',
     academic_year_repository: 'IAcademicYearRepository',
+    inscriptions_translator: IInscriptionsTranslatorService,
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -62,6 +65,7 @@ def verifier_curriculum_apres_soumission(
         verification_experiences_completees=True,
         grade_academique_formation_proposition=formation.grade_academique,
         annee_formation=annee_formation,
+        inscriptions_translator=inscriptions_translator,
     )
 
     # THEN

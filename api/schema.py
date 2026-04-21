@@ -25,7 +25,7 @@
 # ##############################################################################
 from drf_spectacular.generators import SchemaGenerator
 
-ADMISSION_SDK_VERSION = "1.1.18"
+ADMISSION_SDK_VERSION = "1.1.19"
 
 
 class AdmissionSchemaGenerator(SchemaGenerator):
@@ -38,7 +38,7 @@ class AdmissionSchemaGenerator(SchemaGenerator):
         schema["info"]["description"] = "This API delivers data for the Admission project."
         schema["info"]["contact"] = {
             "name": "UCLouvain - OSIS",
-            "url": "https://github.com/uclouvain/osis",
+            "url": "https://github.com/Osis-Uclouvain/osis",
         }
         schema["servers"] = [
             {

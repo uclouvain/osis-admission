@@ -51,8 +51,24 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
 )
 from admission.ddd.admission.shared_kernel.domain.model._candidat_adresse import CandidatAdresse
 from admission.ddd.admission.shared_kernel.domain.model._candidat_signaletique import CandidatSignaletique
+from admission.ddd.admission.shared_kernel.domain.model.assimilation import Assimilation
 from admission.ddd.admission.shared_kernel.domain.model.formation import Formation
+from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import (
+    IAnneeInscriptionFormationTranslator,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_deliberation_translator import IDeliberationTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_diffusion_notes_translator import IDiffusionNotesTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_evaluations_translator import (
+    IInscriptionsEvaluationsTranslator,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_noma_translator import INomasTranslator
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.shared_kernel.domain.service.inscriptions_ucl_candidat import (
+    InscriptionsUCLCandidatService,
+)
 from admission.ddd.admission.shared_kernel.domain.service.verifier_curriculum import VerifierCurriculum
 from admission.ddd.admission.shared_kernel.domain.validator.validator_by_business_action import (
     CoordonneesValidatorList,
@@ -73,7 +89,15 @@ from reference.models.enums.cycle import Cycle
 
 class ProfilCandidat(interface.DomainService):
     @classmethod
-    def verifier_identification(cls, matricule: str, profil_candidat_translator: 'IProfilCandidatTranslator') -> None:
+    def verifier_identification(
+        cls,
+        matricule: str,
+        profil_candidat_translator: 'IProfilCandidatTranslator',
+        candidat_est_inscrit_recemment_ucl: bool,
+    ) -> None:
+        if candidat_est_inscrit_recemment_ucl:
+            return
+
         identification = profil_candidat_translator.get_identification(matricule)
         IdentificationValidatorList(
             identite_signaletique=CandidatSignaletique(
@@ -150,7 +174,11 @@ class ProfilCandidat(interface.DomainService):
         matricule: str,
         profil_candidat_translator: 'IProfilCandidatTranslator',
         formation: Formation,
+        candidat_est_inscrit_recemment_ucl: bool | None = None,
     ) -> None:
+        if candidat_est_inscrit_recemment_ucl:
+            return
+
         etudes_secondaires = profil_candidat_translator.get_etudes_secondaires(matricule)
 
         if formation.type == TrainingType.BACHELOR:
@@ -189,7 +217,11 @@ class ProfilCandidat(interface.DomainService):
         sigle_formation: str = None,
         annee_formation: int = None,
         uuid_proposition: str = None,
+        candidat_est_en_poursuite: bool | None = None,
     ) -> None:
+        if candidat_est_en_poursuite:
+            return
+
         examen = profil_candidat_translator.get_examen(
             uuid_experience,
             matricule,
@@ -213,11 +245,13 @@ class ProfilCandidat(interface.DomainService):
         curriculum_pdf: List[str],
         uuid_proposition: str,
         annee_formation: AcademicYear,
+        inscriptions_translator: IInscriptionsTranslatorService,
     ) -> None:
         curriculum = profil_candidat_translator.get_curriculum(
             matricule=matricule,
             annee_courante=annee_courante,
             uuid_proposition=uuid_proposition,
+            inscriptions_translator=inscriptions_translator,
         )
 
         experiences_academiques_incompletes = VerifierCurriculumDoctorat.recuperer_experiences_academiques_incompletes(
@@ -244,6 +278,7 @@ class ProfilCandidat(interface.DomainService):
         annee_courante: int,
         annee_formation: AcademicYear,
         curriculum: CurriculumAdmissionDTO,
+        candidat_est_inscrit_recemment_ucl: bool,
     ) -> None:
         experiences_academiques_incompletes = VerifierCurriculum.recuperer_experiences_academiques_incompletes(
             experiences=curriculum.experiences_academiques,
@@ -262,6 +297,8 @@ class ProfilCandidat(interface.DomainService):
             equivalence_diplome=proposition.equivalence_diplome,
             sigle_formation=proposition.formation_id.sigle,
             annee_formation=annee_formation,
+            candidat_est_inscrit_recemment_ucl=candidat_est_inscrit_recemment_ucl,
+            candidat_est_en_poursuite=proposition.est_en_poursuite,
         ).validate()
 
     @classmethod
@@ -273,6 +310,7 @@ class ProfilCandidat(interface.DomainService):
         verification_experiences_completees: bool,
         grade_academique_formation_proposition: str,
         annee_formation: AcademicYear,
+        inscriptions_translator: IInscriptionsTranslatorService,
         curriculum_dto: Optional[CurriculumAdmissionDTO] = None,
     ) -> None:
         date_soumission = proposition.soumise_le.date()
@@ -288,6 +326,7 @@ class ProfilCandidat(interface.DomainService):
                 matricule=proposition.matricule_candidat,
                 annee_courante=annee_precedent_formation,
                 uuid_proposition=proposition.entity_id.uuid,
+                inscriptions_translator=inscriptions_translator,
                 experiences_cv_recuperees=ExperiencesCVRecuperees.SEULEMENT_VALORISEES,
             )
             if curriculum_dto is None
@@ -392,6 +431,7 @@ class ProfilCandidat(interface.DomainService):
         verification_experiences_completees: bool,
         grade_academique_formation_proposition: str,
         annee_formation: AcademicYear,
+        inscriptions_translator: IInscriptionsTranslatorService,
         curriculum_dto: Optional[CurriculumAdmissionDTO] = None,
     ) -> None:
         # Le CV est soumis lors de l'envoi de la demande des signatures
@@ -409,6 +449,7 @@ class ProfilCandidat(interface.DomainService):
                 matricule=proposition.matricule_candidat,
                 annee_courante=annee_precedent_formation,
                 uuid_proposition=proposition.entity_id.uuid,
+                inscriptions_translator=inscriptions_translator,
                 experiences_cv_recuperees=ExperiencesCVRecuperees.SEULEMENT_VALORISEES,
             )
             if curriculum_dto is None
@@ -447,10 +488,12 @@ class ProfilCandidat(interface.DomainService):
         proposition,
         profil_candidat_translator: 'IProfilCandidatTranslator',
         annee_courante: int,
+        inscriptions_translator: IInscriptionsTranslatorService,
     ):
         conditions_comptabilite = profil_candidat_translator.get_conditions_comptabilite(
             matricule=proposition.matricule_candidat,
             annee_courante=annee_courante,
+            inscriptions_translator=inscriptions_translator,
         )
 
         ComptabiliteValidatorList(
@@ -468,10 +511,13 @@ class ProfilCandidat(interface.DomainService):
         profil_candidat_translator: 'IProfilCandidatTranslator',
         annee_courante: int,
         formation: Formation,
+        inscriptions_translator: IInscriptionsTranslatorService,
+        assimilation_passee: Assimilation | None,
     ):
         conditions_comptabilite = profil_candidat_translator.get_conditions_comptabilite(
             matricule=proposition.matricule_candidat,
             annee_courante=annee_courante,
+            inscriptions_translator=inscriptions_translator,
         )
         FormationGeneraleComptabiliteValidatorList(
             pays_nationalite_ue=conditions_comptabilite.pays_nationalite_ue,
@@ -480,13 +526,40 @@ class ProfilCandidat(interface.DomainService):
             ),
             comptabilite=proposition.comptabilite,
             formation=formation,
+            assimilation_passee=assimilation_passee,
         ).validate()
 
     @classmethod
-    def verifier_choix_formation_generale(cls, proposition, formation: Formation):
+    def verifier_choix_formation_generale(
+        cls,
+        proposition,
+        formation: Formation,
+        annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
+        inscriptions_translator: IInscriptionsTranslatorService,
+        deliberation_translator: IDeliberationTranslator,
+        diffusion_notes_translator: IDiffusionNotesTranslator,
+        inscriptions_evaluations_translator: IInscriptionsEvaluationsTranslator,
+        nomas_translator: INomasTranslator,
+    ):
+        candidat_est_eligible_a_la_reinscription = InscriptionsUCLCandidatService.est_eligible_a_la_reinscription(
+            matricule_candidat=proposition.matricule_candidat,
+            annee_inscription_formation_translator=annee_inscription_formation_translator,
+            inscriptions_translator=inscriptions_translator,
+            deliberation_translator=deliberation_translator,
+            diffusion_notes_translator=diffusion_notes_translator,
+            inscriptions_evaluations_translator=inscriptions_evaluations_translator,
+        )
+        candidat_est_diplome_formation = InscriptionsUCLCandidatService.est_diplome(
+            matricule_candidat=proposition.matricule_candidat,
+            sigle_formation=formation.entity_id.sigle,
+            deliberation_translator=deliberation_translator,
+            nomas_translator=nomas_translator,
+        )
         ChoixFormationValidatorList(
             proposition=proposition,
             formation=formation,
+            candidat_est_eligible_a_la_reinscription=candidat_est_eligible_a_la_reinscription,
+            candidat_est_diplome_formation=candidat_est_diplome_formation,
         ).validate()
 
     @classmethod
@@ -496,6 +569,7 @@ class ProfilCandidat(interface.DomainService):
         profil_candidat_translator: 'IProfilCandidatTranslator',
         experiences_academiques: list[ExperienceAcademiqueDTO],
         formation: Formation,
+        candidat_est_inscrit_recemment_ucl: bool,
     ):
         identification = profil_candidat_translator.get_identification(proposition.matricule_candidat)
         est_potentiellement_concerne_par_le_bama_15 = cls.est_potentiellement_concerne_par_le_bama_15(
@@ -515,6 +589,7 @@ class ProfilCandidat(interface.DomainService):
             est_potentiellement_concerne_par_le_bama_15=est_potentiellement_concerne_par_le_bama_15,
             est_concerne_par_le_bama_15=proposition.est_concerne_par_le_bama_15,
             preuve_bama_15=proposition.preuve_bama_15,
+            candidat_est_inscrit_recemment_ucl=candidat_est_inscrit_recemment_ucl,
         ).validate()
 
     @classmethod

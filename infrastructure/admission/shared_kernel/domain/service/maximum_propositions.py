@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -38,11 +38,19 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    STATUTS_PROPOSITION_GENERALE_SOUMISE_HORS_FRAIS_DOSSIER,
+    STATUTS_PROPOSITION_GENERALE_NON_SOUMISE_OU_FRAIS_DOSSIER_EN_ATTENTE,
+    STATUTS_PROPOSITION_GENERALE_SOUMISE_HORS_FRAIS_DOSSIER_CLOTUREE_ET_AUTORISEE,
     ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.formation_generale.domain.model.proposition import (
+    Proposition as PropositionGenerale,
 )
 from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions import (
     IMaximumPropositionsAutorisees,
+)
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
+    DemandeEnBrouillonDejaExistantePourCetteFormationException,
+    DemandePourCetteFormationDejaEnvoyeeException,
 )
 from admission.models import (
     ContinuingEducationAdmission,
@@ -57,7 +65,7 @@ class MaximumPropositionsAutorisees(IMaximumPropositionsAutorisees):
     def nb_propositions_envoyees_formation_generale(cls, matricule: str, annee_cible: int) -> int:
         return GeneralEducationAdmission.objects.filter(
             candidate__global_id=matricule,
-            status__in=STATUTS_PROPOSITION_GENERALE_SOUMISE_HORS_FRAIS_DOSSIER,
+            status__in=STATUTS_PROPOSITION_GENERALE_SOUMISE_HORS_FRAIS_DOSSIER_CLOTUREE_ET_AUTORISEE,
             determined_academic_year__year=annee_cible,
         ).count()
 
@@ -118,3 +126,56 @@ class MaximumPropositionsAutorisees(IMaximumPropositionsAutorisees):
             qs = qs.exclude(uuid=proposition_identity.uuid)
 
         return qs.count()
+
+    @classmethod
+    def verifier_une_seule_demande_envoyee_par_formation_generale_par_annee(
+        cls,
+        proposition_candidat: PropositionGenerale,
+        annee_soumise: int = None,
+    ):
+        target_year = annee_soumise or proposition_candidat.annee_calculee or proposition_candidat.formation_id.annee
+
+        has_similar_application = (
+            GeneralEducationAdmission.objects.filter(
+                candidate__global_id=proposition_candidat.matricule_candidat,
+                training__acronym=proposition_candidat.formation_id.sigle,
+                training__academic_year__year=target_year,
+            )
+            .exclude(
+                status__in=STATUTS_PROPOSITION_GENERALE_NON_SOUMISE_OU_FRAIS_DOSSIER_EN_ATTENTE,
+            )
+            .exclude(
+                uuid=proposition_candidat.entity_id.uuid,
+            )
+            .exists()
+        )
+
+        if has_similar_application:
+            raise DemandePourCetteFormationDejaEnvoyeeException(training_year=target_year)
+
+    @classmethod
+    def verifier_une_seule_demande_non_soumise_par_formation_generale(
+        cls,
+        matricule_candidat: str,
+        sigle_formation: str,
+        uuid_proposition: str = '',
+    ):
+        qs = GeneralEducationAdmission.objects.filter(
+            candidate__global_id=matricule_candidat,
+            training__acronym=sigle_formation,
+            status__in=[
+                ChoixStatutPropositionGenerale.EN_BROUILLON.name,
+                ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name,
+            ],
+        )
+
+        if uuid_proposition:
+            qs = qs.exclude(uuid=uuid_proposition)
+
+        similar_application_uuid = qs.values_list('uuid', flat=True).first()
+
+        if similar_application_uuid:
+            raise DemandeEnBrouillonDejaExistantePourCetteFormationException(
+                admission_context='general-education',
+                admission_uuid=str(similar_application_uuid),
+            )

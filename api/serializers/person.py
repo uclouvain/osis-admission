@@ -55,6 +55,7 @@ class PersonIdentificationSerializer(serializers.ModelSerializer):
     last_registration_year = RelatedAcademicYearField(required=False)
     birth_country = RelatedCountryField(required=False)
     country_of_citizenship = RelatedCountryField(required=False)
+    registration_id = serializers.SerializerMethodField()
 
     class Meta:
         model = Person
@@ -73,6 +74,8 @@ class PersonIdentificationSerializer(serializers.ModelSerializer):
             'gender',
             'civil_state',
             'id_photo',
+            'email',
+            'private_email',
             # Pièce d'identité
             'id_card',
             'passport',
@@ -84,8 +87,13 @@ class PersonIdentificationSerializer(serializers.ModelSerializer):
             # Inscrit ?
             'last_registration_year',
             'last_registration_id',
+            'registration_id',
         ]
         extra_kwargs = {'birth_year': {'min_value': 1900, 'max_value': 2999}}
+        read_only_fields = ('email', 'private_email')
+
+    def get_registration_id(self, instance: Person) -> str:
+        return instance.student_set.values_list('registration_id', flat=True).first() or ''
 
     def include_extra_kwargs(self, kwargs, extra_kwargs):
         # Make all fields optional

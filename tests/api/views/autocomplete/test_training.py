@@ -34,6 +34,7 @@ from rest_framework.test import APITestCase
 from admission.ddd.admission.shared_kernel.domain.enums import TypeFormation
 from admission.tests import TESTING_CACHE_SETTING
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from base.models.enums.active_status import ActiveStatusEnum
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import DOCTORAL_COMMISSION, SECTOR
 from base.tests.factories.academic_calendar import AcademicCalendarFactory
@@ -313,6 +314,28 @@ class GeneralEducationAutocompleteTestCase(TrainingDateMockTestCase):
             offer=cls.current_year_computer_master,
         )
 
+        cls.current_year_computer_master_but_inactive = EducationGroupYearFactory(
+            academic_year=cls.current_year,
+            education_group_type__name=TrainingType.MASTER_MA_120.name,
+            title='Master en informatique 1 inactif',
+            active=ActiveStatusEnum.INACTIVE.name,
+        )
+        EducationGroupVersionFactory(
+            root_group__main_teaching_campus=cls.second_campus,
+            offer=cls.current_year_computer_master_but_inactive,
+        )
+
+        cls.current_year_computer_master_but_active_for_reenrolment = EducationGroupYearFactory(
+            academic_year=cls.current_year,
+            education_group_type__name=TrainingType.MASTER_MA_120.name,
+            title='Master en informatique 1 actif pour réinscription uniquement',
+            active=ActiveStatusEnum.RE_REGISTRATION.name,
+        )
+        EducationGroupVersionFactory(
+            root_group__main_teaching_campus=cls.second_campus,
+            offer=cls.current_year_computer_master_but_active_for_reenrolment,
+        )
+
         cls.next_year_training = EducationGroupYearFactory(
             academic_year=cls.next_year,
             education_group_type__name=TrainingType.CERTIFICATE.name,
@@ -331,10 +354,14 @@ class GeneralEducationAutocompleteTestCase(TrainingDateMockTestCase):
             data={'acronym_or_name': 'informatique 1'},
         )
         self.assertEqual(response.status_code, 200, response.content)
-        self.assertEqual(len(response.json()), 2)
+        self.assertEqual(len(response.json()), 3)
         self.assertCountEqual(
             [training['sigle'] for training in response.json()],
-            [self.current_year_computer_certificate.acronym, self.current_year_computer_master.acronym],
+            [
+                self.current_year_computer_certificate.acronym,
+                self.current_year_computer_master.acronym,
+                self.current_year_computer_master_but_active_for_reenrolment.acronym,
+            ],
         )
 
     def test_autocomplete_general_education_with_campus(self):
@@ -384,13 +411,14 @@ class GeneralEducationAutocompleteTestCase(TrainingDateMockTestCase):
             format='json',
         )
         self.assertEqual(response.status_code, 200, response.content)
-        self.assertEqual(len(response.json()), 3)
+        self.assertEqual(len(response.json()), 4)
         self.assertCountEqual(
             [doctorate['sigle'] for doctorate in response.json()],
             [
                 self.current_year_computer_certificate.acronym,
                 self.current_year_biologist_certificate.acronym,
                 self.current_year_computer_master.acronym,
+                self.current_year_computer_master_but_active_for_reenrolment.acronym,
             ],
         )
 
@@ -402,13 +430,14 @@ class GeneralEducationAutocompleteTestCase(TrainingDateMockTestCase):
             format='json',
         )
         self.assertEqual(response.status_code, 200, response.content)
-        self.assertEqual(len(response.json()), 3)
+        self.assertEqual(len(response.json()), 4)
         self.assertCountEqual(
             [doctorate['sigle'] for doctorate in response.json()],
             [
                 self.current_year_computer_certificate.acronym,
                 self.current_year_biologist_certificate.acronym,
                 self.current_year_computer_master.acronym,
+                self.current_year_computer_master_but_active_for_reenrolment.acronym,
             ],
         )
 

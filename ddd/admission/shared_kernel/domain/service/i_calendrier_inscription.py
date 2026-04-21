@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -51,6 +51,9 @@ from admission.ddd.admission.shared_kernel.domain.model.periode import Periode
 from admission.ddd.admission.shared_kernel.domain.service.i_formation_translator import (
     IFormationTranslator,
 )
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
+)
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
@@ -69,7 +72,6 @@ from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
 from admission.ddd.admission.shared_kernel.dtos import IdentificationDTO
 from admission.ddd.admission.shared_kernel.dtos.conditions import InfosDetermineesDTO
 from admission.ddd.admission.shared_kernel.dtos.periode import PeriodeDTO
-from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from osis_common.ddd import interface
@@ -110,6 +112,7 @@ class ICalendrierInscription(interface.DomainService):
         formation: 'Union[Formation, DoctoratFormation]',
         profil_candidat_translator: 'IProfilCandidatTranslator',
         proposition: Optional['Proposition'] = None,
+        inscriptions_translator: IInscriptionsTranslatorService | None = None,
     ) -> 'InfosDetermineesDTO':
         type_formation = formation.type
         pool_ouverts = cls.get_pool_ouverts()
@@ -126,6 +129,14 @@ class ICalendrierInscription(interface.DomainService):
         annees_prioritaires, annees = cls.get_annees_academiques_pour_calcul(type_formation=type_formation)
         changements_etablissement = profil_candidat_translator.get_changements_etablissement(matricule_candidat, annees)
 
+        annee_derniere_inscription_ucl = identification.annee_derniere_inscription_ucl
+
+        if inscriptions_translator:
+            derniere_inscription_ucl = inscriptions_translator.recuperer_derniere_inscription(matricule_candidat)
+
+            if derniere_inscription_ucl:
+                annee_derniere_inscription_ucl = derniere_inscription_ucl.annee
+
         log_messages = [
             f"""
 --------- Pool determination ---------
@@ -135,7 +146,7 @@ ue_plus_5={ue_plus_5},
 access_diplomas={pformat(titres_acces.get_valid_conditions())},
 training_type={type_formation},
 residential_address={residential_address and pformat(attr.asdict(residential_address))},
-annee_derniere_inscription_ucl={identification.annee_derniere_inscription_ucl},
+annee_derniere_inscription_ucl={annee_derniere_inscription_ucl},
 matricule_candidat={matricule_candidat},
 changements_etablissement={changements_etablissement},
 proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if proposition else 'None'},
@@ -149,7 +160,7 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
             access_diplomas=titres_acces.get_valid_conditions(),
             training_type=type_formation,
             residential_address=residential_address,
-            annee_derniere_inscription_ucl=identification.annee_derniere_inscription_ucl,
+            annee_derniere_inscription_ucl=annee_derniere_inscription_ucl,
             matricule_candidat=matricule_candidat,
             changements_etablissement=changements_etablissement,
             proposition=proposition,
@@ -212,21 +223,32 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
         formation_translator: 'IFormationTranslator',
         annee_soumise: int = None,
         pool_soumis: 'AcademicCalendarTypes' = None,
+        candidat_est_en_poursuite_directe: bool = None,
+        inscriptions_translator: IInscriptionsTranslatorService | None = None,
     ) -> None:
         determination = cls.determiner_annee_academique_et_pot(
-            formation_id,
-            matricule_candidat,
-            titres_acces,
-            formation,
-            profil_candidat_translator,
-            proposition,
+            formation_id=formation_id,
+            matricule_candidat=matricule_candidat,
+            titres_acces=titres_acces,
+            formation=formation,
+            profil_candidat_translator=profil_candidat_translator,
+            proposition=proposition,
+            inscriptions_translator=inscriptions_translator,
         )
-        # Si le candidat s'inscrit pour une acad future, mais que la formation n'existe pas dans cette acad
-        if determination.annee != formation_id.annee:
-            if not formation_translator.verifier_existence(formation_id.sigle, determination.annee):
-                raise FormationNonTrouveeException(formation_id.sigle, determination.annee)
+        # Vérifier que la formation a bien lieu pendant l'année académique déterminée et que le candidat peut y
+        # participer dans le cas où la formation n'est accessible que dans le cadre d'une poursuite directe
+        if not formation_translator.verifier_existence(
+            sigle=formation_id.sigle,
+            annee=determination.annee,
+            candidat_est_en_poursuite_directe=candidat_est_en_poursuite_directe,
+        ):
+            raise FormationNonTrouveeException(formation_id.sigle, determination.annee)
 
-        cls.verifier_periode_inscription_specifique(formation=formation, annee_determinee=determination.annee)
+        cls.verifier_periode_inscription_specifique(
+            formation=formation,
+            annee_determinee=determination.annee,
+            candidat_est_en_poursuite=getattr(proposition, 'est_en_poursuite', None),
+        )
 
         # Vérifier la concordance entre l'année/pool soumis et ceux calculés
         if (
@@ -252,10 +274,16 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
         raise NotImplementedError()
 
     @classmethod
-    def verifier_periode_inscription_specifique(cls, formation: Optional[Formation], annee_determinee: Optional[int]):
+    def verifier_periode_inscription_specifique(
+        cls,
+        formation: Optional[Formation],
+        annee_determinee: Optional[int],
+        candidat_est_en_poursuite: Optional[bool],
+    ):
         """
         Vérifier, si une période d'inscription spécifique est définie pour une formation et une année données,
         si la soumission de la demande est possible.
+        :param candidat_est_en_poursuite: Le candidat continue la formation à laquelle il s'inscrit
         :param formation: La formation souhaitée
         :param annee_determinee: L'année souhaitée
         :return:
@@ -267,7 +295,11 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
         message = gettext('Your application cannot be submitted now.')
         date_jour = datetime.date.today()
 
-        if formation.type == TrainingType.BACHELOR and formation.est_formation_medecine_ou_dentisterie:
+        if (
+            formation.type == TrainingType.BACHELOR
+            and formation.est_formation_medecine_ou_dentisterie
+            and not candidat_est_en_poursuite
+        ):
             periode_inscription = cls.recuperer_periode_inscription_specifique_medecine_dentisterie(
                 annee=annee_determinee
             )

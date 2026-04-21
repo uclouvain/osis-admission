@@ -35,6 +35,9 @@ from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervi
 )
 from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription import ICalendrierInscription
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
+)
 from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import ITitresAcces
@@ -52,6 +55,7 @@ def verifier_proposition(
     formation_translator: 'IDoctoratTranslator',
     calendrier_inscription: 'ICalendrierInscription',
     maximum_propositions_service: 'IMaximumPropositionsAutorisees',
+    inscriptions_translator: IInscriptionsTranslatorService,
 ) -> 'PropositionIdentity':
     # GIVEN
     entity_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -82,6 +86,7 @@ def verifier_proposition(
         calendrier_inscription,
         maximum_propositions_service,
         formation,
+        inscriptions_translator=inscriptions_translator,
     )
 
     # THEN

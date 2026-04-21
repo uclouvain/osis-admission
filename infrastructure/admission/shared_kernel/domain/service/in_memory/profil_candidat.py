@@ -37,6 +37,8 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
     DoctoratFormationDTO,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import \
+    IInscriptionsTranslatorService
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import AdmissionExperienceNonTrouveeException
 from admission.ddd.admission.shared_kernel.dtos import AdressePersonnelleDTO, CoordonneesDTO, IdentificationDTO
@@ -45,6 +47,8 @@ from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from admission.ddd.admission.shared_kernel.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.shared_kernel.dtos.resume import ResumeCandidatDTO
 from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.inscriptions_translator import \
+    InscriptionsInMemoryTranslator
 from base.models.enums.civil_state import CivilState
 from base.models.enums.community import CommunityEnum
 from base.models.enums.establishment_type import EstablishmentTypeEnum
@@ -1111,6 +1115,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         matricule: str,
         annee_courante: int,
         uuid_proposition: str,
+        inscriptions_translator: IInscriptionsTranslatorService,
         experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
     ) -> 'CurriculumAdmissionDTO':
         try:
@@ -1246,6 +1251,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         cls,
         matricule: str,
         annee_courante: int,
+        inscriptions_translator: IInscriptionsTranslatorService,
     ) -> 'ConditionsComptabiliteDTO':
         try:
             candidate = next(c for c in cls.profil_candidats if c.matricule == matricule)
@@ -1268,7 +1274,7 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def est_potentiel_vae(cls, matricule: str) -> bool:
-        curriculum = cls.get_curriculum(matricule, datetime.date.today().year, '')
+        curriculum = cls.get_curriculum(matricule, datetime.date.today().year, '', InscriptionsInMemoryTranslator())
         return curriculum.candidat_est_potentiel_vae
 
     @classmethod
@@ -1311,12 +1317,13 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         formation: Union['DoctoratFormationDTO', 'FormationDTO'],
         annee_courante: int,
         uuid_proposition: str,
+        inscriptions_translator: IInscriptionsTranslatorService,
         experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
     ) -> ResumeCandidatDTO:
         return ResumeCandidatDTO(
             identification=cls.get_identification(matricule),
             coordonnees=cls.get_coordonnees(matricule),
-            curriculum=cls.get_curriculum(matricule, annee_courante, uuid_proposition),
+            curriculum=cls.get_curriculum(matricule, annee_courante, uuid_proposition, inscriptions_translator),
             etudes_secondaires=cls.get_etudes_secondaires(matricule),
             connaissances_langues=cls.get_connaissances_langues(matricule),
             examen_formation=cls.get_examen(uuid_proposition, matricule, formation.sigle, formation.annee),
@@ -1329,7 +1336,8 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         matricule: str = None,
         uuid_proposition: str = None,
     ) -> 'ExperienceAcademiqueDTO':
-        curriculum = cls.get_curriculum(matricule, datetime.date.today().year, uuid_proposition)
+        annee_courante = datetime.date.today().year
+        curriculum = cls.get_curriculum(matricule, annee_courante, uuid_proposition, InscriptionsInMemoryTranslator())
 
         try:
             return next(
@@ -1345,7 +1353,8 @@ class ProfilCandidatInMemoryTranslator(IProfilCandidatTranslator):
         uuid_proposition: str,
         uuid_experience: str,
     ) -> 'ExperienceNonAcademiqueDTO':
-        curriculum = cls.get_curriculum(matricule, datetime.date.today().year, uuid_proposition)
+        annee_courante = datetime.date.today().year
+        curriculum = cls.get_curriculum(matricule, annee_courante, uuid_proposition, InscriptionsInMemoryTranslator())
 
         try:
             return next(

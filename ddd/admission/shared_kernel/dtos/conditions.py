@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2022 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,6 +23,8 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import Optional
+
 import attr
 
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
@@ -48,3 +50,4 @@ class AdmissionConditionsDTO(interface.DTO):
 class InfosDetermineesDTO(interface.DTO):
     annee: int
     pool: 'AcademicCalendarTypes'
+    est_en_poursuite: Optional[bool] = None

@@ -45,6 +45,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     DroitsInscriptionMontant,
     MobiliteNombreDeMois,
     PoursuiteDeCycle,
+    RaisonPlusieursDemandesMemesCycleEtAnnee,
     TypeDeRefus,
 )
 from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import (
@@ -528,6 +529,26 @@ class GeneralEducationAdmission(BaseAdmission):
         verbose_name=_('Proof of re-enrolment for the bachelor\'s degree (BAMA15)'),
     )
 
+    several_admissions_same_cycle_same_year_reason = models.CharField(
+        choices=RaisonPlusieursDemandesMemesCycleEtAnnee.choices(),
+        blank=True,
+        default='',
+        max_length=30,
+        verbose_name=_('Reason to create several applications for a same cycle and a same year.'),
+    )
+
+    several_admissions_same_cycle_same_year_justification = models.TextField(
+        blank=True,
+        verbose_name=_('Text justification to create several applications for a same cycle and a same year.'),
+        default='',
+    )
+
+    is_in_pursuit = models.BooleanField(
+        blank=True,
+        null=True,
+        verbose_name=_('Is in pursuit'),
+    )
+
     class Meta:
         verbose_name = _("General education admission")
         ordering = ('-created_at',)
@@ -553,6 +574,7 @@ class GeneralEducationAdmission(BaseAdmission):
             'detailed_status',
             'determined_academic_year',
             'determined_pool',
+            'is_in_pursuit',
         ]
 
         if author:
@@ -565,6 +587,7 @@ class GeneralEducationAdmission(BaseAdmission):
             dto: 'InfosDetermineesDTO' = message_bus_instance.invoke(DeterminerAnneeAcademiqueEtPotQuery(self.uuid))
             self.determined_academic_year = AcademicYear.objects.get(year=dto.annee)
             self.determined_pool = dto.pool.name
+            self.is_in_pursuit = dto.est_en_poursuite
 
         self.save(update_fields=update_fields)
 
