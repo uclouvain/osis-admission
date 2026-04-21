@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -97,11 +97,6 @@ from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import 
 )
 from admission.ddd.admission.shared_kernel.domain.model.complement_formation import (
     ComplementFormationIdentity,
-)
-from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import (
-    EtatEquivalenceTitreAcces,
-    StatutEquivalenceTitreAcces,
-    TypeEquivalenceTitreAcces,
 )
 from admission.ddd.admission.shared_kernel.domain.model.formation import (
     FormationIdentity,
@@ -598,6 +593,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             defaults={
                 'duplicate_documents_when_saving': dupliquer_documents,  # Indicate if the documents must be duplicated
                 'institute_absence_debts_certificate': entity.comptabilite.attestation_absence_dette_etablissement,
+                'verified_debt_clearance': entity.comptabilite.apurement_dettes_verifie,
                 'assimilation_situation': (
                     entity.comptabilite.type_situation_assimilation.name
                     if entity.comptabilite.type_situation_assimilation

@@ -50,6 +50,7 @@ from admission.ddd.admission.shared_kernel.enums import (
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from admission.forms.admission.accounting import AccountingForm
 from admission.models import Accounting, DoctorateAdmission
+from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.curriculum import EducationalExperienceFactory, EducationalExperienceYearFactory
 from admission.tests.factories.roles import CandidateFactory, ProgramManagerRoleFactory, SicManagementRoleFactory
@@ -227,6 +228,10 @@ class DoctorateAccountingFormViewTestCase(TestCase):
             educational_experience=first_experience,
             academic_year=AcademicYearFactory(year=current_year),
         )
+        AdmissionEducationalValuatedExperiences.objects.create(
+            baseadmission=self.doctorate_admission,
+            educationalexperience=first_experience,
+        )
 
         response = self.client.get(self.form_url)
 
@@ -254,6 +259,10 @@ class DoctorateAccountingFormViewTestCase(TestCase):
         EducationalExperienceYearFactory(
             educational_experience=second_experience,
             academic_year=AcademicYearFactory(year=current_year),
+        )
+        AdmissionEducationalValuatedExperiences.objects.create(
+            baseadmission=self.doctorate_admission,
+            educationalexperience=second_experience,
         )
 
         response = self.client.get(self.form_url)

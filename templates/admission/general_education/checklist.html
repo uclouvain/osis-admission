@@ -323,6 +323,9 @@
           {% include 'admission/general_education/includes/checklist/previous_experiences.html' %}
           {% bootstrap_form comment_forms.parcours_anterieur %}
           {% include 'admission/general_education/includes/checklist/previous_experiences_admission_requirement_form.html' %}
+          {% if with_debt_clearance %}
+              {% include 'admission/general_education/includes/checklist/debt_clearance.html' %}
+          {% endif %}
           {% panel _("Previous experience") %}
             {% include "admission/general_education/includes/checklist/parcours.html" with prefix='parcours_anterieur' show_actions=can_update_curriculum %}
           {% endpanel %}

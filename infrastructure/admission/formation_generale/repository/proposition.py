@@ -454,6 +454,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             admission=admission,
             defaults={
                 'institute_absence_debts_certificate': entity.comptabilite.attestation_absence_dette_etablissement,
+                'verified_debt_clearance': entity.comptabilite.apurement_dettes_verifie,
                 'french_community_study_allowance_application': fr_study_allowance_application,
                 'is_staff_child': entity.comptabilite.enfant_personnel,
                 'staff_child_certificate': entity.comptabilite.attestation_enfant_personnel,

@@ -97,6 +97,7 @@ from admission.ddd.admission.shared_kernel.domain.service.i_question_specifique 
 from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidat as ProfilCandidatService
 from admission.ddd.admission.shared_kernel.dtos import EtudesSecondairesAdmissionDTO, IdentificationDTO
 from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.shared_kernel.dtos.inscription import InscriptionDTO
 from admission.ddd.admission.shared_kernel.enums import (
     ChoixAffiliationSport,
     ChoixAssimilation1,
@@ -124,7 +125,6 @@ from ddd.logic.reference.domain.model.bourse import BourseIdentity
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear
 from ddd.logic.shared_kernel.profil.domain.service.i_parcours_interne import IExperienceParcoursInterneTranslator
 from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
 from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd import interface
 
@@ -759,8 +759,8 @@ class Proposition(interface.RootEntity):
         type_formation: TrainingType,
         etudes_secondaires: EtudesSecondairesAdmissionDTO,
         examen: ExamenDTO,
-        experiences_academiques: list[ExperienceAcademiqueDTO],
-        experiences_non_academiques: list[ExperienceNonAcademiqueDTO],
+        inscriptions: list[InscriptionDTO],
+        curriculum: CurriculumAdmissionDTO,
     ):
         ModifierStatutChecklistParcoursAnterieurValidatorList(
             statut=ChoixStatutChecklist[statut_checklist_cible],
@@ -770,9 +770,12 @@ class Proposition(interface.RootEntity):
             type_formation=type_formation,
             type_equivalence_titre_acces=self.type_equivalence_titre_acces,
             etudes_secondaires=etudes_secondaires,
-            experiences_academiques=experiences_academiques,
-            experiences_non_academiques=experiences_non_academiques,
+            curriculum=curriculum,
             examen=examen,
+            annee_formation=self.formation_id.annee,
+            inscriptions=inscriptions,
+            apurement_dettes_verifie=self.comptabilite.apurement_dettes_verifie,
+            uuid_proposition=self.entity_id.uuid,
         ).validate()
 
         self.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist[statut_checklist_cible]
@@ -1261,3 +1264,17 @@ class Proposition(interface.RootEntity):
         self.justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee = (
             justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee
         )
+
+    def marquer_apurement_dettes_verifie(
+        self,
+        auteur_modification: str,
+    ):
+        self.comptabilite.apurement_dettes_verifie = True
+        self.auteur_derniere_modification = auteur_modification
+
+    def marquer_apurement_dettes_a_verifier(
+        self,
+        auteur_modification: str,
+    ):
+        self.comptabilite.apurement_dettes_verifie = False
+        self.auteur_derniere_modification = auteur_modification

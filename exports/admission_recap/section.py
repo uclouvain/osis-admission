@@ -25,8 +25,7 @@
 # ##############################################################################
 from typing import Dict, List, Optional
 
-from django.utils.translation import gettext as _
-from django.utils.translation import override
+from django.utils.translation import gettext as _, override
 
 from admission.calendar.admission_calendar import (
     AdmissionPoolExternalEnrollmentChangeCalendar,
@@ -57,6 +56,7 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     IdentifiantBaseEmplacementDocument,
     OngletsDemande,
 )
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.exports.admission_recap.attachments import (
     Attachment,
     get_accounting_attachments,
@@ -481,6 +481,10 @@ def get_accounting_section(context: ResumePropositionDTO, load_content: bool) ->
         IProfilCandidatTranslator.recuperer_derniers_etablissements_superieurs_communaute_fr_frequentes(
             experiences_academiques=context.curriculum.experiences_academiques,
             annee_minimale=context.curriculum.annee_minimum_a_remplir,
+            experiences_cv_recuperees=ExperiencesCVRecuperees.TOUTES
+            if context.proposition.est_non_soumise
+            else ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION,
+            uuid_proposition=context.proposition.uuid,
         )
     )
     with_assimilation = context.identification.pays_nationalite_europeen is False

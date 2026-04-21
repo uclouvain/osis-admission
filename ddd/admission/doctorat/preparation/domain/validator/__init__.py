@@ -57,6 +57,7 @@ from ._should_groupe_de_supervision_non_complet_pour_promoteurs import (
     ShouldGroupeDeSupervisionNonCompletPourPromoteurs,
 )
 from ._should_informations_checklist_etre_completees import (
+    ShouldApurementDettesEtreVerifie,
     ShouldCddPeutDonnerDecision,
     ShouldChecklistEtreDansEtatCorrectPourApprouverInscription,
     ShouldComplementsFormationEtreVidesSiPasDeComplementsFormation,
@@ -169,4 +170,5 @@ __all__ = [
     "ShouldStatutChecklistEtreDifferentCloture",
     "ShouldDonneesPersonnellesEtreDansEtatCorrectPourApprouverDemande",
     "ShouldDecisionCddEtreDansEtatCorrectPourApprouverDemande",
+    "ShouldApurementDettesEtreVerifie",
 ]

@@ -783,4 +783,12 @@ COMMAND_HANDLERS = {
             inscriptions_translator=InscriptionsTranslatorService(),
         )
     ),
+    MarquerApurementDettesAVerifierCommand: lambda msg_bus, cmd: marquer_apurement_dettes_a_verifier(
+        cmd=cmd,
+        proposition_repository=PropositionRepository(),
+    ),
+    MarquerApurementDettesVerifieCommand: lambda msg_bus, cmd: marquer_apurement_dettes_verifie(
+        cmd=cmd,
+        proposition_repository=PropositionRepository(),
+    ),
 }

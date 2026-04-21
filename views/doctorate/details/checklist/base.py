@@ -42,6 +42,7 @@ from osis_history.models import HistoryEntry
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import OngletsChecklist
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import message_candidat_avec_pae_avant_2015
 from admission.ddd.admission.shared_kernel.commands import RechercherParcoursAnterieurQuery
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
 from admission.ddd.admission.shared_kernel.enums import Onglets, TypeItemFormulaire
@@ -51,9 +52,14 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     DocumentsProjetRecherche,
     OngletsDemande,
 )
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
 from admission.forms import disable_unavailable_forms
-from admission.forms.admission.checklist import AdmissionCommentForm, AssimilationForm
+from admission.forms.admission.checklist import (
+    AdmissionCommentForm,
+    AssimilationForm,
+    PastExperiencesVerifyDebtClearanceForm,
+)
 from admission.mail_templates import (
     ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CANDIDATE_DOCTORATE,
     ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS_DOCTORATE,
@@ -301,6 +307,20 @@ class ChecklistView(
             context['access_titles'] = self.selectable_access_titles
 
             context['past_experiences_admission_requirement_form'] = self.past_experiences_admission_requirement_form
+
+            # Clearance debts
+            context['with_debt_clearance'] = IProfilCandidatTranslator.avec_apurement_dettes(
+                curriculum=command_result.resume.curriculum,
+                experiences_cv_recuperees=ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION,
+                uuid_proposition=command_result.resume.proposition.uuid,
+            )
+            context['debt_clearance_form'] = PastExperiencesVerifyDebtClearanceForm(
+                initial={
+                    'verified_debt_clearance': command_result.resume.comptabilite.apurement_dettes_verifie,
+                }
+                if command_result.resume.comptabilite
+                else {}
+            )
 
             # Financabilité
             context['financabilite'] = self._get_financabilite()

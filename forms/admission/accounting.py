@@ -28,8 +28,7 @@ from typing import List
 
 from django import forms
 from django.core.exceptions import ValidationError
-from django.utils.translation import gettext_lazy as _
-from django.utils.translation import ngettext
+from django.utils.translation import gettext_lazy as _, ngettext
 from localflavor.generic.forms import IBAN_COUNTRY_CODE_LENGTH, BICFormField
 
 from admission.ddd.admission.shared_kernel.domain.validator._should_comptabilite_etre_completee import (
@@ -417,8 +416,8 @@ class AccountingForm(forms.Form):
         super().__init__(**kwargs)
 
         if self.last_french_community_high_education_institutes_attended:
-            names = self.last_french_community_high_education_institutes_attended.get('names')
-            academic_year = self.last_french_community_high_education_institutes_attended.get('academic_year')
+            names = self.last_french_community_high_education_institutes_attended.noms
+            academic_year = self.last_french_community_high_education_institutes_attended.annee
 
             self.fields['attestation_absence_dette_etablissement'].label = ngettext(
                 'Certificate stating no debts to the institution attended during the academic year'
@@ -597,7 +596,6 @@ class AccountingForm(forms.Form):
 
         # Can have assimilation
         if self.with_assimilation:
-
             if cleaned_data.get('type_situation_assimilation'):
                 assimilation_required_fields = set(
                     self.get_assimilation_required_fields(

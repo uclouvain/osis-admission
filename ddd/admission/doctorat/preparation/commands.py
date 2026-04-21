@@ -848,3 +848,15 @@ class ListerPreAdmissionsCandidatQuery(interface.QueryRequest):
 @attr.dataclass(frozen=True, slots=True)
 class RechercherPromoteursQuery(interface.QueryRequest):
     terme_recherche: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class MarquerApurementDettesVerifieCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class MarquerApurementDettesAVerifierCommand(interface.CommandRequest):
+    uuid_proposition: str
+    gestionnaire: str

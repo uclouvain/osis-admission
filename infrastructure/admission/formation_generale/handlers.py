@@ -901,4 +901,12 @@ COMMAND_HANDLERS = {
             proposition_repository=PropositionRepository(),
         )
     ),
+    MarquerApurementDettesAVerifierCommand: lambda msg_bus, cmd: marquer_apurement_dettes_a_verifier(
+        cmd=cmd,
+        proposition_repository=PropositionRepository(),
+    ),
+    MarquerApurementDettesVerifieCommand: lambda msg_bus, cmd: marquer_apurement_dettes_verifie(
+        cmd=cmd,
+        proposition_repository=PropositionRepository(),
+    ),
 }

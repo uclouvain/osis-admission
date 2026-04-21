@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import datetime
+from unittest import mock
 from unittest.mock import patch
 
 import freezegun
@@ -36,9 +37,11 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
     ChoixStatutChecklist,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
+    Proposition,
     PropositionIdentity,
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
+    ApurementDettesNonVerifieException,
     ConditionAccesEtreSelectionneException,
     PropositionNonTrouveeException,
     StatutsChecklistExperiencesEtreValidesException,
@@ -47,6 +50,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 from admission.ddd.admission.formation_generale.test.factory.titre_acces import (
     TitreAccesSelectionnableFactory,
 )
+from admission.ddd.admission.shared_kernel.tests.mixins import AdmissionTestMixin
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
@@ -67,7 +71,7 @@ from osis_profile.models.enums.experience_validation import ChoixStatutValidatio
 
 
 @freezegun.freeze_time('2020-01-01')
-class TestModifierStatutChecklistParcoursAnterieurService(SimpleTestCase):
+class TestModifierStatutChecklistParcoursAnterieurService(AdmissionTestMixin, SimpleTestCase):
     def assertHasInstance(self, container, cls, msg=None):
         if not any(isinstance(obj, cls) for obj in container):
             self.fail(msg or f"No instance of '{cls}' has been found")
@@ -241,3 +245,52 @@ class TestModifierStatutChecklistParcoursAnterieurService(SimpleTestCase):
                     gestionnaire='0123456789',
                 )
             )
+
+    def test_should_renvoyer_erreur_si_apurement_dettes_non_verifie(self):
+        proposition_id = PropositionIdentity(uuid='uuid-SC3DP-confirmee')
+
+        proposition: Proposition = self.proposition_repository.get(entity_id=proposition_id)
+
+        cmd = ModifierStatutChecklistParcoursAnterieurCommand(
+            uuid_proposition='uuid-SC3DP-confirmee',
+            statut=ChoixStatutChecklist.GEST_REUSSITE.name,
+            gestionnaire='0123456789',
+        )
+
+        with mock.patch(
+            'admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat.IProfilCandidatTranslator.'
+            'avec_apurement_dettes',
+            return_value=True,
+        ):
+            proposition.comptabilite.apurement_dettes_verifie = False
+
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(cmd)
+
+            self.assertHasInstance(context.exception.exceptions, ApurementDettesNonVerifieException)
+
+            proposition.comptabilite.apurement_dettes_verifie = True
+
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(cmd)
+
+            self.assertHasNoInstance(context.exception.exceptions, ApurementDettesNonVerifieException)
+
+        with mock.patch(
+            'admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat.IProfilCandidatTranslator.'
+            'avec_apurement_dettes',
+            return_value=False,
+        ):
+            proposition.comptabilite.apurement_dettes_verifie = False
+
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(cmd)
+
+            self.assertHasNoInstance(context.exception.exceptions, ApurementDettesNonVerifieException)
+
+            proposition.comptabilite.apurement_dettes_verifie = True
+
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(cmd)
+
+            self.assertHasNoInstance(context.exception.exceptions, ApurementDettesNonVerifieException)

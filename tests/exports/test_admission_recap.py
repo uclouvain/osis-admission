@@ -61,8 +61,6 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
     GroupeDeSupervisionDTO,
     MembreCADTO,
     PromoteurDTO,
-)
-from admission.ddd.admission.doctorat.preparation.dtos import (
     PropositionDTO as PropositionFormationDoctoraleDTO,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
@@ -82,8 +80,8 @@ from admission.ddd.admission.formation_continue.dtos import (
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
-from admission.ddd.admission.formation_generale.dtos import ComptabiliteDTO
 from admission.ddd.admission.formation_generale.dtos import (
+    ComptabiliteDTO,
     PropositionDTO as PropositionFormationGeneraleDTO,
 )
 from admission.ddd.admission.shared_kernel.dtos import (
@@ -1361,6 +1359,7 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             nom_titulaire_compte='Doe',
             preuve_statut_apatride=['uuid-preuve_statut_apatride'],
             carte_a=['uuid-carte_a'],
+            apurement_dettes_verifie=False,
         )
 
         continuing_proposition_dto = _PropositionFormationContinueDTO(

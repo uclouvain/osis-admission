@@ -38,6 +38,7 @@ from admission.ddd.admission.shared_kernel.enums import (
     TypeSituationAssimilation,
 )
 from admission.models import DoctorateAdmission
+from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.curriculum import (
     EducationalExperienceFactory,
@@ -137,6 +138,7 @@ class DoctorateAccountingDetailViewTestCase(TestCase):
         self.assertEqual(accounting['type_numero_compte'], ChoixTypeCompteBancaire.NON.name)
 
         self.assertEqual(accounting['derniers_etablissements_superieurs_communaute_fr_frequentes'], None)
+        self.assertEqual(accounting['apurement_dettes_verifie'], False)
 
     def test_get_doctorate_accounting_with_frequented_fr_institutes(self):
         self.client.force_login(self.sic_manager_user)
@@ -194,6 +196,10 @@ class DoctorateAccountingDetailViewTestCase(TestCase):
                 educational_experience=experience,
                 academic_year=AcademicYearFactory(year=current_year),
             )
+            AdmissionEducationalValuatedExperiences.objects.create(
+                baseadmission=self.doctorate_admission,
+                educationalexperience=experience,
+            )
 
         # French community institute but out of the range of require years -> must be excluded
         experience = EducationalExperienceFactory(
@@ -210,6 +216,10 @@ class DoctorateAccountingDetailViewTestCase(TestCase):
             educational_experience=experience,
             academic_year=AcademicYearFactory(year=current_year - 1),
         )
+        AdmissionEducationalValuatedExperiences.objects.create(
+            baseadmission=self.doctorate_admission,
+            educationalexperience=experience,
+        )
 
         response = self.client.get(self.url)
 
@@ -220,7 +230,7 @@ class DoctorateAccountingDetailViewTestCase(TestCase):
 
         accounting = response.context['accounting']
         self.assertCountEqual(
-            accounting['derniers_etablissements_superieurs_communaute_fr_frequentes']['names'],
+            accounting['derniers_etablissements_superieurs_communaute_fr_frequentes'].noms,
             [
                 'First institute',
                 'Third institute',

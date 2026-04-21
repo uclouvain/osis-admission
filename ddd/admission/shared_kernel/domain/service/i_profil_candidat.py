@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import datetime
+import uuid
 from abc import abstractmethod
 from typing import Dict, List, Optional, Union
 
@@ -53,6 +54,7 @@ from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import ValorisationE
 from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     CurriculumAExperiencesDTO,
+    CurriculumDTO,
     ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
 )
@@ -111,6 +113,11 @@ class IProfilCandidatTranslator(interface.DomainService):
         inscriptions_translator: IInscriptionsTranslatorService,
         experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
     ) -> 'CurriculumAdmissionDTO':
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def get_annee_premiere_experience_academique(cls, matricule: str) -> int | None:
         raise NotImplementedError
 
     @classmethod
@@ -230,18 +237,34 @@ class IProfilCandidatTranslator(interface.DomainService):
         cls,
         experiences_academiques: List[ExperienceAcademiqueDTO],
         annee_minimale: int,
+        experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
+        uuid_proposition: str | uuid.UUID | None = None,
     ) -> Optional[DerniersEtablissementsSuperieursCommunauteFrancaiseFrequentesDTO]:
+        if isinstance(uuid_proposition, str):
+            try:
+                uuid_proposition = uuid.UUID(uuid_proposition)
+            except ValueError:
+                pass
+
         derniere_annee = 0
         noms = []
 
         for experience in experiences_academiques:
-            derniere_annee_actuelle = max(experience_year.annee for experience_year in experience.annees)
             if (
-                experience.communaute_institut == CommunityEnum.FRENCH_SPEAKING.name
-                and experience.code_institut != UCLouvain_acronym
-                and derniere_annee_actuelle >= annee_minimale
-                and derniere_annee_actuelle >= derniere_annee
+                experience.communaute_institut != CommunityEnum.FRENCH_SPEAKING.name
+                or experience.code_institut == UCLouvain_acronym
+                or experiences_cv_recuperees == ExperiencesCVRecuperees.SEULEMENT_VALORISEES
+                and not experience.valorisee_par_admissions
+                or experiences_cv_recuperees == ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION
+                and (
+                    not experience.valorisee_par_admissions
+                    or uuid_proposition not in experience.valorisee_par_admissions
+                )
             ):
+                continue
+
+            derniere_annee_actuelle = max(experience_year.annee for experience_year in experience.annees)
+            if derniere_annee_actuelle >= annee_minimale and derniere_annee_actuelle >= derniere_annee:
                 if derniere_annee_actuelle > derniere_annee:
                     derniere_annee = derniere_annee_actuelle
                     noms = [experience.nom_institut]
@@ -250,6 +273,23 @@ class IProfilCandidatTranslator(interface.DomainService):
 
         if noms:
             return DerniersEtablissementsSuperieursCommunauteFrancaiseFrequentesDTO(annee=derniere_annee, noms=noms)
+
+    @classmethod
+    def avec_apurement_dettes(
+        cls,
+        curriculum: CurriculumDTO,
+        experiences_cv_recuperees: ExperiencesCVRecuperees,
+        uuid_proposition: str | uuid.UUID | None = None,
+    ) -> bool:
+        return (
+            cls.recuperer_derniers_etablissements_superieurs_communaute_fr_frequentes(
+                experiences_academiques=curriculum.experiences_academiques,
+                annee_minimale=curriculum.annee_minimum_a_remplir,
+                experiences_cv_recuperees=experiences_cv_recuperees,
+                uuid_proposition=uuid_proposition,
+            )
+            is not None
+        )
 
     @classmethod
     @abstractmethod

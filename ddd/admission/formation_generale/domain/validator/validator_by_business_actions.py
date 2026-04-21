@@ -28,6 +28,7 @@ from typing import Dict, List, Optional
 
 import attr
 
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
 from admission.ddd.admission.formation_generale.domain.model._comptabilite import (
     Comptabilite,
 )
@@ -43,6 +44,8 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
 from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldAffiliationsEtreCompletees,
     ShouldAlternativeSecondairesEtreCompletee,
+    ShouldApurementDettesEtreVerifie,
+    ShouldAvoirInscriptionBachelierPourBama15,
     ShouldCandidatEtreEligibleALaReinscription,
     ShouldCandidatPasEtreDiplomeFormation,
     ShouldComplementsFormationEtreVidesSiPasDeComplementsFormation,
@@ -122,6 +125,7 @@ from admission.ddd.admission.shared_kernel.dtos import EtudesSecondairesAdmissio
 from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
     EmplacementDocumentDTO,
 )
+from admission.ddd.admission.shared_kernel.dtos.inscription import InscriptionDTO
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from base.ddd.utils.business_validator import (
     BusinessValidator,
@@ -667,12 +671,16 @@ class ModifierStatutChecklistParcoursAnterieurValidatorList(TwoStepsMultipleBusi
     condition_acces: Optional[ConditionAcces]
     millesime_condition_acces: Optional[int]
 
+    apurement_dettes_verifie: bool
+
     type_formation: TrainingType
+    annee_formation: int
     type_equivalence_titre_acces: TypeEquivalenceTitreAcces | None
     etudes_secondaires: EtudesSecondairesAdmissionDTO
     examen: ExamenDTO
-    experiences_academiques: list[ExperienceAcademiqueDTO]
-    experiences_non_academiques: list[ExperienceNonAcademiqueDTO]
+    curriculum: CurriculumAdmissionDTO
+    inscriptions: list[InscriptionDTO]
+    uuid_proposition: str
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -693,14 +701,27 @@ class ModifierStatutChecklistParcoursAnterieurValidatorList(TwoStepsMultipleBusi
                 type_formation=self.type_formation,
                 etudes_secondaires=self.etudes_secondaires,
                 examen=self.examen,
-                experiences_academiques=self.experiences_academiques,
-                experiences_non_academiques=self.experiences_non_academiques,
+                experiences_academiques=self.curriculum.experiences_academiques,
+                experiences_non_academiques=self.curriculum.experiences_non_academiques,
             ),
             ShouldInformationsEquivalenceEtreRenseignees(
                 statut=self.statut,
                 type_equivalence_titre_acces=self.type_equivalence_titre_acces,
                 type_formation=self.type_formation,
                 etudes_secondaires=self.etudes_secondaires,
+            ),
+            ShouldAvoirInscriptionBachelierPourBama15(
+                statut=self.statut,
+                condition_acces=self.condition_acces,
+                annee_formation=self.annee_formation,
+                titres_acces_selectionnes=self.titres_acces_selectionnes,
+                inscriptions=self.inscriptions,
+            ),
+            ShouldApurementDettesEtreVerifie(
+                statut=self.statut,
+                curriculum=self.curriculum,
+                apurement_dettes_verifie=self.apurement_dettes_verifie,
+                uuid_proposition=self.uuid_proposition,
             ),
         ]
 

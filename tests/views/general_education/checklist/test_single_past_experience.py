@@ -63,6 +63,7 @@ from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.hops import HopsFactory
 from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
+from osis_profile.models.education import HighSchoolDiploma
 from osis_profile.models.enums.curriculum import Result
 from osis_profile.models.enums.experience_validation import (
     ChoixStatutValidationExperience,
@@ -77,7 +78,7 @@ from reference.tests.factories.country import CountryFactory
 class SinglePastExperienceChangeStatusViewTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
+        cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022, 2023]]
 
         cls.commission = EntityWithVersionFactory(version__acronym=ENTITY_CDE)
         EntityVersionFactory(entity=cls.commission)
@@ -351,7 +352,7 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
             url,
             **self.default_headers,
             data={
-                'status': ChoixStatutValidationExperience.VALIDEE.name,
+                'status': ChoixStatutValidationExperience.A_COMPLETER_APRES_INSCRIPTION.name,
             },
         )
 
@@ -362,10 +363,16 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
 
         high_school_diploma.refresh_from_db()
-        self.assertEqual(high_school_diploma.validation_status, ChoixStatutValidationExperience.VALIDEE.name)
+        self.assertEqual(
+            high_school_diploma.validation_status,
+            ChoixStatutValidationExperience.A_COMPLETER_APRES_INSCRIPTION.name,
+        )
 
         exam.refresh_from_db()
-        self.assertEqual(exam.validation_status, ChoixStatutValidationExperience.VALIDEE.name)
+        self.assertEqual(
+            exam.validation_status,
+            ChoixStatutValidationExperience.A_COMPLETER_APRES_INSCRIPTION.name,
+        )
 
     def test_change_the_checklist_status_to_the_validated_status_needs_a_complete_academic_experience(self):
         self.client.force_login(user=self.sic_manager_user)
@@ -551,6 +558,95 @@ class SinglePastExperienceChangeStatusViewTestCase(TestCase):
         exam.refresh_from_db()
 
         self.assertEqual(exam.validation_status, ChoixStatutValidationExperience.VALIDEE.name)
+
+    def test_change_the_checklist_status_to_the_validated_status_needs_valid_secondary_studies(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        high_school_diploma: HighSchoolDiploma = HighSchoolDiplomaFactory(
+            person=self.general_admission.candidate,
+            got_diploma=GotDiploma.THIS_YEAR.name,
+            academic_graduation_year=self.academic_years[1],
+        )
+
+        url = resolve_url(
+            self.url_name,
+            uuid=self.general_admission.uuid,
+            experience_type=TypeExperience.ETUDES_SECONDAIRES.name,
+            experience_uuid=high_school_diploma.uuid,
+        )
+
+        response = self.client.post(
+            url,
+            **self.default_headers,
+            data={
+                'status': ChoixStatutValidationExperience.VALIDEE.name,
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.assertIn(
+            'La décision finale des études secondaires doit être spécifiée.',
+            [m.message for m in response.context['messages']],
+        )
+
+        high_school_diploma.refresh_from_db()
+        self.assertNotEqual(high_school_diploma.validation_status, ChoixStatutValidationExperience.VALIDEE.name)
+
+        high_school_diploma.got_diploma = GotDiploma.YES.name
+        high_school_diploma.save()
+
+        cv_experience = EducationalExperienceFactory(
+            person=high_school_diploma.person,
+        )
+
+        cv_experience_year = EducationalExperienceYearFactory(
+            educational_experience=cv_experience,
+            academic_year=self.academic_years[0],
+        )
+
+        for year in [0, 1]:
+            cv_experience_year.academic_year = self.academic_years[year]
+            cv_experience_year.save()
+
+            response = self.client.post(
+                url,
+                **self.default_headers,
+                data={
+                    'status': ChoixStatutValidationExperience.VALIDEE.name,
+                },
+            )
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+            self.assertIn(
+                'Les études secondaires doivent être la première expérience académique.',
+                [m.message for m in response.context['messages']],
+            )
+
+            high_school_diploma.refresh_from_db()
+            self.assertNotEqual(high_school_diploma.validation_status, ChoixStatutValidationExperience.VALIDEE.name)
+
+        cv_experience_year.academic_year = self.academic_years[2]
+        cv_experience_year.save()
+
+        response = self.client.post(
+            url,
+            **self.default_headers,
+            data={
+                'status': ChoixStatutValidationExperience.VALIDEE.name,
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.assertNotIn(
+            'Les études secondaires doivent être la première expérience académique.',
+            [m.message for m in response.context['messages']],
+        )
+
+        high_school_diploma.refresh_from_db()
+        self.assertEqual(high_school_diploma.validation_status, ChoixStatutValidationExperience.VALIDEE.name)
 
 
 @freezegun.freeze_time('2023-01-01')

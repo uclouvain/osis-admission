@@ -88,11 +88,14 @@ from admission.tests.views.general_education.checklist.sic_decision.base import 
 )
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.choice_field import BLANK_CHOICE
+from base.models.enums.academic_type import AcademicTypes
+from base.models.enums.community import CommunityEnum
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import GotDiploma
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
+from base.tests.factories.organization import OrganizationFactory
 from base.tests.factories.student import StudentFactory
 from epc.models.enums.condition_acces import ConditionAcces
 from epc.models.enums.decision_resultat_cycle import DecisionResultatCycle
@@ -107,36 +110,39 @@ from epc.tests.factories.inscription_programme_annuel import (
 from epc.tests.factories.inscription_programme_cycle import (
     InscriptionProgrammeCycleFactory,
 )
+from osis_profile import BE_ISO_CODE
 from osis_profile.models import Exam
 from osis_profile.models.enums.education import ForeignDiplomaTypes
 from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
 from osis_profile.models.exam import EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
 from osis_profile.tests.factories.exam import ExamFactory, ExamTypeFactory
 from osis_profile.tests.factories.high_school_diploma import HighSchoolDiplomaFactory
+from reference.tests.factories.country import CountryFactory
 
 
 @freezegun.freeze_time('2023-01-01')
 class PastExperiencesStatusViewTestCase(SicPatchMixin):
     @classmethod
     def setUpTestData(cls):
-        cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
+        cls.academic_years = [AcademicYearFactory(year=year) for year in [2020, 2021, 2022]]
 
         cls.commission = EntityWithVersionFactory(version__acronym=ENTITY_CDE)
         EntityVersionFactory(entity=cls.commission)
 
         cls.training = GeneralEducationTrainingFactory(
             management_entity=cls.commission,
-            academic_year=cls.academic_years[0],
+            academic_year=cls.academic_years[1],
             education_group_type__name=TrainingType.BACHELOR.name,
         )
 
         cls.certificate_training = GeneralEducationTrainingFactory(
             management_entity=cls.commission,
-            academic_year=cls.academic_years[0],
+            academic_year=cls.academic_years[1],
             education_group_type__name=TrainingType.CERTIFICATE.name,
         )
 
         cls.candidate = CompletePersonFactory(language=settings.LANGUAGE_CODE_FR)
+        cls.be_country = CountryFactory(iso_code=BE_ISO_CODE)
 
         cls.sic_manager_user = SicManagementRoleFactory(entity=cls.commission).person.user
         cls.fac_manager_user = ProgramManagerRoleFactory(education_group=cls.training.education_group).person.user
@@ -687,6 +693,152 @@ class PastExperiencesStatusViewTestCase(SicPatchMixin):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Check admission
+        self.general_admission.refresh_from_db()
+        self.assertEqual(
+            self.general_admission.checklist['current']['parcours_anterieur']['statut'],
+            ChoixStatutChecklist.GEST_REUSSITE.name,
+        )
+
+    def test_change_the_checklist_status_to_success_with_debt_clearance(self):
+        self.client.force_login(self.sic_manager_user)
+
+        # All critera are met except the one related to the debt clearance
+        self.general_admission.training = self.certificate_training
+        self.general_admission.admission_requirement = ConditionAcces.BAC.name
+        self.general_admission.admission_requirement_year = self.academic_years[1]
+        self.general_admission.save()
+
+        success_url = resolve_url(
+            self.url_name,
+            uuid=self.general_admission.uuid,
+            status=ChoixStatutChecklist.GEST_REUSSITE.name,
+        )
+
+        first_experience = EducationalExperienceFactory(
+            person=self.candidate,
+            obtained_diploma=False,
+            country=self.be_country,
+            institute=OrganizationFactory(
+                community=CommunityEnum.FRENCH_SPEAKING.name,
+                acronym='INSTITUTE',
+                name='First institute',
+            ),
+            validation_status=ChoixStatutValidationExperience.VALIDEE.name,
+        )
+        EducationalExperienceYearFactory(
+            educational_experience=first_experience,
+            academic_year__year=2023,
+        )
+        AdmissionEducationalValuatedExperiences.objects.create(
+            baseadmission=self.general_admission,
+            educationalexperience=first_experience,
+            is_access_title=True,
+        )
+
+        response = self.client.post(success_url, **self.default_headers)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check response
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        messages = [m.message for m in response.context['messages']]
+        self.assertIn(self.error_message_if_missing_data, messages)
+        self.assertNotIn(self.success_message, messages)
+
+        # Check admission
+        self.general_admission.refresh_from_db()
+        self.assertNotEqual(
+            self.general_admission.checklist['current']['parcours_anterieur']['statut'],
+            ChoixStatutChecklist.GEST_REUSSITE.name,
+        )
+
+        self.general_admission.accounting.verified_debt_clearance = True
+        self.general_admission.accounting.save()
+
+        response = self.client.post(success_url, **self.default_headers)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check response
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        messages = [m.message for m in response.context['messages']]
+        self.assertNotIn(self.error_message_if_missing_data, messages)
+        self.assertIn(self.success_message, messages)
+
+        self.general_admission.refresh_from_db()
+        self.assertEqual(
+            self.general_admission.checklist['current']['parcours_anterieur']['statut'],
+            ChoixStatutChecklist.GEST_REUSSITE.name,
+        )
+
+    def test_change_the_checklist_status_to_success_with_bama_15_admission_requirement(self):
+        self.client.force_login(self.sic_manager_user)
+
+        # All critera are met except the one related to the bama 15
+        student = StudentFactory(person=self.general_admission.candidate)
+
+        pce_a = InscriptionProgrammeCycleFactory(
+            etudiant=student,
+            decision=DecisionResultatCycle.DISTINCTION.name,
+        )
+        InscriptionProgrammeAnnuelFactory(
+            programme_cycle=pce_a,
+            statut=StatutInscriptionProgrammAnnuel.ETUDIANT_UCL.name,
+            etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+            programme__offer__academic_type=AcademicTypes.ACADEMIC.name,
+            programme__root_group__academic_year=self.academic_years[0],
+        )
+
+        self.general_admission.training = self.certificate_training
+        self.general_admission.admission_requirement = ConditionAcces.BAMA15.name
+        self.general_admission.admission_requirement_year = self.academic_years[1]
+        self.general_admission.internal_access_titles.add(pce_a)
+        self.general_admission.save()
+
+        success_url = resolve_url(
+            self.url_name,
+            uuid=self.general_admission.uuid,
+            status=ChoixStatutChecklist.GEST_REUSSITE.name,
+        )
+
+        response = self.client.post(success_url, **self.default_headers)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check response
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        messages = [m.message for m in response.context['messages']]
+        self.assertIn(self.error_message_if_missing_data, messages)
+        self.assertNotIn(self.success_message, messages)
+
+        # Check admission
+        self.general_admission.refresh_from_db()
+        self.assertNotEqual(
+            self.general_admission.checklist['current']['parcours_anterieur']['statut'],
+            ChoixStatutChecklist.GEST_REUSSITE.name,
+        )
+
+        InscriptionProgrammeAnnuelFactory(
+            programme_cycle=pce_a,
+            statut=StatutInscriptionProgrammAnnuel.ETUDIANT_UCL.name,
+            etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+            programme__offer__academic_type=AcademicTypes.ACADEMIC.name,
+            programme__root_group__academic_year=self.academic_years[1],
+        )
+
+        self.general_admission.accounting.verified_debt_clearance = True
+        self.general_admission.accounting.save()
+
+        response = self.client.post(success_url, **self.default_headers)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check response
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        messages = [m.message for m in response.context['messages']]
+        self.assertNotIn(self.error_message_if_missing_data, messages)
+        self.assertIn(self.success_message, messages)
+
         self.general_admission.refresh_from_db()
         self.assertEqual(
             self.general_admission.checklist['current']['parcours_anterieur']['statut'],
@@ -1998,3 +2150,67 @@ class PastExperiencesAccessTitleViewTestCase(TestCase):
         self.assertDjangoMessage(response, gettext('Your data have been saved.'))
 
         self.assertFalse(self.general_admission.internal_access_titles.exists())
+
+
+@freezegun.freeze_time('2024-01-01')
+class PastExperiencesVerifyDebtClearanceViewTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
+
+        cls.commission = EntityWithVersionFactory(version__acronym=ENTITY_CDE)
+        EntityVersionFactory(entity=cls.commission)
+
+        cls.training = GeneralEducationTrainingFactory(
+            management_entity=cls.commission,
+            academic_year=cls.academic_years[0],
+            education_group_type__name=TrainingType.BACHELOR.name,
+        )
+        cls.candidate = CompletePersonFactory(language=settings.LANGUAGE_CODE_FR)
+
+        cls.sic_manager_user = SicManagementRoleFactory(entity=cls.commission).person.user
+        cls.fac_manager_user = ProgramManagerRoleFactory(education_group=cls.training.education_group).person.user
+        cls.default_headers = {'HTTP_HX-Request': 'true'}
+        cls.url_name = 'admission:general-education:verify-debt-clearance'
+
+    def setUp(self) -> None:
+        self.general_admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
+            training=self.training,
+            candidate=self.candidate,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+        )
+        self.url = resolve_url(self.url_name, uuid=self.general_admission.uuid)
+
+    def test_verify_debt_clearance(self):
+        self.client.force_login(user=self.sic_manager_user)
+
+        response = self.client.post(
+            self.url,
+            data={
+                'verified_debt_clearance': 'on',
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.general_admission.refresh_from_db()
+
+        accounting = self.general_admission.accounting
+
+        self.assertEqual(accounting.verified_debt_clearance, True)
+        self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
+
+        response = self.client.post(
+            self.url,
+            data={
+                'verified_debt_clearance': '',
+            },
+            **self.default_headers,
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        accounting.refresh_from_db()
+
+        self.assertEqual(accounting.verified_debt_clearance, False)

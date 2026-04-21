@@ -99,6 +99,7 @@ class DoctorateEducationAccountingDTOSerializer(DTOSerializer):
         allow_null=True,
     )
     a_nationalite_ue = serializers.SerializerMethodField(allow_null=True)
+    apurement_dettes_verifie = None
 
     @extend_schema_field(
         inline_serializer(

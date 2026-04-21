@@ -28,6 +28,7 @@ from django.test import TestCase
 from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import (
     ProfilCandidatTranslator,
 )
+from admission.tests.factories.curriculum import EducationalExperienceFactory, EducationalExperienceYearFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.secondary_studies import (
     BelgianHighSchoolDiplomaFactory,
@@ -35,6 +36,7 @@ from admission.tests.factories.secondary_studies import (
     HighSchoolDiplomaAlternativeFactory,
 )
 from base.tests.factories.person import PersonFactory
+from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
 
 
 class ValorisationEtudesSecondairesTestCase(TestCase):
@@ -258,3 +260,87 @@ class ValorisationEtudesSecondairesTestCase(TestCase):
         self.assertTrue(valuation.est_valorise_par_epc)
         self.assertEqual(valuation.types_formations_admissions_valorisees, [])
         self.assertTrue(valuation.est_valorise)
+
+
+class GetAnneePremiereExperienceAcademiqueTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.first_person = PersonFactory()
+        cls.second_person = PersonFactory()
+
+    def test_with_no_experience(self):
+        result = ProfilCandidatTranslator.get_annee_premiere_experience_academique(matricule='ABCDEF')
+        self.assertIsNone(result)
+
+    def test_with_one_experience(self):
+        educational_experience = EducationalExperienceFactory(person=self.first_person)
+
+        EducationalExperienceYearFactory(
+            educational_experience=educational_experience,
+            academic_year__year=2020,
+        )
+
+        EducationalExperienceYearFactory(
+            educational_experience=educational_experience,
+            academic_year__year=2021,
+        )
+
+        result = ProfilCandidatTranslator.get_annee_premiere_experience_academique(
+            matricule=educational_experience.person.global_id,
+        )
+
+        self.assertEqual(result, 2020)
+
+    def test_with_several_experiences(self):
+        first_educational_experience = EducationalExperienceFactory(person=self.first_person)
+
+        EducationalExperienceYearFactory(
+            educational_experience=first_educational_experience,
+            academic_year__year=2020,
+        )
+
+        EducationalExperienceYearFactory(
+            educational_experience=first_educational_experience,
+            academic_year__year=2021,
+        )
+
+        second_educational_experience = EducationalExperienceFactory(person=self.first_person)
+
+        EducationalExperienceYearFactory(
+            educational_experience=second_educational_experience,
+            academic_year__year=2018,
+        )
+
+        EducationalExperienceYearFactory(
+            educational_experience=second_educational_experience,
+            academic_year__year=2022,
+        )
+
+        third_educational_experience = EducationalExperienceFactory(
+            validation_status=ChoixStatutValidationExperience.EN_BROUILLON.name,
+            person=self.first_person,
+        )
+
+        EducationalExperienceYearFactory(
+            educational_experience=third_educational_experience,
+            academic_year__year=2015,
+        )
+
+        EducationalExperienceYearFactory(
+            educational_experience=third_educational_experience,
+            academic_year__year=2016,
+        )
+
+        other_person_educational_experience = EducationalExperienceFactory(person=self.second_person)
+
+        EducationalExperienceYearFactory(
+            educational_experience=other_person_educational_experience,
+            academic_year__year=2014,
+        )
+
+        result = ProfilCandidatTranslator.get_annee_premiere_experience_academique(
+            matricule=first_educational_experience.person.global_id,
+        )
+
+        self.assertEqual(result, 2018)

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -37,14 +37,14 @@ from admission.ddd.admission.shared_kernel.enums import (
     TypeSituationAssimilation,
 )
 from admission.ddd.admission.shared_kernel.enums.comptabilite import ChoixTypeCompteBancaire
-
 from osis_common.ddd import interface
 
 
-@attr.dataclass(frozen=True, slots=True)
+@attr.dataclass(slots=True)
 class Comptabilite(interface.ValueObject):
     # Absence de dettes
     attestation_absence_dette_etablissement: List[str] = attr.Factory(list)
+    apurement_dettes_verifie: bool = False
 
     # Assimilation
     type_situation_assimilation: Optional[TypeSituationAssimilation] = None
