@@ -39,6 +39,8 @@ from admission.ddd.admission.formation_generale.use_case.write.approuver_admissi
 from admission.ddd.admission.formation_generale.use_case.write.approuver_inscription_par_sic_service import (
     approuver_inscription_par_sic,
 )
+from admission.ddd.admission.formation_generale.use_case.write.calculer_condition_d_acces import \
+    calculer_condition_d_acces
 from admission.ddd.admission.formation_generale.use_case.write.modifier_authentification_etudes_secondaires_service import (  # noqa
     modifier_authentification_etudes_secondaires,
 )
@@ -86,6 +88,7 @@ from admission.ddd.admission.formation_generale.use_case.write.specifier_financa
     specifier_financabilite_resultat_calcul,
 )
 from admission.ddd.admission.shared_kernel.commands import RechercherParcoursAnterieurQuery
+from admission.ddd.admission.shared_kernel.domain.service.conditions_d_acces import ConditionDAcces
 from admission.ddd.admission.shared_kernel.use_case.read import recuperer_questions_specifiques_proposition
 from admission.ddd.admission.shared_kernel.use_case.read.rechercher_parcours_anterieur import (
     rechercher_parcours_anterieur,
@@ -123,6 +126,8 @@ from admission.infrastructure.admission.formation_generale.repository.propositio
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from admission.infrastructure.admission.shared_kernel.domain.service.calcul_condition_acces_translator import \
+    CalculConditionAccesTranslator
 from admission.infrastructure.admission.shared_kernel.domain.service.calendrier_inscription import CalendrierInscription
 from admission.infrastructure.admission.shared_kernel.domain.service.deliberation_translator import (
     DeliberationTranslator,
@@ -898,6 +903,14 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: specifier_raison_plusieurs_demandes_meme_cycle_meme_annee(
             cmd=cmd,
             proposition_repository=PropositionRepository(),
+        )
+    ),
+    CalculerConditionDAccesCommand: (
+        lambda msg_bus, cmd: calculer_condition_d_acces(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            condition_d_acces=ConditionDAcces(),
+            calcul_condition_acces_translator=CalculConditionAccesTranslator(),
         )
     ),
 }

@@ -29,6 +29,8 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
 from admission.ddd.admission.doctorat.preparation.use_case.read import *
 from admission.ddd.admission.doctorat.preparation.use_case.read.recuperer_doctorat_service import recuperer_doctorat
 from admission.ddd.admission.doctorat.preparation.use_case.write import *
+from admission.ddd.admission.doctorat.preparation.use_case.write.calculer_condition_d_acces import \
+    calculer_condition_d_acces
 from admission.ddd.admission.doctorat.preparation.use_case.write.demander_candidat_modifier_ca_service import (
     demander_candidat_modifier_ca,
 )
@@ -36,6 +38,7 @@ from admission.ddd.admission.doctorat.preparation.use_case.write.redonner_la_mai
     redonner_la_main_au_candidat,
 )
 from admission.ddd.admission.doctorat.preparation.use_case.write.soumettre_ca_service import soumettre_ca
+from admission.ddd.admission.shared_kernel.domain.service.conditions_d_acces import ConditionDAcces
 from admission.ddd.admission.shared_kernel.use_case.read import recuperer_questions_specifiques_proposition
 from admission.ddd.admission.shared_kernel.use_case.write import (
     annuler_reclamation_emplacement_document,
@@ -87,6 +90,8 @@ from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_
 from infrastructure.shared_kernel.profil.domain.service.in_memory.parcours_interne import (
     ExperienceParcoursInterneInMemoryTranslator,
 )
+from ...shared_kernel.domain.service.in_memory.calcul_condition_acces_translator import \
+    CalculConditionAccesInMemoryTranslator
 
 from ...shared_kernel.domain.service.in_memory.inscriptions_translator import InscriptionsInMemoryTranslator
 from ...shared_kernel.domain.service.in_memory.modifier_checklist_experience_parcours_anterieur import (
@@ -146,6 +151,8 @@ _raccrocher_experiences_curriculum = RaccrocherExperiencesCurriculumInMemory()
 _validation_experience_parcours_anterieur_service = ValidationExperienceParcoursAnterieurInMemoryService()
 _annee_inscription_formation_translator = AnneeInscriptionFormationInMemoryTranslator()
 _inscriptions_translator = InscriptionsInMemoryTranslator()
+_condition_d_acces = ConditionDAcces()
+_condition_acces_translator = CalculConditionAccesInMemoryTranslator()
 
 
 COMMAND_HANDLERS = {
@@ -823,6 +830,14 @@ COMMAND_HANDLERS = {
             comptabilite_translator=_comptabilite_translator,
             groupe_supervision_repository=_groupe_supervision_repository,
             inscriptions_translator=_inscriptions_translator,
+        )
+    ),
+    CalculerConditionDAccesCommand: (
+        lambda msg_bus, cmd: calculer_condition_d_acces(
+            cmd,
+            proposition_repository=_proposition_repository,
+            condition_d_acces=_condition_d_acces,
+            calcul_condition_acces_translator=_condition_acces_translator,
         )
     ),
 }

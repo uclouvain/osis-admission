@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from admission.constants import CONTEXT_GENERAL
 from admission.ddd.admission.formation_generale.commands import SpecifierExperienceEnTantQueTitreAccesCommand
 from admission.ddd.admission.shared_kernel.domain.builder.titre_acces_selectionnable_builder import (
     TitreAccesSelectionnableBuilder,
@@ -48,6 +49,7 @@ def specifier_experience_en_tant_que_titre_acces(
     msg_bus.publish(
         TitreDAccesModifieEvent(
             entity_id=PropositionIdentity(uuid=cmd.uuid_proposition),
+            contexte_admission=CONTEXT_GENERAL,
         )
     )
 

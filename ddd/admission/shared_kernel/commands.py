@@ -215,8 +215,3 @@ class CandidatEstEligibleALaReinscriptionQuery(QueryRequest):
 @attr.dataclass(frozen=True, slots=True)
 class RecupererPeriodeReinscriptionQuery(QueryRequest):
     pass
-
-
-@attr.dataclass(frozen=True, slots=True)
-class CalculerConditionDAccesCommand(interface.CommandRequest):
-    uuid_proposition: str

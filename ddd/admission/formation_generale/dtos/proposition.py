@@ -221,6 +221,7 @@ class PropositionGestionnaireDTO(PropositionDTO):
     # Titres et condition d'accès
     condition_acces: str
     millesime_condition_acces: Optional[int]
+    erreur_condition_acces: str
     type_equivalence_titre_acces: str
     statut_equivalence_titre_acces: str
     information_a_propos_de_la_restriction: str

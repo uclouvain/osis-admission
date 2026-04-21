@@ -23,30 +23,28 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from osis_common.ddd import interface
+from abc import abstractmethod
+from typing import Optional
 
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition as PropositionDoctorat
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition as PropositionGeneral
-from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import ErreurConditionAcces
-from ddd.logic.condition_acces.domain.service.calcul_condition_acces import ConditionAccesInsuffisant, \
-    ConditionAccesIncomplet
+from admission.ddd.admission.shared_kernel.domain.service.i_calcul_condition_acces_translator import \
+    ICalculConditionAccesTranslator
+from ddd.logic.condition_acces.dtos.condition_acces import ConditionAccesDTO
+from ddd.logic.condition_acces.queries import CalculerConditionDAccesQuery
+from infrastructure.messages_bus import message_bus_instance
 
 
-class ConditionDAcces(interface.DomainService):
+class CalculConditionAccesInMemoryTranslator(ICalculConditionAccesTranslator):
     @classmethod
     def calculer_condition_d_acces(
         cls,
         proposition: PropositionDoctorat | PropositionGeneral,
-        calcul_condition_acces_translator: 'ICalculConditionAccesTranslator',
-    ):
-        try:
-            condition_acces = calcul_condition_acces_translator.calculer_condition_d_acces(proposition)
-            if condition_acces is None:
-                proposition.specifier_condition_acces(condition_acces=None, millesime=None)
-            else:
-                proposition.specifier_condition_acces(condition_acces=condition_acces.condition,
-                                                      millesime=condition_acces.millesime)
-        except ConditionAccesInsuffisant:
-            proposition.specifier_erreur_condition_acces(ErreurConditionAcces.INSUFFISANT.name)
-        except ConditionAccesIncomplet:
-            proposition.specifier_erreur_condition_acces(ErreurConditionAcces.INCOMPLET.name)
+    ) -> Optional[ConditionAccesDTO]:
+        return message_bus_instance.invoke(
+            CalculerConditionDAccesQuery(
+                matricule=proposition.matricule_candidat,
+                sigle_formation=proposition.formation_id.sigle,
+                annee=proposition.formation_id.annee,
+            ),
+        )

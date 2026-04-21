@@ -29,6 +29,8 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
 from admission.ddd.admission.doctorat.preparation.use_case.read import *
 from admission.ddd.admission.doctorat.preparation.use_case.read.recuperer_doctorat_service import recuperer_doctorat
 from admission.ddd.admission.doctorat.preparation.use_case.write import *
+from admission.ddd.admission.doctorat.preparation.use_case.write.calculer_condition_d_acces import \
+    calculer_condition_d_acces
 from admission.ddd.admission.doctorat.preparation.use_case.write.demander_candidat_modifier_ca_service import (
     demander_candidat_modifier_ca,
 )
@@ -36,6 +38,7 @@ from admission.ddd.admission.doctorat.preparation.use_case.write.redonner_la_mai
     redonner_la_main_au_candidat,
 )
 from admission.ddd.admission.doctorat.preparation.use_case.write.soumettre_ca_service import soumettre_ca
+from admission.ddd.admission.shared_kernel.domain.service.conditions_d_acces import ConditionDAcces
 from admission.ddd.admission.shared_kernel.use_case.read import recuperer_questions_specifiques_proposition
 from admission.ddd.admission.shared_kernel.use_case.write import (
     annuler_reclamation_emplacement_document,
@@ -75,6 +78,7 @@ from infrastructure.shared_kernel.academic_year.repository.academic_year import 
 from infrastructure.shared_kernel.campus.repository.uclouvain_campus import UclouvainCampusRepository
 from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
 from infrastructure.shared_kernel.profil.domain.service.parcours_interne import ExperienceParcoursInterneTranslator
+from ...shared_kernel.domain.service.calcul_condition_acces_translator import CalculConditionAccesTranslator
 
 from ...shared_kernel.domain.service.inscriptions import InscriptionsTranslatorService
 from ...shared_kernel.domain.service.matricule_etudiant import MatriculeEtudiantService
@@ -775,6 +779,14 @@ COMMAND_HANDLERS = {
             comptabilite_translator=ComptabiliteTranslator(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
             inscriptions_translator=InscriptionsTranslatorService(),
+        )
+    ),
+    CalculerConditionDAccesCommand: (
+        lambda msg_bus, cmd: calculer_condition_d_acces(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            condition_d_acces=ConditionDAcces(),
+            calcul_condition_acces_translator=CalculConditionAccesTranslator(),
         )
     ),
 }

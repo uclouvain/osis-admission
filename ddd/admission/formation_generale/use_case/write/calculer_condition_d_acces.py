@@ -23,31 +23,23 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from dataclasses import dataclass
-
-from admission.constants import CONTEXT_DOCTORATE, CONTEXT_GENERAL
-from admission.ddd.admission.doctorat.preparation.commands import CalculerConditionDAccesCommand as CalculerConditionDAccesCommandDoctorat
-from admission.ddd.admission.formation_generale.commands import CalculerConditionDAccesCommand as CalculerConditionDAccesCommandGeneral
-from admission.ddd.admission.shared_kernel.events import TitreDAccesModifieEvent
-from osis_common.ddd.interface import EventHandler
+from admission.ddd.admission.formation_generale.commands import CalculerConditionDAccesCommand
+from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import \
+    PropositionIdentityBuilder
+from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
 
 
-@dataclass
-class CalculerConditionDAccesHandler(EventHandler):
-    def handle(
-        self,
-        msg_bus: 'MessageBus',
-        event: 'TitreDAccesModifieEvent',
-    ) -> None:
-        if event.contexte_admission == CONTEXT_DOCTORATE:
-            msg_bus.invoke(
-                CalculerConditionDAccesCommandDoctorat(
-                    uuid_proposition=event.entity_id.uuid,
-                )
-            )
-        elif event.contexte_admission == CONTEXT_GENERAL:
-            msg_bus.invoke(
-                CalculerConditionDAccesCommandGeneral(
-                    uuid_proposition=event.entity_id.uuid,
-                )
-            )
+def calculer_condition_d_acces(
+    cmd: 'CalculerConditionDAccesCommand',
+    proposition_repository: 'IPropositionRepository',
+    condition_d_acces: 'IConditionDAcces',
+    calcul_condition_acces_translator: 'ICalculConditionAccesTranslator',
+) -> PropositionIdentity:
+    proposition = proposition_repository.get(PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition))
+
+    condition_d_acces.calculer_condition_d_acces(proposition, calcul_condition_acces_translator)
+
+    proposition_repository.save(proposition)
+
+    return proposition.entity_id

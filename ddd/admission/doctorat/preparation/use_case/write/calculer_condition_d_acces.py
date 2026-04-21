@@ -23,10 +23,22 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.shared_kernel.domain.service.conditions_d_acces import IConditionDAcces
+from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
+from admission.ddd.admission.doctorat.preparation.commands import CalculerConditionDAccesCommand
+from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
 
 
-class ConditionDAccesInMemory(IConditionDAcces):
-    @classmethod
-    def calculer_condition_d_acces(cls, uuid_proposition: str):
-        pass
+def calculer_condition_d_acces(
+    cmd: 'CalculerConditionDAccesCommand',
+    proposition_repository: 'IPropositionRepository',
+    condition_d_acces: 'IConditionDAcces',
+    calcul_condition_acces_translator: 'ICalculConditionAccesTranslator',
+) -> PropositionIdentity:
+    proposition = proposition_repository.get(PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition))
+
+    condition_d_acces.calculer_condition_d_acces(proposition, calcul_condition_acces_translator)
+
+    proposition_repository.save(proposition)
+
+    return proposition.entity_id

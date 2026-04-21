@@ -23,17 +23,20 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.shared_kernel.commands import CalculerConditionDAccesCommand
-from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import EmplacementDocumentIdentity
-from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
+from abc import abstractmethod
+from typing import Optional
+
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition as PropositionDoctorat
+from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition as PropositionGeneral
+from ddd.logic.condition_acces.dtos.condition_acces import ConditionAccesDTO
+from osis_common.ddd import interface
 
 
-def calculer_condition_d_acces(
-    cmd: 'CalculerConditionDAccesCommand',
-    condition_d_acces: 'IConditionDAcces',
-) -> EmplacementDocumentIdentity:
-    proposition_id = PropositionIdentity(uuid=cmd.uuid_proposition)
-
-    condition_d_acces.calculer_condition_d_acces(proposition_id)
-
-    return proposition_id
+class ICalculConditionAccesTranslator(interface.DomainService):
+    @classmethod
+    @abstractmethod
+    def calculer_condition_d_acces(
+        cls,
+        proposition: PropositionDoctorat | PropositionGeneral,
+    ) -> Optional[ConditionAccesDTO]:
+        raise NotImplementedError

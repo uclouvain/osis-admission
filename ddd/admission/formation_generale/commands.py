@@ -777,3 +777,8 @@ class RecupererPeriodeInscriptionSpecifiqueBachelierMedecineDentisterieQuery(int
 @attr.dataclass(frozen=True, slots=True)
 class RecupererTypeDemandeQuery(interface.QueryRequest):
     uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class CalculerConditionDAccesCommand(interface.CommandRequest):
+    uuid_proposition: str

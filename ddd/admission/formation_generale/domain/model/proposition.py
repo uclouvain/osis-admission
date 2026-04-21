@@ -76,6 +76,7 @@ from admission.ddd.admission.shared_kernel.domain.model.condition_complementaire
     ConditionComplementaireApprobationIdentity,
     ConditionComplementaireLibreApprobation,
 )
+from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import ErreurConditionAcces
 from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import (
     EtatEquivalenceTitreAcces,
     StatutEquivalenceTitreAcces,
@@ -248,6 +249,7 @@ class Proposition(interface.RootEntity):
 
     condition_acces: Optional[ConditionAcces] = None
     millesime_condition_acces: Optional[int] = None
+    erreur_condition_acces: Optional[ErreurConditionAcces] = None
 
     type_equivalence_titre_acces: Optional[TypeEquivalenceTitreAcces] = None
     statut_equivalence_titre_acces: Optional[StatutEquivalenceTitreAcces] = None

@@ -33,3 +33,4 @@ from osis_common.ddd.interface import Event
 @attr.dataclass(frozen=True, slots=True, kw_only=True)
 class TitreDAccesModifieEvent(Event):
     entity_id: PropositionIdentity
+    contexte_admission: str

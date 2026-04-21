@@ -65,8 +65,6 @@ from .shared_kernel.domain.service.in_memory.inscriptions_evaluations_translator
     InscriptionsEvaluationsInMemoryTranslator,
 )
 from .shared_kernel.domain.service.in_memory.inscriptions_translator import InscriptionsInMemoryTranslator
-from ...ddd.admission.shared_kernel.use_case.write.calculer_condition_d_acces import calculer_condition_d_acces
-from .shared_kernel.domain.service.condition_d_acces import ConditionDAcces
 from .shared_kernel.domain.service.in_memory.modifier_checklist_experience_parcours_anterieur import (
     ValidationExperienceParcoursAnterieurInMemoryService,
 )
@@ -83,7 +81,6 @@ _deliberation_translator = DeliberationInMemoryTranslator()
 _base_formation_translator = BaseFormationInMemoryTranslator()
 _diffusion_notes_translator = DiffusionNotesInMemoryTranslator()
 _inscriptions_evaluations_translator = InscriptionsEvaluationsInMemoryTranslator()
-_condition_d_acces = ConditionDAcces()
 
 
 COMMAND_HANDLERS = {
@@ -174,11 +171,5 @@ COMMAND_HANDLERS = {
         cmd,
         annee_inscription_formation_translator=_annee_inscription_formation_translator,
         deliberation_translator=_deliberation_translator,
-    ),
-    CalculerConditionDAccesCommand: (
-        lambda msg_bus, cmd: calculer_condition_d_acces(
-            cmd,
-            condition_d_acces=_condition_d_acces,
-        )
     ),
 }

@@ -95,6 +95,7 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
 from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.shared_kernel.domain.model.complement_formation import ComplementFormationIdentity
+from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import ErreurConditionAcces
 from admission.ddd.admission.shared_kernel.domain.model.enums.type_gestionnaire import TypeGestionnaire
 from admission.ddd.admission.shared_kernel.domain.model.formation import FormationIdentity
 from admission.ddd.admission.shared_kernel.domain.model.motif_refus import MotifRefusIdentity
@@ -233,6 +234,7 @@ class Proposition(interface.RootEntity):
 
     condition_acces: Optional[ConditionAcces] = None
     millesime_condition_acces: Optional[int] = None
+    erreur_condition_acces: Optional[ErreurConditionAcces] = None
 
     approuvee_par_cdd_le: Optional[datetime.datetime] = None
 
@@ -1140,3 +1142,13 @@ class Proposition(interface.RootEntity):
             extra={'decision': DecisionCDDEnum.HORS_DECISION.name},
         )
         self.auteur_derniere_modification = auteur_modification
+
+    def specifier_condition_acces(self, condition_acces: Optional[ConditionAcces], millesime: Optional[int]):
+        self.condition_acces = condition_acces
+        self.millesime_condition_acces = millesime
+        self.erreur_condition_acces = None
+
+    def specifier_erreur_condition_acces(self, erreur_condition_acces):
+        self.condition_acces = None
+        self.millesime_condition_acces = None
+        self.erreur_condition_acces = erreur_condition_acces

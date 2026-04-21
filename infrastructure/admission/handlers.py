@@ -124,12 +124,6 @@ COMMAND_HANDLERS = {
         annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
         deliberation_translator=DeliberationTranslator(),
     ),
-    CalculerConditionDAccesCommand: (
-        lambda msg_bus, cmd: calculer_condition_d_acces(
-            cmd,
-            condition_d_acces=ConditionDAcces(),
-        )
-    ),
 }
 
 EVENT_HANDLERS = {}

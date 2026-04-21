@@ -40,6 +40,8 @@ from admission.ddd.admission.formation_generale.use_case.write.approuver_admissi
 from admission.ddd.admission.formation_generale.use_case.write.approuver_inscription_par_sic_service import (
     approuver_inscription_par_sic,
 )
+from admission.ddd.admission.formation_generale.use_case.write.calculer_condition_d_acces import \
+    calculer_condition_d_acces
 from admission.ddd.admission.formation_generale.use_case.write.modifier_authentification_etudes_secondaires_service import (  # noqa
     modifier_authentification_etudes_secondaires,
 )
@@ -89,6 +91,7 @@ from admission.ddd.admission.formation_generale.use_case.write.specifier_financa
 from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_resultat_calcul_service import (
     specifier_financabilite_resultat_calcul,
 )
+from admission.ddd.admission.shared_kernel.domain.service.conditions_d_acces import ConditionDAcces
 from admission.ddd.admission.shared_kernel.use_case.read import recuperer_questions_specifiques_proposition
 from admission.ddd.admission.shared_kernel.use_case.write import (
     annuler_reclamation_emplacement_document,
@@ -133,6 +136,8 @@ from admission.infrastructure.admission.formation_generale.repository.in_memory.
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.annee_inscription_formation import (
     AnneeInscriptionFormationInMemoryTranslator,
 )
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.calcul_condition_acces_translator import \
+    CalculConditionAccesInMemoryTranslator
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.calendrier_inscription import (
     CalendrierInscriptionInMemory,
 )
@@ -244,6 +249,9 @@ _deliberation_translator = DeliberationInMemoryTranslator()
 _diffusion_notes_translator = DiffusionNotesInMemoryTranslator()
 _inscriptions_evaluations_translator = InscriptionsEvaluationsInMemoryTranslator()
 _nomas_translator = NomasInMemoryTranslator()
+_condition_d_acces = ConditionDAcces()
+_condition_acces_translator = CalculConditionAccesInMemoryTranslator()
+
 
 COMMAND_HANDLERS = {
     RechercherFormationGeneraleQuery: lambda msg_bus, cmd: rechercher_formations(
@@ -964,6 +972,14 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: specifier_raison_plusieurs_demandes_meme_cycle_meme_annee(
             cmd=cmd,
             proposition_repository=_proposition_repository,
+        )
+    ),
+    CalculerConditionDAccesCommand: (
+        lambda msg_bus, cmd: calculer_condition_d_acces(
+            cmd,
+            proposition_repository=_proposition_repository,
+            condition_d_acces=_condition_d_acces,
+            calcul_condition_acces_translator=_condition_acces_translator,
         )
     ),
 }

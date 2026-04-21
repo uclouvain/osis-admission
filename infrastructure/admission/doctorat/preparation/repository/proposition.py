@@ -98,6 +98,7 @@ from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import 
 from admission.ddd.admission.shared_kernel.domain.model.complement_formation import (
     ComplementFormationIdentity,
 )
+from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import ErreurConditionAcces
 from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import (
     EtatEquivalenceTitreAcces,
     StatutEquivalenceTitreAcces,
@@ -278,6 +279,7 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
         commentaire_programme_conjoint=admission.join_program_fac_comment,
         condition_acces=ConditionAcces[admission.admission_requirement] if admission.admission_requirement else None,
         millesime_condition_acces=admission.admission_requirement_year and admission.admission_requirement_year.year,
+        erreur_condition_acces=ErreurConditionAcces[admission.admission_requirement_error] if admission.admission_requirement_error else None,
         besoin_de_derogation=(
             BesoinDeDerogation[admission.dispensation_needed] if admission.dispensation_needed else None
         ),
@@ -518,6 +520,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'join_program_fac_comment': entity.commentaire_programme_conjoint,
                 'admission_requirement': entity.condition_acces.name if entity.condition_acces else '',
                 'admission_requirement_year': academic_years.get(entity.millesime_condition_acces),
+                'admission_requirement_error': entity.erreur_condition_acces.name if entity.erreur_condition_acces else '',
                 'dispensation_needed': entity.besoin_de_derogation.name if entity.besoin_de_derogation else '',
                 'tuition_fees_amount': (
                     entity.droits_inscription_montant.name if entity.droits_inscription_montant else ''
@@ -972,6 +975,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             millesime_condition_acces=(
                 admission.admission_requirement_year.year if admission.admission_requirement_year else None
             ),
+            erreur_condition_acces=admission.admission_requirement_error,
             type_equivalence_titre_acces=admission.foreign_access_title_equivalency_type,
             information_a_propos_de_la_restriction=admission.foreign_access_title_equivalency_restriction_about,
             statut_equivalence_titre_acces=admission.foreign_access_title_equivalency_status,
