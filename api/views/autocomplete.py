@@ -53,6 +53,7 @@ from admission.ddd.admission.formation_generale.commands import (
     RechercherFormationGeneraleQuery,
 )
 from admission.ddd.admission.shared_kernel.domain.enums import LISTE_TYPES_FORMATION_GENERALE
+from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
@@ -215,7 +216,7 @@ class AutocompleteGeneralEducationView(ListAPIView):
     pagination_class = None
 
     def list(self, request, **kwargs):
-        education_list = message_bus_instance.invoke(
+        education_list: list[FormationDTO] = message_bus_instance.invoke(
             RechercherFormationGeneraleQuery(
                 type_formation=request.GET.get('type'),
                 campus=request.GET.get('campus'),
@@ -223,6 +224,7 @@ class AutocompleteGeneralEducationView(ListAPIView):
                 statuts=[ActiveStatusEnum.ACTIVE.name, ActiveStatusEnum.RE_REGISTRATION.name],
             )
         )
+        education_list = [training for training in education_list if training.active == ActiveStatusEnum.ACTIVE.name]
         serializer = serializers.FormationGeneraleDTOSerializer(instance=education_list, many=True)
         return Response(serializer.data)
 
