@@ -29,6 +29,7 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcade
 from osis_common.ddd import interface
 from osis_profile import BE_ISO_CODE, REGIMES_LINGUISTIQUES_SANS_TRADUCTION
 from osis_profile.models.enums.curriculum import Result, TranscriptType
+from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
 from osis_profile.views.edit_experience_academique import (
     PREMIERE_ANNEE_AVEC_CREDITS_ECTS_BE,
     SYSTEMES_EVALUATION_AVEC_CREDITS,
@@ -39,6 +40,10 @@ class VerifierCurriculum(interface.DomainService):
     CHAMPS_REQUIS_SI_DIPLOME_OBTENU = ['diplome', 'grade_obtenu']
 
     @classmethod
+    def experience_academique_consideree_complete(cls, experience: ExperienceAcademiqueDTO):
+        return experience.statut_validation == ChoixStatutValidationExperience.VALIDEE.name
+
+    @classmethod
     def recuperer_experiences_academiques_incompletes(
         cls,
         experiences: List[ExperienceAcademiqueDTO],
@@ -47,8 +52,7 @@ class VerifierCurriculum(interface.DomainService):
         experiences_incompletes = {}
 
         for experience in experiences:
-            # Les expériences qui viennent d'EPC sont considérées complètes qu'elles le soient ou non
-            if experience.epc_experience:
+            if cls.experience_academique_consideree_complete(experience=experience):
                 continue
 
             pays_belge = experience.pays == BE_ISO_CODE

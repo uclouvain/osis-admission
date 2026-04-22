@@ -8380,6 +8380,16 @@ components:
         institute:
           type: string
           nullable: true
+        validation_status:
+          allOf:
+          - $ref: '#/components/schemas/ValidationStatusEnum'
+          readOnly: true
+        can_be_updated:
+          type: boolean
+          readOnly: true
+        can_be_deleted:
+          type: boolean
+          readOnly: true
         external_id:
           type: string
           readOnly: true
@@ -9525,6 +9535,10 @@ components:
           maximum: 2147483647
           minimum: -2147483648
           nullable: true
+        validation_status:
+          allOf:
+          - $ref: '#/components/schemas/ValidationStatusEnum'
+          readOnly: true
         belgian_diploma:
           allOf:
           - $ref: '#/components/schemas/BelgianHighSchoolDiploma'
@@ -9905,6 +9919,16 @@ components:
           type: string
           readOnly: true
           nullable: true
+        validation_status:
+          allOf:
+          - $ref: '#/components/schemas/ValidationStatusEnum'
+          readOnly: true
+        can_be_updated:
+          type: boolean
+          readOnly: true
+        can_be_deleted:
+          type: boolean
+          readOnly: true
       required:
       - country
       - educationalexperienceyear_set
@@ -9958,6 +9982,16 @@ components:
           type: string
           readOnly: true
           nullable: true
+        validation_status:
+          allOf:
+          - $ref: '#/components/schemas/ValidationStatusEnum'
+          readOnly: true
+        can_be_updated:
+          type: boolean
+          readOnly: true
+        can_be_deleted:
+          type: boolean
+          readOnly: true
       required:
       - end_date
       - start_date
@@ -10645,6 +10679,16 @@ components:
           items:
             type: string
           readOnly: true
+        validation_status:
+          allOf:
+          - $ref: '#/components/schemas/ValidationStatusEnum'
+          readOnly: true
+        can_be_updated:
+          type: boolean
+          readOnly: true
+        can_be_deleted:
+          type: boolean
+          readOnly: true
         external_id:
           type: string
           readOnly: true
@@ -11088,6 +11132,24 @@ components:
         * `UNEMPLOYMENT` - Chômage
         * `LANGUAGE_TRAVEL` - Séjour linguistique
         * `OTHER` - Autre
+    ValidationStatusEnum:
+      enum:
+      - EN_BROUILLON
+      - A_TRAITER
+      - A_COMPLETER
+      - AUTHENTIFICATION
+      - AVIS_EXPERT
+      - A_COMPLETER_APRES_INSCRIPTION
+      - VALIDEE
+      type: string
+      description: |-
+        * `EN_BROUILLON` - En brouillon
+        * `A_TRAITER` - À traiter
+        * `A_COMPLETER` - À compléter
+        * `AUTHENTIFICATION` - Authentification
+        * `AVIS_EXPERT` - Avis expert
+        * `A_COMPLETER_APRES_INSCRIPTION` - À compléter après inscription
+        * `VALIDEE` - Validé
     WritingAbilityEnum:
       enum:
       - A1

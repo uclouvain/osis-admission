@@ -30,7 +30,7 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from admission.api.serializers.fields import AnswerToSpecificQuestionField, ExperienceDefaultValidationStatusField
+from admission.api.serializers.fields import AnswerToSpecificQuestionField, ExperienceValidationStatusField
 from admission.api.serializers.mixins import GetDefaultContextParam
 from admission.ddd.admission.doctorat.preparation import commands as doctorate_commands
 from admission.ddd.admission.formation_continue import commands as continuing_commands
@@ -62,7 +62,9 @@ class ProfessionalExperienceSerializer(serializers.ModelSerializer):
         default=serializers.CreateOnlyDefault(GetDefaultContextParam('candidate')),
     )
     valuated_from_trainings = serializers.SerializerMethodField()
-    validation_status = ExperienceDefaultValidationStatusField()
+    validation_status = ExperienceValidationStatusField()
+    can_be_updated = serializers.BooleanField(read_only=True)
+    can_be_deleted = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = ProfessionalExperience
@@ -93,6 +95,9 @@ class LiteProfessionalExperienceSerializer(ProfessionalExperienceSerializer):
             'certificate',
             'valuated_from_trainings',
             'external_id',
+            'validation_status',
+            'can_be_updated',
+            'can_be_deleted',
         ]
         read_only_fields = ['external_id']
 
@@ -141,7 +146,9 @@ class EducationalExperienceSerializer(serializers.ModelSerializer):
     program = RelatedDiplomaField(required=False)
     valuated_from_trainings = serializers.SerializerMethodField()
     institute = RelatedInstitute(required=False)
-    validation_status = ExperienceDefaultValidationStatusField()
+    validation_status = ExperienceValidationStatusField()
+    can_be_updated = serializers.BooleanField(read_only=True)
+    can_be_deleted = serializers.BooleanField(read_only=True)
 
     YEAR_FIELDS_TO_UPDATE = [
         'registered_credit_number',
@@ -259,6 +266,9 @@ class LiteEducationalExperienceSerializer(EducationalExperienceSerializer):
             'country',
             'obtained_diploma',
             'external_id',
+            'validation_status',
+            'can_be_updated',
+            'can_be_deleted',
         ]
         read_only_fields = ['external_id']
 

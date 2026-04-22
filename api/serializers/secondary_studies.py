@@ -30,7 +30,7 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from admission.api.serializers.fields import AnswerToSpecificQuestionField
+from admission.api.serializers.fields import AnswerToSpecificQuestionField, ExperienceValidationStatusField
 from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import (
     ProfilCandidatTranslator,
 )
@@ -120,6 +120,9 @@ class HighSchoolDiplomaSerializer(serializers.Serializer):
         source='highschooldiploma.academic_graduation_year',
         required=False,
         allow_null=True,
+    )
+    validation_status = ExperienceValidationStatusField(
+        source='highschooldiploma.validation_status',
     )
     belgian_diploma = BelgianHighSchoolDiplomaSerializer(required=False, allow_null=True)
     foreign_diploma = ForeignHighSchoolDiplomaSerializer(required=False, allow_null=True)
@@ -219,6 +222,9 @@ class HighSchoolDiplomaSerializer(serializers.Serializer):
             base_diploma_data = validated_data.get('highschooldiploma', {})
             instance.highschooldiploma.got_diploma = base_diploma_data.get('got_diploma') or ''
             instance.highschooldiploma.academic_graduation_year = base_diploma_data.get('academic_graduation_year')
+            instance.highschooldiploma.validation_status = self.fields['validation_status'].to_internal_value(
+                data=instance.highschooldiploma.validation_status,
+            )
             instance.highschooldiploma.save()
 
         # The diploma data can only be updated in a specific case for the admissions for a bachelor

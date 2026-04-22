@@ -24,9 +24,18 @@
 #
 # ##############################################################################
 from admission.ddd.admission.shared_kernel.domain.service.verifier_curriculum import VerifierCurriculum
+from base.models.enums.education_group_types import TrainingType
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO
 
 
 class VerifierCurriculumDoctorat(VerifierCurriculum):
     CHAMPS_REQUIS_SI_DIPLOME_OBTENU = VerifierCurriculum.CHAMPS_REQUIS_SI_DIPLOME_OBTENU + [
         'date_prevue_delivrance_diplome',
     ]
+
+    @classmethod
+    def experience_academique_consideree_complete(cls, experience: ExperienceAcademiqueDTO):
+        return (
+            super().experience_academique_consideree_complete(experience=experience)
+            and experience.valorisee_par_admissions and TrainingType.PHD.name in experience.valorisee_par_admissions
+        )

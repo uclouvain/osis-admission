@@ -51,6 +51,7 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
 from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
     ExperienceParcoursInterneDTO,
 )
+from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -207,12 +208,8 @@ class ShouldAnneesCVRequisesCompletees(BusinessValidator):
 @attr.dataclass(frozen=True, slots=True)
 class ShouldExperiencesAcademiquesEtreCompletees(BusinessValidator):
     experiences_academiques_incompletes: Dict[str, str]
-    candidat_est_inscrit_recemment_ucl: bool | None = None
 
     def validate(self, *args, **kwargs):
-        if self.candidat_est_inscrit_recemment_ucl:
-            return
-
         if self.experiences_academiques_incompletes:
             raise MultipleBusinessExceptions(
                 exceptions=set(
@@ -228,14 +225,12 @@ class ShouldExperiencesAcademiquesEtreCompletees(BusinessValidator):
 @attr.dataclass(frozen=True, slots=True)
 class ShouldExperiencesNonAcademiquesAvoirUnCertificat(BusinessValidator):
     experiences_non_academiques: List[ExperienceNonAcademiqueDTO]
-    candidat_est_inscrit_recemment_ucl: bool | None = None
 
     def validate(self, *args, **kwargs):
-        if self.candidat_est_inscrit_recemment_ucl:
-            return
-
         experiences_incompletes = [
-            experience for experience in self.experiences_non_academiques if not experience.certificat
+            experience for experience in self.experiences_non_academiques
+            if experience.statut_validation != ChoixStatutValidationExperience.VALIDEE.name
+            and not experience.certificat
         ]
 
         if experiences_incompletes:

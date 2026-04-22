@@ -28,6 +28,7 @@ from typing import Optional
 from django.utils.functional import cached_property
 from rest_framework.generics import get_object_or_404
 
+from admission.constants import CONTEXT_GENERAL, CONTEXT_CONTINUING, CONTEXT_DOCTORATE
 from admission.models import (
     ContinuingEducationAdmission,
     DoctorateAdmission,
@@ -41,6 +42,8 @@ from admission.utils import (
 
 
 class PersonRelatedMixin:
+    ADMISSION_CONTEXT = CONTEXT_DOCTORATE
+
     @cached_property
     def candidate(self):
         if self.kwargs.get('uuid'):
@@ -56,6 +59,8 @@ class PersonRelatedMixin:
 
 
 class GeneralEducationPersonRelatedMixin:
+    ADMISSION_CONTEXT = CONTEXT_GENERAL
+
     @cached_property
     def candidate(self):
         return get_object_or_404(GeneralEducationAdmission, uuid=self.kwargs.get('uuid')).candidate
@@ -68,6 +73,8 @@ class GeneralEducationPersonRelatedMixin:
 
 
 class ContinuingEducationPersonRelatedMixin:
+    ADMISSION_CONTEXT = CONTEXT_CONTINUING
+
     @cached_property
     def candidate(self):
         return get_object_or_404(ContinuingEducationAdmission, uuid=self.kwargs.get('uuid')).candidate

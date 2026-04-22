@@ -84,11 +84,32 @@ AnswerToSpecificQuestionField = partial(
     default=dict,
 )
 
+class ExperienceValidationStatusField(serializers.ChoiceField):
+    def __init__(self, **kwargs):
+        super().__init__(
+            choices=ChoixStatutValidationExperience.choices(),
+            allow_null=True,
+            required=False,
+            # read_only=True,  # The value is automatically updated
+            **kwargs,
+        )
 
-ExperienceDefaultValidationStatusField = partial(
-    serializers.HiddenField,
-    default=serializers.CreateOnlyDefault(ChoixStatutValidationExperience.EN_BROUILLON.name),
-)
+    def get_value(self, dictionary):
+        # We do not use the user data but only the existing instance data
+        if self.parent.instance:
+            return super().get_attribute(self.parent.instance)
+
+        # Default value
+        return ChoixStatutValidationExperience.EN_BROUILLON.name
+
+    def to_internal_value(self, data):
+        # On update
+        # > if the experience is already in draft, we keep the same status
+        if data == ChoixStatutValidationExperience.EN_BROUILLON.name:
+            return ChoixStatutValidationExperience.EN_BROUILLON.name
+
+        # > otherwise, the experience must be checked again
+        return ChoixStatutValidationExperience.A_TRAITER.name
 
 
 # Available actions

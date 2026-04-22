@@ -186,11 +186,9 @@ class FormationGeneraleCurriculumValidatorList(TwoStepsMultipleBusinessException
             ),
             ShouldExperiencesAcademiquesEtreCompletees(
                 experiences_academiques_incompletes=self.experiences_academiques_incompletes,
-                candidat_est_inscrit_recemment_ucl=self.candidat_est_inscrit_recemment_ucl,
             ),
             ShouldExperiencesNonAcademiquesAvoirUnCertificat(
                 experiences_non_academiques=self.experiences_non_academiques,
-                candidat_est_inscrit_recemment_ucl=self.candidat_est_inscrit_recemment_ucl,
             ),
             ShouldEquivalenceEtreSpecifiee(
                 equivalence=self.equivalence_diplome,
