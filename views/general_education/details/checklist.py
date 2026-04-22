@@ -377,6 +377,13 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
         ]
 
     @cached_property
+    def a_dossiers_admission_pour_annees_ulterieures(self) -> bool:
+        return BaseAdmission.objects.filter(
+            candidate=self.admission.candidate,
+            determined_academic_year__gt=self.admission.determined_academic_year,
+        ).exists()
+
+    @cached_property
     def dossiers_admission_annee(self) -> defaultdict[int, list]:
         qs = (
             BaseAdmission.objects
@@ -700,6 +707,7 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
         )
         context['bg_classes'] = {}
         context['dossiers_admission_annee'] = self.dossiers_admission_annee
+        context['a_dossiers_admission_pour_annees_ulterieures'] = self.a_dossiers_admission_pour_annees_ulterieures
         context['annee_dossier_courant'] = self.admission.determined_academic_year.year
         context['noma'] = self.proposition.noma_candidat
         context.update(**{

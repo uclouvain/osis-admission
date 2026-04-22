@@ -53,7 +53,7 @@
       <div role="tabpanel" class="parcours table-responsive tab-pane{% if not default_tab or default_tab == 'complete' %} active{% endif %}" id="{{ complete_parcours_id }}">
         {% for annee, dossiers in dossiers_admission_annee.items %}
             <div class="panel panel-default" style="margin-top: 20px;">
-                {% include 'osis_profile/personne_demandes_inscription.html' with annee=annee dossiers_admission=dossiers %}
+                {% include 'osis_profile/personne_demandes_inscription.html' with annee=annee dossiers_admission=dossiers a_dossiers_admission_pour_annes_ulterieures=a_dossiers_admission_pour_annees_ulterieurs%}
             </div>
         {% endfor %}
             <div class="panel panel-default">
