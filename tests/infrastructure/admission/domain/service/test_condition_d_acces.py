@@ -25,11 +25,13 @@
 # ##############################################################################
 from django.test import TestCase
 
-from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
-from admission.infrastructure.admission.shared_kernel.domain.service.condition_d_acces import ConditionDAcces
-from admission.infrastructure.admission.shared_kernel.repository.titre_acces_selectionnable import (
-    TitreAccesSelectionnableRepository,
-)
+from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity as PropositionIdentityDoctorat
+from admission.ddd.admission.shared_kernel.domain.service.conditions_d_acces import ConditionDAcces
+from admission.infrastructure.admission.formation_generale.repository.proposition import PropositionRepository
+from admission.infrastructure.admission.doctorat.preparation.repository.proposition import PropositionRepository as PropositionRepositoryDoctorat
+from admission.infrastructure.admission.shared_kernel.domain.service.calcul_condition_acces_translator import \
+    CalculConditionAccesTranslator
 from admission.models.base import BaseAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.curriculum import (
@@ -65,7 +67,8 @@ class ComputeAdmissionRequirementTestCase(TestCase):
     def test_aucun_titre_d_acces(self):
         admission = GeneralEducationAdmissionFactory(training__education_group_type__name=TrainingType.BACHELOR.name)
 
-        ConditionDAcces.calculer_condition_d_acces(PropositionIdentity(uuid=str(admission.uuid)))
+        proposition = PropositionRepository.get(PropositionIdentity(uuid=str(admission.uuid)))
+        ConditionDAcces.calculer_condition_d_acces(proposition, calcul_condition_acces_translator=CalculConditionAccesTranslator)
         admission.refresh_from_db()
 
         self.assertEqual(admission.admission_requirement, '')
@@ -81,7 +84,8 @@ class ComputeAdmissionRequirementTestCase(TestCase):
             academic_graduation_year__year=2025,
         )
 
-        ConditionDAcces.calculer_condition_d_acces(PropositionIdentity(uuid=str(admission.uuid)))
+        proposition = PropositionRepository.get(PropositionIdentity(uuid=str(admission.uuid)))
+        ConditionDAcces.calculer_condition_d_acces(proposition, calcul_condition_acces_translator=CalculConditionAccesTranslator)
         admission.refresh_from_db()
 
         self.assertEqual(admission.admission_requirement, ConditionAcces.SECONDAIRE.name)
@@ -94,7 +98,8 @@ class ComputeAdmissionRequirementTestCase(TestCase):
         )
         BelgianHighSchoolDiplomaFactory(person=admission.candidate)
 
-        ConditionDAcces.calculer_condition_d_acces(PropositionIdentity(uuid=str(admission.uuid)))
+        proposition = PropositionRepository.get(PropositionIdentity(uuid=str(admission.uuid)))
+        ConditionDAcces.calculer_condition_d_acces(proposition, calcul_condition_acces_translator=CalculConditionAccesTranslator)
         admission.refresh_from_db()
 
         self.assertEqual(admission.admission_requirement, ConditionAcces.INSUFFISANT.name)
@@ -111,7 +116,8 @@ class ComputeAdmissionRequirementTestCase(TestCase):
             year=AcademicYear.objects.get(year=2025),
         )
 
-        ConditionDAcces.calculer_condition_d_acces(PropositionIdentity(uuid=str(admission.uuid)))
+        proposition = PropositionRepository.get(PropositionIdentity(uuid=str(admission.uuid)))
+        ConditionDAcces.calculer_condition_d_acces(proposition, calcul_condition_acces_translator=CalculConditionAccesTranslator)
         admission.refresh_from_db()
 
         self.assertEqual(admission.admission_requirement, ConditionAcces.EXAMEN_ADMISSION.name)
@@ -127,7 +133,8 @@ class ComputeAdmissionRequirementTestCase(TestCase):
             type__education_group_years=[admission.training],
         )
 
-        ConditionDAcces.calculer_condition_d_acces(PropositionIdentity(uuid=str(admission.uuid)))
+        proposition = PropositionRepository.get(PropositionIdentity(uuid=str(admission.uuid)))
+        ConditionDAcces.calculer_condition_d_acces(proposition, calcul_condition_acces_translator=CalculConditionAccesTranslator)
         admission.refresh_from_db()
 
         self.assertEqual(admission.admission_requirement, ConditionAcces.INSUFFISANT.name)
@@ -146,7 +153,8 @@ class ComputeAdmissionRequirementTestCase(TestCase):
             is_access_title=True,
         )
 
-        ConditionDAcces.calculer_condition_d_acces(PropositionIdentity(uuid=str(admission.uuid)))
+        proposition = PropositionRepository.get(PropositionIdentity(uuid=str(admission.uuid)))
+        ConditionDAcces.calculer_condition_d_acces(proposition, calcul_condition_acces_translator=CalculConditionAccesTranslator)
         admission.refresh_from_db()
 
         self.assertEqual(admission.admission_requirement, ConditionAcces.BAC.name)
@@ -165,7 +173,8 @@ class ComputeAdmissionRequirementTestCase(TestCase):
             is_access_title=True,
         )
 
-        ConditionDAcces.calculer_condition_d_acces(PropositionIdentity(uuid=str(admission.uuid)))
+        proposition = PropositionRepository.get(PropositionIdentity(uuid=str(admission.uuid)))
+        ConditionDAcces.calculer_condition_d_acces(proposition, calcul_condition_acces_translator=CalculConditionAccesTranslator)
         admission.refresh_from_db()
 
         self.assertEqual(admission.admission_requirement, ConditionAcces.MASTER.name)
@@ -191,7 +200,8 @@ class ComputeAdmissionRequirementTestCase(TestCase):
             is_access_title=True,
         )
 
-        ConditionDAcces.calculer_condition_d_acces(PropositionIdentity(uuid=str(admission.uuid)))
+        proposition = PropositionRepository.get(PropositionIdentity(uuid=str(admission.uuid)))
+        ConditionDAcces.calculer_condition_d_acces(proposition, calcul_condition_acces_translator=CalculConditionAccesTranslator)
         admission.refresh_from_db()
 
         self.assertEqual(admission.admission_requirement, ConditionAcces.BAMA15.name)
@@ -217,7 +227,8 @@ class ComputeAdmissionRequirementTestCase(TestCase):
             is_access_title=True,
         )
 
-        ConditionDAcces.calculer_condition_d_acces(PropositionIdentity(uuid=str(admission.uuid)))
+        proposition = PropositionRepository.get(PropositionIdentity(uuid=str(admission.uuid)))
+        ConditionDAcces.calculer_condition_d_acces(proposition, calcul_condition_acces_translator=CalculConditionAccesTranslator)
         admission.refresh_from_db()
 
         self.assertEqual(admission.admission_requirement, ConditionAcces.SNU_TYPE_COURT.name)
@@ -243,7 +254,8 @@ class ComputeAdmissionRequirementTestCase(TestCase):
             is_access_title=True,
         )
 
-        ConditionDAcces.calculer_condition_d_acces(PropositionIdentity(uuid=str(admission.uuid)))
+        proposition = PropositionRepository.get(PropositionIdentity(uuid=str(admission.uuid)))
+        ConditionDAcces.calculer_condition_d_acces(proposition, calcul_condition_acces_translator=CalculConditionAccesTranslator)
         admission.refresh_from_db()
 
         self.assertEqual(admission.admission_requirement, ConditionAcces.PASSERELLE.name)
@@ -269,7 +281,8 @@ class ComputeAdmissionRequirementTestCase(TestCase):
             is_access_title=True,
         )
 
-        ConditionDAcces.calculer_condition_d_acces(PropositionIdentity(uuid=str(admission.uuid)))
+        proposition = PropositionRepository.get(PropositionIdentity(uuid=str(admission.uuid)))
+        ConditionDAcces.calculer_condition_d_acces(proposition, calcul_condition_acces_translator=CalculConditionAccesTranslator)
         admission.refresh_from_db()
 
         self.assertEqual(admission.admission_requirement, ConditionAcces.SNU_TYPE_LONG_1ER_CYCLE.name)
@@ -295,7 +308,8 @@ class ComputeAdmissionRequirementTestCase(TestCase):
             is_access_title=True,
         )
 
-        ConditionDAcces.calculer_condition_d_acces(PropositionIdentity(uuid=str(admission.uuid)))
+        proposition = PropositionRepository.get(PropositionIdentity(uuid=str(admission.uuid)))
+        ConditionDAcces.calculer_condition_d_acces(proposition, calcul_condition_acces_translator=CalculConditionAccesTranslator)
         admission.refresh_from_db()
 
         self.assertEqual(admission.admission_requirement, ConditionAcces.SNU_TYPE_LONG_2EME_CYCLE.name)
@@ -310,7 +324,8 @@ class ComputeAdmissionRequirementTestCase(TestCase):
             is_access_title=True,
         )
 
-        ConditionDAcces.calculer_condition_d_acces(PropositionIdentity(uuid=str(admission.uuid)))
+        proposition = PropositionRepository.get(PropositionIdentity(uuid=str(admission.uuid)))
+        ConditionDAcces.calculer_condition_d_acces(proposition, calcul_condition_acces_translator=CalculConditionAccesTranslator)
         admission.refresh_from_db()
 
         self.assertEqual(admission.admission_requirement, ConditionAcces.INSUFFISANT.name)
@@ -330,7 +345,8 @@ class ComputeAdmissionRequirementTestCase(TestCase):
             is_access_title=True,
         )
 
-        ConditionDAcces.calculer_condition_d_acces(PropositionIdentity(uuid=str(admission.uuid)))
+        proposition = PropositionRepository.get(PropositionIdentity(uuid=str(admission.uuid)))
+        ConditionDAcces.calculer_condition_d_acces(proposition, calcul_condition_acces_translator=CalculConditionAccesTranslator)
         admission.refresh_from_db()
 
         self.assertEqual(admission.admission_requirement, ConditionAcces.VAE.name)
@@ -358,7 +374,8 @@ class ComputeAdmissionRequirementTestCase(TestCase):
             is_access_title=True,
         )
 
-        ConditionDAcces.calculer_condition_d_acces(PropositionIdentity(uuid=str(admission.uuid)))
+        proposition = PropositionRepository.get(PropositionIdentity(uuid=str(admission.uuid)))
+        ConditionDAcces.calculer_condition_d_acces(proposition, calcul_condition_acces_translator=CalculConditionAccesTranslator)
         admission.refresh_from_db()
 
         self.assertEqual(admission.admission_requirement, ConditionAcces.VALORISATION_180_ECTS.name)
@@ -386,7 +403,8 @@ class ComputeAdmissionRequirementTestCase(TestCase):
             is_access_title=True,
         )
 
-        ConditionDAcces.calculer_condition_d_acces(PropositionIdentity(uuid=str(admission.uuid)))
+        proposition = PropositionRepository.get(PropositionIdentity(uuid=str(admission.uuid)))
+        ConditionDAcces.calculer_condition_d_acces(proposition, calcul_condition_acces_translator=CalculConditionAccesTranslator)
         admission.refresh_from_db()
 
         self.assertEqual(admission.admission_requirement, ConditionAcces.INSUFFISANT.name)
@@ -414,7 +432,8 @@ class ComputeAdmissionRequirementTestCase(TestCase):
             is_access_title=True,
         )
 
-        ConditionDAcces.calculer_condition_d_acces(PropositionIdentity(uuid=str(admission.uuid)))
+        proposition = PropositionRepository.get(PropositionIdentity(uuid=str(admission.uuid)))
+        ConditionDAcces.calculer_condition_d_acces(proposition, calcul_condition_acces_translator=CalculConditionAccesTranslator)
         admission.refresh_from_db()
 
         self.assertEqual(admission.admission_requirement, ConditionAcces.VALORISATION_240_ECTS.name)
@@ -442,7 +461,8 @@ class ComputeAdmissionRequirementTestCase(TestCase):
             is_access_title=True,
         )
 
-        ConditionDAcces.calculer_condition_d_acces(PropositionIdentity(uuid=str(admission.uuid)))
+        proposition = PropositionRepositoryDoctorat.get(PropositionIdentityDoctorat(uuid=str(admission.uuid)))
+        ConditionDAcces.calculer_condition_d_acces(proposition, calcul_condition_acces_translator=CalculConditionAccesTranslator)
         admission.refresh_from_db()
 
         self.assertEqual(admission.admission_requirement, ConditionAcces.INSUFFISANT.name)
@@ -470,7 +490,8 @@ class ComputeAdmissionRequirementTestCase(TestCase):
             is_access_title=True,
         )
 
-        ConditionDAcces.calculer_condition_d_acces(PropositionIdentity(uuid=str(admission.uuid)))
+        proposition = PropositionRepositoryDoctorat.get(PropositionIdentityDoctorat(uuid=str(admission.uuid)))
+        ConditionDAcces.calculer_condition_d_acces(proposition, calcul_condition_acces_translator=CalculConditionAccesTranslator)
         admission.refresh_from_db()
 
         self.assertEqual(admission.admission_requirement, ConditionAcces.VALORISATION_300_ECTS.name)

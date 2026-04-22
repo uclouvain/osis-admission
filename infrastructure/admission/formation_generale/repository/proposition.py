@@ -353,6 +353,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'admission_requirement': entity.condition_acces.name if entity.condition_acces else '',
                 'admission_requirement_year': entity.millesime_condition_acces
                 and academic_years[entity.millesime_condition_acces],
+                'admission_requirement_error': entity.erreur_condition_acces.name if entity.erreur_condition_acces else '',
                 'foreign_access_title_equivalency_type': (
                     entity.type_equivalence_titre_acces.name if entity.type_equivalence_titre_acces else ''
                 ),

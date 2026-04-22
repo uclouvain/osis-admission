@@ -23,6 +23,7 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd import interface
 
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition as PropositionDoctorat
@@ -44,9 +45,9 @@ class ConditionDAcces(interface.DomainService):
             if condition_acces is None:
                 proposition.specifier_condition_acces(condition_acces=None, millesime=None)
             else:
-                proposition.specifier_condition_acces(condition_acces=condition_acces.condition,
+                proposition.specifier_condition_acces(condition_acces=ConditionAcces[condition_acces.condition],
                                                       millesime=condition_acces.millesime)
         except ConditionAccesInsuffisant:
-            proposition.specifier_erreur_condition_acces(ErreurConditionAcces.INSUFFISANT.name)
+            proposition.specifier_erreur_condition_acces(ErreurConditionAcces.INSUFFISANT)
         except ConditionAccesIncomplet:
-            proposition.specifier_erreur_condition_acces(ErreurConditionAcces.INCOMPLET.name)
+            proposition.specifier_erreur_condition_acces(ErreurConditionAcces.INCOMPLET)

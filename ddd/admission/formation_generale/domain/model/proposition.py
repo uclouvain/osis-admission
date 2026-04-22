@@ -1231,3 +1231,13 @@ class Proposition(interface.RootEntity):
         self.justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee = (
             justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee
         )
+
+    def specifier_condition_acces(self, condition_acces: Optional[ConditionAcces], millesime: Optional[int]):
+        self.condition_acces = condition_acces
+        self.millesime_condition_acces = millesime
+        self.erreur_condition_acces = None
+
+    def specifier_erreur_condition_acces(self, erreur_condition_acces):
+        self.condition_acces = None
+        self.millesime_condition_acces = None
+        self.erreur_condition_acces = erreur_condition_acces

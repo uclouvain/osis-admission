@@ -32,7 +32,6 @@ from admission.ddd.admission.shared_kernel.domain.service.i_calcul_condition_acc
     ICalculConditionAccesTranslator
 from ddd.logic.condition_acces.dtos.condition_acces import ConditionAccesDTO
 from ddd.logic.condition_acces.queries import CalculerConditionDAccesQuery
-from infrastructure.messages_bus import message_bus_instance
 
 
 class CalculConditionAccesTranslator(ICalculConditionAccesTranslator):
@@ -41,6 +40,8 @@ class CalculConditionAccesTranslator(ICalculConditionAccesTranslator):
         cls,
         proposition: PropositionDoctorat | PropositionGeneral,
     ) -> Optional[ConditionAccesDTO]:
+        from infrastructure.messages_bus import message_bus_instance
+
         return message_bus_instance.invoke(
             CalculerConditionDAccesQuery(
                 matricule=proposition.matricule_candidat,
