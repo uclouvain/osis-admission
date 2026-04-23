@@ -983,6 +983,7 @@ class DoctorateAdmissionListExcelExportView(BaseAdmissionExcelExportView):
         return [
             _('Application no.'),
             _('Last name / First name'),
+            _('Email address'),
             _('Nationality'),
             _('Scholarship'),
             pgettext('admission', 'Course'),
@@ -1019,6 +1020,7 @@ class DoctorateAdmissionListExcelExportView(BaseAdmissionExcelExportView):
         return [
             row.numero_demande,
             row.candidat,
+            row.email,
             row.nom_pays_nationalite_candidat,
             row.code_bourse,
             row.formation,
