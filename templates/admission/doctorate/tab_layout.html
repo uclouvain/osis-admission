@@ -9,7 +9,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -53,9 +53,17 @@
   <div>
     <span>
       {% if admission.noma_candidat %}
-        <a href="{% url 'consulter_dossier_etudiant' admission.noma_candidat %}" target="_blank">
-          {{ admission.noma_candidat }}
-        </a>
+        <span class="copy-to-clipboard">
+          <a class="copy-to-clipboard-element" href="{{ request.scheme }}://{{ request.get_host }}{% url 'consulter_dossier_etudiant' admission.noma_candidat %}" target="_blank">
+            {{ admission.noma_candidat }}
+          </a>
+          <button
+            class="copy-button"
+            data-html="true"
+          >
+            <i class="far fa-copy"></i>
+          </button>
+        </span>
       {% else %}
         {% translate 'Unknown noma' %}
       {% endif %}
@@ -103,7 +111,7 @@
     <br>
     {% if admission.soumise_le %}
       <span>
-        {% translate 'Submission date:' %} {{ admission.soumise_le|date:'d/m/Y' }}
+        {% translate 'Confirmation date:' %} {{ admission.soumise_le|date:'d/m/Y' }}
       </span>
       <br>
     {% endif %}
