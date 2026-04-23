@@ -335,6 +335,7 @@ class ListerDemandesService(IListerDemandesService):
             field_order = {
                 'numero_demande': ['formatted_reference'],
                 'nom_candidat': ['candidate__last_name', 'candidate__first_name'],
+                'email': ['candidate__email'],
                 'nationalite': [f'candidate__country_of_citizenship__{country_title}'],
                 'code_bourse': ['scholarship'],
                 'formation': ['training__acronym'],
@@ -515,6 +516,7 @@ class ListerDemandesService(IListerDemandesService):
             etat_demande=admission.status,
             nom_candidat=admission.candidate.last_name,
             prenom_candidat=admission.candidate.first_name,
+            email=admission.candidate.email,
             matricule_candidat=admission.candidate.global_id,
             noma_candidat=candidate_noma,
             sigle_formation=admission.training.acronym,

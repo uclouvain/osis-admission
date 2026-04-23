@@ -72,6 +72,7 @@ class DemandeRechercheDTO(interface.DTO):
 
     nom_candidat: str
     prenom_candidat: str
+    email: str
     noma_candidat: str
     matricule_candidat: str
     sigle_formation: str

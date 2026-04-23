@@ -1642,40 +1642,41 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
 
         self.assertStrEqual(row_data[0], result.numero_demande)
         self.assertStrEqual(row_data[1], f'{result.nom_candidat}, {result.prenom_candidat} ({result.noma_candidat})')
-        self.assertStrEqual(row_data[2], result.nom_pays_nationalite_candidat)
-        self.assertStrEqual(row_data[3], result.code_bourse)
-        self.assertStrEqual(row_data[4], f'{result.sigle_formation} - {result.intitule_formation}')
+        self.assertStrEqual(row_data[2], result.email)
+        self.assertStrEqual(row_data[3], result.nom_pays_nationalite_candidat)
+        self.assertStrEqual(row_data[4], result.code_bourse)
+        self.assertStrEqual(row_data[5], f'{result.sigle_formation} - {result.intitule_formation}')
         # Academic record
         self.assertStrEqual(
-            row_data[5],
+            row_data[6],
             'Computer science - Institute - 2022-06-30 - 27.5 ECTS - Grande distinction (80-89%)',
         )
         self.assertStrEqual(
-            row_data[6],
+            row_data[7],
             'Biology - UCLouvain - 2023-06-30 - 29.2 ECTS - Grande distinction',
         )
         # Supervisors
         self.assertStrEqual(
-            row_data[7],
+            row_data[8],
             f'{supervisor.last_name} {supervisor.first_name} ({supervisor.institute}, {supervisor.country.name})',
         )
         # Supervision committee members
         self.assertStrEqual(
-            row_data[8],
+            row_data[9],
             f'{ca_member.person.last_name} {ca_member.person.first_name} '
             f'(UCLouvain, {ca_member.person.country_of_citizenship.name})',
         )
-        self.assertStrEqual(row_data[9], f'{admission.thesis_institute.title} ({admission.thesis_institute.acronym})')
-        self.assertStrEqual(row_data[10], 'non')
-        self.assertStrEqual(row_data[11], '')
-        self.assertStrEqual(row_data[12], 'P3')
-        self.assertStrEqual(row_data[13], str(ChoixStatutPropositionDoctorale.CONFIRMEE.value))
-        self.assertStrEqual(row_data[14], _('Taken in charge'))
-        self.assertStrEqual(row_data[15], _('To be processed'))
-        self.assertStrEqual(row_data[16], '2023/01/01')
-        self.assertStrEqual(row_data[17], '2023/01/03')
+        self.assertStrEqual(row_data[10], f'{admission.thesis_institute.title} ({admission.thesis_institute.acronym})')
+        self.assertStrEqual(row_data[11], 'non')
+        self.assertStrEqual(row_data[12], '')
+        self.assertStrEqual(row_data[13], 'P3')
+        self.assertStrEqual(row_data[14], str(ChoixStatutPropositionDoctorale.CONFIRMEE.value))
+        self.assertStrEqual(row_data[15], _('Taken in charge'))
+        self.assertStrEqual(row_data[16], _('To be processed'))
+        self.assertStrEqual(row_data[17], '2023/01/01')
+        self.assertStrEqual(row_data[18], '2023/01/03')
         self.assertStrEqual(
-            row_data[18],
+            row_data[19],
             f'{result.nom_auteur_derniere_modification}, {result.prenom_auteur_derniere_modification[:1]}',
         )
 
@@ -1697,9 +1698,9 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
 
         self.assertEqual(len(header), len(row_data))
 
-        self.assertStrEqual(row_data[10], 'oui')
         self.assertStrEqual(row_data[11], 'oui')
-        self.assertStrEqual(row_data[16], '')
+        self.assertStrEqual(row_data[12], 'oui')
+        self.assertStrEqual(row_data[17], '')
 
         admission.cotutelle = False
         admission.save(update_fields=['cotutelle'])
@@ -1716,7 +1717,7 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
 
         self.assertEqual(len(header), len(row_data))
 
-        self.assertStrEqual(row_data[11], 'non')
+        self.assertStrEqual(row_data[12], 'non')
 
     def test_export_configuration(self):
         country = CountryFactory()
