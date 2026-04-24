@@ -23,29 +23,28 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from abc import abstractmethod
-from typing import Optional, Tuple
+from admission.ddd.admission.formation_generale.commands import CalculerConditionDAccesCommand
+from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
+    PropositionIdentityBuilder,
+)
+from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.shared_kernel.domain.service.conditions_d_acces import ConditionDAcces
+from admission.ddd.admission.shared_kernel.domain.service.i_calcul_condition_acces_translator import (
+    ICalculConditionAccesTranslator,
+)
 
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition as PropositionDoctorat
-from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition as PropositionGeneral
-from ddd.logic.condition_acces.domain.model.titre_acces import TitreAcces
-from ddd.logic.condition_acces.dtos.condition_acces import ConditionAccesDTO
-from osis_common.ddd import interface
 
+def determiner_titre_et_condition_d_acces(
+    cmd: 'CalculerConditionDAccesCommand',
+    proposition_repository: 'IPropositionRepository',
+    condition_d_acces: 'ConditionDAcces',
+    calcul_condition_acces_translator: 'ICalculConditionAccesTranslator',
+) -> PropositionIdentity:
+    proposition = proposition_repository.get(PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition))
 
-class ICalculConditionAccesTranslator(interface.DomainService):
-    @classmethod
-    @abstractmethod
-    def calculer_condition_d_acces(
-        cls,
-        proposition: PropositionDoctorat | PropositionGeneral,
-    ) -> Optional[ConditionAccesDTO]:
-        raise NotImplementedError
+    condition_d_acces.determiner_titre_et_condition_d_acces(proposition, calcul_condition_acces_translator)
 
-    @classmethod
-    @abstractmethod
-    def determiner_titre_et_condition_d_acces(
-        cls,
-        proposition: PropositionDoctorat | PropositionGeneral,
-    ) -> Tuple[TitreAcces, ConditionAccesDTO]:
-        raise NotImplementedError
+    proposition_repository.save(proposition)
+
+    return proposition.entity_id

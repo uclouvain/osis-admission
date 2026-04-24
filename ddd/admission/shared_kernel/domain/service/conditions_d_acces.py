@@ -23,10 +23,18 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from typing import Optional, Tuple
+
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition as PropositionDoctorat
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition as PropositionGeneral
 from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import ErreurConditionAcces
-from ddd.logic.condition_acces.domain.validator.exceptions import ConditionAccesIncomplet, ConditionAccesInsuffisant
+from ddd.logic.condition_acces.domain.model.titre_acces import TitreAcces
+from ddd.logic.condition_acces.domain.validator.exceptions import (
+    ConditionAccesImpossibleDeCalculer,
+    ConditionAccesIncomplet,
+    ConditionAccesInsuffisant,
+)
+from ddd.logic.condition_acces.dtos.condition_acces import ConditionAccesDTO
 from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd import interface
 
@@ -50,3 +58,17 @@ class ConditionDAcces(interface.DomainService):
             proposition.specifier_erreur_condition_acces(ErreurConditionAcces.INSUFFISANT)
         except ConditionAccesIncomplet:
             proposition.specifier_erreur_condition_acces(ErreurConditionAcces.INCOMPLET)
+
+    @classmethod
+    def determiner_titre_et_condition_d_acces(
+        cls,
+        proposition: PropositionDoctorat | PropositionGeneral,
+        calcul_condition_acces_translator: 'ICalculConditionAccesTranslator',
+    ) -> Optional[Tuple[TitreAcces, ConditionAccesDTO]]:
+        try:
+            titre_acces, condition_acces = calcul_condition_acces_translator.determiner_titre_et_condition_d_acces(
+                proposition
+            )
+            # TODO
+        except ConditionAccesImpossibleDeCalculer:
+            proposition.specifier_erreur_condition_acces(ErreurConditionAcces.IMPOSSIBLE_A_CALCULER)

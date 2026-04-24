@@ -24,13 +24,14 @@
 #
 # ##############################################################################
 from abc import abstractmethod
-from typing import Optional
+from typing import Optional, Tuple
 
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition as PropositionDoctorat
 from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition as PropositionGeneral
 from admission.ddd.admission.shared_kernel.domain.service.i_calcul_condition_acces_translator import (
     ICalculConditionAccesTranslator,
 )
+from ddd.logic.condition_acces.domain.model.titre_acces import TitreAcces
 from ddd.logic.condition_acces.dtos.condition_acces import ConditionAccesDTO
 from ddd.logic.condition_acces.queries import CalculerConditionDAccesQuery
 from infrastructure.messages_bus import message_bus_instance
@@ -49,3 +50,11 @@ class CalculConditionAccesInMemoryTranslator(ICalculConditionAccesTranslator):
                 annee=proposition.formation_id.annee,
             ),
         )
+
+    @classmethod
+    @abstractmethod
+    def determiner_titre_et_condition_d_acces(
+        cls,
+        proposition: PropositionDoctorat | PropositionGeneral,
+    ) -> Optional[Tuple[TitreAcces, ConditionAccesDTO]]:
+        return None

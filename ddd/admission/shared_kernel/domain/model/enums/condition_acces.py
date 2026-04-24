@@ -31,3 +31,4 @@ from base.models.utils.utils import ChoiceEnum
 class ErreurConditionAcces(ChoiceEnum):
     INSUFFISANT = _('INSUFFISANT')
     INCOMPLET = _('INCOMPLET')
+    IMPOSSIBLE_A_CALCULER = _('IMPOSSIBLE_A_CALCULER')
