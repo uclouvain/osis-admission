@@ -130,6 +130,7 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
     TitreAccesEtreSelectionneException,
 )
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
+from admission.ddd.admission.read_view.dto.dossier import DossierAdmissionSansInscriptionDTO
 from admission.ddd.admission.shared_kernel.commands import (
     ListerToutesDemandesQuery,
     RechercherParcoursAnterieurQuery,
@@ -230,6 +231,7 @@ from base.utils.utils import add_close_modal_into_htmx_response
 from base.utils.utils import format_academic_year
 from ddd.logic.dossier_etudiant.read_view.dto.dossier_etudiant import DossierEtudiantDTO
 from ddd.logic.dossier_etudiant.read_view.queries import SearchDossierEtudiantQuery
+from ddd.logic.dossier_etudiant.shared_kernel.dto.dossier_etudiant_lignes_annualisees import FormationEtudiantDTO
 from ddd.logic.shared_kernel.profil.commands import (
     ModifierStatutEtudesSecondairesCommand,
     ModifierStatutExperienceNonAcademiqueCommand,
@@ -384,6 +386,60 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
         ).exists()
 
     @cached_property
+    def dossiers_admission_pour_annees_anterieures_sans_inscription(self) -> list[DossierAdmissionSansInscriptionDTO]:
+        a_inscription_subquery = InscriptionProgrammeAnnuel.objects.filter(
+            admission_uuid=OuterRef('uuid')
+        )
+        qs = BaseAdmission.objects.filter(
+            candidate=self.admission.candidate,
+            determined_academic_year__lt=self.admission.determined_academic_year,
+        ).exclude(
+            uuid__in=Subquery(a_inscription_subquery.values('admission_uuid')),
+        ).exclude(
+            Q(generaleducationadmission__status__in=STATUTS_PROPOSITION_GENERALE_NON_SOUMISE)
+            | Q(continuingeducationadmission__status__in=STATUTS_PROPOSITION_CONTINUE_NON_SOUMISE)
+            | Q(doctorateadmission__status__in=STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE)
+        ).annotate(
+            status=Case(
+                When(
+                    generaleducationadmission__isnull=False,
+                    then=F('generaleducationadmission__status'),
+                ),
+                When(
+                    doctorateadmission__isnull=False,
+                    then=F('doctorateadmission__status'),
+                ),
+                When(
+                    continuingeducationadmission__isnull=False,
+                    then=F('continuingeducationadmission__status'),
+                ),
+                default=Value(''),
+                output_field=CharField(),
+            )
+        ).select_related('training')
+
+        dossiers_admission = []
+        for row in qs:
+            dossiers_admission.append(
+                DossierAdmissionSansInscriptionDTO(
+                    noma=self.proposition.noma_candidat,
+                    formation=FormationEtudiantDTO(
+                        sigle=row.training.acronym,
+                        est_cohorte_premiere_annee=bool('-1' in row.training.acronym),
+                        intitule_complet_fr=row.training.title,
+                        intitule_complet_en=row.training.title_english,
+                        lieu_d_enseignement='',
+                        type='',
+                    ),
+                    annee=row.determined_academic_year.year,
+                    etat_demande=row.status,
+                    admission_uuid=row.uuid,
+                )
+            )
+        return dossiers_admission
+
+
+    @cached_property
     def dossiers_admission_annee(self) -> defaultdict[int, list]:
         qs = (
             BaseAdmission.objects
@@ -449,6 +505,11 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
                         admission_uuid=OuterRef('uuid'),
                     ).values('etat_inscription')[:1]
                 ),
+                cessation_forcee=Subquery(
+                    InscriptionProgrammeAnnuel.objects.filter(
+                        admission_uuid=OuterRef('uuid'),
+                    ).values('cessation_forcee')[:1]
+                ),
                 epc_inscription_date=Subquery(
                     InscriptionProgrammeAnnuel.objects.filter(
                         admission_uuid=OuterRef('uuid'),
@@ -480,6 +541,7 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
             'status_date',
             'admission_type',
             'epc_inscription_status',
+            'cessation_forcee',
             'epc_inscription_date',
             'currently_viewed_admission_sort_order',
             'academic_type_order',
@@ -529,7 +591,6 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
             EtatInscriptionFormation.CESSATION.name,
             EtatInscriptionFormation.EXCLUSION.name,
             EtatInscriptionFormation.DECES.name,
-            # ajouter CESSATION FORCEE
             EtatInscriptionFormation.REFUS.name
         ]
 
@@ -585,7 +646,9 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
             ChoixStatutPropositionDoctorale.RETOUR_DE_FAC.name,
             ChoixStatutPropositionGenerale.ATTENTE_VALIDATION_DIRECTION.name,
             ChoixStatutPropositionDoctorale.ATTENTE_VALIDATION_DIRECTION.name,
-            # vérifier Mise en attente et CA à compléter
+            ChoixStatutPropositionContinue.EN_ATTENTE.name,
+            ChoixStatutPropositionDoctorale.CA_A_COMPLETER.name,
+            ChoixStatutPropositionDoctorale.CA_EN_ATTENTE_DE_SIGNATURE.name,
         ]
 
     def _get_statuts_osis_erreur(self) -> list[str]:
@@ -706,9 +769,11 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
             == ChoixStatutChecklist.GEST_REUSSITE.name
         )
         context['bg_classes'] = {}
-        context['dossiers_admission_annee'] = self.dossiers_admission_annee
         context['a_dossiers_admission_pour_annees_ulterieures'] = self.a_dossiers_admission_pour_annees_ulterieures
+
         context['annee_dossier_courant'] = self.admission.determined_academic_year.year
+        context['dossiers_admission_annee'] = self.dossiers_admission_annee
+
         context['noma'] = self.proposition.noma_candidat
         context.update(**{
             'statuts_epc_autorises': self._get_statuts_epc_autorises(),
@@ -2159,13 +2224,28 @@ class SicDecisionPdfPreviewView(LoadDossierViewMixin, RedirectView):
 
 def get_internal_experiences(
     noma_candidat: str,
+    annee: Optional[int] = None,
 ) -> List[DossierEtudiantDTO]:
     internal_experience: List[DossierEtudiantDTO] = message_bus_instance.invoke(
         SearchDossierEtudiantQuery(
             nomas=[noma_candidat],
         )
     )
+    if annee:
+        internal_experience = _filter_internal_experience_with_year(internal_experience=internal_experience, year=annee)
     return internal_experience
+
+def _filter_internal_experience_with_year(internal_experience, year):
+    result = []
+    for exp in internal_experience:
+        filtered_cycles = []
+        for cycle in exp.cycles:
+            filtered_lines = [la for la in cycle.lignes_annualisees if la.annee == year]
+            if filtered_lines:
+                filtered_cycles.append(attr.evolve(cycle, lignes_annualisees=filtered_lines))
+        if filtered_cycles:
+            result.append(attr.evolve(exp, cycles=filtered_cycles))
+    return result
 
 
 class ApplicationFeesView(
@@ -3212,6 +3292,10 @@ class ChecklistView(
         return get_internal_experiences(noma_candidat=self.proposition.noma_candidat)
 
     @cached_property
+    def internal_experiences_for_admission_year(self) -> List[DossierEtudiantDTO]:
+        return get_internal_experiences(noma_candidat=self.proposition.noma_candidat, annee=self.admission.determined_academic_year.year)
+
+    @cached_property
     def dossier_etudiant(self) -> DossierEtudiantDTO | None :
         return self.internal_experiences[0] if self.internal_experiences else None
 
@@ -3335,6 +3419,11 @@ class ChecklistView(
 
             context['last_year_internal'] = self.last_year_internal
             context['dossier_etudiant'] = self.dossier_etudiant
+
+            dossiers_admission_annee = self.dossiers_admission_annee
+
+            if self.internal_experiences_for_admission_year:
+                self._append_internal_exp_to_dossiers(dossiers_admission_annee)
 
             specific_questions = command_result.resume.questions_specifiques_dtos
 
@@ -3717,7 +3806,26 @@ class ChecklistView(
             examens=[resume.examen_formation],
             dossiers_etudiant=self.internal_experiences,
             additional_messages=self.curriculum_additional_messages(),
+            dossiers_admission_sans_inscription=self.dossiers_admission_pour_annees_anterieures_sans_inscription,
         )
+
+    def _append_internal_exp_to_dossiers(self, dossiers):
+        for internal_exp in self.internal_experiences_for_admission_year:
+            for cycle in internal_exp.cycles:
+                for ligne_annualisee in cycle.lignes_annualisees:
+                    dossiers[ligne_annualisee.annee].append({
+                        'uuid': '',
+                        'determined_academic_year__year': ligne_annualisee.annee,
+                        'training_acronym': ligne_annualisee.formation.sigle,
+                        'training_full_title': ligne_annualisee.formation.intitule_complet_fr,
+                        'epc_inscription_status': ligne_annualisee.pae.etat_inscription_formation,
+                        'epc_status_display': EtatInscriptionFormation.get_value(
+                            ligne_annualisee.pae.etat_inscription_formation
+                        ),
+                        'epc_inscription_date': '',
+                        'cessation_forcee': ligne_annualisee.pae.est_cessation_forcee,
+                    })
+
 
     def _get_financabilite(self):
         # TODO

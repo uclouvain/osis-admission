@@ -359,7 +359,6 @@ class ChecklistView(
             EtatInscriptionFormation.CESSATION.name,
             EtatInscriptionFormation.EXCLUSION.name,
             EtatInscriptionFormation.DECES.name,
-            # ajouter CESSATION FORCEE
             EtatInscriptionFormation.REFUS.name
         ]
 
