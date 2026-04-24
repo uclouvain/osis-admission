@@ -118,6 +118,7 @@ def modifier_choix_formation(
         diffusion_notes_translator=diffusion_notes_translator,
         inscriptions_evaluations_translator=inscriptions_evaluations_translator,
         nomas_translator=nomas_translator,
+        formation_translator=formation_translator,
     )
 
     # THEN

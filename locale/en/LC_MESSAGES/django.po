@@ -5452,6 +5452,10 @@ msgstr ""
 msgid "Rank in diploma"
 msgstr ""
 
+#, python-format
+msgid "Re-registration will be available from %(date)s."
+msgstr ""
+
 msgid "Reason for cancellation"
 msgstr ""
 
@@ -7423,6 +7427,10 @@ msgstr "Work contract"
 
 msgctxt "equivalence_status"
 msgid "Waiting"
+msgstr ""
+
+#, python-format
+msgid "Waiting for all your results for the %(academic_year)s academic year."
 msgstr ""
 
 msgid "Wallonie Bruxelles International (WBI)"

@@ -25,6 +25,7 @@
 # ##############################################################################
 from rest_framework import serializers
 
+from admission.ddd.admission.shared_kernel.dtos.eligibilite_reinscription import EligibiliteReinscriptionDTO
 from admission.ddd.admission.shared_kernel.dtos.inscription_ucl_candidat import (
     InscriptionUCLCandidatDTO,
     PeriodeReinscriptionDTO,
@@ -46,10 +47,11 @@ class CandidateReEnrolmentPeriodDTOSerializer(DTOSerializer):
         source = PeriodeReinscriptionDTO
 
 
-class CandidateReEnrolmentEligibilitySerializer(serializers.Serializer):
+class CandidateReEnrolmentEligibilitySerializer(DTOSerializer):
     """Data related to the candidate re-enrolment eligibility."""
 
-    est_eligible_a_la_reinscription = serializers.BooleanField()
+    class Meta:
+        source = EligibiliteReinscriptionDTO
 
 
 class CandidateEnrolmentInformationSerializer(serializers.Serializer):

@@ -34,10 +34,16 @@ class BaseFormationTranslator(IBaseFormationTranslator):
     def recuperer_informations_formations_inscrites(
         cls,
         sigles_annees: list[tuple[str, int]],
+        uclouvain_est_institution_reference: bool | None = None,
     ) -> dict[tuple[str, int], FormationInscriteDTO]:
         from infrastructure.messages_bus import message_bus_instance
 
-        trainings: list[TrainingDto] = message_bus_instance.invoke(SearchFormationsCommand(sigles_annees=sigles_annees))
+        trainings: list[TrainingDto] = message_bus_instance.invoke(
+            SearchFormationsCommand(
+                sigles_annees=sigles_annees,
+                uclouvain_est_institution_reference=uclouvain_est_institution_reference,
+            )
+        )
 
         return {
             (training.acronym, training.year): FormationInscriteDTO(

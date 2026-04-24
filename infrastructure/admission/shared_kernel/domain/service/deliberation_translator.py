@@ -32,7 +32,17 @@ from ddd.logic.deliberation.cloture.queries import (
     RechercherDeliberationCycleQuery,
     RechercherDeliberationsProgrammesAnnuelsActeesQuery,
 )
+from ddd.logic.deliberation.queries import (
+    ListerFinalisationDeliberationEtudiantQuery,
+    ListerProgressionPotentielleEtudiantDeliberationQuery,
+)
 from ddd.logic.deliberation.shared_kernel.dto.calendrier_academique import PeriodeDeliberationDTO
+from ddd.logic.deliberation.shared_kernel.dto.finalisation_deliberation_etudiant import (
+    FinalisationDeliberationEtudiantDTO,
+)
+from ddd.logic.deliberation.shared_kernel.dto.progression_potentielle_etudiant_deliberation import (
+    ProgressionPotentielleEtudiantDeliberationDTO,
+)
 from ddd.logic.deliberation.shared_kernel.queries import GetPeriodeDeliberationQuery
 
 
@@ -74,6 +84,49 @@ class DeliberationTranslator(IDeliberationTranslator):
             annual_deliberations_dict[deliberation_id][deliberation.numero_session] = deliberation
 
         return annual_deliberations_dict
+
+    @classmethod
+    def recuperer_sessions_avec_deliberations_finalisees(
+        cls,
+        noma: str,
+        annee: int,
+        sigle_formation: str,
+    ) -> set[int]:
+        from infrastructure.messages_bus import message_bus_instance
+
+        try:
+            finalisations_deliberations: list[FinalisationDeliberationEtudiantDTO] = message_bus_instance.invoke(
+                ListerFinalisationDeliberationEtudiantQuery(
+                    sigle_formation=sigle_formation,
+                    nomas=[noma],
+                    annee=annee,
+                )
+            )
+        except NotImplementedError:
+            return set()
+
+        return {finalisation.numero_session for finalisation in finalisations_deliberations}
+
+    @classmethod
+    def recuperer_progressions_potentielles_troisieme_session(
+        cls,
+        noma: str,
+        annee: int,
+        sigle_formation: str,
+    ) -> list[ProgressionPotentielleEtudiantDeliberationDTO]:
+        from infrastructure.messages_bus import message_bus_instance
+
+        try:
+            return message_bus_instance.invoke(
+                ListerProgressionPotentielleEtudiantDeliberationQuery(
+                    sigle_formation=sigle_formation,
+                    nomas=[noma],
+                    annee=annee,
+                    numero_session=3,
+                )
+            )
+        except NotImplementedError:
+            return []
 
     @classmethod
     def recuperer_date_debut_periode_deliberation_deuxieme_session(

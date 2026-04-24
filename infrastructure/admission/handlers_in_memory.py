@@ -164,6 +164,7 @@ COMMAND_HANDLERS = {
         deliberation_translator=_deliberation_translator,
         diffusion_notes_translator=_diffusion_notes_translator,
         inscriptions_evaluations_translator=_inscriptions_evaluations_translator,
+        formation_translator=_base_formation_translator,
     ),
     RecupererPeriodeReinscriptionQuery: lambda msg_bus, cmd: recuperer_periode_reinscription(
         cmd,

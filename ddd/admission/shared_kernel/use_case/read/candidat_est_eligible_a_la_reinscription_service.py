@@ -29,6 +29,7 @@ from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_fo
 )
 from admission.ddd.admission.shared_kernel.domain.service.i_deliberation_translator import IDeliberationTranslator
 from admission.ddd.admission.shared_kernel.domain.service.i_diffusion_notes_translator import IDiffusionNotesTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_formation_translator import IBaseFormationTranslator
 from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_evaluations_translator import (
     IInscriptionsEvaluationsTranslator,
 )
@@ -47,6 +48,7 @@ def candidat_est_eligible_a_la_reinscription(
     deliberation_translator: IDeliberationTranslator,
     diffusion_notes_translator: IDiffusionNotesTranslator,
     inscriptions_evaluations_translator: IInscriptionsEvaluationsTranslator,
+    formation_translator: IBaseFormationTranslator,
 ):
     return InscriptionsUCLCandidatService.est_eligible_a_la_reinscription(
         matricule_candidat=cmd.matricule_candidat,
@@ -55,4 +57,5 @@ def candidat_est_eligible_a_la_reinscription(
         deliberation_translator=deliberation_translator,
         diffusion_notes_translator=diffusion_notes_translator,
         inscriptions_evaluations_translator=inscriptions_evaluations_translator,
+        formation_translator=formation_translator,
     )

@@ -27,6 +27,9 @@ import datetime
 from abc import abstractmethod
 
 from ddd.logic.deliberation.cloture.dto.deliberation import DeliberationCycleDTO, DeliberationProgrammeAnnuelDTO
+from ddd.logic.deliberation.shared_kernel.dto.progression_potentielle_etudiant_deliberation import (
+    ProgressionPotentielleEtudiantDeliberationDTO,
+)
 from osis_common.ddd import interface
 
 
@@ -48,6 +51,26 @@ class IDeliberationTranslator(interface.DomainService):
         nomas: list[str],
         annee: int,
     ) -> dict[tuple[str, str], dict[int, DeliberationProgrammeAnnuelDTO | None]]:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def recuperer_sessions_avec_deliberations_finalisees(
+        cls,
+        noma: str,
+        annee: int,
+        sigle_formation: str,
+    ) -> set[int]:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def recuperer_progressions_potentielles_troisieme_session(
+        cls,
+        noma: str,
+        annee: int,
+        sigle_formation: str,
+    ) -> list[ProgressionPotentielleEtudiantDeliberationDTO]:
         raise NotImplementedError
 
     @classmethod

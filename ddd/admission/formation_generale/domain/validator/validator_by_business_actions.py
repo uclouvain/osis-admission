@@ -119,6 +119,7 @@ from admission.ddd.admission.shared_kernel.domain.validator._should_curriculum_e
     ShouldExperiencesNonAcademiquesAvoirUnCertificat,
 )
 from admission.ddd.admission.shared_kernel.dtos import EtudesSecondairesAdmissionDTO
+from admission.ddd.admission.shared_kernel.dtos.eligibilite_reinscription import EligibiliteReinscriptionDTO
 from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
     EmplacementDocumentDTO,
 )
@@ -835,7 +836,7 @@ class RefuserParSicAValiderValidatorList(TwoStepsMultipleBusinessExceptionListVa
 class ChoixFormationValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     formation: Formation
     proposition: 'Proposition'
-    candidat_est_eligible_a_la_reinscription: bool
+    candidat_est_eligible_a_la_reinscription: EligibiliteReinscriptionDTO
     candidat_est_diplome_formation: bool
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:

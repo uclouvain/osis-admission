@@ -95,13 +95,11 @@ class CandidateReEnrolmentEligibilityView(APIPermissionRequiredMixin, RetrieveAP
     serializer_class = CandidateReEnrolmentEligibilitySerializer
 
     def get_object(self):
-        return {
-            'est_eligible_a_la_reinscription': message_bus_instance.invoke(
-                CandidatEstEligibleALaReinscriptionQuery(
-                    matricule_candidat=self.request.user.person.global_id,
-                )
+        return message_bus_instance.invoke(
+            CandidatEstEligibleALaReinscriptionQuery(
+                matricule_candidat=self.request.user.person.global_id,
             )
-        }
+        )
 
 
 class CandidateEnrolmentInformationView(PersonRelatedMixin, APIPermissionRequiredMixin, RetrieveAPIView):

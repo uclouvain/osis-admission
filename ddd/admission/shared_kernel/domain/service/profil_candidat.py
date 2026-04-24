@@ -58,6 +58,7 @@ from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_fo
 )
 from admission.ddd.admission.shared_kernel.domain.service.i_deliberation_translator import IDeliberationTranslator
 from admission.ddd.admission.shared_kernel.domain.service.i_diffusion_notes_translator import IDiffusionNotesTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_formation_translator import IBaseFormationTranslator
 from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_evaluations_translator import (
     IInscriptionsEvaluationsTranslator,
 )
@@ -540,6 +541,7 @@ class ProfilCandidat(interface.DomainService):
         diffusion_notes_translator: IDiffusionNotesTranslator,
         inscriptions_evaluations_translator: IInscriptionsEvaluationsTranslator,
         nomas_translator: INomasTranslator,
+        formation_translator: IBaseFormationTranslator,
     ):
         candidat_est_eligible_a_la_reinscription = InscriptionsUCLCandidatService.est_eligible_a_la_reinscription(
             matricule_candidat=proposition.matricule_candidat,
@@ -548,6 +550,7 @@ class ProfilCandidat(interface.DomainService):
             deliberation_translator=deliberation_translator,
             diffusion_notes_translator=diffusion_notes_translator,
             inscriptions_evaluations_translator=inscriptions_evaluations_translator,
+            formation_translator=formation_translator,
         )
         candidat_est_diplome_formation = InscriptionsUCLCandidatService.est_diplome(
             matricule_candidat=proposition.matricule_candidat,

@@ -32,10 +32,6 @@ from admission.ddd.admission.shared_kernel.commands import *
 from admission.ddd.admission.shared_kernel.commands import RecupererInformationsDestinataireQuery
 from admission.ddd.admission.shared_kernel.use_case.read import *
 from admission.ddd.admission.shared_kernel.use_case.write import specifier_experience_en_tant_que_titre_acces
-from admission.infrastructure.admission.shared_kernel.domain.service.lister_toutes_demandes import ListerToutesDemandes
-from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidatTranslator
-from admission.infrastructure.admission.shared_kernel.repository.email_destinataire import EmailDestinataireRepository
-from admission.infrastructure.admission.shared_kernel.repository.gestionnaire import GestionnaireRepository
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
@@ -50,6 +46,10 @@ from admission.infrastructure.admission.shared_kernel.domain.service.inscription
 from admission.infrastructure.admission.shared_kernel.domain.service.inscriptions_evaluations_translator import (
     InscriptionsEvaluationsTranslator,
 )
+from admission.infrastructure.admission.shared_kernel.domain.service.lister_toutes_demandes import ListerToutesDemandes
+from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidatTranslator
+from admission.infrastructure.admission.shared_kernel.repository.email_destinataire import EmailDestinataireRepository
+from admission.infrastructure.admission.shared_kernel.repository.gestionnaire import GestionnaireRepository
 from admission.infrastructure.admission.shared_kernel.repository.titre_acces_selectionnable import (
     TitreAccesSelectionnableRepository,
 )
@@ -114,6 +114,7 @@ COMMAND_HANDLERS = {
         deliberation_translator=DeliberationTranslator(),
         diffusion_notes_translator=DiffusionNotesTranslator(),
         inscriptions_evaluations_translator=InscriptionsEvaluationsTranslator(),
+        formation_translator=BaseFormationTranslator(),
     ),
     RecupererPeriodeReinscriptionQuery: lambda msg_bus, cmd: recuperer_periode_reinscription(
         cmd,

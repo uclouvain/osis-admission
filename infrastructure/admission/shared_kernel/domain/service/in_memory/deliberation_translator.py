@@ -27,6 +27,9 @@ import datetime
 
 from admission.ddd.admission.shared_kernel.domain.service.i_deliberation_translator import IDeliberationTranslator
 from ddd.logic.deliberation.cloture.dto.deliberation import DeliberationCycleDTO, DeliberationProgrammeAnnuelDTO
+from ddd.logic.deliberation.shared_kernel.dto.progression_potentielle_etudiant_deliberation import (
+    ProgressionPotentielleEtudiantDeliberationDTO,
+)
 
 
 class DeliberationInMemoryTranslator(IDeliberationTranslator):
@@ -46,6 +49,24 @@ class DeliberationInMemoryTranslator(IDeliberationTranslator):
         annee: int,
     ) -> dict[tuple[str, str], dict[int, DeliberationProgrammeAnnuelDTO | None]]:
         return {}
+
+    @classmethod
+    def recuperer_sessions_avec_deliberations_finalisees(
+        cls,
+        noma: str,
+        annee: int,
+        sigle_formation: str,
+    ) -> set[int]:
+        return set()
+
+    @classmethod
+    def recuperer_progressions_potentielles_troisieme_session(
+        cls,
+        noma: str,
+        annee: int,
+        sigle_formation: str,
+    ) -> list[ProgressionPotentielleEtudiantDeliberationDTO]:
+        return []
 
     @classmethod
     def recuperer_date_debut_periode_deliberation_deuxieme_session(
