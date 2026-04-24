@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,19 +27,19 @@ import random
 
 from django.db.models import QuerySet
 from django.shortcuts import resolve_url
-from django.test import TestCase, Client
+from django.test import Client, TestCase
 
-from admission.models import AdmissionFormItem, AdmissionFormItemInstantiation
 from admission.ddd.admission.shared_kernel.enums import (
-    CritereItemFormulaireNationaliteCandidat,
-    CritereItemFormulaireNationaliteDiplome,
     CritereItemFormulaireLangueEtudes,
+    CritereItemFormulaireNationaliteCandidat,
+    CritereItemFormulaireNationaliteEtudes,
     CritereItemFormulaireVIP,
 )
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
 from admission.management.commands.initialize_specific_questions import SpecificQuestionToInit
+from admission.models import AdmissionFormItem, AdmissionFormItemInstantiation
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_year import AcademicYearFactory
@@ -213,9 +213,9 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             TrainingType.CERTIFICATE.name,
         ]
 
-        form_item_instantiations: QuerySet[
-            AdmissionFormItemInstantiation
-        ] = AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group_type')
+        form_item_instantiations: QuerySet[AdmissionFormItemInstantiation] = (
+            AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group_type')
+        )
 
         self.assertEqual(len(form_item_instantiations), len(education_group_types))
 
@@ -227,7 +227,7 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             self.assertEqual(instantiation.weight, 0)
             self.assertTrue(instantiation.required)
             self.assertEqual(instantiation.candidate_nationality, CritereItemFormulaireNationaliteCandidat.TOUS.name)
-            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteDiplome.TOUS.name)
+            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteEtudes.TOUS.name)
             self.assertEqual(instantiation.study_language, CritereItemFormulaireLangueEtudes.TOUS.name)
             self.assertEqual(instantiation.vip_candidate, CritereItemFormulaireVIP.TOUS.name)
 
@@ -245,9 +245,9 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             TrainingType.AGGREGATION.name,
         ]
 
-        form_item_instantiations: QuerySet[
-            AdmissionFormItemInstantiation
-        ] = AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group_type')
+        form_item_instantiations: QuerySet[AdmissionFormItemInstantiation] = (
+            AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group_type')
+        )
 
         self.assertEqual(len(form_item_instantiations), len(education_group_types))
 
@@ -259,7 +259,7 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             self.assertEqual(instantiation.weight, 0)
             self.assertFalse(instantiation.required)
             self.assertEqual(instantiation.candidate_nationality, CritereItemFormulaireNationaliteCandidat.TOUS.name)
-            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteDiplome.NON_BELGE.name)
+            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteEtudes.NON_BELGE.name)
             self.assertEqual(instantiation.study_language, CritereItemFormulaireLangueEtudes.TOUS.name)
             self.assertEqual(instantiation.vip_candidate, CritereItemFormulaireVIP.TOUS.name)
 
@@ -285,9 +285,9 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             'SBIM2MD',
         ]
 
-        form_item_instantiations: QuerySet[
-            AdmissionFormItemInstantiation
-        ] = AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group')
+        form_item_instantiations: QuerySet[AdmissionFormItemInstantiation] = (
+            AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group')
+        )
 
         self.assertEqual(len(form_item_instantiations), len(acronyms))
 
@@ -304,7 +304,7 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             self.assertEqual(instantiation.weight, 1)
             self.assertTrue(instantiation.required)
             self.assertEqual(instantiation.candidate_nationality, CritereItemFormulaireNationaliteCandidat.NON_UE.name)
-            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteDiplome.TOUS.name)
+            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteEtudes.TOUS.name)
             self.assertEqual(instantiation.study_language, CritereItemFormulaireLangueEtudes.TOUS.name)
             self.assertEqual(instantiation.vip_candidate, CritereItemFormulaireVIP.TOUS.name)
 
@@ -323,7 +323,7 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             self.assertEqual(instantiation.weight, 1)
             self.assertTrue(instantiation.required)
             self.assertEqual(instantiation.candidate_nationality, CritereItemFormulaireNationaliteCandidat.NON_UE.name)
-            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteDiplome.TOUS.name)
+            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteEtudes.TOUS.name)
             self.assertEqual(instantiation.study_language, CritereItemFormulaireLangueEtudes.AUCUNE_ETUDE_FR.name)
             self.assertEqual(instantiation.vip_candidate, CritereItemFormulaireVIP.NON_VIP.name)
 
@@ -339,7 +339,7 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             self.assertEqual(instantiation.weight, 1)
             self.assertTrue(instantiation.required)
             self.assertEqual(instantiation.candidate_nationality, CritereItemFormulaireNationaliteCandidat.TOUS.name)
-            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteDiplome.NON_BELGE.name)
+            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteEtudes.NON_BELGE.name)
             self.assertEqual(instantiation.study_language, CritereItemFormulaireLangueEtudes.AUCUNE_ETUDE_FR.name)
             self.assertEqual(instantiation.vip_candidate, CritereItemFormulaireVIP.NON_VIP.name)
 
@@ -365,9 +365,9 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             'SPHM2M1',
         ]
 
-        form_item_instantiations: QuerySet[
-            AdmissionFormItemInstantiation
-        ] = AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group')
+        form_item_instantiations: QuerySet[AdmissionFormItemInstantiation] = (
+            AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group')
+        )
 
         self.assertEqual(len(form_item_instantiations), len(acronyms))
 
@@ -380,7 +380,7 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             self.assertEqual(instantiation.weight, 1)
             self.assertTrue(instantiation.required)
             self.assertEqual(instantiation.candidate_nationality, CritereItemFormulaireNationaliteCandidat.NON_UE.name)
-            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteDiplome.TOUS.name)
+            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteEtudes.TOUS.name)
             self.assertEqual(instantiation.study_language, CritereItemFormulaireLangueEtudes.AUCUNE_ETUDE_FR.name)
             self.assertEqual(instantiation.vip_candidate, CritereItemFormulaireVIP.NON_VIP.name)
 
@@ -400,9 +400,9 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             'STIC2MD',
         ]
 
-        form_item_instantiations: QuerySet[
-            AdmissionFormItemInstantiation
-        ] = AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group')
+        form_item_instantiations: QuerySet[AdmissionFormItemInstantiation] = (
+            AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group')
+        )
 
         self.assertEqual(len(form_item_instantiations), len(acronyms))
 
@@ -415,7 +415,7 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             self.assertEqual(instantiation.weight, 1)
             self.assertTrue(instantiation.required)
             self.assertEqual(instantiation.candidate_nationality, CritereItemFormulaireNationaliteCandidat.NON_UE.name)
-            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteDiplome.TOUS.name)
+            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteEtudes.TOUS.name)
             self.assertEqual(instantiation.study_language, CritereItemFormulaireLangueEtudes.TOUS.name)
             self.assertEqual(instantiation.vip_candidate, CritereItemFormulaireVIP.NON_VIP.name)
 
@@ -438,9 +438,9 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             'EBEP2MC',
         ]
 
-        form_item_instantiations: QuerySet[
-            AdmissionFormItemInstantiation
-        ] = AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group')
+        form_item_instantiations: QuerySet[AdmissionFormItemInstantiation] = (
+            AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group')
+        )
 
         self.assertEqual(len(form_item_instantiations), len(acronyms))
 
@@ -460,7 +460,7 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             self.assertEqual(instantiation.weight, 1)
             self.assertTrue(instantiation.required)
             self.assertEqual(instantiation.candidate_nationality, CritereItemFormulaireNationaliteCandidat.TOUS.name)
-            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteDiplome.NON_BELGE.name)
+            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteEtudes.NON_BELGE.name)
             self.assertEqual(instantiation.study_language, CritereItemFormulaireLangueEtudes.TOUS.name)
             self.assertEqual(instantiation.vip_candidate, CritereItemFormulaireVIP.NON_VIP.name)
 
@@ -475,7 +475,7 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             self.assertEqual(instantiation.weight, 1)
             self.assertTrue(instantiation.required)
             self.assertEqual(instantiation.candidate_nationality, CritereItemFormulaireNationaliteCandidat.TOUS.name)
-            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteDiplome.NON_BELGE.name)
+            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteEtudes.NON_BELGE.name)
             self.assertEqual(instantiation.study_language, CritereItemFormulaireLangueEtudes.AUCUNE_ETUDE_EN.name)
             self.assertEqual(instantiation.vip_candidate, CritereItemFormulaireVIP.NON_VIP.name)
 
@@ -494,9 +494,9 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             'ETRI2MD',
         ]
 
-        form_item_instantiations: QuerySet[
-            AdmissionFormItemInstantiation
-        ] = AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group')
+        form_item_instantiations: QuerySet[AdmissionFormItemInstantiation] = (
+            AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group')
+        )
 
         self.assertEqual(len(form_item_instantiations), len(acronyms))
 
@@ -509,7 +509,7 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             self.assertEqual(instantiation.weight, 1)
             self.assertTrue(instantiation.required)
             self.assertEqual(instantiation.candidate_nationality, CritereItemFormulaireNationaliteCandidat.TOUS.name)
-            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteDiplome.NON_BELGE.name)
+            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteEtudes.NON_BELGE.name)
             self.assertEqual(instantiation.study_language, CritereItemFormulaireLangueEtudes.AUCUNE_ETUDE_EN.name)
             self.assertEqual(instantiation.vip_candidate, CritereItemFormulaireVIP.NON_VIP.name)
 
@@ -536,9 +536,9 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             'SINF2M1',
         ]
 
-        form_item_instantiations: QuerySet[
-            AdmissionFormItemInstantiation
-        ] = AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group')
+        form_item_instantiations: QuerySet[AdmissionFormItemInstantiation] = (
+            AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group')
+        )
 
         self.assertEqual(len(form_item_instantiations), len(acronyms))
 
@@ -551,7 +551,7 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             self.assertEqual(instantiation.weight, 1)
             self.assertTrue(instantiation.required)
             self.assertEqual(instantiation.candidate_nationality, CritereItemFormulaireNationaliteCandidat.TOUS.name)
-            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteDiplome.NON_BELGE.name)
+            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteEtudes.NON_BELGE.name)
             self.assertEqual(instantiation.study_language, CritereItemFormulaireLangueEtudes.TOUS.name)
             self.assertEqual(instantiation.vip_candidate, CritereItemFormulaireVIP.NON_VIP.name)
 
@@ -569,9 +569,9 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             'FARM2MD',
         ]
 
-        form_item_instantiations: QuerySet[
-            AdmissionFormItemInstantiation
-        ] = AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group')
+        form_item_instantiations: QuerySet[AdmissionFormItemInstantiation] = (
+            AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group')
+        )
 
         self.assertEqual(len(form_item_instantiations), len(acronyms))
 
@@ -584,7 +584,7 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             self.assertEqual(instantiation.weight, 2)
             self.assertTrue(instantiation.required)
             self.assertEqual(instantiation.candidate_nationality, CritereItemFormulaireNationaliteCandidat.TOUS.name)
-            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteDiplome.NON_BELGE.name)
+            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteEtudes.NON_BELGE.name)
             self.assertEqual(instantiation.study_language, CritereItemFormulaireLangueEtudes.AUCUNE_ETUDE_EN.name)
             self.assertEqual(instantiation.vip_candidate, CritereItemFormulaireVIP.NON_VIP.name)
 
@@ -601,9 +601,9 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             'OPES2MD',
         ]
 
-        form_item_instantiations: QuerySet[
-            AdmissionFormItemInstantiation
-        ] = AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group')
+        form_item_instantiations: QuerySet[AdmissionFormItemInstantiation] = (
+            AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group')
+        )
 
         self.assertEqual(len(form_item_instantiations), len(acronyms))
 
@@ -616,7 +616,7 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             self.assertEqual(instantiation.weight, 1)
             self.assertTrue(instantiation.required)
             self.assertEqual(instantiation.candidate_nationality, CritereItemFormulaireNationaliteCandidat.TOUS.name)
-            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteDiplome.TOUS.name)
+            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteEtudes.TOUS.name)
             self.assertEqual(instantiation.study_language, CritereItemFormulaireLangueEtudes.TOUS.name)
             self.assertEqual(instantiation.vip_candidate, CritereItemFormulaireVIP.TOUS.name)
 
@@ -633,9 +633,9 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             'ENVI2MC',
         ]
 
-        form_item_instantiations: QuerySet[
-            AdmissionFormItemInstantiation
-        ] = AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group')
+        form_item_instantiations: QuerySet[AdmissionFormItemInstantiation] = (
+            AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group')
+        )
 
         self.assertEqual(len(form_item_instantiations), len(acronyms))
 
@@ -648,7 +648,7 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             self.assertEqual(instantiation.weight, 1)
             self.assertTrue(instantiation.required)
             self.assertEqual(instantiation.candidate_nationality, CritereItemFormulaireNationaliteCandidat.TOUS.name)
-            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteDiplome.TOUS.name)
+            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteEtudes.TOUS.name)
             self.assertEqual(instantiation.study_language, CritereItemFormulaireLangueEtudes.TOUS.name)
             self.assertEqual(instantiation.vip_candidate, CritereItemFormulaireVIP.NON_VIP.name)
 
@@ -665,9 +665,9 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             'ENVI2MC',
         ]
 
-        form_item_instantiations: QuerySet[
-            AdmissionFormItemInstantiation
-        ] = AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group')
+        form_item_instantiations: QuerySet[AdmissionFormItemInstantiation] = (
+            AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group')
+        )
 
         self.assertEqual(len(form_item_instantiations), len(acronyms))
 
@@ -680,7 +680,7 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             self.assertEqual(instantiation.weight, 2)
             self.assertFalse(instantiation.required)
             self.assertEqual(instantiation.candidate_nationality, CritereItemFormulaireNationaliteCandidat.TOUS.name)
-            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteDiplome.TOUS.name)
+            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteEtudes.TOUS.name)
             self.assertEqual(instantiation.study_language, CritereItemFormulaireLangueEtudes.TOUS.name)
             self.assertEqual(instantiation.vip_candidate, CritereItemFormulaireVIP.NON_VIP.name)
 
@@ -699,9 +699,9 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             'ARCH2MD',
         ]
 
-        form_item_instantiations: QuerySet[
-            AdmissionFormItemInstantiation
-        ] = AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group')
+        form_item_instantiations: QuerySet[AdmissionFormItemInstantiation] = (
+            AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group')
+        )
 
         self.assertEqual(len(form_item_instantiations), len(acronyms))
 
@@ -714,7 +714,7 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             self.assertEqual(instantiation.weight, 1)
             self.assertTrue(instantiation.required)
             self.assertEqual(instantiation.candidate_nationality, CritereItemFormulaireNationaliteCandidat.TOUS.name)
-            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteDiplome.TOUS.name)
+            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteEtudes.TOUS.name)
             self.assertEqual(instantiation.study_language, CritereItemFormulaireLangueEtudes.TOUS.name)
             self.assertEqual(instantiation.vip_candidate, CritereItemFormulaireVIP.TOUS.name)
 
@@ -735,9 +735,9 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             'INGM2MD',
         ]
 
-        form_item_instantiations: QuerySet[
-            AdmissionFormItemInstantiation
-        ] = AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group')
+        form_item_instantiations: QuerySet[AdmissionFormItemInstantiation] = (
+            AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group')
+        )
 
         self.assertEqual(len(form_item_instantiations), len(acronyms))
 
@@ -750,7 +750,7 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             self.assertEqual(instantiation.weight, 2)
             self.assertTrue(instantiation.required)
             self.assertEqual(instantiation.candidate_nationality, CritereItemFormulaireNationaliteCandidat.TOUS.name)
-            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteDiplome.NON_BELGE.name)
+            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteEtudes.NON_BELGE.name)
             self.assertEqual(instantiation.study_language, CritereItemFormulaireLangueEtudes.TOUS.name)
             self.assertEqual(instantiation.vip_candidate, CritereItemFormulaireVIP.NON_VIP.name)
 
@@ -767,9 +767,9 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             'EDUC2MC',
         ]
 
-        form_item_instantiations: QuerySet[
-            AdmissionFormItemInstantiation
-        ] = AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group')
+        form_item_instantiations: QuerySet[AdmissionFormItemInstantiation] = (
+            AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group')
+        )
 
         self.assertEqual(len(form_item_instantiations), len(acronyms))
 
@@ -782,7 +782,7 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             self.assertEqual(instantiation.weight, 1)
             self.assertFalse(instantiation.required)
             self.assertEqual(instantiation.candidate_nationality, CritereItemFormulaireNationaliteCandidat.TOUS.name)
-            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteDiplome.TOUS.name)
+            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteEtudes.TOUS.name)
             self.assertEqual(instantiation.study_language, CritereItemFormulaireLangueEtudes.TOUS.name)
             self.assertEqual(instantiation.vip_candidate, CritereItemFormulaireVIP.TOUS.name)
 
@@ -799,9 +799,9 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             'GERM2MD',
         ]
 
-        form_item_instantiations: QuerySet[
-            AdmissionFormItemInstantiation
-        ] = AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group')
+        form_item_instantiations: QuerySet[AdmissionFormItemInstantiation] = (
+            AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group')
+        )
 
         self.assertEqual(len(form_item_instantiations), len(acronyms))
 
@@ -814,7 +814,7 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             self.assertEqual(instantiation.weight, 1)
             self.assertTrue(instantiation.required)
             self.assertEqual(instantiation.candidate_nationality, CritereItemFormulaireNationaliteCandidat.TOUS.name)
-            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteDiplome.TOUS.name)
+            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteEtudes.TOUS.name)
             self.assertEqual(instantiation.study_language, CritereItemFormulaireLangueEtudes.TOUS.name)
             self.assertEqual(instantiation.vip_candidate, CritereItemFormulaireVIP.TOUS.name)
 
@@ -834,9 +834,9 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             'DENT2MD',
         ]
 
-        form_item_instantiations: QuerySet[
-            AdmissionFormItemInstantiation
-        ] = AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group')
+        form_item_instantiations: QuerySet[AdmissionFormItemInstantiation] = (
+            AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group')
+        )
 
         self.assertEqual(len(form_item_instantiations), len(acronyms))
 
@@ -852,7 +852,7 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             self.assertEqual(instantiation.weight, 1)
             self.assertFalse(instantiation.required)
             self.assertEqual(instantiation.candidate_nationality, CritereItemFormulaireNationaliteCandidat.TOUS.name)
-            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteDiplome.TOUS.name)
+            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteEtudes.TOUS.name)
             self.assertEqual(instantiation.study_language, CritereItemFormulaireLangueEtudes.TOUS.name)
             self.assertEqual(instantiation.vip_candidate, CritereItemFormulaireVIP.TOUS.name)
 
@@ -868,7 +868,7 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             self.assertEqual(instantiation.weight, 1)
             self.assertFalse(instantiation.required)
             self.assertEqual(instantiation.candidate_nationality, CritereItemFormulaireNationaliteCandidat.TOUS.name)
-            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteDiplome.NON_BELGE.name)
+            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteEtudes.NON_BELGE.name)
             self.assertEqual(instantiation.study_language, CritereItemFormulaireLangueEtudes.TOUS.name)
             self.assertEqual(instantiation.vip_candidate, CritereItemFormulaireVIP.TOUS.name)
 
@@ -887,9 +887,9 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             'PARO2MC',
         ]
 
-        form_item_instantiations: QuerySet[
-            AdmissionFormItemInstantiation
-        ] = AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group')
+        form_item_instantiations: QuerySet[AdmissionFormItemInstantiation] = (
+            AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group')
+        )
 
         self.assertEqual(len(form_item_instantiations), len(acronyms))
 
@@ -902,7 +902,7 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             self.assertEqual(instantiation.weight, 1)
             self.assertTrue(instantiation.required)
             self.assertEqual(instantiation.candidate_nationality, CritereItemFormulaireNationaliteCandidat.TOUS.name)
-            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteDiplome.TOUS.name)
+            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteEtudes.TOUS.name)
             self.assertEqual(instantiation.study_language, CritereItemFormulaireLangueEtudes.TOUS.name)
             self.assertEqual(instantiation.vip_candidate, CritereItemFormulaireVIP.TOUS.name)
 
@@ -920,9 +920,9 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             'ARCH1BA',
         ]
 
-        form_item_instantiations: QuerySet[
-            AdmissionFormItemInstantiation
-        ] = AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group')
+        form_item_instantiations: QuerySet[AdmissionFormItemInstantiation] = (
+            AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group')
+        )
 
         self.assertEqual(len(form_item_instantiations), len(acronyms))
 
@@ -935,7 +935,7 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             self.assertEqual(instantiation.weight, 1)
             self.assertTrue(instantiation.required)
             self.assertEqual(instantiation.candidate_nationality, CritereItemFormulaireNationaliteCandidat.TOUS.name)
-            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteDiplome.TOUS.name)
+            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteEtudes.TOUS.name)
             self.assertEqual(instantiation.study_language, CritereItemFormulaireLangueEtudes.TOUS.name)
             self.assertEqual(instantiation.vip_candidate, CritereItemFormulaireVIP.TOUS.name)
 
@@ -954,9 +954,9 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             'VETE1BA',
         ]
 
-        form_item_instantiations: QuerySet[
-            AdmissionFormItemInstantiation
-        ] = AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group')
+        form_item_instantiations: QuerySet[AdmissionFormItemInstantiation] = (
+            AdmissionFormItemInstantiation.objects.filter(form_item=form_item).select_related('education_group')
+        )
 
         self.assertEqual(len(form_item_instantiations), len(acronyms))
 
@@ -969,6 +969,6 @@ class InitializeSpecificQuestionsFormViewTestCase(TestCase):
             self.assertEqual(instantiation.weight, 1)
             self.assertTrue(instantiation.required)
             self.assertEqual(instantiation.candidate_nationality, CritereItemFormulaireNationaliteCandidat.TOUS.name)
-            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteDiplome.TOUS.name)
+            self.assertEqual(instantiation.diploma_nationality, CritereItemFormulaireNationaliteEtudes.TOUS.name)
             self.assertEqual(instantiation.study_language, CritereItemFormulaireLangueEtudes.TOUS.name)
             self.assertEqual(instantiation.vip_candidate, CritereItemFormulaireVIP.TOUS.name)

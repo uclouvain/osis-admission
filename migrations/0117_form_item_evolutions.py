@@ -22,7 +22,6 @@ def forward(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('admission', '0116_onlinepayment'),
     ]
@@ -42,11 +41,10 @@ class Migration(migrations.Migration):
                 ],
                 default='TOUS',
                 max_length=30,
-                verbose_name='Diploma nationality',
-                help_text="Takes into account the nationality of higher education diplomas. "
-                          "'Not Belgian' means that the candidate hasn't got any Belgian diploma but has a foreign "
-                          "diploma. Similarly, 'Not UE' means that the candidate hasn't got any UE diploma but "
-                          "has a non-UE diploma.",
+                verbose_name='Study nationality',
+                help_text="Takes into account the nationality of the secondary and higher education. "
+                "'Belgian' means that the candidate attended a belgian study and 'UE' a UE study ; "
+                "otherwise, the 'Not Belgian' and 'Not UE' criteria are respectively applied.",
             ),
         ),
         migrations.AlterField(

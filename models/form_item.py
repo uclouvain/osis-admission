@@ -32,8 +32,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q, QuerySet
-from django.utils.translation import gettext_lazy as _
-from django.utils.translation import ngettext_lazy, pgettext_lazy
+from django.utils.translation import gettext_lazy as _, ngettext_lazy, pgettext_lazy
 
 from admission.ddd import EN_ISO_CODE
 from admission.ddd.admission.shared_kernel.enums.question_specifique import (
@@ -41,7 +40,7 @@ from admission.ddd.admission.shared_kernel.enums.question_specifique import (
     CritereItemFormulaireFormation,
     CritereItemFormulaireLangueEtudes,
     CritereItemFormulaireNationaliteCandidat,
-    CritereItemFormulaireNationaliteDiplome,
+    CritereItemFormulaireNationaliteEtudes,
     CritereItemFormulaireVIP,
     Onglets,
     TypeChampSelectionFormulaire,
@@ -304,24 +303,26 @@ class AdmissionFormItemInstantiationManager(models.Manager):
         return criteria
 
     @staticmethod
-    def get_diploma_nationality_criteria_by_educational_experiences(
+    def get_study_nationality_criteria_by_educational_experiences(
+        candidate: Person,
         educational_experiences: QuerySet[EducationalExperience],
     ):
-        criteria = [CritereItemFormulaireNationaliteDiplome.TOUS.name]
+        criteria = [CritereItemFormulaireNationaliteEtudes.TOUS.name]
 
-        experiences_with_diploma = [experience for experience in educational_experiences if experience.obtained_diploma]
-
-        if experiences_with_diploma:
-            criteria.append(
-                CritereItemFormulaireNationaliteDiplome.BELGE.name
-                if any(experience.country.iso_code == BE_ISO_CODE for experience in experiences_with_diploma)
-                else CritereItemFormulaireNationaliteDiplome.NON_BELGE.name
-            )
-            criteria.append(
-                CritereItemFormulaireNationaliteDiplome.UE.name
-                if any(experience.country.european_union for experience in experiences_with_diploma)
-                else CritereItemFormulaireNationaliteDiplome.NON_UE.name
-            )
+        criteria.append(
+            CritereItemFormulaireNationaliteEtudes.BELGE.name
+            if hasattr(candidate, 'belgianhighschooldiploma')
+            or any(experience.country.iso_code == BE_ISO_CODE for experience in educational_experiences)
+            else CritereItemFormulaireNationaliteEtudes.NON_BELGE.name
+        )
+        criteria.append(
+            CritereItemFormulaireNationaliteEtudes.UE.name
+            if hasattr(candidate, 'belgianhighschooldiploma')
+            or hasattr(candidate, 'foreignhighschooldiploma')
+            and candidate.foreignhighschooldiploma.country.european_union
+            or any(experience.country.european_union for experience in educational_experiences)
+            else CritereItemFormulaireNationaliteEtudes.NON_UE.name
+        )
 
         return criteria
 
@@ -427,8 +428,9 @@ class AdmissionFormItemInstantiationManager(models.Manager):
                 candidate_nationality__in=self.get_nationality_criteria_by_candidate(candidate),
                 study_language__in=self.get_study_language_criteria_by_candidate(candidate, educational_experiences),
                 vip_candidate__in=self.get_vip_criteria(admission),
-                diploma_nationality__in=self.get_diploma_nationality_criteria_by_educational_experiences(
-                    educational_experiences,
+                diploma_nationality__in=self.get_study_nationality_criteria_by_educational_experiences(
+                    candidate=candidate,
+                    educational_experiences=educational_experiences,
                 ),
             )
             .filter(
@@ -504,14 +506,14 @@ class AdmissionFormItemInstantiation(models.Model):
         verbose_name=_('Candidate nationality'),
     )
     diploma_nationality = models.CharField(
-        choices=CritereItemFormulaireNationaliteDiplome.choices(),
-        default=CritereItemFormulaireNationaliteDiplome.TOUS.name,
+        choices=CritereItemFormulaireNationaliteEtudes.choices(),
+        default=CritereItemFormulaireNationaliteEtudes.TOUS.name,
         max_length=30,
-        verbose_name=_('Diploma nationality'),
+        verbose_name=_('Study nationality'),
         help_text=_(
-            "Takes into account the nationality of higher education diplomas. 'Not Belgian' means that "
-            "the candidate hasn't got any Belgian diploma but has a foreign diploma. Similarly, 'Not UE' means that "
-            "the candidate hasn't got any UE diploma but has a non-UE diploma."
+            "Takes into account the nationality of the secondary and higher education. 'Belgian' means that the "
+            "candidate attended a belgian study and 'UE' a UE study ; otherwise, the 'Not Belgian' and 'Not UE' "
+            "criteria are respectively applied."
         ),
     )
     study_language = models.CharField(
