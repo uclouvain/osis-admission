@@ -27,6 +27,7 @@ import datetime
 import uuid
 from typing import Optional
 from unittest import mock
+from unittest.mock import MagicMock
 
 import freezegun
 from django.test import TestCase
@@ -53,6 +54,7 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
     BoursesEtudesNonRenseignees,
     CandidatDejaDiplomeFormationException,
     CandidatNonEligibleALaReinscriptionException,
+    DejaInscritFormationAnnualiseeException,
     EquivalenceNonRenseigneeException,
     EtudesSecondairesNonCompleteesException,
     EtudesSecondairesNonCompleteesPourAlternativeException,
@@ -2278,3 +2280,23 @@ class TestVerifierPropositionService(TestCase):
                 with self.assertRaises(MultipleBusinessExceptions) as context:
                     self.message_bus.invoke(self.cmd(uuid=self.master_proposition.entity_id.uuid))
                 self.assertHasInstance(context.exception.exceptions, IdentificationNonCompleteeException)
+
+    def test_should_verifier_candidat_pas_deja_inscrit_a_la_formation(self):
+        with mock.patch(
+            'admission.infrastructure.admission.shared_kernel.domain.service.in_memory.inscriptions_translator.'
+            'InscriptionsInMemoryTranslator.recuperer',
+            return_value=[MagicMock(sigle='MASTER-SCI', annee=2021)],
+        ):
+            with self.assertRaises(MultipleBusinessExceptions) as context:
+                self.message_bus.invoke(self.cmd(uuid=self.master_proposition.entity_id.uuid))
+
+                self.assertHasInstance(context.exception.exceptions, DejaInscritFormationAnnualiseeException)
+
+        with mock.patch(
+            'admission.infrastructure.admission.shared_kernel.domain.service.in_memory.inscriptions_translator.'
+            'InscriptionsInMemoryTranslator.recuperer',
+            return_value=[MagicMock(sigle='MASTER-SCI', annee=2020)],
+        ):
+            proposition_id = self.message_bus.invoke(self.cmd(uuid=self.master_proposition.entity_id.uuid))
+
+            self.assertEqual(proposition_id, self.master_proposition.entity_id)

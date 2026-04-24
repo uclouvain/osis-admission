@@ -69,6 +69,7 @@ from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import
 from admission.ddd.admission.shared_kernel.domain.service.verifier_questions_specifiques import (
     VerifierQuestionsSpecifiques,
 )
+from admission.ddd.admission.shared_kernel.dtos.inscription_ucl_candidat import InscriptionUCLCandidatDTO
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from base.ddd.utils.business_validator import execute_functions_and_aggregate_exceptions
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
@@ -102,6 +103,7 @@ class VerifierProposition(interface.DomainService):
         candidat_est_inscrit_recemment_ucl: bool,
         candidat_est_en_poursuite_directe: bool,
         assimilation_passee: Assimilation | None,
+        inscriptions_ucl_candidat: list[InscriptionUCLCandidatDTO],
         annee_soumise: int = None,
         pool_soumis: 'AcademicCalendarTypes' = None,
     ) -> None:
@@ -227,6 +229,12 @@ class VerifierProposition(interface.DomainService):
                 maximum_propositions_service.verifier_une_seule_demande_envoyee_par_formation_generale_par_annee,
                 proposition_candidat=proposition_candidat,
                 annee_soumise=annee_soumise,
+            ),
+            partial(
+                maximum_propositions_service.verifier_pas_deja_inscrit_formation,
+                sigle_formation=formation.entity_id.sigle,
+                annee_formation=annee_formation.year,
+                inscriptions_ucl_candidat=inscriptions_ucl_candidat,
             ),
         )
 
