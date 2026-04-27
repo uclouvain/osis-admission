@@ -1,4 +1,4 @@
-{% load parcours_externe i18n admission strings %}
+{% load parcours_externe i18n admission strings academic_year_display %}
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
   * designed to manage the core business of higher education institutions,
@@ -32,21 +32,6 @@
 
 <div id="{{ prefix }}-parcours" class="tab-content parcours">
 
-    <ul class="nav nav-tabs" role="tablist">
-      <li role="presentation" {% if not default_tab or default_tab == 'complete' %}class="active"{% endif %}>
-        <a href="#{{ prefix }}-parcours-complete" aria-controls="{{ prefix }}-parcours-complete" role="tab" data-toggle="tab">{% trans "Whole view" %}</a>
-      </li>
-      <li role="presentation" {% if default_tab == 'formations' %}class="active"{% endif %}>
-        <a href="#{{ prefix }}-parcours-formations" aria-controls="{{ prefix }}-parcours-formations" role="tab" data-toggle="tab">{% trans "Academics trainings view" %}</a>
-      </li>
-      <li role="presentation" {% if default_tab == 'financabilite' %}class="active"{% endif %}>
-        <a href="#{{ prefix }}-parcours-financabilite" aria-controls="{{ prefix }}-parcours-financabilite" role="tab" data-toggle="tab">{% trans "Financeability view" %}</a>
-      </li>
-      {% if proposition_fusion.status == 'IN_PROGRESS' %}
-        <span class="pull-right badge badge-warning" style="margin-top: 15px;">Modifié par fusion</span>
-      {% endif %}
-    </ul>
-
     <div id="{{ prefix }}-parcours" class="tab-content parcours">
       {# Vue complète #}
       {% concat prefix '-parcours-complete' as complete_parcours_id %}
@@ -58,27 +43,17 @@
         {% endfor %}
             <div class="panel panel-default">
                 <div class="panel-heading" style="display:flex; align-items: baseline; justify-content: space-between;">
-                    {% trans 'Previous experience' %}
+                    {% trans 'Previous experience to ' %}{{ annee_dossier_courant|display_as_academic_year }}
                     <button id="hide-rows-btn" class="btn btn-default btn-sm" onclick="toggleWhiteAndGreyRows()">
                         <span id="eye-icon" class="fa-solid fa-eye-slash"></span>
-                        <span id="hide-label">{% trans 'Hide rows' %}</span>
-                        <span id="show-label" class="hidden">{% trans 'Show rows' %}</span>
+                        <span id="hide-label">{% trans 'Hide experiences not considered in student path' %}</span>
+                        <span id="show-label" class="hidden">{% trans 'Show experiences not considered in student path' %}</span>
                     </button>
                 </div>
                 <div class="panel-body" style="overflow: auto;">
                     {% include 'osis_profile/parcours_anterieur/parcours_anterieur.html' with parcours_tab_id=complete_parcours_id %}
                 </div>
             </div>
-      </div>
-
-      {# Vue formations académiques #}
-      {% concat prefix '-parcours-formations' as formations_prefix_id %}
-      <div role="tabpanel" class="parcours table-responsive tab-pane{% if default_tab == 'formations' %} active{% endif %}" id="{{ formations_prefix_id }}">
-      </div>
-
-      {# Vue finançabilité #}
-      {% concat prefix '-parcours-financabilite' as financabilite_prefix_id %}
-      <div role="tabpanel" class="parcours table-responsive tab-pane{% if default_tab == 'financabilite' %} active{% endif %}" id="{{ financabilite_prefix_id }}">
       </div>
 
   {% if show_actions %}

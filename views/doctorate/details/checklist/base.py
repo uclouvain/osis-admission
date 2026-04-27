@@ -126,7 +126,7 @@ class ChecklistView(
 
     @cached_property
     def internal_experiences(self) -> List[ExperienceParcoursInterneDTO]:
-        return get_internal_experiences(matricule_candidat=self.proposition.matricule_candidat)
+        return get_internal_experiences(noma_candidat=self.proposition.noma_candidat)
 
     @cached_property
     def selected_access_titles(self):
@@ -434,6 +434,8 @@ class ChecklistView(
             command_result = self.proposition_resume
 
             context['resume_proposition'] = command_result.resume
+
+            context['annee_dossier_courant'] = self.admission.determined_academic_year.year
 
             experiences = self._get_experiences(command_result.resume)
             experiences_by_uuid = self._get_experiences_by_uuid(experiences)
@@ -805,7 +807,7 @@ class ChecklistView(
             experiences_academiques=resume.curriculum.experiences_academiques,
             experiences_professionnelles=resume.curriculum.experiences_non_academiques,
             etudes_secondaires=resume.etudes_secondaires,
-            experiences_parcours_interne=self.internal_experiences,
+            dossiers_etudiant=self.internal_experiences,
             additional_messages=self.curriculum_additional_messages(),
         )
 

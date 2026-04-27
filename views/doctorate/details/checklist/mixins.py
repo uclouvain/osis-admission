@@ -24,7 +24,7 @@
 #
 # ##############################################################################
 from collections import defaultdict
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from django.conf import settings
 from django.utils.functional import cached_property
@@ -57,11 +57,12 @@ from admission.utils import get_backoffice_admission_url, get_portal_admission_l
 from admission.views.common.detail_tabs.checklist import ChecklistTabIcon
 from admission.views.common.detail_tabs.comments import COMMENT_TAG_CDD_FOR_SIC
 from admission.views.common.mixins import LoadDossierViewMixin
+from admission.views.general_education.details.checklist import _filter_internal_experience_with_year
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.entity_version import EntityVersion
 from base.utils.utils import format_academic_year
-from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
-from ddd.logic.shared_kernel.profil.queries import RecupererExperiencesParcoursInterneQuery
+from ddd.logic.dossier_etudiant.read_view.dto.dossier_etudiant import DossierEtudiantDTO
+from ddd.logic.dossier_etudiant.read_view.queries import SearchDossierEtudiantQuery
 from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.templatetags.osis_role import has_perm
@@ -223,15 +224,18 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
 
 
 def get_internal_experiences(
-    matricule_candidat: str,
-    with_credits: bool = True,
-) -> List[ExperienceParcoursInterneDTO]:
-    return message_bus_instance.invoke(
-        RecupererExperiencesParcoursInterneQuery(
-            matricule=matricule_candidat,
-            avec_credits=with_credits,
+    noma_candidat: str,
+    annee: Optional[int] = None,
+) -> List[DossierEtudiantDTO]:
+    internal_experience: List[DossierEtudiantDTO] = message_bus_instance.invoke(
+        SearchDossierEtudiantQuery(
+            nomas=[noma_candidat],
         )
     )
+    if annee:
+        internal_experience = _filter_internal_experience_with_year(internal_experience=internal_experience, year=annee)
+    return internal_experience
+
 
 
 def get_email(template_identifier, language, proposition_dto: PropositionGestionnaireDTO, extra_tokens: dict = None):

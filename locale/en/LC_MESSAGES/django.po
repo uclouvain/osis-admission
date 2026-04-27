@@ -23,8 +23,8 @@ msgstr ""
 
 #, python-format
 msgid ""
-"%(current_mimetype)s is not a valid mimetype for the field \"%(field)s\" "
-"(%(field_mimetypes_as_str)s)"
+"%(current_mimetype)s is not a valid mimetype for the field "
+"\"%(field)s\" (%(field_mimetypes_as_str)s)"
 msgstr ""
 
 #, python-format
@@ -306,22 +306,13 @@ msgstr ""
 msgid "Academic year:"
 msgstr ""
 
-msgid "Academics trainings view"
-msgstr ""
-
 msgid "Acceptation condition"
-msgstr ""
-
-msgid "Access condition"
 msgstr ""
 
 msgid "Access condition:"
 msgstr ""
 
 msgid "Access experience details"
-msgstr ""
-
-msgid "Access title"
 msgstr ""
 
 #, python-format
@@ -895,13 +886,7 @@ msgstr ""
 msgid "Assessment test succeeded"
 msgstr ""
 
-msgid "Assim."
-msgstr ""
-
 msgid "Assimilated,Non-assimilated"
-msgstr ""
-
-msgid "Assimilation"
 msgstr ""
 
 msgid "Assimilation 1"
@@ -1090,9 +1075,6 @@ msgctxt "ways_hear_about_training"
 msgid "By someone who has already taken this course in a previous edition"
 msgstr ""
 
-msgid "CA"
-msgstr ""
-
 msgid "CA Member"
 msgstr "Supervision committee member"
 
@@ -1101,9 +1083,6 @@ msgstr "Supervision committee members"
 
 msgid "CANDIDAT_NOTIFIE"
 msgstr "Candidate notified"
-
-msgid "CC"
-msgstr ""
 
 msgid "CDD comment about the collaborative program"
 msgstr ""
@@ -2732,9 +2711,6 @@ msgstr ""
 msgid "Exit without saving"
 msgstr ""
 
-msgid "Experience"
-msgstr "Experience"
-
 msgid "Experience knowledge valorisation"
 msgstr ""
 
@@ -2931,9 +2907,6 @@ msgid "Financeability"
 msgstr ""
 
 msgid "Financeability dispensation needed"
-msgstr ""
-
-msgid "Financeability view"
 msgstr ""
 
 msgid "Financeabilty algorithm proposition not computed yet."
@@ -3301,6 +3274,9 @@ msgstr ""
 msgid "Help text"
 msgstr ""
 
+msgid "Hide experiences not considered in student path"
+msgstr ""
+
 msgid "Hide the checklist menu"
 msgstr ""
 
@@ -3505,9 +3481,9 @@ msgid ""
 "Agreement between UCLouvain and the Host Hospitals drawn up as part of the "
 "UCLouvain bachelor's or master's course in medicine with a view to acquiring "
 "the corresponding course units, and I undertake to comply with its terms: <a "
-"href=\"https://cdn.uclouvain.be/groups/cms-editors-mede/"
-"ConventionStageMed.pdf\" target=\"_blank\">https://cdn.uclouvain.be/groups/"
-"cms-editors-mede/ConventionStageMed.pdf</a>"
+"href=\"https://cdn.uclouvain.be/groups/cms-editors-mede/ConventionStageMed."
+"pdf\" target=\"_blank\">https://cdn.uclouvain.be/groups/cms-editors-mede/"
+"ConventionStageMed.pdf</a>"
 msgstr ""
 
 msgid "I hereby declare that"
@@ -3676,20 +3652,20 @@ msgstr ""
 
 msgid ""
 "In accordance with the information at <a target=\"_blank\" href=\"https://"
-"uclouvain.be/en/study/inscriptions/acces-aux-professions-"
-"reglementees.html\">https://uclouvain.be/en/study/inscriptions/acces-aux-"
-"professions-reglementees.html</a>, I declare that, if the courses listed "
-"therein concern me, I have received the information relating to their "
-"requirements for admission or continuation and to the specific rules or "
-"restrictions of accreditation or professional establishment to which the "
-"professional or accredited title is subject and I accept the terms thereof."
+"uclouvain.be/en/study/inscriptions/acces-aux-professions-reglementees."
+"html\">https://uclouvain.be/en/study/inscriptions/acces-aux-professions-"
+"reglementees.html</a>, I declare that, if the courses listed therein concern "
+"me, I have received the information relating to their requirements for "
+"admission or continuation and to the specific rules or restrictions of "
+"accreditation or professional establishment to which the professional or "
+"accredited title is subject and I accept the terms thereof."
 msgstr ""
 
 msgid ""
 "In accordance with the information at <a target=\"_blank\" href=\"https://"
-"uclouvain.be/en/study/inscriptions/reglementations.html\">https://"
-"uclouvain.be/en/study/inscriptions/reglementations.html</a>, I declare that "
-"I have read the university regulations and accept their terms."
+"uclouvain.be/en/study/inscriptions/reglementations.html\">https://uclouvain."
+"be/en/study/inscriptions/reglementations.html</a>, I declare that I have "
+"read the university regulations and accept their terms."
 msgstr ""
 
 msgid ""
@@ -3708,9 +3684,9 @@ msgstr ""
 #, python-format
 msgid ""
 "In accordance with the registration calendar <a href=\"https://uclouvain.be/"
-"en/study/inscriptions/calendrier-inscriptions.html\" "
-"target=\"_blank\">www.uclouvain.be/enrolment-calendar</a>, I confirm that I "
-"am applying for the academic year %(year)s."
+"en/study/inscriptions/calendrier-inscriptions.html\" target=\"_blank\">www."
+"uclouvain.be/enrolment-calendar</a>, I confirm that I am applying for the "
+"academic year %(year)s."
 msgstr ""
 
 msgid "In draft form"
@@ -3780,10 +3756,6 @@ msgid ""
 msgstr ""
 
 msgid "Injection in error"
-msgstr ""
-
-msgctxt "admission"
-msgid "Inst."
 msgstr ""
 
 msgctxt "admission"
@@ -5215,6 +5187,9 @@ msgstr ""
 msgid "Previous experience"
 msgstr ""
 
+msgid "Previous experience to "
+msgstr ""
+
 msgid "Previous experiences"
 msgstr ""
 
@@ -5506,9 +5481,6 @@ msgstr ""
 
 msgctxt "X"
 msgid "Rector"
-msgstr ""
-
-msgid "Red."
 msgstr ""
 
 msgid "Reduced rights"
@@ -5998,6 +5970,9 @@ msgid "Short label in french"
 msgstr ""
 
 msgid "Show details"
+msgstr ""
+
+msgid "Show experiences not considered in student path"
 msgstr ""
 
 msgid "Show the checklist menu"
@@ -7073,8 +7048,8 @@ msgstr ""
 msgid ""
 "This enrolment authorisation letter allows you to submit an application for "
 "accommodation to the Logistics and Student Accommodation Service (LOGE). To "
-"find out how, go to <a href=\"https://www.uclouvain.be/en/"
-"logement\">www.uclouvain.be/en/logement</a>."
+"find out how, go to <a href=\"https://www.uclouvain.be/en/logement\">www."
+"uclouvain.be/en/logement</a>."
 msgstr ""
 
 msgid "This experience cannot be updated as it has already been valuated."
@@ -7482,9 +7457,6 @@ msgstr ""
 
 msgid ""
 "When you have submitted your application, you have agreed to the following:"
-msgstr ""
-
-msgid "Whole view"
 msgstr ""
 
 msgid "With academic year"
@@ -8203,3 +8175,6 @@ msgstr ""
 #, python-brace-format
 msgid "{obj.dates_formatees} : {obj.fonction} at {obj.employeur}"
 msgstr ""
+
+#~ msgid "Experience"
+#~ msgstr "Experience"

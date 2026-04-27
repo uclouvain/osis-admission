@@ -323,9 +323,10 @@
           {% include 'admission/general_education/includes/checklist/previous_experiences.html' %}
           {% bootstrap_form comment_forms.parcours_anterieur %}
           {% include 'admission/general_education/includes/checklist/previous_experiences_admission_requirement_form.html' %}
-          {% panel _("Previous experience") %}
-            {% include "admission/general_education/includes/checklist/parcours.html" with prefix='parcours_anterieur' show_actions=can_update_curriculum %}
-          {% endpanel %}
+          <div class="page-header" style="margin: 0px;">
+          <h5><b>Parcours</b></h5>
+          </div>
+          {% include "admission/general_education/includes/checklist/parcours.html" with prefix='parcours_anterieur' show_actions=can_update_curriculum %}
           <div class="info-part">
             <strong>
               {% translate 'Financeability' %}
