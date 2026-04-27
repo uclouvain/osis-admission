@@ -52,7 +52,36 @@
       </button>
     </div>
 
-    {% include "admission/doctorate/checklist_menu.html" %}
+    <div id="checklist-menu-container">
+      {% include "admission/doctorate/checklist_menu.html" %}
+      {% if dernieres_vues_par %}
+        <div class="text-center">
+          <span
+            class="fa fa-gears"
+            data-toggle="popover"
+            data-html="true"
+            data-trigger="hover"
+            data-content="
+            <table class='table table-bordered'>
+            <caption>{% translate "Last hour views:" %}</caption>
+              <tbody>
+                {% for vue in dernieres_vues_par %}
+                  <tr>
+                    <td>
+                      {{ vue.person.first_name }} {{ vue.person.last_name }}
+                      {% blocktranslate trimmed with minutes=vue.viewed_at|timesince:now %}
+                        ({{ minutes }} ago)
+                      {% endblocktranslate %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>"
+          ></span>
+        </div>
+      {% endif %}
+    </div>
+
 
     {% url base_namespace|add:":checklist" view.kwargs.uuid as checklist_url %}
     {% concat '?next=' checklist_url '&next_hash_url=' as next_base_url %}
@@ -503,6 +532,7 @@
 
           const defaultTab = currentTab || '#donnees_personnelles';
           const checklistMenu = $('#checklist-menu');
+          const toggleChecklistMenuButton = $('#toggle-menu-button');
           const buttonClassByState = {
               INITIAL_NON_CONCERNE: 'fas fa-xmark text-muted',
               GEST_EN_COURS: 'fas fa-pencil text-warning',
@@ -513,14 +543,25 @@
           };
           const documentContent = $('#document-content');
 
-          $('#toggle-menu-button').on('click', function(){
-              checklistMenu.toggle();
+          function hideChecklistMenu() {
+              configurationCache.setItem('showChecklistMenu', false);
+              checklistMenu.hide();
+              toggleChecklistMenuButton.removeClass('active');
+              toggleChecklistMenuButton.prop('title', "{{ _('Show the checklist menu') }}");
+          }
+
+          function showChecklistMenu() {
+              configurationCache.setItem('showChecklistMenu', true);
+              checklistMenu.show();
+              toggleChecklistMenuButton.addClass('active');
+              toggleChecklistMenuButton.prop('title', "{{ _('Hide the checklist menu') }}");
+          }
+
+          toggleChecklistMenuButton.on('click', function(){
               if (checklistMenu.is(':visible')) {
-                $(this).addClass('active');
-                $(this).prop('title', "{{ _('Hide the checklist menu') }}");
+                hideChecklistMenu();
               } else {
-                $(this).removeClass('active');
-                $(this).prop('title', "{{ _('Show the checklist menu') }}");
+                showChecklistMenu();
               }
           });
 
@@ -657,12 +698,18 @@
               configurationCache = new BaseCache('admission_checklist_configuration_{{ original_admission.uuid }}');
               sidebars.css('min-width', configurationCache.getItem('split_size', '20%'));
 
-              if(configurationCache.getItem('showDocuments', null) === false) {
+              if (configurationCache.getItem('showDocuments', null) === false) {
                   hideDocuments()
+              }
+              if (configurationCache.getItem('showChecklistMenu', null) === false) {
+                  hideChecklistMenu()
               }
 
               // Activate tab from hash on first load
               $(`#checklist-menu *[data-toggle="tab"][href="${defaultTab}"]`).click();
+              $('html, body').animate({
+                scrollTop: $("#main-content").offset().top - $('header > nav').height()
+              }, 800);
 
               $('[data-toggle=popover]').popover();
           });
