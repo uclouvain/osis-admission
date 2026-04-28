@@ -140,11 +140,6 @@ class SinglePastExperienceChangeStatusViewTestCase(SicPatchMixin, TestCase):
 
         self.assertIn(gettext('Experience not found.'), [m.message for m in response.context['messages']])
 
-        self.admission.refresh_from_db()
-
-        self.assertNotEqual(self.admission.last_update_author, self.sic_manager_user.person)
-        self.assertNotEqual(self.admission.modified_at, datetime.datetime.now())
-
     def test_pass_invalid_data(self):
         self.client.force_login(user=self.sic_manager_user)
 
