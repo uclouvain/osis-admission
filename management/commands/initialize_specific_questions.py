@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ from admission.ddd.admission.shared_kernel.enums import (
     CritereItemFormulaireFormation,
     CritereItemFormulaireLangueEtudes,
     CritereItemFormulaireNationaliteCandidat,
-    CritereItemFormulaireNationaliteDiplome,
+    CritereItemFormulaireNationaliteEtudes,
     CritereItemFormulaireVIP,
     Onglets,
     TypeChampSelectionFormulaire,
@@ -302,7 +302,7 @@ class Command(BaseCommand):
                 required=False,
                 display_according_education=CritereItemFormulaireFormation.TYPE_DE_FORMATION.name,
                 education_group_type=education_group_types[education_type],
-                diploma_nationality=CritereItemFormulaireNationaliteDiplome.NON_BELGE.name,
+                diploma_nationality=CritereItemFormulaireNationaliteEtudes.NON_BELGE.name,
                 tab=Onglets.INFORMATIONS_ADDITIONNELLES.name,
             )
 
@@ -374,7 +374,7 @@ class Command(BaseCommand):
                 form_item=b2_french_level,
                 weight=1,
                 required=True,
-                diploma_nationality=CritereItemFormulaireNationaliteDiplome.NON_BELGE.name,
+                diploma_nationality=CritereItemFormulaireNationaliteEtudes.NON_BELGE.name,
                 study_language=CritereItemFormulaireLangueEtudes.AUCUNE_ETUDE_FR.name,
                 vip_candidate=CritereItemFormulaireVIP.NON_VIP.name,
             )
@@ -501,7 +501,7 @@ class Command(BaseCommand):
                 form_item=english_lsm_level,
                 weight=1,
                 required=True,
-                diploma_nationality=CritereItemFormulaireNationaliteDiplome.NON_BELGE.name,
+                diploma_nationality=CritereItemFormulaireNationaliteEtudes.NON_BELGE.name,
                 vip_candidate=CritereItemFormulaireVIP.NON_VIP.name,
             )
 
@@ -513,7 +513,7 @@ class Command(BaseCommand):
                 form_item=english_lsm_level,
                 weight=1,
                 required=True,
-                diploma_nationality=CritereItemFormulaireNationaliteDiplome.NON_BELGE.name,
+                diploma_nationality=CritereItemFormulaireNationaliteEtudes.NON_BELGE.name,
                 study_language=CritereItemFormulaireLangueEtudes.AUCUNE_ETUDE_EN.name,
                 vip_candidate=CritereItemFormulaireVIP.NON_VIP.name,
             )
@@ -558,7 +558,7 @@ class Command(BaseCommand):
                 form_item=english_econ_level,
                 weight=1,
                 required=True,
-                diploma_nationality=CritereItemFormulaireNationaliteDiplome.NON_BELGE.name,
+                diploma_nationality=CritereItemFormulaireNationaliteEtudes.NON_BELGE.name,
                 vip_candidate=CritereItemFormulaireVIP.NON_VIP.name,
                 study_language=CritereItemFormulaireLangueEtudes.AUCUNE_ETUDE_EN.name,
             )
@@ -611,7 +611,7 @@ class Command(BaseCommand):
                 form_item=english_epl_level,
                 weight=1,
                 required=True,
-                diploma_nationality=CritereItemFormulaireNationaliteDiplome.NON_BELGE.name,
+                diploma_nationality=CritereItemFormulaireNationaliteEtudes.NON_BELGE.name,
                 vip_candidate=CritereItemFormulaireVIP.NON_VIP.name,
             )
 
@@ -645,7 +645,7 @@ class Command(BaseCommand):
                 form_item=english_b2_level,
                 weight=2,
                 required=True,
-                diploma_nationality=CritereItemFormulaireNationaliteDiplome.NON_BELGE.name,
+                diploma_nationality=CritereItemFormulaireNationaliteEtudes.NON_BELGE.name,
                 study_language=CritereItemFormulaireLangueEtudes.AUCUNE_ETUDE_EN.name,
                 vip_candidate=CritereItemFormulaireVIP.NON_VIP.name,
             )
@@ -810,7 +810,7 @@ class Command(BaseCommand):
                 form_item=gmat,
                 weight=2,
                 required=True,
-                diploma_nationality=CritereItemFormulaireNationaliteDiplome.NON_BELGE.name,
+                diploma_nationality=CritereItemFormulaireNationaliteEtudes.NON_BELGE.name,
                 vip_candidate=CritereItemFormulaireVIP.NON_VIP.name,
             )
 
@@ -943,7 +943,7 @@ class Command(BaseCommand):
                 form_item=medical_entrance_proof,
                 weight=1,
                 required=False,
-                diploma_nationality=CritereItemFormulaireNationaliteDiplome.NON_BELGE.name,
+                diploma_nationality=CritereItemFormulaireNationaliteEtudes.NON_BELGE.name,
             )
 
         # Dentistry specialization exam

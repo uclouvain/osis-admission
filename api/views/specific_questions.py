@@ -63,6 +63,7 @@ class SpecificQuestionListView(APIPermissionRequiredMixin, generics.ListAPIView)
             'country_of_citizenship',
             'belgianhighschooldiploma',
             'foreignhighschooldiploma__linguistic_regime',
+            'foreignhighschooldiploma__country',
         ).get(pk=admission.candidate_id)
 
         return AdmissionFormItemInstantiation.objects.form_items_by_admission(
