@@ -229,7 +229,7 @@ from base.models.person import Person
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from base.utils.utils import add_close_modal_into_htmx_response
 from base.utils.utils import format_academic_year
-from ddd.logic.dossier_etudiant.read_view.dto.dossier_etudiant import DossierEtudiantDTO
+from ddd.logic.dossier_etudiant.read_view.dto.dossier_etudiant import DossierEtudiantDTO, DossierEtudiantCycleDTO
 from ddd.logic.dossier_etudiant.read_view.queries import SearchDossierEtudiantQuery
 from ddd.logic.dossier_etudiant.shared_kernel.dto.dossier_etudiant_lignes_annualisees import FormationEtudiantDTO
 from ddd.logic.shared_kernel.profil.commands import (
@@ -3303,6 +3303,10 @@ class ChecklistView(
     def last_year_internal(self) -> int | None:
         return self.internal_experiences[0].derniere_annee_du_dernier_cycle() if self.internal_experiences else None
 
+    @cached_property
+    def cycles(self) -> List[DossierEtudiantCycleDTO]:
+        return [cycles for dossier in self.internal_experiences for cycles in dossier.cycles]
+
     @classmethod
     def checklist_documents_by_tab(cls, specific_questions: List[QuestionSpecifiqueDTO]) -> Dict[str, Set[str]]:
         assimilation_documents = {
@@ -3419,6 +3423,7 @@ class ChecklistView(
 
             context['last_year_internal'] = self.last_year_internal
             context['dossier_etudiant'] = self.dossier_etudiant
+            context['cycles'] = self.cycles
 
             dossiers_admission_annee = self.dossiers_admission_annee
 
