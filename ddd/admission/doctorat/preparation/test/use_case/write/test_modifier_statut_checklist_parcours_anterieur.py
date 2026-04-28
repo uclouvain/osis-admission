@@ -29,23 +29,14 @@ from unittest.mock import patch
 import freezegun
 from django.test import SimpleTestCase
 
-from admission.ddd.admission.doctorat.preparation.commands import (
-    ModifierStatutChecklistParcoursAnterieurCommand,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
-    ChoixStatutChecklist,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
-    PropositionIdentity,
-)
+from admission.ddd.admission.doctorat.preparation.commands import ModifierStatutChecklistParcoursAnterieurCommand
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import ChoixStatutChecklist
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     ConditionAccesEtreSelectionneException,
     PropositionNonTrouveeException,
     StatutsChecklistExperiencesEtreValidesException,
     TitreAccesEtreSelectionneException,
-)
-from admission.ddd.admission.formation_generale.test.factory.titre_acces import (
-    TitreAccesSelectionnableFactory,
 )
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
@@ -53,15 +44,14 @@ from admission.infrastructure.admission.doctorat.preparation.repository.in_memor
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
 )
-from admission.infrastructure.admission.shared_kernel.repository.in_memory.titre_acces_selectionnable import (
-    TitreAccesSelectionnableInMemoryRepositoryFactory,
-)
-from admission.infrastructure.message_bus_in_memory import (
-    message_bus_in_memory_instance,
-)
+from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from ddd.logic.condition_acces.test.factory.titre_acces import TitreAccesSelectionnableFactory
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from epc.models.enums.condition_acces import ConditionAcces
+from infrastructure.condition_acces.repository.in_memory.titre_acces_repository import (
+    TitreAccesInMemoryRepositoryFactory,
+)
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
 
@@ -78,7 +68,7 @@ class TestModifierStatutChecklistParcoursAnterieurService(SimpleTestCase):
 
     def setUp(self) -> None:
         self.proposition_repository = PropositionInMemoryRepository()
-        self.titre_acces_repository = TitreAccesSelectionnableInMemoryRepositoryFactory()
+        self.titre_acces_repository = TitreAccesInMemoryRepositoryFactory()
         self.addCleanup(self.proposition_repository.reset)
         self.addCleanup(self.profil_candidat_translator.reset)
 

@@ -38,10 +38,7 @@ from ddd.logic.reference.dtos.bourse import BourseDTO
 from osis_common.ddd import interface
 from osis_profile import PLUS_5_ISO_CODES
 
-from ..domain.model.enums import (
-    STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE,
-    ChoixTypeAdmission,
-)
+from ..domain.model.enums import STATUTS_PROPOSITION_DOCTORALE_NON_SOUMISE, ChoixTypeAdmission
 from ..domain.model.enums.checklist import DroitsInscriptionMontant, TypeDeRefus
 from .doctorat_formation import DoctoratFormationDTO
 from .motif_refus import MotifRefusDTO
@@ -212,6 +209,7 @@ class PropositionGestionnaireDTO(PropositionDTO):
     # Titres et condition d'accès
     condition_acces: str
     millesime_condition_acces: Optional[int]
+    erreur_condition_acces: str
     type_equivalence_titre_acces: str
     statut_equivalence_titre_acces: str
     information_a_propos_de_la_restriction: str

@@ -54,7 +54,6 @@ from admission.ddd.admission.formation_generale.commands import (
     VerifierCurriculumApresSoumissionQuery as VerifierCurriculumApresSoumissionGeneraleQuery,
 )
 from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
-from admission.ddd.admission.shared_kernel.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
 )
@@ -72,6 +71,7 @@ from base.models.academic_calendar import AcademicCalendar
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
+from ddd.logic.condition_acces.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
 from ddd.logic.formation_catalogue.commands import GetSigleFormationParenteQuery
 from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO

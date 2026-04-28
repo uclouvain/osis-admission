@@ -37,23 +37,13 @@ from django.test import TestCase
 from django.utils.translation import gettext
 from rest_framework import status
 
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
-    ENTITY_CDE,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixStatutPropositionDoctorale,
-)
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     ChoixStatutChecklist,
     OngletsChecklist,
 )
-from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import (
-    TypeTitreAccesSelectionnable,
-    recuperer_conditions_acces_par_formation,
-)
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
-    OngletsDemande,
-)
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from admission.models import DoctorateAdmission
 from admission.models.valuated_epxeriences import (
     AdmissionEducationalValuatedExperiences,
@@ -67,10 +57,7 @@ from admission.tests.factories.curriculum import (
 )
 from admission.tests.factories.doctorate import DoctorateFactory
 from admission.tests.factories.person import CompletePersonFactory
-from admission.tests.factories.roles import (
-    ProgramManagerRoleFactory,
-    SicManagementRoleFactory,
-)
+from admission.tests.factories.roles import ProgramManagerRoleFactory, SicManagementRoleFactory
 from admission.tests.factories.secondary_studies import (
     ForeignHighSchoolDiplomaFactory,
     HighSchoolDiplomaAlternativeFactory,
@@ -83,19 +70,14 @@ from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.student import StudentFactory
+from ddd.logic.condition_acces.domain.model.enums.titre_acces import TypeTitreAccesSelectionnable
 from epc.models.enums.condition_acces import ConditionAcces
 from epc.models.enums.decision_resultat_cycle import DecisionResultatCycle
 from epc.models.enums.etat_inscription import EtatInscriptionFormation
-from epc.models.enums.statut_inscription_programme_annuel import (
-    StatutInscriptionProgrammAnnuel,
-)
+from epc.models.enums.statut_inscription_programme_annuel import StatutInscriptionProgrammAnnuel
 from epc.models.enums.type_duree import TypeDuree
-from epc.tests.factories.inscription_programme_annuel import (
-    InscriptionProgrammeAnnuelFactory,
-)
-from epc.tests.factories.inscription_programme_cycle import (
-    InscriptionProgrammeCycleFactory,
-)
+from epc.tests.factories.inscription_programme_annuel import InscriptionProgrammeAnnuelFactory
+from epc.tests.factories.inscription_programme_cycle import InscriptionProgrammeCycleFactory
 from osis_profile.models import Exam
 from osis_profile.models.enums.education import ForeignDiplomaTypes
 from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
@@ -454,16 +436,6 @@ class PastExperiencesAdmissionRequirementViewTestCase(SicPatchMixin, TestCase):
         self.assertEqual(form.fields['admission_requirement'].choices, BLANK_CHOICE + admission_choices)
         self.assertFalse(form.fields['admission_requirement'].disabled)
         self.assertFalse(form.fields['admission_requirement_year'].disabled)
-
-        self.assertEqual(
-            recuperer_conditions_acces_par_formation(TrainingType.PHD.name),
-            [
-                (ConditionAcces.MASTER.name, ConditionAcces.MASTER.label),
-                (ConditionAcces.UNI_SNU_AUTRE.name, ConditionAcces.UNI_SNU_AUTRE.label),
-                (ConditionAcces.VALORISATION_300_ECTS.name, ConditionAcces.VALORISATION_300_ECTS.label),
-                (ConditionAcces.PARCOURS.name, ConditionAcces.PARCOURS.label),
-            ],
-        )
 
         self.admission.checklist['current']['parcours_anterieur']['statut'] = 'GEST_REUSSITE'
         self.admission.save(update_fields=['checklist'])

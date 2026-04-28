@@ -42,9 +42,6 @@ from admission.infrastructure.admission.shared_kernel.repository.in_memory.empla
 from admission.infrastructure.admission.shared_kernel.repository.in_memory.gestionnaire import (
     GestionnaireInMemoryRepository,
 )
-from admission.infrastructure.admission.shared_kernel.repository.in_memory.titre_acces_selectionnable import (
-    TitreAccesSelectionnableInMemoryRepository,
-)
 from ddd.logic.shared_kernel.profil.queries import (
     RecupererInformationsValidationEtudesSecondairesQuery,
     RecupererInformationsValidationExamenQuery,
@@ -68,10 +65,11 @@ from .shared_kernel.domain.service.in_memory.inscriptions_translator import Insc
 from .shared_kernel.domain.service.in_memory.modifier_checklist_experience_parcours_anterieur import (
     ValidationExperienceParcoursAnterieurInMemoryService,
 )
+from .shared_kernel.domain.service.in_memory.titre_acces_translator import TitreAccesInMemoryTranslator
 
 _emplacement_document_repository = emplacement_document_in_memory_repository
 _profil_candidat_translator = ProfilCandidatInMemoryTranslator()
-_titre_acces_selectionnable_repository = TitreAccesSelectionnableInMemoryRepository()
+_titre_acces_translator = TitreAccesInMemoryTranslator()
 _experience_parcours_interne_translator = ExperienceParcoursInterneInMemoryTranslator()
 _gestionnaire_repository = GestionnaireInMemoryRepository()
 _validation_experience_parcours_anterieur = ValidationExperienceParcoursAnterieurInMemoryService()
@@ -81,6 +79,7 @@ _deliberation_translator = DeliberationInMemoryTranslator()
 _base_formation_translator = BaseFormationInMemoryTranslator()
 _diffusion_notes_translator = DiffusionNotesInMemoryTranslator()
 _inscriptions_evaluations_translator = InscriptionsEvaluationsInMemoryTranslator()
+
 
 COMMAND_HANDLERS = {
     ListerToutesDemandesQuery: lambda msg_bus, cmd: lister_demandes(
@@ -110,41 +109,18 @@ COMMAND_HANDLERS = {
     RecupererTitresAccesSelectionnablesPropositionQuery: (
         lambda msg_bus, query: recuperer_titres_acces_selectionnables_proposition(
             query,
-            titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
+            titre_acces_translator=_titre_acces_translator,
             experience_parcours_interne_translator=_experience_parcours_interne_translator,
         )
     ),
     SpecifierExperienceEnTantQueTitreAccesCommand: lambda msg_bus, cmd: specifier_experience_en_tant_que_titre_acces(
+        msg_bus,
         cmd,
-        titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
+        titre_acces_translator=_titre_acces_translator,
     ),
     RechercherFormationsGereesQuery: lambda msg_bus, cmd: rechercher_formations_gerees(
         cmd,
         repository=_gestionnaire_repository,
-    ),
-    RecupererInformationsValidationExperienceAcademiqueQuery: (
-        lambda msg_bus, cmd: recuperer_informations_validation_experience_academique(
-            cmd,
-            validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur,
-        )
-    ),
-    RecupererInformationsValidationExperienceNonAcademiqueQuery: (
-        lambda msg_bus, cmd: recuperer_informations_validation_experience_non_academique(
-            cmd,
-            validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur,
-        )
-    ),
-    RecupererInformationsValidationExamenQuery: (
-        lambda msg_bus, cmd: recuperer_informations_validation_examen(
-            cmd,
-            validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur,
-        )
-    ),
-    RecupererInformationsValidationEtudesSecondairesQuery: (
-        lambda msg_bus, cmd: recuperer_informations_validation_etudes_secondaires(
-            cmd,
-            validation_experience_parcours_anterieur_service=_validation_experience_parcours_anterieur,
-        )
     ),
     RecupererInscriptionsCandidatQuery: lambda msg_bus, cmd: recuperer_inscriptions_candidat(
         cmd,

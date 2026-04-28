@@ -65,18 +65,9 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     TitreAccesEtreSelectionneException,
     TitreAccesEtreSelectionnePourEnvoyerASICException,
 )
-from admission.ddd.admission.shared_kernel.domain.model.complement_formation import (
-    ComplementFormationIdentity,
-)
-from admission.ddd.admission.shared_kernel.domain.model.motif_refus import (
-    MotifRefusIdentity,
-)
-from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import (
-    TitreAccesSelectionnable,
-)
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
-    EmplacementDocumentDTO,
-)
+from admission.ddd.admission.shared_kernel.domain.model.complement_formation import ComplementFormationIdentity
+from admission.ddd.admission.shared_kernel.domain.model.motif_refus import MotifRefusIdentity
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
     StatutReclamationEmplacementDocument,
@@ -84,6 +75,7 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from base.ddd.utils.business_validator import BusinessValidator
 from base.models.enums.personal_data import ChoixStatutValidationDonneesPersonnelles
+from ddd.logic.condition_acces.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
 from epc.models.enums.condition_acces import ConditionAcces
 from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience

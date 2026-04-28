@@ -533,11 +533,9 @@ class ModifierStatutChecklistParcoursAnterieurCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class SpecifierConditionAccesPropositionCommand(interface.CommandRequest):
+class SpecifierAvecComplementsFormationPropositionCommand(interface.CommandRequest):
     uuid_proposition: str
     gestionnaire: str
-    condition_acces: str = ''
-    millesime_condition_acces: Optional[int] = None
     avec_complements_formation: Optional[bool] = None
 
 
@@ -778,4 +776,9 @@ class RecupererPeriodeInscriptionSpecifiqueBachelierMedecineDentisterieQuery(int
 
 @attr.dataclass(frozen=True, slots=True)
 class RecupererTypeDemandeQuery(interface.QueryRequest):
+    uuid_proposition: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class CalculerConditionDAccesCommand(interface.CommandRequest):
     uuid_proposition: str

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -49,6 +49,17 @@ def enum_with_acronym_display(value, enum_name):
             if enum.__name__ == enum_name:
                 if hasattr(enum, value):
                     return getattr(enum, value, value).label
+                break
+    return value or ''
+
+
+@register.filter
+def enum_with_acronym_display_acronym(value, enum_name):
+    if isinstance(value, str):
+        for enum in ChoiceEnumWithAcronym.__subclasses__():
+            if enum.__name__ == enum_name:
+                if hasattr(enum, value):
+                    return getattr(enum, value, value).acronym
                 break
     return value or ''
 

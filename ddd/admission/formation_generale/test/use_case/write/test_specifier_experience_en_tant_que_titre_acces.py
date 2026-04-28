@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,24 +26,21 @@
 
 from django.test import SimpleTestCase
 
-from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import TypeTitreAccesSelectionnable
-
-from admission.ddd.admission.formation_generale.commands import (
-    SpecifierExperienceEnTantQueTitreAccesCommand,
-)
+from admission.ddd.admission.formation_generale.commands import SpecifierExperienceEnTantQueTitreAccesCommand
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.infrastructure.admission.shared_kernel.repository.in_memory.titre_acces_selectionnable import (
-    TitreAccesSelectionnableInMemoryRepositoryFactory,
-)
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from ddd.logic.condition_acces.domain.model.enums.titre_acces import TypeTitreAccesSelectionnable
+from infrastructure.condition_acces.repository.in_memory.titre_acces_repository import (
+    TitreAccesInMemoryRepositoryFactory,
+)
 
 
 class TestSpecifierExperienceEnTantQueTitreAcces(SimpleTestCase):
     def setUp(self) -> None:
         self.proposition_repository = PropositionInMemoryRepository()
-        self.titre_acces_repository = TitreAccesSelectionnableInMemoryRepositoryFactory()
+        self.titre_acces_repository = TitreAccesInMemoryRepositoryFactory()
         self.addCleanup(self.proposition_repository.reset)
 
         self.message_bus = message_bus_in_memory_instance

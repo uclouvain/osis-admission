@@ -32,13 +32,12 @@ from admission.ddd.admission.formation_generale.domain.builder.proposition_ident
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.service.i_formation import IFormationGeneraleTranslator
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
-from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import \
-    IInscriptionsTranslatorService
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
-from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
-from admission.ddd.admission.shared_kernel.repository.i_titre_acces_selectionnable import (
-    ITitreAccesSelectionnableRepository,
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
 )
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_titre_acces_translator import ITitreAccesTranslator
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 from ddd.logic.shared_kernel.profil.domain.service.i_parcours_interne import IExperienceParcoursInterneTranslator
@@ -47,7 +46,7 @@ from ddd.logic.shared_kernel.profil.domain.service.i_parcours_interne import IEx
 def modifier_statut_checklist_parcours_anterieur(
     cmd: 'ModifierStatutChecklistParcoursAnterieurCommand',
     proposition_repository: 'IPropositionRepository',
-    titre_acces_selectionnable_repository: 'ITitreAccesSelectionnableRepository',
+    titre_acces_translator: 'ITitreAccesTranslator',
     experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
     profil_candidat_translator: 'IProfilCandidatTranslator',
     formation_translator: 'IFormationGeneraleTranslator',
@@ -67,7 +66,7 @@ def modifier_statut_checklist_parcours_anterieur(
     proposition = proposition_repository.get(entity_id=proposition_id)
     formation = formation_translator.get(entity_id=proposition.formation_id)
 
-    titres_acces_selectionnes = titre_acces_selectionnable_repository.search_by_proposition(
+    titres_acces_selectionnes = titre_acces_translator.search_by_proposition(
         proposition_identity=proposition_id,
         experience_parcours_interne_translator=experience_parcours_interne_translator,
         seulement_selectionnes=True,

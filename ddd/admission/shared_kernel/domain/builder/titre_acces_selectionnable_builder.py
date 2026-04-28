@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,19 +23,13 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import (
-    TypeTitreAccesSelectionnable,
-)
-from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import (
+from admission.ddd.admission.formation_generale.commands import SpecifierExperienceEnTantQueTitreAccesCommand
+from ddd.logic.condition_acces.domain.model.enums.titre_acces import TypeTitreAccesSelectionnable
+from ddd.logic.condition_acces.domain.model.titre_acces_selectionnable import (
     TitreAccesSelectionnable,
     TitreAccesSelectionnableIdentity,
 )
-from admission.ddd.admission.shared_kernel.dtos.titre_acces_selectionnable import (
-    TitreAccesSelectionnableDTO,
-)
-from admission.ddd.admission.formation_generale.commands import (
-    SpecifierExperienceEnTantQueTitreAccesCommand,
-)
+from ddd.logic.condition_acces.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
 from osis_common.ddd import interface
 
 

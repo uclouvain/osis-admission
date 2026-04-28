@@ -736,6 +736,12 @@
           $('#tabs-content').on('htmx:beforeRequest', function(event) {
               let elt = event.originalEvent.detail.elt;
 
+              const indicator = $(elt).parents('[hx-indicator]').attr('hx-indicator');
+              if (!!indicator) {
+                  $(indicator).addClass("saving");
+                  return ;
+              }
+
               if (elt.dataset.checklistButton) {
                   elt = document.querySelector(elt.dataset.checklistButton);
               }
@@ -774,6 +780,12 @@
                   return ;
               }
               let elt = event.originalEvent.detail.elt;
+
+              const indicator = $(elt).parents('[hx-indicator]').attr('hx-indicator');
+              if (!!indicator) {
+                  $(indicator).removeClass("saving");
+                  return ;
+              }
 
               if (elt.dataset.checklistButton) {
                   elt = document.querySelector(elt.dataset.checklistButton);

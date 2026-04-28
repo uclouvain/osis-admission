@@ -33,9 +33,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_NON_SOUMISE,
     DroitsInscriptionMontant,
 )
-from admission.ddd.admission.formation_generale.dtos.condition_approbation import (
-    ConditionComplementaireApprobationDTO,
-)
+from admission.ddd.admission.formation_generale.dtos.condition_approbation import ConditionComplementaireApprobationDTO
 from admission.ddd.admission.formation_generale.dtos.motif_refus import MotifRefusDTO
 from admission.ddd.admission.shared_kernel.dtos.formation import BaseFormationDTO, FormationDTO
 from admission.ddd.admission.shared_kernel.dtos.poste_diplomatique import PosteDiplomatiqueDTO
@@ -221,6 +219,7 @@ class PropositionGestionnaireDTO(PropositionDTO):
     # Titres et condition d'accès
     condition_acces: str
     millesime_condition_acces: Optional[int]
+    erreur_condition_acces: str
     type_equivalence_titre_acces: str
     statut_equivalence_titre_acces: str
     information_a_propos_de_la_restriction: str

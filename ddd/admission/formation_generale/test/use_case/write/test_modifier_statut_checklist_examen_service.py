@@ -63,6 +63,7 @@ class TestModifierStatutChecklistExamen(SimpleTestCase):
             titre='Title',
             attestation=['uuid-attestation'],
             annee=2020,
+            formations=[],
         )
         self.mock_exam_path = (
             'admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat.'
@@ -78,6 +79,7 @@ class TestModifierStatutChecklistExamen(SimpleTestCase):
                 titre='Title',
                 attestation=['uuid-attestation'],
                 annee=None,
+                formations=[],
             ),
         ):
             with self.assertRaises(MultipleBusinessExceptions) as context:
@@ -103,6 +105,7 @@ class TestModifierStatutChecklistExamen(SimpleTestCase):
                 titre='Title',
                 attestation=[],
                 annee=2025,
+                formations=[],
             ),
         ):
             with self.assertRaises(MultipleBusinessExceptions) as context:

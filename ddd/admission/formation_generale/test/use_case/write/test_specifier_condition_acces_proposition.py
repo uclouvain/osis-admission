@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,42 +25,39 @@
 # ##############################################################################
 
 import factory
-
 from django.test import SimpleTestCase
 
-from admission.ddd.admission.formation_generale.commands import SpecifierConditionAccesPropositionCommand
+from admission.ddd.admission.formation_generale.commands import SpecifierAvecComplementsFormationPropositionCommand
 from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
-from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
-    PropositionNonTrouveeException,
-)
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.formation_generale.test.factory.proposition import (
     PropositionFactory,
     _PropositionIdentityFactory,
 )
-from admission.ddd.admission.formation_generale.test.factory.titre_acces import TitreAccesSelectionnableFactory
 from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationIdentityFactory
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.infrastructure.admission.shared_kernel.repository.in_memory.titre_acces_selectionnable import (
-    TitreAccesSelectionnableInMemoryRepositoryFactory,
-)
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from ddd.logic.condition_acces.test.factory.titre_acces import TitreAccesSelectionnableFactory
 from epc.models.enums.condition_acces import ConditionAcces
+from infrastructure.condition_acces.repository.in_memory.titre_acces_repository import (
+    TitreAccesInMemoryRepositoryFactory,
+)
 
 
 class TestSpecifierConditionAccesPropositionService(SimpleTestCase):
     def setUp(self) -> None:
         self.proposition_repository = PropositionInMemoryRepository()
-        self.titre_acces_repository = TitreAccesSelectionnableInMemoryRepositoryFactory()
+        self.titre_acces_repository = TitreAccesInMemoryRepositoryFactory()
         self.addCleanup(self.proposition_repository.reset)
 
         self.message_bus = message_bus_in_memory_instance
 
     def test_should_specifier_condition_acces_millesime_et_complements_formation_proposition(self):
         proposition_id = self.message_bus.invoke(
-            SpecifierConditionAccesPropositionCommand(
+            SpecifierAvecComplementsFormationPropositionCommand(
                 uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                 condition_acces=ConditionAcces.BAC.name,
                 millesime_condition_acces=2021,
@@ -88,7 +85,7 @@ class TestSpecifierConditionAccesPropositionService(SimpleTestCase):
 
         with self.assertRaises(MultipleBusinessExceptions):
             self.message_bus.invoke(
-                SpecifierConditionAccesPropositionCommand(
+                SpecifierAvecComplementsFormationPropositionCommand(
                     uuid_proposition='uuid-MASTER-SCI-APPROVED-BY-FAC',
                     avec_complements_formation=False,
                     gestionnaire='0123456789',
@@ -104,7 +101,7 @@ class TestSpecifierConditionAccesPropositionService(SimpleTestCase):
 
         with self.assertRaises(MultipleBusinessExceptions):
             self.message_bus.invoke(
-                SpecifierConditionAccesPropositionCommand(
+                SpecifierAvecComplementsFormationPropositionCommand(
                     uuid_proposition='uuid-MASTER-SCI-APPROVED-BY-FAC',
                     avec_complements_formation=False,
                     gestionnaire='0123456789',
@@ -121,7 +118,7 @@ class TestSpecifierConditionAccesPropositionService(SimpleTestCase):
 
         with self.assertRaises(MultipleBusinessExceptions):
             self.message_bus.invoke(
-                SpecifierConditionAccesPropositionCommand(
+                SpecifierAvecComplementsFormationPropositionCommand(
                     uuid_proposition='uuid-MASTER-SCI-APPROVED-BY-FAC',
                     avec_complements_formation=False,
                     gestionnaire='0123456789',
@@ -137,7 +134,7 @@ class TestSpecifierConditionAccesPropositionService(SimpleTestCase):
         self.proposition_repository.save(proposition)
 
         proposition_id = self.message_bus.invoke(
-            SpecifierConditionAccesPropositionCommand(
+            SpecifierAvecComplementsFormationPropositionCommand(
                 uuid_proposition='uuid-MASTER-SCI-APPROVED-BY-FAC',
                 avec_complements_formation=False,
                 gestionnaire='0123456789',
@@ -160,7 +157,7 @@ class TestSpecifierConditionAccesPropositionService(SimpleTestCase):
         )
 
         proposition_id = self.message_bus.invoke(
-            SpecifierConditionAccesPropositionCommand(
+            SpecifierAvecComplementsFormationPropositionCommand(
                 uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                 condition_acces=ConditionAcces.BAC.name,
                 millesime_condition_acces=2021,
@@ -190,7 +187,7 @@ class TestSpecifierConditionAccesPropositionService(SimpleTestCase):
         )
 
         proposition_id = self.message_bus.invoke(
-            SpecifierConditionAccesPropositionCommand(
+            SpecifierAvecComplementsFormationPropositionCommand(
                 uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                 condition_acces=ConditionAcces.BAC.name,
                 millesime_condition_acces=2021,
@@ -204,7 +201,7 @@ class TestSpecifierConditionAccesPropositionService(SimpleTestCase):
 
     def test_should_remplir_automatiquement_question_complements_formation_si_snu_court_comme_condition_acces(self):
         proposition_id = self.message_bus.invoke(
-            SpecifierConditionAccesPropositionCommand(
+            SpecifierAvecComplementsFormationPropositionCommand(
                 uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                 condition_acces=ConditionAcces.BAC.name,
                 millesime_condition_acces=2021,
@@ -217,7 +214,7 @@ class TestSpecifierConditionAccesPropositionService(SimpleTestCase):
         self.assertEqual(proposition.avec_complements_formation, None)
 
         proposition_id = self.message_bus.invoke(
-            SpecifierConditionAccesPropositionCommand(
+            SpecifierAvecComplementsFormationPropositionCommand(
                 uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                 condition_acces=ConditionAcces.SNU_TYPE_COURT.name,
                 millesime_condition_acces=2021,
@@ -230,7 +227,7 @@ class TestSpecifierConditionAccesPropositionService(SimpleTestCase):
         self.assertEqual(proposition.avec_complements_formation, True)
 
         proposition_id = self.message_bus.invoke(
-            SpecifierConditionAccesPropositionCommand(
+            SpecifierAvecComplementsFormationPropositionCommand(
                 uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                 condition_acces=ConditionAcces.BAC.name,
                 millesime_condition_acces=2021,
@@ -244,7 +241,7 @@ class TestSpecifierConditionAccesPropositionService(SimpleTestCase):
         self.assertEqual(proposition.avec_complements_formation, False)
 
         proposition_id = self.message_bus.invoke(
-            SpecifierConditionAccesPropositionCommand(
+            SpecifierAvecComplementsFormationPropositionCommand(
                 uuid_proposition='uuid-MASTER-SCI-CONFIRMED',
                 condition_acces=ConditionAcces.SNU_TYPE_COURT.name,
                 millesime_condition_acces=2021,
@@ -260,7 +257,7 @@ class TestSpecifierConditionAccesPropositionService(SimpleTestCase):
     def test_should_empecher_si_proposition_non_trouvee(self):
         with self.assertRaises(PropositionNonTrouveeException):
             self.message_bus.invoke(
-                SpecifierConditionAccesPropositionCommand(
+                SpecifierAvecComplementsFormationPropositionCommand(
                     uuid_proposition='INCONNUE',
                     gestionnaire='0123456789',
                 )

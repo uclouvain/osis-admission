@@ -1,4 +1,4 @@
-{% load i18n static enums admission bootstrap3 %}
+{% load i18n static enums field_data admission bootstrap3 %}
 
 {% comment "License" %}
 * OSIS stands for Open Student Information System. It's an application
@@ -7,7 +7,7 @@
 * The core business involves the administration of students, teachers,
 * courses, programs and so on.
 *
-* Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+* Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -30,40 +30,62 @@
     hx-swap-oob="true"
     {% endif %}
 >
-  <form
-      hx-post="{% url view.base_namespace|add:':past-experiences-admission-requirement' uuid=view.kwargs.uuid %}"
-      hx-trigger="change delay:2s from:.past-experiences-admission-requirement-field"
-      hx-target="#previous-experiences-admission-requirement-container"
-      hx-swap="outerHTML"
-      action="{% url view.base_namespace|add:':past-experiences-admission-requirement' uuid=view.kwargs.uuid %}"
-      method="post"
-      autocomplete="off"
-  >
+  {% if past_experiences_admission_requirement_form %}
     {% bootstrap_form_errors past_experiences_admission_requirement_form %}
     {% csrf_token %}
-    <div class="row">
-      <div class="col-md-12">
-        {% bootstrap_field past_experiences_admission_requirement_form.admission_requirement %}
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-12">
-        {% bootstrap_field past_experiences_admission_requirement_form.admission_requirement_year %}
-      </div>
-    </div>
-    {% if past_experiences_admission_requirement_form.with_prerequisite_courses %}
-    <div class="row">
-      <div class="col-md-12">
-        {% bootstrap_field past_experiences_admission_requirement_form.with_prerequisite_courses %}
-      </div>
-    </div>
-    {% endif %}
-  </form>
-  {% if request.htmx and not with_swap_oob %}
-    {# Update the access condition in the header #}
-    <span id="header-access-condition" hx-swap-oob="innerHTML">
-      {% translate 'Not specified' context "admission-header" as not_specified %}
-      {{ admission.condition_acces|enum_with_acronym_display:'ConditionAcces'|default:not_specified }}
-    </span>
   {% endif %}
+  <div class="row">
+    {% if original_admission.admission_requirement_error == 'INSUFFISANT' %}
+      <div class="col-md-12">
+        <dl>
+          <dt>{% translate "Admission requirement" %}</dt>
+          <dd>Le titre d’accès sélectionné n’est pas suffisant pour cette formation.</dd>
+        </dl>
+      </div>
+    {% elif original_admission.admission_requirement_error == 'INCOMPLET' %}
+      <div class="col-md-12">
+        <dl>
+          <dt>{% translate "Admission requirement" %}</dt>
+          <dd>
+            Une intervention du Service des inscriptions est nécessaire : Il manque des informations sur l’expérience du
+            titre d’accès sélectionné. Il faut vérifier que l'équivalent FWB a bien été encodé ou que les tables sont
+            complètes pour cette formation.
+          </dd>
+        </dl>
+      </div>
+    {% else %}
+      <div class="col-md-4">
+        <dl>
+          <dt>{% translate "Admission requirement" %}</dt>
+          <dd>
+            {% if original_admission.admission_requirement %}
+              <abbr title="{{ original_admission.admission_requirement|enum_with_acronym_display:'ConditionAcces' }}">
+                {{ original_admission.admission_requirement|enum_with_acronym_display_acronym:'ConditionAcces' }}
+              </abbr>
+            {% else %}
+              {% translate "Not specified" %}
+            {% endif %}
+          </dd>
+        </dl>
+      </div>
+      <div class="col-md-4">
+        {% field_data _('Admission requirement year') original_admission.admission_requirement_year.year %}
+      </div>
+      {% if past_experiences_admission_requirement_form and past_experiences_admission_requirement_form.with_prerequisite_courses %}
+        <div class="col-md-4">
+          <form
+              hx-post="{% url view.base_namespace|add:':past-experiences-admission-requirement' uuid=view.kwargs.uuid %}"
+              hx-trigger="change delay:2s from:.past-experiences-admission-requirement-field"
+              hx-target="#previous-experiences-admission-requirement-container"
+              hx-swap="outerHTML"
+              action="{% url view.base_namespace|add:':past-experiences-admission-requirement' uuid=view.kwargs.uuid %}"
+              method="post"
+              autocomplete="off"
+          >
+            {% bootstrap_field past_experiences_admission_requirement_form.with_prerequisite_courses %}
+          </form>
+        </div>
+      {% endif %}
+    {% endif %}
+  </div>
 </div>

@@ -32,21 +32,9 @@ import freezegun
 from django.test import TestCase
 from django.utils.translation import gettext
 
-from admission.ddd.admission.formation_generale.commands import (
-    RecupererTitresAccesSelectionnablesPropositionQuery,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
-)
-from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import (
-    TypeTitreAccesSelectionnable,
-)
-from admission.ddd.admission.shared_kernel.dtos.titre_acces_selectionnable import (
-    TitreAccesSelectionnableDTO,
-)
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
-    OngletsDemande,
-)
+from admission.ddd.admission.formation_generale.commands import RecupererTitresAccesSelectionnablesPropositionQuery
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from admission.models import GeneralEducationAdmission
 from admission.models.exam import AdmissionExam
 from admission.models.valuated_epxeriences import (
@@ -74,18 +62,14 @@ from base.models.enums.got_diploma import GotDiploma
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.organization import OrganizationFactory
 from base.tests.factories.student import StudentFactory
+from ddd.logic.condition_acces.domain.model.enums.titre_acces import TypeTitreAccesSelectionnable
+from ddd.logic.condition_acces.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
 from epc.models.enums.decision_resultat_cycle import DecisionResultatCycle
 from epc.models.enums.etat_inscription import EtatInscriptionFormation
-from epc.models.enums.statut_inscription_programme_annuel import (
-    StatutInscriptionProgrammAnnuel,
-)
+from epc.models.enums.statut_inscription_programme_annuel import StatutInscriptionProgrammAnnuel
 from epc.models.enums.type_duree import TypeDuree
-from epc.tests.factories.inscription_programme_annuel import (
-    InscriptionProgrammeAnnuelFactory,
-)
-from epc.tests.factories.inscription_programme_cycle import (
-    InscriptionProgrammeCycleFactory,
-)
+from epc.tests.factories.inscription_programme_annuel import InscriptionProgrammeAnnuelFactory
+from epc.tests.factories.inscription_programme_cycle import InscriptionProgrammeCycleFactory
 from infrastructure.messages_bus import message_bus_instance
 from osis_profile import BE_ISO_CODE
 from osis_profile.models.enums.curriculum import Result

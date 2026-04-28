@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -30,33 +30,31 @@ import freezegun
 from django.test import TestCase
 
 from admission.ddd.admission.doctorat.preparation.test.factory.person import PersonneConnueUclDTOFactory
-from admission.ddd.admission.formation_generale.commands import (
-    ApprouverPropositionParFaculteCommand,
-)
+from admission.ddd.admission.formation_generale.commands import ApprouverPropositionParFaculteCommand
 from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
     ChoixStatutChecklist,
+    ChoixStatutPropositionGenerale,
 )
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
-    SituationPropositionNonFACException,
     InformationsAcceptationFacultaireNonSpecifieesException,
+    SituationPropositionNonFACException,
     TitreAccesEtreSelectionnePourEnvoyerASICException,
 )
 from admission.ddd.admission.formation_generale.test.factory.proposition import (
     PropositionFactory,
     _PropositionIdentityFactory,
 )
-from admission.ddd.admission.formation_generale.test.factory.titre_acces import TitreAccesSelectionnableFactory
 from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationIdentityFactory
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.infrastructure.admission.shared_kernel.repository.in_memory.titre_acces_selectionnable import (
-    TitreAccesSelectionnableInMemoryRepositoryFactory,
-)
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from ddd.logic.condition_acces.test.factory.titre_acces import TitreAccesSelectionnableFactory
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
+from infrastructure.condition_acces.repository.in_memory.titre_acces_repository import (
+    TitreAccesInMemoryRepositoryFactory,
+)
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
     PersonneConnueUclInMemoryTranslator,
@@ -100,7 +98,7 @@ class TestApprouverPropositionParFaculte(TestCase):
             'uuid_proposition': 'uuid-MASTER-SCI-APPROVED',
             'gestionnaire': '00321234',
         }
-        self.titre_acces_repository = TitreAccesSelectionnableInMemoryRepositoryFactory()
+        self.titre_acces_repository = TitreAccesInMemoryRepositoryFactory()
         self.titre_acces = TitreAccesSelectionnableFactory(
             entity_id__uuid_proposition='uuid-MASTER-SCI-APPROVED',
             selectionne=True,
