@@ -95,15 +95,15 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
 from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.shared_kernel.domain.model.complement_formation import ComplementFormationIdentity
+from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import ErreurConditionAcces
 from admission.ddd.admission.shared_kernel.domain.model.enums.type_gestionnaire import TypeGestionnaire
 from admission.ddd.admission.shared_kernel.domain.model.formation import FormationIdentity
 from admission.ddd.admission.shared_kernel.domain.model.motif_refus import MotifRefusIdentity
 from admission.ddd.admission.shared_kernel.domain.model.question_specifique import QuestionSpecifique
-from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
     IInscriptionsTranslatorService,
 )
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.domain.service.i_question_specifique import (
     ISuperQuestionSpecifiqueTranslator,
 )
@@ -121,11 +121,9 @@ from admission.ddd.admission.shared_kernel.enums import (
     TypeSituationAssimilation,
 )
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
-from admission.ddd.admission.shared_kernel.repository.i_titre_acces_selectionnable import (
-    ITitreAccesSelectionnableRepository,
-)
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from ddd.logic.condition_acces.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import (
     SITUATION_FINANCABILITE_PAR_ETAT,
@@ -236,6 +234,7 @@ class Proposition(interface.RootEntity):
 
     condition_acces: Optional[ConditionAcces] = None
     millesime_condition_acces: Optional[int] = None
+    erreur_condition_acces: Optional[ErreurConditionAcces] = None
 
     approuvee_par_cdd_le: Optional[datetime.datetime] = None
 
@@ -698,33 +697,6 @@ class Proposition(interface.RootEntity):
         self.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist[statut_checklist_cible]
         self.auteur_derniere_modification = auteur_modification
 
-    def specifier_condition_acces(
-        self,
-        auteur_modification: str,
-        condition_acces: str,
-        millesime_condition_acces: Optional[int],
-        titre_acces_selectionnable_repository: 'ITitreAccesSelectionnableRepository',
-        experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
-    ):
-        nouveau_millesime_condition_acces = millesime_condition_acces
-        nouvelle_condition_acces = getattr(ConditionAcces, condition_acces, None)
-
-        # Si la condition d'accès a changé
-        if nouvelle_condition_acces and nouvelle_condition_acces != self.condition_acces:
-            # Si un seul titre d'accès a été sélectionné,  le millésime correspond à l'année de ce titre
-            titres_selectionnes = titre_acces_selectionnable_repository.search_by_proposition(
-                proposition_identity=self.entity_id,
-                experience_parcours_interne_translator=experience_parcours_interne_translator,
-                seulement_selectionnes=True,
-            )
-
-            if len(titres_selectionnes) == 1:
-                nouveau_millesime_condition_acces = titres_selectionnes[0].annee
-
-        self.auteur_derniere_modification = auteur_modification
-        self.condition_acces = nouvelle_condition_acces
-        self.millesime_condition_acces = nouveau_millesime_condition_acces
-
     def specifier_financabilite_resultat_calcul(
         self,
         financabilite_regle_calcule: EtatFinancabilite,
@@ -1170,3 +1142,13 @@ class Proposition(interface.RootEntity):
             extra={'decision': DecisionCDDEnum.HORS_DECISION.name},
         )
         self.auteur_derniere_modification = auteur_modification
+
+    def specifier_condition_acces(self, condition_acces: Optional[ConditionAcces], millesime: Optional[int]):
+        self.condition_acces = condition_acces
+        self.millesime_condition_acces = millesime
+        self.erreur_condition_acces = None
+
+    def specifier_erreur_condition_acces(self, erreur_condition_acces):
+        self.condition_acces = None
+        self.millesime_condition_acces = None
+        self.erreur_condition_acces = erreur_condition_acces

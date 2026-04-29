@@ -41,8 +41,6 @@ from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation 
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import PdfSicInconnu
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
-from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import TypeTitreAccesSelectionnable
-from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.domain.service.i_unites_enseignement_translator import (
     IUnitesEnseignementTranslator,
@@ -58,6 +56,8 @@ from admission.utils import WeasyprintStylesheets
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
 from base.utils.utils import format_academic_year
+from ddd.logic.condition_acces.domain.model.enums.titre_acces import TypeTitreAccesSelectionnable
+from ddd.logic.condition_acces.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
 from ddd.logic.formation_catalogue.commands import GetCreditsDeLaFormationQuery
 from ddd.logic.shared_kernel.campus.domain.model.uclouvain_campus import UclouvainCampusIdentity
 from ddd.logic.shared_kernel.campus.repository.i_uclouvain_campus import IUclouvainCampusRepository

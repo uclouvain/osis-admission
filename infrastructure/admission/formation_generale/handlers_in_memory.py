@@ -40,6 +40,9 @@ from admission.ddd.admission.formation_generale.use_case.write.approuver_admissi
 from admission.ddd.admission.formation_generale.use_case.write.approuver_inscription_par_sic_service import (
     approuver_inscription_par_sic,
 )
+from admission.ddd.admission.formation_generale.use_case.write.calculer_condition_d_acces import (
+    calculer_condition_d_acces,
+)
 from admission.ddd.admission.formation_generale.use_case.write.modifier_authentification_etudes_secondaires_service import (  # noqa
     modifier_authentification_etudes_secondaires,
 )
@@ -89,6 +92,7 @@ from admission.ddd.admission.formation_generale.use_case.write.specifier_financa
 from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_resultat_calcul_service import (
     specifier_financabilite_resultat_calcul,
 )
+from admission.ddd.admission.shared_kernel.domain.service.conditions_d_acces import ConditionDAcces
 from admission.ddd.admission.shared_kernel.use_case.read import recuperer_questions_specifiques_proposition
 from admission.ddd.admission.shared_kernel.use_case.write import (
     annuler_reclamation_emplacement_document,
@@ -132,6 +136,9 @@ from admission.infrastructure.admission.formation_generale.repository.in_memory.
 )
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.annee_inscription_formation import (
     AnneeInscriptionFormationInMemoryTranslator,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.calcul_condition_acces_translator import (
+    CalculConditionAccesInMemoryTranslator,
 )
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.calendrier_inscription import (
     CalendrierInscriptionInMemory,
@@ -178,6 +185,9 @@ from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.r
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.recuperer_documents_proposition import (
     EmplacementsDocumentsPropositionInMemoryTranslator,
 )
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.titre_acces_translator import (
+    TitreAccesInMemoryTranslator,
+)
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.titres_acces import TitresAccesInMemory
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.unites_enseignement_translator import (
     UnitesEnseignementInMemoryTranslator,
@@ -188,13 +198,13 @@ from admission.infrastructure.admission.shared_kernel.repository.in_memory.email
 from admission.infrastructure.admission.shared_kernel.repository.in_memory.emplacement_document import (
     emplacement_document_in_memory_repository,
 )
-from admission.infrastructure.admission.shared_kernel.repository.in_memory.titre_acces_selectionnable import (
-    TitreAccesSelectionnableInMemoryRepositoryFactory,
-)
 from ddd.logic.shared_kernel.profil.commands import (
     ModifierAuthentificationEtudesSecondairesCommand,
     ModifierAuthentificationExamenCommand,
     ModifierStatutExamenCommand,
+)
+from infrastructure.condition_acces.repository.in_memory.titre_acces_repository import (
+    TitreAccesInMemoryRepositoryFactory,
 )
 from infrastructure.reference.domain.service.in_memory.bourse import BourseInMemoryTranslator
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
@@ -229,7 +239,7 @@ _notification = NotificationInMemory()
 _pdf_generation = PDFGenerationInMemory()
 _unites_enseignement_translator = UnitesEnseignementInMemoryTranslator()
 _poste_diplomatique_translator = PosteDiplomatiqueInMemoryFactory()
-_titre_acces_selectionnable_repository = TitreAccesSelectionnableInMemoryRepositoryFactory()
+_titre_acces_translator = TitreAccesInMemoryTranslator()
 _reference_translator = ReferenceInMemoryTranslator()
 _email_destinataire_repository = EmailDestinataireInMemoryRepository()
 _campus_repository = UclouvainCampusInMemoryRepository()
@@ -244,6 +254,9 @@ _deliberation_translator = DeliberationInMemoryTranslator()
 _diffusion_notes_translator = DiffusionNotesInMemoryTranslator()
 _inscriptions_evaluations_translator = InscriptionsEvaluationsInMemoryTranslator()
 _nomas_translator = NomasInMemoryTranslator()
+_condition_d_acces = ConditionDAcces()
+_condition_acces_translator = CalculConditionAccesInMemoryTranslator()
+
 
 COMMAND_HANDLERS = {
     RechercherFormationGeneraleQuery: lambda msg_bus, cmd: rechercher_formations(
@@ -608,7 +621,7 @@ COMMAND_HANDLERS = {
         pdf_generation=_pdf_generation,
         personne_connue_ucl_translator=_personne_connue_ucl_translator,
         unites_enseignement_translator=_unites_enseignement_translator,
-        titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
+        titre_acces_translator=_titre_acces_translator,
         profil_candidat_translator=_profil_candidat_translator,
         experience_parcours_interne_translator=_experience_parcours_interne_translator,
     ),
@@ -617,7 +630,7 @@ COMMAND_HANDLERS = {
         proposition_repository=_proposition_repository,
         historique=_historique_formation_generale,
         personne_connue_ucl_translator=_personne_connue_ucl_translator,
-        titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
+        titre_acces_translator=_titre_acces_translator,
         experience_parcours_interne_translator=_experience_parcours_interne_translator,
     ),
     ApprouverReorientationExterneParFaculteCommand: lambda msg_bus, cmd: approuver_reorientation_externe_par_faculte(
@@ -625,7 +638,7 @@ COMMAND_HANDLERS = {
         proposition_repository=_proposition_repository,
         historique=_historique_formation_generale,
         personne_connue_ucl_translator=_personne_connue_ucl_translator,
-        titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
+        titre_acces_translator=_titre_acces_translator,
         experience_parcours_interne_translator=_experience_parcours_interne_translator,
     ),
     CompleterQuestionsSpecifiquesCommand: lambda msg_bus, cmd: completer_questions_specifiques(
@@ -668,18 +681,16 @@ COMMAND_HANDLERS = {
     ModifierStatutChecklistParcoursAnterieurCommand: lambda msg_bus, cmd: modifier_statut_checklist_parcours_anterieur(
         cmd,
         proposition_repository=_proposition_repository,
-        titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
+        titre_acces_translator=_titre_acces_translator,
         experience_parcours_interne_translator=_experience_parcours_interne_translator,
         profil_candidat_translator=_profil_candidat_translator,
         formation_translator=_formation_generale_translator,
         academic_year_repository=_academic_year_repository,
         inscriptions_translator=_inscriptions_translator,
     ),
-    SpecifierConditionAccesPropositionCommand: lambda msg_bus, cmd: specifier_condition_acces_proposition(
+    SpecifierAvecComplementsFormationPropositionCommand: lambda msg_bus, cmd: specifier_avec_complements_formation_proposition(
         cmd,
         proposition_repository=_proposition_repository,
-        titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
-        experience_parcours_interne_translator=_experience_parcours_interne_translator,
     ),
     SpecifierEquivalenceTitreAccesEtrangerPropositionCommand: (
         lambda msg_bus, cmd: specifier_equivalence_titre_acces_etranger_proposition(
@@ -701,13 +712,14 @@ COMMAND_HANDLERS = {
         )
     ),
     SpecifierExperienceEnTantQueTitreAccesCommand: lambda msg_bus, cmd: specifier_experience_en_tant_que_titre_acces(
+        msg_bus,
         cmd,
-        titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
+        titre_acces_translator=_titre_acces_translator,
     ),
     RecupererTitresAccesSelectionnablesPropositionQuery: (
         lambda msg_bus, cmd: recuperer_titres_acces_selectionnables_proposition(
             cmd,
-            titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
+            titre_acces_translator=_titre_acces_translator,
             experience_parcours_interne_translator=_experience_parcours_interne_translator,
         )
     ),
@@ -965,6 +977,14 @@ COMMAND_HANDLERS = {
         lambda msg_bus, cmd: specifier_raison_plusieurs_demandes_meme_cycle_meme_annee(
             cmd=cmd,
             proposition_repository=_proposition_repository,
+        )
+    ),
+    CalculerConditionDAccesCommand: (
+        lambda msg_bus, cmd: calculer_condition_d_acces(
+            cmd,
+            proposition_repository=_proposition_repository,
+            condition_d_acces=_condition_d_acces,
+            calcul_condition_acces_translator=_condition_acces_translator,
         )
     ),
 }

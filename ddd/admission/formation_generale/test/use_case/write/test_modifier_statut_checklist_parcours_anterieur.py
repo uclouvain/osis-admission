@@ -28,15 +28,9 @@ import datetime
 import freezegun
 from django.test import SimpleTestCase
 
-from admission.ddd.admission.formation_generale.commands import (
-    ModifierStatutChecklistParcoursAnterieurCommand,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutChecklist,
-)
-from admission.ddd.admission.formation_generale.domain.model.proposition import (
-    PropositionIdentity,
-)
+from admission.ddd.admission.formation_generale.commands import ModifierStatutChecklistParcoursAnterieurCommand
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutChecklist
+from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     ConditionAccesEtreSelectionneException,
     InformationsEquivalenceNonSpecifieesChecklistException,
@@ -45,9 +39,6 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
     TitreAccesEtreSelectionneException,
 )
 from admission.ddd.admission.formation_generale.test.factory.proposition import PropositionFactory
-from admission.ddd.admission.formation_generale.test.factory.titre_acces import (
-    TitreAccesSelectionnableFactory,
-)
 from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import TypeEquivalenceTitreAcces
 from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationIdentityFactory
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
@@ -56,16 +47,15 @@ from admission.infrastructure.admission.formation_generale.repository.in_memory.
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
 )
-from admission.infrastructure.admission.shared_kernel.repository.in_memory.titre_acces_selectionnable import (
-    TitreAccesSelectionnableInMemoryRepositoryFactory,
-)
-from admission.infrastructure.message_bus_in_memory import (
-    message_bus_in_memory_instance,
-)
+from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
+from ddd.logic.condition_acces.test.factory.titre_acces import TitreAccesSelectionnableFactory
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import DiplomeEtrangerEtudesSecondairesDTO
 from epc.models.enums.condition_acces import ConditionAcces
+from infrastructure.condition_acces.repository.in_memory.titre_acces_repository import (
+    TitreAccesInMemoryRepositoryFactory,
+)
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 from osis_profile.models.enums.education import ForeignDiplomaTypes
 from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
@@ -87,7 +77,7 @@ class TestModifierStatutChecklistParcoursAnterieurService(SimpleTestCase):
 
     def setUp(self) -> None:
         self.proposition_repository = PropositionInMemoryRepository()
-        self.titre_acces_repository = TitreAccesSelectionnableInMemoryRepositoryFactory()
+        self.titre_acces_repository = TitreAccesInMemoryRepositoryFactory()
         self.addCleanup(self.proposition_repository.reset)
         self.addCleanup(self.profil_candidat_translator.reset)
 
@@ -168,9 +158,9 @@ class TestModifierStatutChecklistParcoursAnterieurService(SimpleTestCase):
                 selectionne=True,
             )
         )
-        self.profil_candidat_translator.etudes_secondaires[
-            proposition.matricule_candidat
-        ].statut_validation = ChoixStatutValidationExperience.VALIDEE.name
+        self.profil_candidat_translator.etudes_secondaires[proposition.matricule_candidat].statut_validation = (
+            ChoixStatutValidationExperience.VALIDEE.name
+        )
 
         proposition_id = self.message_bus.invoke(
             ModifierStatutChecklistParcoursAnterieurCommand(
@@ -247,10 +237,8 @@ class TestModifierStatutChecklistParcoursAnterieurService(SimpleTestCase):
         )
         self.proposition_repository.save(proposition)
         self.profil_candidat_translator.etudes_secondaires["0123456789"].diplome_belge = None
-        self.profil_candidat_translator.etudes_secondaires[
-            "0123456789"
-        ].diplome_etranger = DiplomeEtrangerEtudesSecondairesDTO(
-            type_diplome=ForeignDiplomaTypes.NATIONAL_BACHELOR.name
+        self.profil_candidat_translator.etudes_secondaires["0123456789"].diplome_etranger = (
+            DiplomeEtrangerEtudesSecondairesDTO(type_diplome=ForeignDiplomaTypes.NATIONAL_BACHELOR.name)
         )
         with self.assertRaises(MultipleBusinessExceptions) as context:
             self.message_bus.invoke(
@@ -310,10 +298,8 @@ class TestModifierStatutChecklistParcoursAnterieurService(SimpleTestCase):
             )
 
         proposition.type_equivalence_titre_acces = None
-        self.profil_candidat_translator.etudes_secondaires[
-            "0123456789"
-        ].diplome_etranger = DiplomeEtrangerEtudesSecondairesDTO(
-            type_diplome=ForeignDiplomaTypes.INTERNATIONAL_BACCALAUREATE.name
+        self.profil_candidat_translator.etudes_secondaires["0123456789"].diplome_etranger = (
+            DiplomeEtrangerEtudesSecondairesDTO(type_diplome=ForeignDiplomaTypes.INTERNATIONAL_BACCALAUREATE.name)
         )
 
         with self.assertRaises(MultipleBusinessExceptions) as context:

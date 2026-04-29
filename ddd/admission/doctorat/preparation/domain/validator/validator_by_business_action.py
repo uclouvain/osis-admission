@@ -29,36 +29,18 @@ from typing import Dict, List, Optional, Union
 import attr
 
 from admission.ddd.admission.doctorat.preparation.business_types import *
-from admission.ddd.admission.doctorat.preparation.domain.model._comptabilite import (
-    Comptabilite,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model._cotutelle import (
-    Cotutelle,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import (
-    DetailProjet,
-)
+from admission.ddd.admission.doctorat.preparation.domain.model._comptabilite import Comptabilite
+from admission.ddd.admission.doctorat.preparation.domain.model._cotutelle import Cotutelle
+from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import DetailProjet
 from admission.ddd.admission.doctorat.preparation.domain.model._experience_precedente_recherche import (
     ExperiencePrecedenteRecherche,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model._financement import (
-    Financement,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model._institut import (
-    InstitutIdentity,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model._membre_CA import (
-    MembreCAIdentity,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import (
-    PromoteurIdentity,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model._signature_promoteur import (
-    SignaturePromoteur,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
-    DoctoratFormation,
-)
+from admission.ddd.admission.doctorat.preparation.domain.model._financement import Financement
+from admission.ddd.admission.doctorat.preparation.domain.model._institut import InstitutIdentity
+from admission.ddd.admission.doctorat.preparation.domain.model._membre_CA import MembreCAIdentity
+from admission.ddd.admission.doctorat.preparation.domain.model._promoteur import PromoteurIdentity
+from admission.ddd.admission.doctorat.preparation.domain.model._signature_promoteur import SignaturePromoteur
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import DoctoratFormation
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixDoctoratDejaRealise,
     ChoixStatutPropositionDoctorale,
@@ -76,15 +58,8 @@ from admission.ddd.admission.doctorat.preparation.domain.validator import *
 from admission.ddd.admission.doctorat.preparation.domain.validator._should_statut_etre_en_attente_de_signature import (
     ShouldStatutEtreEnAttenteDeSignature,
 )
-from admission.ddd.admission.shared_kernel.domain.model.complement_formation import (
-    ComplementFormationIdentity,
-)
-from admission.ddd.admission.shared_kernel.domain.model.motif_refus import (
-    MotifRefusIdentity,
-)
-from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import (
-    TitreAccesSelectionnable,
-)
+from admission.ddd.admission.shared_kernel.domain.model.complement_formation import ComplementFormationIdentity
+from admission.ddd.admission.shared_kernel.domain.model.motif_refus import MotifRefusIdentity
 from admission.ddd.admission.shared_kernel.domain.validator import (
     ShouldAnneesCVRequisesCompletees,
     ShouldExperiencesAcademiquesEtreCompletees,
@@ -93,24 +68,13 @@ from admission.ddd.admission.shared_kernel.domain.validator import (
 from admission.ddd.admission.shared_kernel.domain.validator._should_curriculum_etre_complete import (
     ShouldExperiencesNonAcademiquesAvoirUnCertificat,
 )
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
-    EmplacementDocumentDTO,
-)
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
-from base.ddd.utils.business_validator import (
-    BusinessValidator,
-    TwoStepsMultipleBusinessExceptionListValidator,
-)
-from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
-    AcademicYear,
-)
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
-    ExperienceAcademiqueDTO,
-    ExperienceNonAcademiqueDTO,
-)
-from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
-    ExperienceParcoursInterneDTO,
-)
+from base.ddd.utils.business_validator import BusinessValidator, TwoStepsMultipleBusinessExceptionListValidator
+from ddd.logic.condition_acces.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
 from epc.models.enums.condition_acces import ConditionAcces
 
 

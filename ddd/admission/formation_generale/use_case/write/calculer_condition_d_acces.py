@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,27 +23,24 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Optional
-
-import attr
-
-from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import (
-    TypeTitreAccesSelectionnable,
+from admission.ddd.admission.formation_generale.commands import CalculerConditionDAccesCommand
+from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
+    PropositionIdentityBuilder,
 )
-from osis_common.ddd import interface
+from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
 
 
-@attr.dataclass(frozen=True, slots=True)
-class TitreAccesSelectionnableIdentity(interface.EntityIdentity):
-    type_titre: TypeTitreAccesSelectionnable
-    uuid_experience: str
-    uuid_proposition: str
+def calculer_condition_d_acces(
+    cmd: 'CalculerConditionDAccesCommand',
+    proposition_repository: 'IPropositionRepository',
+    condition_d_acces: 'IConditionDAcces',
+    calcul_condition_acces_translator: 'ICalculConditionAccesTranslator',
+) -> PropositionIdentity:
+    proposition = proposition_repository.get(PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition))
 
+    condition_d_acces.calculer_condition_d_acces(proposition, calcul_condition_acces_translator)
 
-@attr.dataclass(frozen=True, slots=True)
-class TitreAccesSelectionnable(interface.RootEntity):
-    entity_id: TitreAccesSelectionnableIdentity
-    selectionne: bool
-    annee: Optional[int]
-    pays_iso_code: str
-    nom: str
+    proposition_repository.save(proposition)
+
+    return proposition.entity_id

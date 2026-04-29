@@ -29,6 +29,9 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
 from admission.ddd.admission.doctorat.preparation.use_case.read import *
 from admission.ddd.admission.doctorat.preparation.use_case.read.recuperer_doctorat_service import recuperer_doctorat
 from admission.ddd.admission.doctorat.preparation.use_case.write import *
+from admission.ddd.admission.doctorat.preparation.use_case.write.calculer_condition_d_acces import (
+    calculer_condition_d_acces,
+)
 from admission.ddd.admission.doctorat.preparation.use_case.write.demander_candidat_modifier_ca_service import (
     demander_candidat_modifier_ca,
 )
@@ -36,6 +39,7 @@ from admission.ddd.admission.doctorat.preparation.use_case.write.redonner_la_mai
     redonner_la_main_au_candidat,
 )
 from admission.ddd.admission.doctorat.preparation.use_case.write.soumettre_ca_service import soumettre_ca
+from admission.ddd.admission.shared_kernel.domain.service.conditions_d_acces import ConditionDAcces
 from admission.ddd.admission.shared_kernel.use_case.read import recuperer_questions_specifiques_proposition
 from admission.ddd.admission.shared_kernel.use_case.write import (
     annuler_reclamation_emplacement_document,
@@ -68,19 +72,18 @@ from admission.infrastructure.admission.shared_kernel.domain.service.unites_ense
     UnitesEnseignementTranslator,
 )
 from admission.infrastructure.admission.shared_kernel.repository.email_destinataire import EmailDestinataireRepository
-from admission.infrastructure.admission.shared_kernel.repository.titre_acces_selectionnable import (
-    TitreAccesSelectionnableRepository,
-)
 from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
 from infrastructure.shared_kernel.campus.repository.uclouvain_campus import UclouvainCampusRepository
 from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
 from infrastructure.shared_kernel.profil.domain.service.parcours_interne import ExperienceParcoursInterneTranslator
 
+from ...shared_kernel.domain.service.calcul_condition_acces_translator import CalculConditionAccesTranslator
 from ...shared_kernel.domain.service.inscriptions import InscriptionsTranslatorService
 from ...shared_kernel.domain.service.matricule_etudiant import MatriculeEtudiantService
 from ...shared_kernel.domain.service.modifier_checklist_experience_parcours_anterieur import (
     ValidationExperienceParcoursAnterieurService,
 )
+from ...shared_kernel.domain.service.titre_acces_translator import TitreAccesTranslator
 from ..validation.repository.demande import DemandeRepository
 from .domain.service.comptabilite import ComptabiliteTranslator
 from .domain.service.doctorat import DoctoratTranslator
@@ -516,7 +519,7 @@ COMMAND_HANDLERS = {
         pdf_generation=PDFGeneration(),
         personne_connue_ucl_translator=PersonneConnueUclTranslator(),
         unites_enseignement_translator=UnitesEnseignementTranslator(),
-        titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
+        titre_acces_translator=TitreAccesTranslator(),
         profil_candidat_translator=ProfilCandidatTranslator(),
         academic_year_repository=AcademicYearRepository(),
         experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
@@ -550,17 +553,11 @@ COMMAND_HANDLERS = {
     ModifierStatutChecklistParcoursAnterieurCommand: lambda msg_bus, cmd: modifier_statut_checklist_parcours_anterieur(
         cmd,
         proposition_repository=PropositionRepository(),
-        titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
+        titre_acces_translator=TitreAccesTranslator(),
         experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
         profil_candidat_translator=ProfilCandidatTranslator(),
         academic_year_repository=AcademicYearRepository(),
         inscriptions_translator=InscriptionsTranslatorService(),
-    ),
-    SpecifierConditionAccesPropositionCommand: lambda msg_bus, cmd: specifier_condition_acces_proposition(
-        cmd,
-        proposition_repository=PropositionRepository(),
-        titre_acces_selectionnable_repository=TitreAccesSelectionnableRepository(),
-        experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
     ),
     SpecifierBesoinDeDerogationSicCommand: (
         lambda msg_bus, cmd: specifier_besoin_de_derogation(
@@ -781,6 +778,14 @@ COMMAND_HANDLERS = {
             comptabilite_translator=ComptabiliteTranslator(),
             groupe_supervision_repository=GroupeDeSupervisionRepository(),
             inscriptions_translator=InscriptionsTranslatorService(),
+        )
+    ),
+    CalculerConditionDAccesCommand: (
+        lambda msg_bus, cmd: calculer_condition_d_acces(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            condition_d_acces=ConditionDAcces(),
+            calcul_condition_acces_translator=CalculConditionAccesTranslator(),
         )
     ),
 }

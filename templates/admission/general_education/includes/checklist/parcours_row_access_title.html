@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load admission enums i18n %}
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
   * designed to manage the core business of higher education institutions,
@@ -6,7 +6,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
   * see http://www.gnu.org/licenses/.
 {% endcomment %}
 {% if url %}
-  <div>
+  <div id="access-title-{{ experience_uuid }}" hx-swap-oob="true">
     <label>
       <input
           type="checkbox"
@@ -41,4 +41,20 @@
       />
     </label>
   </div>
+{% endif %}
+{% if with_swap_oob and request.htmx %}
+  {# Update others checkboxes #}
+  {% for access_title in access_titles.values %}
+    {% if access_title.uuid_experience != experience_uuid %}
+      {% access_title_checkbox access_title.uuid_experience access_title.type_titre access_title.annee %}
+    {% endif %}
+  {% endfor %}
+
+  {# Update the access condition in the body #}
+  {% include "admission/general_education/includes/checklist/previous_experiences_admission_requirement_form.html" %}
+  {# Update the access condition in the header #}
+  <span id="header-access-condition" hx-swap-oob="innerHTML">
+    {% translate 'Not specified' context "admission-header" as not_specified %}
+    {{ original_admission.admission_requirement|enum_with_acronym_display:'ConditionAcces'|default:not_specified }}
+  </span>
 {% endif %}

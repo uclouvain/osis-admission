@@ -29,6 +29,9 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
 from admission.ddd.admission.doctorat.preparation.use_case.read import *
 from admission.ddd.admission.doctorat.preparation.use_case.read.recuperer_doctorat_service import recuperer_doctorat
 from admission.ddd.admission.doctorat.preparation.use_case.write import *
+from admission.ddd.admission.doctorat.preparation.use_case.write.calculer_condition_d_acces import (
+    calculer_condition_d_acces,
+)
 from admission.ddd.admission.doctorat.preparation.use_case.write.demander_candidat_modifier_ca_service import (
     demander_candidat_modifier_ca,
 )
@@ -36,6 +39,7 @@ from admission.ddd.admission.doctorat.preparation.use_case.write.redonner_la_mai
     redonner_la_main_au_candidat,
 )
 from admission.ddd.admission.doctorat.preparation.use_case.write.soumettre_ca_service import soumettre_ca
+from admission.ddd.admission.shared_kernel.domain.service.conditions_d_acces import ConditionDAcces
 from admission.ddd.admission.shared_kernel.use_case.read import recuperer_questions_specifiques_proposition
 from admission.ddd.admission.shared_kernel.use_case.write import (
     annuler_reclamation_emplacement_document,
@@ -75,8 +79,8 @@ from admission.infrastructure.admission.shared_kernel.repository.in_memory.email
 from admission.infrastructure.admission.shared_kernel.repository.in_memory.emplacement_document import (
     emplacement_document_in_memory_repository,
 )
-from admission.infrastructure.admission.shared_kernel.repository.in_memory.titre_acces_selectionnable import (
-    TitreAccesSelectionnableInMemoryRepositoryFactory,
+from infrastructure.condition_acces.repository.in_memory.titre_acces_repository import (
+    TitreAccesInMemoryRepositoryFactory,
 )
 from infrastructure.reference.domain.service.in_memory.bourse import BourseInMemoryTranslator
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
@@ -88,6 +92,9 @@ from infrastructure.shared_kernel.profil.domain.service.in_memory.parcours_inter
     ExperienceParcoursInterneInMemoryTranslator,
 )
 
+from ...shared_kernel.domain.service.in_memory.calcul_condition_acces_translator import (
+    CalculConditionAccesInMemoryTranslator,
+)
 from ...shared_kernel.domain.service.in_memory.inscriptions_translator import InscriptionsInMemoryTranslator
 from ...shared_kernel.domain.service.in_memory.modifier_checklist_experience_parcours_anterieur import (
     ValidationExperienceParcoursAnterieurInMemoryService,
@@ -98,6 +105,7 @@ from ...shared_kernel.domain.service.in_memory.raccrocher_experiences_curriculum
 from ...shared_kernel.domain.service.in_memory.recuperer_documents_proposition import (
     EmplacementsDocumentsPropositionInMemoryTranslator,
 )
+from ...shared_kernel.domain.service.in_memory.titre_acces_translator import TitreAccesInMemoryTranslator
 from ...shared_kernel.domain.service.matricule_etudiant import MatriculeEtudiantService
 from ..validation.repository.in_memory.demande import DemandeInMemoryRepository
 from .domain.service.in_memory.comptabilite import ComptabiliteInMemoryTranslator
@@ -139,13 +147,15 @@ _pdf_generation = PDFGenerationInMemory()
 _campus_repository = UclouvainCampusInMemoryRepository()
 _email_destinataire_repository = EmailDestinataireInMemoryRepository()
 _personne_connue_ucl_translator = PersonneConnueUclInMemoryTranslator()
-_titre_acces_selectionnable_repository = TitreAccesSelectionnableInMemoryRepositoryFactory()
+_titre_acces_translator = TitreAccesInMemoryTranslator()
 _experience_parcours_interne_translator = ExperienceParcoursInterneInMemoryTranslator()
 _matricule_etudiant_service = MatriculeEtudiantService()
 _raccrocher_experiences_curriculum = RaccrocherExperiencesCurriculumInMemory()
 _validation_experience_parcours_anterieur_service = ValidationExperienceParcoursAnterieurInMemoryService()
 _annee_inscription_formation_translator = AnneeInscriptionFormationInMemoryTranslator()
 _inscriptions_translator = InscriptionsInMemoryTranslator()
+_condition_d_acces = ConditionDAcces()
+_condition_acces_translator = CalculConditionAccesInMemoryTranslator()
 
 
 COMMAND_HANDLERS = {
@@ -569,7 +579,7 @@ COMMAND_HANDLERS = {
         pdf_generation=_pdf_generation,
         personne_connue_ucl_translator=_personne_connue_ucl_translator,
         unites_enseignement_translator=_unites_enseignement_translator,
-        titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
+        titre_acces_translator=_titre_acces_translator,
         profil_candidat_translator=_profil_candidat_translator,
         academic_year_repository=_academic_year_repository,
         experience_parcours_interne_translator=_experience_parcours_interne_translator,
@@ -603,17 +613,11 @@ COMMAND_HANDLERS = {
     ModifierStatutChecklistParcoursAnterieurCommand: lambda msg_bus, cmd: modifier_statut_checklist_parcours_anterieur(
         cmd,
         proposition_repository=_proposition_repository,
-        titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
+        titre_acces_translator=_titre_acces_translator,
         experience_parcours_interne_translator=_experience_parcours_interne_translator,
         profil_candidat_translator=_profil_candidat_translator,
         academic_year_repository=_academic_year_repository,
         inscriptions_translator=_inscriptions_translator,
-    ),
-    SpecifierConditionAccesPropositionCommand: lambda msg_bus, cmd: specifier_condition_acces_proposition(
-        cmd,
-        proposition_repository=_proposition_repository,
-        titre_acces_selectionnable_repository=_titre_acces_selectionnable_repository,
-        experience_parcours_interne_translator=_experience_parcours_interne_translator,
     ),
     SpecifierBesoinDeDerogationSicCommand: (
         lambda msg_bus, cmd: specifier_besoin_de_derogation(
@@ -823,6 +827,14 @@ COMMAND_HANDLERS = {
             comptabilite_translator=_comptabilite_translator,
             groupe_supervision_repository=_groupe_supervision_repository,
             inscriptions_translator=_inscriptions_translator,
+        )
+    ),
+    CalculerConditionDAccesCommand: (
+        lambda msg_bus, cmd: calculer_condition_d_acces(
+            cmd,
+            proposition_repository=_proposition_repository,
+            condition_d_acces=_condition_d_acces,
+            calcul_condition_acces_translator=_condition_acces_translator,
         )
     ),
 }

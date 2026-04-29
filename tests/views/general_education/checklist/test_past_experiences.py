@@ -37,26 +37,18 @@ from django.test import TestCase
 from django.utils.translation import gettext
 from rest_framework import status
 
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
-    ENTITY_CDE,
-)
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutChecklist,
     ChoixStatutPropositionGenerale,
     OngletsChecklist,
-)
-from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import (
-    TypeTitreAccesSelectionnable,
-    recuperer_conditions_acces_par_formation,
 )
 from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import (
     EtatEquivalenceTitreAcces,
     StatutEquivalenceTitreAcces,
     TypeEquivalenceTitreAcces,
 )
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
-    OngletsDemande,
-)
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from admission.forms.admission.checklist import PastExperiencesAdmissionAccessTitleForm
 from admission.models import GeneralEducationAdmission
 from admission.models.exam import AdmissionExam
@@ -75,17 +67,12 @@ from admission.tests.factories.general_education import (
     GeneralEducationTrainingFactory,
 )
 from admission.tests.factories.person import CompletePersonFactory
-from admission.tests.factories.roles import (
-    ProgramManagerRoleFactory,
-    SicManagementRoleFactory,
-)
+from admission.tests.factories.roles import ProgramManagerRoleFactory, SicManagementRoleFactory
 from admission.tests.factories.secondary_studies import (
     ForeignHighSchoolDiplomaFactory,
     HighSchoolDiplomaAlternativeFactory,
 )
-from admission.tests.views.general_education.checklist.sic_decision.base import (
-    SicPatchMixin,
-)
+from admission.tests.views.general_education.checklist.sic_decision.base import SicPatchMixin
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.choice_field import BLANK_CHOICE
 from base.models.enums.education_group_types import TrainingType
@@ -94,19 +81,14 @@ from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.student import StudentFactory
+from ddd.logic.condition_acces.domain.model.enums.titre_acces import TypeTitreAccesSelectionnable
 from epc.models.enums.condition_acces import ConditionAcces
 from epc.models.enums.decision_resultat_cycle import DecisionResultatCycle
 from epc.models.enums.etat_inscription import EtatInscriptionFormation
-from epc.models.enums.statut_inscription_programme_annuel import (
-    StatutInscriptionProgrammAnnuel,
-)
+from epc.models.enums.statut_inscription_programme_annuel import StatutInscriptionProgrammAnnuel
 from epc.models.enums.type_duree import TypeDuree
-from epc.tests.factories.inscription_programme_annuel import (
-    InscriptionProgrammeAnnuelFactory,
-)
-from epc.tests.factories.inscription_programme_cycle import (
-    InscriptionProgrammeCycleFactory,
-)
+from epc.tests.factories.inscription_programme_annuel import InscriptionProgrammeAnnuelFactory
+from epc.tests.factories.inscription_programme_cycle import InscriptionProgrammeCycleFactory
 from osis_profile.models import Exam
 from osis_profile.models.enums.education import ForeignDiplomaTypes
 from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
@@ -814,185 +796,6 @@ class PastExperiencesAdmissionRequirementViewTestCase(TestCase):
         self.assertFalse(form.fields['admission_requirement'].disabled)
         self.assertFalse(form.fields['admission_requirement_year'].disabled)
         self.assertFalse(form.fields['with_prerequisite_courses'].disabled)
-
-        self.assertEqual(
-            recuperer_conditions_acces_par_formation(TrainingType.BACHELOR.name),
-            [
-                (ConditionAcces.SECONDAIRE.name, ConditionAcces.SECONDAIRE.label),
-                (ConditionAcces.EXAMEN_ADMISSION.name, ConditionAcces.EXAMEN_ADMISSION.label),
-                (ConditionAcces.PARCOURS.name, ConditionAcces.PARCOURS.label),
-                (ConditionAcces.VAE.name, ConditionAcces.VAE.label),
-                (ConditionAcces.MASTER.name, ConditionAcces.MASTER.label),
-                (ConditionAcces.BAC.name, ConditionAcces.BAC.label),
-                (ConditionAcces.UNI_SNU_AUTRE.name, ConditionAcces.UNI_SNU_AUTRE.label),
-            ],
-        )
-
-        self.assertEqual(
-            recuperer_conditions_acces_par_formation(TrainingType.MASTER_MC.name),
-            [
-                (ConditionAcces.MASTER.name, ConditionAcces.MASTER.label),
-                (ConditionAcces.VALORISATION_240_ECTS.name, ConditionAcces.VALORISATION_240_ECTS.label),
-                (ConditionAcces.VAE.name, ConditionAcces.VAE.label),
-                (ConditionAcces.PARCOURS.name, ConditionAcces.PARCOURS.label),
-                (ConditionAcces.UNI_SNU_AUTRE.name, ConditionAcces.UNI_SNU_AUTRE.label),
-            ],
-        )
-
-        self.assertEqual(
-            recuperer_conditions_acces_par_formation(TrainingType.MASTER_M5.name),
-            [
-                (ConditionAcces.MASTER.name, ConditionAcces.MASTER.label),
-                (ConditionAcces.VALORISATION_240_ECTS.name, ConditionAcces.VALORISATION_240_ECTS.label),
-                (ConditionAcces.VAE.name, ConditionAcces.VAE.label),
-                (ConditionAcces.PARCOURS.name, ConditionAcces.PARCOURS.label),
-                (ConditionAcces.UNI_SNU_AUTRE.name, ConditionAcces.UNI_SNU_AUTRE.label),
-            ],
-        )
-
-        self.assertEqual(
-            recuperer_conditions_acces_par_formation(TrainingType.MASTER_MA_120.name),
-            [
-                (ConditionAcces.BAC.name, ConditionAcces.BAC.label),
-                (ConditionAcces.BAMA15.name, ConditionAcces.BAMA15.label),
-                (ConditionAcces.SNU_TYPE_COURT.name, ConditionAcces.SNU_TYPE_COURT.label),
-                (ConditionAcces.SNU_TYPE_LONG_1ER_CYCLE.name, ConditionAcces.SNU_TYPE_LONG_1ER_CYCLE.label),
-                (ConditionAcces.SNU_TYPE_LONG_2EME_CYCLE.name, ConditionAcces.SNU_TYPE_LONG_2EME_CYCLE.label),
-                (ConditionAcces.VALORISATION_180_ECTS.name, ConditionAcces.VALORISATION_180_ECTS.label),
-                (ConditionAcces.VAE.name, ConditionAcces.VAE.label),
-                (ConditionAcces.PARCOURS.name, ConditionAcces.PARCOURS.label),
-                (ConditionAcces.MASTER.name, ConditionAcces.MASTER.label),
-                (ConditionAcces.UNI_SNU_AUTRE.name, ConditionAcces.UNI_SNU_AUTRE.label),
-            ],
-        )
-
-        self.assertEqual(
-            recuperer_conditions_acces_par_formation(TrainingType.MASTER_MD_120.name),
-            [
-                (ConditionAcces.BAC.name, ConditionAcces.BAC.label),
-                (ConditionAcces.BAMA15.name, ConditionAcces.BAMA15.label),
-                (ConditionAcces.SNU_TYPE_COURT.name, ConditionAcces.SNU_TYPE_COURT.label),
-                (ConditionAcces.SNU_TYPE_LONG_1ER_CYCLE.name, ConditionAcces.SNU_TYPE_LONG_1ER_CYCLE.label),
-                (ConditionAcces.SNU_TYPE_LONG_2EME_CYCLE.name, ConditionAcces.SNU_TYPE_LONG_2EME_CYCLE.label),
-                (ConditionAcces.VALORISATION_180_ECTS.name, ConditionAcces.VALORISATION_180_ECTS.label),
-                (ConditionAcces.VAE.name, ConditionAcces.VAE.label),
-                (ConditionAcces.PARCOURS.name, ConditionAcces.PARCOURS.label),
-                (ConditionAcces.MASTER.name, ConditionAcces.MASTER.label),
-                (ConditionAcces.UNI_SNU_AUTRE.name, ConditionAcces.UNI_SNU_AUTRE.label),
-            ],
-        )
-
-        self.assertEqual(
-            recuperer_conditions_acces_par_formation(TrainingType.MASTER_MS_120.name),
-            [
-                (ConditionAcces.BAC.name, ConditionAcces.BAC.label),
-                (ConditionAcces.BAMA15.name, ConditionAcces.BAMA15.label),
-                (ConditionAcces.SNU_TYPE_COURT.name, ConditionAcces.SNU_TYPE_COURT.label),
-                (ConditionAcces.SNU_TYPE_LONG_1ER_CYCLE.name, ConditionAcces.SNU_TYPE_LONG_1ER_CYCLE.label),
-                (ConditionAcces.SNU_TYPE_LONG_2EME_CYCLE.name, ConditionAcces.SNU_TYPE_LONG_2EME_CYCLE.label),
-                (ConditionAcces.VALORISATION_180_ECTS.name, ConditionAcces.VALORISATION_180_ECTS.label),
-                (ConditionAcces.VAE.name, ConditionAcces.VAE.label),
-                (ConditionAcces.PARCOURS.name, ConditionAcces.PARCOURS.label),
-                (ConditionAcces.MASTER.name, ConditionAcces.MASTER.label),
-                (ConditionAcces.UNI_SNU_AUTRE.name, ConditionAcces.UNI_SNU_AUTRE.label),
-            ],
-        )
-
-        self.assertEqual(
-            recuperer_conditions_acces_par_formation(TrainingType.MASTER_MS_180_240.name),
-            [
-                (ConditionAcces.BAC.name, ConditionAcces.BAC.label),
-                (ConditionAcces.BAMA15.name, ConditionAcces.BAMA15.label),
-                (ConditionAcces.SNU_TYPE_COURT.name, ConditionAcces.SNU_TYPE_COURT.label),
-                (ConditionAcces.SNU_TYPE_LONG_1ER_CYCLE.name, ConditionAcces.SNU_TYPE_LONG_1ER_CYCLE.label),
-                (ConditionAcces.SNU_TYPE_LONG_2EME_CYCLE.name, ConditionAcces.SNU_TYPE_LONG_2EME_CYCLE.label),
-                (ConditionAcces.VALORISATION_180_ECTS.name, ConditionAcces.VALORISATION_180_ECTS.label),
-                (ConditionAcces.VAE.name, ConditionAcces.VAE.label),
-                (ConditionAcces.PARCOURS.name, ConditionAcces.PARCOURS.label),
-                (ConditionAcces.MASTER.name, ConditionAcces.MASTER.label),
-                (ConditionAcces.UNI_SNU_AUTRE.name, ConditionAcces.UNI_SNU_AUTRE.label),
-            ],
-        )
-
-        self.assertEqual(
-            recuperer_conditions_acces_par_formation(TrainingType.MASTER_M1.name),
-            [
-                (ConditionAcces.BAC.name, ConditionAcces.BAC.label),
-                (ConditionAcces.BAMA15.name, ConditionAcces.BAMA15.label),
-                (ConditionAcces.SNU_TYPE_COURT.name, ConditionAcces.SNU_TYPE_COURT.label),
-                (ConditionAcces.SNU_TYPE_LONG_1ER_CYCLE.name, ConditionAcces.SNU_TYPE_LONG_1ER_CYCLE.label),
-                (ConditionAcces.SNU_TYPE_LONG_2EME_CYCLE.name, ConditionAcces.SNU_TYPE_LONG_2EME_CYCLE.label),
-                (ConditionAcces.VALORISATION_180_ECTS.name, ConditionAcces.VALORISATION_180_ECTS.label),
-                (ConditionAcces.VAE.name, ConditionAcces.VAE.label),
-                (ConditionAcces.PARCOURS.name, ConditionAcces.PARCOURS.label),
-                (ConditionAcces.MASTER.name, ConditionAcces.MASTER.label),
-                (ConditionAcces.UNI_SNU_AUTRE.name, ConditionAcces.UNI_SNU_AUTRE.label),
-            ],
-        )
-
-        self.assertEqual(
-            recuperer_conditions_acces_par_formation(TrainingType.MASTER_M4.name),
-            [
-                (ConditionAcces.BAC.name, ConditionAcces.BAC.label),
-                (ConditionAcces.BAMA15.name, ConditionAcces.BAMA15.label),
-                (ConditionAcces.SNU_TYPE_COURT.name, ConditionAcces.SNU_TYPE_COURT.label),
-                (ConditionAcces.SNU_TYPE_LONG_1ER_CYCLE.name, ConditionAcces.SNU_TYPE_LONG_1ER_CYCLE.label),
-                (ConditionAcces.SNU_TYPE_LONG_2EME_CYCLE.name, ConditionAcces.SNU_TYPE_LONG_2EME_CYCLE.label),
-                (ConditionAcces.VALORISATION_180_ECTS.name, ConditionAcces.VALORISATION_180_ECTS.label),
-                (ConditionAcces.VAE.name, ConditionAcces.VAE.label),
-                (ConditionAcces.PARCOURS.name, ConditionAcces.PARCOURS.label),
-                (ConditionAcces.MASTER.name, ConditionAcces.MASTER.label),
-                (ConditionAcces.UNI_SNU_AUTRE.name, ConditionAcces.UNI_SNU_AUTRE.label),
-            ],
-        )
-
-        self.assertEqual(
-            recuperer_conditions_acces_par_formation(TrainingType.RESEARCH_CERTIFICATE.name),
-            [],
-        )
-
-        self.assertEqual(
-            recuperer_conditions_acces_par_formation(TrainingType.CERTIFICATE.name),
-            [
-                (ConditionAcces.BAC.name, ConditionAcces.BAC.label),
-                (ConditionAcces.MASTER.name, ConditionAcces.MASTER.label),
-                (ConditionAcces.VALORISATION_180_ECTS.name, ConditionAcces.VALORISATION_180_ECTS.label),
-                (ConditionAcces.VAE.name, ConditionAcces.VAE.label),
-                (ConditionAcces.PARCOURS.name, ConditionAcces.PARCOURS.label),
-                (ConditionAcces.UNI_SNU_AUTRE.name, ConditionAcces.UNI_SNU_AUTRE.label),
-            ],
-        )
-
-        self.assertEqual(
-            recuperer_conditions_acces_par_formation(TrainingType.AGGREGATION.name),
-            [
-                (ConditionAcces.MASTER.name, ConditionAcces.MASTER.label),
-                (ConditionAcces.PARCOURS.name, ConditionAcces.PARCOURS.label),
-                (ConditionAcces.MASTER_EPM.name, ConditionAcces.MASTER_EPM.label),
-                (ConditionAcces.UNI_SNU_AUTRE.name, ConditionAcces.UNI_SNU_AUTRE.label),
-            ],
-        )
-
-        self.assertEqual(
-            recuperer_conditions_acces_par_formation(TrainingType.CAPAES.name),
-            [
-                (ConditionAcces.MASTER.name, ConditionAcces.MASTER.label),
-                (ConditionAcces.PARCOURS.name, ConditionAcces.PARCOURS.label),
-                (ConditionAcces.UNI_SNU_AUTRE.name, ConditionAcces.UNI_SNU_AUTRE.label),
-                (ConditionAcces.VALORISATION_180_ECTS.name, ConditionAcces.VALORISATION_180_ECTS.label),
-                (ConditionAcces.VAE.name, ConditionAcces.VAE.label),
-            ],
-        )
-
-        self.assertEqual(
-            recuperer_conditions_acces_par_formation(TrainingType.PHD.name),
-            [
-                (ConditionAcces.MASTER.name, ConditionAcces.MASTER.label),
-                (ConditionAcces.UNI_SNU_AUTRE.name, ConditionAcces.UNI_SNU_AUTRE.label),
-                (ConditionAcces.VALORISATION_300_ECTS.name, ConditionAcces.VALORISATION_300_ECTS.label),
-                (ConditionAcces.PARCOURS.name, ConditionAcces.PARCOURS.label),
-            ],
-        )
 
         self.general_admission.checklist['current']['parcours_anterieur']['statut'] = 'GEST_REUSSITE'
         self.general_admission.save(update_fields=['checklist'])

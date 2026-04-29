@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -37,21 +37,13 @@ from django.utils.translation import get_language, pgettext
 from osis_document_components.utils import is_uuid
 
 from admission.auth.roles.candidate import Candidate
-from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import (
-    PropositionIdentityBuilder,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import (
-    DetailProjet,
-)
+from admission.ddd.admission.doctorat.preparation.builder.proposition_identity_builder import PropositionIdentityBuilder
+from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import DetailProjet
 from admission.ddd.admission.doctorat.preparation.domain.model._experience_precedente_recherche import (
     ExperiencePrecedenteRecherche,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model._financement import (
-    Financement,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model._institut import (
-    InstitutIdentity,
-)
+from admission.ddd.admission.doctorat.preparation.domain.model._financement import Financement
+from admission.ddd.admission.doctorat.preparation.domain.model._institut import InstitutIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     BourseRecherche,
     ChoixCommissionProximiteCDEouCLSM,
@@ -71,17 +63,12 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
     DroitsInscriptionMontant,
     MobiliteNombreDeMois,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
-    Proposition,
-    PropositionIdentity,
-)
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
     StatutChecklist,
     StatutsChecklistDoctorale,
 )
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
-    PropositionNonTrouveeException,
-)
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.doctorat.preparation.dtos import (
     CotutelleDTO,
     DoctoratFormationDTO,
@@ -89,26 +76,17 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
     PropositionGestionnaireDTO,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.motif_refus import MotifRefusDTO
-from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
-    IPropositionRepository,
-)
-from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import (
-    ProfilCandidat,
-)
-from admission.ddd.admission.shared_kernel.domain.model.complement_formation import (
-    ComplementFormationIdentity,
-)
+from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import ProfilCandidat
+from admission.ddd.admission.shared_kernel.domain.model.complement_formation import ComplementFormationIdentity
+from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import ErreurConditionAcces
 from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import (
     EtatEquivalenceTitreAcces,
     StatutEquivalenceTitreAcces,
     TypeEquivalenceTitreAcces,
 )
-from admission.ddd.admission.shared_kernel.domain.model.formation import (
-    FormationIdentity,
-)
-from admission.ddd.admission.shared_kernel.domain.model.motif_refus import (
-    MotifRefusIdentity,
-)
+from admission.ddd.admission.shared_kernel.domain.model.formation import FormationIdentity
+from admission.ddd.admission.shared_kernel.domain.model.motif_refus import MotifRefusIdentity
 from admission.ddd.admission.shared_kernel.domain.service.i_unites_enseignement_translator import (
     IUnitesEnseignementTranslator,
 )
@@ -119,9 +97,7 @@ from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.infrastructure.admission.doctorat.preparation.repository._comptabilite import (
     get_accounting_from_admission,
 )
-from admission.infrastructure.admission.shared_kernel.repository.proposition import (
-    GlobalPropositionRepository,
-)
+from admission.infrastructure.admission.shared_kernel.repository.proposition import GlobalPropositionRepository
 from admission.infrastructure.utils import dto_to_dict
 from admission.models import Accounting, AdmissionFormItem, DoctorateAdmission
 from admission.models.doctorate import PropositionProxy
@@ -278,6 +254,11 @@ def _instantiate_admission(admission: 'DoctorateAdmission') -> 'Proposition':
         commentaire_programme_conjoint=admission.join_program_fac_comment,
         condition_acces=ConditionAcces[admission.admission_requirement] if admission.admission_requirement else None,
         millesime_condition_acces=admission.admission_requirement_year and admission.admission_requirement_year.year,
+        erreur_condition_acces=(
+            ErreurConditionAcces[admission.admission_requirement_error]
+            if admission.admission_requirement_error
+            else None
+        ),
         besoin_de_derogation=(
             BesoinDeDerogation[admission.dispensation_needed] if admission.dispensation_needed else None
         ),
@@ -518,6 +499,9 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 'join_program_fac_comment': entity.commentaire_programme_conjoint,
                 'admission_requirement': entity.condition_acces.name if entity.condition_acces else '',
                 'admission_requirement_year': academic_years.get(entity.millesime_condition_acces),
+                'admission_requirement_error': (
+                    entity.erreur_condition_acces.name if entity.erreur_condition_acces else ''
+                ),
                 'dispensation_needed': entity.besoin_de_derogation.name if entity.besoin_de_derogation else '',
                 'tuition_fees_amount': (
                     entity.droits_inscription_montant.name if entity.droits_inscription_montant else ''
@@ -972,6 +956,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             millesime_condition_acces=(
                 admission.admission_requirement_year.year if admission.admission_requirement_year else None
             ),
+            erreur_condition_acces=admission.admission_requirement_error,
             type_equivalence_titre_acces=admission.foreign_access_title_equivalency_type,
             information_a_propos_de_la_restriction=admission.foreign_access_title_equivalency_restriction_about,
             statut_equivalence_titre_acces=admission.foreign_access_title_equivalency_status,

@@ -23,8 +23,8 @@ msgstr ""
 
 #, python-format
 msgid ""
-"%(current_mimetype)s is not a valid mimetype for the field \"%(field)s\" "
-"(%(field_mimetypes_as_str)s)"
+"%(current_mimetype)s is not a valid mimetype for the field "
+"\"%(field)s\" (%(field_mimetypes_as_str)s)"
 msgstr ""
 
 #, python-format
@@ -528,6 +528,9 @@ msgid ""
 msgstr ""
 
 msgid "Admission requirement"
+msgstr ""
+
+msgid "Admission requirement error"
 msgstr ""
 
 msgid "Admission requirement year"
@@ -1124,9 +1127,6 @@ msgid "CEP"
 msgstr ""
 
 msgid "CERTIFICAT_60_CREDITS"
-msgstr ""
-
-msgid "CESS"
 msgstr ""
 
 msgctxt "equivalence_type"
@@ -3505,9 +3505,9 @@ msgid ""
 "Agreement between UCLouvain and the Host Hospitals drawn up as part of the "
 "UCLouvain bachelor's or master's course in medicine with a view to acquiring "
 "the corresponding course units, and I undertake to comply with its terms: <a "
-"href=\"https://cdn.uclouvain.be/groups/cms-editors-mede/"
-"ConventionStageMed.pdf\" target=\"_blank\">https://cdn.uclouvain.be/groups/"
-"cms-editors-mede/ConventionStageMed.pdf</a>"
+"href=\"https://cdn.uclouvain.be/groups/cms-editors-mede/ConventionStageMed."
+"pdf\" target=\"_blank\">https://cdn.uclouvain.be/groups/cms-editors-mede/"
+"ConventionStageMed.pdf</a>"
 msgstr ""
 
 msgid "I hereby declare that"
@@ -3540,6 +3540,9 @@ msgstr ""
 msgid "INCHANGE"
 msgstr "Unchanged"
 
+msgid "INCOMPLET"
+msgstr ""
+
 msgid "INITIAL_CANDIDAT"
 msgstr "Initial candidate"
 
@@ -3556,6 +3559,9 @@ msgid "INSCRIPTION_REGULIERE_1194"
 msgstr ""
 
 msgid "INSCRIPTION_REGULIERE_835"
+msgstr ""
+
+msgid "INSUFFISANT"
 msgstr ""
 
 msgid "INVALID"
@@ -3676,20 +3682,20 @@ msgstr ""
 
 msgid ""
 "In accordance with the information at <a target=\"_blank\" href=\"https://"
-"uclouvain.be/en/study/inscriptions/acces-aux-professions-"
-"reglementees.html\">https://uclouvain.be/en/study/inscriptions/acces-aux-"
-"professions-reglementees.html</a>, I declare that, if the courses listed "
-"therein concern me, I have received the information relating to their "
-"requirements for admission or continuation and to the specific rules or "
-"restrictions of accreditation or professional establishment to which the "
-"professional or accredited title is subject and I accept the terms thereof."
+"uclouvain.be/en/study/inscriptions/acces-aux-professions-reglementees."
+"html\">https://uclouvain.be/en/study/inscriptions/acces-aux-professions-"
+"reglementees.html</a>, I declare that, if the courses listed therein concern "
+"me, I have received the information relating to their requirements for "
+"admission or continuation and to the specific rules or restrictions of "
+"accreditation or professional establishment to which the professional or "
+"accredited title is subject and I accept the terms thereof."
 msgstr ""
 
 msgid ""
 "In accordance with the information at <a target=\"_blank\" href=\"https://"
-"uclouvain.be/en/study/inscriptions/reglementations.html\">https://"
-"uclouvain.be/en/study/inscriptions/reglementations.html</a>, I declare that "
-"I have read the university regulations and accept their terms."
+"uclouvain.be/en/study/inscriptions/reglementations.html\">https://uclouvain."
+"be/en/study/inscriptions/reglementations.html</a>, I declare that I have "
+"read the university regulations and accept their terms."
 msgstr ""
 
 msgid ""
@@ -3708,9 +3714,9 @@ msgstr ""
 #, python-format
 msgid ""
 "In accordance with the registration calendar <a href=\"https://uclouvain.be/"
-"en/study/inscriptions/calendrier-inscriptions.html\" "
-"target=\"_blank\">www.uclouvain.be/enrolment-calendar</a>, I confirm that I "
-"am applying for the academic year %(year)s."
+"en/study/inscriptions/calendrier-inscriptions.html\" target=\"_blank\">www."
+"uclouvain.be/enrolment-calendar</a>, I confirm that I am applying for the "
+"academic year %(year)s."
 msgstr ""
 
 msgid "In draft form"
@@ -3830,9 +3836,6 @@ msgid "Internal comment"
 msgstr ""
 
 msgid "Internal comment:"
-msgstr ""
-
-msgid "Internal experience"
 msgstr ""
 
 msgid "Internal experiences to choose as access titles"
@@ -5865,9 +5868,6 @@ msgstr ""
 msgid "Secondary education type"
 msgstr ""
 
-msgid "Secondary school"
-msgstr ""
-
 msgid "Secondary school diploma"
 msgstr ""
 
@@ -7073,8 +7073,8 @@ msgstr ""
 msgid ""
 "This enrolment authorisation letter allows you to submit an application for "
 "accommodation to the Logistics and Student Accommodation Service (LOGE). To "
-"find out how, go to <a href=\"https://www.uclouvain.be/en/"
-"logement\">www.uclouvain.be/en/logement</a>."
+"find out how, go to <a href=\"https://www.uclouvain.be/en/logement\">www."
+"uclouvain.be/en/logement</a>."
 msgstr ""
 
 msgid "This experience cannot be updated as it has already been valuated."

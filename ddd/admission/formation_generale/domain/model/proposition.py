@@ -66,7 +66,6 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
     RefuserParSicValidatorList,
     SICPeutSoumettreAFacLorsDeLaDecisionFacultaireValidatorList,
     SicPeutSoumettreAuSicLorsDeLaDecisionFacultaireValidatorList,
-    SpecifierConditionAccesParcoursAnterieurValidatorList,
     SpecifierInformationsApprobationInscriptionValidatorList,
     SpecifierNouvellesInformationsDecisionFacultaireValidatorList,
 )
@@ -77,6 +76,7 @@ from admission.ddd.admission.shared_kernel.domain.model.condition_complementaire
     ConditionComplementaireApprobationIdentity,
     ConditionComplementaireLibreApprobation,
 )
+from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import ErreurConditionAcces
 from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import (
     EtatEquivalenceTitreAcces,
     StatutEquivalenceTitreAcces,
@@ -86,7 +86,6 @@ from admission.ddd.admission.shared_kernel.domain.model.formation import Formati
 from admission.ddd.admission.shared_kernel.domain.model.motif_refus import MotifRefusIdentity
 from admission.ddd.admission.shared_kernel.domain.model.poste_diplomatique import PosteDiplomatiqueIdentity
 from admission.ddd.admission.shared_kernel.domain.model.question_specifique import QuestionSpecifique
-from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
 from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
     IInscriptionsTranslatorService,
 )
@@ -94,6 +93,7 @@ from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat impo
 from admission.ddd.admission.shared_kernel.domain.service.i_question_specifique import (
     ISuperQuestionSpecifiqueTranslator,
 )
+from admission.ddd.admission.shared_kernel.domain.service.i_titre_acces_translator import ITitreAccesTranslator
 from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidat as ProfilCandidatService
 from admission.ddd.admission.shared_kernel.dtos import EtudesSecondairesAdmissionDTO, IdentificationDTO
 from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
@@ -109,12 +109,10 @@ from admission.ddd.admission.shared_kernel.enums import (
     TypeSituationAssimilation,
 )
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
-from admission.ddd.admission.shared_kernel.repository.i_titre_acces_selectionnable import (
-    ITitreAccesSelectionnableRepository,
-)
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
+from ddd.logic.condition_acces.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import (
     SITUATION_FINANCABILITE_PAR_ETAT,
@@ -249,6 +247,7 @@ class Proposition(interface.RootEntity):
 
     condition_acces: Optional[ConditionAcces] = None
     millesime_condition_acces: Optional[int] = None
+    erreur_condition_acces: Optional[ErreurConditionAcces] = None
 
     type_equivalence_titre_acces: Optional[TypeEquivalenceTitreAcces] = None
     statut_equivalence_titre_acces: Optional[StatutEquivalenceTitreAcces] = None
@@ -778,43 +777,12 @@ class Proposition(interface.RootEntity):
         self.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist[statut_checklist_cible]
         self.auteur_derniere_modification = auteur_modification
 
-    def specifier_condition_acces(
+    def specifier_avec_complements_formation(
         self,
         auteur_modification: str,
-        condition_acces: str,
-        millesime_condition_acces: Optional[int],
         avec_complements_formation: Optional[bool],
-        titre_acces_selectionnable_repository: 'ITitreAccesSelectionnableRepository',
-        experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
     ):
-        nouveau_millesime_condition_acces = millesime_condition_acces
-        nouvelle_condition_acces = getattr(ConditionAcces, condition_acces, None)
-
-        # Si la condition d'accès a changé
-        if nouvelle_condition_acces and nouvelle_condition_acces != self.condition_acces:
-            # Si un seul titre d'accès a été sélectionné,  le millésime correspond à l'année de ce titre
-            titres_selectionnes = titre_acces_selectionnable_repository.search_by_proposition(
-                proposition_identity=self.entity_id,
-                experience_parcours_interne_translator=experience_parcours_interne_translator,
-                seulement_selectionnes=True,
-            )
-
-            if len(titres_selectionnes) == 1:
-                nouveau_millesime_condition_acces = titres_selectionnes[0].annee
-
-            # Si la condition d'accès est "SNU Type Court", des compléments de formation sont demandés par défaut
-            if nouvelle_condition_acces == ConditionAcces.SNU_TYPE_COURT:
-                avec_complements_formation = True
-
-        SpecifierConditionAccesParcoursAnterieurValidatorList(
-            avec_complements_formation=avec_complements_formation,
-            complements_formation=self.complements_formation,
-            commentaire_complements_formation=self.commentaire_complements_formation,
-        ).validate()
-
         self.auteur_derniere_modification = auteur_modification
-        self.condition_acces = nouvelle_condition_acces
-        self.millesime_condition_acces = nouveau_millesime_condition_acces
         self.avec_complements_formation = avec_complements_formation
 
         if not avec_complements_formation:
@@ -1261,3 +1229,13 @@ class Proposition(interface.RootEntity):
         self.justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee = (
             justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee
         )
+
+    def specifier_condition_acces(self, condition_acces: Optional[ConditionAcces], millesime: Optional[int]):
+        self.condition_acces = condition_acces
+        self.millesime_condition_acces = millesime
+        self.erreur_condition_acces = None
+
+    def specifier_erreur_condition_acces(self, erreur_condition_acces):
+        self.condition_acces = None
+        self.millesime_condition_acces = None
+        self.erreur_condition_acces = erreur_condition_acces

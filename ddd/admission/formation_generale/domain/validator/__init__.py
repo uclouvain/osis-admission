@@ -27,10 +27,7 @@ from ._should_comptabilite_etre_completee import (
     ShouldAffiliationsEtreCompletees,
     ShouldReductionDesDroitsInscriptionEtreCompletee,
 )
-from ._should_curriculum_etre_complete import (
-    ShouldCurriculumFichierEtreSpecifie,
-    ShouldEquivalenceEtreSpecifiee,
-)
+from ._should_curriculum_etre_complete import ShouldCurriculumFichierEtreSpecifie, ShouldEquivalenceEtreSpecifiee
 from ._should_etudes_secondaires_etre_completees import (
     ShouldAlternativeSecondairesEtreCompletee,
     ShouldDiplomeBelgesEtudesSecondairesEtreComplete,
@@ -40,7 +37,6 @@ from ._should_etudes_secondaires_etre_completees import (
 )
 from ._should_informations_checklist_etre_completees import (
     ShouldChecklistEtreDansEtatCorrectPourApprouverInscription,
-    ShouldComplementsFormationEtreVidesSiPasDeComplementsFormation,
     ShouldConditionAccesEtreSelectionne,
     ShouldDemandeEtreTypeAdmission,
     ShouldDemandeEtreTypeInscription,

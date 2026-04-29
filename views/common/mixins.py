@@ -72,7 +72,6 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
 )
 from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
 from admission.ddd.admission.shared_kernel.domain.model.enums.type_gestionnaire import TypeGestionnaire
-from admission.ddd.admission.shared_kernel.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
 from admission.ddd.admission.shared_kernel.enums import Onglets
 from admission.models import ContinuingEducationAdmission, DoctorateAdmission, EPCInjection, GeneralEducationAdmission
 from admission.models.base import AdmissionViewer, BaseAdmission
@@ -87,6 +86,7 @@ from admission.utils import (
 )
 from admission.views.list import BaseAdmissionList
 from base.models.person_merge_proposal import PersonMergeStatus
+from ddd.logic.condition_acces.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.gestion_des_comptes.dto.periode_soumission_ticket import PeriodeSoumissionTicketDigitDTO
 from ddd.logic.gestion_des_comptes.queries import GetPeriodeActiveSoumissionTicketQuery, GetPropositionFusionQuery

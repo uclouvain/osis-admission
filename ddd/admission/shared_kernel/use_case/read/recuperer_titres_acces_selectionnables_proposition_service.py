@@ -27,20 +27,18 @@ from typing import Dict
 
 from admission.ddd.admission.formation_generale.commands import RecupererTitresAccesSelectionnablesPropositionQuery
 from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.shared_kernel.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
-from admission.ddd.admission.shared_kernel.repository.i_titre_acces_selectionnable import (
-    ITitreAccesSelectionnableRepository,
-)
+from admission.ddd.admission.shared_kernel.domain.service.i_titre_acces_translator import ITitreAccesTranslator
+from ddd.logic.condition_acces.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
 from ddd.logic.shared_kernel.profil.domain.service.i_parcours_interne import IExperienceParcoursInterneTranslator
 
 
 def recuperer_titres_acces_selectionnables_proposition(
     cmd: 'RecupererTitresAccesSelectionnablesPropositionQuery',
-    titre_acces_selectionnable_repository: 'ITitreAccesSelectionnableRepository',
+    titre_acces_translator: 'ITitreAccesTranslator',
     experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
 ) -> Dict[str, TitreAccesSelectionnableDTO]:
     proposition_identity = PropositionIdentity(uuid=cmd.uuid_proposition)
-    return titre_acces_selectionnable_repository.search_dto_by_proposition(
+    return titre_acces_translator.search_dto_by_proposition(
         proposition_identity=proposition_identity,
         experience_parcours_interne_translator=experience_parcours_interne_translator,
         seulement_selectionnes=cmd.seulement_selectionnes,

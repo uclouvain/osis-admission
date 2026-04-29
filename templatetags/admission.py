@@ -83,7 +83,6 @@ from admission.ddd.admission.shared_kernel.dtos.liste import DemandeRechercheDTO
 from admission.ddd.admission.shared_kernel.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.shared_kernel.dtos.resume import ResumePropositionDTO
-from admission.ddd.admission.shared_kernel.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
 from admission.ddd.admission.shared_kernel.enums import Onglets, TypeItemFormulaire
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import StatutReclamationEmplacementDocument
 from admission.ddd.admission.shared_kernel.repository.i_proposition import formater_reference
@@ -104,6 +103,8 @@ from admission.utils import get_access_conditions_url, get_experience_urls
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.enums.civil_state import CivilState
 from base.models.person import Person
+from ddd.logic.condition_acces.domain.model.enums.titre_acces import TypeTitreAccesSelectionnable
+from ddd.logic.condition_acces.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
 from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
@@ -114,6 +115,7 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     MessageCurriculumDTO,
 )
 from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
+from osis_profile import BE_ISO_CODE
 from osis_profile.constants import IMAGE_MIME_TYPES
 from osis_profile.models.enums.experience_validation import EtatAuthentificationParcours
 from osis_profile.models.enums.person import ChoixSexe
@@ -930,15 +932,60 @@ def input_field_data(label, value, editable=True, mask=None, select_key=None):
 )
 def access_title_checkbox(context, experience_uuid, experience_type, current_year):
     access_title: Optional[TitreAccesSelectionnableDTO] = context['access_titles'].get(experience_uuid)
-    if access_title and access_title.annee == current_year:
-        return {
-            'url': f'{context["access_title_url"]}?experience_uuid={experience_uuid}&experience_type={experience_type}',
-            'checked': access_title.selectionne,
-            'experience_uuid': experience_uuid,
-            'can_choose_access_title': context['can_choose_access_title'],
-            'can_choose_access_title_tooltip': context.get('can_choose_access_title_tooltip'),
-        }
-    return {}
+
+    if not access_title or access_title.annee != current_year:
+        return {}
+
+    # Compute can_choose_access_title
+    has_change_access_title_permission = context['can_change_access_title']
+
+    no_selected_titles = all(not access_title_dto.selectionne for access_title_dto in context['access_titles'].values())
+    has_selected_non_academic_titles = any(
+        access_title_dto.selectionne
+        and access_title_dto.type_titre == TypeTitreAccesSelectionnable.EXPERIENCE_NON_ACADEMIQUE.name
+        for access_title_dto in context['access_titles'].values()
+    )
+    has_selected_only_foreign_academic_titles = all(
+        access_title_dto.selectionne
+        and access_title_dto.type_titre == TypeTitreAccesSelectionnable.EXPERIENCE_ACADEMIQUE.name
+        and access_title_dto.pays_iso_code != BE_ISO_CODE
+        for access_title_dto in context['access_titles'].values()
+    )
+    is_access_title_foreign_academic = (
+        access_title.type_titre == TypeTitreAccesSelectionnable.EXPERIENCE_ACADEMIQUE.name
+        and access_title.pays_iso_code != BE_ISO_CODE
+    )
+
+    can_choose_access_title = (
+        has_change_access_title_permission
+        and (
+            access_title.selectionne
+            or has_selected_non_academic_titles
+            or (is_access_title_foreign_academic and has_selected_only_foreign_academic_titles)
+            or no_selected_titles
+        )
+        and not (
+            access_title.type_titre == TypeTitreAccesSelectionnable.EXAMENS.name
+            and context['experiences_by_uuid'][access_title.uuid_experience].sigles_formations
+        )
+    )
+
+    can_choose_access_title_tooltip = (
+        _(
+            'Changes for the access title are not available when the state of the Previous experience '
+            'is "Sufficient".'
+        )
+        if context.get('past_experiences_are_sufficient')
+        else ''
+    )
+
+    return {
+        'url': f'{context["access_title_url"]}?experience_uuid={experience_uuid}&experience_type={experience_type}',
+        'checked': access_title.selectionne,
+        'experience_uuid': experience_uuid,
+        'can_choose_access_title': can_choose_access_title,
+        'can_choose_access_title_tooltip': can_choose_access_title_tooltip,
+    }
 
 
 @register.filter

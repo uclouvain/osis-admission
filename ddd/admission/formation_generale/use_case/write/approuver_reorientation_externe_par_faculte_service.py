@@ -29,9 +29,7 @@ from admission.ddd.admission.formation_generale.domain.model.proposition import 
 from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
-from admission.ddd.admission.shared_kernel.repository.i_titre_acces_selectionnable import (
-    ITitreAccesSelectionnableRepository,
-)
+from admission.ddd.admission.shared_kernel.domain.service.i_titre_acces_translator import ITitreAccesTranslator
 from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
 from ddd.logic.shared_kernel.profil.domain.service.i_parcours_interne import IExperienceParcoursInterneTranslator
 
@@ -41,7 +39,7 @@ def approuver_reorientation_externe_par_faculte(
     proposition_repository: 'IPropositionRepository',
     historique: 'IHistorique',
     personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
-    titre_acces_selectionnable_repository: 'ITitreAccesSelectionnableRepository',
+    titre_acces_translator: 'ITitreAccesTranslator',
     experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
 ) -> PropositionIdentity:
     # GIVEN
@@ -49,7 +47,7 @@ def approuver_reorientation_externe_par_faculte(
 
     gestionnaire_dto = personne_connue_ucl_translator.get(cmd.gestionnaire)
 
-    titres_selectionnes = titre_acces_selectionnable_repository.search_by_proposition(
+    titres_selectionnes = titre_acces_translator.search_by_proposition(
         proposition_identity=proposition.entity_id,
         experience_parcours_interne_translator=experience_parcours_interne_translator,
         seulement_selectionnes=True,

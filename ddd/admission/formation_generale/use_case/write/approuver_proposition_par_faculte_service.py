@@ -31,11 +31,9 @@ from admission.ddd.admission.formation_generale.domain.service.i_pdf_generation 
 from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_titre_acces_translator import ITitreAccesTranslator
 from admission.ddd.admission.shared_kernel.domain.service.i_unites_enseignement_translator import (
     IUnitesEnseignementTranslator,
-)
-from admission.ddd.admission.shared_kernel.repository.i_titre_acces_selectionnable import (
-    ITitreAccesSelectionnableRepository,
 )
 from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
 from ddd.logic.shared_kernel.profil.domain.service.i_parcours_interne import IExperienceParcoursInterneTranslator
@@ -48,14 +46,14 @@ def approuver_proposition_par_faculte(
     pdf_generation: 'IPDFGeneration',
     personne_connue_ucl_translator: 'IPersonneConnueUclTranslator',
     unites_enseignement_translator: 'IUnitesEnseignementTranslator',
-    titre_acces_selectionnable_repository: 'ITitreAccesSelectionnableRepository',
+    titre_acces_translator: 'ITitreAccesTranslator',
     profil_candidat_translator: 'IProfilCandidatTranslator',
     experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
 ) -> PropositionIdentity:
     # GIVEN
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
 
-    titres_selectionnes = titre_acces_selectionnable_repository.search_by_proposition(
+    titres_selectionnes = titre_acces_translator.search_by_proposition(
         proposition_identity=proposition.entity_id,
         experience_parcours_interne_translator=experience_parcours_interne_translator,
         seulement_selectionnes=True,
