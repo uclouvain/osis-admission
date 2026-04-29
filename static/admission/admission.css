@@ -599,3 +599,8 @@ i.deleted-learning-unit-icon::after {
 .select2-results__option--highlighted[aria-selected] .school-address {
     color: #eee;
 }
+
+.field-data-with-multi-line-answer dd {
+    white-space: pre-line;
+    display: block;
+}

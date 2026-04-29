@@ -55,7 +55,6 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
     CandidatDejaDiplomeFormationException,
     CandidatNonEligibleALaReinscriptionException,
     DejaInscritFormationAnnualiseeException,
-    EquivalenceNonRenseigneeException,
     EtudesSecondairesNonCompleteesException,
     EtudesSecondairesNonCompleteesPourAlternativeException,
     EtudesSecondairesNonCompleteesPourDiplomeBelgeException,
@@ -403,25 +402,6 @@ class TestVerifierPropositionService(TestCase):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.cmd(self.master_proposition.entity_id.uuid))
         self.assertHasInstance(context.exception.exceptions, BoursesEtudesNonRenseignees)
-
-    def test_should_retourner_erreur_si_equivalence_non_fournie_aggregation(self):
-        with mock.patch.multiple(self.aggregation_proposition, equivalence_diplome=[]):
-            with self.assertRaises(MultipleBusinessExceptions) as context:
-                self.message_bus.invoke(self.cmd(self.aggregation_proposition.entity_id.uuid))
-            self.assertEqual(len(context.exception.exceptions), 1)
-            self.assertIsInstance(context.exception.exceptions.pop(), EquivalenceNonRenseigneeException)
-
-    def test_should_retourner_erreur_si_equivalence_non_fournie_capaes(self):
-        with mock.patch.multiple(self.capaes_proposition, equivalence_diplome=[]):
-            with self.assertRaises(MultipleBusinessExceptions) as context:
-                self.message_bus.invoke(self.cmd(self.capaes_proposition.entity_id.uuid))
-            self.assertEqual(len(context.exception.exceptions), 1)
-            self.assertIsInstance(context.exception.exceptions.pop(), EquivalenceNonRenseigneeException)
-
-    def test_should_verifier_etre_ok_si_equivalence_non_fournie_capaes_poursuite(self):
-        with mock.patch.multiple(self.capaes_proposition, equivalence_diplome=[], est_en_poursuite=True):
-            id_proposition = self.message_bus.invoke(self.cmd(self.capaes_proposition.entity_id.uuid))
-            self.assertEqual(id_proposition, self.capaes_proposition.entity_id)
 
     def test_should_verifier_etre_ok_si_equivalence_non_fournie_avec_experience_belge_aggregation(self):
         self.experiences_academiques.append(

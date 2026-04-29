@@ -102,8 +102,6 @@ def initier_proposition(
         ]
     )
 
-    formation = formation_translator.get(entity_id=formation_id)
-
     est_en_poursuite = inscriptions_translator.est_en_poursuite(
         matricule_candidat=cmd.matricule_candidat,
         sigle_formation=formation_id.sigle,
@@ -118,9 +116,9 @@ def initier_proposition(
         est_en_poursuite=est_en_poursuite,
     )
 
-    ProfilCandidat.verifier_choix_formation_generale(
-        proposition=proposition,
-        formation=formation,
+    ProfilCandidat.verifier_initialisation_proposition_formation_generale(
+        matricule_candidat=cmd.matricule_candidat,
+        sigle_formation=cmd.sigle_formation,
         annee_inscription_formation_translator=annee_inscription_formation_translator,
         inscriptions_translator=inscriptions_translator,
         deliberation_translator=deliberation_translator,

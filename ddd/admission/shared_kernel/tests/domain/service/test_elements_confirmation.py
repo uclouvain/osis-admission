@@ -271,7 +271,18 @@ class ElementsConfirmationTestCase(TestCase):
             ]
             self.assertListEqual([e.nom for e in elements], expected)
 
-            # Etudiant en poursuite
+            # Etudiant en poursuite directe
+            with patch(
+                'admission.infrastructure.admission.shared_kernel.domain.service.in_memory.'
+                'inscriptions_translator.InscriptionsInMemoryTranslator.est_en_poursuite_directe',
+                return_value=True,
+            ):
+                elements = message_bus_in_memory_instance.invoke(
+                    RecupererElementsConfirmationGeneraleQuery(uuid_proposition="uuid-BACHELIER-ECO1")
+                )
+                self.assertNotIn('frais_dossier', [e.nom for e in elements])
+
+            # Etudiant en poursuite étendue
             with patch.object(
                 PropositionGeneraleRepository.entities[1],
                 'est_en_poursuite',
@@ -280,9 +291,9 @@ class ElementsConfirmationTestCase(TestCase):
                 elements = message_bus_in_memory_instance.invoke(
                     RecupererElementsConfirmationGeneraleQuery(uuid_proposition="uuid-BACHELIER-ECO1")
                 )
-                self.assertNotIn('frais_dossier', [e.nom for e in elements])
+                self.assertIn('frais_dossier', [e.nom for e in elements])
 
-            # Etudiant pas en poursuite
+            # Etudiant pas en poursuite étendue
             with patch.object(
                 PropositionGeneraleRepository.entities[1],
                 'est_en_poursuite',
@@ -290,6 +301,28 @@ class ElementsConfirmationTestCase(TestCase):
             ):
                 elements = message_bus_in_memory_instance.invoke(
                     RecupererElementsConfirmationGeneraleQuery(uuid_proposition="uuid-BACHELIER-ECO1")
+                )
+                self.assertIn('frais_dossier', [e.nom for e in elements])
+
+            # Etudiant en poursuite étendue pour VETE1BA
+            with patch.object(
+                PropositionGeneraleRepository.entities[2],
+                'est_en_poursuite',
+                True,
+            ):
+                elements = message_bus_in_memory_instance.invoke(
+                    RecupererElementsConfirmationGeneraleQuery(uuid_proposition="uuid-BACHELIER-VET")
+                )
+                self.assertNotIn('frais_dossier', [e.nom for e in elements])
+
+            # Etudiant pas en poursuite étendue pour VETE1BA
+            with patch.object(
+                PropositionGeneraleRepository.entities[2],
+                'est_en_poursuite',
+                False,
+            ):
+                elements = message_bus_in_memory_instance.invoke(
+                    RecupererElementsConfirmationGeneraleQuery(uuid_proposition="uuid-BACHELIER-VET")
                 )
                 self.assertIn('frais_dossier', [e.nom for e in elements])
 

@@ -56,6 +56,9 @@ class FormationIdentity(interface.EntityIdentity):
     sigle: str = attr.ib(converter=to_upper_case_converter)
     annee: int
 
+    def est_formation_avec_quota(self):
+        return self.sigle in ['KINE1BA', 'VETE1BA', 'LOGO1BA']
+
 
 def est_formation_medecine_ou_dentisterie(code_domaine: str) -> bool:
     return code_domaine[:2] in PREFIXES_DOMAINES_FORMATIONS_DENT_MED

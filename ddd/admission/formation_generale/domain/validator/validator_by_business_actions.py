@@ -51,7 +51,6 @@ from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldDemandeEtreTypeAdmission,
     ShouldDiplomeBelgesEtudesSecondairesEtreComplete,
     ShouldDiplomeEtrangerEtudesSecondairesEtreComplete,
-    ShouldEquivalenceEtreSpecifiee,
     ShouldFacPeutDonnerDecision,
     ShouldFacPeutSoumettreAuSicLorsDeLaDecisionFacultaire,
     ShouldInformationsBama15EtreCompletees,
@@ -158,11 +157,9 @@ class FormationGeneraleCurriculumValidatorList(TwoStepsMultipleBusinessException
     experiences_academiques: List[ExperienceAcademiqueDTO]
     experiences_academiques_incompletes: Dict[str, str]
     type_formation: TrainingType
-    equivalence_diplome: List[str]
     sigle_formation: str
     annee_formation: AcademicYear
     candidat_est_inscrit_recemment_ucl: bool
-    candidat_est_en_poursuite: bool
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -191,12 +188,6 @@ class FormationGeneraleCurriculumValidatorList(TwoStepsMultipleBusinessException
             ShouldExperiencesNonAcademiquesAvoirUnCertificat(
                 experiences_non_academiques=self.experiences_non_academiques,
                 candidat_est_inscrit_recemment_ucl=self.candidat_est_inscrit_recemment_ucl,
-            ),
-            ShouldEquivalenceEtreSpecifiee(
-                equivalence=self.equivalence_diplome,
-                type_formation=self.type_formation,
-                experiences_academiques=self.experiences_academiques,
-                candidat_est_en_poursuite=self.candidat_est_en_poursuite,
             ),
         ]
 
@@ -847,6 +838,25 @@ class ChoixFormationValidatorList(TwoStepsMultipleBusinessExceptionListValidator
                 proposition=self.proposition,
                 formation=self.formation,
             ),
+            ShouldCandidatEtreEligibleALaReinscription(
+                candidat_est_eligible_a_la_reinscription=self.candidat_est_eligible_a_la_reinscription,
+            ),
+            ShouldCandidatPasEtreDiplomeFormation(
+                candidat_est_diplome_formation=self.candidat_est_diplome_formation,
+            ),
+        ]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class InitialisationPropositionValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
+    candidat_est_eligible_a_la_reinscription: bool
+    candidat_est_diplome_formation: bool
+
+    def get_data_contract_validators(self) -> List[BusinessValidator]:
+        return []
+
+    def get_invariants_validators(self) -> List[BusinessValidator]:
+        return [
             ShouldCandidatEtreEligibleALaReinscription(
                 candidat_est_eligible_a_la_reinscription=self.candidat_est_eligible_a_la_reinscription,
             ),

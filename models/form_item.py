@@ -32,8 +32,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q, QuerySet
-from django.utils.translation import gettext_lazy as _
-from django.utils.translation import ngettext_lazy, pgettext_lazy
+from django.utils.translation import gettext_lazy as _, ngettext_lazy, pgettext_lazy
 
 from admission.ddd import EN_ISO_CODE
 from admission.ddd.admission.shared_kernel.enums.question_specifique import (
@@ -416,9 +415,9 @@ class AdmissionFormItemInstantiationManager(models.Manager):
             'country',
         )
 
-        # Don't retrieve the questions related to a specific training if the candidate already started the training
+        # Only retrieve the specific questions related to the admission if the candidate already started the training
         if getattr(admission, 'is_in_pursuit', None):
-            qs = qs.exclude(display_according_education=CritereItemFormulaireFormation.UNE_FORMATION.name)
+            qs = qs.filter(display_according_education=CritereItemFormulaireFormation.UNE_SEULE_ADMISSION.name)
 
         return (
             qs.filter(

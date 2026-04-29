@@ -25,8 +25,10 @@
 # ##############################################################################
 from typing import Iterable
 
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
+from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from base.models.utils.utils import ChoiceEnum
 
 
@@ -300,3 +302,27 @@ class OngletsChecklist(ChoiceEnum):
 class RaisonPlusieursDemandesMemesCycleEtAnnee(ChoiceEnum):
     ANNULER_PRECEDENTES_DEMANDES = _('Create this new application and cancel your other ones')
     SUIVRE_EN_PARALLELE = _('Take several courses at the same time')
+
+    @classmethod
+    def choix_annuler_precedentes_demandes_avec_informations_formation(cls, formation: FormationDTO):
+        return mark_safe(
+            _(
+                'Create an application for <em>%(training_name)s (%(training_campus)s) '
+                '%(training_acronym)s</em> and cancel your other applications'
+            )
+            % {
+                'training_name': formation.intitule or formation.intitule_fr,
+                'training_campus': formation.campus.nom if formation.campus else '',
+                'training_acronym': formation.sigle,
+            }
+        )
+
+    @classmethod
+    def choices_with_training_info(cls, formation: FormationDTO):
+        return (
+            (
+                cls.ANNULER_PRECEDENTES_DEMANDES.name,
+                cls.choix_annuler_precedentes_demandes_avec_informations_formation(formation=formation),
+            ),
+            (cls.SUIVRE_EN_PARALLELE.name, cls.SUIVRE_EN_PARALLELE.value),
+        )

@@ -1832,6 +1832,12 @@ msgctxt "admission"
 msgid "Courses"
 msgstr ""
 
+#, python-format
+msgid ""
+"Create an application for <em>%(training_name)s (%(training_campus)s) "
+"%(training_acronym)s</em> and cancel your other applications"
+msgstr ""
+
 msgid "Create message"
 msgstr ""
 
@@ -5034,6 +5040,9 @@ msgstr ""
 msgid "Planned duration"
 msgstr ""
 
+msgid "Please briefly explain what you want:"
+msgstr ""
+
 msgid "Please choose the institute or specify another institute"
 msgstr ""
 
@@ -7655,6 +7664,10 @@ msgstr ""
 msgid "Yes,No,Incomplete field"
 msgstr ""
 
+#, python-format
+msgid "You already submitted other applications for %(year)s"
+msgstr ""
+
 msgid "You appear to have unsaved changes, which will be lost."
 msgstr ""
 
@@ -7849,7 +7862,7 @@ msgstr ""
 #, python-format
 msgid ""
 "You have already created another request for this training, please <a "
-"href=\"%(url)s\">continue with that one.</a>"
+"href=\"%(url)s\">continue with that one</a>."
 msgstr ""
 
 #, python-format
@@ -7964,6 +7977,9 @@ msgid "You need to set a member as secretary."
 msgstr ""
 
 msgid "You specified that no Belgian student status situation applies to you."
+msgstr ""
+
+msgid "You want:"
 msgstr ""
 
 msgid ""

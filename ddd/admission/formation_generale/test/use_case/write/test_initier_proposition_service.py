@@ -104,6 +104,30 @@ class TestInitierPropositionService(AdmissionTestMixin, SimpleTestCase):
         self.assertEqual(proposition.bourse_double_diplome_id.uuid, self.cmd.bourse_double_diplome)
         self.assertEqual(proposition.est_en_poursuite, False)
 
+    def test_should_initier_avec_bourses_non_completees(self):
+        cmd = attr.evolve(
+            self.cmd,
+            bourse_erasmus_mundus='',
+            bourse_double_diplome='',
+            bourse_internationale=None,
+            avec_bourse_double_diplome=None,
+            avec_bourse_internationale=None,
+            avec_bourse_erasmus_mundus=None,
+        )
+
+        proposition_id = self.message_bus.invoke(cmd)
+
+        proposition = self.proposition_repository.get(proposition_id)
+
+        self.assertEqual(proposition.entity_id, proposition_id)
+
+        self.assertIsNone(proposition.avec_bourse_erasmus_mundus)
+        self.assertIsNone(proposition.bourse_erasmus_mundus_id)
+        self.assertIsNone(proposition.avec_bourse_internationale)
+        self.assertIsNone(proposition.bourse_internationale_id)
+        self.assertIsNone(proposition.avec_bourse_double_diplome)
+        self.assertIsNone(proposition.bourse_double_diplome_id)
+
     def test_should_initier_en_poursuite(self):
         with mock.patch(
             'admission.infrastructure.admission.shared_kernel.domain.service.in_memory.inscriptions_translator.'

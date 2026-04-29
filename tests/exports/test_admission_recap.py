@@ -61,8 +61,6 @@ from admission.ddd.admission.doctorat.preparation.dtos import (
     GroupeDeSupervisionDTO,
     MembreCADTO,
     PromoteurDTO,
-)
-from admission.ddd.admission.doctorat.preparation.dtos import (
     PropositionDTO as PropositionFormationDoctoraleDTO,
 )
 from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
@@ -82,8 +80,8 @@ from admission.ddd.admission.formation_continue.dtos import (
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
 )
-from admission.ddd.admission.formation_generale.dtos import ComptabiliteDTO
 from admission.ddd.admission.formation_generale.dtos import (
+    ComptabiliteDTO,
     PropositionDTO as PropositionFormationGeneraleDTO,
 )
 from admission.ddd.admission.shared_kernel.dtos import (
@@ -2740,92 +2738,6 @@ class SectionsAttachmentsTestCase(TestCaseWithQueriesAssertions):
             self.assertEqual(attachments[0].label, DocumentsCurriculum['CURRICULUM'])
             self.assertEqual(attachments[0].uuids, self.general_bachelor_context.proposition.curriculum)
             self.assertTrue(attachments[0].required)
-
-    def test_curriculum_attachments_for_capaes_proposition_and_equivalence(self):
-        with mock.patch.multiple(
-            self.general_bachelor_context.proposition.formation,
-            type=TrainingType.CAPAES.name,
-        ):
-            # With one obtained foreign diploma, display a required equivalence
-            section = get_curriculum_section(self.general_bachelor_context, self.empty_questions, False)
-            attachments = section.attachments
-
-            self.assertEqual(len(attachments), 2)
-
-            self.assertEqual(attachments[0].identifier, 'DIPLOME_EQUIVALENCE')
-            self.assertEqual(attachments[0].label, DocumentsCurriculum['DIPLOME_EQUIVALENCE'])
-            self.assertEqual(attachments[0].uuids, self.general_bachelor_context.proposition.equivalence_diplome)
-            self.assertTrue(attachments[0].required)
-
-            self.assertEqual(attachments[1].identifier, 'CURRICULUM')
-            self.assertEqual(attachments[1].label, DocumentsCurriculum['CURRICULUM'])
-            self.assertEqual(attachments[1].uuids, self.general_bachelor_context.proposition.curriculum)
-            self.assertTrue(attachments[1].required)
-
-            # With only one obtained belgian diploma, don't display the equivalence
-            with mock.patch.multiple(
-                self.general_bachelor_context.curriculum.experiences_academiques[0],
-                pays=BE_ISO_CODE,
-            ):
-                section = get_curriculum_section(self.general_bachelor_context, self.empty_questions, False)
-                attachments = section.attachments
-
-                self.assertEqual(len(attachments), 1)
-                self.assertEqual(attachments[0].identifier, 'CURRICULUM')
-
-            # Without diploma, don't display the equivalence
-            with mock.patch.multiple(
-                self.general_bachelor_context.curriculum,
-                experiences_academiques=[],
-            ):
-                section = get_curriculum_section(self.general_bachelor_context, self.empty_questions, False)
-                attachments = section.attachments
-
-                self.assertEqual(len(attachments), 1)
-                self.assertEqual(attachments[0].identifier, 'CURRICULUM')
-
-            # Without obtained diploma, don't display the equivalence
-            with mock.patch.multiple(
-                self.general_bachelor_context.curriculum.experiences_academiques[0],
-                a_obtenu_diplome=False,
-            ):
-                section = get_curriculum_section(self.general_bachelor_context, self.empty_questions, False)
-                attachments = section.attachments
-
-                self.assertEqual(len(attachments), 1)
-                self.assertEqual(attachments[0].identifier, 'CURRICULUM')
-
-            # With both obtained foreign and belgian diplomas, display a facultative equivalence
-            with mock.patch.multiple(
-                self.general_bachelor_context.curriculum,
-                experiences_academiques=[
-                    self.foreign_academic_curriculum_experience,
-                    self.belgian_academic_curriculum_experience,
-                ],
-            ):
-                section = get_curriculum_section(self.general_bachelor_context, self.empty_questions, False)
-                attachments = section.attachments
-
-                self.assertEqual(len(attachments), 2)
-
-                self.assertEqual(attachments[0].identifier, 'DIPLOME_EQUIVALENCE')
-                self.assertFalse(attachments[0].required)
-
-            # With several obtained foreign diplomas, display a required equivalence
-            with mock.patch.multiple(
-                self.general_bachelor_context.curriculum,
-                experiences_academiques=[
-                    self.foreign_academic_curriculum_experience,
-                    self.foreign_academic_curriculum_experience,
-                ],
-            ):
-                section = get_curriculum_section(self.general_bachelor_context, self.empty_questions, False)
-                attachments = section.attachments
-
-                self.assertEqual(len(attachments), 2)
-
-                self.assertEqual(attachments[0].identifier, 'DIPLOME_EQUIVALENCE')
-                self.assertTrue(attachments[0].required)
 
     def test_curriculum_attachments_for_bachelor_proposition(self):
         section = get_curriculum_section(self.general_bachelor_context, self.empty_questions, False)

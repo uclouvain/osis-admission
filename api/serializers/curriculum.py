@@ -296,7 +296,6 @@ class GeneralEducationCompleterCurriculumCommandSerializer(DTOSerializer):
         source = general_commands.CompleterCurriculumCommand
         fields = [
             'curriculum',
-            'equivalence_diplome',
             'reponses_questions_specifiques',
         ]
 

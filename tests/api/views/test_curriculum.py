@@ -734,7 +734,6 @@ class GeneralEducationCurriculumTestCase(
             },
             'curriculum': ['file1.pdf'],
             'uuid_proposition': cls.admission.uuid,
-            'equivalence_diplome': ['file2.pdf'],
         }
 
         # Users
@@ -767,7 +766,6 @@ class GeneralEducationCurriculumTestCase(
             },
         )
         self.assertEqual(updated_admission.curriculum, [uuid.UUID('550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92')])
-        self.assertEqual(updated_admission.diploma_equivalence, [uuid.UUID('550bf83e-2be9-4c1e-a2cd-1bdfe82e2c92')])
 
         self.assertEqual(updated_admission.modified_at, datetime.datetime.now())
         self.assertEqual(updated_admission.last_update_author, self.user.person)

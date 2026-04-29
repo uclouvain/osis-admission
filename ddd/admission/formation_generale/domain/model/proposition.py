@@ -620,12 +620,10 @@ class Proposition(interface.RootEntity):
     def completer_curriculum(
         self,
         curriculum: List[str],
-        equivalence_diplome: List[str],
         reponses_questions_specifiques: Dict,
         auteur_modification: str,
     ):
         self.curriculum = curriculum
-        self.equivalence_diplome = equivalence_diplome
         self.reponses_questions_specifiques = reponses_questions_specifiques
         self.auteur_derniere_modification = auteur_modification
 

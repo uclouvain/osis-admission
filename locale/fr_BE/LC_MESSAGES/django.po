@@ -2013,6 +2013,14 @@ msgctxt "admission"
 msgid "Courses"
 msgstr "Formations"
 
+#, python-format
+msgid ""
+"Create an application for <em>%(training_name)s (%(training_campus)s) "
+"%(training_acronym)s</em> and cancel your other applications"
+msgstr ""
+"Introduire une demande d'inscription en <em>%(training_name)s "
+"(%(training_campus)s) %(training_acronym)s</em> et annuler vos autres demandes"
+
 msgid "Create message"
 msgstr "Créer le message"
 
@@ -5589,6 +5597,9 @@ msgstr ""
 msgid "Planned duration"
 msgstr "Durée prévue"
 
+msgid "Please briefly explain what you want:"
+msgstr "Veuillez expliquer brièvement votre souhait :"
+
 msgid "Please choose the institute or specify another institute"
 msgstr "Veuillez définir l'établissement ou précisez un autre établissement"
 
@@ -8550,6 +8561,10 @@ msgstr "Oui,Non,Tous"
 msgid "Yes,No,Incomplete field"
 msgstr "Oui,Non,Non renseigné·e"
 
+#, python-format
+msgid "You already submitted other applications for %(year)s"
+msgstr "Vous avez déjà soumis d'autres demandes d'inscription pour %(year)s"
+
 msgid "You appear to have unsaved changes, which will be lost."
 msgstr ""
 "Vous semblez avoir des modifications non enregistrées, celles-ci seront "
@@ -8574,7 +8589,8 @@ msgid ""
 "You are already registered for this course which will take place during the "
 "year %(annee)s."
 msgstr ""
-"Vous êtes déjà inscrit·e pour cette formation qui aura lieu durant l'année %(annee)s."
+"Vous êtes déjà inscrit·e pour cette formation qui aura lieu durant l'année "
+"%(annee)s."
 
 msgid "You are applying as ..."
 msgstr "Postulez-vous en tant que ..."
@@ -8817,10 +8833,10 @@ msgstr ""
 #, python-format
 msgid ""
 "You have already created another request for this training, please <a "
-"href=\"%(url)s\">continue with that one.</a>"
+"href=\"%(url)s\">continue with that one</a>."
 msgstr ""
 "Vous avez déjà créé une autre demande pour cette formation, veuillez <a "
-"href=\"%(url)s\">poursuivre cette autre demande.</a>"
+"href=\"%(url)s\">poursuivre cette autre demande</a>."
 
 #, python-format
 msgid ""
@@ -8961,6 +8977,9 @@ msgstr "Vous devez désigner un membre comme secrétaire."
 msgid "You specified that no Belgian student status situation applies to you."
 msgstr ""
 "Vous avez spécifié qu'aucune situation d'assimilation ne s'appliquait à vous."
+
+msgid "You want:"
+msgstr "Vous souhaitez :"
 
 msgid ""
 "You will find the PhD Regulations, specific provisions for your field, PhD "

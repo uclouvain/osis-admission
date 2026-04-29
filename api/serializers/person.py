@@ -34,6 +34,7 @@ from admission.ddd.admission.shared_kernel.dtos import IdentificationDTO
 from base.api.serializers.academic_year import RelatedAcademicYearField
 from base.models.enums.community import CommunityEnum
 from base.models.person import Person
+from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
 from base.utils.serializers import DTOSerializer
 from osis_profile.models import EducationalExperienceYear
 from reference.api.serializers.country import RelatedCountryField
@@ -128,8 +129,9 @@ def candidate_is_potentially_concerned_by_bama_15(admission):
         return False
 
     target_year = (
-      admission.determined_academic_year.year
-      if admission.determined_academic_year_id else admission.training.academic_year.year
+        admission.determined_academic_year.year
+        if admission.determined_academic_year_id
+        else admission.training.academic_year.year
     ) - 1
 
     qs = EducationalExperienceYear.objects.filter(
@@ -138,6 +140,8 @@ def candidate_is_potentially_concerned_by_bama_15(admission):
         educational_experience__obtained_diploma=False,
         educational_experience__institute__community=CommunityEnum.FRENCH_SPEAKING.name,
         educational_experience__program__cycle=Cycle.FIRST_CYCLE.name,
+    ).exclude(
+        educational_experience__institute__acronym=UCLouvain_acronym,
     )
 
     if admission.status not in STATUTS_PROPOSITION_GENERALE_NON_SOUMISE:

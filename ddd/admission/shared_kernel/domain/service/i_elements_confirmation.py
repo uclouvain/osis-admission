@@ -37,8 +37,7 @@ from admission.ddd.admission.formation_generale.domain.service.i_formation impor
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import ElementsConfirmationNonConcordants
 from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation
-from base.models.enums.academic_calendar_type import AcademicCalendarTypes
-from base.models.enums.academic_calendar_type import AcademicCalendarTypes as Pool
+from base.models.enums.academic_calendar_type import AcademicCalendarTypes, AcademicCalendarTypes as Pool
 from base.models.enums.education_group_types import TrainingType
 from osis_common.ddd import interface
 
@@ -179,6 +178,7 @@ class IElementsConfirmation(interface.DomainService):
         profil_candidat_translator: 'IProfilCandidatTranslator',
         annee_soumise: int = None,
         candidat_est_inscrit_recemment_ucl: bool = None,
+        candidat_est_en_poursuite_directe: bool = None,
     ) -> List['ElementConfirmation']:
         elements = []
         identification_dto = (
@@ -260,8 +260,10 @@ class IElementsConfirmation(interface.DomainService):
             and formation_translator.get(proposition.formation_id).type != TrainingType.MASTER_MC
             # et HUE
             and not identification_dto.pays_nationalite_europeen
-            # excepté réinscription en poursuite étendue
-            and not proposition.est_en_poursuite
+            # excepté réinscription en poursuite directe
+            and not candidat_est_en_poursuite_directe
+            # excepté formations KINE1BA, VETE1BA, LOGO1BA lors d'une poursuite étendue
+            and not (proposition.formation_id.est_formation_avec_quota() and proposition.est_en_poursuite)
         ):
             elements.append(
                 ElementConfirmation(
@@ -384,6 +386,7 @@ class IElementsConfirmation(interface.DomainService):
         formation_translator: 'IFormationTranlator',
         profil_candidat_translator: 'IProfilCandidatTranslator',
         candidat_est_inscrit_recemment_ucl: bool = None,
+        candidat_est_en_poursuite_directe: bool = None,
     ) -> None:
         attendu = cls.recuperer(
             proposition=proposition,
@@ -391,6 +394,7 @@ class IElementsConfirmation(interface.DomainService):
             profil_candidat_translator=profil_candidat_translator,
             annee_soumise=annee_soumise,
             candidat_est_inscrit_recemment_ucl=candidat_est_inscrit_recemment_ucl,
+            candidat_est_en_poursuite_directe=candidat_est_en_poursuite_directe,
         )
         if len(soumis) != len(attendu):
             raise ElementsConfirmationNonConcordants

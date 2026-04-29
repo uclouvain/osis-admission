@@ -61,6 +61,11 @@ def recuperer_elements_confirmation(
         matricule_candidat=proposition.matricule_candidat,
         annee_inscription_formation_translator=annee_inscription_formation_translator,
     )
+    candidat_est_en_poursuite_directe = inscriptions_translator.est_en_poursuite_directe(
+        matricule_candidat=proposition.matricule_candidat,
+        sigle_formation=proposition.formation_id.sigle,
+        annee_inscription_formation_translator=annee_inscription_formation_translator,
+    )
 
     # WHEN
 
@@ -70,4 +75,5 @@ def recuperer_elements_confirmation(
         formation_translator=formation_translator,
         profil_candidat_translator=profil_candidat_translator,
         candidat_est_inscrit_recemment_ucl=candidat_est_inscrit_recemment_ucl,
+        candidat_est_en_poursuite_directe=candidat_est_en_poursuite_directe,
     )

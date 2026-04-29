@@ -28,13 +28,10 @@ from typing import List
 import attr
 
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
-    EquivalenceNonRenseigneeException,
     FichierCurriculumNonRenseigneException,
 )
 from base.ddd.utils.business_validator import BusinessValidator
 from base.models.enums.education_group_types import TrainingType
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO
-from osis_profile import BE_ISO_CODE
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -50,24 +47,3 @@ class ShouldCurriculumFichierEtreSpecifie(BusinessValidator):
             and not self.fichier_pdf
         ):
             raise FichierCurriculumNonRenseigneException
-
-
-@attr.dataclass(frozen=True, slots=True)
-class ShouldEquivalenceEtreSpecifiee(BusinessValidator):
-    equivalence: List[str]
-    type_formation: TrainingType
-    experiences_academiques: List[ExperienceAcademiqueDTO]
-    candidat_est_en_poursuite: bool
-
-    def validate(self, *args, **kwargs):
-        experiences_avec_diplome = [
-            experience for experience in self.experiences_academiques if experience.a_obtenu_diplome
-        ]
-        if (
-            not self.candidat_est_en_poursuite
-            and self.type_formation in [TrainingType.AGGREGATION, TrainingType.CAPAES]
-            and not self.equivalence
-            and experiences_avec_diplome
-            and all(experience.pays != BE_ISO_CODE for experience in experiences_avec_diplome)
-        ):
-            raise EquivalenceNonRenseigneeException
