@@ -301,6 +301,15 @@
 
           {% bootstrap_form comment_forms.choix_formation %}
           {% include "admission/general_education/includes/checklist/choix_formation_detail.html" %}
+          {% if has_other_admission_same_year_same_cycle and admission.est_inscription %}
+            {% blocktranslate trimmed with year=admission.formation.annee|get_short_academic_year asvar multiple_applications_panel_label %}
+              The candidate already submitted other applications for {{ year }}
+            {% endblocktranslate %}
+            {% panel multiple_applications_panel_label %}
+              {% field_data _('You want:') admission.raison_plusieurs_demandes_meme_cycle_meme_annee|enum_display:'RaisonPlusieursDemandesMemesCycleEtAnnee' %}
+              {% field_data _('Please briefly explain what you want:') admission.justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee html_tag='blockquote' %}
+            {% endpanel %}
+          {% endif %}
 
           <div class="info-part">
             {% field_data _("Proposition submission") admission.soumise_le %}

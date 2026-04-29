@@ -5589,6 +5589,9 @@ msgstr ""
 msgid "Planned duration"
 msgstr "Durée prévue"
 
+msgid "Please briefly explain what you want:"
+msgstr "Veuillez expliquer brièvement votre souhait :"
+
 msgid "Please choose the institute or specify another institute"
 msgstr "Veuillez définir l'établissement ou précisez un autre établissement"
 
@@ -7184,6 +7187,11 @@ msgid ""
 "The cancel mail has been sent to the candidate the %(date)s by %(sender)s."
 msgstr ""
 "Le mail d'annulation a été envoyé au candidat le %(date)s par %(sender)s."
+
+#, python-format
+msgid "The candidate already submitted other applications for %(year)s"
+msgstr ""
+"Le·la candidat·e a déjà soumis d'autres demandes d'inscription pour %(year)s"
 
 msgid "The candidate has a scholarship"
 msgstr "Le candidat est boursier"
@@ -8961,6 +8969,9 @@ msgstr "Vous devez désigner un membre comme secrétaire."
 msgid "You specified that no Belgian student status situation applies to you."
 msgstr ""
 "Vous avez spécifié qu'aucune situation d'assimilation ne s'appliquait à vous."
+
+msgid "You want:"
+msgstr "Vous souhaitez :"
 
 msgid ""
 "You will find the PhD Regulations, specific provisions for your field, PhD "

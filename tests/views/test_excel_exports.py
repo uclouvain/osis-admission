@@ -35,8 +35,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
-from django.utils.translation import gettext as _
-from django.utils.translation import pgettext, pgettext_lazy
+from django.utils.translation import gettext as _, pgettext, pgettext_lazy
 from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 from osis_async.models import AsyncTask
@@ -65,14 +64,10 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixMoyensDecouverteFormation,
     ChoixStatutPropositionContinue,
     ChoixTypeAdresseFacturation,
-)
-from admission.ddd.admission.formation_continue.domain.model.enums import (
     OngletsChecklist as OngletsChecklistContinue,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import (
     OngletsChecklist as OngletsChecklistGenerale,
 )
 from admission.ddd.admission.shared_kernel.dtos.liste import (
@@ -317,6 +312,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
             plusieurs_demandes=False,
             sigle_formation=cls.admission.training.acronym,
             code_formation=cls.admission.training.partial_acronym,
+            cycle_formation=cls.admission.training.education_group_type.cycle,
             intitule_formation=cls.admission.training.title,
             type_formation=cls.admission.training.education_group_type.name,
             lieu_formation=teaching_campus,

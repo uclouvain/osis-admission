@@ -5034,6 +5034,9 @@ msgstr ""
 msgid "Planned duration"
 msgstr ""
 
+msgid "Please briefly explain what you want:"
+msgstr ""
+
 msgid "Please choose the institute or specify another institute"
 msgstr ""
 
@@ -6477,6 +6480,10 @@ msgstr ""
 #, python-format
 msgid ""
 "The cancel mail has been sent to the candidate the %(date)s by %(sender)s."
+msgstr ""
+
+#, python-format
+msgid "The candidate already submitted other applications for %(year)s"
 msgstr ""
 
 msgid "The candidate has a scholarship"
@@ -7964,6 +7971,9 @@ msgid "You need to set a member as secretary."
 msgstr ""
 
 msgid "You specified that no Belgian student status situation applies to you."
+msgstr ""
+
+msgid "You want:"
 msgstr ""
 
 msgid ""
