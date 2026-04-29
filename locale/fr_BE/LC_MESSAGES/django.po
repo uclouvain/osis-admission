@@ -3589,7 +3589,7 @@ msgid "Help text"
 msgstr "Texte d'aide"
 
 msgid "Hide experiences not considered in student path"
-msgstr "Cacher les expériences pas prises en compte dans le parcours étudiant"
+msgstr "Cacher les états pas pris en compte dans le parcours étudiant"
 
 msgid "Hide the checklist menu"
 msgstr "Cacher le menu de la checklist"
@@ -6593,7 +6593,7 @@ msgid "Show details"
 msgstr "Voir le détail"
 
 msgid "Show experiences not considered in student path"
-msgstr "Montrer les expériences pas prises en compte dans le parcours étudiant"
+msgstr "Montrer les états pas prises en compte dans le parcours étudiant"
 
 msgid "Show the checklist menu"
 msgstr "Afficher le menu de la checklist"
