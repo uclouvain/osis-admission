@@ -49,7 +49,7 @@
   {# Vue complète #}
   {% concat prefix '-parcours-complete' as complete_parcours_id %}
   <div role="tabpanel" class="parcours table-responsive tab-pane{% if not default_tab or default_tab == 'complete' %} active{% endif %}" id="{{ complete_parcours_id }}">
-    {% include 'osis_profile/parcours_externe_complet.html' with show_titre_acces=True curex_a_fusionner=curex_a_fusionner show_actions=show_actions action_template_name="admission/general_education/includes/checklist/parcours_action_column.html" parcours_tab_id=complete_parcours_id %}
+    {% include 'osis_profile/parcours_externe_complet.html' with show_admission_specific_information=True curex_a_fusionner=curex_a_fusionner show_actions=show_actions action_template_name="admission/general_education/includes/checklist/parcours_action_column.html" parcours_tab_id=complete_parcours_id %}
   </div>
 
   {# Vue formations académiques #}
@@ -78,7 +78,7 @@
         {% with experiences_formations=experiences|filter_experiences_trainings %}
           {% for year, year_experiences in experiences_formations.items %}
             {% for experience in year_experiences %}
-              {% include experience|get_experience_row_template with show_titre_acces=True show_actions=show_actions curex_a_fusionner=curex_a_fusionner action_template_name="admission/general_education/includes/checklist/parcours_action_column.html" parcours_tab_id=formations_prefix_id %}
+              {% include experience|get_experience_row_template with show_admission_specific_information=True show_actions=show_actions curex_a_fusionner=curex_a_fusionner action_template_name="admission/general_education/includes/checklist/parcours_action_column.html" parcours_tab_id=formations_prefix_id %}
             {% empty %}
               {% ifchanged %}
               <tr class="bg-primary">
@@ -118,7 +118,7 @@
         {% with experiences_financabilite=experiences|filter_experiences_financability %}
           {% for year, year_experiences in experiences_financabilite.items %}
             {% for experience in year_experiences %}
-              {% include experience|get_experience_row_template with show_titre_acces=True show_actions=show_actions curex_a_fusionner=curex_a_fusionner action_template_name="admission/general_education/includes/checklist/parcours_action_column.html" parcours_tab_id=financabilite_prefix_id %}
+              {% include experience|get_experience_row_template with show_admission_specific_information=True show_actions=show_actions curex_a_fusionner=curex_a_fusionner action_template_name="admission/general_education/includes/checklist/parcours_action_column.html" parcours_tab_id=financabilite_prefix_id %}
             {% endfor %}
           {% endfor %}
         {% endwith %}
