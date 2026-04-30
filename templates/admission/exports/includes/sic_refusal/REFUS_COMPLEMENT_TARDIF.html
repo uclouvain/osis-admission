@@ -6,7 +6,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -24,44 +24,47 @@
 {% endcomment %}
 
 <p>
-  Après examen de votre dossier, j’ai le regret de vous faire savoir que votre demande d’admission au programme de «
-  {% if proposition|est_premiere_annee %}
-    {{ proposition.formation.intitule|intitule_premiere_annee }} ({{ proposition.formation.sigle }}-1)
-  {% else %}
-    {{ proposition.formation.intitule }} ({{ proposition.formation.sigle }})
-  {% endif %}
-   » pour l’année académique {{ proposition.formation.annee|get_academic_year }} ne peut faire
-  l’objet d’une réponse favorable.
+    Après examen de votre dossier, j’ai le regret de vous faire savoir que votre demande d’admission au programme de «
+    {% if proposition|est_premiere_annee %}
+        {{ proposition.formation.intitule|intitule_premiere_annee }} ({{ proposition.formation.sigle }}-1)
+    {% else %}
+        {{ proposition.formation.intitule }} ({{ proposition.formation.sigle }})
+    {% endif %}
+    » pour l’année académique {{ proposition.formation.annee|get_academic_year }} est irrecevable et ne peut faire
+    l’objet d’une réponse favorable.
 </p>
 
 <p>
-  La date tardive à laquelle nous avons reçu le complément de dossier, indispensable à l'analyse de votre demande, ne
-  nous permet plus de traiter celle-ci dans un délai raisonnable pour cette année académique. En effet, comme
-  mentionné sur le site, ce complément devait nous parvenir endéans les 15 jours calendrier suivant la réception du
-  courrier envoyé par notre service. (cfr <a href="https://uclouvain.be/fr/etudier/inscriptions/calendrier-inscriptions.html">
-  https://uclouvain.be/fr/etudier/inscriptions/calendrier-inscriptions.html</a>).
-</p>
-
-<p>Votre dossier est administrativement clôturé en raison du non-respect du délai imparti.</p>
-
-<p>
-  Nous vous proposons, par conséquent, de réintroduire une nouvelle demande d’admission en ligne pour
-  l’année académique {{ proposition.formation.annee|add:1|get_academic_year }} (
-  <a href="https://uclouvain.be/fr/etudier/inscriptions/futurs-etudiants.html">
-  https://uclouvain.be/fr/etudier/inscriptions/futurs-etudiants.html</a>).
+    En effet, malgré les rappels que nous vous avons adressés, nous constatons que vous ne nous avez pas fourni les
+    informations complémentaires indispensables à l’analyse de votre demande d’admission ou que ceux-ci nous sont
+    parvenus
+    trop tardivement et ne nous permettent plus de traiter votre demande dans un délai raisonnable en vue de l’année
+    académique {{ proposition.formation.annee }} Comme indiqué sur notre site, ce complément d’informations devait
+    nous parvenir endéans les 15 jours calendrier suivant la réception du courrier envoyé par notre service (cfr.
+    <a href="https://www.uclouvain.be/fr/inscriptions/calendrier">https://www.uclouvain.be/fr/inscriptions/calendrier</a>).
+    Nous vous proposons, par conséquent, de réintroduire une nouvelle demande d’admission en ligne
+    pour l’année académique {{ proposition.formation.annee|add:1 }} (
+    <a href="https://www.uclouvain.be/fr/inscriptions/parcours-inscription">
+        https://www.uclouvain.be/fr/inscriptions/parcours-inscription</a>).
 </p>
 
 <p>
-  Toutefois, si vous estimez que les motifs de cette clôture administrative ne sont pas fondés et que vous disposez
-  d’arguments à faire valoir, un recours peut être exercé auprès de la Déléguée du Gouvernement de la Communauté
-  française de Belgique conformément à l’article 95, § 1er du décret du 7 novembre 2013 définissant le paysage de
-  l’enseignement supérieur et l’organisation académique des études. Ce recours doit être introduit par courrier
-  électronique ou par courrier recommandé avec accusé de réception ou remis en mains propres contre accusé de
-  réception.
+    Toutefois, si vous estimez que des circonstances exceptionnelles justifient votre retard, il vous est loisible
+    d’introduire un
+    recours auprès de la Déléguée du Gouvernement près l’Université à l’encontre de cette décision d’irrecevabilité
+    conformément à l’article 95, § 1er du décret du 7 novembre 2013 définissant le paysage de l’enseignement supérieur
+    et
+    l’organisation académique des études et à l’article 19 du Règlement général des études et des évaluations de
+    l’UCLouvain.
 </p>
 
 <p>
-  Afin de connaître cette procédure, je vous invite à consulter l’article 19 du Règlement Général des Études et des
-  Évaluations disponible à l’adresse suivante : <a href="https://www.uclouvain.be/fr/universite/rgee">
-  https://www.uclouvain.be/fr/universite/rgee</a>.
+    Sous peine d’irrecevabilité, ce recours doit être introduit dans les quinze jours ouvrables à partir du premier jour
+    ouvrable qui
+    suit la notification de la présente. Le recours doit être introduit par courrier électronique ou remis en mains
+    propres contre
+    accusé de réception ou par courrier recommandé avec accusé de réception. Le modèle de recours, les délais et leurs
+    éventuelles suspensions, les informations pratiques et adresses utiles à cette fin figurent à l’annexe n°1 du
+    Règlement général
+    des études et des évaluations de l’UCLouvain.
 </p>
