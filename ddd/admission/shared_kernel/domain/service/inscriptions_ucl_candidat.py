@@ -25,6 +25,8 @@
 # ##############################################################################
 import datetime
 
+from admission.ddd.admission.formation_generale.domain.model.enums import PoursuiteDeCycle
+from admission.ddd.admission.shared_kernel.domain.model.formation import FormationIdentity
 from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import (
     IAnneeInscriptionFormationTranslator,
 )
@@ -42,8 +44,12 @@ from admission.ddd.admission.shared_kernel.dtos.inscription_ucl_candidat import 
     InscriptionUCLCandidatDTO,
     PeriodeReinscriptionDTO,
 )
+from base.models.enums.education_group_types import TrainingType
 from ddd.logic.deliberation.propositions.domain.model._decision import Decision
 from ddd.logic.diffusion_des_notes.domain.validator.exceptions import DateDiffusionDeNotesFormationPasTrouveException
+from ddd.logic.financabilite.domain.service.algorithmes import VETE1BA
+from epc.models.enums.etat_concours_attestation import EtatConcoursAttestation
+from epc.models.enums.reussite_bloc1 import ReussiteBloc1
 from osis_common.ddd import interface
 
 
@@ -93,6 +99,9 @@ class InscriptionsUCLCandidatService(interface.DomainService):
                     est_diplome=deliberation_cycle.est_diplome if deliberation_cycle else False,
                     lieu_enseignement=formation_courante.lieu_enseignement,
                     type_formation=formation_courante.type,
+                    est_premiere_annee_bachelier=inscription.est_premiere_annee_bachelier,
+                    etat_concours_attestation=inscription.etat_concours_attestation,
+                    noma=inscription.noma,
                 )
             )
 
@@ -255,3 +264,50 @@ class InscriptionsUCLCandidatService(interface.DomainService):
     @classmethod
     def a_suivi_formation(cls, sigle_formation: str, inscriptions: list[InscriptionUCLCandidatDTO]):
         return any(inscription.sigle_formation == sigle_formation for inscription in inscriptions)
+
+    @classmethod
+    def est_en_poursuite_cycle_bachelier(
+        cls,
+        inscriptions_ucl_candidat: list[InscriptionUCLCandidatDTO],
+        formation_id: FormationIdentity,
+        type_formation: TrainingType,
+        deliberation_translator: IDeliberationTranslator,
+    ) -> PoursuiteDeCycle:
+        if type_formation != TrainingType.BACHELOR:
+            return PoursuiteDeCycle.TO_BE_DETERMINED
+
+        inscription_bachelier_annee_precedente = next(
+            (
+                inscription
+                for inscription in inscriptions_ucl_candidat
+                if inscription.sigle_formation == formation_id.sigle and inscription.annee == formation_id.annee - 1
+            ),
+            None,
+        )
+
+        if inscription_bachelier_annee_precedente:
+            if not inscription_bachelier_annee_precedente.est_premiere_annee_bachelier:
+                return PoursuiteDeCycle.YES
+
+            deliberations_annuelles = deliberation_translator.recuperer_deliberations_annuelles(
+                nomas=[inscription_bachelier_annee_precedente.noma],
+                annee=inscription_bachelier_annee_precedente.annee,
+                sigle_formation=inscription_bachelier_annee_precedente.sigle_formation,
+            )
+
+            bloc_1_reussi = any(
+                deliberation_session
+                and deliberation_session.etat_cycle_annualise
+                and deliberation_session.etat_cycle_annualise.reussite_bloc1 == ReussiteBloc1.REUSSITE_BLOC1.name
+                for deliberation in deliberations_annuelles.values()
+                for deliberation_session in deliberation.values()
+            )
+
+            if bloc_1_reussi and (
+                formation_id.sigle != VETE1BA
+                or inscription_bachelier_annee_precedente.etat_concours_attestation
+                == EtatConcoursAttestation.ACCORDEE.name
+            ):
+                return PoursuiteDeCycle.YES
+
+        return PoursuiteDeCycle.NO
