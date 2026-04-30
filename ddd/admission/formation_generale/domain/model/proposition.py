@@ -1198,7 +1198,7 @@ class Proposition(interface.RootEntity):
         annee_formation: AcademicYear,
         identification_dto: IdentificationDTO,
         inscriptions_translator: IInscriptionsTranslatorService,
-        decision_deliberation: DecisionDeliberation,
+        decision_deliberation: DecisionDeliberation | None,
     ):
         if self.type_demande == TypeDemande.INSCRIPTION:
             ApprouverInscriptionParSicValidatorList(

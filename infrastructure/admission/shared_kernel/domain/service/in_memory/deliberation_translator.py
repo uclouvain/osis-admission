@@ -63,8 +63,8 @@ class DeliberationInMemoryTranslator(IDeliberationTranslator):
         noma: str,
         sigle_formation: str,
         annee: Optional[int] = None,
-    ) -> DecisionDeliberation:
+    ) -> DecisionDeliberation | None:
         return DecisionDeliberation(
-            est_diplome=True,
-            reussite_bloc_1=True,
+            est_diplome=False,
+            reussite_bloc_1=False,
         )

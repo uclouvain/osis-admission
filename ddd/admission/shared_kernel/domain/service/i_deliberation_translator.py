@@ -68,5 +68,5 @@ class IDeliberationTranslator(interface.DomainService):
         noma: str,
         sigle_formation: str,
         annee: Optional[int] = None,
-    ) -> DecisionDeliberation:
+    ) -> DecisionDeliberation | None:
         raise NotImplementedError

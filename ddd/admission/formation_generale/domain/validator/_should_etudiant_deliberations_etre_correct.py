@@ -38,18 +38,22 @@ from base.ddd.utils.business_validator import BusinessValidator
 
 @attr.dataclass(frozen=True, slots=True)
 class ShouldEtudiantPremiereAnneeNAPasReussiSonBloc1(BusinessValidator):
-    decision_deliberation: DecisionDeliberation
+    decision_deliberation: DecisionDeliberation | None
     poursuite_de_cycle: PoursuiteDeCycle
 
     def validate(self, *args, **kwargs):
-        if self.poursuite_de_cycle == PoursuiteDeCycle.NO and self.decision_deliberation.reussite_bloc_1:
+        if (
+            self.poursuite_de_cycle == PoursuiteDeCycle.NO
+            and self.decision_deliberation
+            and self.decision_deliberation.reussite_bloc_1
+        ):
             raise EtudiantPremiereAnneeADejaSonBloc1Exception
 
 
 @attr.dataclass(frozen=True, slots=True)
 class ShouldEtudiantNAPasDejaLeDiplome(BusinessValidator):
-    decision_deliberation: DecisionDeliberation
+    decision_deliberation: DecisionDeliberation | None
 
     def validate(self, *args, **kwargs):
-        if self.decision_deliberation.est_diplome:
+        if self.decision_deliberation and self.decision_deliberation.est_diplome:
             raise EtudiantDejaDiplomeException

@@ -562,7 +562,7 @@ class ApprouverAdmissionParSicValidatorList(TwoStepsMultipleBusinessExceptionLis
 
     statut_validation_donnees_personnelles: str
 
-    decision_deliberation: DecisionDeliberation
+    decision_deliberation: DecisionDeliberation | None
     poursuite_de_cycle: PoursuiteDeCycle
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
@@ -618,7 +618,7 @@ class ApprouverInscriptionParSicValidatorList(TwoStepsMultipleBusinessExceptionL
 
     statut_validation_donnees_personnelles: str
 
-    decision_deliberation: DecisionDeliberation
+    decision_deliberation: DecisionDeliberation | None
     poursuite_de_cycle: PoursuiteDeCycle
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:

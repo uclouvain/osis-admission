@@ -111,7 +111,7 @@ class DeliberationTranslator(IDeliberationTranslator):
         noma: str,
         sigle_formation: str,
         annee: Optional[int] = None,
-    ) -> DecisionDeliberation:
+    ) -> DecisionDeliberation | None:
         from infrastructure.messages_bus import message_bus_instance
 
         if not noma:
