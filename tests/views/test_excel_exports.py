@@ -319,6 +319,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
             est_inscription_tardive=None,
             est_modification_inscription_externe=None,
             est_reorientation_inscription_externe=None,
+            est_en_poursuite=None,
             nationalite_candidat=cls.admission.candidate.country_of_citizenship.name,
             nationalite_ue_candidat=cls.admission.candidate.country_of_citizenship.european_union,
             vip=any(

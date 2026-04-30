@@ -1032,6 +1032,9 @@ msgstr ""
 msgid "Belgian National Register Number"
 msgstr ""
 
+msgid "Belgian access diploma"
+msgstr ""
+
 msgid "Belgian diploma"
 msgstr ""
 
@@ -3877,6 +3880,9 @@ msgstr ""
 msgid "Is an external reorientation"
 msgstr ""
 
+msgid "Is belgian access diploma"
+msgstr ""
+
 msgid "Is belgian bachelor"
 msgstr ""
 
@@ -4468,6 +4474,11 @@ msgstr "No"
 msgid "NOMA not found"
 msgstr ""
 
+#, fuzzy
+#| msgid "NO"
+msgid "NON"
+msgstr "No"
+
 msgid "NON_CONCERNE"
 msgstr "Not concerned"
 
@@ -4634,6 +4645,9 @@ msgstr ""
 msgid "Non-retrievable document"
 msgstr ""
 
+msgid "None"
+msgstr ""
+
 msgid "None of these are relevant to me"
 msgstr ""
 
@@ -4718,6 +4732,9 @@ msgstr ""
 
 msgid "OTHER"
 msgstr "Other"
+
+msgid "OUI"
+msgstr ""
 
 msgid "Obtained grade"
 msgstr ""
@@ -5367,6 +5384,9 @@ msgid ""
 "CDE, CLSM or CDSS"
 msgstr ""
 
+msgid "Pursuit"
+msgstr ""
+
 msgid "Quarantine"
 msgstr ""
 
@@ -5378,6 +5398,9 @@ msgstr ""
 msgid ""
 "Question tooltip text for Document, Selection and Text form elements. "
 "Content of the message to be displayed for Message elements."
+msgstr ""
+
+msgid "Quick criteria"
 msgstr ""
 
 msgid "REDUCTION_VCRC"

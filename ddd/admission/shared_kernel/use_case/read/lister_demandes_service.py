@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,9 +27,7 @@
 from typing import List
 
 from admission.ddd.admission.shared_kernel.commands import ListerToutesDemandesQuery
-from admission.ddd.admission.shared_kernel.domain.service.i_filtrer_toutes_demandes import (
-    IListerToutesDemandes,
-)
+from admission.ddd.admission.shared_kernel.domain.service.i_filtrer_toutes_demandes import IListerToutesDemandes
 from admission.ddd.admission.shared_kernel.dtos.liste import DemandeRechercheDTO
 
 
@@ -62,4 +60,5 @@ def lister_demandes(
         filtres_etats_checklist=cmd.filtres_etats_checklist,
         tardif_modif_reorientation=cmd.tardif_modif_reorientation,
         delai_depasse_complements=cmd.delai_depasse_complements,
+        critere_express=cmd.critere_express,
     )

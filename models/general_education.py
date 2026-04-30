@@ -41,6 +41,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     BesoinDeDerogationDelegueVrae,
     ChoixStatutPropositionGenerale,
     DerogationFinancement,
+    DiplomeAccesBelge,
     DispenseOuDroitsMajores,
     DroitsInscriptionMontant,
     MobiliteNombreDeMois,
@@ -528,6 +529,13 @@ class GeneralEducationAdmission(BaseAdmission):
         upload_to=admission_directory_path,
         verbose_name=_('Proof of re-enrolment for the bachelor\'s degree (BAMA15)'),
     )
+    is_belgian_access_diploma = models.CharField(
+        choices=DiplomeAccesBelge.choices(),
+        blank=True,
+        default=DiplomeAccesBelge.NON_CONCERNE.name,
+        max_length=30,
+        verbose_name=_('Is belgian access diploma'),
+    )
 
     several_admissions_same_cycle_same_year_reason = models.CharField(
         choices=RaisonPlusieursDemandesMemesCycleEtAnnee.choices(),
@@ -545,7 +553,7 @@ class GeneralEducationAdmission(BaseAdmission):
 
     is_in_pursuit = models.BooleanField(
         blank=True,
-        null=True,
+        default=False,
         verbose_name=_('Is in pursuit'),
     )
 

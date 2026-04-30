@@ -96,6 +96,9 @@
       {% if admission.est_inscription_tardive %}
         <span class="fa-regular fa-calendar-clock" title="{% translate "Late enrollment" %}"></span>
       {% endif %}
+      {% if admission.est_en_poursuite %}
+        <span class="fa-solid fa-sign-post" title="{% translate "Pursuit" %}"></span>
+      {% endif %}
       {% if admission.plusieurs_demandes %}
         {% list_other_admissions_url admission.uuid admission.type_formation as list_other_admissions_url %}
         <span

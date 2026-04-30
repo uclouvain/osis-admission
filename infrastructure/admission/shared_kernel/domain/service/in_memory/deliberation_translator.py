@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import datetime
+from typing import List
 
 from admission.ddd.admission.shared_kernel.domain.service.i_deliberation_translator import IDeliberationTranslator
 from ddd.logic.deliberation.cloture.dto.deliberation import DeliberationCycleDTO, DeliberationProgrammeAnnuelDTO
@@ -53,3 +54,10 @@ class DeliberationInMemoryTranslator(IDeliberationTranslator):
         annee: int,
     ) -> datetime.date:
         return datetime.date(year=annee, month=4, day=15)
+
+    @classmethod
+    def recuperer_deliberations(
+        cls,
+        noma_etudiant: str,
+    ) -> List['DeliberationProgrammeAnnuelDTO']:
+        return []

@@ -133,19 +133,6 @@ class TypeDemandeTestCase(TestCase):
 
         self.assertEqual(type_demande, TypeDemande.INSCRIPTION)
 
-    def test_type_demande_reinscription_belge_poursuite_non_determinee(self):
-        titres = self.titres_acces_in_memory.recuperer_titres_access('0000000001', TrainingType.CAPAES)
-
-        type_demande = VerifierProposition.determiner_type_demande(
-            PropositionFactory(matricule_candidat='0000000001', est_en_poursuite=None),
-            titres,
-            self.calendrier_inscription,
-            self.profil_candidat_translator,
-            candidat_est_inscrit_recemment_ucl=True,
-        )
-
-        self.assertEqual(type_demande, TypeDemande.INSCRIPTION)
-
     def test_type_demande_reinscription_etranger_en_poursuite(self):
         titres = self.titres_acces_in_memory.recuperer_titres_access('0000000003', TrainingType.CAPAES)
 
@@ -164,19 +151,6 @@ class TypeDemandeTestCase(TestCase):
 
         type_demande = VerifierProposition.determiner_type_demande(
             PropositionFactory(matricule_candidat='0000000003', est_en_poursuite=False),
-            titres,
-            self.calendrier_inscription,
-            self.profil_candidat_translator,
-            candidat_est_inscrit_recemment_ucl=True,
-        )
-
-        self.assertEqual(type_demande, TypeDemande.ADMISSION)
-
-    def test_type_demande_reinscription_etranger_poursuite_non_determinee(self):
-        titres = self.titres_acces_in_memory.recuperer_titres_access('0000000003', TrainingType.CAPAES)
-
-        type_demande = VerifierProposition.determiner_type_demande(
-            PropositionFactory(matricule_candidat='0000000003', est_en_poursuite=None),
             titres,
             self.calendrier_inscription,
             self.profil_candidat_translator,

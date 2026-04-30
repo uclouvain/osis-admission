@@ -25,18 +25,10 @@
 # ##############################################################################
 from typing import Dict, List, Optional
 
-from admission.ddd.admission.doctorat.preparation.dtos import (
-    PropositionDTO as PropositionDoctoraleDTO,
-)
-from admission.ddd.admission.formation_continue.dtos import (
-    PropositionDTO as PropositionContinueDTO,
-)
-from admission.ddd.admission.formation_generale.dtos import (
-    PropositionDTO as PropositionGeneraleDTO,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_filtrer_toutes_demandes import (
-    IListerToutesDemandes,
-)
+from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO as PropositionDoctoraleDTO
+from admission.ddd.admission.formation_continue.dtos import PropositionDTO as PropositionContinueDTO
+from admission.ddd.admission.formation_generale.dtos import PropositionDTO as PropositionGeneraleDTO
+from admission.ddd.admission.shared_kernel.domain.service.i_filtrer_toutes_demandes import IListerToutesDemandes
 from admission.ddd.admission.shared_kernel.dtos.liste import DemandeRechercheDTO
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository as PropositionDoctoraleInMemoryRepository,
@@ -78,6 +70,7 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
         filtres_etats_checklist: Optional[Dict[str, List[str]]] = '',
         tardif_modif_reorientation: Optional[str] = '',
         delai_depasse_complements: Optional[bool] = None,
+        critere_express: Optional[List[str]] = None,
     ) -> PaginatedList[DemandeRechercheDTO]:
         result = PaginatedList(id_attribute='uuid')
 
@@ -110,6 +103,7 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
             est_inscription_tardive=None,
             est_modification_inscription_externe=None,
             est_reorientation_inscription_externe=None,
+            est_en_poursuite=None,
             annee_formation=proposition.formation.annee,
             annee_calculee=proposition.annee_calculee,
             nationalite_candidat='',
@@ -152,6 +146,7 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
             est_inscription_tardive=None,
             est_modification_inscription_externe=None,
             est_reorientation_inscription_externe=None,
+            est_en_poursuite=None,
             annee_formation=proposition.doctorat.annee,
             annee_calculee=proposition.annee_calculee,
             nationalite_candidat=proposition.nationalite_candidat,
@@ -188,6 +183,7 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
             est_inscription_tardive=None,
             est_modification_inscription_externe=None,
             est_reorientation_inscription_externe=None,
+            est_en_poursuite=None,
             annee_formation=proposition.formation.annee,
             nationalite_candidat=proposition.pays_nationalite_candidat,
             nationalite_ue_candidat=proposition.pays_nationalite_ue_candidat,

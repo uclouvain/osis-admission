@@ -44,19 +44,10 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     OngletsChecklist,
     PoursuiteDeCycle,
 )
-from admission.ddd.admission.shared_kernel.dtos.liste import (
-    DemandeRechercheDTO,
-    VisualiseurAdmissionDTO,
-)
+from admission.ddd.admission.shared_kernel.dtos.liste import DemandeRechercheDTO, VisualiseurAdmissionDTO
 from admission.ddd.admission.shared_kernel.enums.checklist import ModeFiltrageChecklist
-from admission.ddd.admission.shared_kernel.enums.liste import (
-    TardiveModificationReorientationFiltre,
-)
-from admission.models import (
-    ContinuingEducationAdmission,
-    DoctorateAdmission,
-    GeneralEducationAdmission,
-)
+from admission.ddd.admission.shared_kernel.enums.liste import TardiveModificationReorientationFiltre
+from admission.models import ContinuingEducationAdmission, DoctorateAdmission, GeneralEducationAdmission
 from admission.models.exam import AdmissionExam
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.admission_viewer import AdmissionViewerFactory
@@ -84,10 +75,7 @@ from base.models.person_merge_proposal import PersonMergeProposal
 from base.tests import QueriesAssertionsMixin
 from base.tests.factories.academic_calendar import AcademicCalendarFactory
 from base.tests.factories.academic_year import AcademicYearFactory
-from base.tests.factories.entity_version import (
-    EntityVersionFactory,
-    MainEntityVersionFactory,
-)
+from base.tests.factories.entity_version import EntityVersionFactory, MainEntityVersionFactory
 from base.tests.factories.person import PersonFactory
 from base.tests.factories.student import StudentFactory
 from base.tests.factories.user import UserFactory
@@ -206,6 +194,7 @@ class AdmissionListTestCase(QueriesAssertionsMixin, TestCase):
                 est_inscription_tardive=None,
                 est_modification_inscription_externe=None,
                 est_reorientation_inscription_externe=None,
+                est_en_poursuite=False,
                 nationalite_candidat=cls.admissions[0].candidate.country_of_citizenship.name,
                 nationalite_ue_candidat=cls.admissions[0].candidate.country_of_citizenship.european_union,
                 vip=any(

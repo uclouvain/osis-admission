@@ -103,6 +103,9 @@ from admission.ddd.admission.shared_kernel.use_case.write import (
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.comptabilite import (
     ComptabiliteInMemoryTranslator,
 )
+from admission.infrastructure.admission.formation_generale.domain.service.in_memory.diplome_acces_belge import (
+    DiplomeAccesBelgeInMemory,
+)
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.formation import (
     FormationGeneraleInMemoryTranslator,
 )
@@ -244,6 +247,8 @@ _deliberation_translator = DeliberationInMemoryTranslator()
 _diffusion_notes_translator = DiffusionNotesInMemoryTranslator()
 _inscriptions_evaluations_translator = InscriptionsEvaluationsInMemoryTranslator()
 _nomas_translator = NomasInMemoryTranslator()
+_diplome_acces_belge_service = DiplomeAccesBelgeInMemory()
+
 
 COMMAND_HANDLERS = {
     RechercherFormationGeneraleQuery: lambda msg_bus, cmd: rechercher_formations(
@@ -338,6 +343,7 @@ COMMAND_HANDLERS = {
         diffusion_notes_translator=_diffusion_notes_translator,
         inscriptions_evaluations_translator=_inscriptions_evaluations_translator,
         nomas_translator=_nomas_translator,
+        diplome_acces_belge_service=_diplome_acces_belge_service,
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,

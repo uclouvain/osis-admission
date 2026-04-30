@@ -55,6 +55,7 @@ class DemandeRechercheDTO(interface.DTO):
     est_inscription_tardive: Optional[bool]
     est_reorientation_inscription_externe: Optional[bool]
     est_modification_inscription_externe: Optional[bool]
+    est_en_poursuite: Optional[bool]
     nationalite_candidat: str
     nationalite_ue_candidat: Optional[bool]
     vip: bool
