@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,24 +24,27 @@
 #
 # ##############################################################################
 import datetime
+from unittest.mock import MagicMock
 
 from django.test import TestCase
 
 from admission.infrastructure.admission.shared_kernel.domain.service.titres_acces import TitresAcces
 from admission.tests.factories.curriculum import (
-    ProfessionalExperienceFactory,
     EducationalExperienceFactory,
     EducationalExperienceYearFactory,
+    ProfessionalExperienceFactory,
 )
 from admission.tests.factories.secondary_studies import (
-    HighSchoolDiplomaAlternativeFactory,
     BelgianHighSchoolDiplomaFactory,
     ForeignHighSchoolDiplomaFactory,
+    HighSchoolDiplomaAlternativeFactory,
 )
+from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import GotDiploma
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.person import PersonFactory
 from osis_profile.models.enums.curriculum import ActivitySector, ActivityType, Result
+from osis_profile.tests.factories.high_school_diploma import HighSchoolDiplomaFactory
 from reference.models.enums.cycle import Cycle
 from reference.tests.factories.diploma_title import DiplomaTitleFactory
 
@@ -49,7 +52,7 @@ from reference.tests.factories.diploma_title import DiplomaTitleFactory
 class TitresAccesTestCase(TestCase):
     def test_pas_de_diplome(self):
         person = PersonFactory()
-        result = TitresAcces.conditions_remplies(person.global_id, [])
+        result = TitresAcces.conditions_remplies(person.global_id, [], [])
         self.assertFalse(result.diplomation_secondaire_belge)
         self.assertFalse(result.diplomation_secondaire_etranger)
         self.assertFalse(result.alternative_etudes_secondaires)
@@ -64,34 +67,34 @@ class TitresAccesTestCase(TestCase):
 
     def test_diplomation_secondaire_belge(self):
         with self.subTest('diplome_belge'):
-            person_avec_diplome_belge = PersonFactory(
-                graduated_from_high_school=GotDiploma.YES.name,
-            )
+            person_avec_diplome_belge = HighSchoolDiplomaFactory(
+                got_diploma=GotDiploma.YES.name,
+            ).person
             BelgianHighSchoolDiplomaFactory(person=person_avec_diplome_belge)
-            result = TitresAcces.conditions_remplies(person_avec_diplome_belge.global_id, [])
+            result = TitresAcces.conditions_remplies(person_avec_diplome_belge.global_id, [], [])
             self.assertTrue(result.diplomation_secondaire_belge)
 
         with self.subTest('sans_diplome'):
-            person_sans_diplome = PersonFactory(
-                graduated_from_high_school=GotDiploma.THIS_YEAR.name,
-            )
-            result = TitresAcces.conditions_remplies(person_sans_diplome.global_id, [])
+            person_sans_diplome = HighSchoolDiplomaFactory(
+                got_diploma=GotDiploma.THIS_YEAR.name,
+            ).person
+            result = TitresAcces.conditions_remplies(person_sans_diplome.global_id, [], [])
             self.assertTrue(result.diplomation_secondaire_belge)
 
     def test_diplomation_secondaire_etranger(self):
-        person = PersonFactory(
-            graduated_from_high_school=GotDiploma.YES.name,
-        )
+        person = HighSchoolDiplomaFactory(
+            got_diploma=GotDiploma.YES.name,
+        ).person
         ForeignHighSchoolDiplomaFactory(person=person)
-        result = TitresAcces.conditions_remplies(person.global_id, [])
+        result = TitresAcces.conditions_remplies(person.global_id, [], [])
         self.assertTrue(result.diplomation_secondaire_etranger)
 
     def test_alternative_etudes_secondaires(self):
-        person = PersonFactory(
-            graduated_from_high_school=GotDiploma.NO.name,
-        )
+        person = HighSchoolDiplomaFactory(
+            got_diploma=GotDiploma.NO.name,
+        ).person
         HighSchoolDiplomaAlternativeFactory(person=person)
-        result = TitresAcces.conditions_remplies(person.global_id, [])
+        result = TitresAcces.conditions_remplies(person.global_id, [], [])
         self.assertTrue(result.alternative_etudes_secondaires)
 
     def test_potentiel_bachelier_belge_sans_diplomation(self):
@@ -104,7 +107,7 @@ class TitresAccesTestCase(TestCase):
                 country__iso_code="BE",
                 obtained_diploma=False,
             )
-            result = TitresAcces.conditions_remplies(person_avec_formation_premier_cycle.global_id, [])
+            result = TitresAcces.conditions_remplies(person_avec_formation_premier_cycle.global_id, [], [])
             self.assertTrue(result.potentiel_bachelier_belge_sans_diplomation)
 
         with self.subTest('autre_formation'):
@@ -115,7 +118,7 @@ class TitresAccesTestCase(TestCase):
                 country__iso_code="BE",
                 obtained_diploma=False,
             )
-            result = TitresAcces.conditions_remplies(person_avec_autre_formation.global_id, [])
+            result = TitresAcces.conditions_remplies(person_avec_autre_formation.global_id, [], [])
             self.assertTrue(result.potentiel_bachelier_belge_sans_diplomation)
 
     def test_diplomation_academique_belge(self):
@@ -130,7 +133,7 @@ class TitresAccesTestCase(TestCase):
                 result=Result.WAITING_RESULT.name,
                 educational_experience=educational_experience,
             )
-            result = TitresAcces.conditions_remplies(person_avec_resultat_en_attente.global_id, [])
+            result = TitresAcces.conditions_remplies(person_avec_resultat_en_attente.global_id, [], [])
             self.assertTrue(result.diplomation_academique_belge)
 
         with self.subTest('avec_diplome'):
@@ -144,14 +147,14 @@ class TitresAccesTestCase(TestCase):
                 result=Result.SUCCESS.name,
                 educational_experience=educational_experience,
             )
-            result = TitresAcces.conditions_remplies(person_avec_diplome.global_id, [])
+            result = TitresAcces.conditions_remplies(person_avec_diplome.global_id, [], [])
             self.assertTrue(result.diplomation_academique_belge)
 
         with self.subTest('etudiant_ucl'):
             person_etudiant_ucl = PersonFactory(
                 last_registration_year=AcademicYearFactory(),
             )
-            result = TitresAcces.conditions_remplies(person_etudiant_ucl.global_id, [])
+            result = TitresAcces.conditions_remplies(person_etudiant_ucl.global_id, [], [])
             self.assertTrue(result.diplomation_academique_belge)
 
     def test_diplomation_academique_etranger(self):
@@ -166,7 +169,7 @@ class TitresAccesTestCase(TestCase):
                 result=Result.WAITING_RESULT.name,
                 educational_experience=educational_experience,
             )
-            result = TitresAcces.conditions_remplies(person_avec_resultat_en_attente.global_id, [])
+            result = TitresAcces.conditions_remplies(person_avec_resultat_en_attente.global_id, [], [])
             self.assertTrue(result.diplomation_academique_etranger)
 
         with self.subTest('avec_diplome'):
@@ -180,7 +183,7 @@ class TitresAccesTestCase(TestCase):
                 result=Result.SUCCESS.name,
                 educational_experience=educational_experience,
             )
-            result = TitresAcces.conditions_remplies(person_avec_diplome.global_id, [])
+            result = TitresAcces.conditions_remplies(person_avec_diplome.global_id, [], [])
             self.assertTrue(result.diplomation_academique_etranger)
 
     def test_potentiel_master_belge_sans_diplomation(self):
@@ -193,7 +196,7 @@ class TitresAccesTestCase(TestCase):
                 country__iso_code="BE",
                 obtained_diploma=False,
             )
-            result = TitresAcces.conditions_remplies(person_avec_formation_second_cycle.global_id, [])
+            result = TitresAcces.conditions_remplies(person_avec_formation_second_cycle.global_id, [], [])
             self.assertTrue(result.potentiel_master_belge_sans_diplomation)
 
         with self.subTest('formation_troisieme_cycle'):
@@ -205,7 +208,7 @@ class TitresAccesTestCase(TestCase):
                 country__iso_code="BE",
                 obtained_diploma=False,
             )
-            result = TitresAcces.conditions_remplies(person_avec_formation_troisieme_cycle.global_id, [])
+            result = TitresAcces.conditions_remplies(person_avec_formation_troisieme_cycle.global_id, [], [])
             self.assertTrue(result.potentiel_master_belge_sans_diplomation)
 
         with self.subTest('autre_formation'):
@@ -216,7 +219,7 @@ class TitresAccesTestCase(TestCase):
                 country__iso_code="BE",
                 obtained_diploma=False,
             )
-            result = TitresAcces.conditions_remplies(person_avec_autre_formation.global_id, [])
+            result = TitresAcces.conditions_remplies(person_avec_autre_formation.global_id, [], [])
             self.assertTrue(result.potentiel_master_belge_sans_diplomation)
 
     def test_diplomation_potentiel_master_belge(self):
@@ -235,7 +238,7 @@ class TitresAccesTestCase(TestCase):
                 result=Result.SUCCESS.name,
                 educational_experience=educational_experience,
             )
-            result = TitresAcces.conditions_remplies(person_avec_formation_second_cycle.global_id, [])
+            result = TitresAcces.conditions_remplies(person_avec_formation_second_cycle.global_id, [], [])
             self.assertTrue(result.diplomation_potentiel_master_belge)
 
         with self.subTest('autre_formation'):
@@ -252,7 +255,7 @@ class TitresAccesTestCase(TestCase):
                 result=Result.SUCCESS.name,
                 educational_experience=educational_experience,
             )
-            result = TitresAcces.conditions_remplies(person_avec_autre_formation.global_id, [])
+            result = TitresAcces.conditions_remplies(person_avec_autre_formation.global_id, [], [])
             self.assertTrue(result.diplomation_potentiel_master_belge)
 
         with self.subTest('en_attente_de_resultat'):
@@ -270,14 +273,14 @@ class TitresAccesTestCase(TestCase):
                 result=Result.WAITING_RESULT.name,
                 educational_experience=educational_experience,
             )
-            result = TitresAcces.conditions_remplies(person_en_attente_de_resultat.global_id, [])
+            result = TitresAcces.conditions_remplies(person_en_attente_de_resultat.global_id, [], [])
             self.assertTrue(result.diplomation_potentiel_master_belge)
 
         with self.subTest('etudiant_ucl'):
             person_etudiant_ucl = PersonFactory(
                 last_registration_year=AcademicYearFactory(),
             )
-            result = TitresAcces.conditions_remplies(person_etudiant_ucl.global_id, [])
+            result = TitresAcces.conditions_remplies(person_etudiant_ucl.global_id, [], [])
             self.assertTrue(result.diplomation_potentiel_master_belge)
 
     def test_diplomation_potentiel_master_etranger(self):
@@ -292,7 +295,7 @@ class TitresAccesTestCase(TestCase):
                 result=Result.WAITING_RESULT.name,
                 educational_experience=educational_experience,
             )
-            result = TitresAcces.conditions_remplies(person_avec_resultat_en_attente.global_id, ['foo'])
+            result = TitresAcces.conditions_remplies(person_avec_resultat_en_attente.global_id, ['foo'], [])
             self.assertFalse(result.diplomation_potentiel_master_etranger)
 
         with self.subTest('avec_diplome'):
@@ -306,7 +309,7 @@ class TitresAccesTestCase(TestCase):
                 result=Result.SUCCESS.name,
                 educational_experience=educational_experience,
             )
-            result = TitresAcces.conditions_remplies(person_avec_diplome.global_id, ['foo'])
+            result = TitresAcces.conditions_remplies(person_avec_diplome.global_id, ['foo'], [])
             self.assertTrue(result.diplomation_potentiel_master_etranger)
 
     def test_diplomation_potentiel_doctorat_belge(self):
@@ -325,7 +328,7 @@ class TitresAccesTestCase(TestCase):
                 result=Result.SUCCESS.name,
                 educational_experience=educational_experience,
             )
-            result = TitresAcces.conditions_remplies(person_avec_formation_troisieme_cycle.global_id, [])
+            result = TitresAcces.conditions_remplies(person_avec_formation_troisieme_cycle.global_id, [], [])
             self.assertTrue(result.diplomation_potentiel_doctorat_belge)
 
         with self.subTest('autre_formation'):
@@ -342,7 +345,7 @@ class TitresAccesTestCase(TestCase):
                 result=Result.SUCCESS.name,
                 educational_experience=educational_experience,
             )
-            result = TitresAcces.conditions_remplies(person_avec_autre_formation.global_id, [])
+            result = TitresAcces.conditions_remplies(person_avec_autre_formation.global_id, [], [])
             self.assertTrue(result.diplomation_potentiel_doctorat_belge)
 
         with self.subTest('en_attente_de_resultat'):
@@ -360,7 +363,7 @@ class TitresAccesTestCase(TestCase):
                 result=Result.WAITING_RESULT.name,
                 educational_experience=educational_experience,
             )
-            result = TitresAcces.conditions_remplies(person_en_attente_de_resultat.global_id, [])
+            result = TitresAcces.conditions_remplies(person_en_attente_de_resultat.global_id, [], [])
             self.assertTrue(result.diplomation_potentiel_doctorat_belge)
 
     def test_potentiel_acces_vae(self):
@@ -386,5 +389,192 @@ class TitresAccesTestCase(TestCase):
             activity='Work - activity',
         )
 
-        result = TitresAcces.conditions_remplies(person.global_id, [])
+        result = TitresAcces.conditions_remplies(person.global_id, [], [])
         self.assertTrue(result.potentiel_acces_vae)
+
+    def test_aucune_experiences_ucl(self):
+        person = PersonFactory()
+
+        ucl_experiences = []
+
+        result = TitresAcces.conditions_remplies(person.global_id, [], ucl_experiences)
+
+        self.assertFalse(result.diplomation_secondaire_belge)
+        self.assertFalse(result.diplomation_secondaire_etranger)
+        self.assertFalse(result.alternative_etudes_secondaires)
+        self.assertFalse(result.potentiel_bachelier_belge_sans_diplomation)
+        self.assertFalse(result.diplomation_academique_belge)
+        self.assertFalse(result.diplomation_academique_etranger)
+        self.assertFalse(result.potentiel_master_belge_sans_diplomation)
+        self.assertFalse(result.diplomation_potentiel_master_belge)
+        self.assertFalse(result.diplomation_potentiel_master_etranger)
+        self.assertFalse(result.diplomation_potentiel_doctorat_belge)
+        self.assertFalse(result.potentiel_acces_vae)
+
+    def test_une_experience_ucl_aggregation_non_diplomee(self):
+        person = PersonFactory()
+
+        ucl_experiences = [
+            MagicMock(est_diplome=False, type_formation=TrainingType.AGGREGATION.name),
+        ]
+
+        result = TitresAcces.conditions_remplies(person.global_id, [], ucl_experiences)
+
+        self.assertFalse(result.diplomation_secondaire_belge)
+        self.assertFalse(result.diplomation_secondaire_etranger)
+        self.assertFalse(result.alternative_etudes_secondaires)
+        self.assertFalse(result.potentiel_bachelier_belge_sans_diplomation)
+        self.assertFalse(result.diplomation_academique_belge)
+        self.assertFalse(result.diplomation_academique_etranger)
+        self.assertFalse(result.potentiel_master_belge_sans_diplomation)
+        self.assertFalse(result.diplomation_potentiel_master_belge)
+        self.assertFalse(result.diplomation_potentiel_master_etranger)
+        self.assertFalse(result.diplomation_potentiel_doctorat_belge)
+        self.assertFalse(result.potentiel_acces_vae)
+
+    def test_une_experience_ucl_aggregation_diplomee(self):
+        person = PersonFactory()
+
+        ucl_experiences = [
+            MagicMock(est_diplome=True, type_formation=TrainingType.AGGREGATION.name),
+        ]
+
+        result = TitresAcces.conditions_remplies(person.global_id, [], ucl_experiences)
+
+        self.assertFalse(result.diplomation_secondaire_belge)
+        self.assertFalse(result.diplomation_secondaire_etranger)
+        self.assertFalse(result.alternative_etudes_secondaires)
+        self.assertFalse(result.potentiel_bachelier_belge_sans_diplomation)
+        self.assertTrue(result.diplomation_academique_belge)
+        self.assertFalse(result.diplomation_academique_etranger)
+        self.assertFalse(result.potentiel_master_belge_sans_diplomation)
+        self.assertFalse(result.diplomation_potentiel_master_belge)
+        self.assertFalse(result.diplomation_potentiel_master_etranger)
+        self.assertFalse(result.diplomation_potentiel_doctorat_belge)
+        self.assertFalse(result.potentiel_acces_vae)
+
+    def test_une_experience_ucl_bachelier_non_diplomee(self):
+        person = PersonFactory()
+
+        ucl_experiences = [
+            MagicMock(est_diplome=False, type_formation=TrainingType.BACHELOR.name),
+        ]
+
+        result = TitresAcces.conditions_remplies(person.global_id, [], ucl_experiences)
+
+        self.assertFalse(result.diplomation_secondaire_belge)
+        self.assertFalse(result.diplomation_secondaire_etranger)
+        self.assertFalse(result.alternative_etudes_secondaires)
+        self.assertTrue(result.potentiel_bachelier_belge_sans_diplomation)
+        self.assertFalse(result.diplomation_academique_belge)
+        self.assertFalse(result.diplomation_academique_etranger)
+        self.assertFalse(result.potentiel_master_belge_sans_diplomation)
+        self.assertFalse(result.diplomation_potentiel_master_belge)
+        self.assertFalse(result.diplomation_potentiel_master_etranger)
+        self.assertFalse(result.diplomation_potentiel_doctorat_belge)
+        self.assertFalse(result.potentiel_acces_vae)
+
+    def test_une_experience_ucl_bachelier_diplomee(self):
+        person = PersonFactory()
+
+        ucl_experiences = [
+            MagicMock(est_diplome=True, type_formation=TrainingType.BACHELOR.name),
+        ]
+
+        result = TitresAcces.conditions_remplies(person.global_id, [], ucl_experiences)
+
+        self.assertFalse(result.diplomation_secondaire_belge)
+        self.assertFalse(result.diplomation_secondaire_etranger)
+        self.assertFalse(result.alternative_etudes_secondaires)
+        self.assertFalse(result.potentiel_bachelier_belge_sans_diplomation)
+        self.assertTrue(result.diplomation_academique_belge)
+        self.assertFalse(result.diplomation_academique_etranger)
+        self.assertFalse(result.potentiel_master_belge_sans_diplomation)
+        self.assertFalse(result.diplomation_potentiel_master_belge)
+        self.assertFalse(result.diplomation_potentiel_master_etranger)
+        self.assertFalse(result.diplomation_potentiel_doctorat_belge)
+        self.assertFalse(result.potentiel_acces_vae)
+
+    def test_une_experience_ucl_master_non_diplomee(self):
+        person = PersonFactory()
+
+        ucl_experiences = [
+            MagicMock(est_diplome=False, type_formation=TrainingType.MASTER_M1.name),
+        ]
+
+        result = TitresAcces.conditions_remplies(person.global_id, [], ucl_experiences)
+
+        self.assertFalse(result.diplomation_secondaire_belge)
+        self.assertFalse(result.diplomation_secondaire_etranger)
+        self.assertFalse(result.alternative_etudes_secondaires)
+        self.assertFalse(result.potentiel_bachelier_belge_sans_diplomation)
+        self.assertFalse(result.diplomation_academique_belge)
+        self.assertFalse(result.diplomation_academique_etranger)
+        self.assertTrue(result.potentiel_master_belge_sans_diplomation)
+        self.assertFalse(result.diplomation_potentiel_master_belge)
+        self.assertFalse(result.diplomation_potentiel_master_etranger)
+        self.assertFalse(result.diplomation_potentiel_doctorat_belge)
+        self.assertFalse(result.potentiel_acces_vae)
+
+    def test_une_experience_ucl_master_diplomee(self):
+        person = PersonFactory()
+
+        ucl_experiences = [
+            MagicMock(est_diplome=True, type_formation=TrainingType.MASTER_M1.name),
+        ]
+
+        result = TitresAcces.conditions_remplies(person.global_id, [], ucl_experiences)
+
+        self.assertFalse(result.diplomation_secondaire_belge)
+        self.assertFalse(result.diplomation_secondaire_etranger)
+        self.assertFalse(result.alternative_etudes_secondaires)
+        self.assertFalse(result.potentiel_bachelier_belge_sans_diplomation)
+        self.assertTrue(result.diplomation_academique_belge)
+        self.assertFalse(result.diplomation_academique_etranger)
+        self.assertFalse(result.potentiel_master_belge_sans_diplomation)
+        self.assertTrue(result.diplomation_potentiel_master_belge)
+        self.assertFalse(result.diplomation_potentiel_master_etranger)
+        self.assertFalse(result.diplomation_potentiel_doctorat_belge)
+        self.assertFalse(result.potentiel_acces_vae)
+
+    def test_une_experience_ucl_doctorat_non_diplomee(self):
+        person = PersonFactory()
+
+        ucl_experiences = [
+            MagicMock(est_diplome=False, type_formation=TrainingType.PHD.name),
+        ]
+
+        result = TitresAcces.conditions_remplies(person.global_id, [], ucl_experiences)
+
+        self.assertFalse(result.diplomation_secondaire_belge)
+        self.assertFalse(result.diplomation_secondaire_etranger)
+        self.assertFalse(result.alternative_etudes_secondaires)
+        self.assertFalse(result.potentiel_bachelier_belge_sans_diplomation)
+        self.assertFalse(result.diplomation_academique_belge)
+        self.assertFalse(result.diplomation_academique_etranger)
+        self.assertFalse(result.potentiel_master_belge_sans_diplomation)
+        self.assertFalse(result.diplomation_potentiel_master_belge)
+        self.assertFalse(result.diplomation_potentiel_master_etranger)
+        self.assertFalse(result.diplomation_potentiel_doctorat_belge)
+        self.assertFalse(result.potentiel_acces_vae)
+
+    def test_une_experience_ucl_doctorat_diplomee(self):
+        person = PersonFactory()
+
+        ucl_experiences = [
+            MagicMock(est_diplome=True, type_formation=TrainingType.PHD.name),
+        ]
+
+        result = TitresAcces.conditions_remplies(person.global_id, [], ucl_experiences)
+
+        self.assertFalse(result.diplomation_secondaire_belge)
+        self.assertFalse(result.diplomation_secondaire_etranger)
+        self.assertFalse(result.alternative_etudes_secondaires)
+        self.assertFalse(result.potentiel_bachelier_belge_sans_diplomation)
+        self.assertTrue(result.diplomation_academique_belge)
+        self.assertFalse(result.diplomation_academique_etranger)
+        self.assertFalse(result.potentiel_master_belge_sans_diplomation)
+        self.assertFalse(result.diplomation_potentiel_master_belge)
+        self.assertFalse(result.diplomation_potentiel_master_etranger)
+        self.assertTrue(result.diplomation_potentiel_doctorat_belge)
+        self.assertFalse(result.potentiel_acces_vae)

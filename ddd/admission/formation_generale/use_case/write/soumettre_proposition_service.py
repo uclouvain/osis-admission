@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,77 +25,58 @@
 # ##############################################################################
 import datetime
 
-from admission.ddd.admission.formation_generale.commands import (
-    SoumettrePropositionCommand,
-)
+from admission.ddd.admission.formation_generale.commands import SoumettrePropositionCommand
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
-from admission.ddd.admission.formation_generale.domain.model.proposition import (
-    PropositionIdentity,
-)
-from admission.ddd.admission.formation_generale.domain.service.checklist import (
-    Checklist,
-)
-from admission.ddd.admission.formation_generale.domain.service.i_formation import (
-    IFormationGeneraleTranslator,
-)
-from admission.ddd.admission.formation_generale.domain.service.i_inscription_tardive import (
-    IInscriptionTardive,
-)
-from admission.ddd.admission.formation_generale.domain.service.i_notification import (
-    INotification,
-)
-from admission.ddd.admission.formation_generale.domain.service.i_paiement_frais_dossier import (
-    IPaiementFraisDossier,
-)
+from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
+from admission.ddd.admission.formation_generale.domain.service.i_formation import IFormationGeneraleTranslator
+from admission.ddd.admission.formation_generale.domain.service.i_inscription_tardive import IInscriptionTardive
+from admission.ddd.admission.formation_generale.domain.service.i_notification import INotification
+from admission.ddd.admission.formation_generale.domain.service.i_paiement_frais_dossier import IPaiementFraisDossier
 from admission.ddd.admission.formation_generale.domain.service.i_question_specifique import (
     IQuestionSpecifiqueTranslator,
 )
-from admission.ddd.admission.formation_generale.domain.service.verifier_proposition import (
-    VerifierProposition,
-)
+from admission.ddd.admission.formation_generale.domain.service.verifier_proposition import VerifierProposition
 from admission.ddd.admission.formation_generale.events import PropositionSoumiseEvent
-from admission.ddd.admission.formation_generale.repository.i_proposition import (
-    IPropositionRepository,
+from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.shared_kernel.domain.builder.formation_identity import FormationIdentityBuilder
+from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import (
+    IAnneeInscriptionFormationTranslator,
 )
-from admission.ddd.admission.shared_kernel.domain.builder.formation_identity import (
-    FormationIdentityBuilder,
+from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription import ICalendrierInscription
+from admission.ddd.admission.shared_kernel.domain.service.i_deliberation_translator import IDeliberationTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_diffusion_notes_translator import IDiffusionNotesTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_elements_confirmation import IElementsConfirmation
+from admission.ddd.admission.shared_kernel.domain.service.i_historique import IHistorique
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_evaluations_translator import (
+    IInscriptionsEvaluationsTranslator,
 )
-from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription import (
-    ICalendrierInscription,
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
 )
-from admission.ddd.admission.shared_kernel.domain.service.i_elements_confirmation import (
-    IElementsConfirmation,
+from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions import IMaximumPropositionsAutorisees
+from admission.ddd.admission.shared_kernel.domain.service.i_modifier_checklist_experience_parcours_anterieur import (
+    IValidationExperienceParcoursAnterieurService,
 )
-from admission.ddd.admission.shared_kernel.domain.service.i_historique import (
-    IHistorique,
+from admission.ddd.admission.shared_kernel.domain.service.i_noma_translator import INomasTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_raccrocher_experiences_curriculum import (
+    IRaccrocherExperiencesCurriculum,
 )
-from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions import (
-    IMaximumPropositionsAutorisees,
+from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import ITitresAcces
+from admission.ddd.admission.shared_kernel.domain.service.inscriptions_ucl_candidat import (
+    InscriptionsUCLCandidatService,
 )
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
-    IProfilCandidatTranslator,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import (
-    ITitresAcces,
-)
-from admission.ddd.admission.shared_kernel.domain.service.profil_soumis_candidat import (
-    ProfilSoumisCandidatTranslator,
-)
+from admission.ddd.admission.shared_kernel.domain.service.profil_soumis_candidat import ProfilSoumisCandidatTranslator
 from admission.ddd.admission.shared_kernel.enums.question_specifique import Onglets
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.service.financabilite import Financabilite
-from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
-    AcademicYearIdentity,
-)
-from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import (
-    GetCurrentAcademicYear,
-)
-from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import (
-    IAcademicYearRepository,
-)
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYearIdentity
+from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
+from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
 
 
 def soumettre_proposition(
@@ -114,7 +95,14 @@ def soumettre_proposition(
     inscription_tardive_service: 'IInscriptionTardive',
     paiement_frais_dossier_service: 'IPaiementFraisDossier',
     historique: 'IHistorique',
-    financabilite_fetcher: 'IFinancabiliteFetcher',
+    raccrocher_experiences_curriculum: 'IRaccrocherExperiencesCurriculum',
+    validation_experience_parcours_anterieur_service: 'IValidationExperienceParcoursAnterieurService',
+    inscriptions_translator: IInscriptionsTranslatorService,
+    deliberation_translator: IDeliberationTranslator,
+    diffusion_notes_translator: IDiffusionNotesTranslator,
+    inscriptions_evaluations_translator: IInscriptionsEvaluationsTranslator,
+    annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
+    nomas_translator: INomasTranslator,
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -139,28 +127,42 @@ def soumettre_proposition(
     )
     formation = formation_translator.get(proposition.formation_id)
     formation_id = FormationIdentityBuilder.build(sigle=proposition.formation_id.sigle, annee=cmd.annee)
+    inscriptions_ucl_candidat = InscriptionsUCLCandidatService.recuperer(
+        matricule_candidat=proposition.matricule_candidat,
+        inscriptions_translator=inscriptions_translator,
+        formation_translator=formation_translator,
+        deliberation_translator=deliberation_translator,
+    )
     titres = titres_acces.recuperer_titres_access(
-        proposition.matricule_candidat,
-        formation.type,
-        proposition.equivalence_diplome,
+        matricule_candidat=proposition.matricule_candidat,
+        type_formation=formation.type,
+        equivalence_diplome=proposition.equivalence_diplome,
+        inscriptions_ucl_candidat=inscriptions_ucl_candidat,
+    )
+    candidat_est_inscrit_recemment_ucl = inscriptions_translator.est_inscrit_recemment(
+        matricule_candidat=proposition.matricule_candidat,
+        annee_inscription_formation_translator=annee_inscription_formation_translator,
+    )
+    candidat_est_en_poursuite_directe = inscriptions_translator.est_en_poursuite_directe(
+        matricule_candidat=proposition.matricule_candidat,
+        sigle_formation=formation.entity_id.sigle,
+        annee_inscription_formation_translator=annee_inscription_formation_translator,
     )
     type_demande = VerifierProposition.determiner_type_demande(
-        proposition,
-        titres,
-        calendrier_inscription,
-        profil_candidat_translator,
+        proposition=proposition,
+        titres=titres,
+        calendrier_inscription=calendrier_inscription,
+        profil_candidat_translator=profil_candidat_translator,
+        candidat_est_inscrit_recemment_ucl=candidat_est_inscrit_recemment_ucl,
     )
     pool = AcademicCalendarTypes[cmd.pool]
 
     identification = profil_candidat_translator.get_identification(proposition.matricule_candidat)
 
-    parcours = financabilite_fetcher.recuperer_donnees_parcours_via_matricule_fgs(
-        matricule_fgs=proposition.matricule_candidat,
-        annee=formation.entity_id.annee,
-    )
-    formation_dto = financabilite_fetcher.recuperer_informations_formation(
-        sigle_formation=formation.entity_id.sigle,
-        annee=formation.entity_id.annee,
+    assimilation_passee = inscriptions_translator.recuperer_assimilation_inscription_formation_annee_precedente(
+        matricule_candidat=proposition.matricule_candidat,
+        sigle_formation=proposition.formation_id.sigle,
+        annee_inscription_formation_translator=annee_inscription_formation_translator,
     )
 
     # WHEN
@@ -178,6 +180,16 @@ def soumettre_proposition(
         formation=formation,
         titres=titres,
         annee_formation=annee_formation,
+        inscriptions_translator=inscriptions_translator,
+        annee_inscription_formation_translator=annee_inscription_formation_translator,
+        deliberation_translator=deliberation_translator,
+        diffusion_notes_translator=diffusion_notes_translator,
+        inscriptions_evaluations_translator=inscriptions_evaluations_translator,
+        candidat_est_inscrit_recemment_ucl=candidat_est_inscrit_recemment_ucl,
+        nomas_translator=nomas_translator,
+        assimilation_passee=assimilation_passee,
+        candidat_est_en_poursuite_directe=candidat_est_en_poursuite_directe,
+        inscriptions_ucl_candidat=inscriptions_ucl_candidat,
     )
     element_confirmation.valider(
         soumis=cmd.elements_confirmation,
@@ -185,6 +197,7 @@ def soumettre_proposition(
         annee_soumise=cmd.annee,
         formation_translator=formation_translator,
         profil_candidat_translator=profil_candidat_translator,
+        candidat_est_inscrit_recemment_ucl=candidat_est_inscrit_recemment_ucl,
     )
 
     doit_payer_frais_dossier = paiement_frais_dossier_service.doit_payer(
@@ -199,11 +212,11 @@ def soumettre_proposition(
     est_inscription_tardive = inscription_tardive_service.est_inscription_tardive(pool)
 
     # THEN
-    financabilite = Financabilite(
-        parcours=parcours,
-        formation=formation_dto,
+    financabilite = Financabilite(annee=formation.entity_id.annee).determiner(
+        sigle_formation=formation.entity_id.sigle,
         est_en_reorientation=proposition.est_reorientation_inscription_externe,
-    ).determiner()
+        matricule_fgs=proposition.matricule_candidat,
+    )
 
     proposition.nettoyer_reponses_questions_specifiques(
         questions_specifiques=questions_specifiques,
@@ -217,6 +230,11 @@ def soumettre_proposition(
         est_inscription_tardive=est_inscription_tardive,
         profil_candidat_soumis=profil_candidat_soumis,
         doit_payer_frais_dossier=doit_payer_frais_dossier,
+        raison_plusieurs_demandes_meme_cycle_meme_annee=cmd.raison_plusieurs_demandes_meme_cycle_meme_annee,
+        justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee=(
+            cmd.justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee
+        ),
+        assimilation_passee=assimilation_passee,
     )
 
     proposition.specifier_financabilite_resultat_calcul(
@@ -230,10 +248,15 @@ def soumettre_proposition(
         formation=formation,
         profil_candidat_translator=profil_candidat_translator,
         questions_specifiques_translator=questions_specifiques_translator,
-        annee_courante=annee_courante,
+        candidat_est_en_poursuite_directe=candidat_est_en_poursuite_directe,
+        assimilation_passee=assimilation_passee,
     )
     proposition_repository.save(proposition)
 
+    raccrocher_experiences_curriculum.raccrocher(proposition=proposition)
+    validation_experience_parcours_anterieur_service.passer_experiences_en_brouillon_en_a_traiter(
+        proposition=proposition
+    )
     notification.confirmer_soumission(proposition)
     historique.historiser_soumission(proposition)
 

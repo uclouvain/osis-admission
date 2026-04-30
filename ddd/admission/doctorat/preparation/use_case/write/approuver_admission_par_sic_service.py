@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,69 +23,35 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.doctorat.events import (
-    AdmissionDoctoraleApprouveeParSicEvent,
-)
-from admission.ddd.admission.doctorat.preparation.commands import (
-    ApprouverAdmissionParSicCommand,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
-    PropositionIdentity,
-)
-from admission.ddd.admission.doctorat.preparation.domain.service.emplacement_document import (
-    EmplacementDocumentService,
-)
-from admission.ddd.admission.doctorat.preparation.domain.service.i_comptabilite import (
-    IComptabiliteTranslator,
-)
-from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import (
-    IHistorique,
-)
-from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import (
-    INotification,
-)
-from admission.ddd.admission.doctorat.preparation.domain.service.i_pdf_generation import (
-    IPDFGeneration,
-)
+from admission.ddd.admission.doctorat.events import AdmissionDoctoraleApprouveeParSicEvent
+from admission.ddd.admission.doctorat.preparation.commands import ApprouverAdmissionParSicCommand
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.doctorat.preparation.domain.service.emplacement_document import EmplacementDocumentService
+from admission.ddd.admission.doctorat.preparation.domain.service.i_comptabilite import IComptabiliteTranslator
+from admission.ddd.admission.doctorat.preparation.domain.service.i_historique import IHistorique
+from admission.ddd.admission.doctorat.preparation.domain.service.i_notification import INotification
+from admission.ddd.admission.doctorat.preparation.domain.service.i_pdf_generation import IPDFGeneration
 from admission.ddd.admission.doctorat.preparation.domain.service.i_question_specifique import (
     IQuestionSpecifiqueTranslator,
 )
 from admission.ddd.admission.doctorat.preparation.repository.i_groupe_de_supervision import (
     IGroupeDeSupervisionRepository,
 )
-from admission.ddd.admission.doctorat.preparation.repository.i_proposition import (
-    IPropositionRepository,
-)
-from admission.ddd.admission.shared_kernel.domain.model.proposition import (
-    PropositionIdentity,
-)
+from admission.ddd.admission.doctorat.preparation.repository.i_proposition import IPropositionRepository
 from admission.ddd.admission.shared_kernel.domain.service.i_emplacements_documents_proposition import (
     IEmplacementsDocumentsPropositionTranslator,
 )
-from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import (
-    IMatriculeEtudiantService,
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService
 )
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
-    IProfilCandidatTranslator,
-)
-from admission.ddd.admission.shared_kernel.domain.service.resume_proposition import (
-    ResumeProposition,
-)
-from admission.ddd.admission.shared_kernel.repository.i_emplacement_document import (
-    IEmplacementDocumentRepository,
-)
-from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
-    AcademicYearIdentity,
-)
-from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import (
-    IAcademicYearRepository,
-)
-from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import (
-    IPersonneConnueUclTranslator,
-)
-from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
-    IExperienceParcoursInterneTranslator,
-)
+from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import IMatriculeEtudiantService
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.shared_kernel.domain.service.resume_proposition import ResumeProposition
+from admission.ddd.admission.shared_kernel.repository.i_emplacement_document import IEmplacementDocumentRepository
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYearIdentity
+from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
+from ddd.logic.shared_kernel.personne_connue_ucl.domain.service.personne_connue_ucl import IPersonneConnueUclTranslator
+from ddd.logic.shared_kernel.profil.domain.service.i_parcours_interne import IExperienceParcoursInterneTranslator
 
 
 def approuver_admission_par_sic(
@@ -105,6 +71,7 @@ def approuver_admission_par_sic(
     experience_parcours_interne_translator: 'IExperienceParcoursInterneTranslator',
     matricule_etudiant_service: 'IMatriculeEtudiantService',
     groupe_supervision_repository: 'IGroupeDeSupervisionRepository',
+    inscriptions_translator: IInscriptionsTranslatorService,
 ) -> PropositionIdentity:
     # GIVEN
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
@@ -117,6 +84,7 @@ def approuver_admission_par_sic(
         academic_year_repository=academic_year_repository,
         groupe_supervision_repository=groupe_supervision_repository,
         question_specifique_translator=question_specifique_translator,
+        inscriptions_translator=inscriptions_translator,
     )
     documents_dto = emplacements_documents_demande_translator.recuperer_emplacements_dto(
         personne_connue_translator=personne_connue_translator,
@@ -137,6 +105,8 @@ def approuver_admission_par_sic(
         experience_parcours_interne_translator=experience_parcours_interne_translator,
         grade_academique_formation_proposition=resume_dto.proposition.doctorat.grade_academique,
         annee_formation=annee_formation,
+        identification_dto=resume_dto.identification,
+        inscriptions_translator=inscriptions_translator,
     )
 
     # THEN

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -37,44 +37,22 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     DerogationFinancement,
     OngletsChecklist,
 )
-from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
-    EtatAuthentificationParcours,
-)
+from base.models.enums.personal_data import ChoixStatutValidationDonneesPersonnelles
 from osis_common.ddd import interface
+from osis_profile.models.enums.experience_validation import EtatAuthentificationParcours
 
 
 @attr.dataclass
 class StatutChecklist(interface.ValueObject):
     libelle: str
-    enfants: List['StatutChecklist'] = attr.Factory(list)
     statut: Optional[ChoixStatutChecklist] = None
     extra: Dict[str, any] = attr.Factory(dict)
 
-    # @property
-    # def statut(self) -> Optional[ChoixStatutChecklist]:
-    #     if self.enfants:
-    #         # Si tous les enfants sont ok, alors c'est ok
-    #         if all(c.statut == ChoixStatutChecklist.GEST_REUSSITE for c in self.enfants):
-    #             return ChoixStatutChecklist.GEST_REUSSITE
-    #
-    #         # Puis c'est selon la présence du plus urgent
-    #         ordre = [
-    #             ChoixStatutChecklist.GEST_BLOCAGE,
-    #             ChoixStatutChecklist.GEST_EN_COURS,
-    #             ChoixStatutChecklist.GEST_BLOCAGE_ULTERIEUR,
-    #             ChoixStatutChecklist.INITIAL_CANDIDAT,
-    #             ChoixStatutChecklist.INITIAL_NON_CONCERNE,
-    #         ]
-    #         for statut in ordre:
-    #             if any(c.statut == statut for c in self.enfants):
-    #                 return statut
-    #     return self.statut
     @classmethod
     def from_dict(cls, item: Dict[str, any]):
         return cls(
             libelle=item.get('libelle', ''),
             statut=ChoixStatutChecklist[item['statut']] if item.get('statut') else None,
-            enfants=[cls.from_dict(enfant) for enfant in item.get('enfants', [])],
             extra=item.get('extra', {}),
         )
 
@@ -90,7 +68,6 @@ class StatutChecklist(interface.ValueObject):
 
 @attr.dataclass
 class StatutsChecklistGenerale:
-    donnees_personnelles: StatutChecklist
     assimilation: StatutChecklist
     frais_dossier: StatutChecklist
     parcours_anterieur: StatutChecklist
@@ -108,14 +85,10 @@ class StatutsChecklistGenerale:
             checklist_by_tab[key] = StatutChecklist.from_dict(item=item)
         return cls(**checklist_by_tab)
 
-    def recuperer_enfant(self, onglet, identifiant_enfant) -> StatutChecklist:
-        return next(
-            enfant for enfant in getattr(self, onglet).enfants if enfant.extra.get('identifiant') == identifiant_enfant
-        )
-
 
 INDEX_ONGLETS_CHECKLIST = {
-    onglet: index for index, onglet in enumerate(attr.fields_dict(StatutsChecklistGenerale))  # type: ignore
+    onglet: index
+    for index, onglet in enumerate(attr.fields_dict(StatutsChecklistGenerale))  # type: ignore
 }
 
 
@@ -150,6 +123,12 @@ class ConfigurationStatutChecklist(interface.ValueObject):
 
         return bool(self.statut) and self.statut.name == status and self.extra.items() <= extra.items()
 
+    def to_dict(self):
+        return {
+            'extra': self.extra,
+            'statut': self.statut.name,
+        }
+
     def merge_statuses(self, other_status):
         return ConfigurationStatutChecklist(
             identifiant=self.identifiant,
@@ -171,29 +150,41 @@ class ConfigurationOngletChecklist(interface.ValueObject):
 
 STATUTS_CHECKLIST_PAR_ONGLET: Dict[str, Dict[str, ConfigurationStatutChecklist]] = {}
 
-onglet_donnes_personnelles = ConfigurationOngletChecklist(
+onglet_donnees_personnelles = ConfigurationOngletChecklist(
     identifiant=OngletsChecklist.donnees_personnelles,
     statuts=[
         ConfigurationStatutChecklist(
-            identifiant='A_TRAITER',
-            libelle=_('To be processed'),
+            identifiant=ChoixStatutValidationDonneesPersonnelles.A_TRAITER.name,
+            libelle=ChoixStatutValidationDonneesPersonnelles.A_TRAITER.value,
             statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
         ),
         ConfigurationStatutChecklist(
-            identifiant='A_COMPLETER',
-            libelle=_('To be completed'),
+            identifiant=ChoixStatutValidationDonneesPersonnelles.TOILETTEES.name,
+            libelle=ChoixStatutValidationDonneesPersonnelles.TOILETTEES.value,
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+            extra={'en_cours': 'cleaned'},
+        ),
+        ConfigurationStatutChecklist(
+            identifiant=ChoixStatutValidationDonneesPersonnelles.A_COMPLETER.name,
+            libelle=ChoixStatutValidationDonneesPersonnelles.A_COMPLETER.value,
             statut=ChoixStatutChecklist.GEST_BLOCAGE,
             extra={'fraud': '0'},
         ),
         ConfigurationStatutChecklist(
-            identifiant='FRAUDEUR',
-            libelle=_('Fraudster'),
+            identifiant=ChoixStatutValidationDonneesPersonnelles.AVIS_EXPERT.name,
+            libelle=ChoixStatutValidationDonneesPersonnelles.AVIS_EXPERT.value,
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+            extra={'en_cours': 'expert_opinion'},
+        ),
+        ConfigurationStatutChecklist(
+            identifiant=ChoixStatutValidationDonneesPersonnelles.FRAUDEUR.name,
+            libelle=ChoixStatutValidationDonneesPersonnelles.FRAUDEUR.value,
             statut=ChoixStatutChecklist.GEST_BLOCAGE,
             extra={'fraud': '1'},
         ),
         ConfigurationStatutChecklist(
-            identifiant='VALIDEES',
-            libelle=_('Validated'),
+            identifiant=ChoixStatutValidationDonneesPersonnelles.VALIDEES.name,
+            libelle=ChoixStatutValidationDonneesPersonnelles.VALIDEES.value,
             statut=ChoixStatutChecklist.GEST_REUSSITE,
         ),
     ],
@@ -564,7 +555,7 @@ onglet_decision_sic = ConfigurationOngletChecklist(
 )
 
 ORGANISATION_ONGLETS_CHECKLIST: List[ConfigurationOngletChecklist] = [
-    onglet_donnes_personnelles,
+    onglet_donnees_personnelles,
     onglet_assimilation,
     onglet_frais_dossier,
     onglet_parcours_anterieur,

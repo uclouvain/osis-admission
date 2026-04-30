@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,7 +24,8 @@
 #
 # ##############################################################################
 import datetime
-from typing import List
+import logging
+from typing import Dict, List, Optional
 
 from django.conf import settings
 from django.forms import forms
@@ -32,33 +33,18 @@ from django.shortcuts import resolve_url
 from django.utils.functional import cached_property
 from django.utils.translation import gettext as _
 from django.views.generic import FormView
+from osis_document_components.services import get_student_files_from_epc
 from osis_mail_template.models import MailTemplate
 
 from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
-from admission.ddd.admission.doctorat.preparation import (
-    commands as doctorate_education_commands,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    STATUTS_PROPOSITION_AVANT_SOUMISSION,
-)
-from admission.ddd.admission.formation_continue import (
-    commands as continuing_education_commands,
-)
-from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutPropositionContinue,
-)
-from admission.ddd.admission.formation_generale import (
-    commands as general_education_commands,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
-)
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
-    EmplacementDocumentDTO,
-)
-from admission.ddd.admission.shared_kernel.dtos.resume import (
-    ResumeEtEmplacementsDocumentsPropositionDTO,
-)
+from admission.ddd.admission.doctorat.preparation import commands as doctorate_education_commands
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import STATUTS_PROPOSITION_AVANT_SOUMISSION
+from admission.ddd.admission.formation_continue import commands as continuing_education_commands
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.ddd.admission.formation_generale import commands as general_education_commands
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.shared_kernel.dtos.resume import ResumeEtEmplacementsDocumentsPropositionDTO
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     EMPLACEMENTS_DOCUMENTS_INTERNES,
     EMPLACEMENTS_DOCUMENTS_RECLAMABLES,
@@ -66,9 +52,7 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
     EMPLACEMENTS_SIC,
     STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER,
 )
-from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
-    ExperiencesCVRecuperees,
-)
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.forms.admission.document import RequestAllDocumentsForm
 from admission.mail_templates import (
     ADMISSION_EMAIL_REQUEST_FAC_DOCUMENTS_CONTINUING,
@@ -96,6 +80,8 @@ __all__ = [
 ]
 
 __namespace__ = False
+
+logger = logging.getLogger(__name__)
 
 
 class CancelDocumentRequestView(
@@ -220,6 +206,24 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
         return self.resume_proposition_and_documents.emplacements_documents
 
     @cached_property
+    def epc_documents(self) -> Optional[List[Dict]]:
+        """
+        Return the list of documents stored in EPC for the current admission
+        Return None if we are unable to get the documents list
+        """
+        if not self.proposition.noma_candidat:
+            return []
+        try:
+            documents = get_student_files_from_epc(self.proposition.noma_candidat)
+        except Exception as e:
+            logger.exception(
+                f"[Documents EPC] Erreur lors de la récupération des documents EPC pour le noma"
+                f" '{self.proposition.noma_candidat}'"
+            )
+            return None
+        return documents
+
+    @cached_property
     def requestable_documents(self):
         requestable_types = (
             EMPLACEMENTS_DOCUMENTS_RECLAMABLES
@@ -253,6 +257,7 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
         context = super().get_context_data(**kwargs)
 
         context['documents'] = self.documents
+        context['epc_documents'] = self.epc_documents
         context['EMPLACEMENTS_DOCUMENTS_INTERNES'] = EMPLACEMENTS_DOCUMENTS_INTERNES
         context['EMPLACEMENTS_FAC'] = EMPLACEMENTS_FAC
         context['STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER'] = STATUTS_EMPLACEMENT_DOCUMENT_A_RECLAMER
@@ -332,9 +337,6 @@ class DocumentView(LoadDossierViewMixin, AdmissionFormMixin, HtmxPermissionRequi
             'salutation': get_salutation_prefix(self.admission.candidate),
             'sender_name': self.current_user_name,
         }
-
-        if self.is_doctorate:
-            tokens['program_managers_names'] = self.admission_program_managers_names
 
         return mail_template.render_subject(tokens=tokens), mail_template.body_as_html(tokens=tokens)
 

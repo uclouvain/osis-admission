@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -39,18 +39,16 @@ from osis_notification.models import EmailNotification
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutPropositionContinue,
-)
+from admission.api.views import SubmitGeneralEducationPropositionView
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
+    RaisonPlusieursDemandesMemesCycleEtAnnee,
 )
 from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
     EtudesSecondairesNonCompleteesException,
 )
-from admission.ddd.admission.shared_kernel.domain.service.i_elements_confirmation import (
-    IElementsConfirmation,
-)
+from admission.ddd.admission.shared_kernel.domain.service.i_elements_confirmation import IElementsConfirmation
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     HorsPeriodeSpecifiqueInscription,
     NombrePropositionsSoumisesDepasseException,
@@ -64,19 +62,16 @@ from admission.ddd.admission.shared_kernel.enums import (
     TypeSituationAssimilation,
 )
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
-from admission.models import AdmissionTask
+from admission.models import AdmissionTask, GeneralEducationAdmission
+from admission.models.exam import AdmissionExam
 from admission.models.specific_question import SpecificQuestionAnswer
 from admission.tests.factories.calendar import (
     AdmissionAcademicCalendarFactory,
     AdmissionMedDentEnrollmentAcademicCalendarFactory,
 )
-from admission.tests.factories.continuing_education import (
-    ContinuingEducationAdmissionFactory,
-)
-from admission.tests.factories.curriculum import ProfessionalExperienceFactory
-from admission.tests.factories.faculty_decision import (
-    FreeAdditionalApprovalConditionFactory,
-)
+from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from admission.tests.factories.curriculum import EducationalExperienceFactory, ProfessionalExperienceFactory
+from admission.tests.factories.faculty_decision import FreeAdditionalApprovalConditionFactory
 from admission.tests.factories.form_item import (
     AdmissionFormItemFactory,
     AdmissionFormItemInstantiationFactory,
@@ -86,24 +81,40 @@ from admission.tests.factories.general_education import (
     GeneralEducationAdmissionFactory,
     GeneralEducationTrainingFactory,
 )
-from admission.tests.factories.person import (
-    IncompletePersonForBachelorFactory,
-    IncompletePersonForIUFCFactory,
-)
+from admission.tests.factories.person import IncompletePersonForBachelorFactory, IncompletePersonForIUFCFactory
 from admission.tests.factories.roles import ProgramManagerRoleFactory
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.academic_year import AcademicYear
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from base.models.enums.academic_type import AcademicTypes
+from base.models.enums.active_status import ActiveStatusEnum
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import GotDiploma
 from base.models.enums.person_address_type import PersonAddressType
 from base.models.enums.state_iufc import StateIUFC
 from base.models.person_address import PersonAddress
 from base.tests import QueriesAssertionsMixin
+from base.tests.factories.academic_calendar import (
+    InscriptionEvaluationAcademicCalendarFactory,
+)
 from base.tests.factories.academic_year import AcademicYearFactory
-from infrastructure.financabilite.domain.service.financabilite import PASS_ET_LAS_LABEL
+from base.tests.factories.session_exam_calendar import SessionExamCalendarFactory
+from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
+from ddd.logic.financabilite.dtos.financabilite import FinancabiliteDTO
+from epc.models.enums.decision_resultat_cycle import DecisionResultatCycle
+from epc.models.enums.etat_inscription import EtatInscriptionFormation
+from epc.models.enums.statut_inscription_programme_annuel import StatutInscriptionProgrammAnnuel
+from epc.models.enums.type_email_fonction_programme import TypeEmailFonctionProgramme
+from epc.tests.factories.email_fonction_programme import EmailFonctionProgrammeFactory
+from epc.tests.factories.inscription_programme_annuel import InscriptionProgrammeAnnuelFactory
+from infrastructure.financabilite.domain.service.fetcher import PASS_ET_LAS_LABEL
 from osis_profile import BE_ISO_CODE
 from osis_profile.models import EducationalExperience, ProfessionalExperience
+from osis_profile.models.education import HighSchoolDiploma
+from osis_profile.models.enums.curriculum import ActivityType
+from osis_profile.models.enums.experience_validation import ChoixStatutValidationExperience
+from osis_profile.tests.factories.exam import ExamFactory, ExamTypeFactory, FirstCycleExamFactory
+from osis_profile.tests.factories.high_school_diploma import HighSchoolDiplomaFactory
 from reference.tests.factories.country import CountryFactory
 
 
@@ -117,9 +128,32 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         )
         self.mock_publish = patcher.start()
         self.addCleanup(patcher.stop)
+        patcher = mock.patch(
+            'admission.ddd.admission.formation_generale.use_case.write.soumettre_proposition_service.Financabilite'
+        )
+        mock_financabilite = patcher.start()
+        self.addCleanup(patcher.stop)
+        mock_financabilite.return_value.determiner.return_value = FinancabiliteDTO(
+            etat=EtatFinancabilite.NON_FINANCABLE.name, details=[]
+        )
+
+        self.admission_ok.status = ChoixStatutPropositionGenerale.EN_BROUILLON.name
+        self.admission_ok.save(update_fields=['status'])
 
     @classmethod
     def setUpTestData(cls):
+        cls.last_exam_enrolment_session_calendars = {
+            year: SessionExamCalendarFactory(
+                number_session=3,
+                academic_calendar=InscriptionEvaluationAcademicCalendarFactory(
+                    data_year__year=year,
+                    start_date=datetime.date(year + 1, 6, 15),
+                    end_date=datetime.date(year + 1, 7, 15),
+                ),
+            )
+            for year in range(1979, 1980)
+        }
+
         AdmissionAcademicCalendarFactory.produce_all_required(quantity=6)
         AdmissionFormItemFactory(internal_label=PASS_ET_LAS_LABEL)
 
@@ -160,7 +194,9 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         cls.third_admission_ok = GeneralEducationAdmissionFactory(
             candidate=cls.second_admission_ok.candidate,
             bachelor_with_access_conditions_met=True,
-            training=cls.admission_ok.training,
+            training__academic_year__year=1980,
+            training__education_group_type__name=TrainingType.BACHELOR.name,
+            training__main_domain__code='11A',
         )
         cls.candidate_ok = cls.admission_ok.candidate
         cls.candidate_ok_residential_address = PersonAddress.objects.filter(
@@ -190,12 +226,15 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
                 'reglement_general': IElementsConfirmation.REGLEMENT_GENERAL,
                 'protection_donnees': IElementsConfirmation.PROTECTION_DONNEES,
                 'professions_reglementees': IElementsConfirmation.PROFESSIONS_REGLEMENTEES,
+                'verification_donnees_tiers': IElementsConfirmation.VERIFICATION_DONNEES_TIERS,
                 'justificatifs': IElementsConfirmation.JUSTIFICATIFS % {'by_service': _("by the Enrolment Office")},
                 'declaration_sur_lhonneur': IElementsConfirmation.DECLARATION_SUR_LHONNEUR
                 % {'to_service': _("to the UCLouvain Registration Service")},
                 'convention_cadre_stages': IElementsConfirmation.CONVENTION_CADRE_STAGE,
                 'communication_hopitaux': IElementsConfirmation.COMMUNICATION_HOPITAUX,
             },
+            'raison_plusieurs_demandes_meme_cycle_meme_annee': RaisonPlusieursDemandesMemesCycleEtAnnee.SUIVRE_EN_PARALLELE.name,
+            'justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee': 'My justification',
         }
 
     def test_general_proposition_verification_with_errors(self):
@@ -217,7 +256,7 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
 
     def test_general_proposition_verification_ok(self):
         self.client.force_authenticate(user=self.candidate_ok.user)
-        with self.assertNumQueriesLessThan(83):
+        with self.assertNumQueriesLessThan(110):
             response = self.client.get(self.ok_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         ret = response.json()
@@ -230,8 +269,44 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         self.assertIsNotNone(ret['date_fin_pot'])
 
     def test_general_proposition_verification_ok_valuate_experiences(self):
-        educational_experience = self.second_candidate_ok.educationalexperience_set.first()
-        professional_experience = self.second_candidate_ok.professionalexperience_set.first()
+        in_draft_educational_experience = self.second_candidate_ok.educationalexperience_set.first()
+        in_draft_professional_experience = self.second_candidate_ok.professionalexperience_set.first()
+
+        in_draft_educational_experience.validation_status = ChoixStatutValidationExperience.EN_BROUILLON.name
+        in_draft_educational_experience.save()
+
+        in_draft_professional_experience.validation_status = ChoixStatutValidationExperience.EN_BROUILLON.name
+        in_draft_professional_experience.save()
+
+        other_educational_experience = EducationalExperienceFactory(
+            person=self.second_candidate_ok,
+            validation_status=ChoixStatutValidationExperience.VALIDEE.name,
+        )
+
+        other_professional_experience = ProfessionalExperienceFactory(
+            person=self.second_candidate_ok,
+            type=ActivityType.INTERNSHIP.name,
+            validation_status=ChoixStatutValidationExperience.A_COMPLETER.name,
+        )
+
+        exam_type = ExamTypeFactory(education_group_years=[self.second_admission_ok.training])
+        exam = ExamFactory(
+            type=exam_type,
+            person=self.second_candidate_ok,
+            certificate=[uuid.uuid4()],
+            year=self.second_admission_ok.training.academic_year,
+        )
+        AdmissionExam.objects.create(exam=exam, admission=self.second_admission_ok)
+
+        self.second_candidate_ok.highschooldiploma.got_diploma = GotDiploma.NO.name
+        self.second_candidate_ok.highschooldiploma.validation_status = ChoixStatutValidationExperience.EN_BROUILLON.name
+        self.second_candidate_ok.highschooldiploma.save()
+        first_cycle_exam = FirstCycleExamFactory(
+            person=self.second_candidate_ok,
+            validation_status=ChoixStatutValidationExperience.EN_BROUILLON.name,
+            certificate=[uuid.uuid4()],
+            year=self.second_admission_ok.training.academic_year,
+        )
 
         self.client.force_authenticate(user=self.second_candidate_ok.user)
 
@@ -244,19 +319,59 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         # Valuation of the secondary studies
         self.assertEqual(self.second_admission_ok.valuated_secondary_studies_person, self.second_candidate_ok)
 
+        high_school_diploma = HighSchoolDiploma.objects.filter(person=self.second_candidate_ok)
+        self.assertEqual(len(high_school_diploma), 1)
+        self.assertEqual(high_school_diploma[0].validation_status, ChoixStatutValidationExperience.A_TRAITER.name)
+
+        first_cycle_exam.refresh_from_db()
+        self.assertEqual(first_cycle_exam.validation_status, ChoixStatutValidationExperience.A_TRAITER.name)
+
+        # Valuation of the exam
+        exam.refresh_from_db()
+        self.assertEqual(exam.validation_status, ChoixStatutValidationExperience.A_TRAITER.name)
+
         # Valuation of the curriculum experiences
-        self.assertEqual(len(self.second_admission_ok.educational_valuated_experiences.all()), 1)
-        self.assertEqual(len(self.second_admission_ok.professional_valuated_experiences.all()), 1)
+        educational_experiences = {
+            xp.uuid: xp for xp in self.second_admission_ok.educational_valuated_experiences.all()
+        }
+        professional_experiences = {
+            xp.uuid: xp for xp in self.second_admission_ok.professional_valuated_experiences.all()
+        }
+
+        self.assertEqual(len(educational_experiences), 2)
+        self.assertEqual(len(professional_experiences), 2)
+
+        self.assertIn(in_draft_educational_experience.uuid, educational_experiences)
+        self.assertIn(other_educational_experience.uuid, educational_experiences)
+        self.assertIn(in_draft_professional_experience.uuid, professional_experiences)
+        self.assertIn(other_professional_experience.uuid, professional_experiences)
+
         self.assertEqual(
-            self.second_admission_ok.educational_valuated_experiences.first().uuid,
-            educational_experience.uuid,
+            educational_experiences[in_draft_educational_experience.uuid].validation_status,
+            ChoixStatutValidationExperience.A_TRAITER.name,
         )
         self.assertEqual(
-            self.second_admission_ok.professional_valuated_experiences.first().uuid,
-            professional_experience.uuid,
+            educational_experiences[other_educational_experience.uuid].validation_status,
+            ChoixStatutValidationExperience.VALIDEE.name,
+        )
+        self.assertEqual(
+            professional_experiences[in_draft_professional_experience.uuid].validation_status,
+            ChoixStatutValidationExperience.A_TRAITER.name,
+        )
+        self.assertEqual(
+            professional_experiences[other_professional_experience.uuid].validation_status,
+            ChoixStatutValidationExperience.A_COMPLETER.name,
         )
 
         # Second submission
+        exam = ExamFactory(
+            type=exam_type,
+            person=self.second_candidate_ok,
+            certificate=[uuid.uuid4()],
+            year=self.third_admission_ok.training.academic_year,
+        )
+        AdmissionExam.objects.create(exam=exam, admission=self.third_admission_ok)
+
         response = self.client.post(self.third_ok_url, data=self.data_ok)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -266,16 +381,13 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         self.assertEqual(self.third_admission_ok.valuated_secondary_studies_person, self.third_admission_ok.candidate)
 
         # Valuation of the curriculum experiences
-        self.assertEqual(len(self.third_admission_ok.educational_valuated_experiences.all()), 1)
-        self.assertEqual(len(self.third_admission_ok.professional_valuated_experiences.all()), 1)
-        self.assertEqual(
-            self.third_admission_ok.educational_valuated_experiences.first().uuid,
-            educational_experience.uuid,
-        )
-        self.assertEqual(
-            self.third_admission_ok.professional_valuated_experiences.first().uuid,
-            professional_experience.uuid,
-        )
+        educational_experiences = self.third_admission_ok.educational_valuated_experiences.all()
+        professional_experiences = self.third_admission_ok.professional_valuated_experiences.all()
+
+        self.assertIn(in_draft_educational_experience, educational_experiences)
+        self.assertIn(other_educational_experience, educational_experiences)
+        self.assertIn(in_draft_professional_experience, professional_experiences)
+        self.assertIn(other_professional_experience, professional_experiences)
 
     @mock.patch(
         'admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription.ICalendrierInscription.'
@@ -313,13 +425,13 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         self.client.force_authenticate(user=self.candidate_ok.user)
 
         # Add a specific period
-        current_specific_enrolment_period = AdmissionMedDentEnrollmentAcademicCalendarFactory(
+        AdmissionMedDentEnrollmentAcademicCalendarFactory(
             data_year=self.admission_ok.determined_academic_year,
             start_date=datetime.date(1980, 2, 1),
             end_date=datetime.date(1980, 2, 15),
         )
 
-        next_specific_enrolment_period = AdmissionMedDentEnrollmentAcademicCalendarFactory(
+        AdmissionMedDentEnrollmentAcademicCalendarFactory(
             data_year__year=self.admission_ok.determined_academic_year.year + 1,
             start_date=datetime.date(1980, 3, 1),
             end_date=datetime.date(1980, 3, 15),
@@ -488,6 +600,14 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
                 str(required_admission_form_item.uuid): 'My first answer',
                 str(facultative_admission_form_item.uuid): '',
             },
+        )
+        self.assertEqual(
+            self.admission_ok.several_admissions_same_cycle_same_year_reason,
+            RaisonPlusieursDemandesMemesCycleEtAnnee.SUIVRE_EN_PARALLELE.name,
+        )
+        self.assertEqual(
+            self.admission_ok.several_admissions_same_cycle_same_year_justification,
+            'My justification',
         )
 
         history_entry: HistoryEntry = HistoryEntry.objects.filter(
@@ -661,12 +781,15 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
                 'reglement_general': IElementsConfirmation.REGLEMENT_GENERAL,
                 'protection_donnees': IElementsConfirmation.PROTECTION_DONNEES,
                 'professions_reglementees': IElementsConfirmation.PROFESSIONS_REGLEMENTEES,
+                'verification_donnees_tiers': IElementsConfirmation.VERIFICATION_DONNEES_TIERS,
                 'justificatifs': IElementsConfirmation.JUSTIFICATIFS % {'by_service': _("by the Enrolment Office")},
                 'declaration_sur_lhonneur': IElementsConfirmation.DECLARATION_SUR_LHONNEUR
                 % {'to_service': _("to the UCLouvain Registration Service")},
                 'convention_cadre_stages': IElementsConfirmation.CONVENTION_CADRE_STAGE,
                 'communication_hopitaux': IElementsConfirmation.COMMUNICATION_HOPITAUX,
             },
+            'raison_plusieurs_demandes_meme_cycle_meme_annee': '',
+            'justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee': '',
         }
         self.client.force_authenticate(user=self.candidate_ok.user)
         self.assertNotEqual(self.admission_ok.training, training)
@@ -704,22 +827,30 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
 
         GeneralEducationAdmissionFactory(
             candidate=self.candidate_ok,
-            status=ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name,
+            status=ChoixStatutPropositionGenerale.TRAITEMENT_FAC.name,
             determined_academic_year=academic_year_1981,
+            training__academic_year=academic_year_1981,
         )
         GeneralEducationAdmissionFactory(
             candidate=self.candidate_ok,
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
             determined_academic_year=academic_year_1981,
+            training__academic_year=academic_year_1981,
+        )
+        GeneralEducationAdmissionFactory(
+            candidate=self.candidate_ok,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+            determined_academic_year=academic_year_1981,
+            training__academic_year=academic_year_1981,
         )
 
-        # Two admissions already submitted for the same year (based on the training year)
+        # Three admissions already submitted for the same year (based on the training year)
         response = self.client.get(current_admission_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         errors_statuses = [e["status_code"] for e in response.json()['errors']]
         self.assertIn(NombrePropositionsSoumisesDepasseException.status_code, errors_statuses)
 
-        # Two admissions already submitted for the same year (based on the determined academic year)
+        # Three admissions already submitted for the same year (based on the determined academic year)
         current_admission.training.academic_year = academic_year_1982
         current_admission.training.save(update_fields=['academic_year'])
         current_admission.determined_academic_year = academic_year_1981
@@ -730,7 +861,7 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         errors_statuses = [e["status_code"] for e in response.json()['errors']]
         self.assertIn(NombrePropositionsSoumisesDepasseException.status_code, errors_statuses)
 
-        # Two admissions already submitted but for a different year (based on the training year)
+        # Three admissions already submitted but for a different year (based on the training year)
         current_admission.determined_academic_year = None
         current_admission.save(update_fields=['determined_academic_year'])
 
@@ -739,7 +870,7 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         errors_statuses = [e["status_code"] for e in response.json()['errors']]
         self.assertNotIn(NombrePropositionsSoumisesDepasseException.status_code, errors_statuses)
 
-        # Two admissions already submitted but for a different year (based on the determined academic year)
+        # Three admissions already submitted but for a different year (based on the determined academic year)
         current_admission.determined_academic_year = academic_year_1982
         current_admission.save(update_fields=['determined_academic_year'])
 
@@ -770,23 +901,31 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
 
         GeneralEducationAdmissionFactory(
             candidate=self.candidate_ok,
-            status=ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name,
+            status=ChoixStatutPropositionGenerale.RETOUR_DE_FAC.name,
             determined_academic_year=academic_year_1981,
+            training__academic_year=academic_year_1981,
         )
         GeneralEducationAdmissionFactory(
             candidate=self.candidate_ok,
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
             determined_academic_year=academic_year_1981,
+            training__academic_year=academic_year_1981,
+        )
+        GeneralEducationAdmissionFactory(
+            candidate=self.candidate_ok,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+            determined_academic_year=academic_year_1981,
+            training__academic_year=academic_year_1981,
         )
 
-        # Two admissions already submitted for the same year (based on the training year)
+        # Three admissions already submitted for the same year (based on the training year)
         response = self.client.post(current_admission_url, data=data)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         errors_statuses = [e["status_code"] for e in response.json()['non_field_errors']]
         self.assertIn(NombrePropositionsSoumisesDepasseException.status_code, errors_statuses)
 
-        # Two admissions already submitted for the same year (based on the determined academic year)
+        # Three admissions already submitted for the same year (based on the determined academic year)
         current_admission.training.academic_year = academic_year_1982
         current_admission.training.save(update_fields=['academic_year'])
         current_admission.determined_academic_year = academic_year_1981
@@ -799,7 +938,7 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
 
         data['annee'] = 1982
 
-        # Two admissions already submitted but for a different year (based on the training year)
+        # Three admissions already submitted but for a different year (based on the training year)
         current_admission.determined_academic_year = None
         current_admission.save(update_fields=['determined_academic_year'])
 
@@ -808,7 +947,7 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         errors_statuses = [e["status_code"] for e in response.json()['non_field_errors']]
         self.assertNotIn(NombrePropositionsSoumisesDepasseException.status_code, errors_statuses)
 
-        # Two admissions already submitted but for a different year (based on the determined academic year)
+        # Three admissions already submitted but for a different year (based on the determined academic year)
         current_admission.determined_academic_year = academic_year_1982
         current_admission.save(update_fields=['determined_academic_year'])
 
@@ -816,6 +955,199 @@ class GeneralPropositionSubmissionTestCase(QueriesAssertionsMixin, APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         errors_statuses = [e["status_code"] for e in response.json()['non_field_errors']]
         self.assertNotIn(NombrePropositionsSoumisesDepasseException.status_code, errors_statuses)
+
+    def test_general_proposition_edit_multiple_applications_same_cycle_same_year_questions(self):
+        self.client.force_authenticate(user=self.candidate_ok.user)
+
+        admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
+            candidate=self.candidate_ok,
+            training__academic_year__year=1980,
+            candidate__country_of_citizenship__european_union=True,
+            candidate__private_email='candidate2@test.be',
+            bachelor_with_access_conditions_met=True,
+            determined_academic_year__year=1980,
+            training__education_group_type__name=TrainingType.BACHELOR.name,
+            training__main_domain__code='11A',
+        )
+
+        url = resolve_url("admission_api_v1:submit-general-proposition", uuid=admission.uuid)
+
+        response = self.client.put(
+            url,
+            {
+                'raison_plusieurs_demandes_meme_cycle_meme_annee': RaisonPlusieursDemandesMemesCycleEtAnnee.SUIVRE_EN_PARALLELE.name,
+                'justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee': 'My justification',
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
+
+        admission.refresh_from_db()
+
+        self.assertEqual(
+            admission.several_admissions_same_cycle_same_year_reason,
+            RaisonPlusieursDemandesMemesCycleEtAnnee.SUIVRE_EN_PARALLELE.name,
+        )
+        self.assertEqual(
+            admission.several_admissions_same_cycle_same_year_justification,
+            'My justification',
+        )
+
+    def test_general_proposition_with_active_or_inactive_training(self):
+        self.client.force_authenticate(user=self.candidate_ok.user)
+
+        # Inactive training
+        admission: GeneralEducationAdmission = GeneralEducationAdmissionFactory(
+            candidate=self.candidate_ok,
+            training__academic_year__year=1980,
+            candidate__country_of_citizenship__european_union=True,
+            candidate__private_email='candidate2@test.be',
+            bachelor_with_access_conditions_met=True,
+            determined_academic_year__year=1980,
+            training__education_group_type__name=TrainingType.BACHELOR.name,
+            training__main_domain__code='11A',
+            training__active=ActiveStatusEnum.INACTIVE.name,
+        )
+
+        url = resolve_url("admission_api_v1:submit-general-proposition", uuid=admission.uuid)
+
+        response = self.client.get(url)
+
+        json_response = response.json()
+
+        errors_codes = [error['status_code'] for error in json_response['errors']]
+        self.assertIn('ADMISSION-7', errors_codes)
+
+        # Active only for re-registration
+        admission.training.active = ActiveStatusEnum.RE_REGISTRATION.name
+        admission.training.save()
+
+        response = self.client.get(url)
+
+        json_response = response.json()
+
+        self.assertEqual(len(json_response['errors']), 1)
+        self.assertEqual(json_response['errors'][0]['status_code'], 'ADMISSION-7')
+
+        internal_enrolment_1978 = InscriptionProgrammeAnnuelFactory(
+            programme_cycle__decision=DecisionResultatCycle.DISTINCTION.name,
+            programme_cycle__etudiant__person=self.candidate_ok,
+            programme__root_group__academic_year__year=1978,
+            programme__root_group__acronym=admission.training.acronym,
+            programme__offer__academic_type=AcademicTypes.ACADEMIC.name,
+            statut=StatutInscriptionProgrammAnnuel.ETUDIANT_UCL.name,
+            etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+        )
+
+        response = self.client.get(url)
+
+        json_response = response.json()
+
+        errors_codes = [error['status_code'] for error in json_response['errors']]
+        self.assertIn('ADMISSION-7', errors_codes)
+
+        internal_enrolment_1978.delete()
+
+        InscriptionProgrammeAnnuelFactory(
+            programme_cycle__decision=DecisionResultatCycle.DISTINCTION.name,
+            programme_cycle__etudiant__person=self.candidate_ok,
+            programme__root_group__academic_year__year=1979,
+            programme__root_group__acronym=admission.training.acronym,
+            programme__offer__academic_type=AcademicTypes.ACADEMIC.name,
+            statut=StatutInscriptionProgrammAnnuel.ETUDIANT_UCL.name,
+            etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+        )
+
+        response = self.client.get(url)
+
+        json_response = response.json()
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
+
+        errors_codes = [error['status_code'] for error in json_response['errors']]
+        self.assertNotIn('ADMISSION-7', errors_codes)
+        self.assertIn('FORMATION-GENERALE-44', errors_codes)  # Already graduated
+
+    def test_has_other_admission_same_cycle_same_year(self):
+        admission = GeneralEducationAdmissionFactory(
+            training__acronym='TRAINING-1',
+            determined_academic_year__year=2020,
+            training__academic_year__year=2020,
+        )
+        admission.training.education_group_type.cycle = 1
+        admission.training.education_group_type.save(update_fields=['cycle'])
+
+        # Temporary display a detailed error message because the test seems to fail in some cases
+        def _get_error_message(a1, a2):
+            return '{}-{},{}-{},{}-{}-{}'.format(
+                a1.training.education_group_type.cycle,
+                a2.training.education_group_type.cycle,
+                a1.determined_academic_year,
+                a2.determined_academic_year,
+                a1.candidate,
+                a2.candidate,
+                a2.status,
+            )
+
+        # No other admission
+        result = SubmitGeneralEducationPropositionView._has_other_admission_same_cycle_same_year(admission)
+        self.assertFalse(result)
+
+        other_admission = GeneralEducationAdmissionFactory(
+            candidate=admission.candidate,
+            status=ChoixStatutPropositionGenerale.CONFIRMEE.name,
+            training__acronym='TRAINING-2',
+            determined_academic_year=admission.determined_academic_year,
+        )
+        other_admission.training.education_group_type.cycle = 1
+        other_admission.training.education_group_type.save(update_fields=['cycle'])
+
+        # Other admission with the same cycle same year
+        result = SubmitGeneralEducationPropositionView._has_other_admission_same_cycle_same_year(admission)
+        self.assertTrue(result, _get_error_message(admission, other_admission))
+
+        # Other admission with another cycle
+        other_admission.training.education_group_type.cycle = 2
+        other_admission.training.education_group_type.save()
+
+        result = SubmitGeneralEducationPropositionView._has_other_admission_same_cycle_same_year(admission)
+        self.assertFalse(result, _get_error_message(admission, other_admission))
+
+        other_admission.training.education_group_type.cycle = 1
+        other_admission.training.education_group_type.save()
+
+        # Other admission with another year
+        other_admission.determined_academic_year = AcademicYearFactory(year=2021)
+        other_admission.save()
+
+        result = SubmitGeneralEducationPropositionView._has_other_admission_same_cycle_same_year(admission)
+        self.assertFalse(result, _get_error_message(admission, other_admission))
+
+        # Admission with valid or invalid status
+        other_admission.determined_academic_year = admission.determined_academic_year
+        other_admission.save()
+
+        invalid_statuses = {
+            ChoixStatutPropositionGenerale.EN_BROUILLON.name,
+            ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name,
+            ChoixStatutPropositionGenerale.ANNULEE.name,
+            ChoixStatutPropositionGenerale.INSCRIPTION_REFUSEE.name,
+            ChoixStatutPropositionGenerale.CLOTUREE.name,
+        }
+
+        for current_status in invalid_statuses:
+            other_admission.status = current_status
+            other_admission.save(update_fields=['status'])
+
+            result = SubmitGeneralEducationPropositionView._has_other_admission_same_cycle_same_year(admission)
+            self.assertFalse(result, _get_error_message(admission, other_admission))
+
+        for current_status in ChoixStatutPropositionGenerale.get_names_except(*invalid_statuses):
+            other_admission.status = current_status
+            other_admission.save(update_fields=['status'])
+
+            result = SubmitGeneralEducationPropositionView._has_other_admission_same_cycle_same_year(admission)
+            self.assertTrue(result, _get_error_message(admission, other_admission))
 
 
 @freezegun.freeze_time('2022-12-10')
@@ -854,6 +1186,11 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
             candidate=cls.second_admission_ok.candidate,
             with_access_conditions_met=True,
             training=training,
+        )
+
+        cls.training_email = EmailFonctionProgrammeFactory(
+            type=TypeEmailFonctionProgramme.DESTINATAIRE_ADMISSION.name,
+            programme=training.education_group,
         )
 
         cls.first_fac_manager = ProgramManagerRoleFactory(education_group=training.education_group).person
@@ -1073,12 +1410,11 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
 
         self.assertEqual(email_object['To'], self.admission_ok.candidate.private_email)
 
-        cc_recipients = email_object['Cc'].split(',')
-        self.assertEqual(len(cc_recipients), 2)
-        self.assertCountEqual(cc_recipients, [self.first_fac_manager.email, self.second_fac_manager.email])
+        cc_recipients = email_object['Cc']
+        self.assertEqual(cc_recipients, self.training_email.email)
 
         content = email_object.as_string()
-        self.assertIn(f'{self.admission_ok.candidate.first_name } {self.admission_ok.candidate.last_name}', content)
+        self.assertIn(f'{self.admission_ok.candidate.first_name} {self.admission_ok.candidate.last_name}', content)
         self.assertIn('http://dummyurl/file/foobar', content)
 
         # Check the history entries
@@ -1091,7 +1427,22 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
 
     def test_continuing_proposition_verification_ok_valuate_experiences(self):
         educational_experience = EducationalExperience.objects.filter(person=self.second_candidate_ok).first()
+        educational_experience.validation_status = ChoixStatutValidationExperience.EN_BROUILLON.name
+        educational_experience.save()
+
         professional_experience = ProfessionalExperience.objects.filter(person=self.second_candidate_ok).first()
+        professional_experience.validation_status = ChoixStatutValidationExperience.EN_BROUILLON.name
+        professional_experience.save()
+
+        self.second_candidate_ok.highschooldiploma.got_diploma = GotDiploma.NO.name
+        self.second_candidate_ok.highschooldiploma.validation_status = ChoixStatutValidationExperience.EN_BROUILLON.name
+        self.second_candidate_ok.highschooldiploma.save()
+        first_cycle_exam = FirstCycleExamFactory(
+            person=self.second_candidate_ok,
+            validation_status=ChoixStatutValidationExperience.EN_BROUILLON.name,
+            certificate=[uuid.uuid4()],
+            year=self.second_admission_ok.training.academic_year,
+        )
 
         self.client.force_authenticate(user=self.second_candidate_ok.user)
 
@@ -1102,19 +1453,23 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
         self.second_admission_ok.refresh_from_db()
 
         # Valuation of the secondary studies
+        self.second_candidate_ok.highschooldiploma.refresh_from_db()
+        first_cycle_exam.refresh_from_db()
         self.assertEqual(self.second_admission_ok.valuated_secondary_studies_person, self.second_candidate_ok)
+        self.assertEqual(
+            self.second_candidate_ok.highschooldiploma.validation_status, ChoixStatutValidationExperience.A_TRAITER.name
+        )
+        self.assertEqual(first_cycle_exam.validation_status, ChoixStatutValidationExperience.A_TRAITER.name)
 
         # Valuation of the curriculum experiences
-        self.assertEqual(len(self.second_admission_ok.educational_valuated_experiences.all()), 1)
-        self.assertEqual(len(self.second_admission_ok.professional_valuated_experiences.all()), 1)
-        self.assertEqual(
-            self.second_admission_ok.educational_valuated_experiences.first().uuid,
-            educational_experience.uuid,
-        )
-        self.assertEqual(
-            self.second_admission_ok.professional_valuated_experiences.first().uuid,
-            professional_experience.uuid,
-        )
+        educational_experiences = self.second_admission_ok.educational_valuated_experiences.all()
+        professional_experiences = self.second_admission_ok.professional_valuated_experiences.all()
+        self.assertEqual(len(educational_experiences), 1)
+        self.assertEqual(len(professional_experiences), 1)
+        self.assertEqual(educational_experiences[0].uuid, educational_experience.uuid)
+        self.assertEqual(professional_experiences[0].uuid, professional_experience.uuid)
+        self.assertEqual(educational_experiences[0].validation_status, ChoixStatutValidationExperience.A_TRAITER.name)
+        self.assertEqual(professional_experiences[0].validation_status, ChoixStatutValidationExperience.A_TRAITER.name)
 
         # Check that the pdf recap has been generated with the right sections
         call_args = self.outline_root.append.call_args_list
@@ -1150,6 +1505,18 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
         self.assertEqual(call_args_by_tab['specific_question'].title, 'Informations complémentaires')
         self.assertEqual(call_args_by_tab['confirmation'].title, 'Finalisation')
 
+        EducationalExperience.objects.filter(person=self.second_candidate_ok).update(
+            validation_status=ChoixStatutValidationExperience.AVIS_EXPERT.name
+        )
+
+        ProfessionalExperience.objects.filter(person=self.second_candidate_ok).update(
+            validation_status=ChoixStatutValidationExperience.A_COMPLETER_APRES_INSCRIPTION.name
+        )
+
+        HighSchoolDiploma.objects.filter(person=self.second_candidate_ok).update(
+            validation_status=ChoixStatutValidationExperience.AUTHENTIFICATION.name
+        )
+
         # Second submission
         response = self.client.post(self.third_ok_url, data=self.submitted_data)
 
@@ -1157,18 +1524,26 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
         self.third_admission_ok.refresh_from_db()
 
         # Valuation of the secondary studies
+        self.second_candidate_ok.highschooldiploma.refresh_from_db()
+        first_cycle_exam.refresh_from_db()
         self.assertEqual(self.third_admission_ok.valuated_secondary_studies_person, self.third_admission_ok.candidate)
+        self.assertEqual(
+            self.second_candidate_ok.highschooldiploma.validation_status,
+            ChoixStatutValidationExperience.AUTHENTIFICATION.name,
+        )
+        self.assertEqual(first_cycle_exam.validation_status, ChoixStatutValidationExperience.A_TRAITER.name)
 
         # Valuation of the curriculum experiences
-        self.assertEqual(len(self.third_admission_ok.educational_valuated_experiences.all()), 1)
-        self.assertEqual(len(self.third_admission_ok.professional_valuated_experiences.all()), 1)
+        educational_experiences = self.third_admission_ok.educational_valuated_experiences.all()
+        professional_experiences = self.third_admission_ok.professional_valuated_experiences.all()
+        self.assertEqual(len(educational_experiences), 1)
+        self.assertEqual(len(professional_experiences), 1)
+        self.assertEqual(educational_experiences[0].uuid, educational_experience.uuid)
+        self.assertEqual(professional_experiences[0].uuid, professional_experience.uuid)
+        self.assertEqual(educational_experiences[0].validation_status, ChoixStatutValidationExperience.AVIS_EXPERT.name)
         self.assertEqual(
-            self.third_admission_ok.educational_valuated_experiences.first().uuid,
-            educational_experience.uuid,
-        )
-        self.assertEqual(
-            self.third_admission_ok.professional_valuated_experiences.first().uuid,
-            professional_experience.uuid,
+            professional_experiences[0].validation_status,
+            ChoixStatutValidationExperience.A_COMPLETER_APRES_INSCRIPTION.name,
         )
 
     def test_continuing_proposition_verification_too_much_submitted_propositions(self):
@@ -1187,7 +1562,10 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
         self.assertIn(NombrePropositionsSoumisesDepasseException.status_code, [e["status_code"] for e in ret['errors']])
 
     def test_continuing_proposition_submission_with_secondary_studies(self):
-        admission = ContinuingEducationAdmissionFactory(candidate__graduated_from_high_school=GotDiploma.YES.name)
+        admission = ContinuingEducationAdmissionFactory()
+        high_school_diploma = HighSchoolDiplomaFactory(
+            person=admission.candidate, got_diploma=GotDiploma.YES.name, academic_graduation_year=None
+        )
         url = resolve_url("admission_api_v1:submit-continuing-proposition", uuid=admission.uuid)
         self.client.force_authenticate(user=admission.candidate.user)
         response = self.client.get(url)
@@ -1198,8 +1576,8 @@ class ContinuingPropositionSubmissionTestCase(APITestCase):
             [e["status_code"] for e in json_response['errors']],
         )
 
-        admission.candidate.graduated_from_high_school_year = self.candidate_ok.graduated_from_high_school_year
-        admission.candidate.save()
+        high_school_diploma.academic_graduation_year = self.candidate_ok.highschooldiploma.academic_graduation_year
+        high_school_diploma.save()
         self.client.force_authenticate(user=admission.candidate.user)
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)

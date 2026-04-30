@@ -24,20 +24,6 @@
 #
 # ##############################################################################
 
-from admission.ddd.admission.shared_kernel.domain.service.i_emplacements_documents_proposition import (
-    IEmplacementsDocumentsPropositionTranslator,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
-    IProfilCandidatTranslator,
-)
-from admission.ddd.admission.shared_kernel.domain.service.resume_proposition import ResumeProposition
-from admission.ddd.admission.shared_kernel.dtos.resume import (
-    ResumeEtEmplacementsDocumentsPropositionDTO,
-)
-from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire
-from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
-    ExperiencesCVRecuperees,
-)
 from admission.ddd.admission.formation_continue.commands import (
     RecupererResumeEtEmplacementsDocumentsPropositionQuery,
 )
@@ -49,6 +35,19 @@ from admission.ddd.admission.formation_continue.domain.service.i_question_specif
 )
 from admission.ddd.admission.formation_continue.repository.i_proposition import (
     IPropositionRepository,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_emplacements_documents_proposition import (
+    IEmplacementsDocumentsPropositionTranslator,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
+    IProfilCandidatTranslator,
+)
+from admission.ddd.admission.shared_kernel.domain.service.resume_proposition import ResumeProposition
+from admission.ddd.admission.shared_kernel.dtos.resume import (
+    ResumeEtEmplacementsDocumentsPropositionDTO,
 )
 from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import (
     IAcademicYearRepository,
@@ -66,6 +65,7 @@ def recuperer_resume_et_emplacements_documents_proposition(
     academic_year_repository: 'IAcademicYearRepository',
     personne_connue_translator: 'IPersonneConnueUclTranslator',
     question_specifique_translator: 'IQuestionSpecifiqueTranslator',
+    inscriptions_translator: IInscriptionsTranslatorService,
 ) -> ResumeEtEmplacementsDocumentsPropositionDTO:
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -79,6 +79,7 @@ def recuperer_resume_et_emplacements_documents_proposition(
         proposition_dto=proposition_dto,
         experiences_cv_recuperees=cmd.experiences_cv_recuperees,
         questions_specifiques_dtos=questions_specifiques_dtos,
+        inscriptions_translator=inscriptions_translator,
     )
 
     # WHEN

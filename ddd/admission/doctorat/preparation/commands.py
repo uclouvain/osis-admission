@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -33,9 +33,7 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixLangueRedactionThese,
 )
 from admission.ddd.admission.shared_kernel import commands
-from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
-    ExperiencesCVRecuperees,
-)
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.shared_kernel.interface import SortedQueryRequest
 from osis_common.ddd import interface
 
@@ -101,6 +99,7 @@ class RechercherDoctoratQuery(interface.QueryRequest):
 @attr.dataclass(frozen=True, slots=True)
 class RecupererResumePropositionQuery(interface.QueryRequest):
     uuid_proposition: str
+    pour_candidat: bool = False
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -706,10 +705,13 @@ class NotifierCandidatDerogationFinancabiliteCommand(interface.CommandRequest):
 class ModifierStatutChecklistExperienceParcoursAnterieurCommand(interface.CommandRequest):
     uuid_proposition: str
     uuid_experience: str
-    type_experience: str
     gestionnaire: str
     statut: str
-    statut_authentification: Optional[bool]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierStatutChecklistExperienceAcademiqueCommand(ModifierStatutChecklistExperienceParcoursAnterieurCommand):
+    pass
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -718,6 +720,18 @@ class ModifierAuthentificationExperienceParcoursAnterieurCommand(interface.Comma
     uuid_experience: str
     gestionnaire: str
     etat_authentification: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierAuthentificationExperienceAcademiqueCommand(ModifierAuthentificationExperienceParcoursAnterieurCommand):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierAuthentificationExperienceNonAcademiqueCommand(
+    ModifierAuthentificationExperienceParcoursAnterieurCommand
+):
+    pass
 
 
 @attr.dataclass(frozen=True, slots=True)

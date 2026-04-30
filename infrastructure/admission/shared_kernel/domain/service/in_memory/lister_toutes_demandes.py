@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -79,7 +79,6 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
         tardif_modif_reorientation: Optional[str] = '',
         delai_depasse_complements: Optional[bool] = None,
     ) -> PaginatedList[DemandeRechercheDTO]:
-
         result = PaginatedList(id_attribute='uuid')
 
         for proposition in PropositionGeneraleInMemoryRepository.search_dto(matricule_candidat=matricule_candidat):
@@ -106,6 +105,7 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
             code_formation=proposition.formation.code,
             intitule_formation=proposition.formation.intitule,
             type_formation=proposition.formation.type,
+            cycle_formation=None,
             lieu_formation=proposition.formation.campus.nom,
             est_inscription_tardive=None,
             est_modification_inscription_externe=None,
@@ -147,6 +147,7 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
             code_formation=proposition.doctorat.sigle,
             intitule_formation=proposition.doctorat.intitule,
             type_formation=proposition.doctorat.type,
+            cycle_formation=None,
             lieu_formation=proposition.doctorat.campus.nom,
             est_inscription_tardive=None,
             est_modification_inscription_externe=None,
@@ -182,6 +183,7 @@ class ListerToutesDemandesInMemory(IListerToutesDemandes):
             code_formation=proposition.formation.sigle,
             intitule_formation=proposition.formation.intitule,
             type_formation=proposition.formation.type,
+            cycle_formation=None,
             lieu_formation=proposition.formation.campus.nom,
             est_inscription_tardive=None,
             est_modification_inscription_externe=None,

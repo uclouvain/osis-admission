@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@ _CANDIDATE_RULESET = {
     # Doctorate
     # A candidate can view as long as it's the author
     'api_view_doctorateadmission': common.is_admission_request_author,
+    'api_view_admission_candidate_enrolment_information': common.is_admission_request_author,
     'api_download_doctorateadmission_pdf_recap': common.is_admission_request_author,
     # A candidate can view as long as he's the author and the proposition is not confirmed
     'api_view_admission_person': common.is_admission_request_author & doctorate.unconfirmed_proposition,
@@ -57,8 +58,11 @@ _CANDIDATE_RULESET = {
     'api_change_doctorateadmission': common.is_admission_request_author & doctorate.unconfirmed_proposition,
     'api_change_admission_person': common.is_admission_request_author
     & doctorate.in_progress
-    & common.does_not_have_a_submitted_admission,
-    'change_admission_person_last_enrolment': common.is_admission_request_author & doctorate.in_progress,
+    & common.does_not_have_a_submitted_admission
+    & common.candidate_is_not_recent_student,
+    'change_admission_person_last_enrolment': common.is_admission_request_author
+    & doctorate.in_progress
+    & ~common.candidate_has_internal_account,
     'api_change_admission_coordinates': common.is_admission_request_author & doctorate.in_progress,
     'api_change_admission_curriculum': common.is_admission_request_author & doctorate.in_progress,
     'api_change_admission_secondary_studies': common.is_admission_request_author & doctorate.in_progress,
@@ -103,6 +107,7 @@ _CANDIDATE_RULESET = {
     # General admission
     # A candidate can view as long as he's the author
     'view_generaleducationadmission': common.is_admission_request_author,
+    'view_generaleducationadmission_candidate_enrolment_information': common.is_admission_request_author,
     'view_generaleducationadmission_person': common.is_admission_request_author & general.in_progress,
     'view_generaleducationadmission_training_choice': common.is_admission_request_author & general.in_progress,
     'view_generaleducationadmission_coordinates': common.is_admission_request_author & general.in_progress,
@@ -118,11 +123,16 @@ _CANDIDATE_RULESET = {
     'change_generaleducationadmission_training_choice': common.is_admission_request_author & general.in_progress,
     'change_generaleducationadmission_person': common.is_admission_request_author
     & general.in_progress
-    & common.does_not_have_a_submitted_admission,
-    'change_generaleducationadmission_person_last_enrolment': common.is_admission_request_author & general.in_progress,
+    & common.does_not_have_a_submitted_admission
+    & common.candidate_is_not_recent_student,
+    'change_generaleducationadmission_person_last_enrolment': common.is_admission_request_author
+    & general.in_progress
+    & ~common.candidate_has_internal_account,
     'change_generaleducationadmission_coordinates': common.is_admission_request_author & general.in_progress,
     'change_generaleducationadmission_curriculum': common.is_admission_request_author & general.in_progress,
-    'change_generaleducationadmission_secondary_studies': common.is_admission_request_author & general.in_progress,
+    'change_generaleducationadmission_secondary_studies': common.is_admission_request_author
+    & general.in_progress
+    & common.candidate_is_not_recent_student,
     'change_generaleducationadmission_exam': common.is_admission_request_author & general.in_progress,
     'change_generaleducationadmission_languages': common.is_admission_request_author & general.in_progress,
     'change_generaleducationadmission_accounting': common.is_admission_request_author & general.in_progress,
@@ -140,6 +150,7 @@ _CANDIDATE_RULESET = {
     # Continuing admission
     # A candidate can view as long as he's the author
     'view_continuingeducationadmission': common.is_admission_request_author,
+    'view_continuingeducationadmission_candidate_enrolment_information': common.is_admission_request_author,
     'view_continuingeducationadmission_person': common.is_admission_request_author & continuing.in_progress,
     'view_continuingeducationadmission_training_choice': common.is_admission_request_author & continuing.in_progress,
     'view_continuingeducationadmission_coordinates': common.is_admission_request_author & continuing.in_progress,
@@ -152,9 +163,11 @@ _CANDIDATE_RULESET = {
     'change_continuingeducationadmission_training_choice': common.is_admission_request_author & continuing.in_progress,
     'change_continuingeducationadmission_person': common.is_admission_request_author
     & continuing.in_progress
-    & common.does_not_have_a_submitted_admission,
+    & common.does_not_have_a_submitted_admission
+    & common.candidate_is_not_recent_student,
     'change_continuingeducationadmission_person_last_enrolment': common.is_admission_request_author
-    & continuing.in_progress,
+    & continuing.in_progress
+    & ~common.candidate_has_internal_account,
     'change_continuingeducationadmission_coordinates': common.is_admission_request_author & continuing.in_progress,
     'change_continuingeducationadmission_curriculum': common.is_admission_request_author & continuing.in_progress,
     'change_continuingeducationadmission_secondary_studies': common.is_admission_request_author

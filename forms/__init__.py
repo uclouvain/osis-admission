@@ -29,9 +29,7 @@ from typing import Dict, Iterable, List, Mapping, Optional, Union
 from django import forms
 from django.conf import settings
 from django.utils.safestring import mark_safe
-from django.utils.translation import get_language
-from django.utils.translation import gettext_lazy as _
-from django.utils.translation import pgettext_lazy
+from django.utils.translation import get_language, gettext_lazy as _, pgettext_lazy
 
 from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from base.forms.utils import EMPTY_CHOICE
@@ -186,12 +184,23 @@ class FilterFieldWidget(forms.SelectMultiple):
             'admission/AdmissionSelectFilter.css',
         ]
 
-    def __init__(self, with_search=False, with_free_options=False, free_options_placeholder='', *args, **kwargs):
+    def __init__(
+        self,
+        with_search=False,
+        with_free_options=False,
+        free_options_placeholder='',
+        free_options_add_button_title='',
+        free_options_clear_button_title='',
+        *args,
+        **kwargs,
+    ):
         super().__init__(*args, **kwargs)
 
         self.with_search = with_search
         self.with_free_options = with_free_options
         self.free_options_placeholder = free_options_placeholder
+        self.free_options_add_button_title = free_options_add_button_title
+        self.free_options_clear_button_title = free_options_clear_button_title
 
     def get_context(self, name, value, attrs):
         context = super().get_context(name, value, attrs)
@@ -199,6 +208,8 @@ class FilterFieldWidget(forms.SelectMultiple):
         context['widget']['attrs']['data-with-search'] = int(self.with_search)
         context['widget']['attrs']['data-with-free-options'] = int(self.with_free_options)
         context['widget']['attrs']['data-free-options-placeholder'] = self.free_options_placeholder
+        context['widget']['attrs']['data-free-options-add-button-title'] = self.free_options_add_button_title
+        context['widget']['attrs']['data-free-options-clear-button-title'] = self.free_options_clear_button_title
         return context
 
 
@@ -270,25 +281,6 @@ class AdmissionHTMLCharField(forms.CharField):
             return html.unescape(cleaned_value)
 
         return cleaned_value
-
-
-class AutoGrowTextareaWidget(forms.Textarea):
-    """A textarea widget whose minimum height is automatically adjusted to fit its content."""
-
-    template_name = "admission/widgets/autogrow_textarea.html"
-
-    def __init__(self, attrs=None):
-        if not attrs:
-            attrs = {}
-
-        attrs['onInput'] = 'this.parentNode.dataset.value = this.value'
-
-        super().__init__(attrs)
-
-    class Media:
-        css = {
-            'all': ('admission/autogrow_textarea.css',),
-        }
 
 
 class SelectWithDisabledOptions(forms.Select):

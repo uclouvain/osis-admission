@@ -151,7 +151,6 @@ def base_education_admission_document_merging(admission):
 
             model_object = updated_document.obj
             model_field = updated_document.field
-            specific_question_uuid = updated_document.specific_question_uuid
 
             new_document_uuids = [
                 uuid.UUID(
@@ -165,19 +164,9 @@ def base_education_admission_document_merging(admission):
                 )
             ]
 
-            if specific_question_uuid:
-                # For a specific question, replace the previous file
-                SpecificQuestionAnswer.objects.update_or_create(
-                    admission=admission,
-                    form_item=AdmissionFormItem.objects.get(uuid=specific_question_uuid),
-                    defaults={
-                        'file': new_document_uuids,
-                    },
-                )
-            else:
-                # Otherwise, update the related field in the specific object
-                setattr(model_object, model_field, new_document_uuids)
-                updated_fields_by_object[model_object].append(model_field)
+            # Update the related field in the specific object
+            setattr(model_object, model_field, new_document_uuids)
+            updated_fields_by_object[model_object].append(model_field)
 
         for model_object, fields in updated_fields_by_object.items():
             model_object.save(update_fields=fields)

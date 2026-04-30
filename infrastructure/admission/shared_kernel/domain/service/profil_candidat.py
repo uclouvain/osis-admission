@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,7 +25,6 @@
 # ##############################################################################
 
 import datetime
-import itertools
 import uuid
 from typing import Dict, List, Optional, Union
 
@@ -43,57 +42,34 @@ from django.db.models import (
     Q,
     QuerySet,
     Subquery,
+    UUIDField,
     Value,
     When,
 )
-from django.db.models.functions import Concat, ExtractMonth, ExtractYear
+from django.db.models.fields.json import KeyTextTransform
+from django.db.models.functions import Cast, Concat, ExtractMonth, ExtractYear
 from django.utils.translation import get_language
 
 from admission.ddd import LANGUES_OBLIGATOIRES_DOCTORAT, NB_MOIS_MIN_VAE
-from admission.ddd.admission.doctorat.preparation.dtos import (
-    ConditionsComptabiliteDTO,
-)
-from admission.ddd.admission.doctorat.preparation.dtos.connaissance_langue import (
-    ConnaissanceLangueDTO,
-)
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
-    CurriculumAdmissionDTO,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
-    IProfilCandidatTranslator,
-)
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
-    ExperienceNonTrouveeException,
-)
-from admission.ddd.admission.shared_kernel.dtos import (
-    AdressePersonnelleDTO,
-    CoordonneesDTO,
-    IdentificationDTO,
-)
-from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import (
-    EtudesSecondairesAdmissionDTO,
+from admission.ddd.admission.doctorat.preparation.dtos import ConditionsComptabiliteDTO
+from admission.ddd.admission.doctorat.preparation.dtos.connaissance_langue import ConnaissanceLangueDTO
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import AdmissionExperienceNonTrouveeException
+from admission.ddd.admission.shared_kernel.dtos import AdressePersonnelleDTO, CoordonneesDTO, IdentificationDTO
+from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
 )
 from admission.ddd.admission.shared_kernel.dtos.merge_proposal import MergeProposalDTO
 from admission.ddd.admission.shared_kernel.dtos.resume import ResumeCandidatDTO
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
-    OngletsDemande,
-)
-from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
-    ExperiencesCVRecuperees,
-)
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from admission.infrastructure.admission.shared_kernel.domain.service.inscriptions import InscriptionsTranslatorService
 from admission.models import EPCInjection as AdmissionEPCInjection
-from admission.models.base import (
-    BaseAdmission,
-)
-from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences, \
-    AdmissionProfessionalValuatedExperiences
-from admission.models.epc_injection import (
-    EPCInjectionStatus as AdmissionEPCInjectionStatus,
-)
-from admission.models.epc_injection import EPCInjectionType
+from admission.models.epc_injection import EPCInjectionStatus as AdmissionEPCInjectionStatus, EPCInjectionType
 from admission.models.functions import ArrayLength
 from base.models.enums.community import CommunityEnum
 from base.models.enums.person_address_type import PersonAddressType
@@ -115,19 +91,13 @@ from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceNonAcademiqueDTO,
 )
 from osis_profile import BE_ISO_CODE
-from osis_profile.models import (
-    EducationalExperience,
-    EducationalExperienceYear,
-    Exam,
-    ExamType,
-    ProfessionalExperience,
-)
-from osis_profile.models.education import LanguageKnowledge
-from osis_profile.models.epc_injection import EPCInjection as CurriculumEPCInjection
+from osis_profile.models import EducationalExperience, EducationalExperienceYear, Exam, ExamType, ProfessionalExperience
+from osis_profile.models.education import HighSchoolDiploma, LanguageKnowledge
 from osis_profile.models.epc_injection import (
+    EPCInjection as CurriculumEPCInjection,
     EPCInjectionStatus as CurriculumEPCInjectionStatus,
+    ExperienceType,
 )
-from osis_profile.models.epc_injection import ExperienceType
 from osis_profile.models.exam import EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
 
 
@@ -199,6 +169,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             noma_derniere_inscription_ucl=candidate.last_registration_id,
             pays_residence=residential_country,
             autres_prenoms=candidate.middle_name,
+            statut_validation_donnees_personnelles=candidate.personal_data_validation_status,
             **country_of_citizenship,
             **birth_country,
         )
@@ -290,16 +261,24 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             high_school_diploma_alternative = candidate.exam_high_school_diploma_alternative[0]
         else:
             high_school_diploma_alternative = None
+        if not hasattr(candidate, 'highschooldiploma'):
+            candidate.highschooldiploma = HighSchoolDiploma()
+            secondary_studies_uuid = ''
+        else:
+            secondary_studies_uuid = str(candidate.highschooldiploma.uuid)
 
         potential_diploma = belgian_high_school_diploma or foreign_high_school_diploma
         return EtudesSecondairesAdmissionDTO(
-            diplome_etudes_secondaires=candidate.graduated_from_high_school,
+            uuid=secondary_studies_uuid,
+            diplome_etudes_secondaires=candidate.highschooldiploma.got_diploma,
             valorisation=ValorisationEtudesSecondairesDTO(
                 est_valorise_par_epc=candidate.is_valuated_by_epc,  # From annotation
                 types_formations_admissions_valorisees=candidate.valuated_training_types,  # From annotation
             ),
             annee_diplome_etudes_secondaires=(
-                candidate.graduated_from_high_school_year.year if candidate.graduated_from_high_school_year else None
+                candidate.highschooldiploma.academic_graduation_year.year
+                if candidate.highschooldiploma.academic_graduation_year
+                else None
             ),
             diplome_belge=(
                 DiplomeBelgeEtudesSecondairesDTO(
@@ -373,6 +352,8 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             ),
             identifiant_externe=potential_diploma.external_id if potential_diploma else None,
             injectee=candidate.secondaire_injecte_par_admission or candidate.secondaire_injecte_par_cv,
+            statut_validation=candidate.highschooldiploma.validation_status,
+            statut_authentification=candidate.highschooldiploma.authentication_status,
         )
 
     @classmethod
@@ -394,6 +375,8 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 valorisee_par_admissions=getattr(experience, 'valuated_from_admissions', None),
                 injectee=experience.injecte_par_admission or experience.injecte_par_cv,
                 identifiant_externe=experience.external_id,
+                statut_validation=experience.validation_status,
+                statut_authentification=experience.authentication_status,
             )
             for experience in experiences_non_academiques
         ]
@@ -415,18 +398,19 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
     @classmethod
     def _get_academic_experiences_dtos(
         cls,
-        matricule: str,
         has_default_language: bool,
-        uuid_proposition: str,
         experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
+        uuid_proposition: str = '',
         uuid_experience: str = '',
+        matricule: str = '',
     ) -> List[ExperienceAcademiqueDTO]:
         """Returns the DTO of the academic experiences of the given candidate."""
-
+        if uuid_experience:
+            filters = {'educational_experience__uuid': uuid_experience}
+        elif matricule:
+            filters = {'educational_experience__person__global_id': matricule}
         educational_experience_years: QuerySet[EducationalExperienceYear] = (
-            EducationalExperienceYear.objects.filter(
-                educational_experience__person__global_id=matricule,
-            )
+            EducationalExperienceYear.objects.filter(**filters)
             .select_related(
                 'academic_year',
                 'educational_experience__country',
@@ -442,7 +426,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             valuated_from_admissions=ArrayAgg(
                 'educational_experience__valuated_from_admission__uuid',
                 filter=Q(educational_experience__valuated_from_admission__isnull=False),
-                default=Value([])
+                default=Value([]),
             ),
         )
 
@@ -455,11 +439,6 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 educational_experience__educational_valuated_experiences__baseadmission_id=uuid.UUID(
                     str(uuid_proposition)
                 )
-            )
-
-        if uuid_experience:
-            educational_experience_years = educational_experience_years.filter(
-                educational_experience__uuid=uuid_experience,
             )
 
         educational_experience_years = educational_experience_years.annotate(
@@ -519,12 +498,12 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                     'nom_formation_equivalente_communaute_fr': '',
                     'cycle_formation': '',
                     'grade_academique_formation': '',
-                    'est_autre_formation': None,
+                    'formation_non_selectionnee_dans_liste_de_reference': None,
                 }
 
                 if experience_year.educational_experience.education_name:
                     program_info['nom_formation'] = experience_year.educational_experience.education_name
-                    program_info['est_autre_formation'] = True
+                    program_info['formation_non_selectionnee_dans_liste_de_reference'] = True
 
                 if experience_year.educational_experience.program_id:
                     program_info['nom_formation'] = experience_year.educational_experience.program.title
@@ -532,7 +511,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                     program_info['grade_academique_formation'] = (
                         experience_year.educational_experience.program.code_grade_acad
                     )
-                    program_info['est_autre_formation'] = False
+                    program_info['formation_non_selectionnee_dans_liste_de_reference'] = False
 
                 if experience_year.educational_experience.fwb_equivalent_program_id:
                     program_info['nom_formation_equivalente_communaute_fr'] = (
@@ -576,6 +555,8 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                     valorisee_par_admissions=getattr(experience_year, 'valuated_from_admissions', None),
                     injectee=experience_year.injecte_par_admission or experience_year.injecte_par_cv,
                     identifiant_externe=experience_year.educational_experience.external_id,
+                    statut_validation=experience_year.educational_experience.validation_status,
+                    statut_authentification=experience_year.educational_experience.authentication_status,
                     **institute,
                     **linguistic_regime,
                     **program_info,
@@ -588,7 +569,6 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def get_identification(cls, matricule: str) -> 'IdentificationDTO':
-
         person = (
             Person.objects.select_related(
                 'country_of_citizenship',
@@ -640,6 +620,30 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         )
 
     @classmethod
+    def get_examen_annotations(cls):
+        return dict(
+            injecte_par_admission=Exists(
+                AdmissionEPCInjection.objects.filter(
+                    admission__exam__exam__uuid=OuterRef('uuid'),
+                    type=EPCInjectionType.DEMANDE.name,
+                    status__in=AdmissionEPCInjectionStatus.blocking_statuses_for_experience(),
+                )
+            ),
+            injecte_par_cv=Exists(
+                CurriculumEPCInjection.objects.annotate(
+                    osis_uuid_text=KeyTextTransform(
+                        'osis_uuid',
+                        KeyTextTransform('examens', 'payload'),
+                    ),
+                    osis_uuid=Cast('osis_uuid_text', UUIDField()),
+                ).filter(
+                    status__in=CurriculumEPCInjectionStatus.blocking_statuses_for_experience(),
+                    osis_uuid=OuterRef('uuid'),
+                )
+            ),
+        )
+
+    @classmethod
     def get_secondary_studies_valuation_annotations(cls):
         return dict(
             belgian_highschool_diploma_institute_address=Concat(
@@ -659,7 +663,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
             valuated_training_types=ArrayAgg(
                 'baseadmissions__training__education_group_type__name',
                 filter=Q(baseadmissions__valuated_secondary_studies_person_id=F('pk')),
-                default=Value([])
+                default=Value([]),
             ),
         )
 
@@ -667,7 +671,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
     def get_etudes_secondaires(cls, matricule: str) -> 'EtudesSecondairesAdmissionDTO':
         candidate: Person = (
             Person.objects.select_related(
-                'graduated_from_high_school_year',
+                'highschooldiploma__academic_graduation_year',
                 'belgianhighschooldiploma__institute',
                 'foreignhighschooldiploma__country',
                 'foreignhighschooldiploma__linguistic_regime',
@@ -706,25 +710,40 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
     @classmethod
     def get_examen(
-        cls, uuid_proposition: str, matricule: str, formation_sigle: str, formation_annee: int
+        cls,
+        uuid_experience: str = None,
+        matricule: str = None,
+        formation_sigle: str = None,
+        formation_annee: int = None,
+        uuid_proposition: str = None,
     ) -> 'ExamenDTO':
         exam_type = ExamType.objects.filter(
             education_group_years__acronym=formation_sigle,
             education_group_years__academic_year__year=formation_annee,
         ).first()
-        if exam_type is None:
+        if formation_annee and formation_sigle and exam_type is None:
             return ExamenDTO(uuid='', requis=False, titre='', attestation=[], annee=None)
-        exam = Exam.objects.filter(
-            admissions__admission__uuid=uuid_proposition,
-        ).first()
+        exam = (
+            (
+                Exam.objects.filter(admissions__admission__uuid=uuid_proposition)
+                .annotate(**cls.get_examen_annotations())
+                .first()
+            )
+            if uuid_proposition
+            else (Exam.objects.filter(uuid=uuid_experience).annotate(**cls.get_examen_annotations()).first())
+        )
         if exam is None:
             return ExamenDTO(uuid='', requis=True, titre=exam_type.title, attestation=[], annee=None)
         return ExamenDTO(
             uuid=str(exam.uuid),
             requis=True,
-            titre=exam_type.title,
+            titre=exam_type.title if exam_type else exam.type.title,
             attestation=exam.certificate,
             annee=exam.year.year if exam.year else None,
+            identifiant_externe=exam.external_id,
+            injectee=exam.injecte_par_admission or exam.injecte_par_cv,
+            statut_validation=exam.validation_status,
+            statut_authentification=exam.authentication_status,
         )
 
     @classmethod
@@ -736,9 +755,16 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 titre=exam.type.title,
                 attestation=exam.certificate,
                 annee=exam.year.year if exam.year else None,
+                identifiant_externe=exam.external_id,
+                injectee=exam.injecte_par_cv or exam.injecte_par_admission,
+                statut_validation=exam.validation_status,
+                statut_authentification=exam.authentication_status,
             )
             for exam in (
                 Exam.objects.exclude(type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR)
+                .annotate(
+                    **cls.get_examen_annotations(),
+                )
                 .select_related('type')
                 .filter(person__global_id=matricule)
             )
@@ -760,7 +786,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 valuated_from_admissions=ArrayAgg(
                     'valuated_from_admission__uuid',
                     filter=Q(valuated_from_admission__isnull=False),
-                    default=Value([])
+                    default=Value([]),
                 ),
                 injecte_par_admission=Exists(
                     AdmissionEPCInjection.objects.filter(
@@ -799,16 +825,16 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         matricule: str,
         annee_courante: int,
         uuid_proposition: str,
+        inscriptions_translator: IInscriptionsTranslatorService,
         experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
     ) -> Optional['CurriculumAdmissionDTO']:
-
         try:
-            minimal_years = cls.get_annees_minimum_curriculum(matricule, annee_courante)
+            minimal_years = cls.get_annees_minimum_curriculum(matricule, annee_courante, inscriptions_translator)
 
             academic_experiences_dtos = cls._get_academic_experiences_dtos(
-                matricule,
-                cls.has_default_language(),
-                uuid_proposition,
+                matricule=matricule,
+                has_default_language=cls.has_default_language(),
+                uuid_proposition=uuid_proposition,
                 experiences_cv_recuperees=experiences_cv_recuperees,
             )
 
@@ -824,58 +850,27 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 annee_derniere_inscription_ucl=minimal_years.get('last_registration_year'),
                 experiences_non_academiques=non_academic_experiences_dtos,
                 annee_minimum_a_remplir=minimal_years.get('minimal_date').year,
+                annee_alternative_diplome_etudes_secondaires=minimal_years.get('high_school_diploma_alternative_year'),
             )
         except Person.DoesNotExist:
             return None
 
     @classmethod
-    def get_uuids_experiences_curriculum_valorisees_par_admission(cls, uuid_proposition: str) -> set[str]:
-        valuated_professionnal_experiences_uuids = AdmissionProfessionalValuatedExperiences.objects.filter(
-            baseadmission_id=uuid_proposition,
-        ).values_list('professionalexperience_id', flat=True)
-        valuated_educational_experiences_uuids = AdmissionEducationalValuatedExperiences.objects.filter(
-            baseadmission_id=uuid_proposition,
-        ).values_list('educationalexperience_id', flat=True)
-
-        exams_uuids = []
-        admission = BaseAdmission.objects.values(
-            'candidate__global_id', 'training__acronym', 'training__academic_year__year'
-        ).get(uuid=uuid_proposition)
-
-        exam = cls.get_examen(
-            uuid_proposition=uuid_proposition,
-            matricule=admission['candidate__global_id'],
-            formation_sigle=admission['training__acronym'],
-            formation_annee=admission['training__academic_year__year'],
-        )
-        if exam.requis:
-            exams_uuids.append(exam.uuid or OngletsDemande.EXAMS.name)
-
-        return set(
-            str(uuid_experience)
-            for uuid_experience in itertools.chain(
-                valuated_educational_experiences_uuids,
-                valuated_professionnal_experiences_uuids,
-                exams_uuids,
-            )
-        )
-
-    @classmethod
     def get_experience_academique(
         cls,
-        matricule: str,
-        uuid_proposition: str,
         uuid_experience: str,
+        matricule: str = None,
+        uuid_proposition: str = None,
     ) -> 'ExperienceAcademiqueDTO':
         experiences = cls._get_academic_experiences_dtos(
-            matricule,
-            cls.has_default_language(),
-            uuid_proposition,
+            matricule=matricule,
+            has_default_language=cls.has_default_language(),
+            uuid_proposition=uuid_proposition,
             uuid_experience=uuid_experience,
         )
 
         if not experiences:
-            raise ExperienceNonTrouveeException
+            raise AdmissionExperienceNonTrouveeException
 
         return experiences[0]
 
@@ -893,7 +888,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         )
 
         if not experiences:
-            raise ExperienceNonTrouveeException
+            raise AdmissionExperienceNonTrouveeException
 
         return experiences[0]
 
@@ -917,28 +912,43 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         )
 
     @classmethod
-    def get_annees_minimum_curriculum(cls, global_id, current_year):
+    def get_annees_minimum_curriculum(
+        cls,
+        global_id,
+        current_year,
+        inscriptions_translator: IInscriptionsTranslatorService,
+    ):
         person = (
             Person.objects.select_related(
-                'graduated_from_high_school_year',
                 'last_registration_year',
             )
+            .annotate(
+                high_school_diploma_alternative_year=Subquery(
+                    Exam.objects.filter(
+                        type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR,
+                        person_id=OuterRef('pk'),
+                    ).values('year__year')[:1],
+                ),
+                secondary_studies_academic_graduation_year=F('highschooldiploma__academic_graduation_year__year'),
+            )
             .only(
-                'graduated_from_high_school_year__year',
                 'last_registration_year__year',
             )
             .get(global_id=global_id)
         )
 
-        last_registration_year = person.last_registration_year.year if person.last_registration_year else None
-        graduated_from_high_school_year = (
-            person.graduated_from_high_school_year.year if person.graduated_from_high_school_year else None
+        last_ucl_enrolment = inscriptions_translator.recuperer_derniere_inscription(matricule_candidat=global_id)
+        last_registration_year = (
+            last_ucl_enrolment.annee
+            if last_ucl_enrolment
+            else (person.last_registration_year.year if person.last_registration_year else None)
         )
 
         minimal_year = cls.get_annee_minimale_a_completer_cv(
             annee_courante=current_year,
             annee_derniere_inscription_ucl=last_registration_year,
-            annee_diplome_etudes_secondaires=graduated_from_high_school_year,
+            annee_diplome_etudes_secondaires=person.secondary_studies_academic_graduation_year,
+            annee_alternative_diplome_etudes_secondaires=person.high_school_diploma_alternative_year,
         )
 
         return {
@@ -948,7 +958,8 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 1,
             ),
             'last_registration_year': last_registration_year,
-            'highschool_diploma_year': graduated_from_high_school_year,
+            'highschool_diploma_year': person.secondary_studies_academic_graduation_year,
+            'high_school_diploma_alternative_year': person.high_school_diploma_alternative_year,
         }
 
     @classmethod
@@ -956,10 +967,12 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         cls,
         matricule: str,
         annee_courante: int,
+        inscriptions_translator: IInscriptionsTranslatorService,
     ) -> 'ConditionsComptabiliteDTO':
         minimal_years = cls.get_annees_minimum_curriculum(
             global_id=matricule,
             current_year=annee_courante,
+            inscriptions_translator=InscriptionsTranslatorService(),
         )
 
         person = (
@@ -1055,6 +1068,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
         formation: Union['DoctoratFormationDTO', 'FormationDTO'],
         annee_courante: int,
         uuid_proposition: str,
+        inscriptions_translator: IInscriptionsTranslatorService,
         experiences_cv_recuperees: ExperiencesCVRecuperees = ExperiencesCVRecuperees.TOUTES,
     ) -> ResumeCandidatDTO:
         has_default_language = cls.has_default_language()
@@ -1072,7 +1086,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 'country_of_citizenship',
                 'birth_country',
                 'last_registration_year',
-                'graduated_from_high_school_year',
+                'highschooldiploma__academic_graduation_year',
                 'belgianhighschooldiploma__institute',
                 'foreignhighschooldiploma__country',
                 'foreignhighschooldiploma__linguistic_regime',
@@ -1125,20 +1139,33 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
 
         candidate: Person = queryset.get(global_id=matricule)
 
-        last_registration_year = candidate.last_registration_year.year if candidate.last_registration_year else None
+        last_ucl_enrolment = inscriptions_translator.recuperer_derniere_inscription(matricule_candidat=matricule)
+        last_registration_year = (
+            last_ucl_enrolment.annee
+            if last_ucl_enrolment
+            else (candidate.last_registration_year.year if candidate.last_registration_year else None)
+        )
         graduated_from_high_school_year = (
-            candidate.graduated_from_high_school_year.year if candidate.graduated_from_high_school_year else None
+            candidate.highschooldiploma.academic_graduation_year.year
+            if hasattr(candidate, 'highschooldiploma') and candidate.highschooldiploma.academic_graduation_year
+            else None
+        )
+        high_school_diploma_alternative_year = (
+            candidate.exam_high_school_diploma_alternative[0].year.year
+            if candidate.exam_high_school_diploma_alternative and candidate.exam_high_school_diploma_alternative[0].year
+            else None
         )
         coordonnees_dto = cls._get_coordonnees_dto(candidate=candidate, has_default_language=has_default_language)
 
         curriculum_dto = CurriculumAdmissionDTO(
             annee_derniere_inscription_ucl=last_registration_year,
             annee_diplome_etudes_secondaires=graduated_from_high_school_year,
+            annee_alternative_diplome_etudes_secondaires=high_school_diploma_alternative_year,
             experiences_academiques=cls._get_academic_experiences_dtos(
-                matricule,
-                has_default_language,
-                uuid_proposition,
-                experiences_cv_recuperees,
+                matricule=matricule,
+                has_default_language=has_default_language,
+                uuid_proposition=uuid_proposition,
+                experiences_cv_recuperees=experiences_cv_recuperees,
             ),
             experiences_non_academiques=cls.get_experiences_non_academiques(
                 matricule=matricule,
@@ -1149,6 +1176,7 @@ class ProfilCandidatTranslator(IProfilCandidatTranslator):
                 annee_courante=annee_courante,
                 annee_diplome_etudes_secondaires=graduated_from_high_school_year,
                 annee_derniere_inscription_ucl=last_registration_year,
+                annee_alternative_diplome_etudes_secondaires=high_school_diploma_alternative_year,
             ),
         )
         return ResumeCandidatDTO(

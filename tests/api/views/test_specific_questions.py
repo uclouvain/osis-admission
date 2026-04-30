@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -936,6 +936,40 @@ class GeneralEducationSpecificQuestionListApiTestCase(APITestCase):
             ],
         )
 
+    def test_retrieve_items_related_to_an_education_group(self):
+        # Education group of a general admission
+        # > without pursuit
+        admission = GeneralEducationAdmissionFactory(
+            candidate=self.candidate,
+            training__academic_year=self.admission.training.academic_year,
+            determined_academic_year=self.admission.determined_academic_year,
+            is_in_pursuit=False,
+        )
+
+        url = resolve_url(
+            "admission_api_v1:general-specific-questions",
+            uuid=admission.uuid,
+            tab=Onglets.CHOIX_FORMATION.name,
+        )
+
+        self.message_instantiation.education_group = admission.training.education_group
+        self.message_instantiation.display_according_education = CritereItemFormulaireFormation.UNE_FORMATION.name
+        self.message_instantiation.save()
+
+        self.client.force_authenticate(user=self.candidate.user)
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 1)
+
+        # > with pursuit
+        admission.is_in_pursuit = True
+        admission.save(update_fields=['is_in_pursuit'])
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 0)
+
 
 class ContinuingEducationSpecificQuestionListApiTestCase(APITestCase):
     @classmethod
@@ -1016,7 +1050,7 @@ class GeneralEducationSpecificQuestionUpdateApiTestCase(APITestCase):
         # Mock osis-document
         self.confirm_remote_upload_patcher = patch('osis_document_components.services.confirm_remote_upload')
         patched = self.confirm_remote_upload_patcher.start()
-        patched.return_value = '4bdffb42-552d-415d-9e4c-725f10dce228'
+        patched.side_effect = lambda value, **kwargs: value if value else '4bdffb42-552d-415d-9e4c-725f10dce228'
 
         self.get_remote_metadata_patcher = patch('osis_document_components.services.get_remote_metadata')
         patched = self.get_remote_metadata_patcher.start()
@@ -1032,7 +1066,7 @@ class GeneralEducationSpecificQuestionUpdateApiTestCase(APITestCase):
 
         patcher = patch('osis_document_components.fields.FileField._confirm_multiple_upload')
         patched = patcher.start()
-        patched.side_effect = lambda _, value, __: ['4bdffb42-552d-415d-9e4c-725f10dce228'] if value else []
+        patched.side_effect = lambda _, value, __: value if value else []
         self.addCleanup(patcher.stop)
 
     @classmethod
@@ -1056,8 +1090,10 @@ class GeneralEducationSpecificQuestionUpdateApiTestCase(APITestCase):
             'reponses_questions_specifiques': {
                 'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
             },
-            'documents_additionnels': ['uuid'],
+            'documents_additionnels': [uuid.uuid4()],
             'poste_diplomatique': cls.diplomatic_post.code,
+            'est_concerne_par_le_bama_15': True,
+            'preuve_bama_15': [uuid.uuid4()],
         }
 
         # Users
@@ -1110,13 +1146,12 @@ class GeneralEducationSpecificQuestionUpdateApiTestCase(APITestCase):
                 'fe254203-17c7-47d6-95e4-3c5c532da551': 'My response',
             },
         )
-        self.assertEqual(
-            str(admission.additional_documents[0]),
-            '4bdffb42-552d-415d-9e4c-725f10dce228',
-        )
+        self.assertEqual(admission.additional_documents, self.update_data['documents_additionnels'])
         self.assertEqual(admission.diplomatic_post, self.diplomatic_post)
         self.assertEqual(admission.modified_at, datetime.datetime.now())
         self.assertEqual(admission.last_update_author, self.candidate.user.person)
+        self.assertEqual(admission.is_concerned_by_bama_15, True)
+        self.assertEqual(admission.bama_15_proof, self.update_data['preuve_bama_15'])
 
         # Unknown diplomatic post
         response = self.client.put(
@@ -1146,8 +1181,8 @@ class ContinuingEducationSpecificQuestionUpdateApiTestCase(APITestCase):
     def setUpTestData(cls):
         # Data
         cls.admission = ContinuingEducationAdmissionFactory(training__academic_year__year=2020)
-        be_country = CountryFactory(iso_code=BE_ISO_CODE)
-        AdmissionAcademicCalendarFactory.produce_all_required()
+        CountryFactory(iso_code=BE_ISO_CODE)
+        AdmissionAcademicCalendarFactory.produce_all_required(quantity=6)
 
         cls.message_instantiation = AdmissionFormItemInstantiationFactory(
             form_item=TextAdmissionFormItemFactory(
@@ -1188,7 +1223,6 @@ class ContinuingEducationSpecificQuestionUpdateApiTestCase(APITestCase):
             'adresse_facturation_destinataire': 'John Doe',
             'adresse_facturation_boite_postale': 'B1',
         }
-        AdmissionAcademicCalendarFactory.produce_all_required()
 
         # Users
         cls.candidate = cls.admission.candidate

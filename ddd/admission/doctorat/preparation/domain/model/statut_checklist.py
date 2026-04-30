@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -37,16 +37,14 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
     DerogationFinancement,
     OngletsChecklist,
 )
-from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
-    EtatAuthentificationParcours,
-)
+from base.models.enums.personal_data import ChoixStatutValidationDonneesPersonnelles
 from osis_common.ddd import interface
+from osis_profile.models.enums.experience_validation import EtatAuthentificationParcours
 
 
 @attr.dataclass
 class StatutChecklist(interface.ValueObject):
     libelle: str
-    enfants: List['StatutChecklist'] = attr.Factory(list)
     statut: Optional[ChoixStatutChecklist] = None
     extra: Dict[str, any] = attr.Factory(dict)
 
@@ -55,7 +53,6 @@ class StatutChecklist(interface.ValueObject):
         return cls(
             libelle=item.get('libelle', ''),
             statut=ChoixStatutChecklist[item['statut']] if item.get('statut') else None,
-            enfants=[cls.from_dict(enfant) for enfant in item.get('enfants', [])],
             extra=item.get('extra', {}),
         )
 
@@ -71,7 +68,6 @@ class StatutChecklist(interface.ValueObject):
 
 @attr.dataclass
 class StatutsChecklistDoctorale:
-    donnees_personnelles: StatutChecklist
     assimilation: StatutChecklist
     parcours_anterieur: StatutChecklist
     financabilite: StatutChecklist
@@ -88,14 +84,10 @@ class StatutsChecklistDoctorale:
             checklist_by_tab[key] = StatutChecklist.from_dict(item=item)
         return cls(**checklist_by_tab)
 
-    def recuperer_enfant(self, onglet, identifiant_enfant) -> StatutChecklist:
-        return next(
-            enfant for enfant in getattr(self, onglet).enfants if enfant.extra.get('identifiant') == identifiant_enfant
-        )
-
 
 INDEX_ONGLETS_CHECKLIST = {
-    onglet: index for index, onglet in enumerate(attr.fields_dict(StatutsChecklistDoctorale))  # type: ignore
+    onglet: index
+    for index, onglet in enumerate(attr.fields_dict(StatutsChecklistDoctorale))  # type: ignore
 }
 
 
@@ -139,6 +131,12 @@ class ConfigurationStatutChecklist(interface.ValueObject):
             identifiant_parent=self.identifiant_parent,
         )
 
+    def to_dict(self):
+        return {
+            'extra': self.extra,
+            'statut': self.statut.name,
+        }
+
 
 @attr.dataclass
 class ConfigurationOngletChecklist(interface.ValueObject):
@@ -151,29 +149,41 @@ class ConfigurationOngletChecklist(interface.ValueObject):
 
 STATUTS_CHECKLIST_PAR_ONGLET: Dict[str, Dict[str, ConfigurationStatutChecklist]] = {}
 
-onglet_donnes_personnelles = ConfigurationOngletChecklist(
+onglet_donnees_personnelles = ConfigurationOngletChecklist(
     identifiant=OngletsChecklist.donnees_personnelles,
     statuts=[
         ConfigurationStatutChecklist(
-            identifiant='A_TRAITER',
-            libelle=_('To be processed'),
+            identifiant=ChoixStatutValidationDonneesPersonnelles.A_TRAITER.name,
+            libelle=ChoixStatutValidationDonneesPersonnelles.A_TRAITER.value,
             statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
         ),
         ConfigurationStatutChecklist(
-            identifiant='A_COMPLETER',
-            libelle=_('To be completed'),
+            identifiant=ChoixStatutValidationDonneesPersonnelles.TOILETTEES.name,
+            libelle=ChoixStatutValidationDonneesPersonnelles.TOILETTEES.value,
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+            extra={'en_cours': 'cleaned'},
+        ),
+        ConfigurationStatutChecklist(
+            identifiant=ChoixStatutValidationDonneesPersonnelles.A_COMPLETER.name,
+            libelle=ChoixStatutValidationDonneesPersonnelles.A_COMPLETER.value,
             statut=ChoixStatutChecklist.GEST_BLOCAGE,
             extra={'fraud': '0'},
         ),
         ConfigurationStatutChecklist(
-            identifiant='FRAUDEUR',
-            libelle=_('Fraudster'),
+            identifiant=ChoixStatutValidationDonneesPersonnelles.AVIS_EXPERT.name,
+            libelle=ChoixStatutValidationDonneesPersonnelles.AVIS_EXPERT.value,
+            statut=ChoixStatutChecklist.GEST_EN_COURS,
+            extra={'en_cours': 'expert_opinion'},
+        ),
+        ConfigurationStatutChecklist(
+            identifiant=ChoixStatutValidationDonneesPersonnelles.FRAUDEUR.name,
+            libelle=ChoixStatutValidationDonneesPersonnelles.FRAUDEUR.value,
             statut=ChoixStatutChecklist.GEST_BLOCAGE,
             extra={'fraud': '1'},
         ),
         ConfigurationStatutChecklist(
-            identifiant='VALIDEES',
-            libelle=_('Validated'),
+            identifiant=ChoixStatutValidationDonneesPersonnelles.VALIDEES.name,
+            libelle=ChoixStatutValidationDonneesPersonnelles.VALIDEES.value,
             statut=ChoixStatutChecklist.GEST_REUSSITE,
         ),
     ],
@@ -502,7 +512,7 @@ onglet_decision_sic = ConfigurationOngletChecklist(
 )
 
 ORGANISATION_ONGLETS_CHECKLIST: List[ConfigurationOngletChecklist] = [
-    onglet_donnes_personnelles,
+    onglet_donnees_personnelles,
     onglet_assimilation,
     onglet_parcours_anterieur,
     onglets_parcours_anterieur_experiences,

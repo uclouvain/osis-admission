@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,16 +29,20 @@ import attr
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutChecklist,
 )
-from admission.ddd.admission.formation_continue.domain.model.statut_checklist import StatutChecklist
+from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
+    StatutChecklist,
+)
 from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
-    ApprouverPropositionTransitionStatutException,
     AnnulerPropositionTransitionStatutException,
-    RefuserPropositionTransitionStatutException,
     ApprouverParFacTransitionStatutException,
-    MettreEnAttenteTransitionStatutException,
+    ApprouverPropositionTransitionStatutException,
+    EtatChecklistDonneesPersonnellesNonValidePourApprouverDemande,
     MettreAValiderTransitionStatutException,
+    MettreEnAttenteTransitionStatutException,
+    RefuserPropositionTransitionStatutException,
 )
 from base.ddd.utils.business_validator import BusinessValidator
+from base.models.enums.personal_data import ChoixStatutValidationDonneesPersonnelles
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -118,3 +122,12 @@ class ShouldPeutCloturerProposition(BusinessValidator):
 
     def validate(self, *args, **kwargs):
         pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ShouldDonneesPersonnellesEtreDansEtatCorrectPourApprouverDemande(BusinessValidator):
+    statut_validation_donnees_personnelles: str
+
+    def validate(self, *args, **kwargs):
+        if self.statut_validation_donnees_personnelles != ChoixStatutValidationDonneesPersonnelles.VALIDEES.name:
+            raise EtatChecklistDonneesPersonnellesNonValidePourApprouverDemande

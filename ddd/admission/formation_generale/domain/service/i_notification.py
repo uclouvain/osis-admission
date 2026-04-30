@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,16 +27,16 @@ from abc import abstractmethod
 from email.message import EmailMessage
 from typing import List, Optional
 
-from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import EmplacementDocument
-from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import EtatAuthentificationParcours
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
-from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
+from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
+from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import EmplacementDocument
 from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import IMatriculeEtudiantService
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.shared_kernel.repository.i_email_destinataire import (
     IEmailDestinataireRepository,
 )
 from osis_common.ddd import interface
+from osis_profile.models.enums.experience_validation import EtatAuthentificationParcours
 
 
 class INotification(interface.DomainService):
@@ -99,7 +99,7 @@ class INotification(interface.DomainService):
     @classmethod
     def modifier_authentification_experience_parcours(
         cls,
-        proposition: Proposition,
+        proposition_id: PropositionIdentity,
         etat_authentification: str,
     ) -> Optional[EmailMessage]:
         methode_notification = {
@@ -110,16 +110,16 @@ class INotification(interface.DomainService):
         }.get(etat_authentification)
 
         if methode_notification:
-            return methode_notification(proposition)
+            return methode_notification(proposition_id)
 
     @classmethod
     @abstractmethod
-    def demande_verification_titre_acces(cls, proposition: Proposition) -> EmailMessage:
+    def demande_verification_titre_acces(cls, proposition_id: PropositionIdentity) -> EmailMessage:
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
-    def informer_candidat_verification_parcours_en_cours(cls, proposition: Proposition) -> EmailMessage:
+    def informer_candidat_verification_parcours_en_cours(cls, proposition_id: PropositionIdentity) -> EmailMessage:
         raise NotImplementedError
 
     @classmethod

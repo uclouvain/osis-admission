@@ -8,7 +8,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -57,9 +57,17 @@
   <div>
     <span>
       {% if admission.noma_candidat %}
-        <a href="{% url 'consulter_dossier_etudiant' admission.noma_candidat %}" target="_blank">
-          {{ admission.noma_candidat }}
-        </a>
+        <span class="copy-to-clipboard">
+          <a class="copy-to-clipboard-element" href="{{ request.scheme }}://{{ request.get_host }}{% url 'consulter_dossier_etudiant' admission.noma_candidat %}" target="_blank">
+            {{ admission.noma_candidat }}
+          </a>
+          <button
+            class="copy-button"
+            data-html="true"
+          >
+            <i class="far fa-copy"></i>
+          </button>
+        </span>
       {% else %}
         {% translate 'Unknown noma' %}
       {% endif %}
@@ -112,7 +120,7 @@
     {% if admission.soumise_le %}
       <br>
       <span>
-        {% translate 'Submission date:' %} {{ admission.soumise_le|date:'d/m/Y' }}
+        {% translate 'Confirmation date:' %} {{ admission.soumise_le|date:'d/m/Y' }}
       </span>
     {% endif %}
     <br>
@@ -124,8 +132,8 @@
   </div>
   <div id="admission-badges" class="min-width">
     {% include 'admission/includes/epc_injection_button.html' %}
-    {% if admission.fraudeur_ares %}
-      <span class="label label-danger">{% translate 'Fraudster (ARES)' %}</span>
+    {% if admission.est_fraudeur %}
+      <span class="label label-danger">{% translate 'Fraudster' %}</span>
     {% endif %}
     {% if admission.candidat_vip %}
       <span class="label label-success">{% translate 'VIP' %}</span>
@@ -135,9 +143,6 @@
     {% endif %}
     {% if admission.est_reorientation_inscription_externe %}
       <span class="label label-admission-primary">{% translate 'External reorientation' %}</span>
-    {% endif %}
-    {% if admission.non_financable %}
-      <span class="label label-danger">{% translate 'Not fundable' %}</span>
     {% endif %}
     {% if admission.candidat_a_plusieurs_demandes %}
       <span

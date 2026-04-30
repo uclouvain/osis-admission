@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -57,9 +57,14 @@ from admission.tests.factories.form_item import (
 )
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import CandidateFactory
+from base.models.enums.academic_type import AcademicTypes
 from base.models.enums.got_diploma import GotDiploma
 from base.models.enums.teaching_type import TeachingTypeEnum
 from base.tests.factories.academic_year import AcademicYearFactory
+from base.tests.factories.person import PersonFactory
+from epc.models.enums.etat_inscription import EtatInscriptionFormation
+from epc.models.enums.statut_inscription_programme_annuel import StatutInscriptionProgrammAnnuel
+from epc.tests.factories.inscription_programme_annuel import InscriptionProgrammeAnnuelFactory
 from osis_profile import FR_ISO_CODE
 from osis_profile.models import (
     EducationalExperience,
@@ -74,6 +79,12 @@ from osis_profile.models.enums.curriculum import (
     Result,
     TranscriptType,
 )
+from osis_profile.models.enums.experience_validation import (
+    ChoixStatutValidationExperience,
+    EtatAuthentificationParcours,
+)
+from osis_profile.tests.factories.exam import FirstCycleExamFactory
+from osis_profile.tests.factories.high_school_diploma import HighSchoolDiplomaFactory
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.diploma_title import DiplomaTitleFactory
 from reference.tests.factories.language import LanguageFactory
@@ -181,8 +192,6 @@ class BaseCurriculumTestCase:
         patcher.start()
         self.addCleanup(patcher.stop)
 
-        self.user.person.graduated_from_high_school = ''
-        self.user.person.graduated_from_high_school_year = None
         self.user.person.last_registration_year = None
         self.user.person.save()
 
@@ -271,6 +280,66 @@ class BaseCurriculumTestCase:
             ['De Septembre 2019 à Décembre 2019'] if self.with_incomplete_periods else [],
         )
 
+    def test_get_curriculum_minimal_year_with_automatic_last_registration(self):
+        create_educational_experiences(person=self.user.person, country=self.country)
+        create_professional_experiences(person=self.user.person)
+
+        self.client.force_authenticate(user=self.user)
+
+        InscriptionProgrammeAnnuelFactory(
+            etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+            programme__offer__academic_type=AcademicTypes.ACADEMIC.name,
+            statut=StatutInscriptionProgrammAnnuel.ETUDIANT_UCL.name,
+            programme__root_group__academic_year__year=2018,
+            programme_cycle__etudiant__person=self.user.person,
+        )
+
+        response = self.client.get(self.url)
+
+        # Check response data
+        response = response.json()
+        self.assertEqual(response.get('minimal_date'), '2019-09-01')
+        self.assertEqual(
+            response.get('incomplete_periods'),
+            ['De Septembre 2019 à Décembre 2019'] if self.with_incomplete_periods else [],
+        )
+
+    def test_get_curriculum_minimal_year_with_secondary_studies_alternative(self):
+        self.client.force_authenticate(user=self.user)
+
+        create_educational_experiences(person=self.user.person, country=self.country)
+        create_professional_experiences(person=self.user.person)
+
+        # With exam for another person
+        exam = FirstCycleExamFactory(person=PersonFactory())
+
+        response = self.client.get(self.url)
+
+        json_response = response.json()
+        self.assertEqual(json_response.get('minimal_date'), '2016-09-01')
+
+        # With exam for the current person but without year
+        exam.person = self.user.person
+        exam.save()
+
+        response = self.client.get(self.url)
+
+        json_response = response.json()
+        self.assertEqual(json_response.get('minimal_date'), '2016-09-01')
+
+        # With exam for the current person with a specified year
+        exam.year = self.academic_year_2018
+        exam.save()
+
+        response = self.client.get(self.url)
+
+        json_response = response.json()
+        self.assertEqual(json_response.get('minimal_date'), '2019-09-01')
+        self.assertEqual(
+            json_response.get('incomplete_periods'),
+            ['De Septembre 2019 à Décembre 2019'] if self.with_incomplete_periods else [],
+        )
+
 
 class AdmissionBaseCurriculumTestCase(BaseCurriculumTestCase):
     def test_get_curriculum(self):
@@ -354,9 +423,9 @@ class AdmissionBaseCurriculumTestCase(BaseCurriculumTestCase):
         create_educational_experiences(person=self.user.person, country=self.country)
         create_professional_experiences(person=self.user.person)
 
-        self.user.person.graduated_from_high_school = GotDiploma.YES.name
-        self.user.person.graduated_from_high_school_year = self.academic_year_2018
-        self.user.person.save()
+        self.user.person.highschooldiploma.got_diploma = GotDiploma.YES.name
+        self.user.person.highschooldiploma.academic_graduation_year = self.academic_year_2018
+        self.user.person.highschooldiploma.save()
 
         response = self.client.get(self.url)
 
@@ -432,7 +501,7 @@ class BaseIncompleteCurriculumExperiencesTestCase:
             json_response.get('incomplete_experiences'),
             (
                 {
-                    str(experience_2018.uuid): [f"L'expérience académique '{program_name}' " f"est incomplète."],
+                    str(experience_2018.uuid): [f"L'expérience académique '{program_name}' est incomplète."],
                 }
                 if desired_result is None
                 else desired_result
@@ -893,9 +962,11 @@ class PersonCurriculumTestCase(BaseCurriculumTestCase, APITestCase):
         create_educational_experiences(person=self.user.person, country=self.country)
         create_professional_experiences(person=self.user.person)
 
-        self.user.person.graduated_from_high_school = GotDiploma.YES.name
-        self.user.person.graduated_from_high_school_year = self.academic_year_2018
-        self.user.person.save()
+        HighSchoolDiplomaFactory(
+            person=self.user.person,
+            got_diploma=GotDiploma.YES.name,
+            academic_graduation_year=self.academic_year_2018,
+        )
 
         response = self.client.get(self.url)
 
@@ -970,6 +1041,8 @@ class ProfessionalExperienceTestCase(APITestCase):
             role='Librarian',
             sector=ActivitySector.PUBLIC.name,
             activity='Work - activity',
+            validation_status=ChoixStatutValidationExperience.A_TRAITER.name,
+            authentication_status=EtatAuthentificationParcours.VRAI.name,
         )
 
         self.admission_details_url = resolve_url(
@@ -1103,6 +1176,8 @@ class ProfessionalExperienceTestCase(APITestCase):
         self.assertEqual(experience.sector, ActivitySector.PRIVATE.name)
         self.assertEqual(experience.activity, 'Volunteering - activity')
         self.assertEqual(experience.external_id, None)
+        self.assertEqual(experience.validation_status, ChoixStatutValidationExperience.EN_BROUILLON.name)
+        self.assertEqual(experience.authentication_status, EtatAuthentificationParcours.NON_CONCERNE.name)
 
         self.admission.refresh_from_db()
         self.assertEqual(self.admission.modified_at, self.today_datetime)
@@ -1158,13 +1233,15 @@ class ProfessionalExperienceTestCase(APITestCase):
         json_response = response.json()
 
         # Check response data
-        self.assertEqual(json_response.get('sector'), ActivitySector.PRIVATE.name),
+        self.assertEqual(json_response.get('sector'), ActivitySector.PRIVATE.name)
 
         experience = ProfessionalExperience.objects.get(
             uuid=self.professional_experience.uuid,
         )
 
         self.assertEqual(experience.sector, ActivitySector.PRIVATE.name)
+        self.assertEqual(experience.validation_status, ChoixStatutValidationExperience.A_TRAITER.name)
+        self.assertEqual(experience.authentication_status, EtatAuthentificationParcours.VRAI.name)
 
     def test_put_professional_experience_with_general_admission(self):
         self.client.force_authenticate(user=self.user)
@@ -1184,7 +1261,7 @@ class ProfessionalExperienceTestCase(APITestCase):
         json_response = response.json()
 
         # Check response data
-        self.assertEqual(json_response.get('sector'), ActivitySector.PRIVATE.name),
+        self.assertEqual(json_response.get('sector'), ActivitySector.PRIVATE.name)
 
         experience = ProfessionalExperience.objects.get(
             uuid=self.professional_experience.uuid,
@@ -1429,6 +1506,8 @@ class EducationalExperienceTestCase(APITestCase):
             dissertation_title='Title',
             dissertation_score='15/20',
             dissertation_summary=[],
+            validation_status=ChoixStatutValidationExperience.A_TRAITER.name,
+            authentication_status=EtatAuthentificationParcours.VRAI.name,
         )
 
         EducationalExperienceYearFactory(
@@ -1652,6 +1731,8 @@ class EducationalExperienceTestCase(APITestCase):
         self.assertEqual(experience.dissertation_title, 'Title')
         self.assertEqual(experience.dissertation_score, '15/20')
         self.assertEqual(experience.dissertation_summary, [])
+        self.assertEqual(experience.validation_status, ChoixStatutValidationExperience.EN_BROUILLON.name)
+        self.assertEqual(experience.authentication_status, EtatAuthentificationParcours.NON_CONCERNE.name)
 
         first_educational_experience_year = EducationalExperienceYear.objects.filter(
             educational_experience=experience
@@ -1752,6 +1833,8 @@ class EducationalExperienceTestCase(APITestCase):
         )
 
         self.assertEqual(experience.obtained_grade, Grade.GREATER_DISTINCTION.name)
+        self.assertEqual(experience.validation_status, ChoixStatutValidationExperience.A_TRAITER.name)
+        self.assertEqual(experience.authentication_status, EtatAuthentificationParcours.VRAI.name)
 
         educational_experience_years = EducationalExperienceYear.objects.filter(educational_experience=experience)
 

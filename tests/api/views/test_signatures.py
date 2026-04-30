@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -30,6 +30,8 @@ import freezegun
 from django.shortcuts import resolve_url
 from osis_history.models import HistoryEntry
 from osis_notification.models import EmailNotification
+from osis_signature.enums import SignatureState
+from osis_signature.models import StateHistory
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -44,7 +46,6 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
     MembreCAManquantException,
     PromoteurDeReferenceManquantException,
     PromoteurManquantException,
-    SignataireNonTrouveException,
 )
 from admission.tests.factories import DoctorateAdmissionFactory, WriteTokenFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
@@ -56,7 +57,6 @@ from admission.tests.factories.supervision import (
     PromoterFactory,
     _ProcessFactory,
 )
-from osis_profile.models import EducationalExperience
 from reference.tests.factories.language import FrenchLanguageFactory
 
 
@@ -265,14 +265,48 @@ class RequestSignaturesApiTestCase(APITestCase):
 
         promoter = PromoterFactory(is_reference_promoter=True)
         external_promoter = ExternalPromoterFactory(process=promoter.process)
-        CaMemberFactory(process=promoter.process)
-        CaMemberFactory(process=promoter.process)
+        invited_ca_member = CaMemberFactory(process=promoter.process)
+        ca_member_who_agreed = CaMemberFactory(process=promoter.process)
+
+        with freezegun.freeze_time('2019-01-01'):
+            invited_first_state_ca_member = StateHistory.objects.create(
+                actor=invited_ca_member, state=SignatureState.INVITED.name
+            )
+            first_state_ca_member_who_agreed = StateHistory.objects.create(
+                actor=ca_member_who_agreed, state=SignatureState.APPROVED.name
+            )
+
         self.admission.supervision_group = promoter.actor_ptr.process
         self.admission.save()
 
         # Send first time
         response = self.client.post(self.url)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        promoter_states = StateHistory.objects.filter(actor=promoter)
+        self.assertEqual(len(promoter_states), 1)
+        self.assertEqual(promoter_states[0].state, SignatureState.INVITED.name)
+        self.assertEqual(promoter_states[0].created_at, datetime(2020, 1, 1))
+
+        external_promoter_states = StateHistory.objects.filter(actor=external_promoter)
+        self.assertEqual(len(external_promoter_states), 1)
+        self.assertEqual(external_promoter_states[0].state, SignatureState.INVITED.name)
+        self.assertEqual(external_promoter_states[0].created_at, datetime(2020, 1, 1))
+
+        invited_ca_member_states = StateHistory.objects.filter(actor=invited_ca_member).order_by('created_at')
+        self.assertEqual(len(invited_ca_member_states), 2)
+        self.assertEqual(invited_ca_member_states[0].state, SignatureState.INVITED.name)
+        self.assertEqual(invited_ca_member_states[0].created_at, datetime(2019, 1, 1))
+        self.assertEqual(invited_first_state_ca_member, invited_ca_member_states[0])
+        self.assertEqual(invited_ca_member_states[1].state, SignatureState.INVITED.name)
+        self.assertEqual(invited_ca_member_states[1].created_at, datetime(2020, 1, 1))
+
+        ca_member_who_agreed_states = StateHistory.objects.filter(actor=ca_member_who_agreed)
+        self.assertEqual(len(ca_member_who_agreed_states), 1)
+        self.assertEqual(ca_member_who_agreed_states[0].state, SignatureState.APPROVED.name)
+        self.assertEqual(ca_member_who_agreed_states[0].created_at, datetime(2019, 1, 1))
+        self.assertEqual(first_state_ca_member_who_agreed, ca_member_who_agreed_states[0])
+
         EmailNotification.objects.all().delete()
 
         # Resend for internal

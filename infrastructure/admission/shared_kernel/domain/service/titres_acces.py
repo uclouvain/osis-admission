@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -32,6 +32,8 @@ from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import 
     ITitresAcces,
 )
 from admission.ddd.admission.shared_kernel.dtos.conditions import AdmissionConditionsDTO
+from admission.ddd.admission.shared_kernel.dtos.inscription_ucl_candidat import InscriptionUCLCandidatDTO
+from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import GotDiploma
 from base.models.person import Person
 from osis_profile.models import (
@@ -49,9 +51,14 @@ from reference.models.enums.cycle import Cycle
 
 class TitresAcces(ITitresAcces):
     @classmethod
-    def conditions_remplies(cls, matricule_candidat: str, equivalence_diplome: List[str]) -> AdmissionConditionsDTO:
+    def conditions_remplies(
+        cls,
+        matricule_candidat: str,
+        equivalence_diplome: List[str],
+        inscriptions_ucl_candidat: List[InscriptionUCLCandidatDTO],
+    ) -> AdmissionConditionsDTO:
         repondu_oui_ou_en_cours = models.Q(
-            graduated_from_high_school__in=[GotDiploma.YES.name, GotDiploma.THIS_YEAR.name]
+            highschooldiploma__got_diploma__in=[GotDiploma.YES.name, GotDiploma.THIS_YEAR.name]
         )
         result = (
             Person.objects.alias(
@@ -83,7 +90,7 @@ class TitresAcces(ITitresAcces):
                 #     ET avoir fourni la PJ d'attestation de réussite de l'examen d'admission aux études de
                 #     premier cycle de l'enseignement supérieur
                 alternative_etudes_secondaires=models.ExpressionWrapper(
-                    models.Q(graduated_from_high_school=GotDiploma.NO.name, diplome_alternatif=True),
+                    models.Q(highschooldiploma__got_diploma=GotDiploma.NO.name, diplome_alternatif=True),
                     output_field=models.BooleanField(),
                 ),
                 # avoir suivi, sans en être diplômé, une formation académique belge
@@ -206,17 +213,50 @@ class TitresAcces(ITitresAcces):
             .filter(global_id=matricule_candidat)
             .first()
         )
+
+        bachelor_types = {TrainingType.BACHELOR.name}
+        master_types = set(TrainingType.master_types())
+        doctorate_types = set(TrainingType.doctorate_types())
+
+        uclouvain_criteria = {
+            'potentiel_bachelier_belge_sans_diplomation': False,
+            'diplomation_academique_belge': False,
+            'potentiel_master_belge_sans_diplomation': False,
+            'diplomation_potentiel_master_belge': False,
+            'diplomation_potentiel_doctorat_belge': False,
+        }
+
+        # TODO manage the bama 15 criteria
+        for inscription in inscriptions_ucl_candidat:
+            if inscription.est_diplome:
+                uclouvain_criteria['diplomation_academique_belge'] = True
+                if inscription.type_formation in doctorate_types:
+                    uclouvain_criteria['diplomation_potentiel_doctorat_belge'] = True
+                elif inscription.type_formation in master_types:
+                    uclouvain_criteria['diplomation_potentiel_master_belge'] = True
+
+            else:
+                if inscription.type_formation in bachelor_types:
+                    uclouvain_criteria['potentiel_bachelier_belge_sans_diplomation'] = True
+                elif inscription.type_formation in master_types:
+                    uclouvain_criteria['potentiel_master_belge_sans_diplomation'] = True
+
         return AdmissionConditionsDTO(
             diplomation_secondaire_belge=result.diplomation_secondaire_belge,
             diplomation_secondaire_etranger=result.diplomation_secondaire_etranger,
             alternative_etudes_secondaires=result.alternative_etudes_secondaires,
-            potentiel_bachelier_belge_sans_diplomation=result.potentiel_bachelier_belge_sans_diplomation,
-            diplomation_academique_belge=result.diplomation_academique_belge,
+            potentiel_bachelier_belge_sans_diplomation=result.potentiel_bachelier_belge_sans_diplomation
+            or uclouvain_criteria['potentiel_bachelier_belge_sans_diplomation'],
+            diplomation_academique_belge=result.diplomation_academique_belge
+            or uclouvain_criteria['diplomation_academique_belge'],
             diplomation_academique_etranger=result.diplomation_academique_etranger,
-            potentiel_master_belge_sans_diplomation=result.potentiel_master_belge_sans_diplomation,
-            diplomation_potentiel_master_belge=result.diplomation_potentiel_master_belge,
+            potentiel_master_belge_sans_diplomation=result.potentiel_master_belge_sans_diplomation
+            or uclouvain_criteria['potentiel_master_belge_sans_diplomation'],
+            diplomation_potentiel_master_belge=result.diplomation_potentiel_master_belge
+            or uclouvain_criteria['diplomation_potentiel_master_belge'],
             diplomation_potentiel_master_etranger=bool(equivalence_diplome)
             and result.diplomation_potentiel_master_etranger,
-            diplomation_potentiel_doctorat_belge=result.diplomation_potentiel_doctorat_belge,
+            diplomation_potentiel_doctorat_belge=result.diplomation_potentiel_doctorat_belge
+            or uclouvain_criteria['diplomation_potentiel_doctorat_belge'],
             potentiel_acces_vae=result.potentiel_acces_vae,
         )

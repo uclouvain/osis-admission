@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -30,35 +30,27 @@ from typing import List, Optional
 from django.conf import settings
 from django.utils.translation import get_language
 
+from admission.ddd.admission.formation_generale.domain.service.i_formation import IFormationGeneraleTranslator
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import FormationNonTrouveeException
 from admission.ddd.admission.shared_kernel.domain.model._campus import Campus
 from admission.ddd.admission.shared_kernel.domain.model.formation import Formation, FormationIdentity
 from admission.ddd.admission.shared_kernel.dtos.campus import CampusDTO
 from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
-from admission.ddd.admission.formation_generale.domain.service.i_formation import (
-    IFormationGeneraleTranslator,
-)
-from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
-    FormationNonTrouveeException,
-)
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from admission.infrastructure.admission.shared_kernel.domain.service.formation_translator import BaseFormationTranslator
 from base.models.enums.active_status import ActiveStatusEnum
 from base.models.enums.education_group_types import TrainingType
-from ddd.logic.formation_catalogue.commands import (
-    RecupererFormationQuery,
-    SearchFormationsCommand,
-)
-from ddd.logic.formation_catalogue.domain.validators.exceptions import (
-    TrainingNotFoundException,
-)
+from ddd.logic.formation_catalogue.commands import RecupererFormationQuery, SearchFormationsCommand
+from ddd.logic.formation_catalogue.domain.validators.exceptions import TrainingNotFoundException
 from ddd.logic.formation_catalogue.dtos.training import TrainingDto
 from ddd.logic.shared_kernel.academic_year.commands import SearchAcademicYearCommand
 from ddd.logic.shared_kernel.campus.commands import GetCampusQuery
 from ddd.logic.shared_kernel.campus.dtos import UclouvainCampusDTO
 
 
-class FormationGeneraleTranslator(IFormationGeneraleTranslator):
+class FormationGeneraleTranslator(BaseFormationTranslator, IFormationGeneraleTranslator):
     @classmethod
     def _build_dto(cls, dto: 'TrainingDto') -> 'FormationDTO':
         from infrastructure.messages_bus import message_bus_instance
@@ -124,6 +116,7 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
             code=dto.code,
             credits=dto.credits,
             grade_academique=str(dto.ares_graca) if dto.ares_graca is not None else '',
+            active=dto.status,
         )
 
     @classmethod
@@ -193,6 +186,7 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
         intitule: Optional[str],
         terme_de_recherche: Optional[str],
         campus: Optional[str],
+        statuts: Optional[List[str]],
     ) -> List['FormationDTO']:
         from infrastructure.messages_bus import message_bus_instance
 
@@ -206,7 +200,7 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
                 est_inscriptible=True,
                 uclouvain_est_institution_reference=True,
                 inscription_web=True,
-                statut=ActiveStatusEnum.ACTIVE.name,
+                statuts=statuts,
                 sigle=sigle,
                 intitule=intitule,
                 terme_de_recherche=terme_de_recherche,
@@ -230,16 +224,21 @@ class FormationGeneraleTranslator(IFormationGeneraleTranslator):
         )
 
     @classmethod
-    def verifier_existence(cls, sigle: str, annee: int) -> bool:
+    def verifier_existence(cls, sigle: str, annee: int, candidat_est_en_poursuite_directe: bool = None) -> bool:
         from infrastructure.messages_bus import message_bus_instance
 
-        dtos = message_bus_instance.invoke(
+        dtos: list[TrainingDto] = message_bus_instance.invoke(
             SearchFormationsCommand(
                 sigles_annees=[(sigle, annee)],
                 est_inscriptible=True,
                 uclouvain_est_institution_reference=True,
                 inscription_web=True,
-                statut=ActiveStatusEnum.ACTIVE.name,
+                statuts=[
+                    ActiveStatusEnum.ACTIVE.name,
+                    ActiveStatusEnum.RE_REGISTRATION.name,
+                ]
+                if candidat_est_en_poursuite_directe
+                else [ActiveStatusEnum.ACTIVE.name],
                 types=list(AnneeInscriptionFormationTranslator.GENERAL_EDUCATION_TYPES),
             )
         )

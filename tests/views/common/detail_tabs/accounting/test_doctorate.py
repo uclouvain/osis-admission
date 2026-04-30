@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -34,7 +34,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formatio
     ENTITY_CDE,
 )
 from admission.ddd.admission.shared_kernel.enums import (
-    ChoixAffiliationSport,
     ChoixTypeCompteBancaire,
     TypeSituationAssimilation,
 )
@@ -50,12 +49,16 @@ from admission.tests.factories.roles import (
     ProgramManagerRoleFactory,
     SicManagementRoleFactory,
 )
+from base.models.enums.academic_type import AcademicTypes
 from base.models.enums.community import CommunityEnum
 from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
 from base.tests.factories.academic_year import AcademicYearFactory, get_current_year
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
+from epc.models.enums.etat_inscription import EtatInscriptionFormation
+from epc.models.enums.statut_inscription_programme_annuel import StatutInscriptionProgrammAnnuel
+from epc.tests.factories.inscription_programme_annuel import InscriptionProgrammeAnnuelFactory
 from reference.tests.factories.country import CountryFactory
 
 
@@ -76,7 +79,6 @@ class DoctorateAccountingDetailViewTestCase(TestCase):
             training__academic_year=self.academic_years[0],
             candidate__language=settings.LANGUAGE_CODE_EN,
             candidate__country_of_citizenship=CountryFactory(european_union=False),
-            candidate__graduated_from_high_school_year=None,
             candidate__last_registration_year=None,
             admitted=True,
         )
@@ -224,3 +226,17 @@ class DoctorateAccountingDetailViewTestCase(TestCase):
                 'Third institute',
             ],
         )
+
+        InscriptionProgrammeAnnuelFactory(
+            etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+            programme__offer__academic_type=AcademicTypes.ACADEMIC.name,
+            statut=StatutInscriptionProgrammAnnuel.ETUDIANT_UCL.name,
+            programme__root_group__academic_year__year=2023,
+            programme_cycle__etudiant__person=self.doctorate_admission.candidate,
+        )
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.assertIsNone(response.context['accounting']['derniers_etablissements_superieurs_communaute_fr_frequentes'])

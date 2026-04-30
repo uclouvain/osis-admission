@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 from django.urls import reverse
+from osis_history.utilities import add_history_entry
 
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
 from base.models.person import Person
@@ -68,3 +69,16 @@ class AdmissionCoordonneesFormView(AdmissionFormMixin, LoadDossierViewMixin, Coo
             f'admission:{self.current_context}:coordonnees',
             kwargs=self.kwargs,
         )
+
+    def form_valid(self, form):
+        form_valid = super().form_valid(form)
+
+        add_history_entry(
+            self.admission_uuid,
+            'Les données personnelles ont été éditées.',
+            'Personal data have been updated.',
+            '{person.first_name} {person.last_name}'.format(person=self.request.user.person),
+            tags=['proposition', 'coordonnees', 'modification'],
+        )
+
+        return form_valid

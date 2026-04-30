@@ -98,6 +98,7 @@ class ContinuingWorkingListAutocomplete(WorkingListAutocomplete):
                 ],
                 'admission_statuses': result.admission_statuses,
                 'epc_injection_in_error': result.epc_injection_in_error,
+                'quarantine': result.quarantine,
             }
             for result in context['object_list']
         ]

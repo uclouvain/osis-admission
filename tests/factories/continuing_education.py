@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@
 #    see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import uuid
 from typing import Dict, List, Union
 
 import factory
@@ -46,6 +45,7 @@ from admission.tests.factories.roles import CandidateFactory
 from admission.tests.factories.utils import generate_proposition_reference
 from base.models.enums import education_group_categories
 from base.models.enums.education_group_types import TrainingType
+from base.models.enums.organization_type import MAIN
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.education_group_year import EducationGroupYearFactory
 from base.tests.factories.person import PersonFactory
@@ -90,6 +90,7 @@ class ContinuingEducationAdmissionFactory(factory.django.DjangoModelFactory):
         ContinuingEducationTrainingFactory,
         academic_year__current=True,
         enrollment_campus__name='Mons',
+        enrollment_campus__organization__type=MAIN,
     )
     reference = factory.LazyAttribute(generate_proposition_reference)
     registration_as = ChoixInscriptionATitre.PRIVE.name
@@ -157,7 +158,6 @@ class ContinuingEducationAdmissionFactory(factory.django.DjangoModelFactory):
 def get_checklist():
     default_content = {
         'libelle': '',
-        'enfants': [],
         'extra': {},
         'statut': ChoixStatutChecklist.INITIAL_CANDIDAT.name,
     }

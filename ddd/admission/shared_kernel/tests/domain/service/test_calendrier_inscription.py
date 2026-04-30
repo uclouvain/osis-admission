@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -40,9 +40,6 @@ from admission.ddd.admission.doctorat.preparation.test.factory.proposition impor
 from admission.ddd.admission.formation_continue.test.factory.proposition import (
     PropositionFactory as PropositionContinueFactory,
 )
-from admission.ddd.admission.formation_generale.domain.model.proposition import (
-    PropositionIdentity,
-)
 from admission.ddd.admission.formation_generale.test.factory.proposition import (
     PropositionFactory,
 )
@@ -71,6 +68,9 @@ from admission.infrastructure.admission.formation_generale.domain.service.in_mem
 )
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.calendrier_inscription import (
     CalendrierInscriptionInMemory,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.inscriptions_translator import (
+    InscriptionsInMemoryTranslator,
 )
 from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
     ProfilCandidatInMemoryTranslator,
@@ -563,6 +563,60 @@ class CalendrierInscriptionTestCase(TestCase):
             profil_candidat_translator=self.profil_candidat_translator,
         )
         self.assertEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_HUE_UCL_PATHWAY_CHANGE)
+
+    @freezegun.freeze_time('22/10/2022')
+    def test_changement_filiere_avec_annee_derniere_inscription_ucl_calculee(self):
+        proposition = PropositionFactory()
+        profil = ProfilCandidatFactory(
+            identification__annee_derniere_inscription_ucl=None,
+            matricule=proposition.matricule_candidat,
+            coordonnees__domicile_legal__pays="AR",
+            identification__pays_nationalite="AR",
+        )
+        self.profil_candidat_translator.profil_candidats.append(profil.identification)
+        self.profil_candidat_translator.get_coordonnees = lambda m: profil.coordonnees
+        with mock.patch(
+            'admission.infrastructure.admission.shared_kernel.domain.service.in_memory.inscriptions_translator.'
+            'InscriptionsInMemoryTranslator.recuperer_derniere_inscription',
+            return_value=MagicMock(annee=2021),
+        ):
+            dto = CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
+                formation_id=proposition.formation_id,
+                proposition=proposition,
+                matricule_candidat=proposition.matricule_candidat,
+                titres_acces=Titres(AdmissionConditionsDTOFactory()),
+                formation=MagicMock(type=TrainingType.BACHELOR),
+                profil_candidat_translator=self.profil_candidat_translator,
+                inscriptions_translator=InscriptionsInMemoryTranslator(),
+            )
+            self.assertEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_HUE_UCL_PATHWAY_CHANGE)
+
+    @freezegun.freeze_time('22/10/2022')
+    def test_changement_filiere_avec_annee_derniere_inscription_ucl_calculee_et_manuelle(self):
+        proposition = PropositionFactory()
+        profil = ProfilCandidatFactory(
+            identification__annee_derniere_inscription_ucl=2020,
+            matricule=proposition.matricule_candidat,
+            coordonnees__domicile_legal__pays="AR",
+            identification__pays_nationalite="AR",
+        )
+        self.profil_candidat_translator.profil_candidats.append(profil.identification)
+        self.profil_candidat_translator.get_coordonnees = lambda m: profil.coordonnees
+        with mock.patch(
+            'admission.infrastructure.admission.shared_kernel.domain.service.in_memory.inscriptions_translator.'
+            'InscriptionsInMemoryTranslator.recuperer_derniere_inscription',
+            return_value=MagicMock(annee=2021),
+        ):
+            dto = CalendrierInscriptionInMemory.determiner_annee_academique_et_pot(
+                formation_id=proposition.formation_id,
+                proposition=proposition,
+                matricule_candidat=proposition.matricule_candidat,
+                titres_acces=Titres(AdmissionConditionsDTOFactory()),
+                formation=MagicMock(type=TrainingType.BACHELOR),
+                profil_candidat_translator=self.profil_candidat_translator,
+                inscriptions_translator=InscriptionsInMemoryTranslator(),
+            )
+            self.assertEqual(dto.pool, AcademicCalendarTypes.ADMISSION_POOL_HUE_UCL_PATHWAY_CHANGE)
 
     @freezegun.freeze_time('01/03/2022')
     def test_ue5_belge(self):

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -32,32 +32,30 @@ import freezegun
 from django.conf import settings
 from django.shortcuts import resolve_url
 from django.test import TestCase, override_settings
-from django.utils.translation import gettext
 from rest_framework import status
 
-from admission.models import Accounting
-from admission.models.general_education import GeneralEducationAdmission
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.ddd.admission.shared_kernel.enums import (
-    TypeSituationAssimilation,
     ChoixAffiliationSport,
-    ChoixTypeCompteBancaire,
     ChoixAssimilation1,
     ChoixAssimilation2,
     ChoixAssimilation3,
     ChoixAssimilation5,
-    LienParente,
     ChoixAssimilation6,
+    ChoixTypeCompteBancaire,
+    LienParente,
+    TypeSituationAssimilation,
 )
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
-from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
 from admission.forms.admission.accounting import AccountingForm
-from admission.tests.factories.curriculum import EducationalExperienceYearFactory, EducationalExperienceFactory
+from admission.models import Accounting
+from admission.models.general_education import GeneralEducationAdmission
+from admission.tests.factories.curriculum import EducationalExperienceFactory, EducationalExperienceYearFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
-from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory, CandidateFactory
+from admission.tests.factories.roles import CandidateFactory, ProgramManagerRoleFactory, SicManagementRoleFactory
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.file_field import PDF_MIME_TYPE
-from base.models.campus import Campus
 from base.models.enums.community import CommunityEnum
 from base.tests.factories.academic_year import AcademicYearFactory, get_current_year
 from base.tests.factories.campus import CampusFactory
@@ -90,9 +88,9 @@ class GeneralAccountingFormViewTestCase(TestCase):
         cls.academic_years = [AcademicYearFactory(year=year) for year in [2021, 2022]]
         cls.be_country = CountryFactory(iso_code='BE', name='Belgique', name_en='Belgium')
         cls.first_doctoral_commission = EntityWithVersionFactory(version__acronym=ENTITY_CDE)
-        cls.louvain_campus = Campus.objects.get(external_id=CampusFactory(name='Louvain-la-Neuve').external_id)
-        cls.other_campus = Campus.objects.get(external_id=CampusFactory(name='Other').external_id)
-        cls.saint_louis_campus = Campus.objects.get(external_id=CampusFactory(name='Bruxelles Saint-Louis').external_id)
+        cls.louvain_campus = CampusFactory(name='Louvain-la-Neuve')
+        cls.other_campus = CampusFactory(name='Other')
+        cls.saint_louis_campus = CampusFactory(name='Bruxelles Saint-Louis')
         EntityVersionFactory(entity=cls.first_doctoral_commission)
         cls.default_form_data = {
             'demande_allocation_d_etudes_communaute_francaise_belgique': 'False',
@@ -118,7 +116,6 @@ class GeneralAccountingFormViewTestCase(TestCase):
             training__academic_year=self.academic_years[0],
             candidate__language=settings.LANGUAGE_CODE_EN,
             candidate__country_of_citizenship=CountryFactory(european_union=False),
-            candidate__graduated_from_high_school_year=None,
             candidate__last_registration_year=None,
             candidate__id_photo=[],
             status=ChoixStatutPropositionGenerale.CONFIRMEE.name,

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -45,6 +45,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     DroitsInscriptionMontant,
     MobiliteNombreDeMois,
     PoursuiteDeCycle,
+    RaisonPlusieursDemandesMemesCycleEtAnnee,
     TypeDeRefus,
 )
 from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import (
@@ -53,18 +54,14 @@ from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import
     TypeEquivalenceTitreAcces,
 )
 from admission.ddd.admission.shared_kernel.dtos.conditions import InfosDetermineesDTO
-from admission.models.base import (
-    BaseAdmission,
-    BaseAdmissionQuerySet,
-    admission_directory_path,
-)
+from admission.models.base import BaseAdmission, BaseAdmissionQuerySet, admission_directory_path
 from admission.models.specific_question import SpecificQuestionAnswer
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.academic_year import AcademicYear
 from base.models.person import Person
-from ddd.logic.financabilite.commands import DeterminerSiCandidatEstFinancableQuery
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.domain.model.enums.situation import SituationFinancabilite
+from ddd.logic.financabilite.queries import DeterminerSiCandidatEstFinancableQuery
 from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd.interface import BusinessException
 
@@ -521,6 +518,36 @@ class GeneralEducationAdmission(BaseAdmission):
         null=True,
         verbose_name=_('Foreign access title equivalence effective date'),
     )
+    is_concerned_by_bama_15 = models.BooleanField(
+        blank=True,
+        null=True,
+        verbose_name=_('Is concerned by BAMA15'),
+    )
+    bama_15_proof = FileField(
+        blank=True,
+        upload_to=admission_directory_path,
+        verbose_name=_('Proof of re-enrolment for the bachelor\'s degree (BAMA15)'),
+    )
+
+    several_admissions_same_cycle_same_year_reason = models.CharField(
+        choices=RaisonPlusieursDemandesMemesCycleEtAnnee.choices(),
+        blank=True,
+        default='',
+        max_length=30,
+        verbose_name=_('Reason to create several applications for a same cycle and a same year.'),
+    )
+
+    several_admissions_same_cycle_same_year_justification = models.TextField(
+        blank=True,
+        verbose_name=_('Text justification to create several applications for a same cycle and a same year.'),
+        default='',
+    )
+
+    is_in_pursuit = models.BooleanField(
+        blank=True,
+        null=True,
+        verbose_name=_('Is in pursuit'),
+    )
 
     class Meta:
         verbose_name = _("General education admission")
@@ -547,6 +574,7 @@ class GeneralEducationAdmission(BaseAdmission):
             'detailed_status',
             'determined_academic_year',
             'determined_pool',
+            'is_in_pursuit',
         ]
 
         if author:
@@ -559,6 +587,7 @@ class GeneralEducationAdmission(BaseAdmission):
             dto: 'InfosDetermineesDTO' = message_bus_instance.invoke(DeterminerAnneeAcademiqueEtPotQuery(self.uuid))
             self.determined_academic_year = AcademicYear.objects.get(year=dto.annee)
             self.determined_pool = dto.pool.name
+            self.is_in_pursuit = dto.est_en_poursuite
 
         self.save(update_fields=update_fields)
 
@@ -572,9 +601,7 @@ class GeneralEducationAdmission(BaseAdmission):
         message_bus_instance.invoke(RecalculerEmplacementsDocumentsNonLibresPropositionCommand(self.uuid))
 
     def update_financability_computed_rule(self, author: 'Person'):
-        from admission.ddd.admission.formation_generale.commands import (
-            SpecifierFinancabiliteResultatCalculCommand,
-        )
+        from admission.ddd.admission.formation_generale.commands import SpecifierFinancabiliteResultatCalculCommand
         from infrastructure.messages_bus import message_bus_instance
 
         financabilite = message_bus_instance.invoke(

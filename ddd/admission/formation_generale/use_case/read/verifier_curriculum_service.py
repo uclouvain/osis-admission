@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,6 +26,12 @@
 import datetime
 
 from admission.ddd.admission.formation_generale.commands import VerifierCurriculumQuery
+from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import (
+    IAnneeInscriptionFormationTranslator,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
+)
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
@@ -54,6 +60,8 @@ def verifier_curriculum(
     profil_candidat_translator: 'IProfilCandidatTranslator',
     academic_year_repository: 'IAcademicYearRepository',
     formation_translator: 'IFormationGeneraleTranslator',
+    inscriptions_translator: IInscriptionsTranslatorService,
+    annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -70,14 +78,26 @@ def verifier_curriculum(
     annee_formation = academic_year_repository.get(
         entity_id=AcademicYearIdentity(year=proposition.annee_calculee or proposition.formation_id.annee)
     )
+    candidat_est_inscrit_recemment_ucl = inscriptions_translator.est_inscrit_recemment(
+        matricule_candidat=proposition.matricule_candidat,
+        annee_inscription_formation_translator=annee_inscription_formation_translator,
+    )
+
+    curriculum = profil_candidat_translator.get_curriculum(
+        matricule=proposition.matricule_candidat,
+        annee_courante=annee_courante,
+        uuid_proposition=proposition.entity_id.uuid,
+        inscriptions_translator=inscriptions_translator,
+    )
 
     # WHEN
     ProfilCandidat().verifier_curriculum_formation_generale(
         proposition=proposition,
         type_formation=formation.type,
-        profil_candidat_translator=profil_candidat_translator,
         annee_courante=annee_courante,
         annee_formation=annee_formation,
+        curriculum=curriculum,
+        candidat_est_inscrit_recemment_ucl=candidat_est_inscrit_recemment_ucl,
     )
 
     # THEN

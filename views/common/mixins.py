@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,21 +23,17 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-import json
-from typing import Dict, Optional, Union, List
+import logging
+from typing import Dict, Optional, Union
 
-from django.contrib import messages
 from django.core.cache import cache
-from django.db.models import Value
-from django.db.models.functions import Concat
 from django.shortcuts import resolve_url
 from django.template.loader import render_to_string
 from django.utils.functional import cached_property
 from django.utils.safestring import mark_safe
-from django.utils.translation import gettext_lazy as _
 from django.views.generic.base import ContextMixin
+from osis_document_components.services import get_student_files_count_from_epc
 
-from admission.auth.roles.program_manager import ProgramManager
 from admission.constants import (
     COMMENT_TAG_FAC,
     COMMENT_TAG_GLOBAL,
@@ -49,60 +45,40 @@ from admission.constants import (
 from admission.ddd.admission.doctorat.preparation.commands import (
     GetCotutelleCommand,
     RecupererAdmissionDoctoratQuery,
-)
-from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererPropositionGestionnaireQuery as RecupererPropositionDoctoraleGestionnaireQuery,
-)
-from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionDoctoraleQuery,
 )
-from admission.ddd.admission.doctorat.preparation.dtos import (
-    PropositionDTO,
+from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_DOCTORALE_PAR_STATUT,
 )
+from admission.ddd.admission.doctorat.preparation.dtos import PropositionDTO
 from admission.ddd.admission.doctorat.validation.commands import RecupererDemandeQuery
 from admission.ddd.admission.formation_continue.commands import (
     RecupererPropositionQuery,
-)
-from admission.ddd.admission.formation_continue.commands import (
     RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionContinueQuery,
 )
-from admission.ddd.admission.formation_continue.dtos.proposition import (
-    PropositionDTO as PropositionContinueDTO,
+from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_CONTINUE_PAR_STATUT,
 )
+from admission.ddd.admission.formation_continue.dtos.proposition import PropositionDTO as PropositionContinueDTO
 from admission.ddd.admission.formation_generale.commands import (
     RecupererPropositionGestionnaireQuery,
-)
-from admission.ddd.admission.formation_generale.commands import (
     RecupererQuestionsSpecifiquesQuery as RecupererQuestionsSpecifiquesPropositionGeneraleQuery,
-)
-from admission.ddd.admission.formation_generale.commands import (
     RecupererTitresAccesSelectionnablesPropositionQuery,
 )
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
+    ORGANISATION_ONGLETS_CHECKLIST_PAR_STATUT as ORGANISATION_ONGLETS_CHECKLIST_GENERALE_PAR_STATUT,
 )
-from admission.ddd.admission.formation_generale.dtos.proposition import (
-    PropositionGestionnaireDTO,
-)
-from admission.ddd.admission.shared_kernel.domain.model.enums.type_gestionnaire import (
-    TypeGestionnaire,
-)
-from admission.ddd.admission.shared_kernel.dtos.titre_acces_selectionnable import (
-    TitreAccesSelectionnableDTO,
-)
+from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
+from admission.ddd.admission.shared_kernel.domain.model.enums.type_gestionnaire import TypeGestionnaire
+from admission.ddd.admission.shared_kernel.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
 from admission.ddd.admission.shared_kernel.enums import Onglets
-from admission.models import (
-    ContinuingEducationAdmission,
-    DoctorateAdmission,
-    EPCInjection,
-    GeneralEducationAdmission,
-)
+from admission.models import ContinuingEducationAdmission, DoctorateAdmission, EPCInjection, GeneralEducationAdmission
 from admission.models.base import AdmissionViewer, BaseAdmission
 from admission.models.epc_injection import EPCInjectionStatus, EPCInjectionType
 from admission.utils import (
     access_title_country,
-    add_close_modal_into_htmx_response,
-    add_messages_into_htmx_response,
     get_cached_admission_perm_obj,
     get_cached_continuing_education_admission_perm_obj,
     get_cached_general_education_admission_perm_obj,
@@ -113,9 +89,12 @@ from admission.views.list import BaseAdmissionList
 from base.models.person_merge_proposal import PersonMergeStatus
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.gestion_des_comptes.dto.periode_soumission_ticket import PeriodeSoumissionTicketDigitDTO
-from ddd.logic.gestion_des_comptes.queries import GetPropositionFusionQuery, GetPeriodeActiveSoumissionTicketQuery
+from ddd.logic.gestion_des_comptes.queries import GetPeriodeActiveSoumissionTicketQuery, GetPropositionFusionQuery
 from infrastructure.messages_bus import message_bus_instance
+from osis_profile.views.mixins.form import FormMixin
 from osis_role.contrib.views import PermissionRequiredMixin
+
+logger = logging.getLogger(__name__)
 
 
 class AdmissionViewMixin(PermissionRequiredMixin, ContextMixin):
@@ -199,16 +178,12 @@ class AdmissionViewMixin(PermissionRequiredMixin, ContextMixin):
         return f'{self.request.user.person.first_name} {self.request.user.person.last_name}'
 
     @cached_property
-    def admission_program_managers_names(self):
-        return ', '.join(
-            ProgramManager.objects.filter(
-                education_group_id=self.admission.training.education_group_id,
-            )
-            .annotate(
-                person_name=Concat('person__first_name', Value(' '), 'person__last_name'),
-            )
-            .values_list('person_name', flat=True)
-        )
+    def checklist_tabs_organization(self):
+        return {
+            CONTEXT_DOCTORATE: ORGANISATION_ONGLETS_CHECKLIST_DOCTORALE_PAR_STATUT,
+            CONTEXT_CONTINUING: ORGANISATION_ONGLETS_CHECKLIST_CONTINUE_PAR_STATUT,
+            CONTEXT_GENERAL: ORGANISATION_ONGLETS_CHECKLIST_GENERALE_PAR_STATUT,
+        }[self.current_context]
 
 
 class LoadDossierViewMixin(AdmissionViewMixin):
@@ -281,9 +256,9 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         # Leave this test first so we are sure the other information are available.
         if self.admission.status != ChoixStatutPropositionGenerale.INSCRIPTION_AUTORISEE.name:
             return False, "Le dossier doit être en 'Inscription autorisée'"
-        periodes_actives = message_bus_instance.invoke(
-            GetPeriodeActiveSoumissionTicketQuery()
-        )  # type: List[PeriodeSoumissionTicketDigitDTO]
+        periodes_actives: list[PeriodeSoumissionTicketDigitDTO] = message_bus_instance.invoke(
+            GetPeriodeActiveSoumissionTicketQuery(),
+        )
         annees_ouvertes = [p.annee for p in periodes_actives]
         if annees_ouvertes and self.admission.determined_academic_year.year not in annees_ouvertes:
             return False, f"Seules les inscriptions en {annees_ouvertes} sont autorisées"
@@ -372,6 +347,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         context['demande_est_en_quarantaine'] = self.demande_est_en_quarantaine
         context['outil_de_comparaison_et_fusion_url'] = self.get_outil_de_comparaison_et_fusion_url()
         context['double_check_decision_url'] = self.get_double_check_decision_url()
+        context['checklist_tabs_organization'] = self.checklist_tabs_organization
         return context
 
     def get_outil_de_comparaison_et_fusion_url(self) -> str:
@@ -382,7 +358,7 @@ class LoadDossierViewMixin(AdmissionViewMixin):
     def get_double_check_decision_url(self) -> str:
         return resolve_url(
             'admission:services:gestion-des-comptes:double-check-decision-informations-injection-signaletique',
-            uuid=self.admission_uuid
+            uuid=self.admission_uuid,
         )
 
     def dispatch(self, request, *args, **kwargs):
@@ -423,41 +399,29 @@ class LoadDossierViewMixin(AdmissionViewMixin):
         if self.demande_est_en_quarantaine:
             tab_label_suffixes['person'] = mark_safe('<span class="fa fa-fas fa-warning text-warning"></span>')
 
+        # Add EPC badge if there are EPC documents
+        try:
+            if self.proposition.noma_candidat:
+                documents_count = get_student_files_count_from_epc(self.proposition.noma_candidat).get('count', 0)
+                if documents_count > 0:
+                    tab_label_suffixes['documents'] = mark_safe('<div class="badge">EPC</div>')
+        except Exception as e:
+            logger.exception(
+                f"[Documents EPC] Erreur lors de la récupération du nombre de documents EPC pour le noma"
+                f" '{self.proposition.noma_candidat}'"
+            )
+
         return tab_label_suffixes
 
 
-class AdmissionFormMixin(AdmissionViewMixin):
-    message_on_success = _('Your data have been saved.')
-    message_on_failure = _('Some errors have been encountered.')
+class AdmissionFormMixin(FormMixin, AdmissionViewMixin):
     update_admission_author = False
-    default_htmx_trigger_form_extra = {}
-    close_modal_on_htmx_request = True
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.custom_headers = {}
-        self.htmx_refresh = False
-        self.htmx_trigger_form_extra = {**self.default_htmx_trigger_form_extra}
-
-    def htmx_trigger_form(self, is_valid: bool):
-        """Add a JS event to listen for when the form is submitted through HTMX."""
-        self.custom_headers = {
-            'HX-Trigger': {
-                "formValidation": {
-                    "is_valid": is_valid,
-                    "message": str(self.message_on_success if is_valid else self.message_on_failure),
-                    **self.htmx_trigger_form_extra,
-                }
-            }
-        }
 
     def update_current_admission_on_form_valid(self, form, admission):
         """Override this method to update the current admission on form valid."""
         pass
 
     def form_valid(self, form):
-        messages.success(self.request, str(self.message_on_success))
-
         # Update the last update author of the admission
         author = getattr(self.request.user, 'person')
         if self.update_admission_author and author:
@@ -467,17 +431,6 @@ class AdmissionFormMixin(AdmissionViewMixin):
             self.update_current_admission_on_form_valid(form, admission)
             admission.save()
 
-        if self.request.htmx:
-            self.htmx_trigger_form(is_valid=True)
-            response = self.render_to_response(self.get_context_data(form=form))
-            if self.htmx_refresh:
-                response.headers['HX-Refresh'] = 'true'
-            else:
-                add_messages_into_htmx_response(request=self.request, response=response)
-                if self.close_modal_on_htmx_request:
-                    add_close_modal_into_htmx_response(response=response)
-            return response
-
         return super().form_valid(form)
 
     def get_checklist_redirect_url(self):
@@ -485,24 +438,3 @@ class AdmissionFormMixin(AdmissionViewMixin):
         if 'next' in self.request.GET:
             url = resolve_url(f'admission:{self.current_context}:checklist', uuid=self.admission_uuid)
             return f"{url}#{self.request.GET['next']}"
-
-    def dispatch(self, request, *args, **kwargs):
-        response = super().dispatch(request, *args, **kwargs)
-        # Add custom headers
-        for header_key, header_value in self.custom_headers.items():
-            current_data_str = response.headers.get(header_key)
-            if current_data_str:
-                current_data = json.loads(current_data_str)
-                current_data.update(header_value)
-            else:
-                current_data = header_value
-            response.headers[header_key] = json.dumps(current_data)
-        return response
-
-    def form_invalid(self, form):
-        messages.error(self.request, str(self.message_on_failure))
-        response = super().form_invalid(form)
-        if self.request.htmx:
-            self.htmx_trigger_form(is_valid=False)
-            add_messages_into_htmx_response(request=self.request, response=response)
-        return response

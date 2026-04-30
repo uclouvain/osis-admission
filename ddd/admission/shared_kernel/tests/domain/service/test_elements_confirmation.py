@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-
+import datetime
 from unittest.mock import patch
 
 import freezegun
@@ -33,7 +33,6 @@ from django.test import TestCase
 from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererElementsConfirmationQuery as RecupererElementsConfirmationDoctoratQuery,
 )
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import ElementsConfirmationNonConcordants
 from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
     PropositionIdentity as PropositionDoctoraleIdentity,
 )
@@ -48,18 +47,13 @@ from admission.ddd.admission.formation_generale.commands import (
     RecupererElementsConfirmationQuery as RecupererElementsConfirmationGeneraleQuery,
     SoumettrePropositionCommand as SoumettrePropositionGeneraleCommand,
 )
-from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationFactory
 from admission.ddd.admission.formation_generale.domain.model.proposition import (
     PropositionIdentity as PropositionGeneraleIdentity,
 )
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import ElementsConfirmationNonConcordants
+from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationFactory
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository as PropositionDoctoraleRepository,
-)
-from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.elements_confirmation import (
-    ElementsConfirmationInMemory,
-)
-from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
-    ProfilCandidatInMemoryTranslator,
 )
 from admission.infrastructure.admission.formation_continue.repository.in_memory.proposition import (
     PropositionInMemoryRepository as PropositionContinueRepository,
@@ -70,13 +64,20 @@ from admission.infrastructure.admission.formation_generale.domain.service.in_mem
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository as PropositionGeneraleRepository,
 )
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.elements_confirmation import (
+    ElementsConfirmationInMemory,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.profil_candidat import (
+    ProfilCandidatInMemoryTranslator,
+)
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
-from ddd.logic.financabilite.domain.model.parcours import ParcoursAcademiqueExterne, ParcoursAcademiqueInterne, Parcours
+from ddd.logic.financabilite.domain.model.parcours import Parcours, ParcoursAcademiqueExterne, ParcoursAcademiqueInterne
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
-from infrastructure.financabilite.domain.service.in_memory.financabilite import FinancabiliteInMemoryFetcher
+from infrastructure.financabilite.domain.service.in_memory.fetcher import InMemoryFetcher
+from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
 
 
 @freezegun.freeze_time('2020-10-15')
@@ -85,10 +86,24 @@ class ElementsConfirmationTestCase(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         ProfilCandidatInMemoryTranslator.reset()
-        FinancabiliteInMemoryFetcher.reset()
         PropositionDoctoraleRepository.reset()
         PropositionContinueRepository.reset()
         PropositionGeneraleRepository.reset()
+        cls.academic_year_repository = AcademicYearInMemoryRepository()
+        cls.academic_year_repository.save(
+            AcademicYear(
+                entity_id=AcademicYearIdentity(year=2020),
+                start_date=datetime.date(2020, 9, 15),
+                end_date=datetime.date(2021, 9, 14),
+            )
+        )
+        cls.academic_year_repository.save(
+            AcademicYear(
+                entity_id=AcademicYearIdentity(year=2024),
+                start_date=datetime.date(2024, 9, 15),
+                end_date=datetime.date(2025, 9, 14),
+            )
+        )
 
     def setUp(self):
         # Mock publish
@@ -107,6 +122,7 @@ class ElementsConfirmationTestCase(TestCase):
             'reglement_doctorat_deontologie',
             'protection_donnees',
             'professions_reglementees',
+            'verification_donnees_tiers',
             'justificatifs',
             'declaration_sur_lhonneur',
         ]
@@ -124,6 +140,7 @@ class ElementsConfirmationTestCase(TestCase):
                 'reglement_doctorat_deontologie',
                 'protection_donnees',
                 'professions_reglementees',
+                'verification_donnees_tiers',
                 'justificatifs',
                 'declaration_sur_lhonneur',
             ]
@@ -156,8 +173,9 @@ class ElementsConfirmationTestCase(TestCase):
                 code_domaine='11',
             ),
         ]
-        with patch.object(PropositionGeneraleRepository.entities[1], 'annee_calculee', 2020), patch.object(
-            FormationGeneraleInMemoryTranslator, 'trainings', new_trainings
+        with (
+            patch.object(PropositionGeneraleRepository.entities[1], 'annee_calculee', 2020),
+            patch.object(FormationGeneraleInMemoryTranslator, 'trainings', new_trainings),
         ):
             elements = message_bus_in_memory_instance.invoke(
                 RecupererElementsConfirmationGeneraleQuery(uuid_proposition="uuid-BACHELIER-ECO1")
@@ -168,6 +186,7 @@ class ElementsConfirmationTestCase(TestCase):
                 'professions_reglementees',
                 'convention_cadre_stages',
                 'communication_hopitaux',
+                'verification_donnees_tiers',
                 'justificatifs',
                 'declaration_sur_lhonneur',
             ]
@@ -181,6 +200,7 @@ class ElementsConfirmationTestCase(TestCase):
             'reglement_general',
             'protection_donnees',
             'professions_reglementees',
+            'verification_donnees_tiers',
             'justificatifs',
             'declaration_sur_lhonneur',
         ]
@@ -197,6 +217,7 @@ class ElementsConfirmationTestCase(TestCase):
                 'reglement_general',
                 'protection_donnees',
                 'professions_reglementees',
+                'verification_donnees_tiers',
                 'justificatifs',
                 'declaration_sur_lhonneur',
             ]
@@ -212,6 +233,7 @@ class ElementsConfirmationTestCase(TestCase):
                 'protection_donnees',
                 'professions_reglementees',
                 'frais_dossier',
+                'verification_donnees_tiers',
                 'justificatifs',
                 'declaration_sur_lhonneur',
             ]
@@ -227,6 +249,7 @@ class ElementsConfirmationTestCase(TestCase):
                 'protection_donnees',
                 'professions_reglementees',
                 'frais_dossier',
+                'verification_donnees_tiers',
                 'justificatifs',
                 'declaration_sur_lhonneur',
             ]
@@ -242,10 +265,33 @@ class ElementsConfirmationTestCase(TestCase):
                 'protection_donnees',
                 'professions_reglementees',
                 'frais_dossier',
+                'verification_donnees_tiers',
                 'justificatifs',
                 'declaration_sur_lhonneur',
             ]
             self.assertListEqual([e.nom for e in elements], expected)
+
+            # Etudiant en poursuite
+            with patch.object(
+                PropositionGeneraleRepository.entities[1],
+                'est_en_poursuite',
+                True,
+            ):
+                elements = message_bus_in_memory_instance.invoke(
+                    RecupererElementsConfirmationGeneraleQuery(uuid_proposition="uuid-BACHELIER-ECO1")
+                )
+                self.assertNotIn('frais_dossier', [e.nom for e in elements])
+
+            # Etudiant pas en poursuite
+            with patch.object(
+                PropositionGeneraleRepository.entities[1],
+                'est_en_poursuite',
+                False,
+            ):
+                elements = message_bus_in_memory_instance.invoke(
+                    RecupererElementsConfirmationGeneraleQuery(uuid_proposition="uuid-BACHELIER-ECO1")
+                )
+                self.assertIn('frais_dossier', [e.nom for e in elements])
 
     def test_recuperer_elements_confirmation_visa(self):
         candidat = ProfilCandidatInMemoryTranslator.profil_candidats[1]
@@ -267,10 +313,33 @@ class ElementsConfirmationTestCase(TestCase):
                     'professions_reglementees',
                     'frais_dossier',
                     'visa',
+                    'verification_donnees_tiers',
                     'justificatifs',
                     'declaration_sur_lhonneur',
                 ]
                 self.assertListEqual([e.nom for e in elements], expected)
+
+                # Etudiant en réinscription
+                with patch(
+                    'admission.infrastructure.admission.shared_kernel.domain.service.in_memory.'
+                    'inscriptions_translator.InscriptionsInMemoryTranslator.est_inscrit_recemment',
+                    return_value=True,
+                ):
+                    elements = message_bus_in_memory_instance.invoke(
+                        RecupererElementsConfirmationGeneraleQuery(uuid_proposition="uuid-BACHELIER-ECO1")
+                    )
+                    self.assertNotIn('visa', [e.nom for e in elements])
+
+                # Etudiant pas en réinscription
+                with patch(
+                    'admission.infrastructure.admission.shared_kernel.domain.service.in_memory.'
+                    'inscriptions_translator.InscriptionsInMemoryTranslator.est_inscrit_recemment',
+                    return_value=False,
+                ):
+                    elements = message_bus_in_memory_instance.invoke(
+                        RecupererElementsConfirmationGeneraleQuery(uuid_proposition="uuid-BACHELIER-ECO1")
+                    )
+                    self.assertIn('visa', [e.nom for e in elements])
 
         # Nationalité non spécifiée
         with patch.multiple(candidat, pays_nationalite='', pays_nationalite_europeen=False):
@@ -327,10 +396,33 @@ class ElementsConfirmationTestCase(TestCase):
                 'protection_donnees',
                 'professions_reglementees',
                 'documents_etudes_contingentees',
+                'verification_donnees_tiers',
                 'justificatifs',
                 'declaration_sur_lhonneur',
             ]
             self.assertListEqual([e.nom for e in elements], expected)
+
+            # Etudiant en poursuite
+            with patch.object(
+                PropositionGeneraleRepository.entities[1],
+                'est_en_poursuite',
+                True,
+            ):
+                elements = message_bus_in_memory_instance.invoke(
+                    RecupererElementsConfirmationGeneraleQuery(uuid_proposition="uuid-BACHELIER-ECO1")
+                )
+                self.assertNotIn('documents_etudes_contingentees', [e.nom for e in elements])
+
+            # Etudiant pas en poursuite
+            with patch.object(
+                PropositionGeneraleRepository.entities[1],
+                'est_en_poursuite',
+                False,
+            ):
+                elements = message_bus_in_memory_instance.invoke(
+                    RecupererElementsConfirmationGeneraleQuery(uuid_proposition="uuid-BACHELIER-ECO1")
+                )
+                self.assertIn('documents_etudes_contingentees', [e.nom for e in elements])
 
     def test_recuperer_elements_confirmation_etudes_communication_ecole(self):
         with patch.object(
@@ -345,6 +437,7 @@ class ElementsConfirmationTestCase(TestCase):
                 'reglement_general',
                 'protection_donnees',
                 'professions_reglementees',
+                'verification_donnees_tiers',
                 'communication_ecole_secondaire',
                 'justificatifs',
                 'declaration_sur_lhonneur',
@@ -375,6 +468,7 @@ class ElementsConfirmationTestCase(TestCase):
                         'reglement_general': "Alors en fait non",
                         'protection_donnees': ElementsConfirmationInMemory.PROTECTION_DONNEES,
                         'professions_reglementees': ElementsConfirmationInMemory.PROFESSIONS_REGLEMENTEES,
+                        'verification_donnees_tiers': ElementsConfirmationInMemory.VERIFICATION_DONNEES_TIERS,
                         'justificatifs': ElementsConfirmationInMemory.JUSTIFICATIFS,
                         'declaration_sur_lhonneur': ElementsConfirmationInMemory.DECLARATION_SUR_LHONNEUR,
                     },
@@ -383,7 +477,7 @@ class ElementsConfirmationTestCase(TestCase):
 
     @freezegun.freeze_time('2024-10-15')
     def test_soumettre_elements_confirmation_differents_radio(self):
-        FinancabiliteInMemoryFetcher.save(
+        InMemoryFetcher.save(
             Parcours(
                 matricule_fgs='0000000001',
                 parcours_academique_interne=ParcoursAcademiqueInterne(programmes_cycles=[]),
@@ -392,16 +486,18 @@ class ElementsConfirmationTestCase(TestCase):
                 nombre_tentative_de_passer_concours_pass_et_las=0,
             )
         )
-        with patch.object(
-            ElementsConfirmationInMemory,
-            'est_candidat_avec_etudes_secondaires_belges_francophones',
-            lambda _: True,
-        ), patch.object(
-            GetCurrentAcademicYear,
-            'get_starting_academic_year',
-            lambda *_: AcademicYear(AcademicYearIdentity(2024), None, None),
-        ), self.assertRaises(
-            ElementsConfirmationNonConcordants
+        with (
+            patch.object(
+                ElementsConfirmationInMemory,
+                'est_candidat_avec_etudes_secondaires_belges_francophones',
+                lambda _: True,
+            ),
+            patch.object(
+                GetCurrentAcademicYear,
+                'get_starting_academic_year',
+                lambda *_: AcademicYear(AcademicYearIdentity(2024), None, None),
+            ),
+            self.assertRaises(ElementsConfirmationNonConcordants),
         ):
             message_bus_in_memory_instance.invoke(
                 SoumettrePropositionGeneraleCommand(
@@ -413,8 +509,11 @@ class ElementsConfirmationTestCase(TestCase):
                         'protection_donnees': ElementsConfirmationInMemory.PROTECTION_DONNEES,
                         'professions_reglementees': ElementsConfirmationInMemory.PROFESSIONS_REGLEMENTEES,
                         'communication_ecole_secondaire': "Non en fait",
+                        'verification_donnees_tiers': ElementsConfirmationInMemory.VERIFICATION_DONNEES_TIERS,
                         'justificatifs': ElementsConfirmationInMemory.JUSTIFICATIFS,
                         'declaration_sur_lhonneur': ElementsConfirmationInMemory.DECLARATION_SUR_LHONNEUR,
                     },
+                    raison_plusieurs_demandes_meme_cycle_meme_annee='',
+                    justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee='',
                 )
             )

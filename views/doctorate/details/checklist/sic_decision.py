@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -52,9 +52,7 @@ from admission.ddd.admission.doctorat.preparation.commands import (
     SpecifierInformationsAcceptationPropositionParSicCommand,
     SpecifierMotifsRefusPropositionParSicCommand,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixStatutPropositionDoctorale,
-)
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     ChoixStatutChecklist,
     OngletsChecklist,
@@ -69,7 +67,7 @@ from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
 )
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.forms.admission.checklist import (
-    CommentForm,
+    AdmissionCommentForm,
     DoctorateSicDecisionApprovalForm,
     DoctorateSicDecisionRefusalForm,
     SicDecisionApprovalDocumentsForm,
@@ -99,24 +97,15 @@ from admission.utils import (
     get_salutation_prefix,
     get_training_url,
 )
-from admission.views.common.detail_tabs.checklist import (
-    PropositionFromResumeMixin,
-    change_admission_status,
-)
+from admission.views.common.detail_tabs.checklist import PropositionFromResumeMixin, change_admission_status
 from admission.views.common.mixins import AdmissionFormMixin, LoadDossierViewMixin
-from admission.views.doctorate.details.checklist.mixins import (
-    CheckListDefaultContextMixin,
-    get_email,
-)
+from admission.views.doctorate.details.checklist.mixins import CheckListDefaultContextMixin, get_email
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.mandate_type import MandateTypes
 from base.models.person import Person
 from base.utils.htmx import HtmxPermissionRequiredMixin
 from base.utils.utils import format_academic_year
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
-    ExperienceAcademiqueDTO,
-    ExperienceNonAcademiqueDTO,
-)
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
 
@@ -197,17 +186,23 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
                 .first()
             )
             context['comment_forms'] = {
-                'decision_sic': CommentForm(
+                'decision_sic': AdmissionCommentForm(
                     comment=comment,
                     form_url=resolve_url(
-                        f'{self.base_namespace}:save-comment', uuid=self.admission_uuid, tab='decision_sic'
+                        f'{self.base_namespace}:save-comment',
+                        uuid=self.admission_uuid,
+                        object_uuid=self.admission_uuid,
+                        tab='decision_sic',
                     ),
                     prefix='decision_sic',
                 ),
-                'decision_sic__derogation': CommentForm(
+                'decision_sic__derogation': AdmissionCommentForm(
                     comment=comment_derogation,
                     form_url=resolve_url(
-                        f'{self.base_namespace}:save-comment', uuid=self.admission_uuid, tab='decision_sic__derogation'
+                        f'{self.base_namespace}:save-comment',
+                        uuid=self.admission_uuid,
+                        object_uuid=self.admission_uuid,
+                        tab='decision_sic__derogation',
                     ),
                     prefix='decision_sic__derogation',
                     label=_('Non-progression dispensation comment'),
@@ -328,7 +323,6 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
                     'sender_name': f'{self.request.user.person.first_name} {self.request.user.person.last_name}',
                     'document_link': EMAIL_TEMPLATE_DOCUMENT_URL_TOKEN,
                     'management_entity_acronym': self.proposition.doctorat.sigle_entite_gestion,
-                    'program_managers_names': self.admission_program_managers_names,
                 },
             )
 
@@ -371,7 +365,6 @@ class SicDecisionMixin(CheckListDefaultContextMixin):
             'training_acronym': self.proposition.formation.sigle,
             'management_entity_name': self.proposition.formation.intitule_entite_gestion,
             'management_entity_acronym': self.proposition.formation.sigle_entite_gestion,
-            'program_managers_names': self.admission_program_managers_names,
             'sender_name': self.current_user_name,
         }
 

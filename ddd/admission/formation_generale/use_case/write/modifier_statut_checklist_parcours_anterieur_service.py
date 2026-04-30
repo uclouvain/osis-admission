@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,31 +23,25 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 
-from admission.ddd.admission.formation_generale.commands import (
-    ModifierStatutChecklistParcoursAnterieurCommand,
-)
+from admission.ddd.admission.formation_generale.commands import ModifierStatutChecklistParcoursAnterieurCommand
 from admission.ddd.admission.formation_generale.domain.builder.proposition_identity_builder import (
     PropositionIdentityBuilder,
 )
-from admission.ddd.admission.formation_generale.domain.model.proposition import (
-    PropositionIdentity,
-)
-from admission.ddd.admission.formation_generale.domain.service.i_formation import (
-    IFormationGeneraleTranslator,
-)
-from admission.ddd.admission.formation_generale.repository.i_proposition import (
-    IPropositionRepository,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
-    IProfilCandidatTranslator,
-)
+from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.formation_generale.domain.service.i_formation import IFormationGeneraleTranslator
+from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import \
+    IInscriptionsTranslatorService
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.shared_kernel.repository.i_titre_acces_selectionnable import (
     ITitreAccesSelectionnableRepository,
 )
-from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
-    IExperienceParcoursInterneTranslator,
-)
+from ddd.logic.shared_kernel.academic_year.domain.service.get_current_academic_year import GetCurrentAcademicYear
+from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
+from ddd.logic.shared_kernel.profil.domain.service.i_parcours_interne import IExperienceParcoursInterneTranslator
 
 
 def modifier_statut_checklist_parcours_anterieur(
@@ -57,7 +51,18 @@ def modifier_statut_checklist_parcours_anterieur(
     experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
     profil_candidat_translator: 'IProfilCandidatTranslator',
     formation_translator: 'IFormationGeneraleTranslator',
+    academic_year_repository: 'IAcademicYearRepository',
+    inscriptions_translator: IInscriptionsTranslatorService,
 ) -> 'PropositionIdentity':
+    annee_courante = (
+        GetCurrentAcademicYear()
+        .get_starting_academic_year(
+            datetime.date.today(),
+            academic_year_repository,
+        )
+        .year
+    )
+
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
     proposition = proposition_repository.get(entity_id=proposition_id)
     formation = formation_translator.get(entity_id=proposition.formation_id)
@@ -68,19 +73,32 @@ def modifier_statut_checklist_parcours_anterieur(
         seulement_selectionnes=True,
     )
 
-    uuids_experiences_valorisees = profil_candidat_translator.get_uuids_experiences_curriculum_valorisees_par_admission(
-        uuid_proposition=proposition_id.uuid,
+    etudes_secondaires = profil_candidat_translator.get_etudes_secondaires(matricule=proposition.matricule_candidat)
+
+    curriculum = profil_candidat_translator.get_curriculum(
+        matricule=proposition.matricule_candidat,
+        experiences_cv_recuperees=ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION,
+        uuid_proposition=proposition.entity_id.uuid,
+        annee_courante=annee_courante,
+        inscriptions_translator=inscriptions_translator,
     )
 
-    etudes_secondaires = profil_candidat_translator.get_etudes_secondaires(matricule=proposition.matricule_candidat)
+    examen = profil_candidat_translator.get_examen(
+        uuid_proposition=proposition.entity_id.uuid,
+        matricule=proposition.matricule_candidat,
+        formation_sigle=proposition.formation_id.sigle,
+        formation_annee=proposition.formation_id.annee,
+    )
 
     proposition.specifier_statut_checklist_parcours_anterieur(
         statut_checklist_cible=cmd.statut,
         titres_acces_selectionnes=titres_acces_selectionnes,
         auteur_modification=cmd.gestionnaire,
-        uuids_experiences_valorisees=uuids_experiences_valorisees,
         type_formation=formation.type,
         etudes_secondaires=etudes_secondaires,
+        examen=examen,
+        experiences_academiques=curriculum.experiences_academiques,
+        experiences_non_academiques=curriculum.experiences_non_academiques,
     )
 
     proposition_repository.save(proposition)

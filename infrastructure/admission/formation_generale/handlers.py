@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,9 +27,7 @@
 import waffle
 
 from admission.ddd.admission.formation_generale.commands import *
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    OngletsChecklist,
-)
+from admission.ddd.admission.formation_generale.domain.model.enums import OngletsChecklist
 from admission.ddd.admission.formation_generale.use_case.read import *
 from admission.ddd.admission.formation_generale.use_case.read.recuperer_pdf_temporaire_decision_sic_service import (
     recuperer_pdf_temporaire_decision_sic,
@@ -41,15 +39,31 @@ from admission.ddd.admission.formation_generale.use_case.write.approuver_admissi
 from admission.ddd.admission.formation_generale.use_case.write.approuver_inscription_par_sic_service import (
     approuver_inscription_par_sic,
 )
+from admission.ddd.admission.formation_generale.use_case.write.modifier_authentification_etudes_secondaires_service import (  # noqa
+    modifier_authentification_etudes_secondaires,
+)
+from admission.ddd.admission.formation_generale.use_case.write.modifier_authentification_examen_service import (
+    modifier_authentification_examen,
+)
+from admission.ddd.admission.formation_generale.use_case.write.modifier_authentification_experience_academique_service import (  # noqa
+    modifier_authentification_experience_academique,
+)
+from admission.ddd.admission.formation_generale.use_case.write.modifier_authentification_experience_non_academique_service import (  # noqa
+    modifier_authentification_experience_non_academique,
+)
+from admission.ddd.admission.formation_generale.use_case.write.modifier_statut_checklist_examen_service import (
+    modifier_statut_checklist_examen,
+)
+from admission.ddd.admission.formation_generale.use_case.write.modifier_statut_checklist_experience_academique_service import (  # noqa
+    modifier_statut_checklist_experience_academique,
+)
 from admission.ddd.admission.formation_generale.use_case.write.refuser_admission_par_sic_service import (
     refuser_admission_par_sic,
 )
 from admission.ddd.admission.formation_generale.use_case.write.refuser_inscription_par_sic_service import (
     refuser_inscription_par_sic,
 )
-from admission.ddd.admission.formation_generale.use_case.write.retyper_document_service import (
-    retyper_document,
-)
+from admission.ddd.admission.formation_generale.use_case.write.retyper_document_service import retyper_document
 from admission.ddd.admission.formation_generale.use_case.write.specifier_besoin_de_derogation_service import (
     specifier_besoin_de_derogation,
 )
@@ -71,12 +85,8 @@ from admission.ddd.admission.formation_generale.use_case.write.specifier_financa
 from admission.ddd.admission.formation_generale.use_case.write.specifier_financabilite_resultat_calcul_service import (
     specifier_financabilite_resultat_calcul,
 )
-from admission.ddd.admission.shared_kernel.commands import (
-    RechercherParcoursAnterieurQuery,
-)
-from admission.ddd.admission.shared_kernel.use_case.read import (
-    recuperer_questions_specifiques_proposition,
-)
+from admission.ddd.admission.shared_kernel.commands import RechercherParcoursAnterieurQuery
+from admission.ddd.admission.shared_kernel.use_case.read import recuperer_questions_specifiques_proposition
 from admission.ddd.admission.shared_kernel.use_case.read.rechercher_parcours_anterieur import (
     rechercher_parcours_anterieur,
 )
@@ -90,97 +100,73 @@ from admission.ddd.admission.shared_kernel.use_case.write import (
     remplir_emplacement_document_par_gestionnaire,
     supprimer_emplacement_document,
 )
-from admission.infrastructure.admission.formation_generale.domain.service.comptabilite import (
-    ComptabiliteTranslator,
-)
-from admission.infrastructure.admission.formation_generale.domain.service.formation import (
-    FormationGeneraleTranslator,
-)
+from admission.infrastructure.admission.formation_generale.domain.service.comptabilite import ComptabiliteTranslator
+from admission.infrastructure.admission.formation_generale.domain.service.formation import FormationGeneraleTranslator
 from admission.infrastructure.admission.formation_generale.domain.service.historique import (
     Historique as HistoriqueFormationGenerale,
 )
-from admission.infrastructure.admission.formation_generale.domain.service.inscription_tardive import (
-    InscriptionTardive,
-)
-from admission.infrastructure.admission.formation_generale.domain.service.notification import (
-    Notification,
-)
+from admission.infrastructure.admission.formation_generale.domain.service.inscription_tardive import InscriptionTardive
+from admission.infrastructure.admission.formation_generale.domain.service.notification import Notification
 from admission.infrastructure.admission.formation_generale.domain.service.paiement_frais_dossier import (
     PaiementFraisDossier,
 )
-from admission.infrastructure.admission.formation_generale.domain.service.pdf_generation import (
-    PDFGeneration,
-)
+from admission.infrastructure.admission.formation_generale.domain.service.pdf_generation import PDFGeneration
 from admission.infrastructure.admission.formation_generale.domain.service.question_specifique import (
     QuestionSpecifiqueTranslator,
 )
-from admission.infrastructure.admission.formation_generale.domain.service.reference import (
-    ReferenceTranslator,
-)
-from admission.infrastructure.admission.formation_generale.domain.service.taches_techniques import (
-    TachesTechniques,
-)
+from admission.infrastructure.admission.formation_generale.domain.service.reference import ReferenceTranslator
+from admission.infrastructure.admission.formation_generale.domain.service.taches_techniques import TachesTechniques
 from admission.infrastructure.admission.formation_generale.repository.emplacement_document import (
     EmplacementDocumentRepository,
 )
-from admission.infrastructure.admission.formation_generale.repository.proposition import (
-    PropositionRepository,
-)
+from admission.infrastructure.admission.formation_generale.repository.proposition import PropositionRepository
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
-from admission.infrastructure.admission.shared_kernel.domain.service.calendrier_inscription import (
-    CalendrierInscription,
+from admission.infrastructure.admission.shared_kernel.domain.service.calendrier_inscription import CalendrierInscription
+from admission.infrastructure.admission.shared_kernel.domain.service.deliberation_translator import (
+    DeliberationTranslator,
 )
-from admission.infrastructure.admission.shared_kernel.domain.service.elements_confirmation import (
-    ElementsConfirmation,
+from admission.infrastructure.admission.shared_kernel.domain.service.diffusion_notes_translator import (
+    DiffusionNotesTranslator,
 )
+from admission.infrastructure.admission.shared_kernel.domain.service.elements_confirmation import ElementsConfirmation
 from admission.infrastructure.admission.shared_kernel.domain.service.emplacements_documents_proposition import (
     EmplacementsDocumentsPropositionTranslator,
 )
-from admission.infrastructure.admission.shared_kernel.domain.service.historique import (
-    Historique as HistoriqueGlobal,
+from admission.infrastructure.admission.shared_kernel.domain.service.historique import Historique as HistoriqueGlobal
+from admission.infrastructure.admission.shared_kernel.domain.service.inscriptions import InscriptionsTranslatorService
+from admission.infrastructure.admission.shared_kernel.domain.service.inscriptions_evaluations_translator import (
+    InscriptionsEvaluationsTranslator,
 )
-from admission.infrastructure.admission.shared_kernel.domain.service.matricule_etudiant import (
-    MatriculeEtudiantService,
-)
+from admission.infrastructure.admission.shared_kernel.domain.service.matricule_etudiant import MatriculeEtudiantService
 from admission.infrastructure.admission.shared_kernel.domain.service.maximum_propositions import (
     MaximumPropositionsAutorisees,
 )
+from admission.infrastructure.admission.shared_kernel.domain.service.modifier_checklist_experience_parcours_anterieur import (
+    ValidationExperienceParcoursAnterieurService,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.noma_translator import NomasTranslator
 from admission.infrastructure.admission.shared_kernel.domain.service.poste_diplomatique import (
     PosteDiplomatiqueTranslator,
 )
-from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import (
-    ProfilCandidatTranslator,
+from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidatTranslator
+from admission.infrastructure.admission.shared_kernel.domain.service.raccrocher_experiences_curriculum import (
+    RaccrocherExperiencesCurriculum,
 )
-from admission.infrastructure.admission.shared_kernel.domain.service.titres_acces import (
-    TitresAcces,
-)
+from admission.infrastructure.admission.shared_kernel.domain.service.titres_acces import TitresAcces
 from admission.infrastructure.admission.shared_kernel.domain.service.unites_enseignement_translator import (
     UnitesEnseignementTranslator,
 )
-from admission.infrastructure.admission.shared_kernel.repository.email_destinataire import (
-    EmailDestinataireRepository,
-)
+from admission.infrastructure.admission.shared_kernel.repository.email_destinataire import EmailDestinataireRepository
 from admission.infrastructure.admission.shared_kernel.repository.titre_acces_selectionnable import (
     TitreAccesSelectionnableRepository,
 )
-from infrastructure.financabilite.domain.service.financabilite import (
-    FinancabiliteFetcher,
-)
 from infrastructure.reference.domain.service.bourse import BourseTranslator
-from infrastructure.shared_kernel.academic_year.repository.academic_year import (
-    AcademicYearRepository,
-)
-from infrastructure.shared_kernel.campus.repository.uclouvain_campus import (
-    UclouvainCampusRepository,
-)
-from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import (
-    PersonneConnueUclTranslator,
-)
-from infrastructure.shared_kernel.profil.domain.service.parcours_interne import (
-    ExperienceParcoursInterneTranslator,
-)
+from infrastructure.shared_kernel.academic_year.repository.academic_year import AcademicYearRepository
+from infrastructure.shared_kernel.campus.repository.uclouvain_campus import UclouvainCampusRepository
+from infrastructure.shared_kernel.personne_connue_ucl.personne_connue_ucl import PersonneConnueUclTranslator
+from infrastructure.shared_kernel.profil.domain.service.parcours_interne import ExperienceParcoursInterneTranslator
 
 
 def _call_if_digit_switch_active(callable_fn):
@@ -208,6 +194,12 @@ COMMAND_HANDLERS = {
         bourse_translator=BourseTranslator(),
         maximum_propositions_service=MaximumPropositionsAutorisees(),
         historique=HistoriqueGlobal(),
+        annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
+        inscriptions_translator=InscriptionsTranslatorService(),
+        deliberation_translator=DeliberationTranslator(),
+        diffusion_notes_translator=DiffusionNotesTranslator(),
+        inscriptions_evaluations_translator=InscriptionsEvaluationsTranslator(),
+        nomas_translator=NomasTranslator(),
     ),
     ListerPropositionsCandidatQuery: lambda msg_bus, cmd: lister_propositions_candidat(
         cmd,
@@ -222,6 +214,13 @@ COMMAND_HANDLERS = {
         proposition_repository=PropositionRepository(),
         formation_translator=FormationGeneraleTranslator(),
         bourse_translator=BourseTranslator(),
+        inscriptions_translator=InscriptionsTranslatorService(),
+        maximum_propositions_service=MaximumPropositionsAutorisees(),
+        annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
+        deliberation_translator=DeliberationTranslator(),
+        diffusion_notes_translator=DiffusionNotesTranslator(),
+        inscriptions_evaluations_translator=InscriptionsEvaluationsTranslator(),
+        nomas_translator=NomasTranslator(),
     ),
     ModifierChecklistChoixFormationCommand: lambda msg_bus, cmd: modifier_checklist_choix_formation(
         msg_bus,
@@ -244,6 +243,12 @@ COMMAND_HANDLERS = {
         academic_year_repository=AcademicYearRepository(),
         questions_specifiques_translator=QuestionSpecifiqueTranslator(),
         maximum_propositions_service=MaximumPropositionsAutorisees(),
+        annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
+        inscriptions_translator=InscriptionsTranslatorService(),
+        deliberation_translator=DeliberationTranslator(),
+        diffusion_notes_translator=DiffusionNotesTranslator(),
+        inscriptions_evaluations_translator=InscriptionsEvaluationsTranslator(),
+        nomas_translator=NomasTranslator(),
     ),
     SoumettrePropositionCommand: lambda msg_bus, cmd: soumettre_proposition(
         msg_bus,
@@ -261,7 +266,14 @@ COMMAND_HANDLERS = {
         inscription_tardive_service=InscriptionTardive(),
         paiement_frais_dossier_service=PaiementFraisDossier(),
         historique=HistoriqueGlobal(),
-        financabilite_fetcher=FinancabiliteFetcher(),
+        raccrocher_experiences_curriculum=RaccrocherExperiencesCurriculum(),
+        validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
+        annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
+        inscriptions_translator=InscriptionsTranslatorService(),
+        deliberation_translator=DeliberationTranslator(),
+        diffusion_notes_translator=DiffusionNotesTranslator(),
+        inscriptions_evaluations_translator=InscriptionsEvaluationsTranslator(),
+        nomas_translator=NomasTranslator(),
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,
@@ -281,6 +293,8 @@ COMMAND_HANDLERS = {
         profil_candidat_translator=ProfilCandidatTranslator(),
         academic_year_repository=AcademicYearRepository(),
         formation_translator=FormationGeneraleTranslator(),
+        inscriptions_translator=InscriptionsTranslatorService(),
+        annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
     ),
     DeterminerAnneeAcademiqueEtPotQuery: lambda msg_bus, cmd: determiner_annee_academique_et_pot(
         cmd,
@@ -289,6 +303,8 @@ COMMAND_HANDLERS = {
         titres_acces=TitresAcces(),
         profil_candidat_translator=ProfilCandidatTranslator(),
         calendrier_inscription=CalendrierInscription(),
+        deliberation_translator=DeliberationTranslator(),
+        inscriptions_translator=InscriptionsTranslatorService(),
     ),
     RecupererElementsConfirmationQuery: lambda msg_bus, cmd: recuperer_elements_confirmation(
         cmd,
@@ -296,6 +312,8 @@ COMMAND_HANDLERS = {
         element_confirmation=ElementsConfirmation(),
         formation_translator=FormationGeneraleTranslator(),
         profil_candidat_translator=ProfilCandidatTranslator(),
+        annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
+        inscriptions_translator=InscriptionsTranslatorService(),
     ),
     RecupererResumePropositionQuery: lambda msg_bus, cmd: recuperer_resume_proposition(
         cmd,
@@ -304,6 +322,8 @@ COMMAND_HANDLERS = {
         i_comptabilite_translator=ComptabiliteTranslator(),
         academic_year_repository=AcademicYearRepository(),
         question_specifique_translator=QuestionSpecifiqueTranslator(),
+        annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
+        inscriptions_translator=InscriptionsTranslatorService(),
     ),
     RecupererPropositionGestionnaireQuery: lambda msg_bus, cmd: recuperer_proposition_gestionnaire(
         cmd,
@@ -319,6 +339,7 @@ COMMAND_HANDLERS = {
         emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
         academic_year_repository=AcademicYearRepository(),
         personne_connue_translator=PersonneConnueUclTranslator(),
+        inscriptions_translator=InscriptionsTranslatorService(),
     ),
     RecupererQuestionsSpecifiquesQuery: lambda msg_bus, cmd: recuperer_questions_specifiques_proposition(
         cmd,
@@ -333,6 +354,7 @@ COMMAND_HANDLERS = {
             question_specifique_translator=QuestionSpecifiqueTranslator(),
             academic_year_repository=AcademicYearRepository(),
             emplacement_document_repository=EmplacementDocumentRepository(),
+            inscriptions_translator=InscriptionsTranslatorService(),
         )
     ),
     ReclamerDocumentsAuCandidatParSICCommand: lambda msg_bus, cmd: reclamer_documents_au_candidat_par_sic(
@@ -354,6 +376,7 @@ COMMAND_HANDLERS = {
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
             emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
+            inscriptions_translator=InscriptionsTranslatorService(),
         )
     ),
     ReclamerDocumentsAuCandidatParFACCommand: lambda msg_bus, cmd: reclamer_documents_au_candidat_par_fac(
@@ -372,6 +395,7 @@ COMMAND_HANDLERS = {
         emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
         academic_year_repository=AcademicYearRepository(),
         personne_connue_translator=PersonneConnueUclTranslator(),
+        inscriptions_translator=InscriptionsTranslatorService(),
     ),
     CompleterEmplacementsDocumentsParCandidatCommand: lambda msg_bus, cmd: (
         completer_emplacements_documents_par_candidat(
@@ -386,6 +410,7 @@ COMMAND_HANDLERS = {
             personne_connue_translator=PersonneConnueUclTranslator(),
             emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
             notification=Notification(),
+            inscriptions_translator=InscriptionsTranslatorService(),
         )
     ),
     InitialiserEmplacementDocumentLibreNonReclamableCommand: lambda msg_bus, cmd: (
@@ -438,6 +463,7 @@ COMMAND_HANDLERS = {
             personne_connue_translator=PersonneConnueUclTranslator(),
             question_specifique_translator=QuestionSpecifiqueTranslator(),
             unites_enseignement_translator=UnitesEnseignementTranslator(),
+            inscriptions_translator=InscriptionsTranslatorService(),
         )
     ),
     SpecifierPaiementNecessaireCommand: lambda msg_bus, cmd: specifier_paiement_necessaire(
@@ -582,6 +608,8 @@ COMMAND_HANDLERS = {
         experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
         profil_candidat_translator=ProfilCandidatTranslator(),
         formation_translator=FormationGeneraleTranslator(),
+        academic_year_repository=AcademicYearRepository(),
+        inscriptions_translator=InscriptionsTranslatorService(),
     ),
     SpecifierConditionAccesPropositionCommand: lambda msg_bus, cmd: specifier_condition_acces_proposition(
         cmd,
@@ -631,12 +659,21 @@ COMMAND_HANDLERS = {
         cmd,
         proposition_repository=PropositionRepository(),
     ),
-    ModifierStatutChecklistExperienceParcoursAnterieurCommand: (
-        lambda msg_bus, cmd: modifier_statut_checklist_experience_parcours_anterieur(
+    ModifierChecklistStatutExperienceAcademiqueCommand: (
+        lambda msg_bus, cmd: modifier_statut_checklist_experience_academique(
             cmd,
             proposition_repository=PropositionRepository(),
             profil_candidat_translator=ProfilCandidatTranslator(),
             formation_translator=FormationGeneraleTranslator(),
+            validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
+        )
+    ),
+    ModifierChecklistStatutExamenCommand: (
+        lambda msg_bus, cmd: modifier_statut_checklist_examen(
+            cmd,
+            proposition_repository=PropositionRepository(),
+            profil_candidat_translator=ProfilCandidatTranslator(),
+            validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
         )
     ),
     SpecifierInformationsAcceptationPropositionParSicCommand: (
@@ -650,14 +687,39 @@ COMMAND_HANDLERS = {
             emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
+            inscriptions_translator=InscriptionsTranslatorService(),
         )
     ),
-    ModifierAuthentificationExperienceParcoursAnterieurCommand: (
-        lambda msg_bus, cmd: modifier_authentification_experience_parcours_anterieur(
+    ModifierAuthentificationExperienceNonAcademiqueCommand: (
+        lambda msg_bus, cmd: modifier_authentification_experience_non_academique(
             cmd,
-            proposition_repository=PropositionRepository(),
             notification=Notification(),
             historique=HistoriqueFormationGenerale(),
+            validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
+        )
+    ),
+    ModifierAuthentificationExperienceAcademiqueCommand: (
+        lambda msg_bus, cmd: modifier_authentification_experience_academique(
+            cmd,
+            notification=Notification(),
+            historique=HistoriqueFormationGenerale(),
+            validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
+        )
+    ),
+    ModifierAuthentificationEtudesSecondairesCommand: (
+        lambda msg_bus, cmd: modifier_authentification_etudes_secondaires(
+            cmd,
+            notification=Notification(),
+            historique=HistoriqueFormationGenerale(),
+            validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
+        )
+    ),
+    ModifierAuthentificationExamenCommand: (
+        lambda msg_bus, cmd: modifier_authentification_examen(
+            cmd,
+            notification=Notification(),
+            historique=HistoriqueFormationGenerale(),
+            validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
         )
     ),
     SpecifierMotifsRefusPropositionParSicCommand: (
@@ -706,6 +768,7 @@ COMMAND_HANDLERS = {
             personne_connue_translator=PersonneConnueUclTranslator(),
             experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
             matricule_etudiant_service=MatriculeEtudiantService(),
+            inscriptions_translator=InscriptionsTranslatorService(),
         )
     ),
     ApprouverInscriptionParSicCommand: (
@@ -721,6 +784,7 @@ COMMAND_HANDLERS = {
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
             experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
+            inscriptions_translator=InscriptionsTranslatorService(),
         )
     ),
     EnvoyerEmailApprobationInscriptionAuCandidatCommand: (
@@ -757,6 +821,7 @@ COMMAND_HANDLERS = {
         cmd,
         profil_candidat_translator=ProfilCandidatTranslator(),
         academic_year_repository=AcademicYearRepository(),
+        inscriptions_translator=InscriptionsTranslatorService(),
     ),
     SpecifierDerogationFinancabiliteCommand: (
         lambda msg_bus, cmd: specifier_derogation_financabilite(
@@ -788,6 +853,7 @@ COMMAND_HANDLERS = {
             experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
             formation_translator=FormationGeneraleTranslator(),
             academic_year_repository=AcademicYearRepository(),
+            inscriptions_translator=InscriptionsTranslatorService(),
         )
     ),
     RecupererPeriodeInscriptionSpecifiqueBachelierMedecineDentisterieQuery: (
@@ -815,6 +881,24 @@ COMMAND_HANDLERS = {
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
             emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
+            inscriptions_translator=InscriptionsTranslatorService(),
+        )
+    ),
+    RecupererTypeDemandeQuery: lambda msg_bus, cmd: recuperer_type_demande(
+        cmd=cmd,
+        proposition_repository=PropositionRepository(),
+        formation_translator=FormationGeneraleTranslator(),
+        profil_candidat_translator=ProfilCandidatTranslator(),
+        titres_acces=TitresAcces(),
+        calendrier_inscription=CalendrierInscription(),
+        annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
+        inscriptions_translator=InscriptionsTranslatorService(),
+        deliberation_translator=DeliberationTranslator(),
+    ),
+    SpecifierRaisonPlusieursDemandesMemeCycleMemeAnneeCommand: (
+        lambda msg_bus, cmd: specifier_raison_plusieurs_demandes_meme_cycle_meme_annee(
+            cmd=cmd,
+            proposition_repository=PropositionRepository(),
         )
     ),
 }

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,8 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+from .candidat_est_eligible_a_la_reinscription_service import candidat_est_eligible_a_la_reinscription
+from .candidat_est_inscrit_recemment_ucl_service import candidat_est_inscrit_recemment_ucl
 from .lister_demandes_service import lister_demandes
 from .rechercher_formations_gerees_service import rechercher_formations_gerees
 from .recuperer_connaissances_langues_service import recuperer_connaissances_langues
@@ -30,6 +32,8 @@ from .recuperer_etudes_secondaires_service import recuperer_etudes_secondaires
 from .recuperer_experience_academique_service import recuperer_experience_academique
 from .recuperer_experience_non_academique_service import recuperer_experience_non_academique
 from .recuperer_informations_destinataire_service import recuperer_informations_destinataire
+from .recuperer_inscriptions_candidat_service import recuperer_inscriptions_candidat
+from .recuperer_periode_reinscription_service import recuperer_periode_reinscription
 from .recuperer_questions_specifiques_proposition_service import recuperer_questions_specifiques_proposition
 from .recuperer_titres_acces_selectionnables_proposition_service import (
     recuperer_titres_acces_selectionnables_proposition,

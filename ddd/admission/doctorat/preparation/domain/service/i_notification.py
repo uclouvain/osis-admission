@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -32,14 +32,15 @@ from admission.ddd.admission.doctorat.preparation.domain.model.groupe_de_supervi
     GroupeDeSupervision,
     SignataireIdentity,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.doctorat.preparation.dtos import AvisDTO, PropositionDTO
 from admission.ddd.admission.shared_kernel.domain.model.emplacement_document import EmplacementDocument
-from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import EtatAuthentificationParcours
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.shared_kernel.domain.service.i_matricule_etudiant import IMatriculeEtudiantService
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
+from admission.ddd.admission.shared_kernel.repository.i_email_destinataire import IEmailDestinataireRepository
 from ddd.logic.shared_kernel.personne_connue_ucl.dtos import PersonneConnueUclDTO
 from osis_common.ddd import interface
+from osis_profile.models.enums.experience_validation import EtatAuthentificationParcours
 
 
 class INotification(interface.DomainService):
@@ -55,7 +56,11 @@ class INotification(interface.DomainService):
 
     @classmethod
     @abstractmethod
-    def notifier_soumission(cls, proposition: Proposition) -> None:
+    def notifier_soumission(
+        cls,
+        proposition: Proposition,
+        email_destinataire_repository: IEmailDestinataireRepository,
+    ) -> None:
         raise NotImplementedError
 
     @classmethod
@@ -94,7 +99,7 @@ class INotification(interface.DomainService):
     @classmethod
     def modifier_authentification_experience_parcours(
         cls,
-        proposition: Proposition,
+        proposition_id: PropositionIdentity,
         etat_authentification: str,
         gestionnaire: PersonneConnueUclDTO,
     ) -> Optional[EmailMessage]:
@@ -106,13 +111,13 @@ class INotification(interface.DomainService):
         }.get(etat_authentification)
 
         if methode_notification:
-            return methode_notification(proposition, gestionnaire)
+            return methode_notification(proposition_id, gestionnaire)
 
     @classmethod
     @abstractmethod
     def demande_verification_titre_acces(
         cls,
-        proposition: Proposition,
+        proposition_id: PropositionIdentity,
         gestionnaire: PersonneConnueUclDTO,
     ) -> EmailMessage:
         raise NotImplementedError
@@ -121,7 +126,7 @@ class INotification(interface.DomainService):
     @abstractmethod
     def informer_candidat_verification_parcours_en_cours(
         cls,
-        proposition: Proposition,
+        proposition_id: PropositionIdentity,
         gestionnaire: PersonneConnueUclDTO,
     ) -> EmailMessage:
         raise NotImplementedError

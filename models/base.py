@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -61,9 +61,8 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.functional import cached_property
-from django.utils.translation import get_language
+from django.utils.translation import get_language, pgettext_lazy
 from django.utils.translation import gettext_lazy as _
-from django.utils.translation import pgettext_lazy
 from osis_comment.models import CommentDeleteMixin
 from osis_document_components.fields import FileField
 from osis_history.models import HistoryEntry
@@ -85,9 +84,12 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_NON_SOUMISE,
     STATUTS_PROPOSITION_GENERALE_NON_SOUMISE_OU_FRAIS_DOSSIER_EN_ATTENTE,
 )
+from admission.ddd.admission.shared_kernel.commands import CandidatEstInscritRecemmentUCLQuery
 from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire
 from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
-from admission.ddd.admission.shared_kernel.repository.i_proposition import CAMPUS_LETTRE_DOSSIER
+from admission.ddd.admission.shared_kernel.repository.i_proposition import (
+    CAMPUS_LETTRE_DOSSIER,
+)
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     ADMISSION_CONTEXT_BY_ALL_OSIS_EDUCATION_TYPE,
     AnneeInscriptionFormationTranslator,
@@ -140,7 +142,7 @@ def training_campus_subquery(training_field: str):
                 'root_group__main_teaching_campus__name',
                 delimiter=',',
                 distinct=True,
-                default=Value('')
+                default=Value(''),
             )
         )
         .values('campus_name')[:1]
@@ -235,9 +237,7 @@ class BaseAdmissionQuerySet(models.QuerySet):
             existing_student_noma=models.Subquery(
                 Student.objects.filter(
                     person_id=OuterRef('candidate_id'),
-                ).values(
-                    'registration_id'
-                )[:1]
+                ).values('registration_id')[:1]
             ),
         ).annotate(
             student_registration_id=Case(
@@ -407,6 +407,18 @@ class BaseAdmissionQuerySet(models.QuerySet):
                 |
                 # Cas validation ticket Digit en erreur
                 ~Q(candidate__personmergeproposal__validation__valid=True)
+            )
+        )
+
+    def exclude_in_quarantine(self):
+        return self.filter(
+            Q(candidate__personmergeproposal__isnull=True)
+            | (
+                ~Q(candidate__personmergeproposal__status__in=PersonMergeStatus.quarantine_statuses())
+                & (
+                    Q(candidate__personmergeproposal__validation__valid=True)
+                    | ~Q(candidate__personmergeproposal__validation__has_key='valid')
+                )
             )
         )
 
@@ -667,7 +679,6 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         return self.reference_str
 
     def get_admission_context(self):
-
         if hasattr(self, 'generaleducationadmission'):
             return CONTEXT_GENERAL
         if hasattr(self, 'doctorateadmission'):
@@ -684,6 +695,14 @@ class BaseAdmission(CommentDeleteMixin, models.Model):
         return any(
             injection.status == EPCInjectionStatus.OK.name
             for injection in self.epc_injection.filter(type=EPCInjectionType.DEMANDE.name)
+        )
+
+    @cached_property
+    def candidate_is_recent_student(self):
+        from infrastructure.messages_bus import message_bus_instance
+
+        return message_bus_instance.invoke(
+            CandidatEstInscritRecemmentUCLQuery(matricule_candidat=self.candidate.global_id)
         )
 
     @cached_property

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -80,11 +80,6 @@ templates.register(
             description=_('Acronym of the management entity'),
             example='ESPO',
         ),
-        Token(
-            name='program_managers_names',
-            description=_("List of names of the program managers."),
-            example='John Doe, Jane Doe',
-        ),
     ],
     tag=DOCTORATE_ADMISSION_TAG,
 )
@@ -131,7 +126,7 @@ templates.register(
             name='late_enrolment_sentence',
             description=_('Sentence indicating the late enrolment (if applicable).'),
             example="Nous attirons votre attention sur le fait que vous avez introduit une demande d'inscription "
-            "tardive. Le jury d'admission se réserve le droit d'accepter ou de refuser cette demande en raison "
+            "tardive. Le jury se réserve le droit d'accepter ou de refuser cette demande en raison "
             "des impératifs pédagogiques.",
         ),
         Token(
@@ -193,11 +188,6 @@ templates.register(
             description=_("List of emails of the program managers."),
             example='john.doe@example.com or jane.doe@example.com',
         ),
-        Token(
-            name='program_managers_names',
-            description=_("List of names of the program managers."),
-            example='John Doe, Jane Doe',
-        ),
     ],
     tag=CONTINUING_ADMISSION_TAG,
 )
@@ -232,11 +222,6 @@ templates.register(
             name='salutation',
             description=_("Greetings depending on the gender of the recipient"),
             example="Cher·ère",
-        ),
-        Token(
-            name='program_managers_names',
-            description=_("List of names of the program managers."),
-            example='John Doe, Jane Doe',
         ),
     ],
     tag=DOCTORATE_ADMISSION_TAG,

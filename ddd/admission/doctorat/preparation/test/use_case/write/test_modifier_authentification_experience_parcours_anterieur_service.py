@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,35 +26,24 @@
 
 from django.test import SimpleTestCase
 
-from admission.ddd.admission.doctorat.preparation.commands import (
-    ModifierAuthentificationExperienceParcoursAnterieurCommand,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
-    ChoixStatutChecklist,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.proposition import (
-    PropositionIdentity,
-)
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
-    PropositionNonTrouveeException,
-)
-from admission.ddd.admission.doctorat.preparation.test.factory.person import (
-    PersonneConnueUclDTOFactory,
-)
-from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
-    EtatAuthentificationParcours,
-)
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
-    ExperienceNonTrouveeException,
-)
+from admission.ddd.admission.doctorat.preparation.commands import ModifierAuthentificationExperienceAcademiqueCommand
+from admission.ddd.admission.doctorat.preparation.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.doctorat.preparation.test.factory.person import PersonneConnueUclDTOFactory
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import AdmissionExperienceNonTrouveeException
 from admission.infrastructure.admission.doctorat.preparation.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
-from admission.infrastructure.message_bus_in_memory import (
-    message_bus_in_memory_instance,
-)
+from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
+from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
 from infrastructure.shared_kernel.personne_connue_ucl.in_memory.personne_connue_ucl import (
     PersonneConnueUclInMemoryTranslator,
+)
+from infrastructure.shared_kernel.profil.domain.service.in_memory.modifier_statut_experience_parcours_anterieur import (
+    ValidationExperienceParcoursAnterieurInMemoryService,
+)
+from osis_profile.models.enums.experience_validation import (
+    ChoixStatutValidationExperience,
+    EtatAuthentificationParcours,
 )
 
 
@@ -70,10 +59,11 @@ class TestModifierAuthentificationExperienceParcoursAnterieur(SimpleTestCase):
         PersonneConnueUclInMemoryTranslator.personnes_connues_ucl = {
             PersonneConnueUclDTOFactory(matricule='0123456789'),
         }
+        self.validation_experience_service = ValidationExperienceParcoursAnterieurInMemoryService()
 
-    def test_should_modifier_vers_statut_checklist_sans_indication_authentification(self):
+    def test_should_modifier_donnees_authentification(self):
         proposition_id = self.message_bus.invoke(
-            ModifierAuthentificationExperienceParcoursAnterieurCommand(
+            ModifierAuthentificationExperienceAcademiqueCommand(
                 uuid_proposition='uuid-SC3DP-confirmee',
                 uuid_experience=self.experience_uuid,
                 etat_authentification=EtatAuthentificationParcours.VRAI.name,
@@ -83,35 +73,22 @@ class TestModifierAuthentificationExperienceParcoursAnterieur(SimpleTestCase):
 
         proposition = self.proposition_repository.get(proposition_id)
 
-        checklist_experience = proposition.checklist_actuelle.recuperer_enfant(
-            'parcours_anterieur',
-            self.experience_uuid,
-        )
-        self.assertEqual(proposition.entity_id, proposition_id)
-        self.assertEqual(checklist_experience.statut, ChoixStatutChecklist.INITIAL_CANDIDAT)
-        self.assertEqual(
-            checklist_experience.extra,
-            {
-                'identifiant': self.experience_uuid,
-                'etat_authentification': EtatAuthentificationParcours.VRAI.name,
-            },
+        informations_validation = (
+            self.validation_experience_service.recuperer_information_validation_experience_academique(
+                uuid_experience=self.experience_uuid,
+            )
         )
 
-    def test_should_empecher_si_proposition_non_trouvee(self):
-        with self.assertRaises(PropositionNonTrouveeException):
-            self.message_bus.invoke(
-                ModifierAuthentificationExperienceParcoursAnterieurCommand(
-                    uuid_proposition='INCONNUE',
-                    uuid_experience=self.experience_uuid,
-                    etat_authentification=EtatAuthentificationParcours.VRAI.name,
-                    gestionnaire='0123456789',
-                )
-            )
+        self.assertEqual(proposition.entity_id, proposition_id)
+        self.assertEqual(informations_validation.uuid, self.experience_uuid)
+        self.assertEqual(informations_validation.type_experience, TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name)
+        self.assertEqual(informations_validation.statut_validation, ChoixStatutValidationExperience.EN_BROUILLON.name)
+        self.assertEqual(informations_validation.statut_authentification, EtatAuthentificationParcours.VRAI.name)
 
     def test_should_empecher_si_experience_non_trouvee(self):
-        with self.assertRaises(ExperienceNonTrouveeException):
+        with self.assertRaises(AdmissionExperienceNonTrouveeException):
             self.message_bus.invoke(
-                ModifierAuthentificationExperienceParcoursAnterieurCommand(
+                ModifierAuthentificationExperienceAcademiqueCommand(
                     uuid_proposition='uuid-SC3DP-confirmee',
                     uuid_experience='INCONNUE',
                     etat_authentification=EtatAuthentificationParcours.VRAI.name,

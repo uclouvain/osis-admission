@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -32,13 +32,8 @@ import attr
 from django.utils.timezone import now
 from django.utils.translation import gettext_noop as __
 
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
-    CurriculumAdmissionDTO,
-)
-from admission.ddd.admission.formation_generale.domain.model._comptabilite import (
-    Comptabilite,
-    comptabilite_non_remplie,
-)
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
+from admission.ddd.admission.formation_generale.domain.model._comptabilite import Comptabilite, comptabilite_non_remplie
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     BesoinDeDerogation,
     BesoinDeDerogationDelegueVrae,
@@ -47,6 +42,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     DecisionFacultaireEnum,
     DerogationFinancement,
     PoursuiteDeCycle,
+    RaisonPlusieursDemandesMemesCycleEtAnnee,
     TypeDeRefus,
 )
 from admission.ddd.admission.formation_generale.domain.model.statut_checklist import (
@@ -74,12 +70,9 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
     SpecifierInformationsApprobationInscriptionValidatorList,
     SpecifierNouvellesInformationsDecisionFacultaireValidatorList,
 )
-from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import (
-    ProfilCandidat,
-)
-from admission.ddd.admission.shared_kernel.domain.model.complement_formation import (
-    ComplementFormationIdentity,
-)
+from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import ProfilCandidat
+from admission.ddd.admission.shared_kernel.domain.model.assimilation import Assimilation
+from admission.ddd.admission.shared_kernel.domain.model.complement_formation import ComplementFormationIdentity
 from admission.ddd.admission.shared_kernel.domain.model.condition_complementaire_approbation import (
     ConditionComplementaireApprobationIdentity,
     ConditionComplementaireLibreApprobation,
@@ -89,37 +82,21 @@ from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import
     StatutEquivalenceTitreAcces,
     TypeEquivalenceTitreAcces,
 )
-from admission.ddd.admission.shared_kernel.domain.model.formation import (
-    FormationIdentity,
+from admission.ddd.admission.shared_kernel.domain.model.formation import FormationIdentity
+from admission.ddd.admission.shared_kernel.domain.model.motif_refus import MotifRefusIdentity
+from admission.ddd.admission.shared_kernel.domain.model.poste_diplomatique import PosteDiplomatiqueIdentity
+from admission.ddd.admission.shared_kernel.domain.model.question_specifique import QuestionSpecifique
+from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
 )
-from admission.ddd.admission.shared_kernel.domain.model.motif_refus import (
-    MotifRefusIdentity,
-)
-from admission.ddd.admission.shared_kernel.domain.model.poste_diplomatique import (
-    PosteDiplomatiqueIdentity,
-)
-from admission.ddd.admission.shared_kernel.domain.model.question_specifique import (
-    QuestionSpecifique,
-)
-from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import (
-    TitreAccesSelectionnable,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
-    IProfilCandidatTranslator,
-)
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.domain.service.i_question_specifique import (
     ISuperQuestionSpecifiqueTranslator,
 )
-from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import (
-    ProfilCandidat as ProfilCandidatService,
-)
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
-    ExperienceNonTrouveeException,
-)
-from admission.ddd.admission.shared_kernel.dtos import EtudesSecondairesAdmissionDTO
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
-    EmplacementDocumentDTO,
-)
+from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidat as ProfilCandidatService
+from admission.ddd.admission.shared_kernel.dtos import EtudesSecondairesAdmissionDTO, IdentificationDTO
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.shared_kernel.enums import (
     ChoixAffiliationSport,
     ChoixAssimilation1,
@@ -135,7 +112,6 @@ from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.shared_kernel.repository.i_titre_acces_selectionnable import (
     ITitreAccesSelectionnableRepository,
 )
-from admission.ddd.admission.shared_kernel.utils import initialiser_checklist_experience
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
@@ -145,12 +121,10 @@ from ddd.logic.financabilite.domain.model.enums.situation import (
     SituationFinancabilite,
 )
 from ddd.logic.reference.domain.model.bourse import BourseIdentity
-from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
-    AcademicYear,
-)
-from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
-    IExperienceParcoursInterneTranslator,
-)
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear
+from ddd.logic.shared_kernel.profil.domain.service.i_parcours_interne import IExperienceParcoursInterneTranslator
+from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
 from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd import interface
 
@@ -282,6 +256,14 @@ class Proposition(interface.RootEntity):
     etat_equivalence_titre_acces: Optional[EtatEquivalenceTitreAcces] = None
     date_prise_effet_equivalence_titre_acces: Optional[datetime.date] = None
 
+    est_concerne_par_le_bama_15: Optional[bool] = None
+    preuve_bama_15: List[str] = attr.Factory(list)
+
+    raison_plusieurs_demandes_meme_cycle_meme_annee: Optional[RaisonPlusieursDemandesMemesCycleEtAnnee] = None
+    justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee: str = ''
+
+    est_en_poursuite: Optional[bool] = None
+
     @property
     def premiere_annee_de_bachelier(self) -> bool:
         return bool(self.poursuite_de_cycle_a_specifier and self.poursuite_de_cycle != PoursuiteDeCycle.YES)
@@ -297,6 +279,7 @@ class Proposition(interface.RootEntity):
         avec_bourse_erasmus_mundus: Optional[bool],
         bourse_erasmus_mundus: Optional[str],
         reponses_questions_specifiques: Dict,
+        est_en_poursuite: bool,
     ):
         self.formation_id = formation_id
         self.reponses_questions_specifiques = reponses_questions_specifiques
@@ -307,6 +290,7 @@ class Proposition(interface.RootEntity):
         self.bourse_erasmus_mundus_id = bourses_ids.get(bourse_erasmus_mundus) if bourse_erasmus_mundus else None
         self.avec_bourse_erasmus_mundus = avec_bourse_erasmus_mundus
         self.auteur_derniere_modification = self.matricule_candidat
+        self.est_en_poursuite = est_en_poursuite
 
         self.comptabilite.affiliation_sport = None  # Ce choix dépend du campus de formation
 
@@ -359,6 +343,9 @@ class Proposition(interface.RootEntity):
         est_inscription_tardive: bool,
         profil_candidat_soumis: ProfilCandidat,
         doit_payer_frais_dossier: bool,
+        raison_plusieurs_demandes_meme_cycle_meme_annee: str,
+        justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee: str,
+        assimilation_passee: Assimilation | None,
     ):
         if doit_payer_frais_dossier:
             self.statut = ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE
@@ -379,6 +366,32 @@ class Proposition(interface.RootEntity):
         self.est_inscription_tardive = est_inscription_tardive
         self.profil_soumis_candidat = profil_candidat_soumis
         self.auteur_derniere_modification = self.matricule_candidat
+        self.raison_plusieurs_demandes_meme_cycle_meme_annee = getattr(
+            RaisonPlusieursDemandesMemesCycleEtAnnee,
+            raison_plusieurs_demandes_meme_cycle_meme_annee,
+            None,
+        )
+        self.justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee = (
+            justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee
+        )
+        if assimilation_passee:
+            self.comptabilite.type_situation_assimilation = assimilation_passee.type_situation_assimilation
+            self.comptabilite.sous_type_situation_assimilation_1 = (
+                assimilation_passee.sous_type_situation_assimilation_1
+            )
+            self.comptabilite.sous_type_situation_assimilation_2 = (
+                assimilation_passee.sous_type_situation_assimilation_2
+            )
+            self.comptabilite.sous_type_situation_assimilation_3 = (
+                assimilation_passee.sous_type_situation_assimilation_3
+            )
+            self.comptabilite.relation_parente = assimilation_passee.relation_parente
+            self.comptabilite.sous_type_situation_assimilation_5 = (
+                assimilation_passee.sous_type_situation_assimilation_5
+            )
+            self.comptabilite.sous_type_situation_assimilation_6 = (
+                assimilation_passee.sous_type_situation_assimilation_6
+            )
 
     def payer_frais_dossier(self):
         self.statut = ChoixStatutPropositionGenerale.CONFIRMEE
@@ -743,13 +756,13 @@ class Proposition(interface.RootEntity):
         statut_checklist_cible: str,
         titres_acces_selectionnes: List[TitreAccesSelectionnable],
         auteur_modification: str,
-        uuids_experiences_valorisees: set[str],
         type_formation: TrainingType,
         etudes_secondaires: EtudesSecondairesAdmissionDTO,
+        examen: ExamenDTO,
+        experiences_academiques: list[ExperienceAcademiqueDTO],
+        experiences_non_academiques: list[ExperienceNonAcademiqueDTO],
     ):
         ModifierStatutChecklistParcoursAnterieurValidatorList(
-            checklist=self.checklist_actuelle,
-            uuids_experiences_valorisees=uuids_experiences_valorisees,
             statut=ChoixStatutChecklist[statut_checklist_cible],
             titres_acces_selectionnes=titres_acces_selectionnes,
             condition_acces=self.condition_acces,
@@ -757,59 +770,12 @@ class Proposition(interface.RootEntity):
             type_formation=type_formation,
             type_equivalence_titre_acces=self.type_equivalence_titre_acces,
             etudes_secondaires=etudes_secondaires,
+            experiences_academiques=experiences_academiques,
+            experiences_non_academiques=experiences_non_academiques,
+            examen=examen,
         ).validate()
 
         self.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist[statut_checklist_cible]
-        self.auteur_derniere_modification = auteur_modification
-
-    def specifier_statut_checklist_experience_parcours_anterieur(
-        self,
-        statut_checklist_cible: str,
-        statut_checklist_authentification: Optional[bool],
-        uuid_experience: str,
-        auteur_modification: str,
-        type_experience: str,
-        profil_candidat_translator: IProfilCandidatTranslator,
-        grade_academique_formation_proposition: str,
-    ):
-        if statut_checklist_cible == ChoixStatutChecklist.GEST_REUSSITE.name:
-            # Une expérience académique ne peut passer à l'état "Validé" que si elle est complète
-            ProfilCandidatService.verifier_experience_curriculum_formation_generale_apres_soumission(
-                proposition=self,
-                uuid_experience=uuid_experience,
-                type_experience=type_experience,
-                profil_candidat_translator=profil_candidat_translator,
-                grade_academique_formation_proposition=grade_academique_formation_proposition,
-            )
-
-        try:
-            experience = self.checklist_actuelle.recuperer_enfant('parcours_anterieur', uuid_experience)
-        except StopIteration:
-            # Si l'expérience n'existe pas dans la checklist, on l'initialise
-            experience = initialiser_checklist_experience(experience_uuid=uuid_experience)
-            self.checklist_actuelle.parcours_anterieur.enfants.append(experience)
-
-        experience.statut = ChoixStatutChecklist[statut_checklist_cible]
-
-        if statut_checklist_authentification is None:
-            experience.extra.pop('authentification', None)
-        else:
-            experience.extra['authentification'] = '1' if statut_checklist_authentification else '0'
-
-        self.auteur_derniere_modification = auteur_modification
-
-    def specifier_authentification_experience_parcours_anterieur(
-        self,
-        uuid_experience: str,
-        auteur_modification: str,
-        etat_authentification: str,
-    ):
-        try:
-            experience = self.checklist_actuelle.recuperer_enfant('parcours_anterieur', uuid_experience)
-        except StopIteration:
-            raise ExperienceNonTrouveeException
-
-        experience.extra['etat_authentification'] = etat_authentification
         self.auteur_derniere_modification = auteur_modification
 
     def specifier_condition_acces(
@@ -876,11 +842,15 @@ class Proposition(interface.RootEntity):
         reponses_questions_specifiques: Dict,
         documents_additionnels: List[str],
         poste_diplomatique: Optional[PosteDiplomatiqueIdentity],
+        est_concerne_par_le_bama_15: Optional[bool],
+        preuve_bama_15: List[str],
     ):
         self.auteur_derniere_modification = self.matricule_candidat
         self.reponses_questions_specifiques = reponses_questions_specifiques
         self.documents_additionnels = documents_additionnels
         self.poste_diplomatique = poste_diplomatique
+        self.est_concerne_par_le_bama_15 = est_concerne_par_le_bama_15
+        self.preuve_bama_15 = preuve_bama_15
 
     def completer_informations_complementaires_par_gestionnaire(
         self,
@@ -888,6 +858,8 @@ class Proposition(interface.RootEntity):
         reponses_questions_specifiques: Dict,
         documents_additionnels: List[str],
         poste_diplomatique: Optional[PosteDiplomatiqueIdentity],
+        est_concerne_par_le_bama_15: Optional[bool],
+        preuve_bama_15: List[str],
         est_bachelier_belge: Optional[bool],
         est_reorientation_inscription_externe: Optional[bool],
         attestation_inscription_reguliere: List[str],
@@ -902,6 +874,9 @@ class Proposition(interface.RootEntity):
         self.documents_additionnels = documents_additionnels
 
         self.poste_diplomatique = poste_diplomatique
+
+        self.est_concerne_par_le_bama_15 = est_concerne_par_le_bama_15
+        self.preuve_bama_15 = preuve_bama_15
 
         self.est_non_resident_au_sens_decret = est_non_resident_au_sens_decret
         self.est_bachelier_belge = est_bachelier_belge
@@ -1205,6 +1180,8 @@ class Proposition(interface.RootEntity):
         experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
         grade_academique_formation_proposition: str,
         annee_formation: AcademicYear,
+        identification_dto: IdentificationDTO,
+        inscriptions_translator: IInscriptionsTranslatorService,
     ):
         if self.type_demande == TypeDemande.INSCRIPTION:
             ApprouverInscriptionParSicValidatorList(
@@ -1215,6 +1192,7 @@ class Proposition(interface.RootEntity):
                 conditions_complementaires_existantes=self.conditions_complementaires_existantes,
                 conditions_complementaires_libres=self.conditions_complementaires_libres,
                 documents_dto=documents_dto,
+                statut_validation_donnees_personnelles=identification_dto.statut_validation_donnees_personnelles,
             ).validate()
 
         else:
@@ -1228,6 +1206,7 @@ class Proposition(interface.RootEntity):
                 nombre_annees_prevoir_programme=self.nombre_annees_prevoir_programme,
                 checklist=self.checklist_actuelle,
                 documents_dto=documents_dto,
+                statut_validation_donnees_personnelles=identification_dto.statut_validation_donnees_personnelles,
             ).validate()
 
         try:
@@ -1239,6 +1218,7 @@ class Proposition(interface.RootEntity):
                 verification_experiences_completees=False,
                 grade_academique_formation_proposition=grade_academique_formation_proposition,
                 annee_formation=annee_formation,
+                inscriptions_translator=inscriptions_translator,
             )
         except MultipleBusinessExceptions:
             raise MultipleBusinessExceptions(exceptions=[CurriculumNonCompletePourAcceptationException()])
@@ -1266,4 +1246,18 @@ class Proposition(interface.RootEntity):
         self.reponses_questions_specifiques = ISuperQuestionSpecifiqueTranslator.clean_specific_question_answers(
             questions_specifiques,
             self.reponses_questions_specifiques,
+        )
+
+    def specifier_raison_plusieurs_demandes_meme_cycle_meme_annee(
+        self,
+        raison_plusieurs_demandes_meme_cycle_meme_annee: str,
+        justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee: str,
+    ):
+        self.raison_plusieurs_demandes_meme_cycle_meme_annee = getattr(
+            RaisonPlusieursDemandesMemesCycleEtAnnee,
+            raison_plusieurs_demandes_meme_cycle_meme_annee,
+            None,
+        )
+        self.justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee = (
+            justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee
         )

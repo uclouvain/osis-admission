@@ -1,4 +1,4 @@
-{% load i18n admission enums panel field_data %}
+{% load i18n admission enums panel field_data academic_year_display %}
 
 {% comment "License" %}
   * OSIS stands for Open Student Information System. It's an application
@@ -7,7 +7,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -41,6 +41,23 @@
         {% field_data _('Competent diplomatic post') proposition.poste_diplomatique|diplomatic_post_name %}
       </div>
     </div>
+  {% endpanel %}
+{% endif %}
+
+{% if display_bama_15_questions %}
+  {% panel _('Dual bachelor-master registration (BAMA15)') %}
+    {% with year=proposition.annee_demande|get_academic_year %}
+      {% blocktranslate asvar is_concerned_by_bama_15_label trimmed with year=year %}
+        According to our analysis, you have a maximum of 15 remaining credits from your bachelor's degree to complete in {{ year }}. Do you confirm this analysis?
+      {% endblocktranslate %}
+      {% field_data is_concerned_by_bama_15_label proposition.est_concerne_par_le_bama_15 %}
+      {% if proposition.est_concerne_par_le_bama_15 %}
+        {% blocktranslate asvar bama_15_proof_label trimmed with year=year %}
+          Proof of re-enrolment for your {{ year }} bachelor's degree
+        {% endblocktranslate %}
+        {% field_data bama_15_proof_label proposition.preuve_bama_15 %}
+      {% endif %}
+    {% endwith %}
   {% endpanel %}
 {% endif %}
 

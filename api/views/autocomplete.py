@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -46,13 +46,13 @@ from admission.api.serializers import PersonSerializer
 from admission.ddd.admission.doctorat.preparation.commands import (
     RechercherDoctoratQuery,
 )
-from admission.ddd.admission.shared_kernel.domain.enums import LISTE_TYPES_FORMATION_GENERALE
 from admission.ddd.admission.formation_continue.commands import (
     RechercherFormationContinueQuery,
 )
 from admission.ddd.admission.formation_generale.commands import (
     RechercherFormationGeneraleQuery,
 )
+from admission.ddd.admission.shared_kernel.domain.enums import LISTE_TYPES_FORMATION_GENERALE
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
@@ -61,11 +61,11 @@ from base.auth.roles.tutor import Tutor
 from base.models.education_group_year import EducationGroupYear
 from base.models.entity_version import EntityVersion
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from base.models.enums.active_status import ActiveStatusEnum
 from base.models.enums.education_group_categories import Categories
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.entity_type import SECTOR
 from base.models.person import Person
-from base.models.specific_iufc_informations import SpecificIUFCInformations
 from base.models.student import Student
 from base.utils.cte import CTESubquery
 from infrastructure.messages_bus import message_bus_instance
@@ -220,6 +220,7 @@ class AutocompleteGeneralEducationView(ListAPIView):
                 type_formation=request.GET.get('type'),
                 campus=request.GET.get('campus'),
                 terme_de_recherche=request.GET.get('acronym_or_name'),
+                statuts=[ActiveStatusEnum.ACTIVE.name, ActiveStatusEnum.RE_REGISTRATION.name],
             )
         )
         serializer = serializers.FormationGeneraleDTOSerializer(instance=education_list, many=True)
@@ -242,31 +243,6 @@ class AutocompleteContinuingEducationView(ListAPIView):
                 terme_de_recherche=request.GET.get('acronym_or_name'),
             )
         )
-
-        # TODO to delete when old IUFC app is closed
-        # Filter the list to retrieve only the trainings that are available
-        if education_list:
-            trainings_filters = Q()
-            for education in education_list:
-                trainings_filters |= Q(
-                    training__academic_year__year=education.annee,
-                    training__acronym=education.sigle,
-                )
-
-            opened_iufc_trainings = (
-                SpecificIUFCInformations.objects.filter(show_to_candidate=True)
-                .filter(trainings_filters)
-                .values_list('training__acronym', 'training__academic_year__year')
-            )
-
-            opened_iufc_trainings_as_set = set(opened_iufc_trainings)
-
-            education_list = [
-                education
-                for education in education_list
-                if (education.sigle, education.annee) in opened_iufc_trainings_as_set
-            ]
-
         serializer = serializers.FormationContinueDTOSerializer(instance=education_list, many=True)
         return Response(serializer.data)
 
@@ -334,8 +310,9 @@ class AutocompleteTutorView(ListAPIView):
             last_name=F("person__last_name"),
             global_id=F("person__global_id"),
         )
-        # Keep only persons with internal account and email address
+        # Keep only employees with internal account and email address
         .filter(
+            person__employee=True,
             person__global_id__startswith='0',
             person__email__endswith=settings.INTERNAL_EMAIL_SUFFIX,
         )
@@ -359,7 +336,8 @@ class AutocompletePersonView(ListAPIView):
             is_student_and_not_tutor=Exists(Student.objects.filter(person=OuterRef('pk'), person__tutor__isnull=True)),
         )
         .filter(
-            # Keep only persons with internal account and email address
+            # Keep only employees with internal account and email address
+            employee=True,
             global_id__startswith='0',
             email__endswith=settings.INTERNAL_EMAIL_SUFFIX,
             # Remove students who aren't tutors

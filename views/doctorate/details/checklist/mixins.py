@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -33,7 +33,6 @@ from osis_comment.models import CommentEntry
 from osis_mail_template.models import MailTemplate
 
 from admission.ddd import MAIL_VERIFICATEUR_CURSUS
-from admission.ddd.admission.shared_kernel.commands import ListerToutesDemandesQuery
 from admission.ddd.admission.doctorat.preparation.commands import (
     RecupererResumeEtEmplacementsDocumentsPropositionQuery,
     VerifierCurriculumApresSoumissionQuery,
@@ -44,36 +43,25 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     AnneesCurriculumNonSpecifieesException,
-    ExperiencesAcademiquesNonCompleteesException,
 )
 from admission.ddd.admission.doctorat.preparation.dtos import PropositionGestionnaireDTO
+from admission.ddd.admission.shared_kernel.commands import ListerToutesDemandesQuery
 from admission.ddd.admission.shared_kernel.dtos.liste import DemandeRechercheDTO
-from admission.ddd.admission.shared_kernel.dtos.resume import (
-    ResumeEtEmplacementsDocumentsPropositionDTO,
-)
+from admission.ddd.admission.shared_kernel.dtos.resume import ResumeEtEmplacementsDocumentsPropositionDTO
 from admission.ddd.admission.shared_kernel.enums.statut import (
     STATUTS_TOUTE_PROPOSITION_AUTORISEE,
     STATUTS_TOUTE_PROPOSITION_SOUMISE,
     STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER_OU_ANNULEE,
 )
-from admission.utils import (
-    get_backoffice_admission_url,
-    get_portal_admission_list_url,
-    get_portal_admission_url,
-)
+from admission.utils import get_backoffice_admission_url, get_portal_admission_list_url, get_portal_admission_url
 from admission.views.common.detail_tabs.checklist import ChecklistTabIcon
 from admission.views.common.detail_tabs.comments import COMMENT_TAG_CDD_FOR_SIC
 from admission.views.common.mixins import LoadDossierViewMixin
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.entity_version import EntityVersion
-from base.models.person_merge_proposal import PersonMergeStatus
 from base.utils.utils import format_academic_year
-from ddd.logic.shared_kernel.profil.commands import (
-    RecupererExperiencesParcoursInterneQuery,
-)
-from ddd.logic.shared_kernel.profil.dtos.parcours_interne import (
-    ExperienceParcoursInterneDTO,
-)
+from ddd.logic.shared_kernel.profil.dtos.parcours_interne import ExperienceParcoursInterneDTO
+from ddd.logic.shared_kernel.profil.queries import RecupererExperiencesParcoursInterneQuery
 from epc.models.enums.condition_acces import ConditionAcces
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.templatetags.osis_role import has_perm
@@ -120,16 +108,6 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
                 reverse=True,
             )
         ]
-
-    @cached_property
-    def incomplete_curriculum_experiences(self):
-        return {
-            str(experience.uuid)
-            for experience in self.proposition_resume.resume.curriculum.experiences_academiques
-            if experience.champs_credits_bloc_1_et_complements_non_remplis(
-                self.proposition_resume.resume.proposition.formation.grade_academique,
-            )
-        }
 
     @cached_property
     def management_entity_title(self):

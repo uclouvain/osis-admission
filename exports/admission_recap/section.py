@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -44,6 +44,7 @@ from admission.ddd.admission.shared_kernel.domain.service.i_elements_confirmatio
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
+from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidat
 from admission.ddd.admission.shared_kernel.dtos.question_specifique import (
     QuestionSpecifiqueDTO,
 )
@@ -145,6 +146,8 @@ class Section:
                     'is_general': context.est_proposition_generale,
                     'is_continuing': context.est_proposition_continue,
                     'is_doctorate': context.est_proposition_doctorale,
+                    'display_to_candidate': context.pour_candidat,
+                    'is_recent_ucl_student': context.candidat_est_etudiant_recent_ucl,
                     'all_inline': True,
                     'hide_files': True,
                     **(extra_context or {}),
@@ -438,12 +441,23 @@ def get_specific_questions_section(
     enrolled_for_contingent_training = CalendrierInscription.inscrit_formation_contingentee(
         sigle=context.proposition.formation.sigle,
     )
+    display_bama_15_questions = (
+        context.est_proposition_generale
+        and ProfilCandidat.est_potentiellement_concerne_par_le_bama_15(
+            uuid_proposition=context.proposition.uuid,
+            annee_formation=context.proposition.annee_demande,
+            statut_proposition=context.proposition.statut,
+            formation=context.proposition.formation,
+            experiences_academiques=context.curriculum.experiences_academiques,
+        )
+    )
     extra_context = {
         'specific_questions': specific_questions_by_tab[Onglets.INFORMATIONS_ADDITIONNELLES.name],
         'eligible_for_reorientation': eligible_for_reorientation,
         'eligible_for_modification': eligible_for_modification,
         'enrolled_for_contingent_training': enrolled_for_contingent_training,
         'display_visa_question': context.est_proposition_generale and context.identification.est_concerne_par_visa,
+        'display_bama_15_questions': display_bama_15_questions,
     }
     return Section(
         identifier=OngletsDemande.INFORMATIONS_ADDITIONNELLES,
@@ -455,6 +469,7 @@ def get_specific_questions_section(
             specific_questions=extra_context['specific_questions'],
             eligible_for_reorientation=eligible_for_reorientation,
             eligible_for_modification=eligible_for_modification,
+            display_bama_15_questions=display_bama_15_questions,
         ),
         load_content=load_content,
     )

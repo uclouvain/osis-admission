@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -28,9 +28,7 @@ from typing import Dict, List, Optional
 
 import attr
 
-from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
-    ExperiencesCVRecuperees,
-)
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
 from admission.ddd.admission.shared_kernel.interface import SortedQueryRequest
 from osis_common.ddd import interface
 from osis_common.ddd.interface import QueryRequest
@@ -196,3 +194,24 @@ class RecupererInformationsDestinataireQuery(QueryRequest):
     annee: int
     sigle_formation: str
     est_premiere_annee: bool
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererInscriptionsCandidatQuery(QueryRequest):
+    matricule_candidat: str
+    annees: list[int] | None = None
+
+
+@attr.dataclass(frozen=True, slots=True)
+class CandidatEstInscritRecemmentUCLQuery(QueryRequest):
+    matricule_candidat: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class CandidatEstEligibleALaReinscriptionQuery(QueryRequest):
+    matricule_candidat: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererPeriodeReinscriptionQuery(QueryRequest):
+    pass

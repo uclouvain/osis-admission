@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -30,8 +30,10 @@ from typing import Dict, List, Optional
 import attr
 
 from admission.ddd.admission.shared_kernel import commands
-from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
-    ExperiencesCVRecuperees,
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
+from ddd.logic.shared_kernel.profil.commands import (
+    ModifierStatutExamenCommand,
+    ModifierStatutExperienceAcademiqueCommand,
 )
 from osis_common.ddd import interface
 
@@ -44,6 +46,7 @@ class RechercherFormationGeneraleQuery(interface.QueryRequest):
     type_formation: Optional[str] = ''
     campus: Optional[str] = ''
     annee: Optional[int] = None
+    statuts: List[str] = None
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -73,6 +76,7 @@ class RecupererPropositionQuery(interface.QueryRequest):
 @attr.dataclass(frozen=True, slots=True)
 class RecupererResumePropositionQuery(interface.QueryRequest):
     uuid_proposition: str
+    pour_candidat: bool = False
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -135,6 +139,15 @@ class SoumettrePropositionCommand(interface.CommandRequest):
     annee: int
     pool: str
     elements_confirmation: Dict[str, str]
+    raison_plusieurs_demandes_meme_cycle_meme_annee: str
+    justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class SpecifierRaisonPlusieursDemandesMemeCycleMemeAnneeCommand(interface.CommandRequest):
+    uuid_proposition: str
+    raison_plusieurs_demandes_meme_cycle_meme_annee: str
+    justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee: str
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -263,6 +276,9 @@ class CompleterQuestionsSpecifiquesCommand(interface.CommandRequest):
     documents_additionnels: List[str] = attr.Factory(list)
     poste_diplomatique: Optional[int] = None
 
+    est_concerne_par_le_bama_15: Optional[bool] = None
+    preuve_bama_15: List[str] = attr.Factory(list)
+
 
 @attr.dataclass(frozen=True, slots=True)
 class CompleterQuestionsSpecifiquesParGestionnaireCommand(interface.CommandRequest):
@@ -273,6 +289,9 @@ class CompleterQuestionsSpecifiquesParGestionnaireCommand(interface.CommandReque
     documents_additionnels: List[str] = attr.Factory(list)
 
     poste_diplomatique: Optional[int] = None
+
+    est_concerne_par_le_bama_15: Optional[bool] = None
+    preuve_bama_15: List[str] = attr.Factory(list)
 
     est_bachelier_belge: Optional[bool] = None
     est_reorientation_inscription_externe: Optional[bool] = None
@@ -592,13 +611,13 @@ class NotifierCandidatDerogationFinancabiliteCommand(interface.CommandRequest):
 
 
 @attr.dataclass(frozen=True, slots=True)
-class ModifierStatutChecklistExperienceParcoursAnterieurCommand(interface.CommandRequest):
+class ModifierChecklistStatutExperienceAcademiqueCommand(ModifierStatutExperienceAcademiqueCommand):
     uuid_proposition: str
-    uuid_experience: str
-    type_experience: str
-    gestionnaire: str
-    statut: str
-    statut_authentification: Optional[bool]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierChecklistStatutExamenCommand(ModifierStatutExamenCommand):
+    uuid_proposition: str
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -607,6 +626,28 @@ class ModifierAuthentificationExperienceParcoursAnterieurCommand(interface.Comma
     uuid_experience: str
     gestionnaire: str
     etat_authentification: str
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierAuthentificationExperienceNonAcademiqueCommand(
+    ModifierAuthentificationExperienceParcoursAnterieurCommand
+):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierAuthentificationEtudesSecondairesCommand(ModifierAuthentificationExperienceParcoursAnterieurCommand):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierAuthentificationExamenCommand(ModifierAuthentificationExperienceParcoursAnterieurCommand):
+    pass
+
+
+@attr.dataclass(frozen=True, slots=True)
+class ModifierAuthentificationExperienceAcademiqueCommand(ModifierAuthentificationExperienceParcoursAnterieurCommand):
+    pass
 
 
 @attr.dataclass(frozen=True, slots=True)
@@ -733,3 +774,8 @@ class RetyperDocumentCommand(interface.CommandRequest):
 @attr.dataclass(frozen=True, slots=True)
 class RecupererPeriodeInscriptionSpecifiqueBachelierMedecineDentisterieQuery(interface.QueryRequest):
     annee: Optional[int]
+
+
+@attr.dataclass(frozen=True, slots=True)
+class RecupererTypeDemandeQuery(interface.QueryRequest):
+    uuid_proposition: str

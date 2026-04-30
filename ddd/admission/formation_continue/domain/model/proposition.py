@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,18 +31,6 @@ import attr
 from django.utils.timezone import now
 from django.utils.translation import gettext_noop as __
 
-from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import ProfilCandidat
-from admission.ddd.admission.shared_kernel.domain.model.formation import FormationIdentity
-from admission.ddd.admission.shared_kernel.domain.model.question_specifique import QuestionSpecifique
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
-    IProfilCandidatTranslator,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_question_specifique import (
-    ISuperQuestionSpecifiqueTranslator,
-)
-from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import (
-    ProfilCandidat as ProfilCandidatService,
-)
 from admission.ddd.admission.formation_continue.domain.model._adresse import Adresse
 from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixEdition,
@@ -70,6 +58,18 @@ from admission.ddd.admission.formation_continue.domain.validator.validator_by_bu
     MettreAValiderValidatorList,
     MettreEnAttenteValidatorList,
     RefuserPropositionValidatorList,
+)
+from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import ProfilCandidat
+from admission.ddd.admission.shared_kernel.domain.model.formation import FormationIdentity
+from admission.ddd.admission.shared_kernel.domain.model.question_specifique import QuestionSpecifique
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
+    IProfilCandidatTranslator,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_question_specifique import (
+    ISuperQuestionSpecifiqueTranslator,
+)
+from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import (
+    ProfilCandidat as ProfilCandidatService,
 )
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from ddd.logic.formation_catalogue.formation_continue.dtos.informations_specifiques import (
@@ -390,8 +390,11 @@ class Proposition(interface.RootEntity):
         gestionnaire: str,
         profil_candidat_translator: IProfilCandidatTranslator,
     ):
+        identification_dto = profil_candidat_translator.get_identification(self.matricule_candidat)
+
         ApprouverPropositionValidatorList(
-            checklist_statut=self.checklist_actuelle.decision,
+            checklist_actuelle=self.checklist_actuelle,
+            statut_validation_donnees_personnelles=identification_dto.statut_validation_donnees_personnelles,
         ).validate()
 
         ProfilCandidatService.verifier_quarantaine(

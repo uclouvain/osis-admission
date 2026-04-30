@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,37 +24,18 @@
 #
 # ##############################################################################
 
-from admission.ddd.admission.formation_generale.commands import (
-    ApprouverInscriptionParSicCommand,
-)
-from admission.ddd.admission.formation_generale.domain.model.proposition import (
-    PropositionIdentity,
-)
-from admission.ddd.admission.formation_generale.domain.service.i_historique import (
-    IHistorique,
-)
-from admission.ddd.admission.formation_generale.events import (
-    InscriptionApprouveeParSicEvent,
-)
-from admission.ddd.admission.formation_generale.repository.i_proposition import (
-    IPropositionRepository,
-)
-from admission.ddd.admission.shared_kernel.domain.model.proposition import (
-    PropositionIdentity,
-)
-from admission.ddd.admission.shared_kernel.domain.service.resume_proposition import (
-    ResumeProposition,
-)
+from admission.ddd.admission.formation_generale.commands import ApprouverInscriptionParSicCommand
+from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.formation_generale.domain.service.i_historique import IHistorique
+from admission.ddd.admission.formation_generale.events import InscriptionApprouveeParSicEvent
+from admission.ddd.admission.formation_generale.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import \
+    IInscriptionsTranslatorService
+from admission.ddd.admission.shared_kernel.domain.service.resume_proposition import ResumeProposition
 from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire
-from admission.ddd.admission.shared_kernel.enums.valorisation_experience import (
-    ExperiencesCVRecuperees,
-)
-from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
-    AcademicYearIdentity,
-)
-from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
-    IExperienceParcoursInterneTranslator,
-)
+from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYearIdentity
+from ddd.logic.shared_kernel.profil.domain.service.i_parcours_interne import IExperienceParcoursInterneTranslator
 
 
 def approuver_inscription_par_sic(
@@ -69,6 +50,7 @@ def approuver_inscription_par_sic(
     academic_year_repository: 'IAcademicYearRepository',
     personne_connue_translator: 'IPersonneConnueUclTranslator',
     experience_parcours_interne_translator: 'IExperienceParcoursInterneTranslator',
+    inscriptions_translator: IInscriptionsTranslatorService,
 ) -> PropositionIdentity:
     # GIVEN
     proposition = proposition_repository.get(entity_id=PropositionIdentity(uuid=cmd.uuid_proposition))
@@ -81,6 +63,7 @@ def approuver_inscription_par_sic(
         proposition_dto=proposition_dto,
         comptabilite_dto=comptabilite_dto,
         experiences_cv_recuperees=ExperiencesCVRecuperees.SEULEMENT_VALORISEES_PAR_ADMISSION,
+        inscriptions_translator=inscriptions_translator,
     )
     questions_specifiques_dtos = question_specifique_translator.search_dto_by_proposition(
         proposition_uuid=cmd.uuid_proposition,
@@ -103,6 +86,8 @@ def approuver_inscription_par_sic(
         experience_parcours_interne_translator=experience_parcours_interne_translator,
         grade_academique_formation_proposition=proposition_dto.formation.grade_academique,
         annee_formation=annee_formation,
+        identification_dto=resume_dto.identification,
+        inscriptions_translator=inscriptions_translator,
     )
 
     # THEN

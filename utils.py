@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,21 +31,17 @@ from typing import Dict, Iterable, List, Optional, Union
 
 import weasyprint
 from django.conf import settings
-from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models
-from django.db.models import Prefetch, QuerySet
+from django.db.models import QuerySet
 from django.shortcuts import resolve_url
 from django.utils import timezone
 from django.utils.translation import get_language, override, pgettext
-from django_htmx.http import trigger_client_event
 from rest_framework.generics import get_object_or_404
 
 from admission.auth.roles.central_manager import CentralManager
-from admission.auth.roles.program_manager import (
-    ProgramManager as AdmissionProgramManager,
-)
+from admission.auth.roles.program_manager import ProgramManager as AdmissionProgramManager
 from admission.auth.roles.sic_management import SicManagement
 from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
 from admission.ddd.admission.doctorat.preparation.commands import (
@@ -57,12 +53,8 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions im
 from admission.ddd.admission.formation_generale.commands import (
     VerifierCurriculumApresSoumissionQuery as VerifierCurriculumApresSoumissionGeneraleQuery,
 )
-from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import (
-    EtudesSecondairesAdmissionDTO,
-)
-from admission.ddd.admission.shared_kernel.dtos.titre_acces_selectionnable import (
-    TitreAccesSelectionnableDTO,
-)
+from admission.ddd.admission.shared_kernel.dtos.etudes_secondaires import EtudesSecondairesAdmissionDTO
+from admission.ddd.admission.shared_kernel.dtos.titre_acces_selectionnable import TitreAccesSelectionnableDTO
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     ADMISSION_CONTEXT_BY_OSIS_EDUCATION_TYPE,
 )
@@ -72,7 +64,6 @@ from admission.models import (
     GeneralEducationAdmission,
     SupervisionActor,
 )
-from admission.models.specific_question import SpecificQuestionAnswer
 from backoffice.settings.rest_framework.exception_handler import get_error_data
 from base.auth.roles.program_manager import ProgramManager
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
@@ -83,10 +74,7 @@ from base.models.enums.education_group_types import TrainingType
 from base.models.person import Person
 from ddd.logic.formation_catalogue.commands import GetSigleFormationParenteQuery
 from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
-from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
-    ExperienceAcademiqueDTO,
-    ExperienceNonAcademiqueDTO,
-)
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
 from osis_common.ddd.interface import BusinessException, QueryRequest
 from osis_profile.models.enums.person import ChoixGenre
 from program_management.ddd.domain.exception import ProgramTreeNotFoundException
@@ -243,17 +231,6 @@ def get_doctoral_cdd_managers(education_group_id) -> QuerySet[Person]:
     )
 
 
-def add_messages_into_htmx_response(request, response):
-    msgs = list(messages.get_messages(request))
-
-    if msgs:
-        trigger_client_event(response, 'messages', [{'message': str(msg.message), 'tags': msg.tags} for msg in msgs])
-
-
-def add_close_modal_into_htmx_response(response):
-    trigger_client_event(response, 'closeModal')
-
-
 def get_portal_admission_list_url() -> str:
     """Return the url of the list of the admissions in the portal."""
     return f'{settings.OSIS_PORTAL_URL}admission/'
@@ -375,11 +352,7 @@ def access_title_country(selectable_access_titles: Iterable[TitreAccesSelectionn
 
 def get_training_url(training_type, training_acronym, partial_training_acronym, suffix):
     # Circular import otherwise
-    from admission.constants import (
-        CONTEXT_CONTINUING,
-        CONTEXT_DOCTORATE,
-        CONTEXT_GENERAL,
-    )
+    from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
     from infrastructure.messages_bus import message_bus_instance
 
     if training_type == TrainingType.PHD.name:
@@ -621,10 +594,21 @@ def get_experience_urls(
         if not computed_permissions['admission.change_admission_exam']:
             return res_context
 
-        res_context['edit_url'] = resolve_url(
-            f'{base_namespace}:update:exam',
-            uuid=admission.uuid,
-        )
+        if experience.epc_experience:
+            if candidate_noma:
+                if computed_permissions['profil.can_edit_parcours_externe']:
+                    res_context['curex_url'] = resolve_url(
+                        'edit-examen-view',
+                        noma=candidate_noma,
+                        experience_uuid=experience.uuid,
+                    )
+                    res_context['edit_new_link_tab'] = True
+
+        else:
+            res_context['edit_url'] = resolve_url(
+                f'{base_namespace}:update:exam',
+                uuid=admission.uuid,
+            )
 
     return res_context
 

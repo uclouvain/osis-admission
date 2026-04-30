@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -38,12 +38,12 @@ from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.language import LanguageFactory
 
 
-class HighSchoolDiplomaFactory(factory.django.DjangoModelFactory):
+class BaseHighSchoolDiplomaFactory(factory.django.DjangoModelFactory):
     person = factory.SubFactory('base.tests.factories.person.PersonFactory')
     academic_graduation_year = factory.SubFactory(AcademicYearFactory, current=True)
 
 
-class BelgianHighSchoolDiplomaFactory(HighSchoolDiplomaFactory):
+class BelgianHighSchoolDiplomaFactory(BaseHighSchoolDiplomaFactory):
     high_school_diploma = factory.LazyAttribute(lambda _: [PdfUploadFactory().uuid])
     community = BelgianCommunitiesOfEducation.GERMAN_SPEAKING.name
     educational_type = EducationalType.PROFESSIONAL_EDUCATION.name
@@ -54,7 +54,7 @@ class BelgianHighSchoolDiplomaFactory(HighSchoolDiplomaFactory):
         model = BelgianHighSchoolDiploma
 
 
-class ForeignHighSchoolDiplomaFactory(HighSchoolDiplomaFactory):
+class ForeignHighSchoolDiplomaFactory(BaseHighSchoolDiplomaFactory):
     country = factory.SubFactory(CountryFactory)
     linguistic_regime = factory.SubFactory(LanguageFactory)
 

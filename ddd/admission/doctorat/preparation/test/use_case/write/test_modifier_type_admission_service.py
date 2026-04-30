@@ -99,15 +99,15 @@ class TestModifierTypeAdmissionPropositionService(SimpleTestCase):
             self.message_bus.invoke(cmd)
             self.assertIsInstance(context.exception.exceptions.pop(), CommissionProximiteInconsistantException)
 
-    def test_should_pas_completer_commission_proximite_cde_vide_et_CDE(self):
+    def test_should_completer_commission_proximite_cde_vide_et_CDE(self):
         cmd = attr.evolve(
             self.cmd,
             commission_proximite='',
             uuid_proposition='uuid-ECGE3DP',
         )
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(cmd)
-            self.assertIsInstance(context.exception.exceptions.pop(), CommissionProximiteInconsistantException)
+        proposition_id = self.message_bus.invoke(cmd)
+        proposition = self.proposition_repository.get(proposition_id)
+        self.assertIsNone(proposition.commission_proximite)
 
     def test_should_pas_completer_commission_proximite_cdss_vide_et_CDSS(self):
         cmd = attr.evolve(
@@ -115,9 +115,9 @@ class TestModifierTypeAdmissionPropositionService(SimpleTestCase):
             commission_proximite='',
             uuid_proposition='uuid-ESP3DP',
         )
-        with self.assertRaises(MultipleBusinessExceptions) as context:
-            self.message_bus.invoke(cmd)
-            self.assertIsInstance(context.exception.exceptions.pop(), CommissionProximiteInconsistantException)
+        proposition_id = self.message_bus.invoke(cmd)
+        proposition = self.proposition_repository.get(proposition_id)
+        self.assertIsNone(proposition.commission_proximite)
 
     def test_should_completer_commission_proximite_cde(self):
         cmd = attr.evolve(

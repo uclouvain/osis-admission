@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -42,6 +42,10 @@ from admission.ddd.admission.formation_generale import (
 from admission.ddd.admission.formation_generale.dtos import (
     ComptabiliteDTO as GeneralAccountingDTO,
 )
+from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
+    AnneeInscriptionFormationTranslator,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.inscriptions import InscriptionsTranslatorService
 from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import (
     ProfilCandidatTranslator,
 )
@@ -61,6 +65,7 @@ def get_last_french_community_high_education_institutes(candidate: Person, date:
     cv_minimal_years = ProfilCandidatTranslator.get_annees_minimum_curriculum(
         global_id=candidate.global_id,
         current_year=AcademicYear.objects.current(date).year,
+        inscriptions_translator=InscriptionsTranslatorService(),
     )
     last_institutes = (
         EducationalExperienceYear.objects.filter(
@@ -126,6 +131,8 @@ class DoctorateEducationAccountingDTOSerializer(DTOSerializer):
 
 
 class GeneralEducationAccountingDTOSerializer(DoctorateEducationAccountingDTOSerializer):
+    a_assimilation_meme_formation_annee_precedente = serializers.SerializerMethodField(allow_null=True)
+
     class Meta:
         source = GeneralAccountingDTO
         extra_kwargs = {
@@ -134,6 +141,15 @@ class GeneralEducationAccountingDTOSerializer(DoctorateEducationAccountingDTOSer
             'prenom_titulaire_compte': {'max_length': 128},
             'nom_titulaire_compte': {'max_length': 128},
         }
+
+    @extend_schema_field(OpenApiTypes.BOOL)
+    def get_a_assimilation_meme_formation_annee_precedente(self, _):
+        assimilation = InscriptionsTranslatorService.recuperer_assimilation_inscription_formation_annee_precedente(
+            matricule_candidat=self.context['candidate'].global_id,
+            sigle_formation=self.context['training_acronym'],
+            annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
+        )
+        return bool(assimilation)
 
 
 class CompleterComptabilitePropositionDoctoraleCommandSerializer(DTOSerializer):

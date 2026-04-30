@@ -45,6 +45,8 @@
             const withSearch = originalSelectField.dataset['withSearch'] === '1';
             const withFreeOptions = originalSelectField.dataset['withFreeOptions'] === '1';
             const freeOptionsPlaceholder = originalSelectField.dataset['freeOptionsPlaceholder'];
+            const freeOptionsAddButtonTitle = originalSelectField.dataset['freeOptionsAddButtonTitle'];
+            const freeOptionsClearButtonTitle = originalSelectField.dataset['freeOptionsClearButtonTitle'];
 
             // Add containers
             const parent = originalSelectField.parentNode;
@@ -90,6 +92,10 @@
                 });
             }
 
+            const getConcatenatedLabelOfSelectedOptions = function(listOfOptions) {
+                return listOfOptions.filter(o => !o.classList.contains(SELECTING_CLASS)).map(o => o.label).join(' ');
+            };
+
             fromSelectFieldContainer.appendChild(fromSelectField);
             originalSelectFieldContainer.appendChild(originalSelectField)
 
@@ -121,6 +127,9 @@
                 const addOptionContainer = document.createElement('div');
                 addOptionContainer.className = 'admissionselectfilter-add-option';
 
+                const addOptionTextInputContainer = document.createElement('div');
+                addOptionTextInputContainer.className = 'input-group';
+
                 const addOptionTextInput = document.createElement('input');
                 addOptionTextInput.id = `${originalSelectField.id}_add_value`;
                 addOptionTextInput.type = 'text';
@@ -130,10 +139,22 @@
 
                 const newElementsContainer = originalSelectField.querySelector('optgroup:last-child') || originalSelectField;
 
-                const addOptionButton = document.createElement('input');
-                addOptionButton.type = 'button';
-                addOptionButton.value = '+';
-                addOptionButton.className = 'btn';
+                const addOptionButtonIcon = document.createElement('i');
+                addOptionButtonIcon.className = 'fa-solid fa-plus';
+
+                const addOptionButton = document.createElement('button');
+                addOptionButton.className = 'btn btn-default';
+                addOptionButton.title = freeOptionsAddButtonTitle;
+
+                const clearOptionContainer = document.createElement('div');
+                clearOptionContainer.className = 'input-group-btn'
+
+                const clearOptionButtonIcon = document.createElement('i');
+                clearOptionButtonIcon.className = 'fa-solid fa-eraser';
+
+                const clearOptionButton = document.createElement('button');
+                clearOptionButton.className = 'btn btn-default';
+                clearOptionButton.title = freeOptionsClearButtonTitle;
 
                 // When the user presses enter on the text input, add the option and prevent the event from propagating
                 addOptionTextInput.addEventListener('keydown', function(event) {
@@ -167,7 +188,21 @@
                     event.preventDefault()
                 });
 
-                addOptionContainer.appendChild(addOptionTextInput);
+                clearOptionButton.addEventListener('click', function(event) {
+                    // Reset input text
+                    const textInput = document.getElementById(addOptionTextInput.id);
+                    textInput.value = '';
+
+                    // Prevent to submit the form
+                    event.preventDefault();
+                });
+
+                clearOptionButton.appendChild(clearOptionButtonIcon);
+                clearOptionContainer.appendChild(clearOptionButton);
+                addOptionTextInputContainer.appendChild(addOptionTextInput);
+                addOptionTextInputContainer.appendChild(clearOptionContainer);
+                addOptionContainer.appendChild(addOptionTextInputContainer);
+                addOptionButton.appendChild(addOptionButtonIcon);
                 addOptionContainer.appendChild(addOptionButton);
                 originalSelectField.after(addOptionContainer);
             }
@@ -211,6 +246,12 @@
 
                 if (targetedOptions.length === 0) return
 
+                // Copy the content of the selected options into the add option text input if one of them is free
+                const addOptionTextInput = document.getElementById(`${originalSelectField.id}_add_value`);
+                if (addOptionTextInput && targetedOptions.some(option => option.label === option.value)) {
+                    addOptionTextInput.value = getConcatenatedLabelOfSelectedOptions(targetedOptions);
+                }
+
                 targetedOptions.forEach(option => {
                     // Original option
                     option.classList.add(SELECTING_CLASS);
@@ -252,6 +293,12 @@
                 originalOption.scrollIntoView()
             }
 
+            const copySelectedOptions = async function (event) {
+                // Copy the content of the selected options of the select into the clipboard
+                const contentToCopy = getConcatenatedLabelOfSelectedOptions(Array.from(event.target.selectedOptions));
+                await navigator.clipboard.writeText(contentToCopy);
+            };
+
             // Add event listeners
 
             // On click
@@ -260,10 +307,12 @@
 
             // On key press
             fromSelectField.addEventListener('keydown', event => {
-                if (event.key === 'Enter' || event.key === 'ArrowRight') onSelectFromOption(event)
+                if (event.key === 'Enter' || event.key === 'ArrowRight') onSelectFromOption(event);
+                if (event.ctrlKey && event.key === 'c') copySelectedOptions(event);
             });
             originalSelectField.addEventListener('keydown', event => {
-                if (event.key === 'Enter' || event.key === 'ArrowLeft') onSelectOriginalOption(event)
+                if (event.key === 'Enter' || event.key === 'ArrowLeft') onSelectOriginalOption(event);
+                if (event.ctrlKey && event.key === 'c') copySelectedOptions(event);
             });
 
             // On focus out of the original select, select every visible option to submit its value at form submission

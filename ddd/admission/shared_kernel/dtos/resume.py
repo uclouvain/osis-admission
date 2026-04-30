@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -89,6 +89,8 @@ class ResumePropositionDTO(ResumeCandidatDTO):
     comptabilite: Optional[AdmissionComptabiliteDTO]
     groupe_supervision: Optional[dtos_doctorat.GroupeDeSupervisionDTO]
     questions_specifiques_dtos: Optional[List[QuestionSpecifiqueDTO]] = None  # Warning : not always set (TODO)
+    candidat_est_etudiant_recent_ucl: Optional[bool] = None  # Warning : not always set (when we do not want to use it)
+    pour_candidat: Optional[bool] = False  # Certaines informations ne sont pas utiles au candidat
 
     @cached_property
     def est_proposition_doctorale(self):

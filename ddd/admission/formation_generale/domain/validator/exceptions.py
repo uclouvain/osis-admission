@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,12 +25,13 @@
 ##############################################################################
 import datetime
 
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext, gettext_lazy as _
 
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_GESTIONNAIRE_PEUT_DEMANDER_PAIEMENT,
     ChoixStatutPropositionGenerale,
 )
+from base.utils.utils import format_academic_year
 from education_group.templatetags.academic_year_display import display_as_academic_year
 from osis_common.ddd.interface import BusinessException
 
@@ -381,4 +382,46 @@ class InformationsEquivalenceNonSpecifieesChecklistException(BusinessException):
 
     def __init__(self, **kwargs):
         message = _('The "Sufficient" status requires the equivalence information to be specified.')
+        super().__init__(message, **kwargs)
+
+
+class InformationsBama15NonCompleteesException(BusinessException):
+    status_code = "FORMATION-GENERALE-42"
+
+    def __init__(self, **kwargs):
+        super().__init__(
+            message=gettext(
+                "Mandatory fields are missing in the 'Additional information > "
+                "Dual bachelor-master registration (BAMA15)' tab."
+            ),
+            **kwargs,
+        )
+
+
+class CandidatNonEligibleALaReinscriptionException(BusinessException):
+    status_code = "FORMATION-GENERALE-43"
+
+    def __init__(self, **kwargs):
+        message = _(
+            "You cannot yet apply for this course because you are currently enrolled in a course that has "
+            "not yet been deliberated."
+        )
+        super().__init__(message, **kwargs)
+
+
+class CandidatDejaDiplomeFormationException(BusinessException):
+    status_code = "FORMATION-GENERALE-44"
+
+    def __init__(self, **kwargs):
+        message = _("You cannot apply for this course because you have already graduated.")
+        super().__init__(message, **kwargs)
+
+
+class DejaInscritFormationAnnualiseeException(BusinessException):
+    status_code = "FORMATION-GENERALE-45"
+
+    def __init__(self, annee: int, **kwargs):
+        message = _("You are already registered for this course which will take place during the year %(annee)s.") % {
+            'annee': format_academic_year(annee, short=True),
+        }
         super().__init__(message, **kwargs)

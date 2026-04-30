@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -285,7 +285,7 @@ class InviterASignerValidatorList(TwoStepsMultipleBusinessExceptionListValidator
     def get_invariants_validators(self) -> List[BusinessValidator]:
         return [
             ShouldSignataireEtreDansGroupeDeSupervision(self.groupe_de_supervision, self.signataire_id),
-            ShouldSignatairePasDejaInvite(self.groupe_de_supervision, self.signataire_id),
+            ShouldSignataireAPasDejaApprouve(self.groupe_de_supervision, self.signataire_id),
         ]
 
 
@@ -346,6 +346,7 @@ class CurriculumValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     annee_courante: int
     annee_derniere_inscription_ucl: Optional[int]
     annee_diplome_etudes_secondaires: Optional[int]
+    annee_alternative_diplome_etudes_secondaires: Optional[int]
     experiences_non_academiques: List[ExperienceNonAcademiqueDTO]
     experiences_academiques: List[ExperienceAcademiqueDTO]
     experiences_academiques_incompletes: Dict[str, str]
@@ -371,6 +372,7 @@ class CurriculumValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
                 experiences_academiques_incompletes=self.experiences_academiques_incompletes,
                 annee_derniere_inscription_ucl=self.annee_derniere_inscription_ucl,
                 annee_diplome_etudes_secondaires=self.annee_diplome_etudes_secondaires,
+                annee_alternative_diplome_etudes_secondaires=self.annee_alternative_diplome_etudes_secondaires,
                 experiences_non_academiques=self.experiences_non_academiques,
                 annee_formation=self.annee_formation,
             ),
@@ -382,6 +384,7 @@ class CurriculumPostSoumissionValidatorList(TwoStepsMultipleBusinessExceptionLis
     annee_precedent_formation: int
     date_soumission: date
     annee_diplome_etudes_secondaires: Optional[int]
+    annee_alternative_diplome_etudes_secondaires: Optional[int]
     experiences_non_academiques: List[ExperienceNonAcademiqueDTO]
     experiences_academiques: List[ExperienceAcademiqueDTO]
     experiences_parcours_interne: List[ExperienceParcoursInterneDTO]
@@ -400,6 +403,7 @@ class CurriculumPostSoumissionValidatorList(TwoStepsMultipleBusinessExceptionLis
                 experiences_academiques_incompletes={},  # Une expérience incomplète justifie quand même une période
                 annee_derniere_inscription_ucl=None,
                 annee_diplome_etudes_secondaires=self.annee_diplome_etudes_secondaires,
+                annee_alternative_diplome_etudes_secondaires=self.annee_alternative_diplome_etudes_secondaires,
                 experiences_non_academiques=self.experiences_non_academiques,
                 date_soumission=self.date_soumission,
                 experiences_parcours_interne=self.experiences_parcours_interne,
@@ -731,6 +735,8 @@ class ApprouverAdmissionParSicValidatorList(TwoStepsMultipleBusinessExceptionLis
     checklist: StatutsChecklistDoctorale
     documents_dto: List[EmplacementDocumentDTO]
 
+    statut_validation_donnees_personnelles: str
+
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
@@ -740,7 +746,7 @@ class ApprouverAdmissionParSicValidatorList(TwoStepsMultipleBusinessExceptionLis
                 statut=self.statut,
             ),
             ShouldDonneesPersonnellesEtreDansEtatCorrectPourApprouverDemande(
-                checklist_actuelle=self.checklist,
+                statut_validation_donnees_personnelles=self.statut_validation_donnees_personnelles,
             ),
             ShouldDecisionCddEtreDansEtatCorrectPourApprouverDemande(
                 checklist_actuelle=self.checklist,
@@ -766,6 +772,8 @@ class ApprouverInscriptionParSicValidatorList(TwoStepsMultipleBusinessExceptionL
 
     documents_dto: List[EmplacementDocumentDTO]
 
+    statut_validation_donnees_personnelles: str
+
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
@@ -775,7 +783,7 @@ class ApprouverInscriptionParSicValidatorList(TwoStepsMultipleBusinessExceptionL
                 statut=self.statut,
             ),
             ShouldDonneesPersonnellesEtreDansEtatCorrectPourApprouverDemande(
-                checklist_actuelle=self.checklist,
+                statut_validation_donnees_personnelles=self.statut_validation_donnees_personnelles,
             ),
             ShouldDecisionCddEtreDansEtatCorrectPourApprouverDemande(
                 checklist_actuelle=self.checklist,
@@ -805,8 +813,8 @@ class ModifierStatutChecklistParcoursAnterieurValidatorList(TwoStepsMultipleBusi
     condition_acces: Optional[ConditionAcces]
     millesime_condition_acces: Optional[int]
 
-    uuids_experiences_valorisees: set[str]
-    checklist: StatutsChecklistDoctorale
+    experiences_academiques: list[ExperienceAcademiqueDTO]
+    experiences_non_academiques: list[ExperienceNonAcademiqueDTO]
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -823,8 +831,8 @@ class ModifierStatutChecklistParcoursAnterieurValidatorList(TwoStepsMultipleBusi
                 millesime_condition_acces=self.millesime_condition_acces,
             ),
             ShouldStatutsChecklistExperiencesEtreValidees(
-                uuids_experiences_valorisees=self.uuids_experiences_valorisees,
-                checklist=self.checklist,
+                experiences_academiques=self.experiences_academiques,
+                experiences_non_academiques=self.experiences_non_academiques,
                 statut=self.statut,
             ),
         ]

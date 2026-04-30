@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -38,6 +38,7 @@ from admission.auth.scope import Scope
 from admission.constants import CONTEXT_CONTINUING, CONTEXT_DOCTORATE, CONTEXT_GENERAL
 from admission.models import DoctorateAdmission, GeneralEducationAdmission
 from admission.models.base import BaseAdmission
+from base.models.enums.personal_data import ChoixStatutValidationDonneesPersonnelles
 from osis_role.errors import predicate_failed_msg
 
 
@@ -224,3 +225,52 @@ def past_experiences_checklist_tab_is_not_sufficient(
     obj: Union[DoctorateAdmission, GeneralEducationAdmission],
 ):
     return obj.checklist.get('current', {}).get('parcours_anterieur', {}).get('statut') != 'GEST_REUSSITE'
+
+
+@predicate(bind=True)
+@predicate_failed_msg(
+    message=_("The \"Personal data\" checklist tab must be in the \"Cleaned\" status in order to do this action.")
+)
+def personal_data_checklist_status_is_cleaned(self, user: User, obj: BaseAdmission):
+    return obj.candidate.personal_data_validation_status == ChoixStatutValidationDonneesPersonnelles.TOILETTEES.name
+
+
+@predicate(bind=True)
+@predicate_failed_msg(
+    message=_(
+        "The \"Personal data\" checklist tab must be in the \"To be processed\" status in order to do this action."
+    )
+)
+def personal_data_checklist_status_is_to_be_processed(self, user: User, obj: BaseAdmission):
+    return obj.candidate.personal_data_validation_status == ChoixStatutValidationDonneesPersonnelles.A_TRAITER.name
+
+
+@predicate(bind=True)
+@predicate_failed_msg(
+    message=_("The \"Personal data\" checklist tab must not be in the \"Validated\" status in order to do this action.")
+)
+def personal_data_checklist_status_is_not_validated(self, user: User, obj: BaseAdmission):
+    return obj.candidate.personal_data_validation_status != ChoixStatutValidationDonneesPersonnelles.VALIDEES.name
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("The candidate is not a UCL student."))
+def candidate_is_recent_student(self, user: User, obj: BaseAdmission):
+    cache_key = f'admission_{obj.candidate_id}_candidate_is_recent_student'
+    if not hasattr(user, cache_key):
+        setattr(user, cache_key, obj.candidate_is_recent_student)
+    return getattr(user, cache_key)
+
+
+@predicate(bind=True)
+@predicate_failed_msg(message=_("The candidate is a UCL student."))
+def candidate_is_not_recent_student(self, user: User, obj: BaseAdmission):
+    cache_key = f'admission_{obj.candidate_id}_candidate_is_recent_student'
+    if not hasattr(user, cache_key):
+        setattr(user, cache_key, obj.candidate_is_recent_student)
+    return not getattr(user, cache_key)
+
+
+@predicate(bind=True)
+def candidate_has_internal_account(self, user: User, obj: BaseAdmission):
+    return not obj.candidate.global_id.startswith('8')

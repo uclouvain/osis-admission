@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -49,38 +49,25 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixStatutPropositionContinue,
     ChoixTypeAdresseFacturation,
 )
-from admission.ddd.admission.formation_continue.domain.model.proposition import (
-    Proposition,
-    PropositionIdentity,
-)
+from admission.ddd.admission.formation_continue.domain.model.proposition import Proposition, PropositionIdentity
 from admission.ddd.admission.formation_continue.domain.model.statut_checklist import (
     StatutChecklist,
     StatutsChecklistContinue,
 )
-from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
-    PropositionNonTrouveeException,
-)
+from admission.ddd.admission.formation_continue.domain.validator.exceptions import PropositionNonTrouveeException
 from admission.ddd.admission.formation_continue.dtos import PropositionDTO
-from admission.ddd.admission.formation_continue.repository.i_proposition import (
-    IPropositionRepository,
-)
-from admission.ddd.admission.shared_kernel.domain.builder.formation_identity import (
-    FormationIdentityBuilder,
-)
-from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import (
-    ProfilCandidat,
-)
+from admission.ddd.admission.formation_continue.repository.i_proposition import IPropositionRepository
+from admission.ddd.admission.shared_kernel.domain.builder.formation_identity import FormationIdentityBuilder
+from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.shared_kernel.dtos import AdressePersonnelleDTO
 from admission.ddd.admission.shared_kernel.dtos.campus import CampusDTO
 from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from admission.ddd.admission.shared_kernel.dtos.profil_candidat import ProfilCandidatDTO
 from admission.ddd.admission.shared_kernel.enums import TypeItemFormulaire
-from admission.infrastructure.admission.shared_kernel.repository.proposition import (
-    GlobalPropositionRepository,
-)
+from admission.infrastructure.admission.shared_kernel.repository.proposition import GlobalPropositionRepository
 from admission.models import AdmissionFormItem, ContinuingEducationAdmissionProxy
-from admission.models.specific_question import SpecificQuestionAnswer
 from admission.models.continuing_education import ContinuingEducationAdmission
+from admission.models.specific_question import SpecificQuestionAnswer
 from base.models.academic_year import AcademicYear
 from base.models.campus import Campus as CampusDb
 from base.models.education_group_year import EducationGroupYear
@@ -488,6 +475,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
                 or admission.sigle_entite_gestion,  # from annotation
                 credits=admission.training.credits,
                 grade_academique=admission.training_academic_grade,  # From annotation
+                active=admission.training.active,
             ),
             adresses_emails_gestionnaires_formation=(
                 ProgramManager.objects.filter(education_group_id=admission.training.education_group_id).values_list(
@@ -546,6 +534,7 @@ class PropositionRepository(GlobalPropositionRepository, IPropositionRepository)
             ),
             elements_confirmation=admission.confirmation_elements,
             pdf_recapitulatif=admission.pdf_recap,
+            dossier_analyse_autorisation=admission.authorization_analysis_folder,
             documents_additionnels=admission.additional_documents,
             motivations=admission.motivations,
             moyens_decouverte_formation=admission.ways_to_find_out_about_the_course,

@@ -108,6 +108,7 @@ from admission.models.epc_injection import (
     EPCInjectionStatus,
     EPCInjectionType,
 )
+from admission.models.exam import AdmissionExam
 from admission.models.form_item import AdmissionFormItem, AdmissionFormItemInstantiation
 from admission.models.online_payment import OnlinePayment
 from admission.models.working_list import (
@@ -131,6 +132,7 @@ from education_group.contrib.admin import EducationGroupRoleModelAdmin
 from epc.models.inscription_programme_cycle import InscriptionProgrammeCycle
 from osis_profile.models import EducationalExperience, ProfessionalExperience
 from osis_role.contrib.admin import EntityRoleModelAdmin, RoleModelAdmin
+
 
 # ##############################################################################
 # Models
@@ -1223,3 +1225,10 @@ class CategorizedFreeDocumentAdmin(admin.ModelAdmin):
         'short_label_en',
         'short_label_fr',
     ]
+
+
+@admin.register(AdmissionExam)
+class AdmissionExamAdmin(admin.ModelAdmin):
+    model = AdmissionExam
+    list_display = ['admission', 'exam']
+    search_fields = ['admission__candidate__last_name', 'admission__candidate__first_name']

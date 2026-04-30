@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,13 +31,11 @@ from typing import List
 from unittest import mock
 
 import freezegun
-import mock
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
-from django.utils.translation import gettext as _
-from django.utils.translation import pgettext, pgettext_lazy
+from django.utils.translation import gettext as _, pgettext, pgettext_lazy
 from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 from osis_async.models import AsyncTask
@@ -66,14 +64,10 @@ from admission.ddd.admission.formation_continue.domain.model.enums import (
     ChoixMoyensDecouverteFormation,
     ChoixStatutPropositionContinue,
     ChoixTypeAdresseFacturation,
-)
-from admission.ddd.admission.formation_continue.domain.model.enums import (
     OngletsChecklist as OngletsChecklistContinue,
 )
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     ChoixStatutPropositionGenerale,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import (
     OngletsChecklist as OngletsChecklistGenerale,
 )
 from admission.ddd.admission.shared_kernel.dtos.liste import (
@@ -318,6 +312,7 @@ class AdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, TestCase):
             plusieurs_demandes=False,
             sigle_formation=cls.admission.training.acronym,
             code_formation=cls.admission.training.partial_acronym,
+            cycle_formation=cls.admission.training.education_group_type.cycle,
             intitule_formation=cls.admission.training.title,
             type_formation=cls.admission.training.education_group_type.name,
             lieu_formation=teaching_campus,
@@ -761,8 +756,6 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
             last_registration_id='NOMA1',
             emergency_contact_phone='010203',
             phone_mobile='01020304',
-            graduated_from_high_school=GotDiploma.YES.name,
-            graduated_from_high_school_year=AcademicYearFactory(year=2014),
         )
         experiences = EducationalExperience.objects.filter(person=candidate)
         experience = experiences[0]
@@ -832,6 +825,9 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
             ],
             other_way_to_find_out_about_the_course='Other way',
         )
+        candidate.highschooldiploma.got_diploma = GotDiploma.YES.name
+        candidate.highschooldiploma.academic_graduation_year = AcademicYearFactory(year=2014)
+        candidate.highschooldiploma.save()
 
         cls.text_form_item = AdmissionFormItemInstantiationFactory(
             form_item=TextAdmissionFormItemFactory(
@@ -1009,7 +1005,7 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
         self.assertStrEqual(row_data[4], str(ChoixGenre.H.value))
         self.assertStrEqual(row_data[5], str(CivilState.LEGAL_COHABITANT.value))
         self.assertStrEqual(row_data[6], 'B1')
-        self.assertStrEqual(row_data[7], '2020-01-01'),
+        (self.assertStrEqual(row_data[7], '2020-01-01'),)
         self.assertStrEqual(row_data[8], 'Place 1')
         self.assertStrEqual(row_data[9], 'B2')
         self.assertStrEqual(row_data[10], 'N1')
@@ -1069,9 +1065,10 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
         self.admission.save()
 
         self.admission.candidate.last_registration_year = None
-        self.admission.candidate.graduated_from_high_school = GotDiploma.NO.name
-        self.admission.candidate.graduated_from_high_school_year = None
+        self.admission.candidate.highschooldiploma.got_diploma = GotDiploma.NO.name
+        self.admission.candidate.highschooldiploma.academic_graduation_year = None
 
+        self.admission.candidate.highschooldiploma.save()
         self.admission.candidate.save()
 
         new_experience = EducationalExperienceFactory(
@@ -1083,7 +1080,7 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
             ),
             obtained_diploma=True,
         )
-        new_experience_year = EducationalExperienceYearFactory(
+        EducationalExperienceYearFactory(
             academic_year__year=2010,
             educational_experience=new_experience,
         )
@@ -1283,7 +1280,7 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
         )
 
     def test_export_configuration(self):
-        candidate = PersonFactory()
+        PersonFactory()
         campus = CampusFactory()
         filters = str(
             {
@@ -1307,6 +1304,8 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
                     OngletsChecklistContinue.decision.name: ['A_TRAITER', 'A_VALIDER'],
                 },
                 'demandeur': str(self.sic_management_user.person.uuid),
+                'site_inscription': str(campus.uuid),
+                'quarantaine': True,
             }
         )
 
@@ -1321,8 +1320,8 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
         )
 
         names, values = list(worksheet.iter_cols(values_only=True))
-        self.assertEqual(len(names), 17)
-        self.assertEqual(len(values), 17)
+        self.assertEqual(len(names), 19)
+        self.assertEqual(len(values), 19)
 
         # Check the names of the parameters
         self.assertStrEqual(names[0], _('Creation date'))
@@ -1342,6 +1341,8 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
         self.assertStrEqual(names[14], _('Interested mark'))
         self.assertStrEqual(names[15], _('Include or exclude the checklist filters'))
         self.assertStrEqual(names[16], _('Checklist filters'))
+        self.assertStrEqual(names[17], _('Enrolment campus'))
+        self.assertStrEqual(names[18], _('Quarantine'))
 
         # Check the values of the parameters
         self.assertStrEqual(values[0], '3 Janvier 2023')
@@ -1375,6 +1376,8 @@ class ContinuingAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Tes
                 }
             ),
         )
+        self.assertStrEqual(values[17], campus.name)
+        self.assertStrEqual(values[18], 'oui')
 
 
 @freezegun.freeze_time('2023-01-03')
@@ -1586,24 +1589,24 @@ class DoctorateAdmissionListExcelExportViewTestCase(QueriesAssertionsMixin, Test
             expected_graduation_date=datetime.date(2022, 6, 30),
         )
 
-        educational_experience_year_1 = EducationalExperienceYearFactory(
+        EducationalExperienceYearFactory(
             educational_experience=educational_experience,
             acquired_credit_number=15,
             academic_year__year=2020,
         )
 
-        educational_experience_year_2 = EducationalExperienceYearFactory(
+        EducationalExperienceYearFactory(
             educational_experience=educational_experience,
             acquired_credit_number=12.5,
             academic_year__year=2021,
         )
 
-        valuation = AdmissionEducationalValuatedExperiencesFactory(
+        AdmissionEducationalValuatedExperiencesFactory(
             baseadmission=admission,
             educationalexperience=educational_experience,
         )
 
-        internal_experience = InscriptionProgrammeAnnuelFactory(
+        InscriptionProgrammeAnnuelFactory(
             programme_cycle__etudiant__person=admission.candidate,
             programme_cycle__decision=DecisionResultatCycle.GRANDE_DISTINCTION.name,
             programme_cycle__date_decision=datetime.date(2023, 6, 30),

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from admission.api.serializers.fields import AnswerToSpecificQuestionField
+from admission.api.serializers.fields import AnswerToSpecificQuestionField, ExperienceDefaultValidationStatusField
 from admission.api.serializers.mixins import GetDefaultContextParam
 from admission.ddd.admission.doctorat.preparation import commands as doctorate_commands
 from admission.ddd.admission.formation_continue import commands as continuing_commands
@@ -38,6 +38,7 @@ from admission.ddd.admission.formation_generale import commands as general_comma
 from admission.infrastructure.admission.shared_kernel.domain.service.annee_inscription_formation import (
     AnneeInscriptionFormationTranslator,
 )
+from admission.infrastructure.admission.shared_kernel.domain.service.inscriptions import InscriptionsTranslatorService
 from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import (
     ProfilCandidatTranslator,
 )
@@ -61,11 +62,13 @@ class ProfessionalExperienceSerializer(serializers.ModelSerializer):
         default=serializers.CreateOnlyDefault(GetDefaultContextParam('candidate')),
     )
     valuated_from_trainings = serializers.SerializerMethodField()
+    validation_status = ExperienceDefaultValidationStatusField()
 
     class Meta:
         model = ProfessionalExperience
         exclude = [
             'id',
+            'authentication_status',
         ]
         read_only_fields = ['external_id']
 
@@ -138,6 +141,7 @@ class EducationalExperienceSerializer(serializers.ModelSerializer):
     program = RelatedDiplomaField(required=False)
     valuated_from_trainings = serializers.SerializerMethodField()
     institute = RelatedInstitute(required=False)
+    validation_status = ExperienceDefaultValidationStatusField()
 
     YEAR_FIELDS_TO_UPDATE = [
         'registered_credit_number',
@@ -157,6 +161,7 @@ class EducationalExperienceSerializer(serializers.ModelSerializer):
             'complement_registered_credit_number',
             'complement_acquired_credit_number',
             'block_1_acquired_credit_number',
+            'authentication_status',
         ]
         read_only_fields = ['external_id']
 
@@ -313,6 +318,7 @@ class CurriculumDetailsSerializer(serializers.Serializer):
         return ProfilCandidatTranslator.get_annees_minimum_curriculum(
             global_id=self.context.get('related_person').global_id,
             current_year=current_year.year,
+            inscriptions_translator=InscriptionsTranslatorService(),
         ).get('minimal_date')
 
     @extend_schema_field(OpenApiTypes.DATE)

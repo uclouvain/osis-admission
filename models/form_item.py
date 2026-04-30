@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,7 +25,6 @@
 # ##############################################################################
 import uuid as uuid
 from collections import defaultdict
-from os.path import dirname
 from typing import List
 
 from django.conf import settings
@@ -35,7 +34,6 @@ from django.db import models
 from django.db.models import Q, QuerySet
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import ngettext_lazy, pgettext_lazy
-from osis_document_components.utils import generate_filename, is_uuid
 
 from admission.ddd import EN_ISO_CODE
 from admission.ddd.admission.shared_kernel.enums.question_specifique import (
@@ -417,6 +415,10 @@ class AdmissionFormItemInstantiationManager(models.Manager):
             'linguistic_regime',
             'country',
         )
+
+        # Don't retrieve the questions related to a specific training if the candidate already started the training
+        if getattr(admission, 'is_in_pursuit', None):
+            qs = qs.exclude(display_according_education=CritereItemFormulaireFormation.UNE_FORMATION.name)
 
         return (
             qs.filter(

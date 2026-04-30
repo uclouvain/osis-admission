@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -32,27 +32,15 @@ from django.test import TestCase, override_settings
 from django.utils.translation import pgettext
 from osis_history.models import HistoryEntry
 
+from admission.ddd.admission.formation_continue.domain.validator.exceptions import PropositionNonTrouveeException
+from admission.ddd.admission.formation_generale.commands import RecupererPropositionGestionnaireQuery
+from admission.ddd.admission.formation_generale.domain.model.enums import ChoixStatutPropositionGenerale
+from admission.ddd.admission.formation_generale.domain.validator.exceptions import PropositionNonTrouveeException
+from admission.ddd.admission.formation_generale.dtos.condition_approbation import ConditionComplementaireApprobationDTO
+from admission.ddd.admission.formation_generale.dtos.proposition import PropositionGestionnaireDTO
 from admission.ddd.admission.shared_kernel.dtos.campus import CampusDTO
 from admission.ddd.admission.shared_kernel.dtos.formation import BaseFormationDTO, FormationDTO
 from admission.ddd.admission.shared_kernel.enums import TypeSituationAssimilation
-from admission.ddd.admission.formation_continue.domain.validator.exceptions import (
-    PropositionNonTrouveeException,
-)
-from admission.ddd.admission.formation_generale.commands import (
-    RecupererPropositionGestionnaireQuery,
-)
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
-)
-from admission.ddd.admission.formation_generale.domain.validator.exceptions import (
-    PropositionNonTrouveeException,
-)
-from admission.ddd.admission.formation_generale.dtos.condition_approbation import (
-    ConditionComplementaireApprobationDTO,
-)
-from admission.ddd.admission.formation_generale.dtos.proposition import (
-    PropositionGestionnaireDTO,
-)
 from admission.models import GeneralEducationAdmission
 from admission.tests.factories.faculty_decision import (
     AdditionalApprovalConditionFactory,
@@ -63,6 +51,7 @@ from admission.tests.factories.general_education import (
     GeneralEducationAdmissionFactory,
     GeneralEducationTrainingFactory,
 )
+from base.models.enums.active_status import ActiveStatusEnum
 from base.models.enums.organization_type import MAIN
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version import EntityVersionFactory
@@ -83,6 +72,12 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
     def setUpTestData(cls):
         super().setUpTestData()
         cls.country = CountryFactory()
+        cls.file_uuids = {
+            file_name: [uuid.uuid4()]
+            for file_name in [
+                'bama_15_proof',
+            ]
+        }
 
     def setUp(self) -> None:
         school = EntityFactory()
@@ -97,6 +92,8 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
             candidate__private_email='john.doe@example.com',
             training__credits=180,
             candidate__country_of_citizenship=self.country,
+            is_concerned_by_bama_15=True,
+            bama_15_proof=self.file_uuids['bama_15_proof'],
         )
         self.hops = HopsFactory(
             education_group_year=self.admission.training,
@@ -106,7 +103,9 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         patcher = patch("osis_document_components.services.get_remote_token", return_value="foobar")
         patcher.start()
         self.addCleanup(patcher.stop)
-        patcher = patch("osis_document_components.services.get_remote_metadata", return_value={"name": "myfile", "size": 1})
+        patcher = patch(
+            "osis_document_components.services.get_remote_metadata", return_value={"name": "myfile", "size": 1}
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
         patcher = patch("osis_document_components.services.confirm_remote_upload", return_value=str(uuid.uuid4()))
@@ -157,6 +156,7 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
                 sigle_entite_gestion='SCH',
                 credits=180,
                 grade_academique='5',
+                active=ActiveStatusEnum.ACTIVE.name,
             ),
         )
         self.assertEqual(result.reference, f'M-SCH22-{self.admission}')
@@ -197,12 +197,12 @@ class GetPropositionDTOForGestionnaireTestCase(TestCase):
         self.assertEqual(result.nationalite_candidat_code_iso, self.admission.candidate.country_of_citizenship.iso_code)
         self.assertEqual(result.photo_identite_candidat, self.admission.candidate.id_card)
         self.assertEqual(result.candidat_a_plusieurs_demandes, False)
-        self.assertEqual(result.titre_acces, '')
-        self.assertEqual(result.fraudeur_ares, False)
-        self.assertEqual(result.non_financable, False)
+        self.assertEqual(result.est_fraudeur, False)
         self.assertEqual(result.est_inscription_tardive, None)
         self.assertEqual(result.candidat_vip, False)
         self.assertEqual(result.candidat_assimile, False)
+        self.assertEqual(result.est_concerne_par_le_bama_15, True)
+        self.assertEqual(result.preuve_bama_15, self.file_uuids['bama_15_proof'])
 
     def test_get_proposition_with_country_of_citizenship(self):
         self.admission.candidate.country_of_citizenship = CountryFactory()

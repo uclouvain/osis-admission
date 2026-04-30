@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -34,29 +34,18 @@ from django.shortcuts import resolve_url
 from django.test import TestCase
 from rest_framework import status
 
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
-    ENTITY_CDE,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
-    ChoixStatutPropositionDoctorale,
-)
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
+from admission.ddd.admission.doctorat.preparation.domain.model.enums import ChoixStatutPropositionDoctorale
 from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from admission.models import DoctorateAdmission
 from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.curriculum import (
-    EducationalExperienceFactory,
-    EducationalExperienceYearFactory,
-)
-from admission.tests.factories.roles import (
-    ProgramManagerRoleFactory,
-    SicManagementRoleFactory,
-)
+from admission.tests.factories.curriculum import EducationalExperienceFactory, EducationalExperienceYearFactory
+from admission.tests.factories.roles import ProgramManagerRoleFactory, SicManagementRoleFactory
 from base.forms.utils import FIELD_REQUIRED_MESSAGE
 from base.forms.utils.choice_field import BLANK_CHOICE_DISPLAY
 from base.forms.utils.file_field import PDF_MIME_TYPE
 from base.models.academic_year import AcademicYear
-from base.models.campus import Campus
 from base.models.enums.community import CommunityEnum
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.tests.factories.academic_year import AcademicYearFactory
@@ -65,12 +54,10 @@ from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.organization import OrganizationFactory
 from osis_profile.models import EducationalExperience, EducationalExperienceYear
-from osis_profile.models.enums.curriculum import (
-    EvaluationSystem,
-    Grade,
-    Reduction,
-    Result,
-    TranscriptType,
+from osis_profile.models.enums.curriculum import EvaluationSystem, Grade, Reduction, Result, TranscriptType
+from osis_profile.models.enums.experience_validation import (
+    ChoixStatutValidationExperience,
+    EtatAuthentificationParcours,
 )
 from reference.models.enums.cycle import Cycle
 from reference.tests.factories.country import CountryFactory
@@ -89,8 +76,8 @@ class CurriculumEducationalExperienceFormViewForDoctorateTestCase(TestCase):
         cls.be_country = CountryFactory(iso_code='BE', name='Belgique', name_en='Belgium')
         cls.fr_country = CountryFactory(iso_code='FR', name='France', name_en='France')
         first_doctoral_commission = EntityWithVersionFactory(version__acronym=ENTITY_CDE)
-        cls.louvain_campus = Campus.objects.get(external_id=CampusFactory(name='Louvain-la-Neuve').external_id)
-        cls.other_campus = Campus.objects.get(external_id=CampusFactory(name='Other').external_id)
+        cls.louvain_campus = CampusFactory(name='Louvain-la-Neuve')
+        cls.other_campus = CampusFactory(name='Other')
         EntityVersionFactory(entity=first_doctoral_commission)
         cls.greek = LanguageFactory(code='EL')
         cls.french = LanguageFactory(code='FR')
@@ -100,7 +87,6 @@ class CurriculumEducationalExperienceFormViewForDoctorateTestCase(TestCase):
             training__academic_year=cls.academic_years[0],
             candidate__language=settings.LANGUAGE_CODE_EN,
             candidate__country_of_citizenship=CountryFactory(european_union=False),
-            candidate__graduated_from_high_school_year=None,
             candidate__last_registration_year=None,
             candidate__id_photo=[],
             submitted=True,
@@ -145,6 +131,8 @@ class CurriculumEducationalExperienceFormViewForDoctorateTestCase(TestCase):
             with_complement=True,
             complement_registered_credit_number=30,
             complement_acquired_credit_number=29,
+            validation_status=ChoixStatutValidationExperience.AUTHENTIFICATION.name,
+            authentication_status=EtatAuthentificationParcours.VRAI.name,
         )
         self.first_experience_year: EducationalExperienceYear = EducationalExperienceYearFactory(
             educational_experience=self.experience,
@@ -159,7 +147,9 @@ class CurriculumEducationalExperienceFormViewForDoctorateTestCase(TestCase):
         )
 
         # Mock osis document api
-        patcher = mock.patch("osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value)
+        patcher = mock.patch(
+            "osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
@@ -509,6 +499,8 @@ class CurriculumEducationalExperienceFormViewForDoctorateTestCase(TestCase):
         self.assertEqual(new_experience.dissertation_title, '')
         self.assertEqual(new_experience.dissertation_score, '')
         self.assertEqual(new_experience.dissertation_summary, [])
+        self.assertEqual(new_experience.validation_status, ChoixStatutValidationExperience.A_TRAITER.name)
+        self.assertEqual(new_experience.authentication_status, EtatAuthentificationParcours.NON_CONCERNE.name)
 
         # Check the years
         years = new_experience.educationalexperienceyear_set.all()
@@ -580,6 +572,8 @@ class CurriculumEducationalExperienceFormViewForDoctorateTestCase(TestCase):
         self.assertEqual(self.experience.dissertation_summary, self.files_uuids[0])
         self.assertEqual(self.experience.graduate_degree, self.files_uuids[1])
         self.assertEqual(self.experience.graduate_degree_translation, [])
+        self.assertEqual(self.experience.validation_status, ChoixStatutValidationExperience.AUTHENTIFICATION.name)
+        self.assertEqual(self.experience.authentication_status, EtatAuthentificationParcours.VRAI.name)
 
         # Check the years
         years = self.experience.educationalexperienceyear_set.all().order_by('academic_year__year')

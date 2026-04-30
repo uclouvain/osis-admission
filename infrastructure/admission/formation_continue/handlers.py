@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -55,6 +55,9 @@ from admission.infrastructure.admission.formation_continue.domain.service.lister
 from admission.infrastructure.admission.formation_continue.domain.service.notification import (
     Notification,
 )
+from admission.infrastructure.admission.formation_continue.domain.service.pdf_generation import (
+    PDFGeneration,
+)
 from admission.infrastructure.admission.formation_continue.domain.service.question_specifique import (
     QuestionSpecifiqueTranslator,
 )
@@ -79,8 +82,12 @@ from admission.infrastructure.admission.shared_kernel.domain.service.emplacement
 from admission.infrastructure.admission.shared_kernel.domain.service.historique import (
     Historique as HistoriqueGlobal,
 )
+from admission.infrastructure.admission.shared_kernel.domain.service.inscriptions import InscriptionsTranslatorService
 from admission.infrastructure.admission.shared_kernel.domain.service.maximum_propositions import (
     MaximumPropositionsAutorisees,
+)
+from admission.infrastructure.admission.shared_kernel.domain.service.modifier_checklist_experience_parcours_anterieur import (
+    ValidationExperienceParcoursAnterieurService,
 )
 from admission.infrastructure.admission.shared_kernel.domain.service.profil_candidat import (
     ProfilCandidatTranslator,
@@ -91,6 +98,7 @@ from admission.infrastructure.admission.shared_kernel.domain.service.raccrocher_
 from admission.infrastructure.admission.shared_kernel.domain.service.titres_acces import (
     TitresAcces,
 )
+from admission.infrastructure.admission.shared_kernel.repository.email_destinataire import EmailDestinataireRepository
 from infrastructure.shared_kernel.academic_year.repository.academic_year import (
     AcademicYearRepository,
 )
@@ -142,6 +150,8 @@ COMMAND_HANDLERS = {
         calendrier_inscription=CalendrierInscription(),
         maximum_propositions_service=MaximumPropositionsAutorisees(),
         questions_specifiques_translator=QuestionSpecifiqueTranslator(),
+        annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
+        inscriptions_translator=InscriptionsTranslatorService(),
     ),
     SoumettrePropositionCommand: lambda msg_bus, cmd: soumettre_proposition(
         msg_bus,
@@ -157,6 +167,10 @@ COMMAND_HANDLERS = {
         questions_specifiques_translator=QuestionSpecifiqueTranslator(),
         historique=HistoriqueGlobal(),
         raccrocher_experiences_curriculum=RaccrocherExperiencesCurriculum(),
+        email_destinataire_repository=EmailDestinataireRepository(),
+        validation_experience_parcours_anterieur_service=ValidationExperienceParcoursAnterieurService(),
+        annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
+        inscriptions_translator=InscriptionsTranslatorService(),
     ),
     CompleterCurriculumCommand: lambda msg_bus, cmd: completer_curriculum(
         cmd,
@@ -187,6 +201,8 @@ COMMAND_HANDLERS = {
         i_profil_candidat_translator=ProfilCandidatTranslator(),
         academic_year_repository=AcademicYearRepository(),
         question_specifique_translator=QuestionSpecifiqueTranslator(),
+        annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
+        inscriptions_translator=InscriptionsTranslatorService(),
     ),
     RecupererQuestionsSpecifiquesQuery: lambda msg_bus, cmd: recuperer_questions_specifiques_proposition(
         cmd,
@@ -200,6 +216,7 @@ COMMAND_HANDLERS = {
         emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
         academic_year_repository=AcademicYearRepository(),
         personne_connue_translator=PersonneConnueUclTranslator(),
+        inscriptions_translator=InscriptionsTranslatorService(),
     ),
     RecupererDocumentsReclamesPropositionQuery: lambda msg_bus, cmd: recuperer_documents_reclames_proposition(
         cmd,
@@ -209,6 +226,7 @@ COMMAND_HANDLERS = {
         emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
         academic_year_repository=AcademicYearRepository(),
         personne_connue_translator=PersonneConnueUclTranslator(),
+        inscriptions_translator=InscriptionsTranslatorService(),
     ),
     RecupererResumeEtEmplacementsDocumentsPropositionQuery: (
         lambda msg_bus, cmd: recuperer_resume_et_emplacements_documents_proposition(
@@ -219,6 +237,7 @@ COMMAND_HANDLERS = {
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
             question_specifique_translator=QuestionSpecifiqueTranslator(),
+            inscriptions_translator=InscriptionsTranslatorService(),
         )
     ),
     RetyperDocumentCommand: (
@@ -294,6 +313,7 @@ COMMAND_HANDLERS = {
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
             emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
+            inscriptions_translator=InscriptionsTranslatorService(),
         )
     ),
     CompleterEmplacementsDocumentsParCandidatCommand: lambda msg_bus, cmd: (
@@ -308,6 +328,7 @@ COMMAND_HANDLERS = {
             personne_connue_translator=PersonneConnueUclTranslator(),
             emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
             notification=Notification(),
+            inscriptions_translator=InscriptionsTranslatorService(),
         )
     ),
     RecalculerEmplacementsDocumentsNonLibresPropositionCommand: (
@@ -318,6 +339,7 @@ COMMAND_HANDLERS = {
             question_specifique_translator=QuestionSpecifiqueTranslator(),
             academic_year_repository=AcademicYearRepository(),
             emplacement_document_repository=EmplacementDocumentRepository(),
+            inscriptions_translator=InscriptionsTranslatorService(),
         )
     ),
     InitialiserEmplacementDocumentLibreNonReclamableCommand: lambda msg_bus, cmd: (
@@ -376,6 +398,13 @@ COMMAND_HANDLERS = {
             academic_year_repository=AcademicYearRepository(),
             personne_connue_translator=PersonneConnueUclTranslator(),
             emplacements_documents_demande_translator=EmplacementsDocumentsPropositionTranslator(),
+            inscriptions_translator=InscriptionsTranslatorService(),
+        )
+    ),
+    GenererDocumentAnalysePropositionAutorisationCommand: (
+        lambda msg_bus, cmd: generer_document_analyse_proposition_autorisation(
+            cmd=cmd,
+            pdf_generation_service=PDFGeneration(),
         )
     ),
 }

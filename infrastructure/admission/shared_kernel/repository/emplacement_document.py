@@ -190,28 +190,16 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
                 else:
                     model_objects_cache[model_object] = model_object
                 model_field = emplacement_document.field
-                specific_question_uuid = emplacement_document.specific_question_uuid
                 document_uuids = emplacement_document.uuids
 
                 if document_uuids != entity.uuids_documents:
-                    if model_field != 'specific_question_answers':
-                        if model_object not in updated_fields_by_object:
-                            updated_fields_by_object[model_object] = [model_field]
-                        else:
-                            updated_fields_by_object[model_object].append(model_field)
-
-                    if specific_question_uuid:
-                        # For a specific question, replace the previous file
-                        SpecificQuestionAnswer.objects.update_or_create(
-                            admission=admission,
-                            form_item=AdmissionFormItem.objects.get(uuid=specific_question_uuid),
-                            defaults={
-                                'file': entity.uuids_documents,
-                            },
-                        )
+                    if model_object not in updated_fields_by_object:
+                        updated_fields_by_object[model_object] = [model_field]
                     else:
-                        # Otherwise, update the related field in the specific object
-                        setattr(model_object, model_field, entity.uuids_documents)
+                        updated_fields_by_object[model_object].append(model_field)
+
+                    # Update the related field in the specific object
+                    setattr(model_object, model_field, entity.uuids_documents)
 
                     # Save the author of the file
                     if entity.uuids_documents:
@@ -467,7 +455,7 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
         model_field = emplacement_document.field
         specific_question_uuid = emplacement_document.specific_question_uuid
 
-        if model_object == admission and model_field != 'specific_question_answers':
+        if model_object == admission:
             admission_update_fields.append(model_field)
 
         entity = cls.entity_from_dict(entity_id, emplacement_document)
@@ -498,21 +486,13 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
         elif entity.type.name in EMPLACEMENTS_DOCUMENTS_RECLAMABLES:
             # Remove the document from the field of the related object
             if supprimer_donnees:
+                # Reset the related field in the specific object
+                setattr(model_object, model_field, [])
+
                 with transaction.atomic():
-                    if specific_question_uuid:
-                        # For a specific question, remove the answer from the specific question field of the admission
-                        SpecificQuestionAnswer.objects.filter(
-                            admission=admission, form_item__uuid=specific_question_uuid
-                        ).delete()
-
-                    else:
-                        # Otherwise, reset the related field in the specific object
-                        setattr(model_object, model_field, [])
-
-                    with transaction.atomic():
-                        if model_object != admission:
-                            model_object.save(update_fields=[model_field])
-                        admission.save(update_fields=admission_update_fields)
+                    if model_object != admission:
+                        model_object.save(update_fields=[model_field])
+                    admission.save(update_fields=admission_update_fields)
 
             # Don't keep the data related to the document request
             else:
@@ -529,10 +509,6 @@ class BaseEmplacementDocumentRepository(IEmplacementDocumentRepository):
         entity_id: PropositionIdentity,
     ) -> Union[GeneralEducationAdmission, DoctorateAdmission, ContinuingEducationAdmission]:
         try:
-            return cls.admission_model_class.objects.prefetch_related(
-                Prefetch(
-                    'specific_question_answers', queryset=SpecificQuestionAnswer.objects.select_related('form_item')
-                )
-            ).get(uuid=entity_id.uuid)
+            return cls.admission_model_class.objects.get(uuid=entity_id.uuid)
         except cls.admission_model_class.DoesNotExist:
             raise PropositionNonTrouveeException

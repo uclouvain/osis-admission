@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -30,35 +30,27 @@ from django.conf import settings
 from django.db.models import F, Max, Prefetch, Q, QuerySet
 from django.utils.translation import get_language, gettext
 
-from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import (
-    TypeTitreAccesSelectionnable,
-)
-from admission.ddd.admission.shared_kernel.domain.model.proposition import (
-    PropositionIdentity,
-)
+from admission.ddd.admission.shared_kernel.domain.model.enums.condition_acces import TypeTitreAccesSelectionnable
+from admission.ddd.admission.shared_kernel.domain.model.proposition import PropositionIdentity
 from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import (
     TitreAccesSelectionnable,
     TitreAccesSelectionnableIdentity,
 )
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
-    ExperienceNonTrouveeException,
+    AdmissionExperienceNonTrouveeException,
     PropositionNonTrouveeException,
 )
-from admission.ddd.admission.shared_kernel.enums.emplacement_document import (
-    OngletsDemande,
-)
+from admission.ddd.admission.shared_kernel.enums.emplacement_document import OngletsDemande
 from admission.ddd.admission.shared_kernel.repository.i_titre_acces_selectionnable import (
     ITitreAccesSelectionnableRepository,
 )
-from admission.models.base import (
-    BaseAdmission,
+from admission.models.base import BaseAdmission
+from admission.models.valuated_epxeriences import (
+    AdmissionEducationalValuatedExperiences,
+    AdmissionProfessionalValuatedExperiences,
 )
-from admission.models.valuated_epxeriences import AdmissionEducationalValuatedExperiences, \
-    AdmissionProfessionalValuatedExperiences
 from base.utils.utils import format_academic_year
-from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
-    IExperienceParcoursInterneTranslator,
-)
+from ddd.logic.shared_kernel.profil.domain.service.i_parcours_interne import IExperienceParcoursInterneTranslator
 from osis_profile import BE_ISO_CODE, MOIS_DEBUT_ANNEE_ACADEMIQUE
 from osis_profile.models import EXAM_TYPE_PREMIER_CYCLE_LABEL_FR, Exam
 from osis_profile.models.enums.curriculum import ActivityType, Result
@@ -79,8 +71,10 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
                 'candidate__belgianhighschooldiploma__institute',
                 'candidate__foreignhighschooldiploma__academic_graduation_year',
                 'candidate__foreignhighschooldiploma__country',
-                'candidate__graduated_from_high_school_year',
                 'training__academic_year',
+            )
+            .annotate(
+                secondary_studies_year=F('candidate__highschooldiploma__academic_graduation_year__year'),
             )
             .prefetch_related(
                 Prefetch(
@@ -193,9 +187,9 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
             elif isinstance(high_school_diploma, Exam) and high_school_diploma.year is not None:
                 high_school_diploma_experience_year = high_school_diploma.year.year
 
-        elif getattr(admission.candidate, 'graduated_from_high_school_year', None):
+        elif admission.secondary_studies_year:
             high_school_diploma_experience_uuid = OngletsDemande.ETUDES_SECONDAIRES.name
-            high_school_diploma_experience_year = admission.candidate.graduated_from_high_school_year.year
+            high_school_diploma_experience_year = admission.secondary_studies_year
             formatted_high_school_diploma_name = '{title} ({year})'
             formatted_high_school_diploma_name_variables['title'] = gettext('Secondary school')
 
@@ -370,14 +364,14 @@ class TitreAccesSelectionnableRepository(ITitreAccesSelectionnableRepository):
                 baseadmission_id=entity.entity_id.uuid_proposition,
                 educationalexperience_id=entity.entity_id.uuid_experience,
             ).update(is_access_title=entity.selectionne):
-                raise ExperienceNonTrouveeException
+                raise AdmissionExperienceNonTrouveeException
 
         elif entity.entity_id.type_titre == TypeTitreAccesSelectionnable.EXPERIENCE_NON_ACADEMIQUE:
             if not AdmissionProfessionalValuatedExperiences.objects.filter(
                 baseadmission_id=entity.entity_id.uuid_proposition,
                 professionalexperience_id=entity.entity_id.uuid_experience,
             ).update(is_access_title=entity.selectionne):
-                raise ExperienceNonTrouveeException
+                raise AdmissionExperienceNonTrouveeException
 
         elif entity.entity_id.type_titre == TypeTitreAccesSelectionnable.EXPERIENCE_PARCOURS_INTERNE:
             experience_pk = uuid.UUID(entity.entity_id.uuid_experience).int

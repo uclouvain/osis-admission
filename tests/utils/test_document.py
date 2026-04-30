@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -146,7 +146,7 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
             'related_checklist_tab': OngletsChecklist.parcours_anterieur.name,
         }
 
-        SpecificQuestionAnswer.objects.create(
+        specific_question_answer = SpecificQuestionAnswer.objects.create(
             admission=self.general_admission,
             form_item=AdmissionFormItemFactory(
                 uuid=specific_question_uuid,
@@ -168,12 +168,13 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
         # Valid identifier
         document = get_document_from_identifier(self.general_admission, sic_free_requestable_document_id)
         self.assertIsNotNone(document)
-        self.assertEqual(document.obj, self.general_admission)
-        self.assertEqual(document.field, 'specific_question_answers')
+        self.assertEqual(document.obj, specific_question_answer)
+        self.assertEqual(document.field, 'file')
         self.assertEqual(
             list(map(str, document.uuids)),
             self.general_admission.get_specific_question_answers_dict()[specific_question_uuid],
         )
+        self.assertEqual(document.uuids, specific_question_answer.file)
         self.assertEqual(document.type, TypeEmplacementDocument.LIBRE_RECLAMABLE_SIC.name)
         self.assertEqual(document.requestable, True)
         self.assertEqual(document.specific_question_uuid, specific_question_uuid)
@@ -204,8 +205,7 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
         specific_question_uuid = str(item.form_item.uuid)
 
         document_id = (
-            f'{base_identifier}.{IdentifiantBaseEmplacementDocument.QUESTION_SPECIFIQUE.name}.'
-            f'{specific_question_uuid}'
+            f'{base_identifier}.{IdentifiantBaseEmplacementDocument.QUESTION_SPECIFIQUE.name}.{specific_question_uuid}'
         )
 
         # Already requested
@@ -237,8 +237,8 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
         # Valid identifier
         document = get_document_from_identifier(self.general_admission, document_id)
         self.assertIsNotNone(document)
-        self.assertEqual(document.obj, self.general_admission)
-        self.assertEqual(document.field, 'specific_question_answers')
+        self.assertEqual(document.obj, specific_question_answer)
+        self.assertEqual(document.field, 'file')
         self.assertEqual(
             document.uuids,
             [
@@ -246,6 +246,7 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
                 for value in self.general_admission.get_specific_question_answers_dict()[specific_question_uuid]
             ],
         )
+        self.assertEqual(document.uuids, specific_question_answer.file)
         self.assertEqual(document.type, TypeEmplacementDocument.NON_LIBRE.name)
         self.assertEqual(document.requestable, True)
         self.assertEqual(document.specific_question_uuid, specific_question_uuid)
@@ -266,8 +267,8 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
 
         document = get_document_from_identifier(self.general_admission, document_id)
         self.assertIsNotNone(document)
-        self.assertEqual(document.obj, self.general_admission)
-        self.assertEqual(document.field, 'specific_question_answers')
+        self.assertEqual(document.obj, specific_question_answer)
+        self.assertEqual(document.field, 'file')
         self.assertEqual(
             document.uuids,
             [
@@ -275,6 +276,7 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
                 for value in self.general_admission.get_specific_question_answers_dict()[specific_question_uuid]
             ],
         )
+        self.assertEqual(document.uuids, specific_question_answer.file)
         self.assertEqual(document.type, TypeEmplacementDocument.NON_LIBRE.name)
         self.assertEqual(document.requestable, True)
         self.assertEqual(document.specific_question_uuid, specific_question_uuid)
@@ -428,6 +430,20 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
         self.assertEqual(document.obj, doctorate_admission)
         self.assertEqual(document.field, 'archived_record_signatures_sent')
         self.assertCountEqual(document.mimetypes, [PDF_MIME_TYPE, PNG_MIME_TYPE, JPEG_MIME_TYPE])
+
+        # Authorization analysis folder
+        file_uuid = uuid.uuid4()
+        continuing_admission: ContinuingEducationAdmission = ContinuingEducationAdmissionFactory(
+            authorization_analysis_folder=[file_uuid],
+        )
+        document = get_document_from_identifier(
+            continuing_admission,
+            f'{base_identifier}.DOSSIER_ANALYSE_AUTORISATION',
+        )
+
+        self.assertIsNotNone(document)
+        self.assertEqual(document.obj, continuing_admission)
+        self.assertEqual(document.field, 'authorization_analysis_folder')
 
     def test_get_non_free_identification_document(self):
         base_identifier = OngletsDemande.IDENTIFICATION.name
@@ -993,6 +1009,21 @@ class TestGetDocumentFromIdentifier(TestCaseWithQueriesAssertions):
         self.assertIsNotNone(document)
         self.assertEqual(document.obj, self.general_admission)
         self.assertEqual(document.field, 'additional_documents')
+        self.assertEqual(document.uuids, [file_uuid])
+
+        # Bama 15 proof
+        file_uuid = uuid.uuid4()
+        self.general_admission.bama_15_proof = [file_uuid]
+        self.general_admission.save()
+
+        document = get_document_from_identifier(
+            self.general_admission,
+            f'{base_identifier}.PREUVE_BAMA_15',
+        )
+
+        self.assertIsNotNone(document)
+        self.assertEqual(document.obj, self.general_admission)
+        self.assertEqual(document.field, 'bama_15_proof')
         self.assertEqual(document.uuids, [file_uuid])
 
     def test_get_non_free_additional_accounting_document(self):

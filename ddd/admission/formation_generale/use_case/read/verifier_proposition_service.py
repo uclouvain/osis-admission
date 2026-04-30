@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,17 +25,32 @@
 # ##############################################################################
 import datetime
 
+from admission.ddd.admission.shared_kernel.domain.service.i_annee_inscription_formation import (
+    IAnneeInscriptionFormationTranslator,
+)
 from admission.ddd.admission.shared_kernel.domain.service.i_calendrier_inscription import (
     ICalendrierInscription,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_deliberation_translator import IDeliberationTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_diffusion_notes_translator import IDiffusionNotesTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_evaluations_translator import (
+    IInscriptionsEvaluationsTranslator,
+)
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
 )
 from admission.ddd.admission.shared_kernel.domain.service.i_maximum_propositions import (
     IMaximumPropositionsAutorisees,
 )
+from admission.ddd.admission.shared_kernel.domain.service.i_noma_translator import INomasTranslator
 from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
     IProfilCandidatTranslator,
 )
 from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import (
     ITitresAcces,
+)
+from admission.ddd.admission.shared_kernel.domain.service.inscriptions_ucl_candidat import (
+    InscriptionsUCLCandidatService,
 )
 from admission.ddd.admission.shared_kernel.enums.question_specifique import Onglets
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
@@ -67,6 +82,12 @@ def verifier_proposition(
     academic_year_repository: 'IAcademicYearRepository',
     questions_specifiques_translator: 'IQuestionSpecifiqueTranslator',
     maximum_propositions_service: 'IMaximumPropositionsAutorisees',
+    inscriptions_translator: IInscriptionsTranslatorService,
+    deliberation_translator: IDeliberationTranslator,
+    diffusion_notes_translator: IDiffusionNotesTranslator,
+    inscriptions_evaluations_translator: IInscriptionsEvaluationsTranslator,
+    annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
+    nomas_translator: INomasTranslator,
 ) -> 'PropositionIdentity':
     # GIVEN
     proposition_id = PropositionIdentityBuilder.build_from_uuid(cmd.uuid_proposition)
@@ -88,11 +109,36 @@ def verifier_proposition(
         onglets=Onglets.get_names(),
     )
 
+    inscriptions_ucl_candidat = InscriptionsUCLCandidatService.recuperer(
+        matricule_candidat=proposition.matricule_candidat,
+        inscriptions_translator=inscriptions_translator,
+        formation_translator=formation_translator,
+        deliberation_translator=deliberation_translator,
+    )
+
     formation = formation_translator.get(proposition.formation_id)
     titres = titres_acces.recuperer_titres_access(
-        proposition.matricule_candidat,
-        formation.type,
-        proposition.equivalence_diplome,
+        matricule_candidat=proposition.matricule_candidat,
+        type_formation=formation.type,
+        equivalence_diplome=proposition.equivalence_diplome,
+        inscriptions_ucl_candidat=inscriptions_ucl_candidat,
+    )
+
+    candidat_est_inscrit_recemment_ucl = inscriptions_translator.est_inscrit_recemment(
+        matricule_candidat=proposition.matricule_candidat,
+        annee_inscription_formation_translator=annee_inscription_formation_translator,
+    )
+
+    candidat_est_en_poursuite_directe = inscriptions_translator.est_en_poursuite_directe(
+        matricule_candidat=proposition.matricule_candidat,
+        sigle_formation=formation.entity_id.sigle,
+        annee_inscription_formation_translator=annee_inscription_formation_translator,
+    )
+
+    assimilation_passee = inscriptions_translator.recuperer_assimilation_inscription_formation_annee_precedente(
+        matricule_candidat=proposition.matricule_candidat,
+        sigle_formation=proposition.formation_id.sigle,
+        annee_inscription_formation_translator=annee_inscription_formation_translator,
     )
 
     # WHEN
@@ -108,6 +154,16 @@ def verifier_proposition(
         titres=titres,
         formation=formation,
         annee_formation=annee_formation,
+        annee_inscription_formation_translator=annee_inscription_formation_translator,
+        inscriptions_translator=inscriptions_translator,
+        deliberation_translator=deliberation_translator,
+        diffusion_notes_translator=diffusion_notes_translator,
+        inscriptions_evaluations_translator=inscriptions_evaluations_translator,
+        candidat_est_inscrit_recemment_ucl=candidat_est_inscrit_recemment_ucl,
+        nomas_translator=nomas_translator,
+        assimilation_passee=assimilation_passee,
+        candidat_est_en_poursuite_directe=candidat_est_en_poursuite_directe,
+        inscriptions_ucl_candidat=inscriptions_ucl_candidat,
     )
 
     # THEN

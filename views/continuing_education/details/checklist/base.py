@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,37 +24,37 @@
 #
 # ##############################################################################
 import itertools
+from collections import defaultdict
 from typing import Dict, List, Set
 
 import attr
 from django.conf import settings
+from django.db.models import Q
 from django.shortcuts import resolve_url
 from django.template.defaultfilters import truncatechars
 from django.utils.functional import cached_property
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext
 from django.views.generic import TemplateView
 from osis_comment.models import CommentEntry
 from osis_mail_template.exceptions import EmptyMailTemplateContent
 from osis_mail_template.models import MailTemplate
 
-from admission.auth.roles.program_manager import ProgramManager
-from admission.ddd.admission.shared_kernel.commands import ListerToutesDemandesQuery
+from admission.ddd.admission.formation_continue.commands import RecupererResumeEtEmplacementsDocumentsPropositionQuery
+from admission.ddd.admission.formation_continue.domain.model.enums import OngletsChecklist
+from admission.ddd.admission.shared_kernel.commands import (
+    ListerToutesDemandesQuery,
+    RecupererInformationsDestinataireQuery,
+)
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import InformationsDestinatairePasTrouvee
+from admission.ddd.admission.shared_kernel.dtos.destinataire import InformationsDestinataireDTO
 from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
-from admission.ddd.admission.shared_kernel.dtos.resume import (
-    ResumeEtEmplacementsDocumentsPropositionDTO,
-)
-from admission.ddd.admission.formation_continue.commands import (
-    RecupererResumeEtEmplacementsDocumentsPropositionQuery,
-)
+from admission.ddd.admission.shared_kernel.dtos.resume import ResumeEtEmplacementsDocumentsPropositionDTO
 from admission.ddd.admission.shared_kernel.enums.statut import (
     STATUTS_TOUTE_PROPOSITION_SOUMISE_HORS_FRAIS_DOSSIER_OU_ANNULEE,
 )
-from admission.ddd.admission.formation_continue.domain.model.enums import (
-    OngletsChecklist,
-)
 from admission.exports.admission_recap.section import get_dynamic_questions_by_tab
 from admission.forms import disable_unavailable_forms
-from admission.forms.admission.checklist import CommentForm
+from admission.forms.admission.checklist import AdmissionCommentForm
 from admission.forms.admission.continuing_education.checklist import (
     CloseForm,
     DecisionCancelForm,
@@ -72,12 +72,8 @@ from admission.mail_templates import (
     ADMISSION_EMAIL_DECISION_IUFC_COMMENT_FOR_FAC,
     ADMISSION_EMAIL_DECISION_ON_HOLD,
 )
-from admission.utils import (
-    get_backoffice_admission_url,
-    get_portal_admission_url,
-    get_salutation_prefix,
-)
-from admission.views.common.detail_tabs.checklist import PropositionFromResumeMixin
+from admission.utils import get_backoffice_admission_url, get_portal_admission_url, get_salutation_prefix
+from admission.views.common.detail_tabs.checklist import ChecklistTabIcon, PropositionFromResumeMixin
 from admission.views.common.mixins import LoadDossierViewMixin
 from infrastructure.messages_bus import message_bus_instance
 from osis_role.templatetags.osis_role import has_perm
@@ -117,14 +113,19 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
             settings.LANGUAGE_CODE_EN: self.proposition.formation.intitule,
         }[candidate.language]
 
-        program_managers = ProgramManager.objects.filter(
-            education_group=self.admission.training.education_group,
-        ).select_related('person')
-
-        managers_emails = (' ' + _('or') + ' ').join(
-            f'<a href="mailto:{program_manager.person.email}">{program_manager.person.email}</a>'
-            for program_manager in program_managers
-        )
+        try:
+            recipient: InformationsDestinataireDTO = message_bus_instance.invoke(
+                RecupererInformationsDestinataireQuery(
+                    sigle_formation=self.admission.training.acronym,
+                    annee=self.admission.training.academic_year.year,
+                    est_premiere_annee=False,
+                )
+            )
+            if not recipient.email:
+                raise InformationsDestinatairePasTrouvee
+            managers_emails = f'<a href="mailto:{recipient.email}">{recipient.email}</a>'
+        except InformationsDestinatairePasTrouvee:
+            managers_emails = ''
 
         return {
             'candidate_first_name': self.proposition.prenom_candidat,
@@ -317,6 +318,18 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        checklist_additional_icons: dict[str, list[ChecklistTabIcon]] = defaultdict(list)
+
+        checklist_additional_icons['donnees_personnelles'].append(
+            ChecklistTabIcon(
+                identifier='quarantine',
+                icon='fas fa-warning text-warning',
+                title=gettext('The application is in quarantine'),
+                displayed=self.demande_est_en_quarantaine,
+            )
+        )
+
+        context['checklist_additional_icons'] = checklist_additional_icons
         context['can_update_checklist_tab'] = self.can_update_checklist_tab
         context['can_change_payment'] = self.request.user.has_perm('admission.change_payment', self.admission)
         context['can_change_faculty_decision'] = self.request.user.has_perm(
@@ -337,20 +350,35 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
             'fiche_etudiant',
             'decision__IUFC_for_FAC',
             'decision__FAC_for_IUFC',
+            'donnees_personnelles',
+        ]
+        profile_tabs = [
+            OngletsChecklist.donnees_personnelles.name,
         ]
 
         comments = {
             ('__'.join(c.tags)): c
             for c in CommentEntry.objects.filter(
-                object_uuid=self.admission_uuid,
-                tags__overlap=OngletsChecklist.get_names(),
+                Q(
+                    object_uuid=self.admission_uuid,
+                    tags__overlap=OngletsChecklist.get_names_except(*profile_tabs),
+                )
+                | Q(
+                    object_uuid=self.admission.candidate.uuid,
+                    tags__overlap=profile_tabs,
+                ),
             )
         }
 
         context['comment_forms'] = {
-            tab_name: CommentForm(
+            tab_name: AdmissionCommentForm(
                 comment=comments.get(tab_name, None),
-                form_url=resolve_url(f'{self.base_namespace}:save-comment', uuid=self.admission_uuid, tab=tab_name),
+                form_url=resolve_url(
+                    f'{self.base_namespace}:save-comment',
+                    uuid=self.admission_uuid,
+                    object_uuid=self.admission.candidate.uuid if tab_name in profile_tabs else self.admission_uuid,
+                    tab=tab_name,
+                ),
                 prefix=tab_name,
             )
             for tab_name in tab_names
@@ -405,6 +433,7 @@ class ChecklistView(
                 'CURRICULUM',
                 'COPIE_TITRE_SEJOUR',
                 'DOSSIER_ANALYSE',
+                'DOSSIER_ANALYSE_AUTORISATION',
                 'DIPLOME',
             },
             'decision': {
@@ -413,7 +442,12 @@ class ChecklistView(
                 'CURRICULUM',
                 'COPIE_TITRE_SEJOUR',
                 'DOSSIER_ANALYSE',
+                'DOSSIER_ANALYSE_AUTORISATION',
                 'DIPLOME',
+            },
+            'donnees_personnelles': {
+                'CARTE_IDENTITE',
+                'PASSEPORT',
             },
         }
         return documents_by_tab
@@ -430,8 +464,6 @@ class ChecklistView(
         return ["admission/continuing_education/checklist.html"]
 
     def get_context_data(self, **kwargs):
-        from infrastructure.messages_bus import message_bus_instance
-
         context = super().get_context_data(**kwargs)
         if not self.request.htmx:
             # Retrieve data related to the proposition

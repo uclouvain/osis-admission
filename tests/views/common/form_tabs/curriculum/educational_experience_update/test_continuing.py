@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -33,25 +33,14 @@ from django.test import TestCase
 from rest_framework import status
 
 from admission.constants import CONTEXT_CONTINUING
-from admission.ddd.admission.formation_continue.domain.model.enums import (
-    ChoixStatutPropositionContinue,
-)
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.models import ContinuingEducationAdmission
 from admission.tests.factories import DoctorateAdmissionFactory
-from admission.tests.factories.continuing_education import (
-    ContinuingEducationAdmissionFactory,
-)
-from admission.tests.factories.curriculum import (
-    EducationalExperienceFactory,
-    EducationalExperienceYearFactory,
-)
+from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
+from admission.tests.factories.curriculum import EducationalExperienceFactory, EducationalExperienceYearFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
-from admission.tests.factories.roles import (
-    ProgramManagerRoleFactory,
-    SicManagementRoleFactory,
-)
+from admission.tests.factories.roles import ProgramManagerRoleFactory, SicManagementRoleFactory
 from base.forms.utils.file_field import PDF_MIME_TYPE
-from base.models.campus import Campus
 from base.models.enums.community import CommunityEnum
 from base.models.enums.establishment_type import EstablishmentTypeEnum
 from base.tests.factories.academic_year import AcademicYearFactory
@@ -63,12 +52,10 @@ from osis_profile.forms.experience_academique import (
     EDUCATIONAL_EXPERIENCE_YEAR_FIELDS_BY_CONTEXT,
 )
 from osis_profile.models import EducationalExperience, EducationalExperienceYear
-from osis_profile.models.enums.curriculum import (
-    EvaluationSystem,
-    Grade,
-    Reduction,
-    Result,
-    TranscriptType,
+from osis_profile.models.enums.curriculum import EvaluationSystem, Grade, Reduction, Result, TranscriptType
+from osis_profile.models.enums.experience_validation import (
+    ChoixStatutValidationExperience,
+    EtatAuthentificationParcours,
 )
 from reference.models.enums.cycle import Cycle
 from reference.tests.factories.country import CountryFactory
@@ -85,8 +72,8 @@ class CurriculumEducationalExperienceFormViewForContinuingTestCase(TestCase):
         cls.old_academic_years = [AcademicYearFactory(year=year) for year in [2003, 2004, 2005, 2006, 2007]]
         cls.be_country = CountryFactory(iso_code='BE', name='Belgique', name_en='Belgium')
         cls.fr_country = CountryFactory(iso_code='FR', name='France', name_en='France')
-        cls.louvain_campus = Campus.objects.get(external_id=CampusFactory(name='Louvain-la-Neuve').external_id)
-        cls.other_campus = Campus.objects.get(external_id=CampusFactory(name='Other').external_id)
+        cls.louvain_campus = CampusFactory(name='Louvain-la-Neuve')
+        cls.other_campus = CampusFactory(name='Other')
         cls.greek = LanguageFactory(code='EL')
         cls.french = LanguageFactory(code='FR')
         cls.entity = EntityVersionFactory().entity
@@ -163,6 +150,8 @@ class CurriculumEducationalExperienceFormViewForContinuingTestCase(TestCase):
             with_complement=True,
             complement_registered_credit_number=40,
             complement_acquired_credit_number=39,
+            validation_status=ChoixStatutValidationExperience.AUTHENTIFICATION.name,
+            authentication_status=EtatAuthentificationParcours.VRAI.name,
         )
         self.first_experience_year: EducationalExperienceYear = EducationalExperienceYearFactory(
             educational_experience=self.experience,
@@ -188,7 +177,9 @@ class CurriculumEducationalExperienceFormViewForContinuingTestCase(TestCase):
         )
 
         # Mock osis document api
-        patcher = mock.patch("osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value)
+        patcher = mock.patch(
+            "osis_document_components.services.get_remote_token", side_effect=lambda value, **kwargs: value
+        )
         patcher.start()
         self.addCleanup(patcher.stop)
         patcher = mock.patch(
@@ -232,7 +223,7 @@ class CurriculumEducationalExperienceFormViewForContinuingTestCase(TestCase):
 
         doctorate_admission.delete()
 
-        general_admission = GeneralEducationAdmissionFactory(
+        GeneralEducationAdmissionFactory(
             candidate=self.continuing_admission.candidate,
             status=ChoixStatutPropositionContinue.CONFIRMEE.name,
         )
@@ -254,7 +245,7 @@ class CurriculumEducationalExperienceFormViewForContinuingTestCase(TestCase):
 
         doctorate_admission.delete()
 
-        general_admission = GeneralEducationAdmissionFactory(
+        GeneralEducationAdmissionFactory(
             candidate=self.continuing_admission.candidate,
             status=ChoixStatutPropositionContinue.CONFIRMEE.name,
         )
@@ -370,6 +361,8 @@ class CurriculumEducationalExperienceFormViewForContinuingTestCase(TestCase):
         self.assertEqual(experience.with_complement, None)
         self.assertEqual(experience.complement_registered_credit_number, None)
         self.assertEqual(experience.complement_acquired_credit_number, None)
+        self.assertEqual(experience.validation_status, ChoixStatutValidationExperience.A_TRAITER.name)
+        self.assertEqual(experience.authentication_status, EtatAuthentificationParcours.NON_CONCERNE.name)
 
         years = experience.educationalexperienceyear_set.all().order_by('academic_year__year')
 
@@ -473,6 +466,8 @@ class CurriculumEducationalExperienceFormViewForContinuingTestCase(TestCase):
         self.assertEqual(experience.with_complement, None)
         self.assertEqual(experience.complement_registered_credit_number, None)
         self.assertEqual(experience.complement_acquired_credit_number, None)
+        self.assertEqual(experience.validation_status, ChoixStatutValidationExperience.AUTHENTIFICATION.name)
+        self.assertEqual(experience.authentication_status, EtatAuthentificationParcours.VRAI.name)
 
         years = experience.educationalexperienceyear_set.all().order_by('academic_year__year')
 

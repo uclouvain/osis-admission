@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -50,15 +50,25 @@ from admission.tests.factories.secondary_studies import (
     HighSchoolDiplomaAlternativeFactory,
 )
 from admission.tests.factories.supervision import CaMemberFactory, PromoterFactory
+from base.models.enums.academic_type import AcademicTypes
 from base.models.enums.education_group_types import TrainingType
 from base.models.enums.got_diploma import GotDiploma
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityFactory
 from base.tests.factories.entity_version_address import EntityVersionAddressFactory
 from base.tests.factories.person import PersonFactory
+from epc.models.enums.etat_inscription import EtatInscriptionFormation
+from epc.models.enums.statut_inscription_programme_annuel import StatutInscriptionProgrammAnnuel
+from epc.tests.factories.inscription_programme_annuel import InscriptionProgrammeAnnuelFactory
 from osis_profile.models import BelgianHighSchoolDiploma, Exam, ForeignHighSchoolDiploma
+from osis_profile.models.education import HighSchoolDiploma
 from osis_profile.models.enums.education import EducationalType
+from osis_profile.models.enums.experience_validation import (
+    ChoixStatutValidationExperience,
+    EtatAuthentificationParcours,
+)
 from osis_profile.models.exam import EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
+from osis_profile.tests.factories.high_school_diploma import HighSchoolDiplomaFactory
 from reference.tests.factories.country import CountryFactory
 from reference.tests.factories.high_school import HighSchoolFactory
 from reference.tests.factories.language import LanguageFactory
@@ -180,8 +190,21 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
 
     def test_diploma_create_with_doctorate_admission(self):
         self.client.force_authenticate(user=self.candidate_user)
+
         response = self.create_belgian_diploma_with_doctorate_admission(self.diploma_data)
+
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
+
+        high_school_diploma = HighSchoolDiploma.objects.filter(person=self.candidate_user.person).first()
+        self.assertIsNotNone(high_school_diploma)
+        self.assertEqual(
+            high_school_diploma.academic_graduation_year.year,
+            self.diploma_data["belgian_diploma"]["academic_graduation_year"],
+        )
+        self.assertEqual(high_school_diploma.got_diploma, GotDiploma.YES.name)
+        self.assertEqual(high_school_diploma.validation_status, ChoixStatutValidationExperience.EN_BROUILLON.name)
+        self.assertEqual(high_school_diploma.authentication_status, EtatAuthentificationParcours.NON_CONCERNE.name)
+
         belgian_diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.candidate_user.pk)
         self.assertEqual(
             belgian_diploma.academic_graduation_year.year,
@@ -192,8 +215,10 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         self.assertEqual(belgian_diploma.educational_other, "")
         self.assertEqual(belgian_diploma.institute.uuid, self.diploma_data["belgian_diploma"]["institute"])
         self.assertEqual(belgian_diploma.other_institute_name, "")
+
         foreign_diploma = ForeignHighSchoolDiploma.objects.filter(person__user_id=self.candidate_user.pk)
         self.assertEqual(foreign_diploma.count(), 0)
+
         updated_admission = BaseAdmission.objects.get(uuid=self.doctorate_admission_uuid)
         self.assertEqual(
             updated_admission.get_specific_question_answers_dict(),
@@ -223,6 +248,20 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         self.assertEqual(updated_admission.modified_at, datetime.datetime.now())
         self.assertEqual(updated_admission.last_update_author, self.candidate_user.person)
 
+    def test_diploma_create_with_general_admission_and_ucl_student(self):
+        self.client.force_authenticate(user=self.candidate_user)
+
+        InscriptionProgrammeAnnuelFactory(
+            programme_cycle__etudiant__person=self.candidate_user.person,
+            etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+            programme__offer__academic_type=AcademicTypes.ACADEMIC.name,
+            statut=StatutInscriptionProgrammAnnuel.ETUDIANT_UCL.name,
+            programme__root_group__academic_year__year=2023,
+        )
+
+        response = self.create_belgian_diploma_with_general_admission(self.diploma_data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
     def test_diploma_create_with_continuing_admission(self):
         self.client.force_authenticate(user=self.candidate_user)
         response = self.create_belgian_diploma_with_continuing_admission(self.diploma_data)
@@ -248,6 +287,7 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
             self.doctorate_admission_url,
             {
                 "graduated_from_high_school": GotDiploma.YES.name,
+                "graduated_from_high_school_year": self.academic_year.year,
                 "belgian_diploma": {
                     "institute": self.high_school.uuid,
                     "academic_graduation_year": self.academic_year.year,
@@ -330,7 +370,7 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.candidate_user.pk)
 
         self.assertEqual(diploma.educational_type, self.diploma_data['belgian_diploma']['educational_type'])
-        self.assertEqual(diploma.person.graduated_from_high_school, self.diploma_data['graduated_from_high_school'])
+        self.assertEqual(diploma.person.highschooldiploma.got_diploma, self.diploma_data['graduated_from_high_school'])
 
         admission = BaseAdmission.objects.get(uuid=self.general_master_admission_uuid)
         self.assertEqual(
@@ -351,7 +391,7 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.candidate_user.pk)
 
         self.assertEqual(diploma.educational_type, self.diploma_data['belgian_diploma']['educational_type'])
-        self.assertEqual(diploma.person.graduated_from_high_school, self.diploma_data['graduated_from_high_school'])
+        self.assertEqual(diploma.person.highschooldiploma.got_diploma, self.diploma_data['graduated_from_high_school'])
 
         self.general_bachelor_admission.refresh_from_db()
         self.assertEqual(
@@ -367,11 +407,11 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
 
         # The base data cannot be updated
         self.assertEqual(
-            diploma.person.graduated_from_high_school,
+            diploma.person.highschooldiploma.got_diploma,
             self.diploma_data['graduated_from_high_school'],
         )
         self.assertEqual(
-            diploma.person.graduated_from_high_school_year.year,
+            diploma.person.highschooldiploma.academic_graduation_year.year,
             self.diploma_data['graduated_from_high_school_year'],
         )
 
@@ -401,7 +441,7 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.candidate_user.pk)
 
         self.assertEqual(diploma.educational_type, self.diploma_data['belgian_diploma']['educational_type'])
-        self.assertEqual(diploma.person.graduated_from_high_school, self.diploma_data['graduated_from_high_school'])
+        self.assertEqual(diploma.person.highschooldiploma.got_diploma, self.diploma_data['graduated_from_high_school'])
 
         admission = BaseAdmission.objects.get(uuid=self.general_master_admission_uuid)
         self.assertEqual(
@@ -414,7 +454,7 @@ class BelgianHighSchoolDiplomaTestCase(APITestCase):
         diploma = BelgianHighSchoolDiploma.objects.get(person__user_id=self.candidate_user.pk)
 
         self.assertEqual(diploma.educational_type, self.diploma_data['belgian_diploma']['educational_type'])
-        self.assertEqual(diploma.person.graduated_from_high_school, self.diploma_data['graduated_from_high_school'])
+        self.assertEqual(diploma.person.highschooldiploma.got_diploma, self.diploma_data['graduated_from_high_school'])
 
         admission = BaseAdmission.objects.get(uuid=self.general_master_admission_uuid)
         self.assertEqual(
@@ -436,6 +476,7 @@ class ForeignHighSchoolDiplomaTestCase(APITestCase):
         cls.country = CountryFactory(iso_code="FR")
         cls.foreign_diploma_data = {
             "graduated_from_high_school": GotDiploma.YES.name,
+            "graduated_from_high_school_year": cls.academic_year.year,
             "foreign_diploma": {
                 "other_linguistic_regime": "Français",
                 "academic_graduation_year": cls.academic_year.year,
@@ -445,6 +486,11 @@ class ForeignHighSchoolDiplomaTestCase(APITestCase):
         }
         cls.general_admission = GeneralEducationAdmissionFactory(candidate=cls.admission.candidate)
         cls.general_admission_url = resolve_url("general_secondary_studies", uuid=cls.general_admission.uuid)
+        cls.high_school_diploma = HighSchoolDiplomaFactory(
+            person=cls.user.person,
+            validation_status=ChoixStatutValidationExperience.A_TRAITER.name,
+            authentication_status=EtatAuthentificationParcours.VRAI.name,
+        )
 
         AdmissionAcademicCalendarFactory.produce_all_required()
 
@@ -477,11 +523,21 @@ class ForeignHighSchoolDiplomaTestCase(APITestCase):
 
     def test_diploma_create(self):
         response = self.create_foreign_diploma(self.foreign_diploma_data)
+
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
+
+        high_school_diploma = HighSchoolDiploma.objects.filter(person=self.user.person).first()
+        self.assertIsNotNone(high_school_diploma)
+        self.assertEqual(high_school_diploma.academic_graduation_year, self.academic_year)
+        self.assertEqual(high_school_diploma.got_diploma, GotDiploma.YES.name)
+        self.assertEqual(high_school_diploma.validation_status, ChoixStatutValidationExperience.A_TRAITER.name)
+        self.assertEqual(high_school_diploma.authentication_status, EtatAuthentificationParcours.VRAI.name)
+
         foreign_diploma = ForeignHighSchoolDiploma.objects.get(person__user_id=self.user.pk)
         self.assertEqual(foreign_diploma.academic_graduation_year, self.academic_year)
         self.assertEqual(foreign_diploma.country, self.country)
         self.assertEqual(foreign_diploma.linguistic_regime, self.language)
+
         belgian_diploma = BelgianHighSchoolDiploma.objects.filter(person__user_id=self.user.pk)
         self.assertEqual(belgian_diploma.count(), 0)
 
@@ -534,6 +590,11 @@ class HighSchoolDiplomaAlternativeTestCase(APITestCase):
                 "year": cls.admission.determined_academic_year.year + 1,
             },
         }
+        cls.high_school_diploma = HighSchoolDiplomaFactory(
+            person=cls.user.person,
+            validation_status=ChoixStatutValidationExperience.A_TRAITER.name,
+            authentication_status=EtatAuthentificationParcours.VRAI.name,
+        )
         AdmissionAcademicCalendarFactory.produce_all_required()
 
     def setUp(self):
@@ -598,19 +659,37 @@ class HighSchoolDiplomaAlternativeTestCase(APITestCase):
         BelgianHighSchoolDiplomaFactory(person=self.user.person)
         ForeignHighSchoolDiplomaFactory(person=self.user.person)
         HighSchoolDiplomaAlternativeFactory(person=self.user.person)
+
         # Update the high school diploma alternative
         response = self.create_high_school_diploma_alternative(self.high_school_diploma_alternative_data)
+
         # Check response
         json_response = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK, json_response)
         self.assertIsNone(json_response["belgian_diploma"])
         self.assertIsNone(json_response["foreign_diploma"])
         self.assertIsNotNone(json_response["high_school_diploma_alternative"])
+
         # Check the created object
         high_school_diploma_alternative = Exam.objects.get(
-            person__user_id=self.user.pk, type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR
+            person__user_id=self.user.pk,
+            type__label_fr=EXAM_TYPE_PREMIER_CYCLE_LABEL_FR,
         )
         self.assertEqual(high_school_diploma_alternative.certificate, [UUID(self.file_uuid)])
+        self.assertEqual(
+            high_school_diploma_alternative.validation_status,
+            ChoixStatutValidationExperience.A_TRAITER.name,
+        )
+        self.assertEqual(high_school_diploma_alternative.authentication_status, EtatAuthentificationParcours.VRAI.name)
+
+        # Check the base high school diploma object
+        high_school_diploma = HighSchoolDiploma.objects.filter(person=self.user.person).first()
+        self.assertIsNotNone(high_school_diploma)
+        self.assertEqual(high_school_diploma.academic_graduation_year, None)
+        self.assertEqual(high_school_diploma.got_diploma, GotDiploma.NO.name)
+        self.assertEqual(high_school_diploma.validation_status, ChoixStatutValidationExperience.A_TRAITER.name)
+        self.assertEqual(high_school_diploma.authentication_status, EtatAuthentificationParcours.VRAI.name)
+
         # Clean previous high school diplomas
         self.assertEqual(BelgianHighSchoolDiploma.objects.filter(person=self.user.person).count(), 0)
         self.assertEqual(ForeignHighSchoolDiploma.objects.filter(person=self.user.person).count(), 0)

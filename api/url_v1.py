@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -92,6 +92,10 @@ urlpatterns = [
     path('propositions', views.PropositionListView),
     path('propositions/permissions', views.PropositionCreatePermissionsView),
     path('propositions/specific-enrolment-periods', views.SpecificEnrolmentPeriodsApiView),
+    path('propositions/re-enrolment-period', views.CandidateReEnrolmentPeriodView),
+    path('propositions/ucl-enrolments', views.CandidateUCLEnrolmentsView),
+    path('propositions/candidate-re-enrolment-eligibity', views.CandidateReEnrolmentEligibilityView),
+    path('propositions/candidate-ucl-enrolment-information', views.CandidateEnrolmentInformationView),
     path('identification', views.IdentificationDTOView, views.IdentificationDTOView),
     # > Doctorate education
     path('supervised_propositions', views.SupervisedPropositionListView),
@@ -108,6 +112,10 @@ urlpatterns = [
     path('propositions/doctorate/pre-admission-list', views.DoctoratePreAdmissionList),
     path('propositions/doctorate/<uuid:uuid>', views.DoctoratePropositionView),
     _path('propositions/doctorate/<uuid:uuid>/', include(doctorate_view_set_router.urls)),
+    path(
+        'propositions/doctorate/<uuid:uuid>/candidate-ucl-enrolment-information',
+        views.CandidateEnrolmentInformationView,
+    ),
     path('propositions/doctorate/<uuid:uuid>/person', views.PersonViewSet),
     path('propositions/doctorate/<uuid:uuid>/person_last_enrolment', views.DoctoratePersonLastEnrolmentViewSet),
     path('propositions/doctorate/<uuid:uuid>/coordonnees', views.CoordonneesViewSet),
@@ -144,6 +152,10 @@ urlpatterns = [
     # > General education
     path('propositions/general-education', views.GeneralTrainingChoiceAPIView),
     path('propositions/general-education/<uuid:uuid>', views.GeneralPropositionView),
+    path(
+        'propositions/general-education/<uuid:uuid>/candidate-ucl-enrolment-information',
+        views.GeneralCandidateEnrolmentInformationView,
+    ),
     path('propositions/general-education/<uuid:uuid>/training-choice', views.GeneralUpdateTrainingChoiceAPIView),
     path('propositions/general-education/<uuid:uuid>/person', views.GeneralPersonView),
     path('propositions/general-education/<uuid:uuid>/person_last_enrolment', views.GeneralPersonLastEnrolmentViewSet),
@@ -173,6 +185,10 @@ urlpatterns = [
     # > Continuing education
     path('propositions/continuing-education', views.ContinuingTrainingChoiceAPIView),
     path('propositions/continuing-education/<uuid:uuid>', views.ContinuingPropositionView),
+    path(
+        'propositions/continuing-education/<uuid:uuid>/candidate-ucl-enrolment-information',
+        views.ContinuingCandidateEnrolmentInformationView,
+    ),
     path('propositions/continuing-education/<uuid:uuid>/training-choice', views.ContinuingUpdateTrainingChoiceAPIView),
     path('propositions/continuing-education/<uuid:uuid>/person', views.ContinuingPersonView),
     path(

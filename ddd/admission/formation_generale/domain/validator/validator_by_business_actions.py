@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -43,6 +43,8 @@ from admission.ddd.admission.formation_generale.domain.model.statut_checklist im
 from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldAffiliationsEtreCompletees,
     ShouldAlternativeSecondairesEtreCompletee,
+    ShouldCandidatEtreEligibleALaReinscription,
+    ShouldCandidatPasEtreDiplomeFormation,
     ShouldComplementsFormationEtreVidesSiPasDeComplementsFormation,
     ShouldConditionAccesEtreSelectionne,
     ShouldCurriculumFichierEtreSpecifie,
@@ -52,6 +54,7 @@ from admission.ddd.admission.formation_generale.domain.validator import (
     ShouldEquivalenceEtreSpecifiee,
     ShouldFacPeutDonnerDecision,
     ShouldFacPeutSoumettreAuSicLorsDeLaDecisionFacultaire,
+    ShouldInformationsBama15EtreCompletees,
     ShouldInformationsEquivalenceEtreRenseignees,
     ShouldPeutSpecifierInformationsDecisionFacultaire,
     ShouldPropositionEtreInscriptionTardiveAvecConditionAcces,
@@ -81,6 +84,7 @@ from admission.ddd.admission.formation_generale.domain.validator._should_informa
     ShouldParcoursAnterieurEtreSuffisant,
     ShouldSicPeutDonnerDecision,
 )
+from admission.ddd.admission.shared_kernel.domain.model.assimilation import Assimilation
 from admission.ddd.admission.shared_kernel.domain.model.complement_formation import (
     ComplementFormationIdentity,
 )
@@ -132,6 +136,7 @@ from ddd.logic.shared_kernel.profil.dtos.etudes_secondaires import (
     DiplomeBelgeEtudesSecondairesDTO,
     DiplomeEtrangerEtudesSecondairesDTO,
 )
+from ddd.logic.shared_kernel.profil.dtos.examens import ExamenDTO
 from ddd.logic.shared_kernel.profil.dtos.parcours_externe import (
     ExperienceAcademiqueDTO,
     ExperienceNonAcademiqueDTO,
@@ -148,6 +153,7 @@ class FormationGeneraleCurriculumValidatorList(TwoStepsMultipleBusinessException
     annee_courante: int
     annee_derniere_inscription_ucl: Optional[int]
     annee_diplome_etudes_secondaires: Optional[int]
+    annee_alternative_diplome_etudes_secondaires: Optional[int]
     experiences_non_academiques: List[ExperienceNonAcademiqueDTO]
     experiences_academiques: List[ExperienceAcademiqueDTO]
     experiences_academiques_incompletes: Dict[str, str]
@@ -155,6 +161,8 @@ class FormationGeneraleCurriculumValidatorList(TwoStepsMultipleBusinessException
     equivalence_diplome: List[str]
     sigle_formation: str
     annee_formation: AcademicYear
+    candidat_est_inscrit_recemment_ucl: bool
+    candidat_est_en_poursuite: bool
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -164,6 +172,7 @@ class FormationGeneraleCurriculumValidatorList(TwoStepsMultipleBusinessException
             ShouldCurriculumFichierEtreSpecifie(
                 fichier_pdf=self.fichier_pdf,
                 type_formation=self.type_formation,
+                candidat_est_inscrit_recemment_ucl=self.candidat_est_inscrit_recemment_ucl,
             ),
             ShouldAnneesCVRequisesCompletees(
                 annee_courante=self.annee_courante,
@@ -171,19 +180,23 @@ class FormationGeneraleCurriculumValidatorList(TwoStepsMultipleBusinessException
                 experiences_academiques_incompletes=self.experiences_academiques_incompletes,
                 annee_derniere_inscription_ucl=self.annee_derniere_inscription_ucl,
                 annee_diplome_etudes_secondaires=self.annee_diplome_etudes_secondaires,
+                annee_alternative_diplome_etudes_secondaires=self.annee_alternative_diplome_etudes_secondaires,
                 experiences_non_academiques=self.experiences_non_academiques,
                 annee_formation=self.annee_formation,
             ),
             ShouldExperiencesAcademiquesEtreCompletees(
                 experiences_academiques_incompletes=self.experiences_academiques_incompletes,
+                candidat_est_inscrit_recemment_ucl=self.candidat_est_inscrit_recemment_ucl,
             ),
             ShouldExperiencesNonAcademiquesAvoirUnCertificat(
                 experiences_non_academiques=self.experiences_non_academiques,
+                candidat_est_inscrit_recemment_ucl=self.candidat_est_inscrit_recemment_ucl,
             ),
             ShouldEquivalenceEtreSpecifiee(
                 equivalence=self.equivalence_diplome,
                 type_formation=self.type_formation,
                 experiences_academiques=self.experiences_academiques,
+                candidat_est_en_poursuite=self.candidat_est_en_poursuite,
             ),
         ]
 
@@ -193,6 +206,7 @@ class FormationGeneraleCurriculumPostSoumissionValidatorList(TwoStepsMultipleBus
     annee_precedent_formation: int
     date_soumission: datetime.date
     annee_diplome_etudes_secondaires: Optional[int]
+    annee_alternative_diplome_etudes_secondaires: Optional[int]
     experiences_non_academiques: List[ExperienceNonAcademiqueDTO]
     experiences_academiques: List[ExperienceAcademiqueDTO]
     experiences_parcours_interne: List[ExperienceParcoursInterneDTO]
@@ -211,6 +225,7 @@ class FormationGeneraleCurriculumPostSoumissionValidatorList(TwoStepsMultipleBus
                 experiences_academiques_incompletes={},  # Une expérience incomplète justifie quand même une période
                 annee_derniere_inscription_ucl=None,
                 annee_diplome_etudes_secondaires=self.annee_diplome_etudes_secondaires,
+                annee_alternative_diplome_etudes_secondaires=self.annee_alternative_diplome_etudes_secondaires,
                 experiences_non_academiques=self.experiences_non_academiques,
                 date_soumission=self.date_soumission,
                 experiences_parcours_interne=self.experiences_parcours_interne,
@@ -252,6 +267,7 @@ class FormationGeneraleComptabiliteValidatorList(TwoStepsMultipleBusinessExcepti
     a_frequente_recemment_etablissement_communaute_fr: Optional[bool]
     comptabilite: Comptabilite
     formation: Formation
+    assimilation_passee: Assimilation | None
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -272,6 +288,7 @@ class FormationGeneraleComptabiliteValidatorList(TwoStepsMultipleBusinessExcepti
             ShouldAssimilationEtreCompletee(
                 pays_nationalite_ue=self.pays_nationalite_ue,
                 comptabilite=self.comptabilite,
+                assimilation_passee=self.assimilation_passee,
             ),
             ShouldAffiliationsEtreCompletees(
                 affiliation_sport=self.comptabilite.affiliation_sport,
@@ -561,6 +578,8 @@ class ApprouverAdmissionParSicValidatorList(TwoStepsMultipleBusinessExceptionLis
     checklist: StatutsChecklistGenerale
     documents_dto: List[EmplacementDocumentDTO]
 
+    statut_validation_donnees_personnelles: str
+
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
@@ -570,7 +589,7 @@ class ApprouverAdmissionParSicValidatorList(TwoStepsMultipleBusinessExceptionLis
                 statut=self.statut,
             ),
             ShouldDonneesPersonnellesEtreDansEtatCorrectPourApprouverDemande(
-                checklist_actuelle=self.checklist,
+                statut_validation_donnees_personnelles=self.statut_validation_donnees_personnelles,
             ),
             ShouldFinancabiliteEtreDansEtatCorrectPourApprouverDemande(
                 checklist_actuelle=self.checklist,
@@ -605,6 +624,8 @@ class ApprouverInscriptionParSicValidatorList(TwoStepsMultipleBusinessExceptionL
 
     documents_dto: List[EmplacementDocumentDTO]
 
+    statut_validation_donnees_personnelles: str
+
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
@@ -614,7 +635,7 @@ class ApprouverInscriptionParSicValidatorList(TwoStepsMultipleBusinessExceptionL
                 statut=self.statut,
             ),
             ShouldDonneesPersonnellesEtreDansEtatCorrectPourApprouverDemande(
-                checklist_actuelle=self.checklist,
+                statut_validation_donnees_personnelles=self.statut_validation_donnees_personnelles,
             ),
             ShouldFinancabiliteEtreDansEtatCorrectPourApprouverDemande(
                 checklist_actuelle=self.checklist,
@@ -646,12 +667,12 @@ class ModifierStatutChecklistParcoursAnterieurValidatorList(TwoStepsMultipleBusi
     condition_acces: Optional[ConditionAcces]
     millesime_condition_acces: Optional[int]
 
-    uuids_experiences_valorisees: set[str]
-    checklist: StatutsChecklistGenerale
-
     type_formation: TrainingType
     type_equivalence_titre_acces: TypeEquivalenceTitreAcces | None
     etudes_secondaires: EtudesSecondairesAdmissionDTO
+    examen: ExamenDTO
+    experiences_academiques: list[ExperienceAcademiqueDTO]
+    experiences_non_academiques: list[ExperienceNonAcademiqueDTO]
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -668,10 +689,12 @@ class ModifierStatutChecklistParcoursAnterieurValidatorList(TwoStepsMultipleBusi
                 millesime_condition_acces=self.millesime_condition_acces,
             ),
             ShouldStatutsChecklistExperiencesEtreValidees(
-                uuids_experiences_valorisees=self.uuids_experiences_valorisees,
-                checklist=self.checklist,
                 statut=self.statut,
                 type_formation=self.type_formation,
+                etudes_secondaires=self.etudes_secondaires,
+                examen=self.examen,
+                experiences_academiques=self.experiences_academiques,
+                experiences_non_academiques=self.experiences_non_academiques,
             ),
             ShouldInformationsEquivalenceEtreRenseignees(
                 statut=self.statut,
@@ -725,6 +748,12 @@ class FormationGeneraleInformationsComplementairesValidatorList(TwoStepsMultiple
 
     poste_diplomatique: Optional[PosteDiplomatiqueIdentity]
 
+    experiences_academiques: list[ExperienceAcademiqueDTO]
+    est_potentiellement_concerne_par_le_bama_15: bool
+    est_concerne_par_le_bama_15: bool | None
+    preuve_bama_15: list[str]
+    candidat_est_inscrit_recemment_ucl: bool
+
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
 
@@ -735,6 +764,14 @@ class FormationGeneraleInformationsComplementairesValidatorList(TwoStepsMultiple
                 pays_nationalite_europeen=self.pays_nationalite_europeen,
                 pays_residence=self.pays_residence,
                 poste_diplomatique=self.poste_diplomatique,
+                candidat_est_inscrit_recemment_ucl=self.candidat_est_inscrit_recemment_ucl,
+            ),
+            ShouldInformationsBama15EtreCompletees(
+                experiences_academiques=self.experiences_academiques,
+                est_potentiellement_concerne_par_le_bama_15=self.est_potentiellement_concerne_par_le_bama_15,
+                est_concerne_par_le_bama_15=self.est_concerne_par_le_bama_15,
+                preuve_bama_15=self.preuve_bama_15,
+                candidat_est_inscrit_recemment_ucl=self.candidat_est_inscrit_recemment_ucl,
             ),
         ]
 
@@ -798,6 +835,8 @@ class RefuserParSicAValiderValidatorList(TwoStepsMultipleBusinessExceptionListVa
 class ChoixFormationValidatorList(TwoStepsMultipleBusinessExceptionListValidator):
     formation: Formation
     proposition: 'Proposition'
+    candidat_est_eligible_a_la_reinscription: bool
+    candidat_est_diplome_formation: bool
 
     def get_data_contract_validators(self) -> List[BusinessValidator]:
         return []
@@ -807,5 +846,11 @@ class ChoixFormationValidatorList(TwoStepsMultipleBusinessExceptionListValidator
             ShouldRenseignerBoursesEtudesSelonFormation(
                 proposition=self.proposition,
                 formation=self.formation,
-            )
+            ),
+            ShouldCandidatEtreEligibleALaReinscription(
+                candidat_est_eligible_a_la_reinscription=self.candidat_est_eligible_a_la_reinscription,
+            ),
+            ShouldCandidatPasEtreDiplomeFormation(
+                candidat_est_diplome_formation=self.candidat_est_diplome_formation,
+            ),
         ]

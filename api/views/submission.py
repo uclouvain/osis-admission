@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from typing import Union
 
 from django.utils import timezone
 from drf_spectacular.utils import OpenApiResponse, extend_schema
@@ -41,10 +40,6 @@ from admission.ddd.admission.doctorat.preparation.commands import (
     SoumettrePropositionCommand as SoumettrePropositionDoctoratCommand,
 )
 from admission.ddd.admission.doctorat.preparation.commands import VerifierProjetQuery
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
-    ConditionsAccessNonRempliesException,
-    PoolNonResidentContingenteNonOuvertException,
-)
 from admission.ddd.admission.formation_continue.commands import (
     RecupererElementsConfirmationQuery as RecupererElementsConfirmationContinueQuery,
 )
@@ -55,13 +50,21 @@ from admission.ddd.admission.formation_generale.commands import (
     RecupererElementsConfirmationQuery as RecupererElementsConfirmationGeneralQuery,
 )
 from admission.ddd.admission.formation_generale.commands import (
+    RecupererTypeDemandeQuery,
+    SpecifierRaisonPlusieursDemandesMemeCycleMemeAnneeCommand,
+)
+from admission.ddd.admission.formation_generale.commands import (
     SoumettrePropositionCommand as SoumettrePropositionGeneraleCommand,
 )
-from admission.models import (
-    ContinuingEducationAdmission,
-    DoctorateAdmission,
-    GeneralEducationAdmission,
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutPropositionGenerale,
 )
+from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
+    ConditionsAccessNonRempliesException,
+    PoolNonResidentContingenteNonOuvertException,
+)
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
+from admission.models import GeneralEducationAdmission
 from admission.utils import (
     gather_business_exceptions,
     get_access_conditions_url,
@@ -72,7 +75,6 @@ from admission.utils import (
 from base.models.academic_calendar import AcademicCalendar
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from infrastructure.messages_bus import message_bus_instance
-from osis_profile.models import EducationalExperience, ProfessionalExperience
 from osis_role.contrib.views import APIPermissionRequiredMixin
 
 __all__ = [
@@ -81,26 +83,6 @@ __all__ = [
     "SubmitGeneralEducationPropositionView",
     "SubmitContinuingEducationPropositionView",
 ]
-
-
-def valuate_experiences(instance: Union[GeneralEducationAdmission, ContinuingEducationAdmission, DoctorateAdmission]):
-    # Valuate the secondary studies of the candidate
-    if isinstance(
-        instance,
-        (GeneralEducationAdmission, ContinuingEducationAdmission),
-    ):
-        instance.valuated_secondary_studies_person_id = instance.candidate_id
-        instance.save(update_fields=['valuated_secondary_studies_person_id'])
-
-    # Valuate curriculum experiences
-    instance.educational_valuated_experiences.add(
-        *EducationalExperience.objects.filter(person_id=instance.candidate_id)
-    )
-
-    # Valuate curriculum experiences
-    instance.professional_valuated_experiences.add(
-        *ProfessionalExperience.objects.filter(person_id=instance.candidate_id)
-    )
 
 
 class VerifyDoctoralProjectView(APIPermissionRequiredMixin, mixins.RetrieveModelMixin, GenericAPIView):
@@ -198,7 +180,6 @@ class SubmitDoctoralPropositionView(
         serializer.is_valid(raise_exception=True)
         cmd = SoumettrePropositionDoctoratCommand(**serializer.data, uuid_proposition=str(kwargs['uuid']))
         proposition_id = message_bus_instance.invoke(cmd)
-        valuate_experiences(self.get_permission_object())
         serializer = serializers.PropositionIdentityDTOSerializer(instance=proposition_id)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -213,7 +194,29 @@ class SubmitGeneralEducationPropositionView(
     permission_mapping = {
         'GET': 'admission.submit_generaleducationadmission',
         'POST': 'admission.submit_generaleducationadmission',
+        'PUT': 'admission.submit_generaleducationadmission',
     }
+
+    @classmethod
+    def _has_other_admission_same_cycle_same_year(cls, admission):
+        return (
+            GeneralEducationAdmission.objects.filter(
+                candidate=admission.candidate,
+                training__education_group_type__cycle=admission.training.education_group_type.cycle,
+                determined_academic_year_id=admission.determined_academic_year_id,
+            )
+            .exclude(uuid=admission.uuid)
+            .exclude(
+                status__in=[
+                    ChoixStatutPropositionGenerale.EN_BROUILLON.name,
+                    ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE.name,
+                    ChoixStatutPropositionGenerale.ANNULEE.name,
+                    ChoixStatutPropositionGenerale.INSCRIPTION_REFUSEE.name,
+                    ChoixStatutPropositionGenerale.CLOTUREE.name,
+                ],
+            )
+            .exists()
+        )
 
     def get_permission_object(self):
         return get_cached_general_education_admission_perm_obj(self.kwargs['uuid'])
@@ -245,26 +248,59 @@ class SubmitGeneralEducationPropositionView(
             data['pool_end_date'] = period.end_date
 
         self.add_access_conditions_url(data)
+
+        data['display_several_applications_same_cycle_same_year_questions'] = False
+
         if not data['errors']:
             cmd = RecupererElementsConfirmationGeneralQuery(self.kwargs['uuid'])
             data['elements_confirmation'] = message_bus_instance.invoke(cmd)
 
+            # Check if we need to display the questions asked when the candidate has several applications for the same
+            # cycle for the same year and when the current admission type is "INSCRIPTION"
+            has_other_applications_same_cycle = self._has_other_admission_same_cycle_same_year(admission)
+
+            if has_other_applications_same_cycle:
+                application_type = message_bus_instance.invoke(
+                    RecupererTypeDemandeQuery(uuid_proposition=self.kwargs['uuid'])
+                )
+
+                data['display_several_applications_same_cycle_same_year_questions'] = (
+                    application_type == TypeDemande.INSCRIPTION.name
+                )
+
         return Response(PropositionErrorsSerializer(data).data, status=status.HTTP_200_OK)
 
     @extend_schema(
-        request=serializers.SubmitPropositionSerializer,
+        request=serializers.SubmitGeneralPropositionSerializer,
         responses=serializers.GeneralEducationPropositionIdentityWithStatusSerializer,
         operation_id='submit_general_education_proposition',
     )
     def post(self, request, *args, **kwargs):
         """Submit the proposition."""
-        serializer = serializers.SubmitPropositionSerializer(data=request.data)
+        serializer = serializers.SubmitGeneralPropositionSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         cmd = SoumettrePropositionGeneraleCommand(**serializer.data, uuid_proposition=str(kwargs['uuid']))
         message_bus_instance.invoke(cmd)
         admission = self.get_permission_object()
-        valuate_experiences(admission)
         serializer = serializers.GeneralEducationPropositionIdentityWithStatusSerializer(instance=admission)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        request=serializers.SpecifierRaisonPlusieursDemandesMemeCycleMemeAnneeCommandSerializer,
+        responses=serializers.PropositionIdentityDTOSerializer,
+        operation_id='specify_reason_multiple_applications_same_cycle_same_year',
+    )
+    def put(self, request, *args, **kwargs):
+        """Submit the reason to have multiple applications for the same cycle for the same year."""
+        serializer = serializers.SpecifierRaisonPlusieursDemandesMemeCycleMemeAnneeCommandSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        result = message_bus_instance.invoke(
+            SpecifierRaisonPlusieursDemandesMemeCycleMemeAnneeCommand(
+                **serializer.data,
+                uuid_proposition=str(kwargs['uuid']),
+            )
+        )
+        serializer = serializers.PropositionIdentityDTOSerializer(instance=result)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 

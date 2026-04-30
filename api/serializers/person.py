@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2023 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -24,20 +24,28 @@
 #
 # ##############################################################################
 from django.db import models
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
+from admission.ddd.admission.formation_generale.domain.model.enums import STATUTS_PROPOSITION_GENERALE_NON_SOUMISE
+from admission.ddd.admission.shared_kernel.domain.model.formation import FORMATIONS_POUR_BAMA_15
 from admission.ddd.admission.shared_kernel.dtos import IdentificationDTO
 from base.api.serializers.academic_year import RelatedAcademicYearField
+from base.models.enums.community import CommunityEnum
 from base.models.person import Person
 from base.utils.serializers import DTOSerializer
+from osis_profile.models import EducationalExperienceYear
 from reference.api.serializers.country import RelatedCountryField
+from reference.models.enums.cycle import Cycle
+from reference.services.belgian_niss_validator import BelgianNISSValidatorService
 
 __all__ = [
     "PersonIdentificationSerializer",
     "IdentificationDTOSerializer",
+    "GeneralIdentificationDTOSerializer",
+    "candidate_is_potentially_concerned_by_bama_15",
 ]
-
-from reference.services.belgian_niss_validator import BelgianNISSValidatorService
 
 
 class PersonIdentificationSerializer(serializers.ModelSerializer):
@@ -47,6 +55,7 @@ class PersonIdentificationSerializer(serializers.ModelSerializer):
     last_registration_year = RelatedAcademicYearField(required=False)
     birth_country = RelatedCountryField(required=False)
     country_of_citizenship = RelatedCountryField(required=False)
+    registration_id = serializers.SerializerMethodField()
 
     class Meta:
         model = Person
@@ -65,6 +74,8 @@ class PersonIdentificationSerializer(serializers.ModelSerializer):
             'gender',
             'civil_state',
             'id_photo',
+            'email',
+            'private_email',
             # Pièce d'identité
             'id_card',
             'passport',
@@ -76,8 +87,13 @@ class PersonIdentificationSerializer(serializers.ModelSerializer):
             # Inscrit ?
             'last_registration_year',
             'last_registration_id',
+            'registration_id',
         ]
         extra_kwargs = {'birth_year': {'min_value': 1900, 'max_value': 2999}}
+        read_only_fields = ('email', 'private_email')
+
+    def get_registration_id(self, instance: Person) -> str:
+        return instance.student_set.values_list('registration_id', flat=True).first() or ''
 
     def include_extra_kwargs(self, kwargs, extra_kwargs):
         # Make all fields optional
@@ -101,5 +117,38 @@ class PersonIdentificationSerializer(serializers.ModelSerializer):
 
 
 class IdentificationDTOSerializer(DTOSerializer):
+    statut_validation_donnees_personnelles = None
+
     class Meta:
         source = IdentificationDTO
+
+
+def candidate_is_potentially_concerned_by_bama_15(admission):
+    if admission.training.education_group_type.name not in FORMATIONS_POUR_BAMA_15:
+        return False
+
+    target_year = (
+      admission.determined_academic_year.year
+      if admission.determined_academic_year_id else admission.training.academic_year.year
+    ) - 1
+
+    qs = EducationalExperienceYear.objects.filter(
+        educational_experience__person_id=admission.candidate_id,
+        academic_year__year=target_year,
+        educational_experience__obtained_diploma=False,
+        educational_experience__institute__community=CommunityEnum.FRENCH_SPEAKING.name,
+        educational_experience__program__cycle=Cycle.FIRST_CYCLE.name,
+    )
+
+    if admission.status not in STATUTS_PROPOSITION_GENERALE_NON_SOUMISE:
+        qs = qs.filter(educational_experience__educational_valuated_experiences__baseadmission_id=admission.uuid)
+
+    return qs.exists()
+
+
+class GeneralIdentificationDTOSerializer(IdentificationDTOSerializer):
+    est_potentiellement_concerne_par_le_bama_15 = serializers.SerializerMethodField()
+
+    @extend_schema_field(OpenApiTypes.BOOL)
+    def get_est_potentiellement_concerne_par_le_bama_15(self, _):
+        return candidate_is_potentially_concerned_by_bama_15(admission=self.context['admission'])

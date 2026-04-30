@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -166,6 +166,10 @@ def get_identification_attachments(context: ResumePropositionDTO) -> List[Attach
             candidate_language=context.identification.langue_contact,
         )
     ]
+
+    if context.pour_candidat and context.candidat_est_etudiant_recent_ucl:
+        return attachments
+
     if context.identification.numero_carte_identite or context.identification.numero_registre_national_belge:
         attachments.append(
             Attachment(
@@ -501,6 +505,7 @@ def get_specific_questions_attachments(
     specific_questions: List[QuestionSpecifiqueDTO],
     eligible_for_reorientation: bool,
     eligible_for_modification: bool,
+    display_bama_15_questions: bool,
 ) -> List[Attachment]:
     """Returns the specific questions attachments."""
     attachments = []
@@ -510,6 +515,20 @@ def get_specific_questions_attachments(
                 identifier='COPIE_TITRE_SEJOUR',
                 label=DocumentsQuestionsSpecifiques['COPIE_TITRE_SEJOUR'],
                 uuids=context.proposition.copie_titre_sejour,
+                candidate_language=context.identification.langue_contact,
+            )
+        )
+
+    if display_bama_15_questions and context.proposition.est_concerne_par_le_bama_15:
+        attachments.append(
+            Attachment(
+                identifier='PREUVE_BAMA_15',
+                label=DocumentsQuestionsSpecifiques['PREUVE_BAMA_15'],
+                label_interpolation={
+                    'year': format_academic_year(context.proposition.annee_demande),
+                },
+                uuids=context.proposition.preuve_bama_15,
+                required=True,
                 candidate_language=context.identification.langue_contact,
             )
         )

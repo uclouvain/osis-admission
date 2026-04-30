@@ -17,10 +17,6 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#, python-brace-format
-msgid " (last update by {author} on {date} at {time}):"
-msgstr ""
-
 #, python-format
 msgid "%(added)s ECTS added with %(validated)s validated by the CDD."
 msgstr ""
@@ -142,8 +138,8 @@ msgid ""
 msgstr ""
 
 msgid ""
-"<strong>Warning</strong> the candidate is reported as a <strong>fraudster</"
-"strong>"
+"<strong>Warning</strong> the candidate is reported as <strong>fraudster</"
+"strong> by the ARES"
 msgstr ""
 
 #, python-format
@@ -183,10 +179,11 @@ msgid ""
 "receive the enrolment authorisation signed by you, we will let you know how "
 "to pay."
 msgstr ""
-"A compulsory minimum €50 tuition fee deposit must be paid as soon as possible and no later than 31 October "
-"%(start_year)s. The tuition fee balance must be paid in full by 1 February "
-"%(end_year)s. As soon as we receive the enrolment authorisation signed by "
-"you, we will let you know how to pay."
+"A compulsory minimum €50 tuition fee deposit must be paid as soon as "
+"possible and no later than 31 October %(start_year)s. The tuition fee "
+"balance must be paid in full by 1 February %(end_year)s. As soon as we "
+"receive the enrolment authorisation signed by you, we will let you know how "
+"to pay."
 
 msgid "A deny mail has already been sent to the candidate."
 msgstr ""
@@ -327,6 +324,12 @@ msgstr ""
 msgid "Access title"
 msgstr ""
 
+#, python-format
+msgid ""
+"According to our analysis, you have a maximum of 15 remaining credits from "
+"your bachelor's degree to complete in %(year)s. Do you confirm this analysis?"
+msgstr ""
+
 msgid "Account holder first name"
 msgstr ""
 
@@ -447,6 +450,9 @@ msgid "Add an academic course"
 msgstr ""
 
 msgid "Add the corresponding program manager roles (doctorate)"
+msgstr ""
+
+msgid "Add this reason"
 msgstr ""
 
 msgid "Add validation of prior experience (VAE)"
@@ -634,6 +640,9 @@ msgstr ""
 msgid "Analysis folder for a general education admission"
 msgstr ""
 
+msgid "Analysis folder generated when the application is validated"
+msgstr ""
+
 msgid "Annex 1 visa form"
 msgstr ""
 
@@ -672,6 +681,9 @@ msgid ""
 "a>"
 msgstr ""
 
+msgid "Appendix to enrolment authorization"
+msgstr ""
+
 msgid "Application"
 msgstr ""
 
@@ -694,7 +706,7 @@ msgstr ""
 msgid "Application fee: <strong>&euro;%(amount)s</strong>"
 msgstr ""
 
-msgid "Application fees where also received."
+msgid "Application fees were also received."
 msgstr ""
 
 msgid "Application for a study allowance from the French Community of Belgium"
@@ -1130,6 +1142,9 @@ msgstr "Chemistry"
 msgid "CIRE, unlimited stay or foreigner`s card"
 msgstr ""
 
+msgid "CO_DIPLOMATION_1260"
+msgstr "1260 € - Joint degree"
+
 msgid "CO_DIPLOMATION_132"
 msgstr "132 € - Joint degree"
 
@@ -1450,6 +1465,9 @@ msgid "Claim cancelled on"
 msgstr ""
 
 msgid "Cleaned"
+msgstr ""
+
+msgid "Clear the reason"
 msgstr ""
 
 msgid "Clinical Research Fund (FRC)"
@@ -1828,6 +1846,9 @@ msgstr ""
 msgid "Create the recap of the proposition"
 msgstr ""
 
+msgid "Create this new application and cancel your other ones"
+msgstr ""
+
 msgid "Created"
 msgstr ""
 
@@ -1889,6 +1910,9 @@ msgstr ""
 msgid "DISPENSE_VCRC"
 msgstr ""
 
+msgid "DROITS_MAJORES"
+msgstr ""
+
 msgid "DROITS_MAJORES_DEMANDES"
 msgstr ""
 
@@ -1896,6 +1920,9 @@ msgid "Dashboard indicator"
 msgstr ""
 
 msgid "Data protection"
+msgstr ""
+
+msgid "Data verification with third parties"
 msgstr ""
 
 msgid "Date"
@@ -2006,6 +2033,9 @@ msgstr ""
 
 msgctxt "equivalence_state"
 msgid "Definitive"
+msgstr ""
+
+msgid "Definitive PhD admission date"
 msgstr ""
 
 msgid "Definitive admission date to doctorate"
@@ -2259,6 +2289,9 @@ msgstr ""
 msgid "Document"
 msgstr ""
 
+msgid "Document attached to the pre-admission enrolment authorisation"
+msgstr ""
+
 msgid "Document category"
 msgstr ""
 
@@ -2359,6 +2392,9 @@ msgstr ""
 msgid "Dr"
 msgstr ""
 
+msgid "Dual bachelor-master registration (BAMA15)"
+msgstr ""
+
 msgid "Dual degree scholarship"
 msgstr ""
 
@@ -2391,6 +2427,9 @@ msgstr ""
 
 #, python-format
 msgid "ENROLMENT AUTHORISATION<br>for the %(academic_year)s academic year"
+msgstr ""
+
+msgid "EPC"
 msgstr ""
 
 msgid "EPC injection"
@@ -2823,9 +2862,6 @@ msgstr ""
 msgid "Faculty process"
 msgstr ""
 
-msgid "False"
-msgstr ""
-
 msgid "Feedback from Fac"
 msgstr ""
 
@@ -3006,6 +3042,17 @@ msgid ""
 "showing that you have been awarded the scholarship on the dates indicated."
 msgstr ""
 
+msgid ""
+"For some reason, the experience isn't yet initialized. However, this is "
+"required to edit its status, its comments, etc."
+msgstr ""
+
+msgid "For the CDD Chair:"
+msgstr ""
+
+msgid "For the PhD Committee President CDD:"
+msgstr ""
+
 msgid "For the attention of"
 msgstr ""
 
@@ -3050,9 +3097,6 @@ msgid "Former UCLouvain student"
 msgstr ""
 
 msgid "Fraudster"
-msgstr ""
-
-msgid "Fraudster (ARES)"
 msgstr ""
 
 msgid "Fraudster status from ARES"
@@ -3328,6 +3372,15 @@ msgid "I am an asylum seeker"
 msgstr ""
 
 msgid ""
+"I am aware that UCLouvain reserves the right to consult the centralized "
+"database of the French Community of Belgium, SIEL-SUP (Student "
+"Identification and Enrollment in Higher Education), to verify the data "
+"provided with the relevant third parties, and to request the original "
+"documents constituting my admission file, as well as any additional "
+"documents (which may be requested at the time of enrollment)."
+msgstr ""
+
+msgid ""
 "I am aware that as an applicant without a European Union nationality or "
 "Belgian student status, I am required to pay an application fee of &euro;200 "
 "via online payment. The application fee must be received by UCLouvain within "
@@ -3499,7 +3552,10 @@ msgstr "Enrollment"
 msgid "INSCRIPTION_AU_ROLE"
 msgstr ""
 
-msgid "INSCRIPTION_REGULIERE"
+msgid "INSCRIPTION_REGULIERE_1194"
+msgstr ""
+
+msgid "INSCRIPTION_REGULIERE_835"
 msgstr ""
 
 msgid "INVALID"
@@ -3752,9 +3808,6 @@ msgstr ""
 msgid "Institution Federation Wallonie-Bruxelles"
 msgstr ""
 
-msgid "Institution contacted"
-msgstr ""
-
 msgid "Institution in which the PhD thesis has been realised / started"
 msgstr ""
 
@@ -3825,6 +3878,12 @@ msgid "Is an external reorientation"
 msgstr ""
 
 msgid "Is belgian bachelor"
+msgstr ""
+
+msgid "Is concerned by BAMA15"
+msgstr ""
+
+msgid "Is in pursuit"
 msgstr ""
 
 msgid "Is it a Wallonia-Brussels Federation institution?"
@@ -4012,9 +4071,6 @@ msgstr ""
 msgid "List of emails of the program managers."
 msgstr ""
 
-msgid "List of names of the program managers."
-msgstr ""
-
 msgid ""
 "List of the mandatory requested documents that must be submitted "
 "immediately, with the reason"
@@ -4186,6 +4242,11 @@ msgid "Management of the enrolment applications"
 msgstr ""
 
 msgid "Manager follow-up"
+msgstr ""
+
+msgid ""
+"Mandatory fields are missing in the 'Additional information > Dual bachelor-"
+"master registration (BAMA15)' tab."
 msgstr ""
 
 msgid ""
@@ -4612,9 +4673,6 @@ msgstr ""
 msgid "Not free"
 msgstr ""
 
-msgid "Not fundable"
-msgstr ""
-
 msgctxt "dashboard-indicator admission"
 msgid "Not in order of registration"
 msgstr ""
@@ -4900,9 +4958,6 @@ msgstr ""
 msgid "Passport number"
 msgstr ""
 
-msgid "Past experiences authentication"
-msgstr ""
-
 msgid "Past non-academic activities (prof. and not prof.)"
 msgstr ""
 
@@ -4965,6 +5020,9 @@ msgstr ""
 msgid "PhD research experience"
 msgstr ""
 
+msgid "PhD student"
+msgstr ""
+
 msgid "Place of birth"
 msgstr ""
 
@@ -4974,6 +5032,9 @@ msgid ""
 msgstr ""
 
 msgid "Planned duration"
+msgstr ""
+
+msgid "Please briefly explain what you want:"
 msgstr ""
 
 msgid "Please choose the institute or specify another institute"
@@ -5041,6 +5102,13 @@ msgstr ""
 
 #, python-format
 msgid "Please note that the first term begins on %(date)s."
+msgstr ""
+
+msgid ""
+"Please note that these amounts are currently the subject of a draft decree "
+"under which the Wallonia-Brussels Federation is considering increasing them "
+"(see: <a href=\"https://www.uclouvain.be/en/enrolment/registration-fee-"
+"amount\" target=\"_blank\">The amount of tuition fees</a>)."
 msgstr ""
 
 msgid ""
@@ -5216,6 +5284,13 @@ msgstr ""
 msgid "Proof of passing the exam"
 msgstr ""
 
+msgid "Proof of re-enrolment for the bachelor's degree (BAMA15)"
+msgstr ""
+
+#, python-format
+msgid "Proof of re-enrolment for your %(year)s bachelor's degree"
+msgstr ""
+
 msgid "Proof of receipt of unemployment benefit, pension or compensation"
 msgstr ""
 
@@ -5253,6 +5328,9 @@ msgstr ""
 
 msgctxt "equivalence_state"
 msgid "Provisional"
+msgstr ""
+
+msgid "Provisional thesis title"
 msgstr ""
 
 msgid "Proximity Commission for Dental Sciences (DENT)"
@@ -5384,6 +5462,9 @@ msgid "Reason for exceeding the deadline"
 msgstr ""
 
 msgid "Reason for refusal"
+msgstr ""
+
+msgid "Reason to create several applications for a same cycle and a same year."
 msgstr ""
 
 msgid "Reasons"
@@ -5582,6 +5663,9 @@ msgid "Requested documents list"
 msgstr ""
 
 msgid "Requested on"
+msgstr ""
+
+msgid "Requesting fraud status from the ARES"
 msgstr ""
 
 #, python-format
@@ -5808,6 +5892,9 @@ msgstr ""
 msgid "Sector"
 msgstr ""
 
+msgid "Select a document to display it"
+msgstr ""
+
 #, python-format
 msgid "Select valid choices. %(value)s is not one of the available choices."
 msgid_plural ""
@@ -5859,6 +5946,11 @@ msgid "Send to faculty"
 msgstr ""
 
 msgid "Sender"
+msgstr ""
+
+msgid ""
+"Sending the authorization is impossible while the personal data are in the "
+"\"Fraudster\" status."
 msgstr ""
 
 msgid "Sent to EPC"
@@ -6198,6 +6290,9 @@ msgstr "To be verified"
 msgid "Tab"
 msgstr ""
 
+msgid "Take several courses at the same time"
+msgstr ""
+
 msgid "Taken in charge"
 msgstr ""
 
@@ -6232,7 +6327,27 @@ msgstr ""
 msgid "Text"
 msgstr ""
 
+msgid ""
+"Text justification to create several applications for a same cycle and a "
+"same year."
+msgstr ""
+
 msgid "Text size"
+msgstr ""
+
+msgid ""
+"The \"Personal data\" checklist tab must be in the \"Cleaned\" status in "
+"order to do this action."
+msgstr ""
+
+msgid ""
+"The \"Personal data\" checklist tab must be in the \"To be processed\" "
+"status in order to do this action."
+msgstr ""
+
+msgid ""
+"The \"Personal data\" checklist tab must not be in the \"Validated\" status "
+"in order to do this action."
 msgstr ""
 
 msgid ""
@@ -6292,6 +6407,16 @@ msgid ""
 msgstr ""
 
 msgid "The NOMA must contain 8 digits."
+msgstr ""
+
+msgid ""
+"The PhD Field Committee has approved your application for pre-admission."
+msgstr ""
+
+msgid ""
+"The PhD Field Committee has approved your proposal for a <span class=\"bold-"
+"text\">supervisor</span> and <span class=\"bold-text\">supervisory "
+"committee</span>, composed as follows:"
 msgstr ""
 
 msgid ""
@@ -6357,6 +6482,10 @@ msgid ""
 "The cancel mail has been sent to the candidate the %(date)s by %(sender)s."
 msgstr ""
 
+#, python-format
+msgid "The candidate already submitted other applications for %(year)s"
+msgstr ""
+
 msgid "The candidate has a scholarship"
 msgstr ""
 
@@ -6364,7 +6493,13 @@ msgid ""
 "The candidate has already applied for this course for this academic year."
 msgstr ""
 
+msgid "The candidate is a UCL student."
+msgstr ""
+
 msgid "The candidate is doing a mobility"
+msgstr ""
+
+msgid "The candidate is not a UCL student."
 msgstr ""
 
 msgid "The candidate must provide a student visa"
@@ -6505,6 +6640,9 @@ msgstr ""
 msgid "The element has not been found."
 msgstr ""
 
+msgid "The experience has been initialized"
+msgstr ""
+
 msgid "The experience has been valuated."
 msgstr ""
 
@@ -6610,6 +6748,11 @@ msgid "The maximum number of documents must be a positive number."
 msgstr ""
 
 msgid "The member is not external."
+msgstr ""
+
+msgid ""
+"The member of the supervision group can't be invited because he has already "
+"agreed."
 msgstr ""
 
 msgid "The mimetypes must be a list with at least one mimetype."
@@ -6796,6 +6939,10 @@ msgid ""
 "quarantine."
 msgstr ""
 
+msgid ""
+"The tuition fee communicated by the Enrolment Office is based on your status."
+msgstr ""
+
 #, python-format
 msgid "The type of the admission form item is unknown (%(type)s)."
 msgstr ""
@@ -6803,6 +6950,9 @@ msgstr ""
 #, python-format
 msgid "The university tuition fee is EURO %(montant)s."
 msgstr "The university tuition fee is €%(montant)s."
+
+msgid "There are no EPC documents for this student."
+msgstr ""
 
 msgid "There can be no more CA members in the supervision group."
 msgstr ""
@@ -6819,6 +6969,9 @@ msgid ""
 msgstr ""
 
 msgid "There is no required exam for this training."
+msgstr ""
+
+msgid "There was an error while getting the EPC documents list."
 msgstr ""
 
 msgid "Thesis field"
@@ -6901,11 +7054,6 @@ msgid "This activity will be restored"
 msgstr ""
 
 msgid ""
-"This amount is subject to change pending the adoption and publication of the "
-"decree setting it."
-msgstr ""
-
-msgid ""
 "This course is closed. The candidate can express its interest by ticking the "
 "box below or by contacting a course administrator."
 msgstr ""
@@ -6934,9 +7082,6 @@ msgid ""
 "accommodation to the Logistics and Student Accommodation Service (LOGE). To "
 "find out how, go to <a href=\"https://www.uclouvain.be/en/logement\">www."
 "uclouvain.be/en/logement</a>."
-msgstr ""
-
-msgid "This experience can't be validated if mandatory information is missing."
 msgstr ""
 
 msgid "This experience cannot be updated as it has already been valuated."
@@ -7108,9 +7253,6 @@ msgstr ""
 msgid "Trigger the payment hook"
 msgstr ""
 
-msgid "True"
-msgstr ""
-
 msgid "Tuition fees amount"
 msgstr ""
 
@@ -7168,6 +7310,9 @@ msgstr ""
 msgid "UUID"
 msgstr ""
 
+msgid "Unable to get fraud status from the ARES at the moment"
+msgstr ""
+
 msgid "Unavailable"
 msgstr ""
 
@@ -7182,6 +7327,9 @@ msgid "Unknown"
 msgstr ""
 
 msgid "Unknown PDF type."
+msgstr ""
+
+msgid "Unknown author"
 msgstr ""
 
 msgid "Unknown citizenship"
@@ -7306,6 +7454,11 @@ msgid ""
 "We would like to draw your attention to the fact that you have submitted a "
 "late application. The admission panel reserves the right to accept or refuse "
 "this application on the basis of educational requirements."
+msgstr ""
+
+msgid ""
+"We would like to draw your attention to the need to meet the deadline set "
+"out in the PhD regulations for the submission of your mid-term evaluation."
 msgstr ""
 
 msgid "Weight"
@@ -7524,6 +7677,12 @@ msgid ""
 "send an email to %(recipient)s."
 msgstr ""
 
+#, python-format
+msgid ""
+"You are already registered for this course which will take place during the "
+"year %(annee)s."
+msgstr ""
+
 msgid "You are applying as ..."
 msgstr ""
 
@@ -7545,8 +7704,34 @@ msgid "You are registering as"
 msgstr ""
 
 msgid ""
+"You are writing your thesis under <span class=\"bold-text\">joint "
+"supervision</span>. Please note that the procedures involved in establishing "
+"joint supervision (CDD approval of joint supervision, contact with the "
+"partner university, submission of application form) must be completed within "
+"the first 12 months of starting your thesis."
+msgstr ""
+
+msgid ""
 "You can add any document you feel is relevant to your application "
 "(supporting documents, proof of language level, etc.)."
+msgstr ""
+
+#, python-format
+msgid ""
+"You can do it automatically by clicking <button type=\"submit\" class=\"btn-"
+"link p-0 no-border\">here</button> or manually through the <a "
+"href=\"%(edit_experience_url)s\">edit form</a>."
+msgstr ""
+
+msgid ""
+"You can do it automatically by clicking <button type=\"submit\" class=\"btn-"
+"link p-0 no-border\">here</button>."
+msgstr ""
+
+#, python-format
+msgid ""
+"You can do it manually through the <a href=\"%(edit_experience_url)s\">edit "
+"form</a>."
 msgstr ""
 
 msgid ""
@@ -7598,6 +7783,9 @@ msgid ""
 "You can search for an additional training by name or acronym, or paste in a "
 "list of acronyms separated by the \"%(separator)s\" character and ending "
 "with the same character."
+msgstr ""
+
+msgid "You cannot apply for this course because you have already graduated."
 msgstr ""
 
 msgid ""
@@ -7652,12 +7840,29 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
+msgid ""
+"You cannot yet apply for this course because you are currently enrolled in a "
+"course that has not yet been deliberated."
+msgstr ""
+
 msgid "You do not meet the admission requirements"
 msgstr ""
 
 msgid ""
 "You do not specify if you are applying as resident or non-resident (as "
 "defined by government decree)."
+msgstr ""
+
+#, python-format
+msgid ""
+"You have already created another request for this training, please <a "
+"href=\"%(url)s\">continue with that one.</a>"
+msgstr ""
+
+#, python-format
+msgid ""
+"You have already submitted a request for this course which will take place "
+"during the year %(training_year)s."
 msgstr ""
 
 msgid "You have the option to integrate it in the current application."
@@ -7768,6 +7973,21 @@ msgstr ""
 msgid "You specified that no Belgian student status situation applies to you."
 msgstr ""
 
+msgid "You want:"
+msgstr ""
+
+msgid ""
+"You will find the PhD Regulations, specific provisions for your field, PhD "
+"programme stages and other helpful information on your PhD Field Committee "
+"website."
+msgstr ""
+
+msgid ""
+"You will find the PhD regulations, specific provisions for your field, the "
+"stages of the PhD programme and more helpful information on the website of "
+"your PhD Field Committee."
+msgstr ""
+
 msgid ""
 "You will receive a monthly newsletter explaining all the benefits and "
 "activities associated with this programme."
@@ -7789,6 +8009,12 @@ msgid "Your application is currently being reviewed by the course exam board"
 msgstr ""
 
 msgid "Your background is not suited to this course"
+msgstr ""
+
+msgid ""
+"Your complete application must be received by us within a maximum of 12 "
+"months. If it is not already attached to your application for admission, "
+"please:"
 msgstr ""
 
 msgid "Your completed and signed reorientation form"
@@ -7876,6 +8102,16 @@ msgctxt "payment"
 msgid "creditcard"
 msgstr "Credit card"
 
+msgid ""
+"define and prepare a thesis project in collaboration with your supervisor;"
+msgstr ""
+
+msgid ""
+"define and propose a PhD programme in collaboration with your supervisor; "
+"credits are awarded for modules, reading seminars and other research "
+"activities completed during the pre-admission period;"
+msgstr ""
+
 msgid "education group type"
 msgstr ""
 
@@ -7890,6 +8126,11 @@ msgctxt "payment"
 msgid "failed"
 msgstr "Failed"
 
+msgid ""
+"identify and establish scientific collaboration with your supervisor, "
+"including the necessary contacts for a Supervisory Committee."
+msgstr ""
+
 msgid "items per page"
 msgstr ""
 
@@ -7900,6 +8141,9 @@ msgstr ""
 msgid "no"
 msgstr ""
 
+msgid "on"
+msgstr ""
+
 #, python-format
 msgid "on %(date)s at %(hour)s"
 msgstr ""
@@ -7907,9 +8151,6 @@ msgstr ""
 msgctxt "payment"
 msgid "open"
 msgstr "Open"
-
-msgid "or"
-msgstr ""
 
 msgctxt "payment"
 msgid "paid"

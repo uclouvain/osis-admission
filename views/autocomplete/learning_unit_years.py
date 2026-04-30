@@ -57,10 +57,18 @@ class LearningUnitYearAndClassesAutocomplete(BaseLearningUnitYearAutoComplete):
         if not sigle or not annee:
             return []
 
-        cmd = LearningUnitAndPartimSearchCommand(annee_academique=annee, code=sigle, types_a_exclure=types_a_exclure)
+        cmd = LearningUnitAndPartimSearchCommand(
+            annee_academique=annee,
+            terme_de_recherche=sigle,
+            types_a_exclure=types_a_exclure,
+        )
         result_unites_enseignement = message_bus_instance.invoke(cmd)
 
-        cmd = SearchDetailClassesEffectivesCommand(annee=annee, code=sigle, types_a_exclure=types_a_exclure)
+        cmd = SearchDetailClassesEffectivesCommand(
+            annee=annee,
+            terme_de_recherche=sigle,
+            types_a_exclure=types_a_exclure,
+        )
         result_classes = message_bus_instance.invoke(cmd)
 
         full_results = result_unites_enseignement + result_classes

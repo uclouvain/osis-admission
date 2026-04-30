@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,19 +27,20 @@ from typing import Optional
 
 from django.forms import Form
 from django.shortcuts import resolve_url
+from django.urls import reverse
 from django.utils.functional import cached_property
 from django.utils.translation import gettext
-from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, TemplateView
-from osis_comment.models import CommentEntry
 from osis_history.models import HistoryEntry
+from typing_extensions import Type
 
 from admission.ddd.admission.doctorat.preparation.commands import (
+    ModifierAuthentificationExperienceAcademiqueCommand,
+    ModifierAuthentificationExperienceNonAcademiqueCommand,
     ModifierAuthentificationExperienceParcoursAnterieurCommand,
-    ModifierStatutChecklistExperienceParcoursAnterieurCommand,
+    ModifierStatutChecklistExperienceAcademiqueCommand,
     ModifierStatutChecklistParcoursAnterieurCommand,
     SpecifierConditionAccesPropositionCommand,
-    VerifierExperienceCurriculumApresSoumissionQuery,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
     ChoixStatutChecklist,
@@ -47,37 +48,28 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
 )
 from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
     ConditionAccesEtreSelectionneException,
-    ExperiencesAcademiquesNonCompleteesException,
     TitreAccesEtreSelectionneException,
 )
-from admission.ddd.admission.shared_kernel.commands import (
-    SpecifierExperienceEnTantQueTitreAccesCommand,
-)
-from admission.ddd.admission.shared_kernel.domain.model.enums.authentification import (
-    EtatAuthentificationParcours,
-)
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
-    ExperienceNonTrouveeException,
-)
-from admission.forms.admission.checklist import (
-    CommentForm,
-    DoctoratePastExperiencesAdmissionRequirementForm,
-    ExperienceStatusForm,
-    SinglePastExperienceAuthenticationForm,
-    StatusForm,
-    can_edit_experience_authentication,
-)
+from admission.ddd.admission.shared_kernel.commands import SpecifierExperienceEnTantQueTitreAccesCommand
+from admission.forms.admission.checklist import DoctoratePastExperiencesAdmissionRequirementForm, StatusForm
 from admission.templatetags.admission import authentication_css_class
 from admission.utils import get_missing_curriculum_periods_for_doctorate
 from admission.views.common.detail_tabs.checklist import ChecklistTabIcon
 from admission.views.common.mixins import AdmissionFormMixin, AdmissionViewMixin
-from admission.views.doctorate.details.checklist.mixins import (
-    CheckListDefaultContextMixin,
-)
+from admission.views.doctorate.details.checklist.mixins import CheckListDefaultContextMixin
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.utils.htmx import HtmxPermissionRequiredMixin
+from ddd.logic.shared_kernel.profil.commands import (
+    ModifierStatutExperienceNonAcademiqueCommand,
+    ModifierStatutExperienceParcoursAnterieurCommand,
+)
+from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
 from infrastructure.messages_bus import message_bus_instance
 from osis_common.ddd.interface import BusinessException
+from osis_profile.models.enums.experience_validation import EtatAuthentificationParcours
+from osis_profile.views.authentication_status import ChangeExperienceAuthenticationStatus
+from osis_profile.views.mixins.status import EditStatusMixin
+from osis_profile.views.validation_status import ChangeExperienceValidationStatus
 
 __all__ = [
     'MissingCurriculumPeriodsView',
@@ -292,52 +284,38 @@ class SinglePastExperienceMixin(
     PastExperiencesMixin,
     AdmissionFormMixin,
     CheckListDefaultContextMixin,
-    HtmxPermissionRequiredMixin,
-    FormView,
+    EditStatusMixin,
 ):
-    @cached_property
-    def experience_uuid(self):
-        return self.request.GET.get('identifier')
+    update_admission_author = True
 
-    @cached_property
-    def experience_type(self):
-        return self.request.GET.get('type', '')
+    def get_authentication_url(self):
+        return reverse(
+            f'{self.base_namespace}:single-past-experience-change-authentication',
+            kwargs={
+                'experience_uuid': self.experience_uuid,
+                'experience_type': self.kwargs['experience_type'],
+                'uuid': self.admission_uuid,
+            },
+        )
 
-    @property
-    def experience(self):
-        return next(
-            (
-                experience
-                for experience in self.admission.checklist['current']['parcours_anterieur']['enfants']
-                if experience['extra']['identifiant'] == self.experience_uuid
-            ),
-            None,
+    def get_validation_url(self):
+        return reverse(
+            f'{self.base_namespace}:single-past-experience-change-status',
+            kwargs={
+                'experience_uuid': self.experience_uuid,
+                'experience_type': self.kwargs['experience_type'],
+                'uuid': self.admission_uuid,
+            },
         )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        experience = self.experience
-        context['current'] = experience
-        context['initial'] = self.experience or {}
-        context['experience_type'] = self.experience_type
-        authentication_comment_identifier = f'parcours_anterieur__{self.experience_uuid}__authentication'
-        context.setdefault('comment_forms', {})
-        context['comment_forms'][authentication_comment_identifier] = CommentForm(
-            comment=CommentEntry.objects.filter(
-                object_uuid=self.admission_uuid,
-                tags=['parcours_anterieur', self.experience_uuid, 'authentication'],
-            )
-            .select_related('author')
-            .first(),
-            form_url=resolve_url(
-                f'{self.base_namespace}:save-comment',
-                uuid=self.admission_uuid,
-                tab=authentication_comment_identifier,
-            ),
-            prefix=authentication_comment_identifier,
-            disabled=not can_edit_experience_authentication(self.experience),
-            label=_('Comment about the authentication'),
-        )
+
+        experience_validation_dto = self.get_experience_validation_dto()
+        context['experience'] = experience_validation_dto
+
+        tab_identifier = f'parcours_anterieur__{self.experience_uuid}'
+
         context['experience_authentication_history_entry'] = (
             HistoryEntry.objects.filter(
                 object_uuid=self.admission_uuid,
@@ -348,105 +326,65 @@ class SinglePastExperienceMixin(
             .first()
         )
 
-        if experience:
-            tab_identifier = f'parcours_anterieur__{self.experience_uuid}'
-            experience_authentication_state = experience['extra'].get('etat_authentification') or ''
-            context['checklist_additional_icons'][tab_identifier].append(
-                ChecklistTabIcon(
-                    identifier='authentication_state',
-                    icon=authentication_css_class(authentication_status=experience_authentication_state),
-                    title=EtatAuthentificationParcours.get_value(experience_authentication_state),
-                    displayed=bool(experience_authentication_state),
-                )
-            )
-        return context
-
-    def get_success_url(self):
-        return self.request.get_full_path()
-
-    def command(self, form):
-        raise NotImplementedError
-
-    def form_valid(self, form):
-        try:
-            self.command(form)
-        except ExperienceNonTrouveeException as exception:
-            self.message_on_failure = exception.message
-            return super().form_invalid(form)
-        except MultipleBusinessExceptions as exception:
-            self.message_on_failure = exception.exceptions.pop().message
-            return super().form_invalid(form)
-        return super().form_valid(form)
-
-    @cached_property
-    def incomplete_curriculum_experiences(self):
-        # Override it to only check a single experience
-        try:
-            message_bus_instance.invoke(
-                VerifierExperienceCurriculumApresSoumissionQuery(
-                    uuid_proposition=self.admission_uuid,
-                    uuid_experience=self.experience_uuid,
-                    type_experience=self.experience_type,
-                )
-            )
-            return set()
-        except MultipleBusinessExceptions as multiple_exceptions:
-            return {
-                str(e.reference)
-                for e in multiple_exceptions.exceptions
-                if isinstance(e, ExperiencesAcademiquesNonCompleteesException)
-            }
-
-
-class SinglePastExperienceChangeStatusView(SinglePastExperienceMixin):
-    name = 'single-past-experience-change-status'
-    urlpatterns = 'single-past-experience-change-status'
-    permission_required = 'admission.checklist_change_past_experiences'
-    template_name = 'admission/general_education/includes/checklist/previous_experience_single.html'
-    htmx_template_name = 'admission/general_education/includes/checklist/previous_experience_single.html'
-    form_class = ExperienceStatusForm
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['authentication_form'] = SinglePastExperienceAuthenticationForm(self.experience)
-        return context
-
-    def command(self, form):
-        message_bus_instance.invoke(
-            ModifierStatutChecklistExperienceParcoursAnterieurCommand(
-                uuid_proposition=self.admission_uuid,
-                uuid_experience=self.experience_uuid,
-                type_experience=self.experience_type,
-                gestionnaire=self.request.user.person.global_id,
-                statut=form.cleaned_data['status'],
-                statut_authentification=form.cleaned_data['authentification'],
+        context['checklist_additional_icons'][tab_identifier].append(
+            ChecklistTabIcon(
+                identifier='authentication_state',
+                icon=authentication_css_class(authentication_status=experience_validation_dto.statut_authentification),
+                title=EtatAuthentificationParcours.get_value(experience_validation_dto.statut_authentification),
+                displayed=bool(experience_validation_dto.statut_authentification),
             )
         )
 
-
-class SinglePastExperienceChangeAuthenticationView(SinglePastExperienceMixin):
-    name = 'single-past-experience-change-authentication'
-    urlpatterns = 'single-past-experience-change-authentication'
-    permission_required = 'admission.checklist_change_past_experiences'
-    template_name = 'admission/general_education/includes/checklist/previous_experience_single_authentication_form.html'
-    htmx_template_name = (
-        'admission/general_education/includes/checklist/previous_experience_single_authentication_form.html'
-    )
-    form_class = SinglePastExperienceAuthenticationForm
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['checklist_experience_data'] = self.experience
-        return kwargs
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['authentication_form'] = context['form']
         return context
 
+
+class SinglePastExperienceChangeStatusView(ChangeExperienceValidationStatus, SinglePastExperienceMixin):
+    name = 'single-past-experience-change-status'
+    urlpatterns = {
+        'single-past-experience-change-status': (
+            'single-past-experience-change-status/<str:experience_type>/<uuid:experience_uuid>'
+        )
+    }
+    permission_required = 'admission.checklist_change_past_experiences'
+    template_name = 'admission/general_education/includes/checklist/previous_experience_single.html'
+    htmx_template_name = 'admission/general_education/includes/checklist/previous_experience_single.html'
+    without_context = False
+
     def command(self, form):
+        update_status_experience_cmd: Type[ModifierStatutExperienceParcoursAnterieurCommand] = {
+            TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name: ModifierStatutChecklistExperienceAcademiqueCommand,
+            TypeExperience.ACTIVITE_NON_ACADEMIQUE.name: ModifierStatutExperienceNonAcademiqueCommand,
+        }[self.kwargs['experience_type']]
+
+        cmd_parameters = {
+            'uuid_experience': self.experience_uuid,
+            'gestionnaire': self.request.user.person.global_id,
+            'statut': form.cleaned_data['status'],
+        }
+        if update_status_experience_cmd == ModifierStatutChecklistExperienceAcademiqueCommand:
+            cmd_parameters['uuid_proposition'] = self.admission_uuid
+
+        message_bus_instance.invoke(update_status_experience_cmd(**cmd_parameters))
+
+
+class SinglePastExperienceChangeAuthenticationView(ChangeExperienceAuthenticationStatus, SinglePastExperienceMixin):
+    name = 'single-past-experience-change-authentication'
+    urlpatterns = {
+        'single-past-experience-change-authentication': (
+            'single-past-experience-change-authentication/<str:experience_type>/<str:experience_uuid>'
+        )
+    }
+    permission_required = 'admission.checklist_change_past_experiences'
+    without_context = False
+
+    def command(self, form):
+        update_status_experience_cmd: Type[ModifierAuthentificationExperienceParcoursAnterieurCommand] = {
+            TypeExperience.FORMATION_ACADEMIQUE_EXTERNE.name: ModifierAuthentificationExperienceAcademiqueCommand,
+            TypeExperience.ACTIVITE_NON_ACADEMIQUE.name: ModifierAuthentificationExperienceNonAcademiqueCommand,
+        }[self.kwargs['experience_type']]
+
         message_bus_instance.invoke(
-            ModifierAuthentificationExperienceParcoursAnterieurCommand(
+            update_status_experience_cmd(
                 uuid_proposition=self.admission_uuid,
                 uuid_experience=self.experience_uuid,
                 gestionnaire=self.request.user.person.global_id,

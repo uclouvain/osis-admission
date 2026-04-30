@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -35,23 +35,14 @@ from admission.ddd.admission.doctorat.preparation.domain.model._comptabilite imp
     Comptabilite,
     comptabilite_non_remplie,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import (
-    DetailProjet,
-)
+from admission.ddd.admission.doctorat.preparation.domain.model._detail_projet import DetailProjet
 from admission.ddd.admission.doctorat.preparation.domain.model._experience_precedente_recherche import (
     ExperiencePrecedenteRecherche,
     aucune_experience_precedente_recherche,
 )
-from admission.ddd.admission.doctorat.preparation.domain.model._financement import (
-    Financement,
-    financement_non_rempli,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model._institut import (
-    InstitutIdentity,
-)
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
-    DoctoratFormation,
-)
+from admission.ddd.admission.doctorat.preparation.domain.model._financement import Financement, financement_non_rempli
+from admission.ddd.admission.doctorat.preparation.domain.model._institut import InstitutIdentity
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import DoctoratFormation
 from admission.ddd.admission.doctorat.preparation.domain.model.enums import (
     ChoixCommissionProximiteCDEouCLSM,
     ChoixCommissionProximiteCDSS,
@@ -69,7 +60,6 @@ from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist i
     DispenseOuDroitsMajores,
     DroitsInscriptionMontant,
     MobiliteNombreDeMois,
-    OngletsChecklist,
 )
 from admission.ddd.admission.doctorat.preparation.domain.model.statut_checklist import (
     StatutChecklist,
@@ -102,50 +92,24 @@ from admission.ddd.admission.doctorat.preparation.domain.validator.validator_by_
     SpecifierInformationsApprobationInscriptionValidatorList,
     SpecifierNouvellesInformationsDecisionCDDValidatorList,
 )
-from admission.ddd.admission.doctorat.preparation.dtos.curriculum import (
-    CurriculumAdmissionDTO,
-)
-from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import (
-    ProfilCandidat,
-)
-from admission.ddd.admission.shared_kernel.domain.model.complement_formation import (
-    ComplementFormationIdentity,
-)
-from admission.ddd.admission.shared_kernel.domain.model.enums.equivalence import (
-    EtatEquivalenceTitreAcces,
-    StatutEquivalenceTitreAcces,
-    TypeEquivalenceTitreAcces,
-)
-from admission.ddd.admission.shared_kernel.domain.model.enums.type_gestionnaire import (
-    TypeGestionnaire,
-)
-from admission.ddd.admission.shared_kernel.domain.model.formation import (
-    FormationIdentity,
-)
-from admission.ddd.admission.shared_kernel.domain.model.motif_refus import (
-    MotifRefusIdentity,
-)
-from admission.ddd.admission.shared_kernel.domain.model.question_specifique import (
-    QuestionSpecifique,
-)
-from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import (
-    TitreAccesSelectionnable,
-)
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
-    IProfilCandidatTranslator,
+from admission.ddd.admission.doctorat.preparation.dtos.curriculum import CurriculumAdmissionDTO
+from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import ProfilCandidat
+from admission.ddd.admission.shared_kernel.domain.model.complement_formation import ComplementFormationIdentity
+from admission.ddd.admission.shared_kernel.domain.model.enums.type_gestionnaire import TypeGestionnaire
+from admission.ddd.admission.shared_kernel.domain.model.formation import FormationIdentity
+from admission.ddd.admission.shared_kernel.domain.model.motif_refus import MotifRefusIdentity
+from admission.ddd.admission.shared_kernel.domain.model.question_specifique import QuestionSpecifique
+from admission.ddd.admission.shared_kernel.domain.model.titre_acces_selectionnable import TitreAccesSelectionnable
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
+from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
+    IInscriptionsTranslatorService,
 )
 from admission.ddd.admission.shared_kernel.domain.service.i_question_specifique import (
     ISuperQuestionSpecifiqueTranslator,
 )
-from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import (
-    ProfilCandidat as ProfilCandidatService,
-)
-from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
-    ExperienceNonTrouveeException,
-)
-from admission.ddd.admission.shared_kernel.dtos.emplacement_document import (
-    EmplacementDocumentDTO,
-)
+from admission.ddd.admission.shared_kernel.domain.service.profil_candidat import ProfilCandidat as ProfilCandidatService
+from admission.ddd.admission.shared_kernel.dtos import IdentificationDTO
+from admission.ddd.admission.shared_kernel.dtos.emplacement_document import EmplacementDocumentDTO
 from admission.ddd.admission.shared_kernel.enums import (
     ChoixAssimilation1,
     ChoixAssimilation2,
@@ -160,7 +124,6 @@ from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.ddd.admission.shared_kernel.repository.i_titre_acces_selectionnable import (
     ITitreAccesSelectionnableRepository,
 )
-from admission.ddd.admission.shared_kernel.utils import initialiser_checklist_experience
 from base.ddd.utils.business_validator import MultipleBusinessExceptions
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
@@ -169,15 +132,10 @@ from ddd.logic.financabilite.domain.model.enums.situation import (
     SituationFinancabilite,
 )
 from ddd.logic.reference.domain.model.bourse import BourseIdentity
-from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import (
-    AcademicYear,
-)
-from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import (
-    IAcademicYearRepository,
-)
-from ddd.logic.shared_kernel.profil.domain.service.parcours_interne import (
-    IExperienceParcoursInterneTranslator,
-)
+from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear
+from ddd.logic.shared_kernel.academic_year.repository.i_academic_year import IAcademicYearRepository
+from ddd.logic.shared_kernel.profil.domain.service.i_parcours_interne import IExperienceParcoursInterneTranslator
+from ddd.logic.shared_kernel.profil.dtos.parcours_externe import ExperienceAcademiqueDTO, ExperienceNonAcademiqueDTO
 from epc.models.enums.condition_acces import ConditionAcces
 from osis_common.ddd import interface
 
@@ -725,11 +683,12 @@ class Proposition(interface.RootEntity):
         statut_checklist_cible: str,
         titres_acces_selectionnes: List[TitreAccesSelectionnable],
         auteur_modification: str,
-        uuids_experiences_valorisees: set[str],
+        experiences_academiques: list[ExperienceAcademiqueDTO],
+        experiences_non_academiques: list[ExperienceNonAcademiqueDTO],
     ):
         ModifierStatutChecklistParcoursAnterieurValidatorList(
-            checklist=self.checklist_actuelle,
-            uuids_experiences_valorisees=uuids_experiences_valorisees,
+            experiences_academiques=experiences_academiques,
+            experiences_non_academiques=experiences_non_academiques,
             statut=ChoixStatutChecklist[statut_checklist_cible],
             titres_acces_selectionnes=titres_acces_selectionnes,
             condition_acces=self.condition_acces,
@@ -737,58 +696,6 @@ class Proposition(interface.RootEntity):
         ).validate()
 
         self.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist[statut_checklist_cible]
-        self.auteur_derniere_modification = auteur_modification
-
-    def specifier_statut_checklist_experience_parcours_anterieur(
-        self,
-        statut_checklist_cible: str,
-        statut_checklist_authentification: Optional[bool],
-        uuid_experience: str,
-        auteur_modification: str,
-        type_experience: str,
-        profil_candidat_translator: IProfilCandidatTranslator,
-        grade_academique_formation_proposition: str,
-    ):
-        if statut_checklist_cible == ChoixStatutChecklist.GEST_REUSSITE.name:
-            # Une expérience académique ne peut passer à l'état "Validé" que si elle est complète
-            ProfilCandidatService.verifier_experience_curriculum_formation_doctorale_apres_soumission(
-                proposition=self,
-                uuid_experience=uuid_experience,
-                type_experience=type_experience,
-                profil_candidat_translator=profil_candidat_translator,
-                grade_academique_formation_proposition=grade_academique_formation_proposition,
-            )
-        try:
-            experience = self.checklist_actuelle.recuperer_enfant(
-                OngletsChecklist.parcours_anterieur.name,
-                uuid_experience,
-            )
-        except StopIteration:
-            # Si l'expérience n'existe pas dans la checklist, on l'initialise
-            experience = initialiser_checklist_experience(experience_uuid=uuid_experience)
-            self.checklist_actuelle.parcours_anterieur.enfants.append(experience)
-
-        experience.statut = ChoixStatutChecklist[statut_checklist_cible]
-
-        if statut_checklist_authentification is None:
-            experience.extra.pop('authentification', None)
-        else:
-            experience.extra['authentification'] = '1' if statut_checklist_authentification else '0'
-
-        self.auteur_derniere_modification = auteur_modification
-
-    def specifier_authentification_experience_parcours_anterieur(
-        self,
-        uuid_experience: str,
-        auteur_modification: str,
-        etat_authentification: str,
-    ):
-        try:
-            experience = self.checklist_actuelle.recuperer_enfant('parcours_anterieur', uuid_experience)
-        except StopIteration:
-            raise ExperienceNonTrouveeException
-
-        experience.extra['etat_authentification'] = etat_authentification
         self.auteur_derniere_modification = auteur_modification
 
     def specifier_condition_acces(
@@ -1026,6 +933,8 @@ class Proposition(interface.RootEntity):
         experience_parcours_interne_translator: IExperienceParcoursInterneTranslator,
         grade_academique_formation_proposition: str,
         annee_formation: AcademicYear,
+        identification_dto: IdentificationDTO,
+        inscriptions_translator: IInscriptionsTranslatorService,
     ):
         if self.type_demande == TypeDemande.INSCRIPTION:
             ApprouverInscriptionParSicValidatorList(
@@ -1033,6 +942,7 @@ class Proposition(interface.RootEntity):
                 checklist=self.checklist_actuelle,
                 besoin_de_derogation=self.besoin_de_derogation,
                 documents_dto=documents_dto,
+                statut_validation_donnees_personnelles=identification_dto.statut_validation_donnees_personnelles,
             ).validate()
 
         else:
@@ -1042,6 +952,7 @@ class Proposition(interface.RootEntity):
                 complements_formation=self.complements_formation,
                 checklist=self.checklist_actuelle,
                 documents_dto=documents_dto,
+                statut_validation_donnees_personnelles=identification_dto.statut_validation_donnees_personnelles,
             ).validate()
 
         try:
@@ -1053,6 +964,7 @@ class Proposition(interface.RootEntity):
                 verification_experiences_completees=False,
                 grade_academique_formation_proposition=grade_academique_formation_proposition,
                 annee_formation=annee_formation,
+                inscriptions_translator=inscriptions_translator,
             )
         except MultipleBusinessExceptions:
             raise MultipleBusinessExceptions(exceptions=[CurriculumNonCompletePourAcceptationException()])
