@@ -32,13 +32,13 @@ from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
 from admission.api.serializers.pool_questions import PoolQuestionsSerializer
-from admission.calendar.admission_calendar import SIGLES_WITH_QUOTA
+from admission.constants import SIGLES_WITH_QUOTA
+from admission.ddd.admission.formation_generale.commands import VerifierPropositionQuery
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     ModificationInscriptionExterneNonConfirmeeException,
     ReorientationInscriptionExterneNonConfirmeeException,
     ResidenceAuSensDuDecretNonRenseigneeException,
 )
-from admission.ddd.admission.formation_generale.commands import VerifierPropositionQuery
 from admission.models import GeneralEducationAdmission
 from admission.utils import (
     gather_business_exceptions,

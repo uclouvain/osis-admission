@@ -25,8 +25,7 @@
 # ##############################################################################
 from typing import Dict, List, Optional
 
-from django.utils.translation import gettext as _
-from django.utils.translation import override
+from django.utils.translation import gettext as _, override
 
 from admission.calendar.admission_calendar import (
     AdmissionPoolExternalEnrollmentChangeCalendar,
@@ -278,20 +277,8 @@ def get_curriculum_section(
         if experience.a_obtenu_diplome
     )
 
-    all_foreign_diploma = has_foreign_diploma and all(
-        experience.pays != BE_ISO_CODE
-        for experience in context.curriculum.experiences_academiques
-        if experience.a_obtenu_diplome
-    )
-
     curriculum_extra_context = {
         'display_equivalence': formation.type in TRAINING_TYPES_WITH_EQUIVALENCE and has_foreign_diploma,
-        'require_equivalence': formation.type
-        in [
-            TrainingType.AGGREGATION.name,
-            TrainingType.CAPAES.name,
-        ]
-        and all_foreign_diploma,
         'display_curriculum': (
             context.proposition.inscription_au_role_obligatoire is True
             if context.est_proposition_continue

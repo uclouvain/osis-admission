@@ -143,6 +143,10 @@ def soumettre_proposition(
         matricule_candidat=proposition.matricule_candidat,
         annee_inscription_formation_translator=annee_inscription_formation_translator,
     )
+    candidat_est_inscrit_annee_precedente = inscriptions_translator.candidat_est_inscrit_annee_precedente(
+        matricule_candidat=proposition.matricule_candidat,
+        annee_inscription_formation_translator=annee_inscription_formation_translator,
+    )
     candidat_est_en_poursuite_directe = inscriptions_translator.est_en_poursuite_directe(
         matricule_candidat=proposition.matricule_candidat,
         sigle_formation=formation.entity_id.sigle,
@@ -153,7 +157,7 @@ def soumettre_proposition(
         titres=titres,
         calendrier_inscription=calendrier_inscription,
         profil_candidat_translator=profil_candidat_translator,
-        candidat_est_inscrit_recemment_ucl=candidat_est_inscrit_recemment_ucl,
+        candidat_est_inscrit_annee_precedente=candidat_est_inscrit_annee_precedente,
     )
     pool = AcademicCalendarTypes[cmd.pool]
 
@@ -198,6 +202,7 @@ def soumettre_proposition(
         formation_translator=formation_translator,
         profil_candidat_translator=profil_candidat_translator,
         candidat_est_inscrit_recemment_ucl=candidat_est_inscrit_recemment_ucl,
+        candidat_est_en_poursuite_directe=candidat_est_en_poursuite_directe,
     )
 
     doit_payer_frais_dossier = paiement_frais_dossier_service.doit_payer(

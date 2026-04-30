@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -56,7 +56,6 @@ class GlobalCurriculumForm(ConfigurableFormMixin):
         self,
         display_equivalence: bool,
         display_curriculum: bool,
-        require_equivalence: bool,
         require_curriculum: bool,
         *args,
         **kwargs,
@@ -65,9 +64,6 @@ class GlobalCurriculumForm(ConfigurableFormMixin):
 
         if not display_equivalence:
             del self.fields['equivalence_diplome']
-
-        elif require_equivalence:
-            self.fields['equivalence_diplome'].widget.attrs['class'] = REQUIRED_FIELD_CLASS
 
         if not display_curriculum:
             del self.fields['curriculum']

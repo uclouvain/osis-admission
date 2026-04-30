@@ -148,6 +148,18 @@ class InscriptionsTranslatorService(IInscriptionsTranslatorService):
         ).exists()
 
     @classmethod
+    def candidat_est_inscrit_annee_precedente(
+        cls,
+        matricule_candidat: str,
+        annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
+    ) -> bool:
+        administrative_year = annee_inscription_formation_translator.recuperer_calendrier_administratif_courant().annee
+        return cls.enrolment_qs(
+            global_id=matricule_candidat,
+            years=[administrative_year - 1],
+        ).exists()
+
+    @classmethod
     def recuperer_derniere_inscription(
         cls,
         matricule_candidat: str,

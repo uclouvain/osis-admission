@@ -38,6 +38,7 @@ from admission.tests.factories.curriculum import (
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from base.models.enums.community import CommunityEnum
 from base.models.enums.education_group_types import TrainingType
+from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.organization import OrganizationFactory
 from reference.models.enums.cycle import Cycle
@@ -52,6 +53,10 @@ class CandidateHasFirstCycleFwbExperienceWithNoDiplomaForTheEnrolmentTrainingTes
         cls.second_cycle_program = DiplomaTitleFactory(cycle=Cycle.SECOND_CYCLE.name)
         cls.french_speaking_institute = OrganizationFactory(community=CommunityEnum.FRENCH_SPEAKING.name)
         cls.german_speaking_institute = OrganizationFactory(community=CommunityEnum.GERMAN_SPEAKING.name)
+        cls.ucl_institute = OrganizationFactory(
+            acronym=UCLouvain_acronym,
+            community=CommunityEnum.FRENCH_SPEAKING.name,
+        )
 
     def test_with_in_draft_admission(self):
         admission = GeneralEducationAdmissionFactory(
@@ -125,6 +130,14 @@ class CandidateHasFirstCycleFwbExperienceWithNoDiplomaForTheEnrolmentTrainingTes
         res = candidate_is_potentially_concerned_by_bama_15(admission)
 
         self.assertTrue(res)
+
+        # UCL experience
+        experience.institute = self.ucl_institute
+        experience.save()
+
+        res = candidate_is_potentially_concerned_by_bama_15(admission)
+
+        self.assertFalse(res)
 
     def test_with_submitted_admission(self):
         admission = GeneralEducationAdmissionFactory(

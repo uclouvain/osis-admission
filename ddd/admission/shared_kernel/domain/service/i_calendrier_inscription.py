@@ -33,6 +33,7 @@ from django.utils.formats import date_format
 from django.utils.translation import gettext
 
 from admission.calendar.admission_calendar import *
+from admission.constants import SIGLES_WITH_QUOTA
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
     DoctoratFormation,
 )

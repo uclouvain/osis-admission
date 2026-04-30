@@ -48,6 +48,7 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
     FormationGeneraleCurriculumValidatorList,
     FormationGeneraleExperienceAcademiquePostSoumissionValidatorList,
     FormationGeneraleInformationsComplementairesValidatorList,
+    InitialisationPropositionValidatorList,
 )
 from admission.ddd.admission.shared_kernel.domain.model._candidat_adresse import CandidatAdresse
 from admission.ddd.admission.shared_kernel.domain.model._candidat_signaletique import CandidatSignaletique
@@ -79,6 +80,7 @@ from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from admission.ddd.admission.shared_kernel.enums.valorisation_experience import ExperiencesCVRecuperees
 from base.models.enums.community import CommunityEnum
 from base.models.enums.education_group_types import TrainingType
+from base.tasks.synchronize_entities_addresses import UCLouvain_acronym
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear
 from ddd.logic.shared_kernel.profil.domain.enums import TypeExperience
 from ddd.logic.shared_kernel.profil.domain.service.i_parcours_interne import IExperienceParcoursInterneTranslator
@@ -294,11 +296,9 @@ class ProfilCandidat(interface.DomainService):
             fichier_pdf=proposition.curriculum,
             experiences_non_academiques=curriculum.experiences_non_academiques,
             type_formation=type_formation,
-            equivalence_diplome=proposition.equivalence_diplome,
             sigle_formation=proposition.formation_id.sigle,
             annee_formation=annee_formation,
             candidat_est_inscrit_recemment_ucl=candidat_est_inscrit_recemment_ucl,
-            candidat_est_en_poursuite=proposition.est_en_poursuite,
         ).validate()
 
     @classmethod
@@ -563,6 +563,37 @@ class ProfilCandidat(interface.DomainService):
         ).validate()
 
     @classmethod
+    def verifier_initialisation_proposition_formation_generale(
+        cls,
+        matricule_candidat: str,
+        sigle_formation: str,
+        annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
+        inscriptions_translator: IInscriptionsTranslatorService,
+        deliberation_translator: IDeliberationTranslator,
+        diffusion_notes_translator: IDiffusionNotesTranslator,
+        inscriptions_evaluations_translator: IInscriptionsEvaluationsTranslator,
+        nomas_translator: INomasTranslator,
+    ):
+        candidat_est_eligible_a_la_reinscription = InscriptionsUCLCandidatService.est_eligible_a_la_reinscription(
+            matricule_candidat=matricule_candidat,
+            annee_inscription_formation_translator=annee_inscription_formation_translator,
+            inscriptions_translator=inscriptions_translator,
+            deliberation_translator=deliberation_translator,
+            diffusion_notes_translator=diffusion_notes_translator,
+            inscriptions_evaluations_translator=inscriptions_evaluations_translator,
+        )
+        candidat_est_diplome_formation = InscriptionsUCLCandidatService.est_diplome(
+            matricule_candidat=matricule_candidat,
+            sigle_formation=sigle_formation,
+            deliberation_translator=deliberation_translator,
+            nomas_translator=nomas_translator,
+        )
+        InitialisationPropositionValidatorList(
+            candidat_est_eligible_a_la_reinscription=candidat_est_eligible_a_la_reinscription,
+            candidat_est_diplome_formation=candidat_est_diplome_formation,
+        ).validate()
+
+    @classmethod
     def verifier_informations_complementaires_formation_generale(
         cls,
         proposition,
@@ -618,6 +649,7 @@ class ProfilCandidat(interface.DomainService):
             (demande_non_soumise or xp.valorisee_par_admissions and uuid_proposition in xp.valorisee_par_admissions)
             and xp.cycle_formation == Cycle.FIRST_CYCLE.name
             and xp.communaute_institut == CommunityEnum.FRENCH_SPEAKING.name
+            and xp.code_institut != UCLouvain_acronym
             and not xp.a_obtenu_diplome
             and not xp.formation_non_selectionnee_dans_liste_de_reference
             and any(annee for annee in xp.annees if annee.annee == annee_precedent_formation)

@@ -77,7 +77,7 @@ def recuperer_type_demande(
         inscriptions_ucl_candidat=inscriptions_ucl_candidat,
     )
 
-    candidat_est_inscrit_recemment_ucl = inscriptions_translator.est_inscrit_recemment(
+    candidat_est_inscrit_annee_precedente = inscriptions_translator.candidat_est_inscrit_annee_precedente(
         matricule_candidat=proposition.matricule_candidat,
         annee_inscription_formation_translator=annee_inscription_formation_translator,
     )
@@ -87,7 +87,7 @@ def recuperer_type_demande(
         titres=titres,
         calendrier_inscription=calendrier_inscription,
         profil_candidat_translator=profil_candidat_translator,
-        candidat_est_inscrit_recemment_ucl=candidat_est_inscrit_recemment_ucl,
+        candidat_est_inscrit_annee_precedente=candidat_est_inscrit_annee_precedente,
     )
 
     return type_demande.name

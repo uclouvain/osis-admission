@@ -960,3 +960,96 @@ class RetrieveDirectPursuitAssimilationTestCase(TestCase):
         )
 
         self.assertIsNone(result)
+
+
+@freezegun.freeze_time(datetime.date(2025, 1, 1))
+class IsEnrolledThePreviousYearTestCase(TestCase):
+    is_enrolled_the_previous_year = partial(
+        InscriptionsTranslatorService.candidat_est_inscrit_annee_precedente,
+        annee_inscription_formation_translator=AnneeInscriptionFormationTranslator(),
+    )
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+
+        cls.academic_years = {year: AcademicYearFactory(year=year) for year in [2023, 2024, 2025, 2026]}
+
+        cls.administrative_calendar = AcademicCalendarFactory(
+            reference=AcademicCalendarTypes.GENERAL_EDUCATION_ENROLLMENT.name,
+            start_date=datetime.date(2024, 11, 1),
+            end_date=datetime.date(2025, 10, 31),
+            data_year=cls.academic_years[2025],
+        )
+
+    def setUp(self):
+        super().setUp()
+
+        self.enrolment = InscriptionProgrammeAnnuelFactory(
+            etat_inscription=EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+            programme__offer__academic_type=AcademicTypes.ACADEMIC.name,
+            statut=StatutInscriptionProgrammAnnuel.ETUDIANT_UCL.name,
+            programme__root_group__academic_year=self.academic_years[2024],
+        )
+
+        self.student = self.enrolment.programme_cycle.etudiant.person
+
+    def test_with_no_enrolment(self):
+        result = self.is_enrolled_the_previous_year(matricule_candidat='UNKNOWN')
+
+        self.assertFalse(result)
+
+    def test_depends_on_enrolment_state(self):
+        valid_values = {
+            EtatInscriptionFormation.INSCRIT_AU_ROLE.name,
+            EtatInscriptionFormation.PROVISOIRE.name,
+            EtatInscriptionFormation.CESSATION.name,
+        }
+
+        for value in EtatInscriptionFormation:
+            self.enrolment.etat_inscription = value.name
+            self.enrolment.save()
+
+            result = self.is_enrolled_the_previous_year(matricule_candidat=self.student.global_id)
+
+            self.assertEqual(result, value.name in valid_values)
+
+    def test_depends_on_academic_type(self):
+        valid_values = {
+            AcademicTypes.ACADEMIC.name,
+            AcademicTypes.NON_ACADEMIC_CREF.name,
+        }
+
+        for value in AcademicTypes:
+            self.enrolment.programme.offer.academic_type = value.name
+            self.enrolment.programme.offer.save()
+
+            result = self.is_enrolled_the_previous_year(matricule_candidat=self.student.global_id)
+
+            self.assertEqual(result, value.name in valid_values)
+
+    def test_depends_on_status(self):
+        valid_values = {
+            StatutInscriptionProgrammAnnuel.ETUDIANT_UCL.name,
+        }
+
+        for value in StatutInscriptionProgrammAnnuel:
+            self.enrolment.statut = value.name
+            self.enrolment.save()
+
+            result = self.is_enrolled_the_previous_year(matricule_candidat=self.student.global_id)
+
+            self.assertEqual(result, value.name in valid_values)
+
+    def test_depends_on_academic_year(self):
+        valid_values = {
+            2024,
+        }
+
+        for year, academic_year in self.academic_years.items():
+            self.enrolment.programme.offer.academic_year = academic_year
+            self.enrolment.programme.offer.save()
+
+            result = self.is_enrolled_the_previous_year(matricule_candidat=self.student.global_id)
+
+            self.assertEqual(result, year in valid_values)

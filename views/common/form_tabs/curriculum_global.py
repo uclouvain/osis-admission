@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -37,7 +37,6 @@ from admission.ddd.admission.formation_generale.commands import (
     CompleterCurriculumCommand as CompleterCurriculumGeneraleCommand,
 )
 from admission.forms.admission.curriculum import GlobalCurriculumForm
-from admission.constants import CONTEXT_DOCTORATE, CONTEXT_GENERAL, CONTEXT_CONTINUING
 from admission.views.common.detail_tabs.curriculum_global import CurriculumGlobalCommonViewMixin
 from admission.views.common.mixins import AdmissionFormMixin
 from base.models.enums.education_group_types import TrainingType
@@ -60,18 +59,6 @@ class CurriculumGlobalFormView(AdmissionFormMixin, CurriculumGlobalCommonViewMix
     }
 
     @cached_property
-    def require_equivalence(self):
-        return (
-            self.proposition.formation.type
-            in {
-                TrainingType.AGGREGATION.name,
-                TrainingType.CAPAES.name,
-            }
-            and self.curriculum.a_diplome_etranger
-            and not self.curriculum.a_diplome_belge
-        )
-
-    @cached_property
     def require_curriculum(self):
         return self.proposition.formation.type != TrainingType.BACHELOR.name and (self.is_doctorate or self.is_general)
 
@@ -80,7 +67,6 @@ class CurriculumGlobalFormView(AdmissionFormMixin, CurriculumGlobalCommonViewMix
         kwargs['form_item_configurations'] = self.specific_questions
         kwargs['display_equivalence'] = self.display_equivalence
         kwargs['display_curriculum'] = self.display_curriculum
-        kwargs['require_equivalence'] = self.require_equivalence
         kwargs['require_curriculum'] = self.require_curriculum
         return kwargs
 
@@ -109,7 +95,6 @@ class CurriculumGlobalFormView(AdmissionFormMixin, CurriculumGlobalCommonViewMix
         elif self.is_general:
             message_bus_instance.invoke(
                 CompleterCurriculumGeneraleCommand(
-                    equivalence_diplome=form.cleaned_data['equivalence_diplome'],
                     **common_kwargs,
                 )
             )

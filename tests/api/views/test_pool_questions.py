@@ -31,6 +31,7 @@ from django.shortcuts import resolve_url
 from rest_framework.test import APITestCase
 
 from admission.calendar.admission_calendar import *
+from admission.constants import SIGLES_WITH_QUOTA
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     ResidenceAuSensDuDecretNonDisponiblePourInscriptionException,
 )

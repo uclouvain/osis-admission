@@ -29,7 +29,6 @@ from ._should_comptabilite_etre_completee import (
 )
 from ._should_curriculum_etre_complete import (
     ShouldCurriculumFichierEtreSpecifie,
-    ShouldEquivalenceEtreSpecifiee,
 )
 from ._should_etudes_secondaires_etre_completees import (
     ShouldAlternativeSecondairesEtreCompletee,

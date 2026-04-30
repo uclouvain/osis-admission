@@ -245,12 +245,12 @@ class VerifierProposition(interface.DomainService):
         titres: 'Titres',
         calendrier_inscription: 'ICalendrierInscription',
         profil_candidat_translator: 'IProfilCandidatTranslator',
-        candidat_est_inscrit_recemment_ucl: bool,
+        candidat_est_inscrit_annee_precedente: bool,
     ) -> 'TypeDemande':
         est_ue_plus_5 = calendrier_inscription.est_ue_plus_5(
             profil_candidat_translator.get_identification(proposition.matricule_candidat),
         )
-        if candidat_est_inscrit_recemment_ucl:
+        if candidat_est_inscrit_annee_precedente:
             # Hors (UE+5) qui ne sont pas en poursuite = admission
             # le reste = inscription
             return (

@@ -156,7 +156,6 @@ class CompleterCurriculumCommand(interface.CommandRequest):
     auteur_modification: str
 
     curriculum: List[str] = attr.Factory(list)
-    equivalence_diplome: List[str] = attr.Factory(list)
     reponses_questions_specifiques: Dict = attr.Factory(dict)
 
 

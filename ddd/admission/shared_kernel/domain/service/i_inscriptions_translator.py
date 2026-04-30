@@ -63,6 +63,15 @@ class IInscriptionsTranslatorService(interface.DomainService):
 
     @classmethod
     @abstractmethod
+    def candidat_est_inscrit_annee_precedente(
+        cls,
+        matricule_candidat: str,
+        annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
+    ) -> bool:
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
     def recuperer_derniere_inscription(
         cls,
         matricule_candidat: str,

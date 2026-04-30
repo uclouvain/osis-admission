@@ -29,8 +29,8 @@ from django.conf import settings
 from django.utils.translation import get_language, gettext_lazy as _
 
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
-from ddd.logic.shared_kernel.profil.domain.validator.exceptions import ExperienceNonTrouveeException
 from base.utils.utils import format_academic_year
+from ddd.logic.shared_kernel.profil.domain.validator.exceptions import ExperienceNonTrouveeException
 from osis_common.ddd.interface import BusinessException
 
 
@@ -285,7 +285,7 @@ class DemandeEnBrouillonDejaExistantePourCetteFormationException(BusinessExcepti
 
         message = _(
             'You have already created another request for this training, please '
-            '<a href="%(url)s">continue with that one.</a>'
+            '<a href="%(url)s">continue with that one</a>.'
         ) % {'url': portal_admission_url}
 
         super().__init__(message, **kwargs)

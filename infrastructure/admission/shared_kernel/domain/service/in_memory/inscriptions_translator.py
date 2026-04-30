@@ -55,6 +55,14 @@ class InscriptionsInMemoryTranslator(IInscriptionsTranslatorService):
         return False
 
     @classmethod
+    def candidat_est_inscrit_annee_precedente(
+        cls,
+        matricule_candidat: str,
+        annee_inscription_formation_translator: IAnneeInscriptionFormationTranslator,
+    ) -> bool:
+        return False
+
+    @classmethod
     def est_en_poursuite(
         cls,
         matricule_candidat: str,

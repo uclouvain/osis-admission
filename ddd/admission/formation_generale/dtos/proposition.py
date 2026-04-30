@@ -32,6 +32,7 @@ import attr
 from admission.ddd.admission.formation_generale.domain.model.enums import (
     STATUTS_PROPOSITION_GENERALE_NON_SOUMISE,
     DroitsInscriptionMontant,
+    RaisonPlusieursDemandesMemesCycleEtAnnee,
 )
 from admission.ddd.admission.formation_generale.dtos.condition_approbation import (
     ConditionComplementaireApprobationDTO,
@@ -162,6 +163,21 @@ class PropositionDTO(interface.DTO):
     @property
     def annee_demande(self):
         return self.annee_calculee or self.formation.annee
+
+    @property
+    def valeur_raison_plusieurs_demandes_meme_cycle_meme_annee(self):
+        if not self.raison_plusieurs_demandes_meme_cycle_meme_annee:
+            return ''
+        if (
+            self.raison_plusieurs_demandes_meme_cycle_meme_annee
+            == RaisonPlusieursDemandesMemesCycleEtAnnee.ANNULER_PRECEDENTES_DEMANDES.name
+        ):
+            return (
+                RaisonPlusieursDemandesMemesCycleEtAnnee.choix_annuler_precedentes_demandes_avec_informations_formation(
+                    formation=self.formation
+                )
+            )
+        return RaisonPlusieursDemandesMemesCycleEtAnnee.get_value(self.raison_plusieurs_demandes_meme_cycle_meme_annee)
 
 
 @attr.dataclass(frozen=True, slots=True)

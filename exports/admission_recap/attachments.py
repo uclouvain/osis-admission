@@ -357,7 +357,6 @@ def get_curriculum_attachments(
     specific_questions: List[QuestionSpecifiqueDTO],
     display_equivalence: bool,
     display_curriculum: bool,
-    require_equivalence: bool,
     require_curriculum: bool,
     **kwargs,
 ) -> List[Attachment]:
@@ -370,7 +369,7 @@ def get_curriculum_attachments(
                 identifier='DIPLOME_EQUIVALENCE',
                 label=DocumentsCurriculum['DIPLOME_EQUIVALENCE'],
                 uuids=context.proposition.equivalence_diplome,
-                required=require_equivalence,
+                required=False,
                 candidate_language=context.identification.langue_contact,
             )
         )

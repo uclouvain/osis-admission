@@ -169,7 +169,7 @@ class AdmissionCurriculumGlobalFormViewForGeneralTestCase(TestCase):
 
         form = response.context['form']
 
-        self.assertIn('equivalence_diplome', form.fields)
+        self.assertNotIn('equivalence_diplome', form.fields)
 
         other_admission = GeneralEducationAdmissionFactory(
             candidate=self.general_admission.candidate,
