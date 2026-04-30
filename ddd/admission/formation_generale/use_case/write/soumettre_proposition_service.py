@@ -164,6 +164,12 @@ def soumettre_proposition(
         sigle_formation=proposition.formation_id.sigle,
         annee_inscription_formation_translator=annee_inscription_formation_translator,
     )
+    est_en_poursuite_cycle_bachelier = InscriptionsUCLCandidatService.est_en_poursuite_cycle_bachelier(
+        inscriptions_ucl_candidat=inscriptions_ucl_candidat,
+        formation_id=formation_id,
+        type_formation=formation.type,
+        deliberation_translator=deliberation_translator,
+    )
 
     # WHEN
     VerifierProposition.verifier(
@@ -235,6 +241,7 @@ def soumettre_proposition(
             cmd.justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee
         ),
         assimilation_passee=assimilation_passee,
+        est_en_poursuite_cycle_bachelier=est_en_poursuite_cycle_bachelier,
     )
 
     proposition.specifier_financabilite_resultat_calcul(

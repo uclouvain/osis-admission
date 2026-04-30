@@ -24,7 +24,9 @@
 #
 # ##############################################################################
 import datetime
+from typing import Optional
 
+from admission.ddd.admission.shared_kernel.domain.deliberation import DecisionDeliberation
 from admission.ddd.admission.shared_kernel.domain.service.i_deliberation_translator import IDeliberationTranslator
 from ddd.logic.deliberation.cloture.dto.deliberation import DeliberationCycleDTO, DeliberationProgrammeAnnuelDTO
 
@@ -44,6 +46,7 @@ class DeliberationInMemoryTranslator(IDeliberationTranslator):
         cls,
         nomas: list[str],
         annee: int,
+        sigle_formation: str = '',
     ) -> dict[tuple[str, str], dict[int, DeliberationProgrammeAnnuelDTO | None]]:
         return {}
 
@@ -53,3 +56,15 @@ class DeliberationInMemoryTranslator(IDeliberationTranslator):
         annee: int,
     ) -> datetime.date:
         return datetime.date(year=annee, month=4, day=15)
+
+    @classmethod
+    def recuperer_decision_deliberation(
+        cls,
+        noma: str,
+        sigle_formation: str,
+        annee: Optional[int] = None,
+    ) -> DecisionDeliberation:
+        return DecisionDeliberation(
+            est_diplome=True,
+            reussite_bloc_1=True,
+        )

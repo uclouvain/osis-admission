@@ -70,6 +70,7 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
     SpecifierInformationsApprobationInscriptionValidatorList,
     SpecifierNouvellesInformationsDecisionFacultaireValidatorList,
 )
+from admission.ddd.admission.shared_kernel.domain.deliberation import DecisionDeliberation
 from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.shared_kernel.domain.model.assimilation import Assimilation
 from admission.ddd.admission.shared_kernel.domain.model.complement_formation import ComplementFormationIdentity
@@ -346,6 +347,7 @@ class Proposition(interface.RootEntity):
         raison_plusieurs_demandes_meme_cycle_meme_annee: str,
         justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee: str,
         assimilation_passee: Assimilation | None,
+        est_en_poursuite_cycle_bachelier: PoursuiteDeCycle,
     ):
         if doit_payer_frais_dossier:
             self.statut = ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE
@@ -374,6 +376,7 @@ class Proposition(interface.RootEntity):
         self.justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee = (
             justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee
         )
+        self.poursuite_de_cycle = est_en_poursuite_cycle_bachelier
         if assimilation_passee:
             self.comptabilite.type_situation_assimilation = assimilation_passee.type_situation_assimilation
             self.comptabilite.sous_type_situation_assimilation_1 = (
@@ -1182,6 +1185,7 @@ class Proposition(interface.RootEntity):
         annee_formation: AcademicYear,
         identification_dto: IdentificationDTO,
         inscriptions_translator: IInscriptionsTranslatorService,
+        decision_deliberation: DecisionDeliberation,
     ):
         if self.type_demande == TypeDemande.INSCRIPTION:
             ApprouverInscriptionParSicValidatorList(
@@ -1193,6 +1197,8 @@ class Proposition(interface.RootEntity):
                 conditions_complementaires_libres=self.conditions_complementaires_libres,
                 documents_dto=documents_dto,
                 statut_validation_donnees_personnelles=identification_dto.statut_validation_donnees_personnelles,
+                decision_deliberation=decision_deliberation,
+                poursuite_de_cycle=self.poursuite_de_cycle,
             ).validate()
 
         else:
@@ -1207,6 +1213,8 @@ class Proposition(interface.RootEntity):
                 checklist=self.checklist_actuelle,
                 documents_dto=documents_dto,
                 statut_validation_donnees_personnelles=identification_dto.statut_validation_donnees_personnelles,
+                decision_deliberation=decision_deliberation,
+                poursuite_de_cycle=self.poursuite_de_cycle,
             ).validate()
 
         try:

@@ -50,6 +50,7 @@ from base.models.enums.academic_type import AcademicTypes
 from base.tests.factories.academic_calendar import AcademicCalendarFactory
 from base.tests.factories.academic_year import AcademicYearFactory
 from epc.models.enums.assimilation import Assimilation as AssimilationEnum
+from epc.models.enums.etat_concours_attestation import EtatConcoursAttestation
 from epc.models.enums.etat_inscription import EtatInscriptionFormation
 from epc.models.enums.statut_inscription_programme_annuel import StatutInscriptionProgrammAnnuel
 from epc.tests.factories.inscription_programme_annuel import InscriptionProgrammeAnnuelFactory
@@ -401,6 +402,7 @@ class RetrieveValidEnrolmentsTestCase(TestCase):
             programme__offer__academic_type=AcademicTypes.ACADEMIC.name,
             statut=StatutInscriptionProgrammAnnuel.ETUDIANT_UCL.name,
             programme__root_group__academic_year=self.academic_years[2024],
+            programme_cycle__etat_concours_attestation=EtatConcoursAttestation.ACCORDEE.name,
         )
 
         self.student = self.enrolment.programme_cycle.etudiant.person
@@ -419,6 +421,7 @@ class RetrieveValidEnrolmentsTestCase(TestCase):
         self.assertEqual(result[0].annee, self.enrolment.programme.offer.academic_year.year)
         self.assertEqual(result[0].noma, self.enrolment.programme_cycle.etudiant.registration_id)
         self.assertEqual(result[0].est_premiere_annee_bachelier, self.enrolment.est_premiere_annee_bachelier)
+        self.assertEqual(result[0].etat_concours_attestation, self.enrolment.programme_cycle.etat_concours_attestation)
 
     def test_depends_on_enrolment_state(self):
         valid_values = {
