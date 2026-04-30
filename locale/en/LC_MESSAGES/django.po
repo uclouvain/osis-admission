@@ -2113,9 +2113,6 @@ msgstr ""
 msgid "Diploma equivalence"
 msgstr ""
 
-msgid "Diploma nationality"
-msgstr ""
-
 msgid "Diploma of aptitude for access to higher education (DAES)"
 msgstr ""
 
@@ -6172,6 +6169,9 @@ msgstr ""
 msgid "Study language"
 msgstr ""
 
+msgid "Study nationality"
+msgstr ""
+
 msgid "Subject"
 msgstr ""
 
@@ -6302,10 +6302,10 @@ msgid ""
 msgstr ""
 
 msgid ""
-"Takes into account the nationality of higher education diplomas. 'Not "
-"Belgian' means that the candidate hasn't got any Belgian diploma but has a "
-"foreign diploma. Similarly, 'Not UE' means that the candidate hasn't got any "
-"UE diploma but has a non-UE diploma."
+"Takes into account the nationality of the secondary and higher education. "
+"'Belgian' means that the candidate attended a belgian study and 'UE' a UE "
+"study ; otherwise, the 'Not Belgian' and 'Not UE' criteria are respectively "
+"applied."
 msgstr ""
 
 msgid "Teaching campus of the training"
