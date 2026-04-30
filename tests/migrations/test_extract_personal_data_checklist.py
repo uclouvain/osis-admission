@@ -55,7 +55,6 @@ class ExtractPersonalDataChecklistTestCase(TestCase):
         cls.validated_status = cls.personal_data_statuses[ChoixStatutValidationDonneesPersonnelles.VALIDEES.name]
         # Temporary remove some new statuses that are not yet managed in admission
         cls.statuses_to_ignore = [
-            ChoixStatutValidationDonneesPersonnelles.DETTE_ACTIVE,
             ChoixStatutValidationDonneesPersonnelles.EXCLU,
         ]
 
