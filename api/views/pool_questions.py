@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -33,17 +33,14 @@ from rest_framework.settings import api_settings
 
 from admission.api.serializers.pool_questions import PoolQuestionsSerializer
 from admission.calendar.admission_calendar import SIGLES_WITH_QUOTA
+from admission.ddd.admission.formation_generale.commands import VerifierPropositionQuery
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     ModificationInscriptionExterneNonConfirmeeException,
     ReorientationInscriptionExterneNonConfirmeeException,
     ResidenceAuSensDuDecretNonRenseigneeException,
 )
-from admission.ddd.admission.formation_generale.commands import VerifierPropositionQuery
 from admission.models import GeneralEducationAdmission
-from admission.utils import (
-    gather_business_exceptions,
-    get_cached_general_education_admission_perm_obj,
-)
+from admission.utils import gather_business_exceptions, get_cached_general_education_admission_perm_obj
 from base.models.academic_calendar import AcademicCalendar
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
 from base.models.enums.education_group_types import TrainingType
@@ -129,7 +126,7 @@ class PoolQuestionsView(APIPermissionRequiredMixin, RetrieveAPIView):
             field_questions_to_display.append(academic_year_field_name)
 
         # Build relevant field list
-        if self.get_permission_object().training.acronym in SIGLES_WITH_QUOTA:
+        if admission.training.acronym in SIGLES_WITH_QUOTA and not admission.is_in_pursuit:
             field_questions_to_display.append('is_non_resident')
         if admission.reorientation_pool_end_date is not None:
             field_questions_to_display += [

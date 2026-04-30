@@ -33,30 +33,17 @@ from django.utils.formats import date_format
 from django.utils.translation import gettext
 
 from admission.calendar.admission_calendar import *
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
-    DoctoratFormation,
-)
-from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import (
-    IdentificationNonCompleteeException,
-)
-from admission.ddd.admission.formation_generale.domain.model.proposition import (
-    Proposition,
-)
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import DoctoratFormation
+from admission.ddd.admission.doctorat.preparation.domain.validator.exceptions import IdentificationNonCompleteeException
+from admission.ddd.admission.formation_generale.domain.model.proposition import Proposition
 from admission.ddd.admission.formation_generale.dtos import PropositionDTO
-from admission.ddd.admission.shared_kernel.domain.model.formation import (
-    Formation,
-    FormationIdentity,
-)
+from admission.ddd.admission.shared_kernel.domain.model.formation import Formation, FormationIdentity
 from admission.ddd.admission.shared_kernel.domain.model.periode import Periode
-from admission.ddd.admission.shared_kernel.domain.service.i_formation_translator import (
-    IFormationTranslator,
-)
+from admission.ddd.admission.shared_kernel.domain.service.i_formation_translator import IFormationTranslator
 from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_translator import (
     IInscriptionsTranslatorService,
 )
-from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import (
-    IProfilCandidatTranslator,
-)
+from admission.ddd.admission.shared_kernel.domain.service.i_profil_candidat import IProfilCandidatTranslator
 from admission.ddd.admission.shared_kernel.domain.service.i_titres_acces import Titres
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     AucunPoolCorrespondantException,
@@ -364,7 +351,7 @@ proposition={('Proposition(' + pformat(attr.asdict(proposition)) + ')') if propo
         """Si le candidat s'inscrit dans une formation contingentée et n'a pas répondu à la question
         sur la résidence au sens du décret."""
         if cls.inscrit_formation_contingentee(sigle) and proposition:
-            if proposition.est_non_resident_au_sens_decret is None:
+            if proposition.est_non_resident_au_sens_decret is None and not proposition.est_en_poursuite:
                 raise ResidenceAuSensDuDecretNonRenseigneeException()
             elif (
                 cls.INTERDIRE_INSCRIPTION_ETUDES_CONTINGENTES_POUR_NON_RESIDENT
