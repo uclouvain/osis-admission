@@ -24,6 +24,7 @@
 #
 # ##############################################################################
 import datetime
+import uuid
 from unittest.mock import MagicMock, patch
 
 import freezegun
@@ -37,6 +38,7 @@ from admission.ddd.admission.formation_generale.domain.model.enums import (
     RaisonPlusieursDemandesMemesCycleEtAnnee,
 )
 from admission.ddd.admission.formation_generale.domain.model.proposition import PropositionIdentity
+from admission.ddd.admission.formation_generale.domain.model.statut_checklist import StatutChecklist
 from admission.ddd.admission.formation_generale.domain.service.checklist import Checklist
 from admission.ddd.admission.formation_generale.test.factory.proposition import PropositionFactory
 from admission.ddd.admission.shared_kernel.domain.model.assimilation import Assimilation
@@ -52,6 +54,9 @@ from admission.ddd.admission.shared_kernel.enums import (
 from admission.infrastructure.admission.formation_generale.domain.service.in_memory.formation import (
     FormationGeneraleInMemoryTranslator,
 )
+from admission.infrastructure.admission.formation_generale.domain.service.in_memory.question_specifique import (
+    QuestionSpecifiqueInMemoryTranslator,
+)
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
     PropositionInMemoryRepository,
 )
@@ -63,10 +68,13 @@ from admission.infrastructure.admission.shared_kernel.domain.service.in_memory.p
 )
 from admission.infrastructure.message_bus_in_memory import message_bus_in_memory_instance
 from base.models.enums.academic_calendar_type import AcademicCalendarTypes
+from base.models.enums.community import CommunityEnum
+from base.models.enums.education_group_types import TrainingType
 from ddd.logic.financabilite.domain.model.enums.etat import EtatFinancabilite
 from ddd.logic.financabilite.dtos.financabilite import FinancabiliteDTO
 from ddd.logic.shared_kernel.academic_year.domain.model.academic_year import AcademicYear, AcademicYearIdentity
 from infrastructure.shared_kernel.academic_year.repository.in_memory.academic_year import AcademicYearInMemoryRepository
+from reference.models.enums.cycle import Cycle
 
 
 class TestSoumettrePropositionGenerale(TestCase):
@@ -489,3 +497,206 @@ class TestSoumettrePropositionGenerale(TestCase):
 
         self.assertEqual(statut_checklist.statut, ChoixStatutChecklist.INITIAL_CANDIDAT)
         self.assertEqual(statut_checklist.libelle, 'Declared not assimilated')
+
+    def test_initialisation_checklist_specificites_formation_avec_aucune_reponse(self):
+        question_specifique_translator = QuestionSpecifiqueInMemoryTranslator()
+
+        statut_suffisant = StatutChecklist(
+            libelle="Sufficient",
+            statut=ChoixStatutChecklist.GEST_REUSSITE,
+        )
+
+        statut_checklist = Checklist._recuperer_statut_checklist_initial_specificites_formation(
+            proposition=MagicMock(
+                documents_additionnels=[],
+            ),
+            identification_dto=MagicMock(est_concerne_par_visa=False),
+            questions_specifiques_translator=question_specifique_translator,
+            experiences_academiques=[],
+            formation=MagicMock(type=TrainingType.BACHELOR.name),
+            candidat_est_inscrit_recemment_ucl=False,
+        )
+
+        self.assertEqual(statut_checklist, statut_suffisant)
+
+    def test_initialisation_checklist_specificites_formation_avec_documents_additionnels(self):
+        question_specifique_translator = QuestionSpecifiqueInMemoryTranslator()
+
+        statut_a_traiter = StatutChecklist(
+            libelle="To be processed",
+            statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
+        )
+
+        statut_checklist = Checklist._recuperer_statut_checklist_initial_specificites_formation(
+            proposition=MagicMock(
+                documents_additionnels=[uuid.uuid4()],
+            ),
+            identification_dto=MagicMock(est_concerne_par_visa=False),
+            questions_specifiques_translator=question_specifique_translator,
+            experiences_academiques=[],
+            formation=MagicMock(type=TrainingType.BACHELOR.name),
+            candidat_est_inscrit_recemment_ucl=False,
+        )
+
+        self.assertEqual(statut_checklist, statut_a_traiter)
+
+    def test_initialisation_checklist_specificites_formation_avec_visa(self):
+        question_specifique_translator = QuestionSpecifiqueInMemoryTranslator()
+
+        statut_suffisant = StatutChecklist(
+            libelle="Sufficient",
+            statut=ChoixStatutChecklist.GEST_REUSSITE,
+        )
+        statut_a_traiter = StatutChecklist(
+            libelle="To be processed",
+            statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
+        )
+
+        statut_checklist = Checklist._recuperer_statut_checklist_initial_specificites_formation(
+            proposition=MagicMock(
+                documents_additionnels=[],
+            ),
+            identification_dto=MagicMock(est_concerne_par_visa=True),
+            questions_specifiques_translator=question_specifique_translator,
+            experiences_academiques=[],
+            formation=MagicMock(type=TrainingType.BACHELOR.name),
+            candidat_est_inscrit_recemment_ucl=False,
+        )
+
+        self.assertEqual(statut_checklist, statut_a_traiter)
+
+        statut_checklist = Checklist._recuperer_statut_checklist_initial_specificites_formation(
+            proposition=MagicMock(
+                documents_additionnels=[],
+            ),
+            identification_dto=MagicMock(est_concerne_par_visa=True),
+            questions_specifiques_translator=question_specifique_translator,
+            experiences_academiques=[],
+            formation=MagicMock(type=TrainingType.BACHELOR.name),
+            candidat_est_inscrit_recemment_ucl=True,
+        )
+
+        self.assertEqual(statut_checklist, statut_suffisant)
+
+    def test_initialisation_checklist_specificites_formation_avec_bama_15(self):
+        question_specifique_translator = QuestionSpecifiqueInMemoryTranslator()
+
+        statut_suffisant = StatutChecklist(
+            libelle="Sufficient",
+            statut=ChoixStatutChecklist.GEST_REUSSITE,
+        )
+        statut_a_traiter = StatutChecklist(
+            libelle="To be processed",
+            statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
+        )
+
+        statut_checklist = Checklist._recuperer_statut_checklist_initial_specificites_formation(
+            proposition=MagicMock(
+                documents_additionnels=[],
+                annee_calculee=2026,
+            ),
+            identification_dto=MagicMock(est_concerne_par_visa=False),
+            questions_specifiques_translator=question_specifique_translator,
+            experiences_academiques=[
+                MagicMock(
+                    cycle_formation=Cycle.FIRST_CYCLE.name,
+                    communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
+                    a_obtenu_diplome=False,
+                    formation_non_selectionnee_dans_liste_de_reference=False,
+                    annees=[MagicMock(annee=2025)],
+                )
+            ],
+            formation=MagicMock(type=TrainingType.MASTER_M1.name),
+            candidat_est_inscrit_recemment_ucl=False,
+        )
+
+        self.assertEqual(statut_checklist, statut_a_traiter)
+
+        statut_checklist = Checklist._recuperer_statut_checklist_initial_specificites_formation(
+            proposition=MagicMock(
+                documents_additionnels=[],
+                annee_calculee=2026,
+            ),
+            identification_dto=MagicMock(est_concerne_par_visa=False),
+            questions_specifiques_translator=question_specifique_translator,
+            experiences_academiques=[
+                MagicMock(
+                    cycle_formation=Cycle.FIRST_CYCLE.name,
+                    communaute_institut=CommunityEnum.FRENCH_SPEAKING.name,
+                    a_obtenu_diplome=False,
+                    formation_non_selectionnee_dans_liste_de_reference=False,
+                    annees=[MagicMock(annee=2025)],
+                )
+            ],
+            formation=MagicMock(type=TrainingType.MASTER_M1.name),
+            candidat_est_inscrit_recemment_ucl=True,
+        )
+
+        self.assertEqual(statut_checklist, statut_suffisant)
+
+    def test_initialisation_checklist_specificites_formation_avec_questions_specifiques(self):
+        question_specifique_translator = QuestionSpecifiqueInMemoryTranslator()
+
+        statut_suffisant = StatutChecklist(
+            libelle="Sufficient",
+            statut=ChoixStatutChecklist.GEST_REUSSITE,
+        )
+        statut_a_traiter = StatutChecklist(
+            libelle="To be processed",
+            statut=ChoixStatutChecklist.INITIAL_CANDIDAT,
+        )
+
+        # Questions spécifiques
+        with mock.patch.object(
+            question_specifique_translator,
+            'search_dto_by_proposition',
+            return_value=[MagicMock(requis=True, valeur='ABC')],
+        ):
+            statut_checklist = Checklist._recuperer_statut_checklist_initial_specificites_formation(
+                proposition=MagicMock(
+                    documents_additionnels=[],
+                ),
+                identification_dto=MagicMock(est_concerne_par_visa=False),
+                questions_specifiques_translator=question_specifique_translator,
+                experiences_academiques=[],
+                formation=MagicMock(type=TrainingType.BACHELOR.name),
+                candidat_est_inscrit_recemment_ucl=False,
+            )
+
+            self.assertEqual(statut_checklist, statut_a_traiter)
+
+        with mock.patch.object(
+            question_specifique_translator,
+            'search_dto_by_proposition',
+            return_value=[MagicMock(requis=False, valeur='ABC')],
+        ):
+            statut_checklist = Checklist._recuperer_statut_checklist_initial_specificites_formation(
+                proposition=MagicMock(
+                    documents_additionnels=[],
+                ),
+                identification_dto=MagicMock(est_concerne_par_visa=False),
+                questions_specifiques_translator=question_specifique_translator,
+                experiences_academiques=[],
+                formation=MagicMock(type=TrainingType.BACHELOR.name),
+                candidat_est_inscrit_recemment_ucl=False,
+            )
+
+            self.assertEqual(statut_checklist, statut_a_traiter)
+
+        with mock.patch.object(
+            question_specifique_translator,
+            'search_dto_by_proposition',
+            return_value=[MagicMock(requis=False, valeur='')],
+        ):
+            statut_checklist = Checklist._recuperer_statut_checklist_initial_specificites_formation(
+                proposition=MagicMock(
+                    documents_additionnels=[],
+                ),
+                identification_dto=MagicMock(est_concerne_par_visa=False),
+                questions_specifiques_translator=question_specifique_translator,
+                experiences_academiques=[],
+                formation=MagicMock(type=TrainingType.BACHELOR.name),
+                candidat_est_inscrit_recemment_ucl=False,
+            )
+
+            self.assertEqual(statut_checklist, statut_suffisant)

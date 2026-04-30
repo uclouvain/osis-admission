@@ -141,6 +141,13 @@ def verifier_proposition(
         annee_inscription_formation_translator=annee_inscription_formation_translator,
     )
 
+    curriculum = profil_candidat_translator.get_curriculum(
+        matricule=proposition.matricule_candidat,
+        annee_courante=annee_courante,
+        uuid_proposition=proposition.entity_id.uuid,
+        inscriptions_translator=inscriptions_translator,
+    )
+
     # WHEN
     VerifierProposition.verifier(
         proposition_candidat=proposition,
@@ -164,6 +171,7 @@ def verifier_proposition(
         assimilation_passee=assimilation_passee,
         candidat_est_en_poursuite_directe=candidat_est_en_poursuite_directe,
         inscriptions_ucl_candidat=inscriptions_ucl_candidat,
+        curriculum=curriculum,
     )
 
     # THEN
