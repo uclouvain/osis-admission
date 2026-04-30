@@ -4244,6 +4244,9 @@ msgstr ""
 msgid "Manager follow-up"
 msgstr ""
 
+msgid "Manager opinion"
+msgstr ""
+
 msgid ""
 "Mandatory fields are missing in the 'Additional information > Dual bachelor-"
 "master registration (BAMA15)' tab."

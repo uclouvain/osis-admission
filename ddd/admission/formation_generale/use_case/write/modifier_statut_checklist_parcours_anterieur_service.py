@@ -92,6 +92,7 @@ def modifier_statut_checklist_parcours_anterieur(
 
     proposition.specifier_statut_checklist_parcours_anterieur(
         statut_checklist_cible=cmd.statut,
+        statut_checklist_cible_extra=cmd.extra,
         titres_acces_selectionnes=titres_acces_selectionnes,
         auteur_modification=cmd.gestionnaire,
         type_formation=formation.type,

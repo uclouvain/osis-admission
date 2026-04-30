@@ -1998,6 +1998,7 @@ class PastExperiencesStatusView(
                 ModifierStatutChecklistParcoursAnterieurCommand(
                     uuid_proposition=self.admission_uuid,
                     statut=form.cleaned_data['status'],
+                    extra=self.request.GET.get('extra', ''),
                     gestionnaire=self.request.user.person.global_id,
                 )
             )

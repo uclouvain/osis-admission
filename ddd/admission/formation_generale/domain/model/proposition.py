@@ -754,6 +754,7 @@ class Proposition(interface.RootEntity):
     def specifier_statut_checklist_parcours_anterieur(
         self,
         statut_checklist_cible: str,
+        statut_checklist_cible_extra: str,
         titres_acces_selectionnes: List[TitreAccesSelectionnable],
         auteur_modification: str,
         type_formation: TrainingType,
@@ -776,6 +777,13 @@ class Proposition(interface.RootEntity):
         ).validate()
 
         self.checklist_actuelle.parcours_anterieur.statut = ChoixStatutChecklist[statut_checklist_cible]
+        if (
+            self.checklist_actuelle.parcours_anterieur.statut == ChoixStatutChecklist.GEST_EN_COURS
+            and statut_checklist_cible_extra
+        ):
+            self.checklist_actuelle.parcours_anterieur.extra = {'en_cours': statut_checklist_cible_extra}
+        else:
+            self.checklist_actuelle.parcours_anterieur.extra = {}
         self.auteur_derniere_modification = auteur_modification
 
     def specifier_condition_acces(
