@@ -68,6 +68,8 @@ class IdentificationDTO(interface.DTO):
     annee_derniere_inscription_ucl: Optional[int]
     noma_derniere_inscription_ucl: str
 
+    noma_etudiant: str
+
     statut_validation_donnees_personnelles: str
 
     @property

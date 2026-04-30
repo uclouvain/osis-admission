@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Admission API
-  version: 1.1.19
+  version: 1.1.20.dev1774
   description: This API delivers data for the Admission project.
   contact:
     name: UCLouvain - OSIS
@@ -9476,6 +9476,8 @@ components:
           nullable: true
         noma_derniere_inscription_ucl:
           type: string
+        noma_etudiant:
+          type: string
         est_potentiellement_concerne_par_le_bama_15:
           type: boolean
           readOnly: true
@@ -9493,6 +9495,7 @@ components:
       - nom_pays_naissance
       - nom_pays_nationalite
       - noma_derniere_inscription_ucl
+      - noma_etudiant
       - numero_carte_identite
       - numero_passeport
       - numero_registre_national_belge
@@ -9644,6 +9647,8 @@ components:
           nullable: true
         noma_derniere_inscription_ucl:
           type: string
+        noma_etudiant:
+          type: string
       required:
       - autres_prenoms
       - carte_identite
@@ -9658,6 +9663,7 @@ components:
       - nom_pays_naissance
       - nom_pays_nationalite
       - noma_derniere_inscription_ucl
+      - noma_etudiant
       - numero_carte_identite
       - numero_passeport
       - numero_registre_national_belge
