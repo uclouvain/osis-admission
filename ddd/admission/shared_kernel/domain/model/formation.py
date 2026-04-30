@@ -25,6 +25,7 @@
 # ##############################################################################
 import attr
 
+from admission.constants import SIGLES_WITH_QUOTA
 from admission.ddd import PREFIXES_DOMAINES_FORMATIONS_DENT_MED
 from admission.ddd.admission.shared_kernel.domain.enums import TypeFormation
 from admission.ddd.admission.shared_kernel.domain.model._campus import Campus
@@ -57,7 +58,7 @@ class FormationIdentity(interface.EntityIdentity):
     annee: int
 
     def est_formation_avec_quota(self):
-        return self.sigle in ['KINE1BA', 'VETE1BA', 'LOGO1BA']
+        return self.sigle in SIGLES_WITH_QUOTA
 
 
 def est_formation_medecine_ou_dentisterie(code_domaine: str) -> bool:

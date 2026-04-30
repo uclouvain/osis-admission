@@ -32,27 +32,27 @@ from django.test import TestCase
 from django.utils.translation import gettext
 from rest_framework import status
 
-from admission.calendar.admission_calendar import SIGLES_WITH_QUOTA
-from admission.models import GeneralEducationAdmission, ContinuingEducationAdmission
+from admission.constants import SIGLES_WITH_QUOTA
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
+from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
 from admission.ddd.admission.shared_kernel.dtos.question_specifique import QuestionSpecifiqueDTO
 from admission.ddd.admission.shared_kernel.enums import Onglets
-from admission.ddd.admission.formation_continue.domain.model.enums import ChoixStatutPropositionContinue
+from admission.models import ContinuingEducationAdmission, GeneralEducationAdmission
 from admission.tests.factories.continuing_education import (
-    ContinuingEducationTrainingFactory,
     ContinuingEducationAdmissionFactory,
+    ContinuingEducationTrainingFactory,
 )
 from admission.tests.factories.diplomatic_post import DiplomaticPostFactory
 from admission.tests.factories.form_item import AdmissionFormItemInstantiationFactory, MessageAdmissionFormItemFactory
 from admission.tests.factories.general_education import GeneralEducationAdmissionFactory
 from admission.tests.factories.roles import (
-    SicManagementRoleFactory,
     CandidateFactory,
     ProgramManagerRoleFactory,
+    SicManagementRoleFactory,
 )
 from base.models.enums.person_address_type import PersonAddressType
 from base.tests.factories.academic_year import AcademicYearFactory
-from base.tests.factories.education_group_year import Master120TrainingFactory, EducationGroupYearBachelorFactory
+from base.tests.factories.education_group_year import EducationGroupYearBachelorFactory, Master120TrainingFactory
 from base.tests.factories.entity import EntityWithVersionFactory
 from base.tests.factories.entity_version import EntityVersionFactory
 from base.tests.factories.person_address import PersonAddressFactory

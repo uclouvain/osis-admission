@@ -35,7 +35,7 @@ from django.test import TestCase, override_settings
 from django.utils.translation import gettext
 from rest_framework import status
 
-from admission.calendar.admission_calendar import SIGLES_WITH_QUOTA
+from admission.constants import SIGLES_WITH_QUOTA
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
     ENTITY_CDE,
 )

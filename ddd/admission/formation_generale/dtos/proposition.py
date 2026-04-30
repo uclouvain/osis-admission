@@ -170,7 +170,7 @@ class PropositionDTO(interface.DTO):
             return ''
         if (
             self.raison_plusieurs_demandes_meme_cycle_meme_annee
-            == RaisonPlusieursDemandesMemesCycleEtAnnee.SUIVRE_EN_PARALLELE.name
+            == RaisonPlusieursDemandesMemesCycleEtAnnee.ANNULER_PRECEDENTES_DEMANDES.name
         ):
             return (
                 RaisonPlusieursDemandesMemesCycleEtAnnee.choix_annuler_precedentes_demandes_avec_informations_formation(

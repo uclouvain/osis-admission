@@ -27,6 +27,7 @@ import datetime
 from abc import ABC
 from typing import Dict, List, Optional
 
+from admission.constants import SIGLES_WITH_QUOTA
 from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import (
     DoctoratFormation,
 )
@@ -76,7 +77,6 @@ __all__ = [
     "AdmissionAccessConditionsUrl",
     "AdmissionMedicineDentistryEnrollmentCalendar",
     "AdmissionPoolMedicineDentistryStandardPeriodCalendar",
-    "SIGLES_WITH_QUOTA",
     "est_formation_contingentee_et_non_resident",
     "PoolCalendar",
 ]
@@ -93,8 +93,6 @@ DIPLOMES_ACCES_BELGE = [
     ConditionAccess.POTENTIEL_ACCES_VAE,
     ConditionAccess.ALTERNATIVE_ETUDES_SECONDAIRES,
 ]
-
-SIGLES_WITH_QUOTA = ['KINE1BA', 'VETE1BA', 'LOGO1BA']
 
 SECOND_CYCLE_TYPES = [
     TrainingType.AGGREGATION.name,

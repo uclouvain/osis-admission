@@ -25,8 +25,9 @@
 # ##############################################################################
 from typing import Iterable
 
+from django.utils.html import format_html
 from django.utils.safestring import mark_safe
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext, gettext_lazy as _
 
 from admission.ddd.admission.shared_kernel.dtos.formation import FormationDTO
 from base.models.utils.utils import ChoiceEnum
@@ -305,16 +306,14 @@ class RaisonPlusieursDemandesMemesCycleEtAnnee(ChoiceEnum):
 
     @classmethod
     def choix_annuler_precedentes_demandes_avec_informations_formation(cls, formation: FormationDTO):
-        return mark_safe(
-            _(
-                'Create an application for <em>%(training_name)s (%(training_campus)s) '
-                '%(training_acronym)s</em> and cancel your other applications'
-            )
-            % {
-                'training_name': formation.intitule or formation.intitule_fr,
-                'training_campus': formation.campus.nom if formation.campus else '',
-                'training_acronym': formation.sigle,
-            }
+        return format_html(
+            gettext(
+                'Create an application for <em>{training_name} ({training_campus}) {training_acronym}</em> '
+                'and cancel your other applications'
+            ),
+            training_name=formation.intitule or formation.intitule_fr,
+            training_campus=formation.campus.nom if formation.campus else '',
+            training_acronym=formation.sigle,
         )
 
     @classmethod
