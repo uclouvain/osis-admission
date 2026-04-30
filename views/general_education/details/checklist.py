@@ -40,7 +40,8 @@ from django.urls import reverse
 from django.utils import timezone, translation
 from django.utils.formats import date_format
 from django.utils.functional import cached_property
-from django.utils.translation import gettext, gettext_lazy as _, ngettext, override, pgettext
+from django.utils.translation import gettext, ngettext, override, pgettext
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, TemplateView
 from django.views.generic.base import RedirectView, View
 from django_htmx.http import HttpResponseClientRefresh
@@ -1555,15 +1556,15 @@ class SicApprovalDecisionView(
             nombre_annees_prevoir_programme=form.cleaned_data['program_planned_years_number'],
             nom_personne_contact_programme_annuel=form.cleaned_data['annual_program_contact_person_name'],
             email_personne_contact_programme_annuel=form.cleaned_data['annual_program_contact_person_email'],
+            droits_inscription_montant=form.cleaned_data['tuition_fees_amount'],
+            droits_inscription_montant_autre=form.cleaned_data.get('tuition_fees_amount_other', None),
+            dispense_ou_droits_majores=form.cleaned_data['tuition_fees_dispensation'],
         )
 
     def launch_command(self, form):
         message_bus_instance.invoke(
             SpecifierInformationsAcceptationPropositionParSicCommand(
                 **self.get_common_command_kwargs(form),
-                droits_inscription_montant=form.cleaned_data['tuition_fees_amount'],
-                droits_inscription_montant_autre=form.cleaned_data.get('tuition_fees_amount_other', None),
-                dispense_ou_droits_majores=form.cleaned_data['tuition_fees_dispensation'],
                 tarif_particulier=form.cleaned_data.get('particular_cost', ''),
                 refacturation_ou_tiers_payant=form.cleaned_data.get('rebilling_or_third_party_payer', ''),
                 annee_de_premiere_inscription_et_statut=form.cleaned_data.get('first_year_inscription_and_status', ''),

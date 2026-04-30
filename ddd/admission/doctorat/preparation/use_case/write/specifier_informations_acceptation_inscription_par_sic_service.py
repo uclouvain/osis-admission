@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -51,6 +51,9 @@ def specifier_informations_acceptation_inscription_par_sic(
         commentaire_complements_formation=cmd.commentaire_complements_formation,
         nom_personne_contact_programme_annuel=cmd.nom_personne_contact_programme_annuel,
         email_personne_contact_programme_annuel=cmd.email_personne_contact_programme_annuel,
+        droits_inscription_montant=cmd.droits_inscription_montant,
+        droits_inscription_montant_autre=cmd.droits_inscription_montant_autre,
+        dispense_ou_droits_majores=cmd.dispense_ou_droits_majores,
     )
 
     proposition_repository.save(entity=proposition)

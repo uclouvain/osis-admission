@@ -555,15 +555,15 @@ class SicApprovalDecisionView(
             commentaire_complements_formation=form.cleaned_data['prerequisite_courses_fac_comment'],
             nom_personne_contact_programme_annuel=form.cleaned_data['annual_program_contact_person_name'],
             email_personne_contact_programme_annuel=form.cleaned_data['annual_program_contact_person_email'],
+            droits_inscription_montant=form.cleaned_data['tuition_fees_amount'],
+            droits_inscription_montant_autre=form.cleaned_data.get('tuition_fees_amount_other', None),
+            dispense_ou_droits_majores=form.cleaned_data['tuition_fees_dispensation'],
         )
 
     def launch_command(self, form):
         message_bus_instance.invoke(
             SpecifierInformationsAcceptationPropositionParSicCommand(
                 **self.get_common_command_kwargs(form),
-                droits_inscription_montant=form.cleaned_data['tuition_fees_amount'],
-                droits_inscription_montant_autre=form.cleaned_data.get('tuition_fees_amount_other', None),
-                dispense_ou_droits_majores=form.cleaned_data['tuition_fees_dispensation'],
                 est_mobilite=form.cleaned_data.get('is_mobility', ''),
                 nombre_de_mois_de_mobilite=form.cleaned_data.get('mobility_months_amount', ''),
                 doit_se_presenter_en_sic=form.cleaned_data.get('must_report_to_sic', False),

@@ -6,7 +6,7 @@
 #  The core business involves the administration of students, teachers,
 #  courses, programs and so on.
 #
-#  Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#  Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -33,24 +33,24 @@ from django.test import TestCase
 from django.utils.translation import gettext
 from osis_history.models import HistoryEntry
 
+from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
+from admission.ddd.admission.formation_generale.domain.model.enums import (
+    ChoixStatutChecklist,
+    ChoixStatutPropositionGenerale,
+)
+from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
 from admission.models import GeneralEducationAdmission
 from admission.models.checklist import AdditionalApprovalCondition, FreeAdditionalApprovalCondition
-from admission.ddd.admission.doctorat.preparation.domain.model.doctorat_formation import ENTITY_CDE
-from admission.ddd.admission.shared_kernel.enums.type_demande import TypeDemande
-from admission.ddd.admission.formation_generale.domain.model.enums import (
-    ChoixStatutPropositionGenerale,
-    ChoixStatutChecklist,
-)
 from admission.tests.factories.faculty_decision import (
     AdditionalApprovalConditionFactory,
     FreeAdditionalApprovalConditionFactory,
 )
 from admission.tests.factories.general_education import (
-    GeneralEducationTrainingFactory,
     GeneralEducationAdmissionFactory,
+    GeneralEducationTrainingFactory,
 )
 from admission.tests.factories.person import CompletePersonFactory
-from admission.tests.factories.roles import SicManagementRoleFactory, ProgramManagerRoleFactory
+from admission.tests.factories.roles import ProgramManagerRoleFactory, SicManagementRoleFactory
 from admission.tests.views.general_education.checklist.sic_decision.base import SicPatchMixin
 from base.tests.factories.academic_year import AcademicYearFactory
 from base.tests.factories.entity import EntityWithVersionFactory
@@ -89,9 +89,9 @@ class SicEnrolmentApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
             determined_academic_year=cls.academic_years[0],
         )
         cls.experience_uuid = str(cls.general_admission.candidate.educationalexperience_set.first().uuid)
-        cls.general_admission.checklist['current']['parcours_anterieur'][
-            'statut'
-        ] = ChoixStatutChecklist.GEST_REUSSITE.name
+        cls.general_admission.checklist['current']['parcours_anterieur']['statut'] = (
+            ChoixStatutChecklist.GEST_REUSSITE.name
+        )
         cls.general_admission.save()
         cls.url = resolve_url(
             'admission:general-education:sic-decision-enrolment-approval',
@@ -136,9 +136,6 @@ class SicEnrolmentApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.assertEqual(form.initial.get('all_additional_approval_conditions'), [])
 
         for field in [
-            'tuition_fees_amount',
-            'tuition_fees_amount_other',
-            'tuition_fees_dispensation',
             'particular_cost',
             'rebilling_or_third_party_payer',
             'first_year_inscription_and_status',
@@ -342,6 +339,9 @@ class SicEnrolmentApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
             'sic-decision-approval-annual_program_contact_person_name': 'John Doe',
             'sic-decision-approval-annual_program_contact_person_email': 'john.doe@example.be',
             'sic-decision-approval-join_program_fac_comment': 'Comment about the join program',
+            'sic-decision-approval-tuition_fees_amount': 'AUTRE',
+            'sic-decision-approval-tuition_fees_amount_other': 10.5,
+            'sic-decision-approval-tuition_fees_dispensation': 'DISPENSE_OFFRE',
             'sic-decision-TOTAL_FORMS': '2',
             'sic-decision-INITIAL_FORMS': '0',
             'sic-decision-MIN_NUM_FORMS': '0',
@@ -386,6 +386,9 @@ class SicEnrolmentApprovalDecisionViewTestCase(SicPatchMixin, TestCase):
         self.assertEqual(self.general_admission.program_planned_years_number, 5)
         self.assertEqual(self.general_admission.annual_program_contact_person_name, 'John Doe')
         self.assertEqual(self.general_admission.annual_program_contact_person_email, 'john.doe@example.be')
+        self.assertEqual(self.general_admission.tuition_fees_amount, 'AUTRE')
+        self.assertEqual(self.general_admission.tuition_fees_amount_other, 10.5)
+        self.assertEqual(self.general_admission.tuition_fees_dispensation, 'DISPENSE_OFFRE')
         self.assertEqual(self.general_admission.last_update_author, self.sic_manager_user.person)
         self.assertEqual(self.general_admission.modified_at, datetime.datetime.now())
 

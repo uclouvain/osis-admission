@@ -7,7 +7,7 @@
   * The core business involves the administration of students, teachers,
   * courses, programs and so on.
   *
-  * Copyright (C) 2015-2025 Université catholique de Louvain (http://www.uclouvain.be)
+  * Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
   *
   * This program is free software: you can redistribute it and/or modify
   * it under the terms of the GNU General Public License as published by
@@ -102,7 +102,7 @@
     {% bootstrap_field sic_decision_approval_form.with_additional_approval_conditions %}
     <div
         id="sic-decision-additional-approval-conditions-container"
-        class="mb-15"
+        class="mb-15 hidden"
     >
       {% candidate_language admission.langue_contact_candidat as candidate_language_tag %}
       {% bootstrap_field sic_decision_approval_form.all_additional_approval_conditions label=sic_decision_approval_form.all_additional_approval_conditions.label|add:candidate_language_tag|safe form_group_class="form-group required_field" %}
@@ -169,6 +169,10 @@
       </div>
     </fieldset>
 
+    {% bootstrap_field sic_decision_approval_form.tuition_fees_amount %}
+    {% bootstrap_field sic_decision_approval_form.tuition_fees_amount_other form_group_class='form-group required_field' %}
+    {% bootstrap_field sic_decision_approval_form.tuition_fees_dispensation %}
+
     {% block sic_decision_approval_form_additional_fields %}{% endblock %}
 
   </div>
@@ -211,6 +215,11 @@
 
     window.admission.sicDecisionApprovalForm = function (element) {
     $(document).ready(function() {
+        {# Display fields depending on other fields #}
+        $('#id_sic-decision-approval-tuition_fees_amount_other').dependsOn({
+            '#id_sic-decision-approval-tuition_fees_amount': {values: ['AUTRE']},
+        }, {duration: 0, valueOnDisable: '',});
+
         {% block additional_scripts %}
         {% endblock %}
 

@@ -6,7 +6,7 @@
 #    The core business involves the administration of students, teachers,
 #    courses, programs and so on.
 #
-#    Copyright (C) 2015-2024 Université catholique de Louvain (http://www.uclouvain.be)
+#    Copyright (C) 2015-2026 Université catholique de Louvain (http://www.uclouvain.be)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -30,9 +30,9 @@ import factory
 import freezegun
 from django.test import TestCase
 
-from admission.ddd.admission.shared_kernel.domain.model.complement_formation import ComplementFormationIdentity
-from admission.ddd.admission.shared_kernel.domain.model.condition_complementaire_approbation import (
-    ConditionComplementaireApprobationIdentity,
+from admission.ddd.admission.doctorat.preparation.domain.model.enums.checklist import (
+    DispenseOuDroitsMajores,
+    DroitsInscriptionMontant,
 )
 from admission.ddd.admission.formation_generale.commands import (
     SpecifierInformationsAcceptationInscriptionParSicCommand,
@@ -46,6 +46,10 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
 from admission.ddd.admission.formation_generale.test.factory.proposition import (
     PropositionFactory,
     _PropositionIdentityFactory,
+)
+from admission.ddd.admission.shared_kernel.domain.model.complement_formation import ComplementFormationIdentity
+from admission.ddd.admission.shared_kernel.domain.model.condition_complementaire_approbation import (
+    ConditionComplementaireApprobationIdentity,
 )
 from admission.ddd.admission.shared_kernel.tests.factory.formation import FormationIdentityFactory
 from admission.infrastructure.admission.formation_generale.repository.in_memory.proposition import (
@@ -99,6 +103,9 @@ class TestSpecifierInformationsAcceptationInscriptionParSic(TestCase):
             'nom_personne_contact_programme_annuel': '',
             'email_personne_contact_programme_annuel': '',
             'gestionnaire': '0123456789',
+            'droits_inscription_montant': '',
+            'droits_inscription_montant_autre': None,
+            'dispense_ou_droits_majores': '',
         }
 
     def test_should_etre_ok_avec_min_informations(self):
@@ -120,6 +127,9 @@ class TestSpecifierInformationsAcceptationInscriptionParSic(TestCase):
         self.assertEqual(proposition.nombre_annees_prevoir_programme, 2)
         self.assertEqual(proposition.nom_personne_contact_programme_annuel_annuel, '')
         self.assertEqual(proposition.email_personne_contact_programme_annuel_annuel, '')
+        self.assertEqual(proposition.droits_inscription_montant, '')
+        self.assertEqual(proposition.droits_inscription_montant_autre, None)
+        self.assertEqual(proposition.dispense_ou_droits_majores, '')
 
     def test_should_lever_exception_si_statut_proposition_non_valide(self):
         self.proposition.statut = ChoixStatutPropositionGenerale.TRAITEMENT_FAC
@@ -153,6 +163,9 @@ class TestSpecifierInformationsAcceptationInscriptionParSic(TestCase):
                 nom_personne_contact_programme_annuel='John Doe',
                 email_personne_contact_programme_annuel='john.doe@uclouvain.be',
                 gestionnaire='0123456789',
+                droits_inscription_montant=DroitsInscriptionMontant.AUTRE.name,
+                droits_inscription_montant_autre=10.5,
+                dispense_ou_droits_majores=DispenseOuDroitsMajores.REDUCTION_VCRC.name,
             )
         )
 
@@ -190,3 +203,6 @@ class TestSpecifierInformationsAcceptationInscriptionParSic(TestCase):
         self.assertEqual(proposition.nom_personne_contact_programme_annuel_annuel, 'John Doe')
         self.assertEqual(proposition.email_personne_contact_programme_annuel_annuel, 'john.doe@uclouvain.be')
         self.assertEqual(proposition.auteur_derniere_modification, '0123456789')
+        self.assertEqual(proposition.droits_inscription_montant, DroitsInscriptionMontant.AUTRE.name)
+        self.assertEqual(proposition.droits_inscription_montant_autre, 10.5)
+        self.assertEqual(proposition.dispense_ou_droits_majores, DispenseOuDroitsMajores.REDUCTION_VCRC.name)

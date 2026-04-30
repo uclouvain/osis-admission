@@ -425,3 +425,19 @@ class DejaInscritFormationAnnualiseeException(BusinessException):
             'annee': format_academic_year(annee, short=True),
         }
         super().__init__(message, **kwargs)
+
+
+class EtudiantPremiereAnneeADejaSonBloc1Exception(BusinessException):
+    status_code = "FORMATION-GENERALE-46"
+
+    def __init__(self, **kwargs):
+        message = _("The bloc 1 is successful for this training. The student should be in cycle pursuing")
+        super().__init__(message=message, **kwargs)
+
+
+class EtudiantDejaDiplomeException(BusinessException):
+    status_code = "FORMATION-GENERALE-47"
+
+    def __init__(self, **kwargs):
+        message = _("The student already has a diploma for this training")
+        super().__init__(message=message, **kwargs)

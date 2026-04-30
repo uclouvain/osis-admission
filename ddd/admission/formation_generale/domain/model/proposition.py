@@ -70,6 +70,7 @@ from admission.ddd.admission.formation_generale.domain.validator.validator_by_bu
     SpecifierInformationsApprobationInscriptionValidatorList,
     SpecifierNouvellesInformationsDecisionFacultaireValidatorList,
 )
+from admission.ddd.admission.shared_kernel.domain.deliberation import DecisionDeliberation
 from admission.ddd.admission.shared_kernel.domain.model._profil_candidat import ProfilCandidat
 from admission.ddd.admission.shared_kernel.domain.model.assimilation import Assimilation
 from admission.ddd.admission.shared_kernel.domain.model.complement_formation import ComplementFormationIdentity
@@ -346,6 +347,7 @@ class Proposition(interface.RootEntity):
         raison_plusieurs_demandes_meme_cycle_meme_annee: str,
         justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee: str,
         assimilation_passee: Assimilation | None,
+        est_en_poursuite_cycle_bachelier: PoursuiteDeCycle,
     ):
         if doit_payer_frais_dossier:
             self.statut = ChoixStatutPropositionGenerale.FRAIS_DOSSIER_EN_ATTENTE
@@ -374,6 +376,7 @@ class Proposition(interface.RootEntity):
         self.justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee = (
             justification_textuelle_plusieurs_demandes_meme_cycle_meme_annee
         )
+        self.poursuite_de_cycle = est_en_poursuite_cycle_bachelier
         if assimilation_passee:
             self.comptabilite.type_situation_assimilation = assimilation_passee.type_situation_assimilation
             self.comptabilite.sous_type_situation_assimilation_1 = (
@@ -1009,6 +1012,9 @@ class Proposition(interface.RootEntity):
         nombre_annees_prevoir_programme: Optional[int],
         nom_personne_contact_programme_annuel: str,
         email_personne_contact_programme_annuel: str,
+        droits_inscription_montant: str,
+        droits_inscription_montant_autre: Optional[float],
+        dispense_ou_droits_majores: str,
     ):
         """Spécifier les informations d'acceptation par SIC communes entre les admissions et les inscriptions."""
         self.auteur_derniere_modification = auteur_modification
@@ -1043,6 +1049,10 @@ class Proposition(interface.RootEntity):
 
         self.nom_personne_contact_programme_annuel_annuel = nom_personne_contact_programme_annuel
         self.email_personne_contact_programme_annuel_annuel = email_personne_contact_programme_annuel
+
+        self.droits_inscription_montant = droits_inscription_montant
+        self.droits_inscription_montant_autre = droits_inscription_montant_autre
+        self.dispense_ou_droits_majores = dispense_ou_droits_majores
 
     def specifier_informations_acceptation_par_sic(
         self,
@@ -1093,11 +1103,11 @@ class Proposition(interface.RootEntity):
             nombre_annees_prevoir_programme=nombre_annees_prevoir_programme,
             nom_personne_contact_programme_annuel=nom_personne_contact_programme_annuel,
             email_personne_contact_programme_annuel=email_personne_contact_programme_annuel,
+            droits_inscription_montant=droits_inscription_montant,
+            droits_inscription_montant_autre=droits_inscription_montant_autre,
+            dispense_ou_droits_majores=dispense_ou_droits_majores,
         )
 
-        self.droits_inscription_montant = droits_inscription_montant
-        self.droits_inscription_montant_autre = droits_inscription_montant_autre
-        self.dispense_ou_droits_majores = dispense_ou_droits_majores
         self.tarif_particulier = tarif_particulier
         self.refacturation_ou_tiers_payant = refacturation_ou_tiers_payant
         self.annee_de_premiere_inscription_et_statut = annee_de_premiere_inscription_et_statut
@@ -1119,6 +1129,9 @@ class Proposition(interface.RootEntity):
         nombre_annees_prevoir_programme: Optional[int],
         nom_personne_contact_programme_annuel: str,
         email_personne_contact_programme_annuel: str,
+        droits_inscription_montant: str,
+        droits_inscription_montant_autre: Optional[float],
+        dispense_ou_droits_majores: str,
     ):
         SpecifierInformationsApprobationInscriptionValidatorList(
             statut=self.statut,
@@ -1135,6 +1148,9 @@ class Proposition(interface.RootEntity):
             nombre_annees_prevoir_programme=nombre_annees_prevoir_programme,
             nom_personne_contact_programme_annuel=nom_personne_contact_programme_annuel,
             email_personne_contact_programme_annuel=email_personne_contact_programme_annuel,
+            droits_inscription_montant=droits_inscription_montant,
+            droits_inscription_montant_autre=droits_inscription_montant_autre,
+            dispense_ou_droits_majores=dispense_ou_droits_majores,
         )
 
     def specifier_motifs_refus_par_sic(
@@ -1182,6 +1198,7 @@ class Proposition(interface.RootEntity):
         annee_formation: AcademicYear,
         identification_dto: IdentificationDTO,
         inscriptions_translator: IInscriptionsTranslatorService,
+        decision_deliberation: DecisionDeliberation | None,
     ):
         if self.type_demande == TypeDemande.INSCRIPTION:
             ApprouverInscriptionParSicValidatorList(
@@ -1193,6 +1210,8 @@ class Proposition(interface.RootEntity):
                 conditions_complementaires_libres=self.conditions_complementaires_libres,
                 documents_dto=documents_dto,
                 statut_validation_donnees_personnelles=identification_dto.statut_validation_donnees_personnelles,
+                decision_deliberation=decision_deliberation,
+                poursuite_de_cycle=self.poursuite_de_cycle,
             ).validate()
 
         else:
@@ -1207,6 +1226,8 @@ class Proposition(interface.RootEntity):
                 checklist=self.checklist_actuelle,
                 documents_dto=documents_dto,
                 statut_validation_donnees_personnelles=identification_dto.statut_validation_donnees_personnelles,
+                decision_deliberation=decision_deliberation,
+                poursuite_de_cycle=self.poursuite_de_cycle,
             ).validate()
 
         try:

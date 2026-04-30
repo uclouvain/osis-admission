@@ -705,6 +705,9 @@ class SpecifierInformationsAcceptationInscriptionParSicCommand(interface.Command
     nombre_annees_prevoir_programme: Optional[int] = None
     nom_personne_contact_programme_annuel: str = ''
     email_personne_contact_programme_annuel: str = ''
+    droits_inscription_montant: str = ''
+    droits_inscription_montant_autre: Optional[float] = None
+    dispense_ou_droits_majores: str = ''
 
 
 @attr.dataclass(frozen=True, slots=True)

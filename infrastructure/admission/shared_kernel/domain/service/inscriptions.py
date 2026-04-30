@@ -91,11 +91,13 @@ class InscriptionsTranslatorService(IInscriptionsTranslatorService):
             sigle_formation=F('programme__offer__acronym'),
             annee_formation=F('programme__offer__academic_year__year'),
             noma=F('programme_cycle__etudiant__registration_id'),
+            etat_concours_attestation=F('programme_cycle__etat_concours_attestation'),
         ).values(
             'sigle_formation',
             'annee_formation',
             'noma',
             'est_premiere_annee_bachelier',
+            'etat_concours_attestation',
         )
 
         return [
@@ -104,6 +106,7 @@ class InscriptionsTranslatorService(IInscriptionsTranslatorService):
                 annee=enrolment['annee_formation'],
                 noma=enrolment['noma'],
                 est_premiere_annee_bachelier=enrolment['est_premiere_annee_bachelier'],
+                etat_concours_attestation=enrolment['etat_concours_attestation'],
             )
             for enrolment in enrolment_qs
         ]

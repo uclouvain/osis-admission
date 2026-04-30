@@ -6477,6 +6477,11 @@ msgid ""
 "requested immediately."
 msgstr ""
 
+msgid ""
+"The bloc 1 is successful for this training. The student should be in cycle "
+"pursuing"
+msgstr ""
+
 #, python-format
 msgid ""
 "The cancel mail has been sent to the candidate the %(date)s by %(sender)s."
@@ -6920,6 +6925,9 @@ msgid ""
 "The status of the request is currently \"{current_status}\". Only the "
 "statuses \"{from_statuses}\" allow you to move to the \"{to_status}\" status "
 "for the application fee."
+msgstr ""
+
+msgid "The student already has a diploma for this training"
 msgstr ""
 
 msgid "The submitted information is not consistent with information requested."

@@ -769,6 +769,8 @@ COMMAND_HANDLERS = {
             experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
             matricule_etudiant_service=MatriculeEtudiantService(),
             inscriptions_translator=InscriptionsTranslatorService(),
+            deliberation_translator=DeliberationTranslator(),
+            unites_enseignement_translator=UnitesEnseignementTranslator(),
         )
     ),
     ApprouverInscriptionParSicCommand: (
@@ -785,6 +787,8 @@ COMMAND_HANDLERS = {
             personne_connue_translator=PersonneConnueUclTranslator(),
             experience_parcours_interne_translator=ExperienceParcoursInterneTranslator(),
             inscriptions_translator=InscriptionsTranslatorService(),
+            deliberation_translator=DeliberationTranslator(),
+            unites_enseignement_translator=UnitesEnseignementTranslator(),
         )
     ),
     EnvoyerEmailApprobationInscriptionAuCandidatCommand: (

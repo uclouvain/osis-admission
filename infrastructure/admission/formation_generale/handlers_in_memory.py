@@ -245,6 +245,7 @@ _diffusion_notes_translator = DiffusionNotesInMemoryTranslator()
 _inscriptions_evaluations_translator = InscriptionsEvaluationsInMemoryTranslator()
 _nomas_translator = NomasInMemoryTranslator()
 
+
 COMMAND_HANDLERS = {
     RechercherFormationGeneraleQuery: lambda msg_bus, cmd: rechercher_formations(
         cmd,
@@ -841,6 +842,8 @@ COMMAND_HANDLERS = {
             experience_parcours_interne_translator=_experience_parcours_interne_translator,
             matricule_etudiant_service=_matricule_etudiant_service,
             inscriptions_translator=_inscriptions_translator,
+            deliberation_translator=_deliberation_translator,
+            unites_enseignement_translator=_unites_enseignement_translator,
         )
     ),
     ApprouverInscriptionParSicCommand: (
@@ -857,6 +860,8 @@ COMMAND_HANDLERS = {
             personne_connue_translator=_personne_connue_ucl_translator,
             experience_parcours_interne_translator=_experience_parcours_interne_translator,
             inscriptions_translator=_inscriptions_translator,
+            deliberation_translator=_deliberation_translator,
+            unites_enseignement_translator=_unites_enseignement_translator,
         )
     ),
     EnvoyerEmailApprobationInscriptionAuCandidatCommand: (
