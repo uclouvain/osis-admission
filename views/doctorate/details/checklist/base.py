@@ -33,6 +33,7 @@ from django.db.models import Q
 from django.shortcuts import resolve_url
 from django.template.defaultfilters import truncatechars
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, TemplateView
@@ -58,6 +59,7 @@ from admission.mail_templates import (
     ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CANDIDATE_DOCTORATE,
     ADMISSION_EMAIL_CHECK_BACKGROUND_AUTHENTICATION_TO_CHECKERS_DOCTORATE,
 )
+from admission.models import AdmissionViewer
 from admission.models.epc_injection import EPCInjection, EPCInjectionStatus, EPCInjectionType
 from admission.templatetags.admission import authentication_css_class, bg_class_by_checklist_experience
 from admission.utils import get_salutation_prefix
@@ -528,6 +530,22 @@ class ChecklistView(
             )
             if self.proposition_fusion:
                 context['proposition_fusion'] = self.proposition_fusion
+
+            context['dernieres_vues_par'] = (
+                AdmissionViewer.objects.filter(
+                    admission=self.admission,
+                    viewed_at__gte=timezone.now() - datetime.timedelta(hours=1),
+                )
+                .select_related('person')
+                .only(
+                    'person__last_name',
+                    'person__first_name',
+                    'viewed_at',
+                )
+                .order_by('-viewed_at')
+                .exclude(person=self.request.user.person)
+            )
+            context['now'] = timezone.now()
 
         context['injection_signaletique'] = self.injection_signaletique
         return context

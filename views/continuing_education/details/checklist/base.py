@@ -23,6 +23,7 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
+import datetime
 import itertools
 from collections import defaultdict
 from typing import Dict, List, Set
@@ -32,6 +33,7 @@ from django.conf import settings
 from django.db.models import Q
 from django.shortcuts import resolve_url
 from django.template.defaultfilters import truncatechars
+from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext
 from django.views.generic import TemplateView
@@ -72,6 +74,7 @@ from admission.mail_templates import (
     ADMISSION_EMAIL_DECISION_IUFC_COMMENT_FOR_FAC,
     ADMISSION_EMAIL_DECISION_ON_HOLD,
 )
+from admission.models import AdmissionViewer
 from admission.utils import get_backoffice_admission_url, get_portal_admission_url, get_salutation_prefix
 from admission.views.common.detail_tabs.checklist import ChecklistTabIcon, PropositionFromResumeMixin
 from admission.views.common.mixins import LoadDossierViewMixin
@@ -522,5 +525,21 @@ class ChecklistView(
                 context['documents'][tab_name].sort(
                     key=lambda doc: (not doc.est_emplacement_document_libre, doc.libelle)
                 )
+
+            context['dernieres_vues_par'] = (
+                AdmissionViewer.objects.filter(
+                    admission=self.admission,
+                    viewed_at__gte=timezone.now() - datetime.timedelta(hours=1),
+                )
+                .select_related('person')
+                .only(
+                    'person__last_name',
+                    'person__first_name',
+                    'viewed_at',
+                )
+                .order_by('-viewed_at')
+                .exclude(person=self.request.user.person)
+            )
+            context['now'] = timezone.now()
 
         return context
