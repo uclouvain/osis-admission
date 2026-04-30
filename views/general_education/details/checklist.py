@@ -419,7 +419,6 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
         )
 
         submitted_for_the_current_year_admissions: List[DemandeRechercheDTO] = []
-        has_other_admission_same_year_same_cycle = False
 
         for admission in candidate_admissions:
             if (
@@ -429,17 +428,6 @@ class CheckListDefaultContextMixin(LoadDossierViewMixin):
             ):
                 submitted_for_the_current_year_admissions.append(admission)
 
-                if (
-                    admission.cycle_formation == self.admission.training.education_group_type.cycle
-                    and admission.etat_demande
-                    not in {
-                        ChoixStatutPropositionGenerale.INSCRIPTION_REFUSEE.name,
-                        ChoixStatutPropositionGenerale.CLOTUREE.name,
-                    }
-                ):
-                    has_other_admission_same_year_same_cycle = True
-
-        context['has_other_admission_same_year_same_cycle'] = has_other_admission_same_year_same_cycle
         context['toutes_les_demandes'] = candidate_admissions
         context['autres_demandes'] = submitted_for_the_current_year_admissions
 
