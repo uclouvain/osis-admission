@@ -24,12 +24,14 @@
 #
 # ##############################################################################
 import datetime
+from unittest import mock
 
 import freezegun
 from django.shortcuts import resolve_url
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from admission.ddd.admission.shared_kernel.domain.model.enums.eligibilite_reinscription import EligibiliteReinscription
 from admission.tests.factories import DoctorateAdmissionFactory
 from admission.tests.factories.calendar import AdmissionAcademicCalendarFactory
 from admission.tests.factories.continuing_education import ContinuingEducationAdmissionFactory
@@ -39,23 +41,15 @@ from base.models.enums.academic_type import AcademicTypes
 from base.models.enums.education_group_types import TrainingType
 from base.tests.factories.academic_calendar import (
     BasculementDeliberationAcademicCalendarFactory,
-    DiffusionDesNotesAcademicCalendarFactory,
     InscriptionEvaluationAcademicCalendarFactory,
 )
-from base.tests.factories.offer_year_calendar import OfferYearCalendarFactory
 from base.tests.factories.session_exam_calendar import SessionExamCalendarFactory
 from base.tests.factories.student import StudentFactory
-from ddd.logic.deliberation.propositions.domain.model._decision import Decision
-from ddd.logic.inscription_aux_evaluations.shared_kernel.domain.model._type_inscription import TypeInscription
-from deliberation.models.deliberation_actee import DeliberationActee
-from deliberation.tests.factories.deliberation_actee import DeliberationActeeFactory
 from epc.models.enums.decision_resultat_cycle import DecisionResultatCycle
 from epc.models.enums.etat_inscription import EtatInscriptionFormation
 from epc.models.enums.statut_inscription_programme_annuel import StatutInscriptionProgrammAnnuel
 from epc.models.inscription_programme_annuel import InscriptionProgrammeAnnuel
 from epc.tests.factories.inscription_programme_annuel import InscriptionProgrammeAnnuelFactory
-from inscription_evaluation.models.formulaire_inscription import FormulaireInscription
-from inscription_evaluation.tests.factories.formulaire_inscription import FormulaireInscriptionFactory
 
 
 class CandidateUCLEnrolmentsViewTestCase(APITestCase):
@@ -280,20 +274,26 @@ class CandidateReEnrolmentEligibilityViewTestCase(APITestCase):
             programme__offer__academic_type=AcademicTypes.ACADEMIC.name,
         )
 
-    def _build_acted_deliberation(self, cycle_result='', annual_result='', year=2024) -> DeliberationActee:
-        acted_deliberation = DeliberationActeeFactory(
-            sigle_formation=self.enrolment.programme.offer.acronym,
-            noma=self.student.registration_id,
-            mention_de_cycle=cycle_result,
+        self.mock_finalized_deliberations_patcher = mock.patch(
+            'admission.infrastructure.admission.handlers.DeliberationTranslator.recuperer_sessions_avec_deliberations_finalisees',
+            return_value={},
         )
-        acted_deliberation.deliberations_programmes_annuels[0]['annee'] = year
-        acted_deliberation.deliberations_programmes_annuels[0]['numero_session'] = 1
-        acted_deliberation.deliberations_programmes_annuels[0]['decision'] = annual_result
-        acted_deliberation.etats_cycles_annualises[0]['annee'] = year
-        acted_deliberation.etats_cycles_annualises[0]['numero_session'] = 1
-        acted_deliberation.save()
+        self.mock_finalized_deliberations = self.mock_finalized_deliberations_patcher.start()
+        self.addCleanup(self.mock_finalized_deliberations_patcher.stop)
 
-        return acted_deliberation
+        self.mock_potential_progression_session_3_patcher = mock.patch(
+            'admission.infrastructure.admission.handlers.DeliberationTranslator.recuperer_progressions_potentielles_troisieme_session',
+            return_value={},
+        )
+        self.mock_potential_progression_session_3 = self.mock_potential_progression_session_3_patcher.start()
+        self.addCleanup(self.mock_potential_progression_session_3_patcher.stop)
+
+        self.mock_authorization_patcher = mock.patch(
+            'admission.infrastructure.admission.handlers.DiffusionNotesTranslator.recuperer_sessions_avec_autorisation_diffusion_resultats',
+            return_value={},
+        )
+        self.mock_authorization = self.mock_authorization_patcher.start()
+        self.addCleanup(self.mock_authorization_patcher.stop)
 
     def test_user_not_logged_assert_not_authorized(self):
         self.client.force_authenticate(user=None)
@@ -308,10 +308,15 @@ class CandidateReEnrolmentEligibilityViewTestCase(APITestCase):
             response = getattr(self.client, method)(self.url)
             self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    def _test_is_eligible(self, value: bool):
+    def _test_is_eligible(self, value: str, check_detail_message: str = ''):
         response = self.client.get(self.url)
+
         eligibility = response.json()
-        self.assertEqual(eligibility['est_eligible_a_la_reinscription'], value)
+
+        self.assertEqual(eligibility['decision'], value)
+
+        if check_detail_message:
+            self.assertEqual(eligibility['raison_non_eligibilite'], check_detail_message)
 
     def test_candidate_eligibility_depends_on_enrolment_status(self):
         self.client.force_authenticate(user=self.candidate.user)
@@ -323,7 +328,11 @@ class CandidateReEnrolmentEligibilityViewTestCase(APITestCase):
         for current_value in StatutInscriptionProgrammAnnuel:
             self.enrolment.statut = current_value.name
             self.enrolment.save(update_fields=['statut'])
-            self._test_is_eligible(current_value not in desired_values)
+            self._test_is_eligible(
+                EligibiliteReinscription.EST_ELIGIBLE.name
+                if current_value not in desired_values
+                else EligibiliteReinscription.NON_ELIGIBLE_EN_ATTENTE_RESULTATS.name,
+            )
 
     def test_candidate_eligibility_depends_on_enrolment_state(self):
         self.client.force_authenticate(user=self.candidate.user)
@@ -336,7 +345,11 @@ class CandidateReEnrolmentEligibilityViewTestCase(APITestCase):
         for current_value in EtatInscriptionFormation:
             self.enrolment.etat_inscription = current_value.name
             self.enrolment.save(update_fields=['etat_inscription'])
-            self._test_is_eligible(current_value not in desired_values)
+            self._test_is_eligible(
+                EligibiliteReinscription.EST_ELIGIBLE.name
+                if current_value not in desired_values
+                else EligibiliteReinscription.NON_ELIGIBLE_EN_ATTENTE_RESULTATS.name,
+            )
 
     def test_candidate_eligibility_depends_on_academic_type(self):
         self.client.force_authenticate(user=self.candidate.user)
@@ -351,7 +364,11 @@ class CandidateReEnrolmentEligibilityViewTestCase(APITestCase):
         for current_value in AcademicTypes:
             offer.academic_type = current_value.name
             offer.save(update_fields=['academic_type'])
-            self._test_is_eligible(current_value not in desired_values)
+            self._test_is_eligible(
+                EligibiliteReinscription.EST_ELIGIBLE.name
+                if current_value not in desired_values
+                else EligibiliteReinscription.NON_ELIGIBLE_EN_ATTENTE_RESULTATS.name,
+            )
 
     def test_candidate_eligibility_depends_on_training_type(self):
         self.client.force_authenticate(user=self.candidate.user)
@@ -364,130 +381,106 @@ class CandidateReEnrolmentEligibilityViewTestCase(APITestCase):
         for training_type in training_types:
             self.enrolment.programme.offer.education_group_type.name = training_type.name
             self.enrolment.programme.offer.education_group_type.save()
-            self._test_is_eligible(True)
+            self._test_is_eligible(EligibiliteReinscription.EST_ELIGIBLE.name)
 
-    def test_candidate_eligibility_depends_on_cycle_mention(self):
+    def test_candidate_eligibility_depends_on_finalized_deliberations_with_published_results(self):
         self.client.force_authenticate(user=self.candidate.user)
 
-        acted_deliberation = self._build_acted_deliberation(cycle_result=DecisionResultatCycle.DISTINCTION.name)
+        # No finalized deliberation and no authorization
+        self.mock_finalized_deliberations.return_value = set()
+        self.mock_authorization.return_value = set()
+        self._test_is_eligible(EligibiliteReinscription.NON_ELIGIBLE_EN_ATTENTE_RESULTATS.name)
 
-        self._test_is_eligible(True)
+        # One finalized deliberation but no authorization
+        self.mock_finalized_deliberations.return_value = {1}
+        self.mock_authorization.return_value = set()
+        self._test_is_eligible(EligibiliteReinscription.NON_ELIGIBLE_EN_ATTENTE_FIN_INSCRIPTION_EXAMENS_SESSION_3.name)
 
-        acted_deliberation.mention_de_cycle = ''
-        acted_deliberation.save()
+        # One finalized deliberation with authorization to another session
+        self.mock_finalized_deliberations.return_value = {1}
+        self.mock_authorization.return_value = {2}
 
-        self._test_is_eligible(False)
+        self._test_is_eligible(EligibiliteReinscription.NON_ELIGIBLE_EN_ATTENTE_FIN_INSCRIPTION_EXAMENS_SESSION_3.name)
 
-    def test_candidate_eligibility_depends_on_annual_result(self):
-        self.client.force_authenticate(user=self.candidate.user)
+        # One finalized deliberation with authorization
+        self.mock_finalized_deliberations.return_value = {2}
+        self.mock_authorization.return_value = {2}
 
-        acted_deliberation = self._build_acted_deliberation(annual_result=Decision.REUSSITE.name)
-
-        self._test_is_eligible(True)
-
-        acted_deliberation.deliberations_programmes_annuels[0]['decision'] = Decision.NON_REUSSITE.name
-        acted_deliberation.save()
-
-        self._test_is_eligible(False)
-
-    def test_candidate_eligibility_depends_on_last_exam_session_enrolment_date(self):
-        self.client.force_authenticate(user=self.candidate.user)
-
-        self._build_acted_deliberation()
-
-        with freezegun.freeze_time('2025-07-15'):
-            self._test_is_eligible(False)
-
-        with freezegun.freeze_time('2025-07-16'):
-            self._test_is_eligible(True)
+        self._test_is_eligible(EligibiliteReinscription.EST_ELIGIBLE.name)
 
     @freezegun.freeze_time('2025-07-16')
-    def test_candidate_eligibility_depends_on_last_exam_session_enrolment(self):
+    def test_candidate_eligibility_after_last_exam_session_enrolment_period(self):
         self.client.force_authenticate(user=self.candidate.user)
 
-        # The student is not enrolled to the last exam session > eligible
-        # > (no form)
-        acted_deliberation = self._build_acted_deliberation()
+        # Potential progression in september -> no eligible
+        self.mock_potential_progression_session_3.return_value = {3}
+        self.mock_finalized_deliberations.return_value = set()
+        self.mock_authorization.return_value = set()
 
-        self._test_is_eligible(True)
+        self._test_is_eligible(EligibiliteReinscription.NON_ELIGIBLE_EN_ATTENTE_RESULTATS.name)
 
-        # > (a form but without enrolment)
-        form = FormulaireInscriptionFactory(
-            noma=self.student.registration_id,
-            session=3,
-            sigle_formation=self.enrolment.programme.offer.acronym,
-            annee=2024,
+        # No potential progression in september and:
+        self.mock_potential_progression_session_3.return_value = set()
+
+        # > no finalized deliberation and no authorization -> no eligible
+        self.mock_finalized_deliberations.return_value = set()
+        self.mock_authorization.return_value = set()
+
+        self._test_is_eligible(EligibiliteReinscription.NON_ELIGIBLE_EN_ATTENTE_RESULTATS.name)
+
+        # > the session 2 has finalized deliberation but no authorization -> no eligible
+        self.mock_finalized_deliberations.return_value = {2}
+        self.mock_authorization.return_value = set()
+
+        self._test_is_eligible(EligibiliteReinscription.NON_ELIGIBLE_EN_ATTENTE_RESULTATS.name)
+
+        self.mock_finalized_deliberations.return_value = {1, 2}
+        self.mock_authorization.return_value = {1}
+
+        self._test_is_eligible(EligibiliteReinscription.NON_ELIGIBLE_EN_ATTENTE_RESULTATS.name)
+
+        # > the session 2 has finalized deliberation and authorization -> eligible
+        self.mock_authorization.return_value = {2}
+        self.mock_finalized_deliberations.return_value = {2}
+
+        self._test_is_eligible(EligibiliteReinscription.EST_ELIGIBLE.name)
+
+        self.mock_authorization.return_value = {1, 2}
+        self.mock_finalized_deliberations.return_value = {1, 2}
+
+        self._test_is_eligible(EligibiliteReinscription.EST_ELIGIBLE.name)
+
+        # > the session 1 has finalized deliberation but no authorization -> no eligible
+        self.mock_finalized_deliberations.return_value = {1}
+        self.mock_authorization.return_value = set()
+
+        self._test_is_eligible(EligibiliteReinscription.NON_ELIGIBLE_EN_ATTENTE_RESULTATS.name)
+
+        # > the session 1 has finalized deliberation and authorization -> eligible
+        self.mock_authorization.return_value = {1}
+        self.mock_finalized_deliberations.return_value = {1}
+
+        self._test_is_eligible(EligibiliteReinscription.EST_ELIGIBLE.name)
+
+    @freezegun.freeze_time('2025-07-15')
+    def test_candidate_eligibility_before_end_of_the_last_exam_session_enrolment_period(self):
+        self.client.force_authenticate(user=self.candidate.user)
+
+        # One finalized deliberation -> no eligible
+        self.mock_finalized_deliberations.return_value = {3}
+
+        self._test_is_eligible(
+            value=EligibiliteReinscription.NON_ELIGIBLE_EN_ATTENTE_FIN_INSCRIPTION_EXAMENS_SESSION_3.name,
+            check_detail_message="La réinscription sera accessible à partir du 16 juillet 2025.",
         )
 
-        self._test_is_eligible(True)
+        # No finalized deliberation -> no eligible
+        self.mock_finalized_deliberations.return_value = set()
 
-        # The student is enrolled to the last exam session
-        # > but the result is not announced (no result and no published mark)
-        form.delete()
-        forms = [
-            FormulaireInscriptionFactory.avec_inscriptions(
-                codes_ue={('LDROI1001', TypeInscription.PREMIERE_INSCRIPTION)},
-                noma=self.student.registration_id,
-                session=session,
-                sigle_formation=self.enrolment.programme.offer.acronym,
-                annee=2024,
-            )
-            for session in (1, 2, 3)
-        ]
-
-        for form in forms:
-            form.formulaire['codes_ue_inscriptibles'] = {}
-
-        FormulaireInscription.objects.bulk_update(objs=forms, fields=['formulaire'])
-
-        self._test_is_eligible(False)
-
-        # > but the result is not announced (result but no published mark (no configured date))
-        third_session_annual_result = acted_deliberation.deliberations_programmes_annuels[0].copy()
-        third_session_annual_result['numero_session'] = 3
-        third_session_annual_result['decision'] = Decision.NON_REUSSITE.name
-        acted_deliberation.deliberations_programmes_annuels.append(third_session_annual_result)
-
-        third_session_cycle_result = acted_deliberation.etats_cycles_annualises[0].copy()
-        third_session_cycle_result['numero_session'] = 3
-        acted_deliberation.etats_cycles_annualises.append(third_session_cycle_result)
-
-        acted_deliberation.save()
-
-        self._test_is_eligible(False)
-
-        # > but the result is not announced (result but no published mark (future date)
-        last_session_diffusion_score_calendar = SessionExamCalendarFactory(
-            number_session=3,
-            academic_calendar=DiffusionDesNotesAcademicCalendarFactory(
-                data_year__year=2024,
-                start_date=datetime.date(2025, 7, 20),
-                end_date=datetime.date(2025, 7, 31),
-            ),
+        self._test_is_eligible(
+            value=EligibiliteReinscription.NON_ELIGIBLE_EN_ATTENTE_RESULTATS.name,
+            check_detail_message="En attente de l'ensemble de vos résultats pour l'année académique 2024-2025.",
         )
-        OfferYearCalendarFactory(
-            academic_calendar=last_session_diffusion_score_calendar.academic_calendar,
-            education_group_year=self.enrolment.programme.offer,
-            start_date=last_session_diffusion_score_calendar.academic_calendar.start_date,
-            end_date=last_session_diffusion_score_calendar.academic_calendar.end_date,
-        )
-
-        self._test_is_eligible(False)
-
-        # > but the result is announced (result and published mark (current date)
-        with freezegun.freeze_time('2025-07-20'):
-            self._test_is_eligible(True)
-
-        # > but the result is announced (result and published mark (past date)
-        with freezegun.freeze_time('2025-07-21'):
-            self._test_is_eligible(True)
-
-        # > but the result is not announced (no result but published mark)
-        with freezegun.freeze_time('2025-07-20'):
-            third_session_annual_result['decision'] = Decision.PAS_DE_DECISION.name
-            acted_deliberation.save()
-
-            self._test_is_eligible(False)
 
 
 @freezegun.freeze_time('2025-01-01')

@@ -23,25 +23,14 @@
 #  see http://www.gnu.org/licenses/.
 #
 # ##############################################################################
-from admission.ddd.admission.shared_kernel.domain.service.i_formation_translator import IBaseFormationTranslator
-from admission.ddd.admission.shared_kernel.dtos.formation import FormationInscriteDTO
 
 
-class BaseFormationInMemoryTranslator(IBaseFormationTranslator):
-    @classmethod
-    def recuperer_informations_formations_inscrites(
-        cls,
-        sigles_annees: list[tuple[str, int]],
-        uclouvain_est_institution_reference: bool | None = None,
-    ) -> dict[tuple[str, int], FormationInscriteDTO]:
-        return {
-            (sigle, annee): FormationInscriteDTO(
-                sigle=sigle,
-                annee=annee,
-                intitule_fr='',
-                intitule_en='',
-                lieu_enseignement='',
-                type='',
-            )
-            for sigle, annee in sigles_annees
-        }
+from base.models.utils.utils import ChoiceEnum
+
+
+class EligibiliteReinscription(ChoiceEnum):
+    EST_ELIGIBLE = 'EST_ELIGIBLE'
+    NON_ELIGIBLE_EN_ATTENTE_RESULTATS = 'NON_ELIGIBLE_EN_ATTENTE_RESULTATS'
+    NON_ELIGIBLE_EN_ATTENTE_FIN_INSCRIPTION_EXAMENS_SESSION_3 = (
+        'NON_ELIGIBLE_EN_ATTENTE_FIN_INSCRIPTION_EXAMENS_SESSION_3'
+    )

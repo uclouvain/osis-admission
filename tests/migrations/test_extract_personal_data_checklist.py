@@ -218,7 +218,9 @@ class ExtractPersonalDataChecklistTestCase(TestCase):
                 self.assertEqual(person.personal_data_validation_status, priority_status)
 
             for non_priority_status in ChoixStatutValidationDonneesPersonnelles.get_names_except(
-                current_status, *priority_statuses, *self.statuses_to_ignore,
+                current_status,
+                *priority_statuses,
+                *self.statuses_to_ignore,
             ):
                 second_admission.checklist['current']['donnees_personnelles'] = self.personal_data_statuses[
                     non_priority_status

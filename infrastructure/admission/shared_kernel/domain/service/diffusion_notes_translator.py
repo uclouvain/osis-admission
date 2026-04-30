@@ -26,8 +26,9 @@
 import datetime
 
 from admission.ddd.admission.shared_kernel.domain.service.i_diffusion_notes_translator import IDiffusionNotesTranslator
+from ddd.logic.diffusion_des_notes.dto.autorisation_diffusion_de_notes import AutorisationDiffusionDeNotesDTO
 from ddd.logic.diffusion_des_notes.dto.date_diffusion_de_notes_individuelle import DateDiffusionDeNotesDTO
-from ddd.logic.diffusion_des_notes.queries import GetDateDiffusionDeNotesQuery
+from ddd.logic.diffusion_des_notes.queries import GetDateDiffusionDeNotesQuery, ListerAutorisationDiffusionDeNotesQuery
 
 
 class DiffusionNotesTranslator(IDiffusionNotesTranslator):
@@ -52,3 +53,22 @@ class DiffusionNotesTranslator(IDiffusionNotesTranslator):
         )
 
         return marks_diffusion_date.date
+
+    @classmethod
+    def recuperer_sessions_avec_autorisation_diffusion_resultats(
+        cls,
+        sigle_formation: str,
+        noma: str,
+        annee: int,
+    ) -> set[int]:
+        from infrastructure.messages_bus import message_bus_instance
+
+        autorisations: list[AutorisationDiffusionDeNotesDTO] = message_bus_instance.invoke(
+            ListerAutorisationDiffusionDeNotesQuery(
+                sigle_formation=sigle_formation,
+                noma=noma,
+                annee=annee,
+            )
+        )
+
+        return {autorisation.numero_session for autorisation in autorisations}

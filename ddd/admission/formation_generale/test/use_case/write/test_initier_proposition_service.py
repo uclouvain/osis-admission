@@ -25,6 +25,7 @@
 # ##############################################################################
 import uuid
 from unittest import mock
+from unittest.mock import MagicMock
 
 import attr
 from django.test import SimpleTestCase
@@ -42,6 +43,7 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
     CandidatDejaDiplomeFormationException,
     CandidatNonEligibleALaReinscriptionException,
 )
+from admission.ddd.admission.shared_kernel.domain.model.enums.eligibilite_reinscription import EligibiliteReinscription
 from admission.ddd.admission.shared_kernel.domain.validator.exceptions import (
     DemandeEnBrouillonDejaExistantePourCetteFormationException,
     FormationNonTrouveeException,
@@ -129,7 +131,7 @@ class TestInitierPropositionService(AdmissionTestMixin, SimpleTestCase):
         with mock.patch(
             'admission.ddd.admission.shared_kernel.domain.service.inscriptions_ucl_candidat.'
             'InscriptionsUCLCandidatService.est_eligible_a_la_reinscription',
-            return_value=False,
+            return_value=MagicMock(decision=EligibiliteReinscription.NON_ELIGIBLE_EN_ATTENTE_RESULTATS.name),
         ):
             with self.assertRaises(MultipleBusinessExceptions) as context:
                 self.message_bus.invoke(self.cmd)

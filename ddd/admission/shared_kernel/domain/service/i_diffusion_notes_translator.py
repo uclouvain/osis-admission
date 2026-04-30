@@ -40,3 +40,12 @@ class IDiffusionNotesTranslator(interface.DomainService):
         annee: int,
     ) -> datetime.date:
         raise NotImplementedError
+
+    @classmethod
+    def recuperer_sessions_avec_autorisation_diffusion_resultats(
+        cls,
+        sigle_formation: str,
+        noma: str,
+        annee: int,
+    ) -> set[int]:
+        raise NotImplementedError

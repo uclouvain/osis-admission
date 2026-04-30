@@ -38,12 +38,11 @@ from admission.ddd.admission.shared_kernel.domain.service.i_inscriptions_transla
     IInscriptionsTranslatorService,
 )
 from admission.ddd.admission.shared_kernel.domain.service.i_noma_translator import INomasTranslator
+from admission.ddd.admission.shared_kernel.dtos.eligibilite_reinscription import EligibiliteReinscriptionDTO
 from admission.ddd.admission.shared_kernel.dtos.inscription_ucl_candidat import (
     InscriptionUCLCandidatDTO,
     PeriodeReinscriptionDTO,
 )
-from ddd.logic.deliberation.propositions.domain.model._decision import Decision
-from ddd.logic.diffusion_des_notes.domain.validator.exceptions import DateDiffusionDeNotesFormationPasTrouveException
 from osis_common.ddd import interface
 
 
@@ -107,7 +106,8 @@ class InscriptionsUCLCandidatService(interface.DomainService):
         deliberation_translator: IDeliberationTranslator,
         diffusion_notes_translator: IDiffusionNotesTranslator,
         inscriptions_evaluations_translator: IInscriptionsEvaluationsTranslator,
-    ) -> bool:
+        formation_translator: IBaseFormationTranslator,
+    ) -> EligibiliteReinscriptionDTO:
         # Récupérer l'année académique à vérifier
         calendrier_administratif = annee_inscription_formation_translator.recuperer_calendrier_administratif_courant()
 
@@ -120,21 +120,14 @@ class InscriptionsUCLCandidatService(interface.DomainService):
         )
 
         if not inscriptions:
-            return True
+            return EligibiliteReinscriptionDTO.est_eligible()
 
-        nomas = [inscription.noma for inscription in inscriptions]
+        formations = formation_translator.recuperer_informations_formations_inscrites(
+            sigles_annees=[(inscription.sigle, inscription.annee) for inscription in inscriptions],
+            uclouvain_est_institution_reference=True,
+        )
 
         # Récupérer les informations relatives aux délibérations
-        deliberations_cycles = deliberation_translator.recuperer_deliberations_cycles(
-            nomas=nomas,
-            annee=annee_cible,
-        )
-
-        deliberations_annuellees = deliberation_translator.recuperer_deliberations_annuelles(
-            nomas=nomas,
-            annee=annee_cible,
-        )
-
         date_fin_periode_inscription_examen_derniere_session = (
             inscriptions_evaluations_translator.recuperer_date_fin_periode_inscription_etudiants_derniere_session(
                 annee=annee_cible,
@@ -147,57 +140,80 @@ class InscriptionsUCLCandidatService(interface.DomainService):
             date_du_jour > date_fin_periode_inscription_examen_derniere_session
         )
 
-        inscriptions_examens_derniere_session = (
-            inscriptions_evaluations_translator.recuperer_inscriptions_etudiants_derniere_session(
-                nomas=nomas,
-                annee=annee_cible,
-            )
-            if est_apres_fin_periode_inscription_examen_derniere_session
-            else set()
-        )
+        candidat_en_attente_fin_inscriptions_examens_session_3 = False
 
         for inscription in inscriptions:
-            identifiant_inscription = (inscription.noma, inscription.sigle)
+            # Si la formation n'est pas connue et / ou uclouvain non référent -> éligible
+            if (inscription.sigle, inscription.annee) not in formations:
+                continue
 
-            deliberation_cycle = deliberations_cycles.get(identifiant_inscription)
-            deliberation_annuelle_par_session = deliberations_annuellees.get(identifiant_inscription, {})
+            sessions_avec_deliberations_finalisees = (
+                deliberation_translator.recuperer_sessions_avec_deliberations_finalisees(
+                    noma=inscription.noma,
+                    sigle_formation=inscription.sigle,
+                    annee=inscription.annee,
+                )
+            )
 
-            # Le cycle et l'année ne sont pas réussies
-            if (not deliberation_cycle or not deliberation_cycle.est_diplome) and not any(
-                deliberation_session.decision == Decision.REUSSITE.name
-                for deliberation_session in deliberation_annuelle_par_session.values()
+            sessions_avec_autorisation_diffusion_resultats = (
+                diffusion_notes_translator.recuperer_sessions_avec_autorisation_diffusion_resultats(
+                    noma=inscription.noma,
+                    sigle_formation=inscription.sigle,
+                    annee=inscription.annee,
+                )
+            )
+
+            # Si les délibération d'un étudiant pour un programme annuel sont finalisées et la diffusion des
+            # résultats est autorisée -> éligible
+            if (
+                sessions_avec_deliberations_finalisees
+                and sessions_avec_autorisation_diffusion_resultats
+                and sessions_avec_deliberations_finalisees == sessions_avec_autorisation_diffusion_resultats
             ):
-                # <= 15/7/N
-                if not est_apres_fin_periode_inscription_examen_derniere_session:
-                    return False
+                continue
 
-                # > 15/7/N, avec inscription à la dernière session
-                if identifiant_inscription in inscriptions_examens_derniere_session:
-                    deliberation_derniere_session = deliberation_annuelle_par_session.get(3)
+            # Si après la date de fin de "Inscriptions aux examens - Session d'examens n°3" (>15/07)
+            if est_apres_fin_periode_inscription_examen_derniere_session:
+                progressions_potentielles_session_3 = (
+                    deliberation_translator.recuperer_progressions_potentielles_troisieme_session(
+                        noma=inscription.noma,
+                        sigle_formation=inscription.sigle,
+                        annee=inscription.annee,
+                    )
+                )
 
-                    if not deliberation_derniere_session:
-                        # Pas de décision de délibération pour la dernière session
-                        return False
+                # Si progression potentielle en septembre -> Non éligible à la réinscription (cadenas rouge)
+                if progressions_potentielles_session_3:
+                    return EligibiliteReinscriptionDTO.est_non_eligible_et_en_attente_resultats(annee=annee_cible)
 
-                    try:
-                        date_diffusion_notes_derniere_session = (
-                            diffusion_notes_translator.recuperer_date_diffusion_notes_derniere_session(
-                                sigle_formation=inscription.sigle,
-                                est_premiere_annee_bachelier=inscription.est_premiere_annee_bachelier,
-                                noma=inscription.noma,
-                                annee=inscription.annee,
-                            )
-                        )
+                # Si pas de progression potentielle en septembre
 
-                        # Les notes n'ont pas été diffusées
-                        if date_du_jour < date_diffusion_notes_derniere_session:
-                            return False
+                # > et diffusion des résultats autorisée -> éligible
+                if (
+                    max(sessions_avec_deliberations_finalisees, default=None)
+                    in sessions_avec_autorisation_diffusion_resultats
+                ):
+                    continue
 
-                    except DateDiffusionDeNotesFormationPasTrouveException:
-                        # Les notes n'ont pas été diffusées
-                        return False
+                # > et diffusion des résultats non autorisée -> Non éligible à la réinscription (cadenas rouge)
+                return EligibiliteReinscriptionDTO.est_non_eligible_et_en_attente_resultats(annee=annee_cible)
 
-        return True
+            # Sinon -> Non éligible à la réinscription
+            else:
+                # Cadenas orange si au-moins une décision sur le programme annuel
+                if sessions_avec_deliberations_finalisees:
+                    candidat_en_attente_fin_inscriptions_examens_session_3 = True
+
+                # Sinon cadenas rouge
+                else:
+                    return EligibiliteReinscriptionDTO.est_non_eligible_et_en_attente_resultats(annee=annee_cible)
+
+        if candidat_en_attente_fin_inscriptions_examens_session_3:
+            return EligibiliteReinscriptionDTO.est_non_eligible_et_en_attente_fin_periode_inscription_examens(
+                date_fin_periode_inscription_examens=date_fin_periode_inscription_examen_derniere_session
+            )
+
+        return EligibiliteReinscriptionDTO.est_eligible()
 
     @classmethod
     def recuperer_informations_periode_de_reinscription(

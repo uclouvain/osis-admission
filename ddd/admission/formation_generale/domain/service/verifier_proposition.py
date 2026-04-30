@@ -177,6 +177,7 @@ class VerifierProposition(interface.DomainService):
                 diffusion_notes_translator=diffusion_notes_translator,
                 inscriptions_evaluations_translator=inscriptions_evaluations_translator,
                 nomas_translator=nomas_translator,
+                formation_translator=formation_translator,
             ),
             partial(
                 profil_candidat_service.verifier_informations_complementaires_formation_generale,

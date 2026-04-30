@@ -6063,6 +6063,10 @@ msgstr "Boutons radios"
 msgid "Rank in diploma"
 msgstr "Rang dans le diplôme"
 
+#, python-format
+msgid "Re-registration will be available from %(date)s."
+msgstr "La réinscription sera accessible à partir du %(date)s."
+
 msgid "Reason for cancellation"
 msgstr "Motif d'annulation"
 
@@ -8292,6 +8296,12 @@ msgctxt "equivalence_status"
 msgid "Waiting"
 msgstr "En attente"
 
+#, python-format
+msgid "Waiting for all your results for the %(academic_year)s academic year."
+msgstr ""
+"En attente de l'ensemble de vos résultats pour l'année académique "
+"%(academic_year)s."
+
 msgid "Wallonie Bruxelles International (WBI)"
 msgstr "Wallonie Bruxelles International (WBI)"
 
@@ -8582,7 +8592,8 @@ msgid ""
 "You are already registered for this course which will take place during the "
 "year %(annee)s."
 msgstr ""
-"Vous êtes déjà inscrit·e pour cette formation qui aura lieu durant l'année %(annee)s."
+"Vous êtes déjà inscrit·e pour cette formation qui aura lieu durant l'année "
+"%(annee)s."
 
 msgid "You are applying as ..."
 msgstr "Postulez-vous en tant que ..."

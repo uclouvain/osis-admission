@@ -38,3 +38,12 @@ class DiffusionNotesInMemoryTranslator(IDiffusionNotesTranslator):
         annee: int,
     ) -> datetime.date:
         return datetime.date(year=annee, month=7, day=15)
+
+    @classmethod
+    def recuperer_sessions_avec_autorisation_diffusion_resultats(
+        cls,
+        sigle_formation: str,
+        noma: str,
+        annee: int,
+    ) -> set[int]:
+        return set()

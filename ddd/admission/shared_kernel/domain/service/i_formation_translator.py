@@ -36,6 +36,7 @@ class IBaseFormationTranslator(interface.DomainService):
     def recuperer_informations_formations_inscrites(
         cls,
         sigles_annees: list[tuple[str, int]],
+        uclouvain_est_institution_reference: bool | None = None,
     ) -> dict[tuple[str, int], FormationInscriteDTO]:
         raise NotImplementedError
 

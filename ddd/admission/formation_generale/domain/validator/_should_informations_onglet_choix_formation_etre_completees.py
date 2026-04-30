@@ -31,7 +31,9 @@ from admission.ddd.admission.formation_generale.domain.validator.exceptions impo
     CandidatDejaDiplomeFormationException,
     CandidatNonEligibleALaReinscriptionException,
 )
+from admission.ddd.admission.shared_kernel.domain.model.enums.eligibilite_reinscription import EligibiliteReinscription
 from admission.ddd.admission.shared_kernel.domain.model.formation import Formation
+from admission.ddd.admission.shared_kernel.dtos.eligibilite_reinscription import EligibiliteReinscriptionDTO
 from base.ddd.utils.business_validator import BusinessValidator
 
 
@@ -60,10 +62,10 @@ class ShouldRenseignerBoursesEtudesSelonFormation(BusinessValidator):
 
 @attr.dataclass(frozen=True, slots=True)
 class ShouldCandidatEtreEligibleALaReinscription(BusinessValidator):
-    candidat_est_eligible_a_la_reinscription: bool
+    candidat_est_eligible_a_la_reinscription: EligibiliteReinscriptionDTO
 
     def validate(self, *args, **kwargs):
-        if not self.candidat_est_eligible_a_la_reinscription:
+        if self.candidat_est_eligible_a_la_reinscription.decision != EligibiliteReinscription.EST_ELIGIBLE.name:
             raise CandidatNonEligibleALaReinscriptionException
 
 
